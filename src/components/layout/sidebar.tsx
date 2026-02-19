@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -45,20 +46,24 @@ export function Sidebar({ role, userName }: SidebarProps) {
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
-          {!collapsed && (
-            <Link href="/dashboard" className="flex items-center gap-1">
-              <span className="font-serif text-xl font-bold text-white">
-                Sales
+        <div className="flex h-16 items-center justify-between px-3 border-b border-sidebar-border">
+          <Link href="/dashboard" className="flex items-center gap-2 min-w-0">
+            <Image
+              src="/logo.png"
+              alt="Sales System"
+              width={32}
+              height={32}
+              className="shrink-0"
+            />
+            {!collapsed && (
+              <span className="font-serif text-lg font-bold text-white whitespace-nowrap">
+                Sales<span className="text-brand">System</span>
               </span>
-              <span className="font-serif text-xl font-bold text-brand">
-                System
-              </span>
-            </Link>
-          )}
+            )}
+          </Link>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground shrink-0"
           >
             {collapsed ? (
               <ChevronRight className="h-4 w-4" />

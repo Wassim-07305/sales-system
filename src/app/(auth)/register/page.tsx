@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { RegisterForm } from "./register-form";
 
 export default function RegisterPage() {
@@ -6,6 +7,13 @@ export default function RegisterPage() {
       {/* Left panel - brand */}
       <div className="hidden lg:flex lg:w-1/2 bg-brand-dark items-center justify-center p-12">
         <div className="max-w-md text-center">
+          <Image
+            src="/logo.png"
+            alt="Sales System"
+            width={80}
+            height={80}
+            className="mx-auto mb-6"
+          />
           <h1 className="font-serif text-5xl font-bold text-white mb-4">
             Sales<span className="text-brand">System</span>
           </h1>
@@ -19,6 +27,13 @@ export default function RegisterPage() {
       <div className="flex w-full lg:w-1/2 items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8 text-center">
+            <Image
+              src="/logo.png"
+              alt="Sales System"
+              width={48}
+              height={48}
+              className="mx-auto mb-3"
+            />
             <h1 className="font-serif text-3xl font-bold">
               Sales<span className="text-brand">System</span>
             </h1>
