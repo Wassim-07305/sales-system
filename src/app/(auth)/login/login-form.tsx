@@ -8,13 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const router = useRouter();
 
   async function handleLogin(e: React.FormEvent) {
@@ -35,53 +34,6 @@ export function LoginForm() {
 
     router.push("/dashboard");
     router.refresh();
-  }
-
-  async function handleMagicLink() {
-    if (!email) {
-      toast.error("Entrez votre email");
-      return;
-    }
-    setLoading(true);
-
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
-
-    if (error) {
-      toast.error("Erreur lors de l'envoi du lien");
-      setLoading(false);
-      return;
-    }
-
-    setMagicLinkSent(true);
-    setLoading(false);
-    toast.success("Lien de connexion envoyé !");
-  }
-
-  if (magicLinkSent) {
-    return (
-      <div className="text-center py-8">
-        <div className="mx-auto w-12 h-12 rounded-full bg-brand/10 flex items-center justify-center mb-4">
-          <Mail className="h-6 w-6 text-brand" />
-        </div>
-        <h3 className="text-lg font-semibold mb-2">Vérifiez votre email</h3>
-        <p className="text-muted-foreground text-sm mb-4">
-          Un lien de connexion a été envoyé à <strong>{email}</strong>
-        </p>
-        <Button
-          variant="ghost"
-          onClick={() => setMagicLinkSent(false)}
-          className="text-sm"
-        >
-          Retour
-        </Button>
-      </div>
-    );
   }
 
   return (
@@ -117,26 +69,6 @@ export function LoginForm() {
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Se connecter
-      </Button>
-
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">ou</span>
-        </div>
-      </div>
-
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={handleMagicLink}
-        disabled={loading}
-      >
-        <Mail className="mr-2 h-4 w-4" />
-        Connexion par magic link
       </Button>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
