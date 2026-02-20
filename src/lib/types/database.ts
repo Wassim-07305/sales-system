@@ -344,8 +344,72 @@ export interface CommunityPost {
   content: string;
   image_url: string | null;
   likes_count: number;
+  hidden: boolean;
   created_at: string;
   author?: Profile;
+}
+
+export interface CommunityComment {
+  id: string;
+  post_id: string;
+  author_id: string | null;
+  content: string;
+  created_at: string;
+  author?: Profile;
+}
+
+export interface Affiliate {
+  id: string;
+  user_id: string;
+  referral_code: string;
+  total_referrals: number;
+  total_converted: number;
+  total_commission: number;
+  created_at: string;
+}
+
+export interface Referral {
+  id: string;
+  affiliate_id: string;
+  referred_email: string | null;
+  referred_name: string | null;
+  status: "pending" | "converted" | "expired";
+  deal_id: string | null;
+  commission: number;
+  created_at: string;
+}
+
+export interface DmConversation {
+  id: string;
+  prospect_id: string | null;
+  platform: string;
+  messages: Array<{ sender: string; content: string; type: string; timestamp: string }>;
+  last_message_at: string | null;
+  created_at: string;
+  prospect?: Prospect;
+}
+
+export interface VoiceProfile {
+  id: string;
+  user_id: string;
+  voice_id: string | null;
+  sample_url: string | null;
+  status: "pending" | "processing" | "ready";
+  created_at: string;
+}
+
+export interface VoiceMessage {
+  id: string;
+  voice_profile_id: string | null;
+  input_text: string | null;
+  input_audio_url: string | null;
+  output_audio_url: string | null;
+  status: "pending" | "processing" | "ready" | "failed";
+  scheduled_send_at: string | null;
+  sent: boolean;
+  target_prospect_id: string | null;
+  created_at: string;
+  prospect?: Prospect;
 }
 
 // Supabase Database type (simplified for now - will be generated from Supabase CLI later)
@@ -380,6 +444,12 @@ export interface Database {
       daily_quotas: { Row: DailyQuota; Insert: Partial<DailyQuota> & { user_id: string; date: string }; Update: Partial<DailyQuota> };
       content_posts: { Row: ContentPost; Insert: Partial<ContentPost>; Update: Partial<ContentPost> };
       community_posts: { Row: CommunityPost; Insert: Partial<CommunityPost> & { content: string }; Update: Partial<CommunityPost> };
+      community_comments: { Row: CommunityComment; Insert: Partial<CommunityComment> & { post_id: string; content: string }; Update: Partial<CommunityComment> };
+      affiliates: { Row: Affiliate; Insert: Partial<Affiliate> & { user_id: string; referral_code: string }; Update: Partial<Affiliate> };
+      referrals: { Row: Referral; Insert: Partial<Referral> & { affiliate_id: string }; Update: Partial<Referral> };
+      dm_conversations: { Row: DmConversation; Insert: Partial<DmConversation> & { platform: string }; Update: Partial<DmConversation> };
+      voice_profiles: { Row: VoiceProfile; Insert: Partial<VoiceProfile> & { user_id: string }; Update: Partial<VoiceProfile> };
+      voice_messages: { Row: VoiceMessage; Insert: Partial<VoiceMessage>; Update: Partial<VoiceMessage> };
     };
   };
 }

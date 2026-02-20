@@ -57,5 +57,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Redirect clients with incomplete onboarding to /onboarding
+  if (user && !pathname.startsWith("/onboarding") && !isPublicRoute) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, onboarding_completed")
+      .eq("id", user.id)
+      .single();
+
+    if (
+      profile &&
+      ["client_b2b", "client_b2c"].includes(profile.role) &&
+      !profile.onboarding_completed
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }

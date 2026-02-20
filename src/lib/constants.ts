@@ -20,6 +20,7 @@ import {
   FolderOpen,
   LineChart,
   Gift,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -107,6 +108,14 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/community",
     icon: UsersRound,
     roles: ["admin", "manager", "client_b2b", "client_b2c"],
+  },
+
+  // Inbox (DM conversations)
+  {
+    label: "Inbox",
+    href: "/inbox",
+    icon: Inbox,
+    roles: ["admin", "manager", "setter", "closer"],
   },
 
   // Chat

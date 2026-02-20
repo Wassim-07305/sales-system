@@ -8,10 +8,11 @@ interface AppShellProps {
   role: UserRole;
   userName: string;
   avatarUrl?: string | null;
+  userId: string;
   children: React.ReactNode;
 }
 
-export function AppShell({ role, userName, avatarUrl, children }: AppShellProps) {
+export function AppShell({ role, userName, avatarUrl, userId, children }: AppShellProps) {
   return (
     <div className="min-h-screen">
       {/* Desktop sidebar */}
