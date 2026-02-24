@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import { AdminDashboard } from "./admin-dashboard";
 import { SetterDashboard } from "./setter-dashboard";
 import { ClientDashboard } from "./client-dashboard";
+import {
+  getAdminDashboardData,
+  getClientDashboardData,
+  getSetterDashboardData,
+} from "@/lib/actions/dashboard";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function DashboardPage() {
@@ -23,15 +28,33 @@ export default async function DashboardPage() {
 
   switch (role) {
     case "admin":
-    case "manager":
-      return <AdminDashboard />;
+    case "manager": {
+      const data = await getAdminDashboardData();
+      return <AdminDashboard data={data} />;
+    }
     case "setter":
-    case "closer":
-      return <SetterDashboard />;
+    case "closer": {
+      const data = await getSetterDashboardData(user.id);
+      return <SetterDashboard data={data} />;
+    }
     case "client_b2b":
-    case "client_b2c":
-      return <ClientDashboard />;
-    default:
-      return <ClientDashboard />;
+    case "client_b2c": {
+      const data = await getClientDashboardData(user.id);
+      return (
+        <ClientDashboard
+          data={data}
+          userName={profile?.full_name || "Utilisateur"}
+        />
+      );
+    }
+    default: {
+      const data = await getClientDashboardData(user.id);
+      return (
+        <ClientDashboard
+          data={data}
+          userName={profile?.full_name || "Utilisateur"}
+        />
+      );
+    }
   }
 }

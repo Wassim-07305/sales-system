@@ -91,3 +91,116 @@ export async function deleteOnboardingStep(stepId: string) {
   await supabase.from("onboarding_steps").delete().eq("id", stepId);
   revalidatePath("/settings/onboarding");
 }
+
+// --- Batch 1B: Enhanced Onboarding ---
+
+export async function submitOnboardingQuiz(answers: Record<string, string>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Calculate score based on answers
+  const score = calculateQuizScore(answers);
+  const colorCode = score >= 80 ? "green" : score >= 50 ? "orange" : "red";
+
+  await supabase.from("onboarding_quiz_responses").insert({
+    user_id: user.id,
+    answers,
+    score,
+    color_code: colorCode,
+  });
+
+  // Update profile with quiz results
+  await supabase
+    .from("profiles")
+    .update({ onboarding_step: 1 })
+    .eq("id", user.id);
+
+  revalidatePath("/onboarding");
+  return { score, colorCode };
+}
+
+function calculateQuizScore(answers: Record<string, string>): number {
+  // Scoring logic based on answer quality
+  let score = 0;
+  const keys = Object.keys(answers);
+  for (const key of keys) {
+    const answer = answers[key];
+    if (answer && answer.length > 20) score += 15;
+    else if (answer && answer.length > 5) score += 10;
+    else if (answer) score += 5;
+  }
+  return Math.min(100, Math.round((score / (keys.length * 15)) * 100));
+}
+
+export async function getWelcomePack(userId: string) {
+  const supabase = await createClient();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, full_name, company")
+    .eq("id", userId)
+    .single();
+
+  const role = profile?.role || "client_b2c";
+
+  // Get welcome pack for this role
+  const { data: pack } = await supabase
+    .from("welcome_packs")
+    .select("*")
+    .eq("role", role)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  // Get quiz results for personalization
+  const { data: quizResult } = await supabase
+    .from("onboarding_quiz_responses")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return {
+    profile,
+    pack,
+    quizResult,
+    personalizedTips: generatePersonalizedTips(role, quizResult?.color_code || "orange"),
+  };
+}
+
+function generatePersonalizedTips(role: string, colorCode: string): string[] {
+  // Stub — will use AI later
+  const tips: Record<string, string[]> = {
+    green: [
+      "Excellent profil ! Vous êtes prêt à démarrer la prospection active.",
+      "Commencez par personnaliser vos scripts dans l'onglet Scripts.",
+      "Planifiez vos 3 premières sessions de rôle-play.",
+    ],
+    orange: [
+      "Bon potentiel ! Complétez les modules de formation prioritaires.",
+      "Concentrez-vous sur la maîtrise des objections.",
+      "Participez aux calls de groupe pour progresser plus vite.",
+    ],
+    red: [
+      "Bienvenue ! Commencez par les bases du setting.",
+      "Regardez toutes les vidéos d'onboarding attentivement.",
+      "N'hésitez pas à poser des questions dans la communauté.",
+    ],
+  };
+  return tips[colorCode] || tips.orange;
+}
+
+export async function triggerAutoBooking(userId: string) {
+  // Stub — will integrate with booking system later
+  return { success: true, message: "Booking automatique programmé" };
+}
+
+export async function scrapeAndGenerateScript(linkedinUrl: string) {
+  // Stub — will use AI/scraping later
+  return {
+    success: true,
+    script: "Bonjour [Nom], j'ai vu votre profil et je pense que notre programme pourrait vous intéresser. Seriez-vous disponible pour un appel de 15 minutes cette semaine ?",
+    profileData: { name: "Prospect", industry: "Non défini" },
+  };
+}

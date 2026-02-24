@@ -21,6 +21,13 @@ import {
   LineChart,
   Gift,
   Inbox,
+  Swords,
+  MessageCircle,
+  ScrollText,
+  Bot,
+  Building2,
+  Zap,
+  Store,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -128,6 +135,36 @@ export const NAV_ITEMS: NavItem[] = [
 
   // Setter/Closer specific
   {
+    label: "Role-Play",
+    href: "/roleplay",
+    icon: Swords,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+  {
+    label: "Scripts",
+    href: "/scripts",
+    icon: ScrollText,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+  {
+    label: "WhatsApp",
+    href: "/whatsapp",
+    icon: MessageCircle,
+    roles: ["admin", "manager", "setter"],
+  },
+  {
+    label: "Automation",
+    href: "/automation",
+    icon: Zap,
+    roles: ["admin", "manager"],
+  },
+  {
+    label: "Marketplace",
+    href: "/marketplace",
+    icon: Store,
+    roles: ["setter", "closer"],
+  },
+  {
     label: "Défis",
     href: "/challenges",
     icon: Trophy,
@@ -135,6 +172,12 @@ export const NAV_ITEMS: NavItem[] = [
   },
 
   // Client specific
+  {
+    label: "Portail",
+    href: "/portal",
+    icon: Building2,
+    roles: ["client_b2b"],
+  },
   {
     label: "Onboarding",
     href: "/onboarding",
@@ -178,6 +221,12 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/settings",
     icon: Settings,
     roles: ["admin", "manager"],
+    children: [
+      { label: "Général", href: "/settings", icon: Settings, roles: ["admin", "manager"] },
+      { label: "Onboarding", href: "/settings/onboarding", icon: BookOpen, roles: ["admin", "manager"] },
+      { label: "Modes IA", href: "/settings/ai-modes", icon: Bot, roles: ["admin", "manager"] },
+      { label: "White Label", href: "/settings/white-label", icon: Building2, roles: ["admin", "manager"] },
+    ],
   },
 ];
 

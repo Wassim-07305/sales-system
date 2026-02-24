@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { CourseView } from "./course-view";
+import {
+  getCourseWithPrerequisites,
+  getQuizAttempts,
+} from "@/lib/actions/academy";
 
 interface Props {
   params: Promise<{ courseId: string }>;
@@ -13,13 +17,14 @@ export default async function CoursePage({ params }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: course } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("id", courseId)
-    .single();
+  // Get course with prerequisites
+  const courseData = await getCourseWithPrerequisites(
+    courseId,
+    user?.id || ""
+  );
+  if (!courseData) notFound();
 
-  if (!course) notFound();
+  const { course, prerequisites, allPrereqsMet } = courseData;
 
   const { data: lessons } = await supabase
     .from("lessons")
@@ -44,6 +49,23 @@ export default async function CoursePage({ params }: Props) {
       (lessons || []).map((l) => l.id)
     );
 
+  // Fetch quiz attempts for each lesson that has a quiz
+  const quizAttempts: Record<
+    string,
+    { todayAttempts: number; bestScore: number; maxAttempts: number }
+  > = {};
+
+  if (user) {
+    for (const quiz of quizzes || []) {
+      const attempts = await getQuizAttempts(quiz.lesson_id, user.id);
+      quizAttempts[quiz.lesson_id] = {
+        todayAttempts: attempts.todayAttempts,
+        bestScore: attempts.bestScore,
+        maxAttempts: quiz.max_attempts_per_day || 3,
+      };
+    }
+  }
+
   return (
     <CourseView
       course={course}
@@ -51,6 +73,9 @@ export default async function CoursePage({ params }: Props) {
       progress={progress || []}
       quizzes={quizzes || []}
       userId={user?.id || ""}
+      prerequisites={prerequisites}
+      allPrereqsMet={allPrereqsMet}
+      quizAttempts={quizAttempts}
     />
   );
 }

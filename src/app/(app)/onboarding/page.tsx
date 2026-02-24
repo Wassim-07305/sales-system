@@ -32,6 +32,14 @@ export default async function OnboardingPage() {
     .select("*")
     .eq("client_id", user.id);
 
+  const { data: quizResult } = await supabase
+    .from("onboarding_quiz_responses")
+    .select("score, color_code")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const progressMap: Record<string, { completed: boolean; response_data: Record<string, unknown> }> = {};
   for (const p of progress || []) {
     progressMap[p.step_id] = { completed: p.completed, response_data: p.response_data || {} };
@@ -41,6 +49,7 @@ export default async function OnboardingPage() {
     <OnboardingFlow
       steps={steps || []}
       progressMap={progressMap}
+      quizResult={quizResult}
     />
   );
 }
