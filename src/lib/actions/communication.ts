@@ -213,7 +213,7 @@ export async function sendBroadcast(data: {
       type: "broadcast",
       title: data.subject || "Nouvelle diffusion",
       body: data.content.substring(0, 200),
-      is_read: false,
+      read: false,
     }));
 
     await supabase.from("notifications").insert(notifications);

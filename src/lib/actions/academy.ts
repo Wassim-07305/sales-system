@@ -134,7 +134,7 @@ export async function getResourceLibrary() {
   const supabase = await createClient();
 
   const { data: resources } = await supabase
-    .from("resource_items")
+    .from("resource_library")
     .select("*")
     .order("created_at", { ascending: false });
 

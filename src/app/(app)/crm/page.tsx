@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { KanbanBoard } from "./kanban-board";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { Plus } from "lucide-react";
 
 export default async function CRMPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: stages } = await supabase
     .from("pipeline_stages")

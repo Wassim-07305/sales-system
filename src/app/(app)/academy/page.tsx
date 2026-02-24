@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { CourseGrid } from "./course-grid";
 
 export default async function AcademyPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: courses } = await supabase
     .from("courses")
@@ -17,7 +17,7 @@ export default async function AcademyPage() {
   const { data: progress } = await supabase
     .from("lesson_progress")
     .select("*")
-    .eq("user_id", user?.id || "");
+    .eq("user_id", user.id);
 
   return (
     <div>

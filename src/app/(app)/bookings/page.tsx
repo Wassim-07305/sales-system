@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { BookingCalendar } from "./booking-calendar";
-import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
-import Link from "next/link";
 
 export default async function BookingsPage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: bookings } = await supabase
     .from("bookings")
@@ -18,14 +18,7 @@ export default async function BookingsPage() {
       <PageHeader
         title="Bookings"
         description="Calendrier et gestion des rendez-vous"
-      >
-        <Link href="/bookings/settings">
-          <Button variant="outline" size="sm">
-            <Settings className="h-4 w-4 mr-2" />
-            Paramètres
-          </Button>
-        </Link>
-      </PageHeader>
+      />
       <BookingCalendar initialBookings={bookings || []} />
     </div>
   );

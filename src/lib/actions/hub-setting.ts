@@ -242,28 +242,21 @@ export async function createFollowUpSequence(data: {
 }) {
   const supabase = await createClient();
 
-  const { data: sequence, error: seqError } = await supabase
-    .from("follow_up_sequences")
-    .insert({ name: data.name })
-    .select()
-    .single();
-
-  if (seqError || !sequence) throw new Error(seqError?.message || "Erreur création séquence");
-
-  // Create steps
-  const steps = data.steps.map((step, index) => ({
-    sequence_id: sequence.id,
+  // Steps are stored as JSONB in follow_up_sequences.steps
+  const stepsJson = data.steps.map((step, index) => ({
     step_order: index + 1,
     day_offset: step.day_offset,
     action: step.action,
     message_template: step.message_template,
   }));
 
-  const { error: stepsError } = await supabase
-    .from("follow_up_sequence_steps")
-    .insert(steps);
+  const { data: sequence, error } = await supabase
+    .from("follow_up_sequences")
+    .insert({ name: data.name, steps: stepsJson })
+    .select()
+    .single();
 
-  if (stepsError) throw new Error(stepsError.message);
+  if (error || !sequence) throw new Error(error?.message || "Erreur création séquence");
 
   revalidatePath("/prospecting/follow-ups");
   return sequence;
@@ -275,7 +268,7 @@ export async function completeFollowUpTask(taskId: string) {
   const { error } = await supabase
     .from("follow_up_tasks")
     .update({
-      status: "completed",
+      completed: true,
       completed_at: new Date().toISOString(),
     })
     .eq("id", taskId);
@@ -290,32 +283,35 @@ export async function assignFollowUpSequence(
 ) {
   const supabase = await createClient();
 
-  // Fetch sequence steps
-  const { data: steps } = await supabase
-    .from("follow_up_sequence_steps")
+  // Fetch sequence with JSONB steps
+  const { data: sequence } = await supabase
+    .from("follow_up_sequences")
     .select("*")
-    .eq("sequence_id", sequenceId)
-    .order("step_order");
+    .eq("id", sequenceId)
+    .single();
 
-  if (!steps || steps.length === 0)
+  const steps = (sequence?.steps || []) as Array<{
+    step_order: number;
+    day_offset: number;
+    action: string;
+    message_template: string;
+  }>;
+
+  if (steps.length === 0)
     throw new Error("Séquence vide ou introuvable");
 
   // Create tasks for each step
   const now = new Date();
-  const tasks = steps.map(
-    (step: Record<string, unknown>) => ({
-      prospect_id: prospectId,
-      sequence_id: sequenceId,
-      step_order: step.step_order,
-      action: step.action,
-      message_template: step.message_template,
-      scheduled_at: new Date(
-        now.getTime() +
-          (step.day_offset as number) * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      status: "pending",
-    })
-  );
+  const tasks = steps.map((step) => ({
+    prospect_id: prospectId,
+    sequence_id: sequenceId,
+    step_index: step.step_order - 1,
+    message_content: step.message_template,
+    scheduled_at: new Date(
+      now.getTime() + step.day_offset * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    completed: false,
+  }));
 
   const { error } = await supabase.from("follow_up_tasks").insert(tasks);
   if (error) throw new Error(error.message);
@@ -328,7 +324,7 @@ export async function getFollowUpSequences() {
 
   const { data: sequences } = await supabase
     .from("follow_up_sequences")
-    .select("*, steps:follow_up_sequence_steps(*)")
+    .select("*")
     .order("created_at", { ascending: false });
 
   return (sequences || []).map((s: Record<string, unknown>) => ({
