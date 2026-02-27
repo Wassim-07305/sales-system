@@ -25,6 +25,7 @@ import {
   deleteCourse,
 } from "@/lib/actions/academy-admin";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { CourseFormDialog } from "./course-form-dialog";
 
 interface CourseModule {
@@ -232,49 +233,64 @@ export function CourseList({ initialCourses }: CourseListProps) {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-border">
+                  <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                    {/* Primary action: edit content (modules + lessons) */}
                     <Button
-                      variant="outline"
+                      asChild
                       size="sm"
-                      className="flex-1 gap-1.5"
-                      onClick={() => handleEdit(course)}
+                      className="w-full gap-1.5 bg-brand text-brand-dark hover:bg-brand/90"
                     >
-                      <Pencil className="h-3.5 w-3.5" />
-                      Modifier
+                      <Link href={`/academy/admin/${course.id}`}>
+                        <Layers className="h-3.5 w-3.5" />
+                        Modules &amp; Lecons
+                      </Link>
                     </Button>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleTogglePublish(course)}
-                      disabled={isToggling || isPending}
-                      title={
-                        course.is_published ? "Depublier" : "Publier"
-                      }
-                    >
-                      {isToggling ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : course.is_published ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
+                    {/* Secondary actions */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 gap-1.5"
+                        onClick={() => handleEdit(course)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Infos
+                      </Button>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(course.id)}
-                      disabled={isDeleting || isPending}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      title="Supprimer"
-                    >
-                      {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleTogglePublish(course)}
+                        disabled={isToggling || isPending}
+                        title={
+                          course.is_published ? "Depublier" : "Publier"
+                        }
+                      >
+                        {isToggling ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : course.is_published ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(course.id)}
+                        disabled={isDeleting || isPending}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        title="Supprimer"
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

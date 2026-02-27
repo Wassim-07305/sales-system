@@ -882,6 +882,23 @@ function LessonEditor({
           </div>
 
           <div className="space-y-3">
+            {/* Preview de la video actuelle */}
+            {videoUrl && (
+              <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Video actuelle :</p>
+                <p className="text-sm truncate">{videoUrl}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setVideoUrl("")}
+                >
+                  <X className="h-3.5 w-3.5 mr-1.5" />
+                  Retirer la video
+                </Button>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="video-url">URL de la video (YouTube, Vimeo, etc.)</Label>
               <Input
@@ -901,12 +918,12 @@ function LessonEditor({
             <FileUpload
               bucket="academy"
               path="videos"
-              accept="video/*"
+              accept="video/mp4,video/webm"
               maxSize={500}
               onUpload={(url) => setVideoUrl(url)}
               onRemove={() => setVideoUrl("")}
               currentUrl={
-                videoUrl && !videoUrl.startsWith("http") ? videoUrl : undefined
+                videoUrl && videoUrl.includes("supabase") ? videoUrl : undefined
               }
               label="Glissez une video ou cliquez pour uploader"
             />
@@ -957,9 +974,9 @@ function LessonEditor({
           {/* Upload nouvelle piece jointe */}
           <FileUpload
             bucket="academy"
-            path="attachments"
-            accept="*/*"
-            maxSize={50}
+            path="resources"
+            accept=".pdf,.zip,.xlsx,.docx,.pptx,.mp4,.webm,.jpg,.jpeg,.png,.webp,.gif"
+            maxSize={100}
             onUpload={handleAttachmentUpload}
             label="Ajouter une piece jointe"
           />

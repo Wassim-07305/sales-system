@@ -98,6 +98,7 @@ export async function submitQuizAttempt(
 
   await supabase.from("quiz_attempts").insert({
     user_id: user.id,
+    quiz_id: quizId,
     lesson_id: lessonId,
     answers,
     score,
@@ -294,12 +295,35 @@ export async function getCourseDetail(courseId: string) {
     .eq("course_id", courseId);
 
   let allPrereqsMet = true;
-  const prerequisites = (prereqs || []).map((p: Record<string, unknown>) => {
-    const prereqLessons = lessonIds; // simplified
-    const completed = progressMap[p.prerequisite_course_id as string]?.completed ?? false;
-    if (!completed) allPrereqsMet = false;
-    return { ...p, completed };
-  });
+  const prerequisites = await Promise.all(
+    (prereqs || []).map(async (p: Record<string, unknown>) => {
+      const prereqCourseId = p.prerequisite_course_id as string;
+
+      // Fetch all lessons of the prerequisite course
+      const { data: prereqLessons } = await supabase
+        .from("lessons")
+        .select("id")
+        .eq("course_id", prereqCourseId);
+
+      const prereqLessonIds = (prereqLessons || []).map((l) => l.id);
+
+      if (prereqLessonIds.length === 0) {
+        return { ...p, completed: true };
+      }
+
+      // Check if ALL lessons of the prerequisite course are completed
+      const { data: completedLessons } = await supabase
+        .from("lesson_progress")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("completed", true)
+        .in("lesson_id", prereqLessonIds);
+
+      const completed = (completedLessons || []).length >= prereqLessonIds.length;
+      if (!completed) allPrereqsMet = false;
+      return { ...p, completed };
+    })
+  );
 
   return {
     course: { ...course, modules },
