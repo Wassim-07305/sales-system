@@ -46,19 +46,28 @@ export async function sendMessage(conversationId: string, content: string, type:
 
   const { data: conv } = await supabase
     .from("dm_conversations")
-    .select("messages")
+    .select("messages, linkedin_conversation_id")
     .eq("id", conversationId)
     .single();
 
   if (!conv) return;
 
+  const isLinkedIn = !!conv.linkedin_conversation_id;
   const messages = Array.isArray(conv.messages) ? conv.messages : [];
-  messages.push({
+
+  const newMessage: Record<string, unknown> = {
     sender: "damien",
     content,
     type,
     timestamp: new Date().toISOString(),
-  });
+  };
+
+  // Si conversation LinkedIn, marquer pour envoi par l'extension Chrome
+  if (isLinkedIn) {
+    newMessage.pending_send = true;
+  }
+
+  messages.push(newMessage);
 
   await supabase.from("dm_conversations").update({
     messages,

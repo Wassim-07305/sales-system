@@ -28,6 +28,10 @@ import {
   Wrench,
   ExternalLink,
   Copy,
+  Chrome,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
 } from "lucide-react";
 import {
   analyzeProfile,
@@ -49,8 +53,16 @@ interface Prospect {
   list: { id: string; name: string } | null;
 }
 
+interface SyncStatus {
+  connected: boolean;
+  lastSyncAt: string | null;
+  conversationsSynced: number;
+  prospectsSynced: number;
+}
+
 interface Props {
   prospects: Prospect[];
+  syncStatus: SyncStatus | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -73,7 +85,7 @@ const statusColors: Record<string, string> = {
   lost: "bg-red-100 text-red-700",
 };
 
-export function LinkedinView({ prospects }: Props) {
+export function LinkedinView({ prospects, syncStatus }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -182,6 +194,52 @@ export function LinkedinView({ prospects }: Props) {
           {prospects.length} prospects
         </Badge>
       </PageHeader>
+
+      {/* Extension Chrome status bar */}
+      <Card className="mb-6">
+        <CardContent className="flex items-center justify-between py-3 px-4">
+          <div className="flex items-center gap-3">
+            <Chrome className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              {syncStatus?.connected ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm font-medium text-emerald-600">
+                    Extension connectée
+                  </span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Extension non connectée
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {syncStatus ? (
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <span>{syncStatus.prospectsSynced} prospects synchronisés</span>
+              <span>{syncStatus.conversationsSynced} conversations</span>
+              {syncStatus.lastSyncAt && (
+                <span className="flex items-center gap-1">
+                  <RefreshCw className="h-3 w-3" />
+                  {formatDistanceToNow(new Date(syncStatus.lastSyncAt), {
+                    addSuffix: true,
+                    locale: fr,
+                  })}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Installez l&apos;extension Chrome pour synchroniser LinkedIn
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="outils">
         <TabsList className="mb-6">

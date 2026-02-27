@@ -417,10 +417,30 @@ export interface DmConversation {
   id: string;
   prospect_id: string | null;
   platform: string;
-  messages: Array<{ sender: string; content: string; type: string; timestamp: string }>;
+  messages: Array<{
+    sender: string;
+    content: string;
+    type: string;
+    timestamp: string;
+    pending_send?: boolean;
+    sent_at?: string;
+    linkedin_message_id?: string;
+  }>;
   last_message_at: string | null;
+  linkedin_conversation_id: string | null;
   created_at: string;
   prospect?: Prospect;
+}
+
+export interface LinkedInSync {
+  id: string;
+  user_id: string;
+  linkedin_profile_id: string | null;
+  last_sync_at: string | null;
+  sync_status: string;
+  conversations_synced: number;
+  prospects_synced: number;
+  created_at: string;
 }
 
 export interface VoiceProfile {

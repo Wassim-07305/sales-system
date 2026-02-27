@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <div class="header">
+      <img src="../icons/logo.png" width="24" height="24" />
+      <span class="title">Sales System</span>
+      <span class="subtitle">LinkedIn Bridge</span>
+    </div>
+
+    <div id="login-section" class="section hidden">
+      <input id="email" type="email" placeholder="Email" class="input" />
+      <input id="password" type="password" placeholder="Mot de passe" class="input" />
+      <button id="login-btn" class="btn btn-primary">Se connecter</button>
+      <div id="login-error" class="error hidden"></div>
+    </div>
+
+    <div id="status-section" class="section hidden">
+      <div class="status-card">
+        <div class="status-row">
+          <span class="dot dot-green" id="ss-dot"></span>
+          <span id="ss-status">Sales System connecte</span>
+        </div>
+        <div class="status-row">
+          <span class="dot" id="li-dot"></span>
+          <span id="li-status">LinkedIn...</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value" id="prospects-count">0</span>
+          <span class="stat-label">Prospects synchro</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="conversations-count">0</span>
+          <span class="stat-label">Conversations</span>
+        </div>
+      </div>
+
+      <div class="stat-row" id="last-sync"></div>
+
+      <button id="sync-btn" class="btn btn-primary">Synchroniser maintenant</button>
+      <button id="logout-btn" class="btn btn-secondary">Deconnexion</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,6 +1,16 @@
 "use server";
 
+import webPush from "web-push";
 import { createClient } from "@/lib/supabase/server";
+
+// Configure VAPID keys
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
+const VAPID_EMAIL = process.env.VAPID_EMAIL || "mailto:admin@salessystem.com";
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  webPush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+}
 
 export async function subscribePush(subscription: {
   endpoint: string;
@@ -60,20 +70,43 @@ export async function sendPush(
     .single();
 
   if (!subscription) {
-    console.log(
-      `[Push] Aucun abonnement push pour l'utilisateur ${userId}`
-    );
     return { sent: false, reason: "no_subscription" };
   }
 
-  // Stub: In production, use web-push library to send notification
-  console.log(`[Push] Envoi de notification push à ${userId}:`, {
-    title,
-    body,
-    endpoint: subscription.endpoint,
-  });
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    console.warn("[Push] VAPID keys non configurées");
+    return { sent: false, reason: "vapid_not_configured" };
+  }
 
-  return { sent: true };
+  try {
+    const pushSubscription = {
+      endpoint: subscription.endpoint,
+      keys: subscription.keys as { p256dh: string; auth: string },
+    };
+
+    const payload = JSON.stringify({
+      title,
+      body,
+      icon: "/icons/icon-192x192.png",
+      badge: "/icons/icon-72x72.png",
+      data: { url: "/notifications" },
+    });
+
+    await webPush.sendNotification(pushSubscription, payload);
+    return { sent: true };
+  } catch (err: unknown) {
+    const statusCode = (err as { statusCode?: number }).statusCode;
+    // Si le navigateur a revoque l'abonnement (410 Gone), on le supprime
+    if (statusCode === 410 || statusCode === 404) {
+      await supabase
+        .from("push_subscriptions")
+        .delete()
+        .eq("user_id", userId);
+      return { sent: false, reason: "subscription_expired" };
+    }
+    console.error(`[Push] Erreur envoi à ${userId}:`, err);
+    return { sent: false, reason: "send_error" };
+  }
 }
 
 export async function sendBulkPush(
