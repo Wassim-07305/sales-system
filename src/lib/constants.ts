@@ -230,6 +230,107 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+export interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+// Items du footer sidebar (hors navigation principale)
+const FOOTER_HREFS = ["/profile", "/settings"];
+
+export const NAV_SECTIONS: NavSection[] = [
+  {
+    label: "",
+    items: NAV_ITEMS.filter((i) => i.href === "/dashboard"),
+  },
+  {
+    label: "Ventes",
+    items: NAV_ITEMS.filter((i) =>
+      ["/crm", "/contacts", "/bookings", "/contracts", "/analytics"].includes(i.href)
+    ),
+  },
+  {
+    label: "Communication",
+    items: NAV_ITEMS.filter((i) =>
+      ["/inbox", "/chat", "/whatsapp"].includes(i.href)
+    ),
+  },
+  {
+    label: "Prospection",
+    items: NAV_ITEMS.filter((i) =>
+      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href)
+    ),
+  },
+  {
+    label: "Formation",
+    items: NAV_ITEMS.filter((i) =>
+      ["/academy", "/community", "/challenges"].includes(i.href)
+    ),
+  },
+  {
+    label: "Gestion",
+    items: NAV_ITEMS.filter((i) =>
+      ["/team", "/content", "/customers", "/marketplace"].includes(i.href)
+    ),
+  },
+  {
+    label: "Espace Client",
+    items: NAV_ITEMS.filter((i) =>
+      ["/portal", "/onboarding", "/calls", "/resources", "/kpis", "/referral"].includes(
+        i.href
+      )
+    ),
+  },
+];
+
+// Breadcrumb labels pour les segments d'URL
+export const BREADCRUMB_LABELS: Record<string, string> = {
+  dashboard: "Dashboard",
+  crm: "CRM",
+  contacts: "Contacts",
+  bookings: "Bookings",
+  contracts: "Contrats",
+  analytics: "Analytics",
+  academy: "Academy",
+  team: "Équipe",
+  prospecting: "Prospection",
+  hub: "Hub",
+  linkedin: "LinkedIn",
+  instagram: "Instagram",
+  "follow-ups": "Relances",
+  scoring: "Scoring",
+  templates: "Templates",
+  inbox: "Inbox",
+  chat: "Chat",
+  broadcast: "Diffusion",
+  video: "Vidéo",
+  replays: "Replays",
+  whatsapp: "WhatsApp",
+  settings: "Paramètres",
+  sequences: "Séquences",
+  roleplay: "Role-Play",
+  scripts: "Scripts",
+  automation: "Automation",
+  marketplace: "Marketplace",
+  challenges: "Défis",
+  community: "Communauté",
+  portal: "Portail",
+  onboarding: "Onboarding",
+  calls: "Appels",
+  resources: "Ressources",
+  kpis: "KPIs",
+  referral: "Parrainage",
+  profile: "Profil",
+  content: "Contenus",
+  customers: "Clients",
+  notifications: "Notifications",
+  "ai-modes": "Modes IA",
+  "white-label": "White Label",
+  branding: "Branding",
+  subscription: "Abonnement",
+  voice: "Voix",
+};
+
 export const PIPELINE_DEFAULT_STAGES = [
   { name: "Prospect", color: "#6b6b6b", position: 0 },
   { name: "Contacté", color: "#3b82f6", position: 1 },

@@ -36,6 +36,7 @@ export default async function AppLayout({
     <AppShell
       role={userProfile.role as UserRole}
       userName={userProfile.full_name || "Utilisateur"}
+      email={userProfile.email || user.email || ""}
       avatarUrl={userProfile.avatar_url}
       userId={user.id}
     >
