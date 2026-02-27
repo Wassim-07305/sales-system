@@ -1,53 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
+import { getCourseDetail } from "@/lib/actions/academy";
 import { CourseView } from "./course-view";
-import {
-  getCourseWithPrerequisites,
-  getQuizAttempts,
-} from "@/lib/actions/academy";
 
-interface Props {
+export default async function CoursePage({
+  params,
+}: {
   params: Promise<{ courseId: string }>;
-}
-
-export default async function CoursePage({ params }: Props) {
+}) {
   const { courseId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  // Get course with prerequisites
-  const courseData = await getCourseWithPrerequisites(
-    courseId,
-    user?.id || ""
-  );
-  if (!courseData) notFound();
-
-  const { course, prerequisites, allPrereqsMet } = courseData;
-
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("*")
-    .eq("course_id", courseId)
-    .order("position");
-
-  const { data: progress } = await supabase
-    .from("lesson_progress")
-    .select("*")
-    .eq("user_id", user?.id || "")
-    .in(
-      "lesson_id",
-      (lessons || []).map((l) => l.id)
-    );
-
-  const { data: quizzes } = await supabase
-    .from("quizzes")
-    .select("*")
-    .in(
-      "lesson_id",
-      (lessons || []).map((l) => l.id)
-    );
+  const result = await getCourseDetail(courseId);
+  if (!result) notFound();
 
   // Fetch quiz attempts for each lesson that has a quiz
   const quizAttempts: Record<
@@ -55,27 +24,61 @@ export default async function CoursePage({ params }: Props) {
     { todayAttempts: number; bestScore: number; maxAttempts: number }
   > = {};
 
-  if (user) {
-    for (const quiz of quizzes || []) {
-      const attempts = await getQuizAttempts(quiz.lesson_id, user.id);
-      quizAttempts[quiz.lesson_id] = {
-        todayAttempts: attempts.todayAttempts,
-        bestScore: attempts.bestScore,
-        maxAttempts: quiz.max_attempts_per_day || 3,
-      };
-    }
+  const today = new Date().toISOString().split("T")[0];
+
+  for (const [lessonId, quiz] of Object.entries(result.quizMap)) {
+    const { data: attempts } = await supabase
+      .from("quiz_attempts")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("lesson_id", lessonId)
+      .order("attempted_at", { ascending: false });
+
+    const todayAttempts = (attempts || []).filter(
+      (a: { attempted_at: string }) =>
+        a.attempted_at >= `${today}T00:00:00.000Z`
+    );
+
+    quizAttempts[lessonId] = {
+      todayAttempts: todayAttempts.length,
+      bestScore: Math.max(0, ...(attempts || []).map((a: { score: number }) => a.score)),
+      maxAttempts:
+        (quiz as { max_attempts_per_day?: number }).max_attempts_per_day || 3,
+    };
   }
 
   return (
     <CourseView
-      course={course}
-      lessons={lessons || []}
-      progress={progress || []}
-      quizzes={quizzes || []}
-      userId={user?.id || ""}
-      prerequisites={prerequisites}
-      allPrereqsMet={allPrereqsMet}
+      course={result.course as CourseViewCourse}
+      progressMap={result.progressMap}
+      quizMap={result.quizMap}
+      prerequisites={result.prerequisites}
+      allPrereqsMet={result.allPrereqsMet}
+      userId={user.id}
       quizAttempts={quizAttempts}
     />
   );
 }
+
+// Type helper for the course shape returned by getCourseDetail
+type CourseViewCourse = {
+  id: string;
+  title: string;
+  description: string | null;
+  modules: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    position: number;
+    lessons: Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      video_url: string | null;
+      duration_minutes: number | null;
+      attachments: Array<{ name: string; url: string; type: string }>;
+      content_html: string | null;
+      position: number;
+    }>;
+  }>;
+};

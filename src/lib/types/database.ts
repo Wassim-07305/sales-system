@@ -160,11 +160,23 @@ export interface Course {
   has_prerequisites: boolean;
   created_at: string;
   lessons?: Lesson[];
+  modules?: CourseModule[];
+}
+
+export interface CourseModule {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  position: number;
+  created_at: string;
+  lessons?: Lesson[];
 }
 
 export interface Lesson {
   id: string;
   course_id: string;
+  module_id: string | null;
   title: string;
   description: string | null;
   position: number;
@@ -172,6 +184,7 @@ export interface Lesson {
   transcript: string | null;
   duration_minutes: number | null;
   attachments: Array<{ name: string; url: string; type: string }>;
+  content_html: string | null;
   created_at: string;
 }
 

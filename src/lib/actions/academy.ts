@@ -186,3 +186,179 @@ export async function aiCorrectExercise(
     ],
   };
 }
+
+export async function getCoursesWithModules() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("*, modules:course_modules(*, lessons:lessons(id, title, position, duration_minutes, video_url))")
+    .eq("is_published", true)
+    .order("position", { ascending: true });
+
+  // Get user progress if authenticated
+  let progressMap: Record<string, boolean> = {};
+  if (user) {
+    const { data: progress } = await supabase
+      .from("lesson_progress")
+      .select("lesson_id, completed")
+      .eq("user_id", user.id)
+      .eq("completed", true);
+
+    if (progress) {
+      progressMap = Object.fromEntries(progress.map((p: { lesson_id: string }) => [p.lesson_id, true]));
+    }
+  }
+
+  return {
+    courses: (courses || []).map((c: Record<string, unknown>) => ({
+      ...c,
+      modules: Array.isArray(c.modules)
+        ? (c.modules as Record<string, unknown>[])
+            .sort((a, b) => (a.position as number) - (b.position as number))
+            .map((m) => ({
+              ...m,
+              lessons: Array.isArray(m.lessons)
+                ? (m.lessons as Record<string, unknown>[]).sort((a, b) => (a.position as number) - (b.position as number))
+                : [],
+            }))
+        : [],
+    })),
+    progressMap,
+  };
+}
+
+export async function getCourseDetail(courseId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  // Fetch course with modules and lessons
+  const { data: course } = await supabase
+    .from("courses")
+    .select("*, modules:course_modules(*, lessons:lessons(*))")
+    .eq("id", courseId)
+    .single();
+
+  if (!course) return null;
+
+  // Sort modules and lessons by position
+  const modules = Array.isArray(course.modules)
+    ? (course.modules as Record<string, unknown>[])
+        .sort((a, b) => (a.position as number) - (b.position as number))
+        .map((m) => ({
+          ...m,
+          lessons: Array.isArray(m.lessons)
+            ? (m.lessons as Record<string, unknown>[]).sort((a, b) => (a.position as number) - (b.position as number))
+            : [],
+        }))
+    : [];
+
+  // Get all lesson IDs
+  const lessonIds = modules.flatMap((m) =>
+    (m.lessons as Array<{ id: string }>).map((l) => l.id)
+  );
+
+  // Fetch progress
+  const { data: progress } = await supabase
+    .from("lesson_progress")
+    .select("*")
+    .eq("user_id", user.id)
+    .in("lesson_id", lessonIds.length > 0 ? lessonIds : ["none"]);
+
+  const progressMap: Record<string, { completed: boolean; quiz_score: number | null }> = {};
+  if (progress) {
+    for (const p of progress) {
+      progressMap[p.lesson_id] = { completed: p.completed, quiz_score: p.quiz_score };
+    }
+  }
+
+  // Fetch quizzes
+  const { data: quizzes } = await supabase
+    .from("quizzes")
+    .select("*")
+    .in("lesson_id", lessonIds.length > 0 ? lessonIds : ["none"]);
+
+  const quizMap: Record<string, Record<string, unknown>> = {};
+  if (quizzes) {
+    for (const q of quizzes) {
+      quizMap[q.lesson_id] = q;
+    }
+  }
+
+  // Fetch prerequisites
+  const { data: prereqs } = await supabase
+    .from("course_prerequisites")
+    .select("*, prerequisite:courses!prerequisite_course_id(id, title)")
+    .eq("course_id", courseId);
+
+  let allPrereqsMet = true;
+  const prerequisites = (prereqs || []).map((p: Record<string, unknown>) => {
+    const prereqLessons = lessonIds; // simplified
+    const completed = progressMap[p.prerequisite_course_id as string]?.completed ?? false;
+    if (!completed) allPrereqsMet = false;
+    return { ...p, completed };
+  });
+
+  return {
+    course: { ...course, modules },
+    progressMap,
+    quizMap,
+    prerequisites,
+    allPrereqsMet,
+  };
+}
+
+export async function markLessonComplete(lessonId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { error } = await supabase
+    .from("lesson_progress")
+    .upsert(
+      {
+        user_id: user.id,
+        lesson_id: lessonId,
+        completed: true,
+        completed_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,lesson_id" }
+    );
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/academy");
+}
+
+export async function trackVideoProgress(lessonId: string, watchedPercent: number) {
+  if (watchedPercent < 80) return;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Check if already completed
+  const { data: existing } = await supabase
+    .from("lesson_progress")
+    .select("completed")
+    .eq("user_id", user.id)
+    .eq("lesson_id", lessonId)
+    .single();
+
+  if (existing?.completed) return;
+
+  await supabase
+    .from("lesson_progress")
+    .upsert(
+      {
+        user_id: user.id,
+        lesson_id: lessonId,
+        completed: true,
+        completed_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,lesson_id" }
+    );
+
+  revalidatePath("/academy");
+}
