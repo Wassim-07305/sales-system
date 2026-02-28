@@ -84,6 +84,7 @@ export function CourseFormDialog({
         await createCourse({
           title: title.trim(),
           description: description.trim() || undefined,
+          thumbnail_url: thumbnailUrl ?? undefined,
           is_published: isPublished,
         });
         toast.success("Formation creee");

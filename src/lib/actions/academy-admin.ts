@@ -40,6 +40,7 @@ export async function getAdminCourses() {
 export async function createCourse(data: {
   title: string;
   description?: string;
+  thumbnail_url?: string;
   target_roles?: string[];
   is_published?: boolean;
 }) {
@@ -60,6 +61,7 @@ export async function createCourse(data: {
     .insert({
       title: data.title,
       description: data.description || null,
+      thumbnail_url: data.thumbnail_url || null,
       target_roles: data.target_roles || ["setter", "closer", "client_b2b", "client_b2c"],
       is_published: data.is_published ?? false,
       position,
