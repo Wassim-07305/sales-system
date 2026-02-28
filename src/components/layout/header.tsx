@@ -28,9 +28,12 @@ export function Header({ userName, email, avatarUrl, role, userId, unreadCount }
     setTheme,
   } = useUIStore();
 
-  // Breadcrumb from pathname
+  // Breadcrumb from pathname — skip UUID segments
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const segments = pathname.split("/").filter(Boolean);
-  const breadcrumbs = segments.map((seg) => BREADCRUMB_LABELS[seg] || seg);
+  const breadcrumbs = segments
+    .filter((seg) => !UUID_RE.test(seg))
+    .map((seg) => BREADCRUMB_LABELS[seg] || seg.charAt(0).toUpperCase() + seg.slice(1));
 
   async function handleLogout() {
     const supabase = createClient();
