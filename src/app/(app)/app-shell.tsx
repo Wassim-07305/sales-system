@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { NotificationsPanel } from "@/components/layout/notifications-panel";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { NavigationProgress } from "@/components/layout/navigation-progress";
 import type { UserRole } from "@/lib/types/database";
 
 interface AppShellProps {
@@ -34,6 +35,7 @@ export function AppShell({
 
   return (
     <ThemeProvider>
+      <NavigationProgress />
       <div className="flex h-screen overflow-hidden bg-background">
         {/* Sidebar */}
         <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} />
