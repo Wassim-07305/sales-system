@@ -1056,15 +1056,9 @@ function VideoPlayer({
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onTimeUpdate: () => void;
 }) {
+  // Pas de vidéo → rien du tout (les documents s'affichent directement après)
   if (!lesson.video_url) {
-    return (
-      <div className="aspect-video rounded-xl bg-black flex items-center justify-center">
-        <div className="text-center text-white/50">
-          <PlayCircle className="h-16 w-16 mx-auto mb-3" />
-          <p className="text-sm">Aucune video pour cette lecon</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const embed = getVideoEmbed(lesson.video_url);
