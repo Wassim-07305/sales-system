@@ -18,33 +18,38 @@ export default async function CoursePage({
   const result = await getCourseDetail(courseId);
   if (!result) notFound();
 
-  // Fetch quiz attempts for each lesson that has a quiz
+  // Fetch ALL quiz attempts in a single query instead of N+1
+  const lessonIdsWithQuiz = Object.keys(result.quizMap);
+  const today = new Date().toISOString().split("T")[0];
+
   const quizAttempts: Record<
     string,
     { todayAttempts: number; bestScore: number; maxAttempts: number }
   > = {};
 
-  const today = new Date().toISOString().split("T")[0];
-
-  for (const [lessonId, quiz] of Object.entries(result.quizMap)) {
-    const { data: attempts } = await supabase
+  if (lessonIdsWithQuiz.length > 0) {
+    const { data: allAttempts } = await supabase
       .from("quiz_attempts")
-      .select("*")
+      .select("lesson_id, score, attempted_at")
       .eq("user_id", user.id)
-      .eq("lesson_id", lessonId)
+      .in("lesson_id", lessonIdsWithQuiz)
       .order("attempted_at", { ascending: false });
 
-    const todayAttempts = (attempts || []).filter(
-      (a: { attempted_at: string }) =>
-        a.attempted_at >= `${today}T00:00:00.000Z`
-    );
+    for (const lessonId of lessonIdsWithQuiz) {
+      const attempts = (allAttempts || []).filter(
+        (a) => a.lesson_id === lessonId
+      );
+      const todayAttempts = attempts.filter(
+        (a) => a.attempted_at >= `${today}T00:00:00.000Z`
+      );
+      const quiz = result.quizMap[lessonId] as { max_attempts_per_day?: number };
 
-    quizAttempts[lessonId] = {
-      todayAttempts: todayAttempts.length,
-      bestScore: Math.max(0, ...(attempts || []).map((a: { score: number }) => a.score)),
-      maxAttempts:
-        (quiz as { max_attempts_per_day?: number }).max_attempts_per_day || 3,
-    };
+      quizAttempts[lessonId] = {
+        todayAttempts: todayAttempts.length,
+        bestScore: Math.max(0, ...attempts.map((a) => a.score)),
+        maxAttempts: quiz.max_attempts_per_day || 3,
+      };
+    }
   }
 
   return (
