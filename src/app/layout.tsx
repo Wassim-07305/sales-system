@@ -51,6 +51,24 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={`${jakarta.variable} ${playfair.variable} font-sans antialiased`}>
+        {/* Force cleanup of old next-pwa service worker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(reg) {
+                    reg.update();
+                    reg.unregister();
+                  });
+                });
+                caches.keys().then(function(keys) {
+                  keys.forEach(function(k) { caches.delete(k); });
+                });
+              }
+            `,
+          }}
+        />
         {children}
         <Toaster
           position="top-right"
