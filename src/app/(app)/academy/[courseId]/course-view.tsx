@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,6 +30,7 @@ import {
   RotateCcw,
   Menu,
   X,
+  Loader2,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -232,6 +233,9 @@ export function CourseView({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [autoCompleted, setAutoCompleted] = useState(false);
 
+  // -- Transitions for async actions
+  const [markingComplete, startMarkTransition] = useTransition();
+
   // -- Mobile sidebar
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -260,20 +264,31 @@ export function CourseView({
     setMobileSidebarOpen(false);
   }
 
-  async function handleMarkComplete() {
+  function handleMarkComplete() {
     if (!selectedLessonId) return;
     if (completedLessonIds.has(selectedLessonId)) return;
 
-    try {
-      await markLessonComplete(selectedLessonId);
-      setLocalProgress((prev) => ({
-        ...prev,
-        [selectedLessonId]: { completed: true, quiz_score: null },
-      }));
-      toast.success("Lecon terminee !");
-    } catch {
-      toast.error("Erreur lors de la mise a jour");
-    }
+    // Optimistic update — UI reacts instantly
+    const lessonId = selectedLessonId;
+    setLocalProgress((prev) => ({
+      ...prev,
+      [lessonId]: { completed: true, quiz_score: null },
+    }));
+
+    startMarkTransition(async () => {
+      try {
+        await markLessonComplete(lessonId);
+        toast.success("Lecon terminee !");
+      } catch {
+        // Rollback on error
+        setLocalProgress((prev) => {
+          const next = { ...prev };
+          delete next[lessonId];
+          return next;
+        });
+        toast.error("Erreur lors de la mise a jour");
+      }
+    });
   }
 
   function handleTimeUpdate() {
@@ -723,10 +738,15 @@ export function CourseView({
                     !activeQuiz && (
                       <Button
                         onClick={handleMarkComplete}
+                        disabled={markingComplete}
                         className="bg-brand text-brand-dark hover:bg-brand/90 gap-2"
                       >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Marquer comme termine
+                        {markingComplete ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="h-4 w-4" />
+                        )}
+                        {markingComplete ? "Enregistrement..." : "Marquer comme termine"}
                       </Button>
                     )
                   )}

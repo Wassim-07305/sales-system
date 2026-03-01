@@ -70,7 +70,7 @@ export async function createCourse(data: {
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
   return course?.id;
 }
 
@@ -89,7 +89,7 @@ export async function updateCourse(courseId: string, data: {
     .eq("id", courseId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function deleteCourse(courseId: string) {
@@ -101,7 +101,7 @@ export async function deleteCourse(courseId: string) {
     .eq("id", courseId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function reorderCourses(orderedIds: string[]) {
@@ -114,7 +114,7 @@ export async function reorderCourses(orderedIds: string[]) {
       .eq("id", orderedIds[i]);
   }
 
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 // ─── Module CRUD ──────────────────────────────────────────
@@ -148,7 +148,7 @@ export async function createModule(data: {
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
   return mod?.id;
 }
 
@@ -164,7 +164,7 @@ export async function updateModule(moduleId: string, data: {
     .eq("id", moduleId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function deleteModule(moduleId: string) {
@@ -176,7 +176,7 @@ export async function deleteModule(moduleId: string) {
     .eq("id", moduleId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function reorderModules(courseId: string, orderedModuleIds: string[]) {
@@ -189,7 +189,7 @@ export async function reorderModules(courseId: string, orderedModuleIds: string[
       .eq("id", orderedModuleIds[i]);
   }
 
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 // ─── Lesson CRUD ──────────────────────────────────────────
@@ -230,7 +230,7 @@ export async function createLesson(data: {
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
   return lesson?.id;
 }
 
@@ -250,7 +250,7 @@ export async function updateLesson(lessonId: string, data: {
     .eq("id", lessonId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function deleteLesson(lessonId: string) {
@@ -262,7 +262,7 @@ export async function deleteLesson(lessonId: string) {
     .eq("id", lessonId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function reorderLessons(moduleId: string, orderedLessonIds: string[]) {
@@ -275,7 +275,7 @@ export async function reorderLessons(moduleId: string, orderedLessonIds: string[
       .eq("id", orderedLessonIds[i]);
   }
 
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function addLessonAttachment(lessonId: string, attachment: {
@@ -301,7 +301,7 @@ export async function addLessonAttachment(lessonId: string, attachment: {
     .eq("id", lessonId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
 
 export async function removeLessonAttachment(lessonId: string, attachmentUrl: string) {
@@ -323,5 +323,5 @@ export async function removeLessonAttachment(lessonId: string, attachmentUrl: st
     .eq("id", lessonId);
 
   if (error) throw new Error(error.message);
-  revalidatePath("/academy", "layout");
+  revalidatePath("/academy", "page");
 }
