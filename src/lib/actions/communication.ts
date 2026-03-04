@@ -310,37 +310,78 @@ export async function getRoomPolls(roomId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// AI Stubs
+// AI Features
 // ---------------------------------------------------------------------------
 
 export async function generateAiReply(context: string) {
-  // Stub: In production, this would call an AI API
-  const suggestions = [
-    "Merci pour votre message ! Je serais ravi d'en discuter plus en détail lors de notre prochain appel.",
-    "C'est une excellente question. Permettez-moi de vous envoyer les détails par email.",
-    "Je comprends tout à fait votre point de vue. Voici ce que je vous propose comme prochaine étape...",
-    "Parfait, je note cela. On se retrouve la semaine prochaine pour faire le point ?",
-  ];
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  const fallbackSuggestion = "Merci pour votre message ! Je serais ravi d'en discuter plus en détail lors de notre prochain appel.";
 
-  // Simulate a small delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  if (!isAiConfigured()) {
+    return { suggestion: fallbackSuggestion, context };
+  }
 
-  return {
-    suggestion: suggestions[Math.floor(Math.random() * suggestions.length)],
-    context,
-  };
+  try {
+    const { complete } = await import("@/lib/ai/utils");
+    const { REPLY_SUGGESTION_SYSTEM_PROMPT } = await import("@/lib/ai/prompts");
+
+    const suggestion = await complete({
+      system: REPLY_SUGGESTION_SYSTEM_PROMPT,
+      user: `Génère une réponse professionnelle et pertinente pour ce contexte :\n\n${context}`,
+      model: "HAIKU",
+      maxTokens: 512,
+    });
+
+    return { suggestion, context };
+  } catch {
+    return { suggestion: fallbackSuggestion, context };
+  }
 }
 
 export async function generatePostCallSummary(roomId: string) {
-  // Stub: In production, this would process the recording with AI
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  return {
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  const fallback = {
     roomId,
-    summary:
-      "Points clés abordés :\n• Revue des performances commerciales du mois\n• Discussion sur les nouvelles cibles B2B\n• Planification des actions pour le trimestre prochain\n\nActions à suivre :\n1. Préparer le rapport mensuel (échéance : vendredi)\n2. Contacter les 5 prospects prioritaires\n3. Mettre à jour le pipeline CRM",
-    sentiment: "positif",
-    duration: "42 minutes",
+    summary: "Points clés abordés :\n• Revue des performances commerciales du mois\n• Discussion sur les nouvelles cibles B2B\n• Planification des actions pour le trimestre prochain\n\nActions à suivre :\n1. Préparer le rapport mensuel\n2. Contacter les prospects prioritaires\n3. Mettre à jour le pipeline CRM",
+    sentiment: "positif" as const,
+    duration: "N/A",
     keyTopics: ["Performance commerciale", "Cibles B2B", "Plan trimestriel"],
   };
+
+  if (!isAiConfigured()) return fallback;
+
+  try {
+    const supabase = await createClient();
+    const { data: room } = await supabase
+      .from("video_rooms")
+      .select("title, description, started_at, ended_at")
+      .eq("id", roomId)
+      .single();
+
+    if (!room) return fallback;
+
+    const duration = room.started_at && room.ended_at
+      ? `${Math.round((new Date(room.ended_at).getTime() - new Date(room.started_at).getTime()) / 60000)} minutes`
+      : "N/A";
+
+    const { completeJSON } = await import("@/lib/ai/utils");
+    const { CALL_SUMMARY_SYSTEM_PROMPT } = await import("@/lib/ai/prompts");
+
+    const result = await completeJSON<{
+      summary: string;
+      sentiment: string;
+      duration: string;
+      keyTopics: string[];
+    }>({
+      system: CALL_SUMMARY_SYSTEM_PROMPT,
+      user: `Génère un résumé pour cette visioconférence :\n\nTitre : ${room.title || "Appel de groupe"}\nDescription : ${room.description || "N/A"}\nDurée : ${duration}\n\nGénère un résumé structuré avec les points clés probables basés sur le contexte.`,
+      model: "SONNET",
+      maxTokens: 1024,
+      fallback: { summary: fallback.summary, sentiment: "positif", duration, keyTopics: fallback.keyTopics },
+    });
+
+    return { roomId, ...result };
+  } catch {
+    return fallback;
+  }
 }

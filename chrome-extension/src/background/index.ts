@@ -12,6 +12,7 @@ chrome.webRequest.onSendHeaders.addListener(
       (h) => h.name.toLowerCase() === "csrf-token"
     );
     if (csrfHeader?.value) {
+      console.log("[BG] CSRF token captured:", csrfHeader.value.slice(0, 10) + "...");
       setLinkedInAuth({ csrfToken: csrfHeader.value, isLoggedIn: true });
     }
   },
@@ -87,9 +88,30 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
     }
 
     case "force_sync": {
+      console.log("[BG] force_sync received");
       await runSync();
       const sync = await getSyncState();
+      console.log("[BG] force_sync done:", JSON.stringify(sync));
       return { action: "sync_complete", sync };
+    }
+
+    case "debug_capture": {
+      // Ask the content script for captured messaging URLs and headers
+      const tabs = await chrome.tabs.query({ url: "https://www.linkedin.com/*" });
+      if (tabs.length === 0 || !tabs[0].id) {
+        return { error: "No LinkedIn tab found" };
+      }
+      return new Promise((resolve) => {
+        chrome.tabs.sendMessage(tabs[0].id!, { action: "get_captured_headers" }, (response) => {
+          if (chrome.runtime.lastError) {
+            resolve({ error: chrome.runtime.lastError.message });
+            return;
+          }
+          console.log("[BG] Captured headers:", JSON.stringify(response?.headers || {}));
+          console.log("[BG] Captured API URLs:", JSON.stringify(response?.apiUrls || []));
+          resolve(response);
+        });
+      });
     }
 
     default:
@@ -97,6 +119,10 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
   console.log("[Sales System LinkedIn Bridge] Extension installed");
+  // Reset sync state on install/reload to prevent stuck "syncing" state
+  const { setSyncState } = await import("../shared/storage");
+  await setSyncState({ syncStatus: "idle", error: null });
+  console.log("[BG] Sync state reset to idle on install");
 });

@@ -11,6 +11,7 @@ export interface LinkedInProfile {
 
 export interface LinkedInConversation {
   conversationId: string;
+  conversationUrn: string;
   participants: Array<{
     publicIdentifier: string;
     firstName: string;
@@ -46,6 +47,7 @@ export interface AuthState {
 
 export interface LinkedInAuth {
   csrfToken: string | null;
+  mailboxUrn: string | null;
   isLoggedIn: boolean;
 }
 
@@ -60,4 +62,5 @@ export type ExtensionMessage =
   | { action: "login_result"; success: boolean; error?: string }
   | { action: "logout" }
   | { action: "send_message"; conversationId: string; prospectId: string; content: string }
-  | { action: "message_sent"; success: boolean; error?: string };
+  | { action: "message_sent"; success: boolean; error?: string }
+  | { action: "debug_capture" };

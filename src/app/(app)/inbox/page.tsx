@@ -4,7 +4,7 @@ import { getConversations } from "@/lib/actions/inbox";
 import { getProspects } from "@/lib/actions/prospecting";
 import { InboxView } from "./inbox-view";
 
-export default async function InboxPage() {
+export default async function InboxPage({ searchParams }: { searchParams: Promise<{ conversation?: string }> }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -19,9 +19,10 @@ export default async function InboxPage() {
     redirect("/dashboard");
   }
 
+  const params = await searchParams;
   const conversations = await getConversations();
   const prospects = await getProspects();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <InboxView conversations={conversations as any} prospects={prospects as any} />;
+  return <InboxView conversations={conversations as any} prospects={prospects as any} selectedConversationId={params.conversation} />;
 }

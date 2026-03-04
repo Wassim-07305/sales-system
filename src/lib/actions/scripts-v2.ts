@@ -250,30 +250,30 @@ export async function getScriptTemplates() {
 }
 
 // ---------------------
-// AI Script Generation (Stub)
+// AI Script Generation
 // ---------------------
 
 export async function generateAiScript(niche: string, network: string) {
-  // Stub: returns mock script content
-  const mockScripts: Record<string, string> = {
-    default: `Bonjour [Prénom],
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  const fallbackContent = `Bonjour [Prénom],\n\nJe suis [Votre nom], spécialisé en ${niche}.\n\nJ'ai remarqué que vous êtes actif sur ${network} et je pense que nous pourrions collaborer.\n\nSeriez-vous disponible pour un échange de 15 minutes cette semaine ?\n\nCordialement,\n[Votre nom]`;
 
-Je suis [Votre nom], spécialisé en ${niche}.
+  if (!isAiConfigured()) {
+    return { content: fallbackContent, niche, network };
+  }
 
-J'ai remarqué que vous êtes actif sur ${network} et je pense que nous pourrions collaborer.
+  try {
+    const { complete } = await import("@/lib/ai/utils");
+    const { SCRIPT_GENERATION_SYSTEM_PROMPT } = await import("@/lib/ai/prompts");
 
-Seriez-vous disponible pour un échange de 15 minutes cette semaine ?
+    const content = await complete({
+      system: SCRIPT_GENERATION_SYSTEM_PROMPT,
+      user: `Génère un script de vente complet pour :\n- Niche : ${niche}\n- Réseau : ${network}\n\nLe script doit être directement utilisable, avec des indications entre crochets pour les éléments à personnaliser.\nStructure : Accroche > Questions de découverte > Présentation valeur > Objections courantes > Closing.`,
+      model: "SONNET",
+      maxTokens: 2048,
+    });
 
-Cordialement,
-[Votre nom]`,
-  };
-
-  // Simulate AI delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  return {
-    content: mockScripts.default,
-    niche,
-    network,
-  };
+    return { content, niche, network };
+  } catch {
+    return { content: fallbackContent, niche, network };
+  }
 }

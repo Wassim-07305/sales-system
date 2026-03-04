@@ -21,12 +21,16 @@ export async function getLinkedInAuth(): Promise<LinkedInAuth> {
   const result = await chrome.storage.session.get(STORAGE_KEYS.linkedinAuth);
   return result[STORAGE_KEYS.linkedinAuth] || {
     csrfToken: null,
+    mailboxUrn: null,
     isLoggedIn: false,
   };
 }
 
-export async function setLinkedInAuth(auth: LinkedInAuth): Promise<void> {
-  await chrome.storage.session.set({ [STORAGE_KEYS.linkedinAuth]: auth });
+export async function setLinkedInAuth(auth: Partial<LinkedInAuth>): Promise<void> {
+  const current = await getLinkedInAuth();
+  await chrome.storage.session.set({
+    [STORAGE_KEYS.linkedinAuth]: { ...current, ...auth },
+  });
 }
 
 export async function getSyncState(): Promise<SyncState> {

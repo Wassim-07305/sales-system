@@ -40,10 +40,12 @@ interface Prospect {
   status: string;
 }
 
-export function InboxView({ conversations, prospects }: { conversations: Conversation[]; prospects: Prospect[] }) {
+export function InboxView({ conversations, prospects, selectedConversationId }: { conversations: Conversation[]; prospects: Prospect[]; selectedConversationId?: string }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversations[0] || null);
+  const [selectedConv, setSelectedConv] = useState<Conversation | null>(
+    (selectedConversationId && conversations.find((c) => c.id === selectedConversationId)) || conversations[0] || null
+  );
   const [messageText, setMessageText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);

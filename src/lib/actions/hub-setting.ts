@@ -2,6 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { isAiConfigured } from "@/lib/ai/client";
+import { complete, completeJSON } from "@/lib/ai/utils";
+import {
+  DM_GENERATION_SYSTEM_PROMPT,
+  OBJECTION_DETECTION_SYSTEM_PROMPT,
+  PROFILE_ANALYSIS_SYSTEM_PROMPT,
+  COMMENT_SUGGESTION_SYSTEM_PROMPT,
+} from "@/lib/ai/prompts";
 
 // ─── Multi-Network Overview ────────────────────────────────────────
 
@@ -52,73 +60,95 @@ export async function getMultiNetworkOverview() {
   return overview;
 }
 
-// ─── AI Message Generator (Stub) ──────────────────────────────────
+// ─── AI Message Generator ─────────────────────────────────────────
 
 export async function generateAiMessage(
   prospectName: string,
   context: string,
   platform: string
 ) {
-  // Stub: returns platform-specific DM template
-  const templates: Record<string, string> = {
+  // Fallback templates si l'IA n'est pas configurée
+  const fallback: Record<string, string> = {
     linkedin: `Bonjour ${prospectName},\n\nJ'ai vu votre profil et ${context}. Je travaille avec des professionnels comme vous pour les aider à développer leur activité.\n\nSeriez-vous ouvert(e) à un échange rapide de 15 min cette semaine ?\n\nBien cordialement`,
     instagram: `Hey ${prospectName} ! 👋\n\nJ'ai vu ton contenu et ${context}. Trop cool ce que tu fais !\n\nJe bosse avec des créateurs dans ta niche et j'ai quelques idées qui pourraient t'intéresser. On en parle en DM ? 🚀`,
   };
 
-  return (
-    templates[platform] ||
-    `Bonjour ${prospectName},\n\n${context}\n\nÀ bientôt !`
-  );
+  if (!isAiConfigured()) {
+    return fallback[platform] || `Bonjour ${prospectName},\n\n${context}\n\nÀ bientôt !`;
+  }
+
+  try {
+    return await complete({
+      system: DM_GENERATION_SYSTEM_PROMPT,
+      user: `Génère un message de prospection personnalisé.\n\nPLATEFORME : ${platform}\nNOM DU PROSPECT : ${prospectName}\nCONTEXTE : ${context}`,
+      model: "HAIKU",
+    });
+  } catch {
+    return fallback[platform] || `Bonjour ${prospectName},\n\n${context}\n\nÀ bientôt !`;
+  }
 }
 
-// ─── Profile Analyzer (Stub) ──────────────────────────────────────
+// ─── Profile Analyzer ─────────────────────────────────────────────
 
 export async function analyzeProfile(profileUrl: string) {
-  // Stub: returns fake profile analysis
   const isLinkedin = profileUrl.includes("linkedin");
   const isInstagram = profileUrl.includes("instagram");
+  const platform = isLinkedin ? "linkedin" : isInstagram ? "instagram" : "autre";
 
-  return {
-    platform: isLinkedin ? "linkedin" : isInstagram ? "instagram" : "autre",
-    name: "Jean-Pierre Dupont",
-    headline: isLinkedin
-      ? "CEO @ StartupTech | Passionné par l'IA et le Growth"
-      : "Créateur de contenu | 12K abonnés",
-    followers: isLinkedin ? 2450 : 12300,
-    engagementRate: isLinkedin ? 3.2 : 4.8,
-    lastActive: "Il y a 2 jours",
-    topics: isLinkedin
-      ? ["IA", "SaaS", "Leadership", "Growth Hacking"]
-      : ["Lifestyle", "Business", "Motivation"],
-    score: isLinkedin ? 78 : 65,
-    recommendation: isLinkedin
-      ? "Profil très actif avec un bon réseau B2B. Approche recommandée : commentaire sur un post récent avant DM."
-      : "Bon taux d'engagement. Approche recommandée : réagir à 3 stories avant DM.",
+  const fallback = {
+    platform,
+    name: "Prospect",
+    headline: "Non disponible",
+    followers: 0,
+    engagementRate: 0,
+    lastActive: "Inconnu",
+    topics: [] as string[],
+    score: 50,
+    recommendation: "Analysez le profil manuellement pour plus de détails.",
   };
+
+  if (!isAiConfigured()) return fallback;
+
+  try {
+    // Extraire le slug/username depuis l'URL
+    const slug = profileUrl.split("/in/")[1]?.replace(/\/$/, "")
+      || profileUrl.split(".com/")[1]?.replace(/\/$/, "")
+      || profileUrl;
+
+    return await completeJSON<typeof fallback>({
+      system: PROFILE_ANALYSIS_SYSTEM_PROMPT,
+      user: `Analyse ce profil ${platform} et génère une évaluation structurée.\n\nURL : ${profileUrl}\nSlug/Username : ${slug}\nPlateforme : ${platform}\n\nBase ton analyse sur les indices disponibles dans l'URL et le slug du profil. Estime les métriques de manière réaliste.`,
+      model: "SONNET",
+      fallback,
+    });
+  } catch {
+    return fallback;
+  }
 }
 
-// ─── Comment Suggester (Stub) ─────────────────────────────────────
+// ─── Comment Suggester ────────────────────────────────────────────
 
 export async function suggestComments(postUrl: string) {
-  // Stub: returns 3 French comment suggestions
-  void postUrl;
-  return [
-    {
-      type: "value" as const,
-      comment:
-        "Super article ! Le point sur la stratégie de contenu est particulièrement pertinent. J'ai appliqué une approche similaire et les résultats ont été bluffants. Merci du partage 🙌",
-    },
-    {
-      type: "question" as const,
-      comment:
-        "Très intéressant ! Quelle a été la plus grosse difficulté que vous avez rencontrée en mettant cela en place ? Je suis curieux d'en savoir plus sur les coulisses.",
-    },
-    {
-      type: "story" as const,
-      comment:
-        "Ça me parle tellement ! J'accompagne des professionnels sur ce sujet et je retrouve exactement ces tendances. Le marché évolue vite et il faut s'adapter. Bravo pour cette analyse 👏",
-    },
+  type Comment = { type: "value" | "question" | "story"; comment: string };
+  const fallback: Comment[] = [
+    { type: "value", comment: "Super article ! Le point sur la stratégie de contenu est particulièrement pertinent. J'ai appliqué une approche similaire et les résultats ont été bluffants. Merci du partage !" },
+    { type: "question", comment: "Très intéressant ! Quelle a été la plus grosse difficulté que vous avez rencontrée en mettant cela en place ? Je suis curieux d'en savoir plus sur les coulisses." },
+    { type: "story", comment: "Ça me parle tellement ! J'accompagne des professionnels sur ce sujet et je retrouve exactement ces tendances. Le marché évolue vite et il faut s'adapter. Bravo pour cette analyse !" },
   ];
+
+  if (!isAiConfigured()) return fallback;
+
+  try {
+    const platform = postUrl.includes("linkedin") ? "LinkedIn" : postUrl.includes("instagram") ? "Instagram" : "réseau social";
+    return await completeJSON<Comment[]>({
+      system: COMMENT_SUGGESTION_SYSTEM_PROMPT,
+      user: `Génère 3 commentaires pertinents pour ce post ${platform} :\n\nURL : ${postUrl}\n\nAdapte le ton à la plateforme ${platform}.`,
+      model: "HAIKU",
+      fallback,
+    });
+  } catch {
+    return fallback;
+  }
 }
 
 // ─── Story Scraper (Stub) ─────────────────────────────────────────
@@ -333,62 +363,43 @@ export async function getFollowUpSequences() {
   }));
 }
 
-// ─── Objection Detection (Stub) ───────────────────────────────────
+// ─── Objection Detection ──────────────────────────────────────────
 
 export async function detectObjections(message: string) {
-  const patterns: {
-    pattern: RegExp;
-    type: string;
-    response: string;
-  }[] = [
-    {
-      pattern: /trop cher|prix|budget|coût|cher/i,
-      type: "prix",
-      response:
-        "Je comprends votre préoccupation sur le prix. Nos clients constatent un ROI en moyenne de 3x leur investissement dès le premier mois. On peut en discuter ?",
-    },
-    {
-      pattern: /pas le temps|occupé|débordé|plus tard|pas maintenant/i,
-      type: "temps",
-      response:
-        "Je comprends, le temps est précieux. C'est justement pour ça que notre solution fait gagner en moyenne 10h par semaine. Un call de 15 min pourrait vous le démontrer.",
-    },
-    {
-      pattern: /pas intéressé|ça ne m'intéresse pas|non merci/i,
-      type: "intérêt",
-      response:
-        "Pas de souci ! Par curiosité, quel est votre plus gros défi actuellement en termes de prospection ? Je pourrai peut-être vous partager une ressource utile.",
-    },
-    {
-      pattern: /déjà.*solution|j'utilise|on a déjà/i,
-      type: "concurrence",
-      response:
-        "Super que vous soyez déjà équipé ! Beaucoup de nos clients utilisaient une solution similaire avant. Ce qui les a fait switcher, c'est [avantage clé]. Ça vaut le coup de comparer ?",
-    },
-    {
-      pattern: /réfléchir|j'y pense|je vais voir/i,
-      type: "hésitation",
-      response:
-        "Bien sûr, prenez le temps qu'il vous faut. Pour vous aider dans votre réflexion, je peux vous envoyer une étude de cas d'un client dans votre secteur ?",
-    },
-  ];
+  const noObjectionFallback = {
+    hasObjection: false as const,
+    objections: [] as { type: string; suggestedResponse: string }[],
+    suggestion: "Aucune objection détectée. Le prospect semble réceptif, continuez la conversation !",
+  };
 
-  const detected = patterns
-    .filter(({ pattern }) => pattern.test(message))
-    .map(({ type, response }) => ({ type, suggestedResponse: response }));
-
-  if (detected.length === 0) {
-    return {
-      hasObjection: false,
-      objections: [],
-      suggestion:
-        "Aucune objection détectée. Le prospect semble réceptif, continuez la conversation !",
-    };
+  if (!isAiConfigured()) {
+    // Fallback regex si IA non configurée
+    const patterns = [
+      { pattern: /trop cher|prix|budget|coût|cher/i, type: "prix", response: "Je comprends votre préoccupation sur le prix. Nos clients constatent un ROI en moyenne de 3x leur investissement dès le premier mois. On peut en discuter ?" },
+      { pattern: /pas le temps|occupé|débordé|plus tard|pas maintenant/i, type: "temps", response: "Je comprends, le temps est précieux. C'est justement pour ça que notre solution fait gagner en moyenne 10h par semaine. Un call de 15 min pourrait vous le démontrer." },
+      { pattern: /pas intéressé|ça ne m'intéresse pas|non merci/i, type: "intérêt", response: "Pas de souci ! Par curiosité, quel est votre plus gros défi actuellement en termes de prospection ?" },
+      { pattern: /déjà.*solution|j'utilise|on a déjà/i, type: "concurrence", response: "Super que vous soyez déjà équipé ! Beaucoup de nos clients utilisaient une solution similaire avant. Ça vaut le coup de comparer ?" },
+      { pattern: /réfléchir|j'y pense|je vais voir/i, type: "hésitation", response: "Bien sûr, prenez le temps qu'il vous faut. Je peux vous envoyer une étude de cas d'un client dans votre secteur ?" },
+    ];
+    const detected = patterns
+      .filter(({ pattern }) => pattern.test(message))
+      .map(({ type, response }) => ({ type, suggestedResponse: response }));
+    if (detected.length === 0) return noObjectionFallback;
+    return { hasObjection: true as const, objections: detected, suggestion: `${detected.length} objection(s) détectée(s).` };
   }
 
-  return {
-    hasObjection: true,
-    objections: detected,
-    suggestion: `${detected.length} objection(s) détectée(s). Utilisez les réponses suggérées pour avancer.`,
-  };
+  try {
+    return await completeJSON<{
+      hasObjection: boolean;
+      objections: { type: string; suggestedResponse: string }[];
+      suggestion: string;
+    }>({
+      system: OBJECTION_DETECTION_SYSTEM_PROMPT,
+      user: `Analyse ce message d'un prospect et détecte les objections :\n\n"${message}"`,
+      model: "HAIKU",
+      fallback: noObjectionFallback,
+    });
+  } catch {
+    return noObjectionFallback;
+  }
 }

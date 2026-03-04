@@ -39,6 +39,7 @@ import {
   generateAiMessage,
 } from "@/lib/actions/hub-setting";
 import { updateProspectStatus } from "@/lib/actions/prospecting";
+import { createConversation } from "@/lib/actions/inbox";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -174,6 +175,19 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
         router.refresh();
       } catch {
         toast.error("Erreur de mise à jour");
+      }
+    });
+  }
+
+  async function handleOpenConversation(prospectId: string) {
+    startTransition(async () => {
+      try {
+        const convId = await createConversation(prospectId, "linkedin");
+        if (convId) {
+          router.push(`/inbox?conversation=${convId}`);
+        }
+      } catch {
+        toast.error("Impossible d'ouvrir la conversation");
       }
     });
   }
@@ -511,6 +525,15 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleOpenConversation(prospect.id)}
+                        disabled={isPending}
+                        title="Ouvrir la conversation"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
                       <Select
                         value={prospect.status}
                         onValueChange={(val) =>

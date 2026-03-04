@@ -54,10 +54,33 @@ export async function calculateMatchScore(
   setterId: string,
   entrepreneurId: string
 ) {
-  // Stub -- will use AI later
-  const score = Math.floor(Math.random() * 40) + 60;
-  return {
-    score,
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  const fallback = {
+    score: Math.floor(Math.random() * 40) + 60,
     factors: ["Experience", "Disponibilite", "Specialisation"],
   };
+
+  if (!isAiConfigured()) return fallback;
+
+  try {
+    const supabase = await createClient();
+    const [{ data: setter }, { data: entrepreneur }] = await Promise.all([
+      supabase.from("profiles").select("full_name, role, setter_maturity_score").eq("id", setterId).single(),
+      supabase.from("profiles").select("full_name, role, company").eq("id", entrepreneurId).single(),
+    ]);
+
+    if (!setter || !entrepreneur) return fallback;
+
+    const { completeJSON } = await import("@/lib/ai/utils");
+    const { MATCH_SCORE_SYSTEM_PROMPT } = await import("@/lib/ai/prompts");
+
+    return await completeJSON<typeof fallback>({
+      system: MATCH_SCORE_SYSTEM_PROMPT,
+      user: `Analyse la compatibilité entre ce setter et cet entrepreneur.\n\nSETTER :\n- Nom : ${setter.full_name}\n- Rôle : ${setter.role}\n- Score maturité : ${setter.setter_maturity_score ?? "N/A"}/100\n\nENTREPRENEUR :\n- Nom : ${entrepreneur.full_name}\n- Entreprise : ${entrepreneur.company || "N/A"}\n- Rôle : ${entrepreneur.role}`,
+      model: "HAIKU",
+      fallback,
+    });
+  } catch {
+    return fallback;
+  }
 }

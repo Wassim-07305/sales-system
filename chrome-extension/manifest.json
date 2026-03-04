@@ -7,7 +7,10 @@
     "storage",
     "alarms",
     "notifications",
-    "webRequest"
+    "webRequest",
+    "cookies",
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
     "https://www.linkedin.com/*"

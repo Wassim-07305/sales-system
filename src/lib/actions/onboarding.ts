@@ -165,13 +165,12 @@ export async function getWelcomePack(userId: string) {
     profile,
     pack,
     quizResult,
-    personalizedTips: generatePersonalizedTips(role, quizResult?.color_code || "orange"),
+    personalizedTips: await generatePersonalizedTips(role, quizResult?.color_code || "orange"),
   };
 }
 
-function generatePersonalizedTips(role: string, colorCode: string): string[] {
-  // Stub — will use AI later
-  const tips: Record<string, string[]> = {
+async function generatePersonalizedTips(role: string, colorCode: string): Promise<string[]> {
+  const fallbackTips: Record<string, string[]> = {
     green: [
       "Excellent profil ! Vous êtes prêt à démarrer la prospection active.",
       "Commencez par personnaliser vos scripts dans l'onglet Scripts.",
@@ -188,7 +187,26 @@ function generatePersonalizedTips(role: string, colorCode: string): string[] {
       "N'hésitez pas à poser des questions dans la communauté.",
     ],
   };
-  return tips[colorCode] || tips.orange;
+
+  const fallback = fallbackTips[colorCode] || fallbackTips.orange;
+
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  if (!isAiConfigured()) return fallback;
+
+  try {
+    const { completeJSON } = await import("@/lib/ai/utils");
+    const { PERSONALIZED_TIPS_SYSTEM_PROMPT } = await import("@/lib/ai/prompts");
+
+    return await completeJSON<string[]>({
+      system: PERSONALIZED_TIPS_SYSTEM_PROMPT,
+      user: `Génère 3 conseils personnalisés pour un apprenant.\n\nRôle : ${role}\nNiveau (code couleur) : ${colorCode} (green = excellent, orange = moyen, red = débutant)\n\nChaque conseil doit être actionnable, encourageant et spécifique au niveau de l'apprenant.`,
+      model: "HAIKU",
+      maxTokens: 512,
+      fallback,
+    });
+  } catch {
+    return fallback;
+  }
 }
 
 export async function triggerAutoBooking(userId: string) {
@@ -197,10 +215,27 @@ export async function triggerAutoBooking(userId: string) {
 }
 
 export async function scrapeAndGenerateScript(linkedinUrl: string) {
-  // Stub — will use AI/scraping later
-  return {
+  const fallback = {
     success: true,
     script: "Bonjour [Nom], j'ai vu votre profil et je pense que notre programme pourrait vous intéresser. Seriez-vous disponible pour un appel de 15 minutes cette semaine ?",
     profileData: { name: "Prospect", industry: "Non défini" },
   };
+
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  if (!isAiConfigured()) return fallback;
+
+  try {
+    const slug = linkedinUrl.split("/in/")[1]?.replace(/\/$/, "") || "prospect";
+    const { completeJSON } = await import("@/lib/ai/utils");
+
+    return await completeJSON<typeof fallback>({
+      system: `Tu es un expert en prospection LinkedIn. Génère un script de prospection personnalisé basé sur l'URL d'un profil LinkedIn. Retourne UNIQUEMENT un JSON valide : { "success": true, "script": "<string>", "profileData": { "name": "<string>", "industry": "<string>" } }`,
+      user: `Génère un script de prospection personnalisé pour ce profil LinkedIn.\n\nURL : ${linkedinUrl}\nSlug : ${slug}\n\nDéduis le nom et le secteur d'activité depuis le slug. Génère un script naturel et personnalisé.`,
+      model: "HAIKU",
+      maxTokens: 1024,
+      fallback,
+    });
+  } catch {
+    return fallback;
+  }
 }

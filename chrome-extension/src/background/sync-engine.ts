@@ -9,15 +9,28 @@ import {
 import { setSyncState, getSyncState, getAuth, getLinkedInAuth } from "../shared/storage";
 
 export async function runSync(): Promise<void> {
+  console.log("[Sync] Starting sync...");
+
   const auth = await getAuth();
   const liAuth = await getLinkedInAuth();
 
-  if (!auth.isAuthenticated || !liAuth.csrfToken) {
+  console.log("[Sync] Auth:", auth.isAuthenticated ? "OK" : "NOT AUTHENTICATED");
+  console.log("[Sync] LinkedIn CSRF:", liAuth.csrfToken ? "OK (" + liAuth.csrfToken.slice(0, 10) + "...)" : "MISSING");
+  console.log("[Sync] mailboxUrn:", liAuth.mailboxUrn ? "OK" : "NOT YET RESOLVED");
+
+  if (!auth.isAuthenticated) {
+    console.warn("[Sync] Aborted — not authenticated to Sales System");
+    return;
+  }
+
+  if (!liAuth.csrfToken) {
+    console.warn("[Sync] Aborted — no LinkedIn CSRF token. Navigate on linkedin.com to capture it.");
     return;
   }
 
   const currentState = await getSyncState();
   if (currentState.syncStatus === "syncing") {
+    console.warn("[Sync] Already syncing, skipping");
     return;
   }
 
@@ -27,15 +40,21 @@ export async function runSync(): Promise<void> {
     let conversationsSynced = 0;
     let prospectsSynced = 0;
 
+    console.log("[Sync] Fetching LinkedIn conversations...");
     const conversations = await fetchConversations(20);
+    console.log("[Sync] Got", conversations.length, "conversations");
 
     for (const conv of conversations) {
       if (conv.participants.length > 2) continue;
 
       const otherParticipant = conv.participants[0];
-      if (!otherParticipant?.publicIdentifier) continue;
+      if (!otherParticipant?.publicIdentifier) {
+        console.log("[Sync] Skipping conversation without participant identifier:", conv.conversationUrn?.slice(0, 60));
+        continue;
+      }
 
       const profileUrl = "https://www.linkedin.com/in/" + otherParticipant.publicIdentifier + "/";
+      console.log("[Sync] Processing:", otherParticipant.firstName, otherParticipant.lastName, "(" + conv.conversationUrn?.slice(0, 60) + ")");
 
       const prospect = await upsertProspect({
         name: (otherParticipant.firstName + " " + otherParticipant.lastName).trim(),
@@ -46,7 +65,9 @@ export async function runSync(): Promise<void> {
       if (prospect) {
         prospectsSynced++;
 
-        const messages = await fetchMessages(conv.conversationId, 40);
+        // Use conversationUrn for fetching messages (new GraphQL format)
+        const messages = await fetchMessages(conv.conversationUrn, 40);
+        console.log("[Sync]   Messages:", messages.length);
 
         const formattedMessages = messages.map((msg) => ({
           sender: msg.sender === otherParticipant.publicIdentifier ? "prospect" : "damien",
@@ -56,7 +77,9 @@ export async function runSync(): Promise<void> {
           linkedin_message_id: msg.messageId,
         }));
 
-        const existing = await getConversationByLinkedinId(conv.conversationId);
+        // Use conversationUrn as the linkedin_conversation_id (full URN)
+        const linkedinConvId = conv.conversationUrn || conv.conversationId;
+        const existing = await getConversationByLinkedinId(linkedinConvId);
         let mergedMessages = formattedMessages;
 
         if (existing) {
@@ -87,7 +110,7 @@ export async function runSync(): Promise<void> {
 
         await upsertConversation({
           prospect_id: prospect.id,
-          linkedin_conversation_id: conv.conversationId,
+          linkedin_conversation_id: linkedinConvId,
           platform: "linkedin",
           messages: mergedMessages,
         });
@@ -95,6 +118,8 @@ export async function runSync(): Promise<void> {
         conversationsSynced++;
       }
     }
+
+    console.log("[Sync] Done!", conversationsSynced, "conversations,", prospectsSynced, "prospects");
 
     await setSyncState({
       syncStatus: "idle",

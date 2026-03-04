@@ -76,33 +76,37 @@ export async function upsertProspect(data: {
   const sb = await getSupabaseClient();
   if (!sb) return null;
 
+  // Try to find existing prospect first
   const { data: existing } = await sb
     .from("prospects")
     .select("id")
     .eq("profile_url", data.profile_url)
-    .single();
+    .maybeSingle();
 
   if (existing) return { id: existing.id };
 
-  const { data: inserted, error } = await sb
-    .from("prospects")
-    .insert({
-      name: data.name,
-      profile_url: data.profile_url,
-      platform: data.platform,
-      status: "new",
-      engagement_score: 0,
-      auto_follow_up: false,
-      conversation_history: [],
-    })
-    .select("id")
-    .single();
+  // INSERT without .select() — the SELECT RLS policy may be missing,
+  // which causes .insert().select() to fail with 42501.
+  const { error } = await sb.from("prospects").insert({
+    name: data.name,
+    profile_url: data.profile_url,
+    platform: data.platform,
+    status: "new",
+  });
 
   if (error) {
     console.error("[SS] Error inserting prospect:", error);
     return null;
   }
-  return inserted;
+
+  // Fetch the ID of the newly inserted prospect
+  const { data: created } = await sb
+    .from("prospects")
+    .select("id")
+    .eq("profile_url", data.profile_url)
+    .maybeSingle();
+
+  return created;
 }
 
 export async function getProspectByUrl(profileUrl: string): Promise<{ id: string } | null> {

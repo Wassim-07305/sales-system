@@ -175,17 +175,28 @@ export async function aiCorrectExercise(
   exerciseText: string,
   userAnswer: string
 ) {
-  // Stub — will use OpenAI later
-  return {
+  const { isAiConfigured } = await import("@/lib/ai/client");
+  const fallback = {
     score: Math.floor(Math.random() * 30) + 70,
-    feedback:
-      "Bonne reponse dans l'ensemble. Points d'amelioration : structure plus claire, ajout d'exemples concrets.",
+    feedback: "Bonne reponse dans l'ensemble. Points d'amelioration : structure plus claire, ajout d'exemples concrets.",
     suggestions: [
       "Utilisez des exemples tires de votre experience",
       "Structurez votre reponse en 3 parties",
       "Ajoutez une conclusion avec un call-to-action",
     ],
   };
+
+  if (!isAiConfigured()) return fallback;
+
+  const { completeJSON } = await import("@/lib/ai/utils");
+  const { EXERCISE_CORRECTION_SYSTEM_PROMPT } = await import("@/lib/ai/prompts");
+
+  return completeJSON<typeof fallback>({
+    system: EXERCISE_CORRECTION_SYSTEM_PROMPT,
+    user: `EXERCICE :\n${exerciseText}\n\nREPONSE DE L'APPRENANT :\n${userAnswer}\n\nEvalue la réponse sur 100 en fonction de la pertinence, la qualité de l'argumentation, l'utilisation d'exemples concrets et la structure. Fournis un feedback bienveillant mais exigeant et 3 suggestions d'amélioration.`,
+    model: "HAIKU",
+    fallback,
+  });
 }
 
 export async function getCoursesWithModules() {
