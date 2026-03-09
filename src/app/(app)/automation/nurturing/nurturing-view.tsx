@@ -210,7 +210,7 @@ export function NurturingView({ rules, executions }: Props) {
                   onChange={(e) => setDelay(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Temps d'attente après l'événement déclencheur
+                  Temps d&apos;attente après l&apos;événement déclencheur
                 </p>
               </div>
 

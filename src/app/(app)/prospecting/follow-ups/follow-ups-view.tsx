@@ -468,7 +468,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                 <div>
                   <p className="text-2xl font-bold">{todayTasks.length}</p>
                   <p className="text-xs text-muted-foreground">
-                    À faire aujourd'hui
+                    À faire aujourd&apos;hui
                   </p>
                 </div>
               </CardContent>
@@ -555,7 +555,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                 {todayTasks.length === 0 && (
                   <div className="p-8 text-center text-muted-foreground">
                     <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    Aucune tâche pour aujourd'hui. Bravo !
+                    Aucune tâche pour aujourd&apos;hui. Bravo !
                   </div>
                 )}
               </div>
