@@ -194,7 +194,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                       width={120}
                       tick={{ fontSize: 12 }}
                     />
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    { }
                     <Tooltip
                       formatter={(value: any) => [
                         `${Number(value).toLocaleString("fr-FR")} \u20ac`,
@@ -233,7 +233,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                     <XAxis dataKey="range" />
                     <YAxis allowDecimals={false} />
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    { }
                     <Tooltip
                       formatter={(value: any) => [value, "Clients"]}
                       labelFormatter={(label) => `Score: ${label}`}

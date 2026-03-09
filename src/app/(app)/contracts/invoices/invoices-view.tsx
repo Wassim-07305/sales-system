@@ -41,7 +41,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-interface Invoice {
+export interface Invoice {
   id: string;
   contract_id: string;
   client_id: string;
@@ -56,7 +56,7 @@ interface Invoice {
   client?: { id: string; full_name: string | null; email: string } | null;
 }
 
-interface Contract {
+export interface Contract {
   id: string;
   amount: number;
   status: string;

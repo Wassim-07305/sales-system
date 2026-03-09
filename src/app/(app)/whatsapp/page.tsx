@@ -16,7 +16,7 @@ export default async function WhatsAppPage() {
   const connection = await getWhatsAppConnection();
   const conversations = await getConversations();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return (
     <WhatsAppView
       connection={connection as any}

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getInvoices } from "@/lib/actions/payments";
-import { InvoicesView } from "./invoices-view";
+import { InvoicesView, type Invoice, type Contract } from "./invoices-view";
 
 export default async function InvoicesPage() {
   const supabase = await createClient();
@@ -18,8 +18,8 @@ export default async function InvoicesPage() {
 
   return (
     <InvoicesView
-      invoices={invoices as any}
-      contracts={(contracts || []) as any}
+      invoices={invoices as Invoice[]}
+      contracts={(contracts || []) as Contract[]}
     />
   );
 }

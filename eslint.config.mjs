@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore chrome extension build output
+    "chrome-extension/**",
+    // Ignore PWA service worker files
+    "public/*.js",
   ]),
 ]);
 

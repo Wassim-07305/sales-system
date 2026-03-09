@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getPaymentInstallments, getOverduePayments } from "@/lib/actions/payments";
-import { PaymentsView } from "./payments-view";
+import { PaymentsView, type Installment } from "./payments-view";
 
 export default async function PaymentsPage() {
   const supabase = await createClient();
@@ -13,8 +13,8 @@ export default async function PaymentsPage() {
 
   return (
     <PaymentsView
-      installments={installments as any}
-      overdue={overdue as any}
+      installments={installments as Installment[]}
+      overdue={overdue as Installment[]}
     />
   );
 }
