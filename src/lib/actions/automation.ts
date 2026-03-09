@@ -178,3 +178,82 @@ export async function runPlacementWorkflow() {
   revalidatePath("/automation/placement");
   return { matched: executions.length };
 }
+
+/**
+ * Check for clients whose contract/subscription ends within 30 days
+ * and trigger an upsell notification sequence.
+ */
+export async function runUpsellSequence() {
+  const supabase = await createClient();
+  const now = new Date();
+  const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Find contracts expiring within 30 days
+  const { data: expiringContracts } = await supabase
+    .from("contracts")
+    .select("id, client_id, title, end_date, profiles!contracts_client_id_fkey(full_name, email)")
+    .eq("status", "active")
+    .lte("end_date", thirtyDaysFromNow)
+    .gte("end_date", now.toISOString());
+
+  if (!expiringContracts || expiringContracts.length === 0) {
+    return { processed: 0 };
+  }
+
+  const alerts: Array<{ user_id: string; title: string; body: string; type: string; link: string }> = [];
+
+  for (const contract of expiringContracts) {
+    const clientId = contract.client_id;
+    if (!clientId) continue;
+
+    const profile = Array.isArray(contract.profiles) ? contract.profiles[0] : contract.profiles;
+    const clientName = (profile as { full_name?: string })?.full_name || "Client";
+    const endDate = new Date(contract.end_date);
+    const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Check if already notified for this contract
+    const { data: existing } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", clientId)
+      .eq("type", "upsell_renewal")
+      .gte("created_at", new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(1);
+
+    if (existing && existing.length > 0) continue;
+
+    // Notify client
+    alerts.push({
+      user_id: clientId,
+      title: "Ton accompagnement se termine bientot",
+      body: `Il te reste ${daysLeft} jours. Decouvre nos offres de suivi pour continuer ta progression !`,
+      type: "upsell_renewal",
+      link: "/settings/subscription",
+    });
+
+    // Notify admins
+    const { data: admins } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", ["admin", "manager"]);
+
+    for (const admin of admins || []) {
+      alerts.push({
+        user_id: admin.id,
+        title: `Renouvellement : ${clientName}`,
+        body: `Contrat "${contract.title}" expire dans ${daysLeft} jours. Action de retention recommandee.`,
+        type: "upsell_renewal",
+        link: "/contracts",
+      });
+    }
+  }
+
+  if (alerts.length > 0) {
+    await supabase.from("notifications").insert(
+      alerts.map((a) => ({ ...a, read: false }))
+    );
+  }
+
+  revalidatePath("/notifications");
+  return { processed: expiringContracts.length, alertsSent: alerts.length };
+}

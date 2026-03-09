@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
+import { ReputationBadge } from "@/components/community/reputation-badge";
 
 interface Post {
   id: string;
@@ -46,9 +47,10 @@ interface Props {
   post: Post;
   comments: Comment[];
   userId: string;
+  reputations?: Record<string, number>;
 }
 
-export function ThreadView({ post, comments, userId }: Props) {
+export function ThreadView({ post, comments, userId, reputations = {} }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [liked, setLiked] = useState(false);
@@ -95,9 +97,14 @@ export function ThreadView({ post, comments, userId }: Props) {
               {post.author?.full_name?.charAt(0) || "?"}
             </div>
             <div>
-              <p className="font-medium">
-                {post.author?.full_name || "Anonyme"}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="font-medium">
+                  {post.author?.full_name || "Anonyme"}
+                </p>
+                {post.author?.id && reputations[post.author.id] !== undefined && (
+                  <ReputationBadge score={reputations[post.author.id]} />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {format(new Date(post.created_at), "d MMMM yyyy 'à' HH:mm", {
                   locale: fr,
@@ -159,6 +166,9 @@ export function ThreadView({ post, comments, userId }: Props) {
                     <p className="text-sm font-medium">
                       {c.author?.full_name || "Anonyme"}
                     </p>
+                    {c.author?.id && reputations[c.author.id] !== undefined && (
+                      <ReputationBadge score={reputations[c.author.id]} />
+                    )}
                     <span className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(c.created_at), {
                         addSuffix: true,

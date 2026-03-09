@@ -18,20 +18,7 @@ export default async function ProjectionsPage() {
     redirect("/dashboard");
   }
 
-  // Fetch all three scenarios server-side
-  const [conservative, moderate, optimistic] = await Promise.all([
-    getRevenueProjections("conservative"),
-    getRevenueProjections("moderate"),
-    getRevenueProjections("optimistic"),
-  ]);
+  const projections = await getRevenueProjections();
 
-  return (
-    <ProjectionsView
-      scenarios={{
-        conservative: conservative as any,
-        moderate: moderate as any,
-        optimistic: optimistic as any,
-      }}
-    />
-  );
+  return <ProjectionsView data={projections} />;
 }

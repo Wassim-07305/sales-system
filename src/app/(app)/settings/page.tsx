@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Bell, Shield, Palette } from "lucide-react";
+import { Settings, Bell, Shield, Palette, ChevronRight } from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -77,7 +78,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Security */}
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Shield className="h-5 w-5" />
@@ -90,6 +91,27 @@ export default function SettingsPage() {
             <Input type="password" placeholder="Nouveau mot de passe" />
           </div>
           <Button variant="outline">Mettre à jour le mot de passe</Button>
+        </CardContent>
+      </Card>
+
+      {/* RGPD / Privacy */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Confidentialité & RGPD
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Gérez vos consentements, exportez vos données et exercez vos droits RGPD.
+          </p>
+          <Link href="/settings/privacy">
+            <Button variant="outline" className="w-full justify-between">
+              Accéder aux paramètres de confidentialité
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>

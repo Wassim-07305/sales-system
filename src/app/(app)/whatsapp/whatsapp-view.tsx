@@ -166,6 +166,12 @@ export function WhatsAppView({
         description="Gérez vos conversations WhatsApp"
       >
         <div className="flex gap-2">
+          <Link href="/whatsapp/analytics">
+            <Button variant="outline" size="sm">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </Button>
+          </Link>
           <Link href="/whatsapp/sequences">
             <Button variant="outline" size="sm">
               Séquences

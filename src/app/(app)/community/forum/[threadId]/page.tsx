@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getComments } from "@/lib/actions/community";
+import { getComments, getUserReputationBatch } from "@/lib/actions/community";
 import { ThreadView } from "./thread-view";
 
 export default async function ThreadPage({
@@ -35,11 +35,19 @@ export default async function ThreadPage({
   // Fetch comments
   const comments = await getComments(threadId);
 
+  // Batch fetch reputations for post author + comment authors
+  const authorIds = [...new Set([
+    (normalizedPost.author as any)?.id,
+    ...(comments as any[]).map((c: any) => c.author?.id),
+  ].filter(Boolean))] as string[];
+  const reputations = await getUserReputationBatch(authorIds);
+
   return (
     <ThreadView
       post={normalizedPost as any}
       comments={comments as any}
       userId={user.id}
+      reputations={reputations}
     />
   );
 }

@@ -16,6 +16,7 @@ import {
   UsersRound,
   BookOpen,
   ShieldAlert,
+  Shield,
   Video,
   FolderOpen,
   LineChart,
@@ -25,9 +26,14 @@ import {
   MessageCircle,
   ScrollText,
   Bot,
+  Bell,
   Building2,
   Zap,
   Store,
+  SlidersHorizontal,
+  HelpCircle,
+  LifeBuoy,
+  Map,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -209,6 +215,30 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["client_b2b", "client_b2c"],
   },
 
+  // Support
+  {
+    label: "Support",
+    href: "/support",
+    icon: LifeBuoy,
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+  },
+
+  // Roadmap
+  {
+    label: "Roadmap",
+    href: "/roadmap",
+    icon: Map,
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+  },
+
+  // Help
+  {
+    label: "Centre d'aide",
+    href: "/help",
+    icon: HelpCircle,
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+  },
+
   // Profile & Settings
   {
     label: "Profil",
@@ -226,6 +256,10 @@ export const NAV_ITEMS: NavItem[] = [
       { label: "Onboarding", href: "/settings/onboarding", icon: BookOpen, roles: ["admin", "manager"] },
       { label: "Modes IA", href: "/settings/ai-modes", icon: Bot, roles: ["admin", "manager"] },
       { label: "White Label", href: "/settings/white-label", icon: Building2, roles: ["admin", "manager"] },
+      { label: "Notifications", href: "/settings/notifications", icon: Bell, roles: ["admin", "manager"] },
+      { label: "Confidentialité & RGPD", href: "/settings/privacy", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Sécurité & 2FA", href: "/settings/security", icon: ShieldAlert, roles: ["admin", "manager"] },
+      { label: "Champs personnalisés", href: "/settings/custom-fields", icon: SlidersHorizontal, roles: ["admin", "manager"] },
     ],
   },
 ];
@@ -281,6 +315,10 @@ export const NAV_SECTIONS: NavSection[] = [
       )
     ),
   },
+  {
+    label: "Support",
+    items: NAV_ITEMS.filter((i) => ["/support", "/roadmap", "/help"].includes(i.href)),
+  },
 ];
 
 // Breadcrumb labels pour les segments d'URL
@@ -291,6 +329,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   bookings: "Bookings",
   contracts: "Contrats",
   analytics: "Analytics",
+  projections: "Projections",
   academy: "Academy",
   team: "Équipe",
   prospecting: "Prospection",
@@ -300,6 +339,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   "follow-ups": "Relances",
   scoring: "Scoring",
   templates: "Templates",
+  campaigns: "Campagnes",
   inbox: "Inbox",
   chat: "Chat",
   broadcast: "Diffusion",
@@ -309,11 +349,16 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   settings: "Paramètres",
   sequences: "Séquences",
   roleplay: "Role-Play",
+  reviews: "Analyse d'appels",
   scripts: "Scripts",
+  training: "Entraînement",
   automation: "Automation",
   marketplace: "Marketplace",
+  monetization: "Monétisation",
   challenges: "Défis",
+  achievements: "Achievements",
   community: "Communauté",
+  reputation: "Réputation",
   portal: "Portail",
   onboarding: "Onboarding",
   calls: "Appels",
@@ -326,9 +371,27 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   notifications: "Notifications",
   "ai-modes": "Modes IA",
   "white-label": "White Label",
+  "custom-fields": "Champs personnalisés",
   branding: "Branding",
   subscription: "Abonnement",
   voice: "Voix",
+  timeline: "Parcours",
+  simulator: "Simulateur",
+  privacy: "Confidentialité & RGPD",
+  security: "Sécurité & 2FA",
+  duplicates: "Doublons",
+  intelligence: "Hunting Intelligence",
+  certificates: "Certificats",
+  diagnostic: "Diagnostic",
+  path: "Parcours d'apprentissage",
+  import: "Import en masse",
+  reports: "Rapports",
+  roadmap: "Roadmap",
+  enrichment: "Enrichissement IA",
+  segments: "Segmentation",
+  support: "Support",
+  help: "Centre d'aide",
+  groups: "Groupes d'entraînement",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { aiComplete, aiJSON } from "@/lib/ai/client";
 
 export async function completeOnboardingStep(stepId: string, responseData?: Record<string, unknown>) {
   const supabase = await createClient();
@@ -165,42 +166,290 @@ export async function getWelcomePack(userId: string) {
     profile,
     pack,
     quizResult,
-    personalizedTips: generatePersonalizedTips(role, quizResult?.color_code || "orange"),
+    personalizedTips: await generatePersonalizedTips(role, quizResult?.color_code || "orange"),
   };
 }
 
-function generatePersonalizedTips(role: string, colorCode: string): string[] {
-  // Stub — will use AI later
-  const tips: Record<string, string[]> = {
-    green: [
-      "Excellent profil ! Vous êtes prêt à démarrer la prospection active.",
-      "Commencez par personnaliser vos scripts dans l'onglet Scripts.",
-      "Planifiez vos 3 premières sessions de rôle-play.",
-    ],
-    orange: [
-      "Bon potentiel ! Complétez les modules de formation prioritaires.",
-      "Concentrez-vous sur la maîtrise des objections.",
-      "Participez aux calls de groupe pour progresser plus vite.",
-    ],
-    red: [
-      "Bienvenue ! Commencez par les bases du setting.",
-      "Regardez toutes les vidéos d'onboarding attentivement.",
-      "N'hésitez pas à poser des questions dans la communauté.",
-    ],
-  };
-  return tips[colorCode] || tips.orange;
+async function generatePersonalizedTips(role: string, colorCode: string): Promise<string[]> {
+  try {
+    const result = await aiJSON<{ tips: string[] }>(
+      `Génère 4 conseils personnalisés pour un nouvel utilisateur de S Academy.
+
+Profil :
+- Rôle : ${role === "client_b2c" ? "Setter en formation (B2C)" : role === "client_b2b" ? "Entrepreneur (B2B)" : role}
+- Niveau détecté (code couleur quiz) : ${colorCode === "green" ? "Avancé (🟢)" : colorCode === "orange" ? "Intermédiaire (🟡)" : "Débutant (🔴)"}
+
+Réponds en JSON : { "tips": ["conseil 1", "conseil 2", "conseil 3", "conseil 4"] }
+
+Les conseils doivent être :
+- Concrets et actionnables (pas de généralités)
+- Adaptés au niveau du profil
+- Orientés vers les premières actions à faire sur la plateforme
+- En français, tutoiement`,
+      { system: "Tu es le coach de S Academy, une plateforme de formation au setting/vente." }
+    );
+    return result.tips;
+  } catch {
+    const fallback: Record<string, string[]> = {
+      green: [
+        "Excellent profil ! Tu es prêt à démarrer la prospection active.",
+        "Commence par personnaliser tes scripts dans l'onglet Scripts.",
+        "Planifie tes 3 premières sessions de jeu de rôles.",
+        "Rejoins le prochain call de groupe pour te présenter.",
+      ],
+      orange: [
+        "Bon potentiel ! Complète les modules de formation prioritaires.",
+        "Concentre-toi sur la maîtrise des objections.",
+        "Participe aux calls de groupe pour progresser plus vite.",
+        "Fais au moins 1 session de roleplay IA par jour.",
+      ],
+      red: [
+        "Bienvenue ! Commence par les bases du setting.",
+        "Regarde toutes les vidéos d'onboarding attentivement.",
+        "N'hésite pas à poser tes questions dans la communauté.",
+        "Fixe-toi un objectif : terminer le module 1 cette semaine.",
+      ],
+    };
+    return fallback[colorCode] || fallback.orange;
+  }
 }
 
+/**
+ * Auto-book the first onboarding call for a new client.
+ * Finds the next available slot and creates a confirmed booking.
+ */
 export async function triggerAutoBooking(userId: string) {
-  // Stub — will integrate with booking system later
-  return { success: true, message: "Booking automatique programmé" };
+  const supabase = await createClient();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", userId)
+    .single();
+
+  if (!profile) return { success: false, message: "Profil non trouve" };
+
+  // Check if already has an onboarding booking
+  const { data: existing } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slot_type", "onboarding")
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return { success: true, message: "Un appel d'onboarding est deja programme", bookingId: existing[0].id };
+  }
+
+  // Find available booking slots in the next 7 days
+  const now = new Date();
+  const { data: slots } = await supabase
+    .from("booking_slots")
+    .select("day_of_week, start_time")
+    .eq("is_available", true)
+    .order("day_of_week")
+    .limit(5);
+
+  let targetDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+  if (slots && slots.length > 0) {
+    const slot = slots[0];
+    const targetDay = slot.day_of_week;
+    targetDate = new Date(now);
+    while (targetDate.getDay() !== targetDay || targetDate <= now) {
+      targetDate = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
+    }
+    const [h, m] = (slot.start_time || "10:00").split(":").map(Number);
+    targetDate.setHours(h, m, 0, 0);
+  } else {
+    targetDate.setHours(10, 0, 0, 0);
+  }
+
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .insert({
+      user_id: userId,
+      prospect_name: profile.full_name || profile.email,
+      scheduled_at: targetDate.toISOString(),
+      slot_type: "onboarding",
+      status: "confirmed",
+      notes: "Appel d'onboarding automatique",
+    })
+    .select("id")
+    .single();
+
+  if (error) return { success: false, message: error.message };
+
+  // Notify user
+  await supabase.from("notifications").insert({
+    user_id: userId,
+    title: "Appel d'onboarding programme !",
+    body: `Ton premier appel est prevu le ${targetDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} a ${targetDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.`,
+    type: "onboarding_call",
+    link: "/bookings",
+    read: false,
+  });
+
+  // Notify admins
+  const { data: admins } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", ["admin", "manager"]);
+
+  if (admins && admins.length > 0) {
+    await supabase.from("notifications").insert(
+      admins.map((a) => ({
+        user_id: a.id,
+        title: "Nouvel appel d'onboarding",
+        body: `${profile.full_name || "Nouveau client"} — appel programme le ${targetDate.toLocaleDateString("fr-FR")}.`,
+        type: "onboarding_call",
+        link: "/bookings",
+        read: false,
+      }))
+    );
+  }
+
+  revalidatePath("/bookings");
+  return { success: true, message: "Appel d'onboarding programme", bookingId: booking?.id };
 }
 
 export async function scrapeAndGenerateScript(linkedinUrl: string) {
-  // Stub — will use AI/scraping later
-  return {
-    success: true,
-    script: "Bonjour [Nom], j'ai vu votre profil et je pense que notre programme pourrait vous intéresser. Seriez-vous disponible pour un appel de 15 minutes cette semaine ?",
-    profileData: { name: "Prospect", industry: "Non défini" },
-  };
+  // Note : le scraping réel de LinkedIn nécessite une API tierce (Proxycurl, PhantomBuster, etc.)
+  // Pour l'instant, on génère un script basé sur l'URL fournie
+  try {
+    const script = await aiComplete(
+      `Génère un script de premier message LinkedIn professionnel basé sur ce profil : ${linkedinUrl}
+
+Le script doit :
+- Commencer par une accroche personnalisée liée au profil
+- Mentionner un point commun ou un intérêt pour leur activité
+- Proposer un échange de valeur (pas de pitch direct)
+- Se terminer par une question ouverte
+- Être concis (3-5 phrases max)
+- Utiliser le tutoiement
+
+Écris uniquement le texte du message, sans guillemets.`,
+      {
+        system: "Tu es un expert en copywriting LinkedIn. Tu crées des messages d'approche qui génèrent des taux de réponse élevés. Ton ton est professionnel mais humain.",
+        maxTokens: 512,
+      }
+    );
+
+    return {
+      success: true,
+      script,
+      profileData: {
+        name: "Prospect LinkedIn",
+        industry: "À déterminer après scraping",
+        source: linkedinUrl,
+      },
+    };
+  } catch {
+    return {
+      success: true,
+      script: "Bonjour [Nom], j'ai vu votre profil et votre parcours m'a interpellé. Seriez-vous ouvert à un échange de 15 minutes cette semaine ?",
+      profileData: { name: "Prospect", industry: "Non défini" },
+    };
+  }
+}
+
+// --- Feature #07: Checklist d'onboarding interactive gamifiée ---
+
+export async function getOnboardingChecklist(userId: string) {
+  const supabase = await createClient();
+
+  const checklistItems = [
+    { id: "checklist_profile", label: "Completer ton profil", link: "/profile", icon: "user" },
+    { id: "checklist_module1", label: "Commencer le Module 1", link: "/academy", icon: "book" },
+    { id: "checklist_roleplay", label: "Faire ta premiere session de roleplay", link: "/roleplay", icon: "target" },
+    { id: "checklist_journal", label: "Remplir ton journal du jour", link: "/dashboard", icon: "edit" },
+    { id: "checklist_booking", label: "Reserver ton appel d'onboarding", link: "/bookings", icon: "calendar" },
+    { id: "checklist_community", label: "Te presenter dans la communaute", link: "/community/forum", icon: "users" },
+  ];
+
+  const { data: completed } = await supabase
+    .from("client_onboarding")
+    .select("step_id")
+    .eq("client_id", userId)
+    .eq("completed", true)
+    .like("step_id", "checklist_%");
+
+  const completedIds = new Set((completed || []).map((c) => c.step_id));
+
+  return checklistItems.map((item) => ({
+    ...item,
+    completed: completedIds.has(item.id),
+  }));
+}
+
+export async function toggleChecklistItem(itemId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { data: existing } = await supabase
+    .from("client_onboarding")
+    .select("completed")
+    .eq("client_id", user.id)
+    .eq("step_id", itemId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("client_onboarding")
+      .update({ completed: !existing.completed, completed_at: new Date().toISOString() })
+      .eq("client_id", user.id)
+      .eq("step_id", itemId);
+  } else {
+    await supabase.from("client_onboarding").insert({
+      client_id: user.id,
+      step_id: itemId,
+      completed: true,
+      completed_at: new Date().toISOString(),
+      response_data: {},
+    });
+  }
+
+  revalidatePath("/onboarding");
+  revalidatePath("/dashboard");
+}
+
+// --- Feature #10: Tunnel de double validation ---
+
+export async function submitCommitments(commitments: {
+  charter_accepted: boolean;
+  objectives_confirmed: boolean;
+  availability_confirmed: boolean;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  if (!commitments.charter_accepted || !commitments.objectives_confirmed || !commitments.availability_confirmed) {
+    throw new Error("Tous les engagements doivent etre valides");
+  }
+
+  await supabase.from("client_onboarding").upsert({
+    client_id: user.id,
+    step_id: "double_validation",
+    completed: true,
+    completed_at: new Date().toISOString(),
+    response_data: commitments,
+  }, { onConflict: "client_id,step_id" });
+
+  revalidatePath("/onboarding");
+  return { success: true };
+}
+
+export async function hasCompletedCommitments(userId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("client_onboarding")
+    .select("completed")
+    .eq("client_id", userId)
+    .eq("step_id", "double_validation")
+    .eq("completed", true)
+    .maybeSingle();
+
+  return !!data;
 }

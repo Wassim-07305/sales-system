@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Search,
   Settings,
+  Zap,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -132,6 +133,12 @@ export function CourseGrid({ courses, progressMap, isAdmin }: CourseGridProps) {
         title="Academy"
         description="Formez-vous et développez vos compétences"
       >
+        <Button asChild variant="outline" size="sm">
+          <Link href="/academy/micro">
+            <Zap className="size-4" />
+            Micro-learning
+          </Link>
+        </Button>
         {isAdmin && (
           <Button asChild variant="outline" size="sm">
             <Link href="/academy/admin">

@@ -18,6 +18,10 @@ import {
   ShieldCheck,
   Handshake,
   Target,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -42,6 +46,12 @@ interface Profile {
   difficulty: string;
 }
 
+interface PastSession {
+  score: number | null;
+  ai_feedback: Feedback | null;
+  started_at: string;
+}
+
 interface Session {
   id: string;
   score: number | null;
@@ -49,6 +59,7 @@ interface Session {
   conversation: Message[];
   duration_seconds: number | null;
   profile: Profile | null;
+  pastSessions?: PastSession[];
 }
 
 interface Props {
@@ -235,6 +246,89 @@ export function DebriefView({ session }: Props) {
                       ))}
                     </ul>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Progression vs past sessions */}
+          {session.pastSessions && session.pastSessions.length > 0 && feedback && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-brand" />
+                  Progression
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {(() => {
+                    const pastScores = session.pastSessions!
+                      .filter((s) => s.score !== null)
+                      .map((s) => s.score!);
+                    const avgPast = pastScores.length > 0
+                      ? Math.round(pastScores.reduce((a, b) => a + b, 0) / pastScores.length)
+                      : 0;
+                    const diff = score - avgPast;
+                    const TrendIcon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
+                    const trendColor = diff > 0 ? "text-green-500" : diff < 0 ? "text-red-400" : "text-muted-foreground";
+
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Moy. sessions precedentes</span>
+                          <span className="text-sm font-medium">{avgPast}%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Cette session</span>
+                          <span className="text-sm font-bold">{score}%</span>
+                        </div>
+                        <div className={cn("flex items-center gap-1 pt-1", trendColor)}>
+                          <TrendIcon className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            {diff > 0 ? `+${diff}` : diff} points
+                          </span>
+                          <span className="text-xs text-muted-foreground ml-1">
+                            ({pastScores.length} session{pastScores.length > 1 ? "s" : ""} precedente{pastScores.length > 1 ? "s" : ""})
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recommended exercises */}
+          {feedback && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-yellow-500" />
+                  Exercices recommandes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {feedback.objection_handling < 70 && (
+                  <Link href="/roleplay" className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm">
+                    Entrainement gestion des objections (score: {feedback.objection_handling}%)
+                  </Link>
+                )}
+                {feedback.rapport_building < 70 && (
+                  <Link href="/roleplay" className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm">
+                    Entrainement creation de rapport (score: {feedback.rapport_building}%)
+                  </Link>
+                )}
+                {feedback.closing_technique < 70 && (
+                  <Link href="/roleplay" className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm">
+                    Entrainement technique de closing (score: {feedback.closing_technique}%)
+                  </Link>
+                )}
+                {feedback.objection_handling >= 70 && feedback.rapport_building >= 70 && feedback.closing_technique >= 70 && (
+                  <p className="text-sm text-muted-foreground">
+                    Excellent ! Tous tes scores sont au-dessus de 70%. Continue comme ca !
+                  </p>
                 )}
               </CardContent>
             </Card>

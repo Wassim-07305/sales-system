@@ -16,6 +16,7 @@ import { Plus, FileText, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { DownloadPdfButton } from "./download-pdf-button";
 
 const statusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
@@ -47,12 +48,20 @@ export default async function ContractsPage() {
         title="Contrats"
         description="Gérez vos contrats et signatures"
       >
-        <Link href="/contracts/new">
-          <Button className="bg-brand text-brand-dark hover:bg-brand/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau contrat
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/contracts/cash-flow">
+            <Button variant="outline" size="sm">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Cash Flow
+            </Button>
+          </Link>
+          <Link href="/contracts/new">
+            <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Nouveau contrat
+            </Button>
+          </Link>
+        </div>
       </PageHeader>
 
       <Card>
@@ -65,6 +74,7 @@ export default async function ContractsPage() {
                 <TableHead>Montant</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -101,11 +111,14 @@ export default async function ContractsPage() {
                       locale: fr,
                     })}
                   </TableCell>
+                  <TableCell>
+                    <DownloadPdfButton contract={contract} />
+                  </TableCell>
                 </TableRow>
               ))}
               {(!contracts || contracts.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     Aucun contrat
                   </TableCell>
                 </TableRow>

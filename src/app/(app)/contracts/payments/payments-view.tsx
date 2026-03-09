@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { recordPayment } from "@/lib/actions/payments";
+import { createPaymentCheckout } from "@/lib/actions/stripe";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -29,6 +30,7 @@ import {
   CheckCircle2,
   Clock,
   CreditCard,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -82,11 +84,24 @@ export function PaymentsView({ installments, overdue }: Props) {
     return i.status === filter;
   });
 
+  function handlePayOnline(installmentId: string) {
+    startTransition(async () => {
+      try {
+        const { url } = await createPaymentCheckout(installmentId);
+        if (url) {
+          window.location.href = url;
+        }
+      } catch {
+        toast.error("Erreur lors de la creation du paiement en ligne");
+      }
+    });
+  }
+
   function handleRecordPayment(installmentId: string) {
     startTransition(async () => {
       try {
         await recordPayment(installmentId);
-        toast.success("Paiement enregistré avec succès");
+        toast.success("Paiement enregistre avec succes");
         router.refresh();
       } catch {
         toast.error("Erreur lors de l'enregistrement du paiement");
@@ -169,15 +184,25 @@ export function PaymentsView({ installments, overdue }: Props) {
                   <p className="text-xs text-red-600">
                     Échéance : {format(new Date(item.due_date), "d MMM yyyy", { locale: fr })}
                   </p>
-                  <Button
-                    size="sm"
-                    className="mt-3 w-full bg-red-600 text-white hover:bg-red-700"
-                    onClick={() => handleRecordPayment(item.id)}
-                    disabled={isPending}
-                  >
-                    <CreditCard className="h-3 w-3 mr-1" />
-                    Marquer comme payé
-                  </Button>
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                      onClick={() => handlePayOnline(item.id)}
+                      disabled={isPending}
+                    >
+                      {isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <CreditCard className="h-3 w-3 mr-1" />}
+                      Payer en ligne
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleRecordPayment(item.id)}
+                      disabled={isPending}
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -245,15 +270,26 @@ export function PaymentsView({ installments, overdue }: Props) {
                   </TableCell>
                   <TableCell className="text-right">
                     {installment.status !== "paid" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRecordPayment(installment.id)}
-                        disabled={isPending}
-                      >
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Marquer payé
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handlePayOnline(installment.id)}
+                          disabled={isPending}
+                          className="bg-brand text-brand-dark hover:bg-brand/90"
+                        >
+                          {isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <CreditCard className="h-3 w-3 mr-1" />}
+                          Payer
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRecordPayment(installment.id)}
+                          disabled={isPending}
+                          title="Marquer comme paye manuellement"
+                        >
+                          <CheckCircle2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>

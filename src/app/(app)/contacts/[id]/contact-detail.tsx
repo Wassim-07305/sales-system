@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/page-header";
 import type { Profile, Deal, DealActivity } from "@/lib/types/database";
+import type { TimelineEvent } from "@/lib/actions/timeline";
 import {
   Mail,
   Phone,
@@ -16,13 +17,16 @@ import {
   Calendar,
   DollarSign,
   ArrowLeft,
+  History,
 } from "lucide-react";
 import Link from "next/link";
+import { ClientTimeline } from "@/components/client-timeline";
 
 interface ContactDetailProps {
   contact: Profile;
   deals: Deal[];
   activities: DealActivity[];
+  timelineEvents?: TimelineEvent[];
 }
 
 const activityIcons: Record<string, React.ReactNode> = {
@@ -34,7 +38,7 @@ const activityIcons: Record<string, React.ReactNode> = {
   status_change: <Target className="h-3.5 w-3.5" />,
 };
 
-export function ContactDetail({ contact, deals, activities }: ContactDetailProps) {
+export function ContactDetail({ contact, deals, activities, timelineEvents }: ContactDetailProps) {
   const totalDealValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
 
   return (
@@ -165,12 +169,12 @@ export function ContactDetail({ contact, deals, activities }: ContactDetailProps
         {/* Activity timeline */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Activité récente</CardTitle>
+            <CardTitle className="text-lg">Activite recente</CardTitle>
           </CardHeader>
           <CardContent>
             {activities.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                Aucune activité
+                Aucune activite
               </p>
             ) : (
               <div className="space-y-4">
@@ -199,6 +203,13 @@ export function ContactDetail({ contact, deals, activities }: ContactDetailProps
           </CardContent>
         </Card>
       </div>
+
+      {/* Full journey timeline */}
+      {timelineEvents && timelineEvents.length > 0 && (
+        <div className="mt-6">
+          <ClientTimeline events={timelineEvents} />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChallengesView } from "./challenges-view";
+import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
 
 export default async function ChallengesPage() {
   const supabase = await createClient();
@@ -55,6 +56,7 @@ export default async function ChallengesPage() {
       progressMap={progressMap}
       leaderboard={leaderboard || []}
       currentUserId={user.id}
+      allBadges={BADGE_DEFINITIONS}
     />
   );
 }

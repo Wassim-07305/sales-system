@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useTransition } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -19,6 +19,7 @@ import { KanbanColumn } from "./kanban-column";
 import { DealCard } from "./deal-card";
 import { NewDealDialog } from "./new-deal-dialog";
 import { DealPanel } from "./deal-panel";
+import { FilterPanel } from "./filter-panel";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { Deal, PipelineStage } from "@/lib/types/database";
@@ -32,6 +33,13 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search, Filter } from "lucide-react";
+import { getFilteredDeals, getDealSources, getTeamMembers, type DealFilters } from "@/lib/actions/crm";
+
+interface TeamMember {
+  id: string;
+  full_name: string | null;
+  role: string;
+}
 
 interface KanbanBoardProps {
   initialStages: PipelineStage[];
@@ -53,6 +61,44 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [tempFilter, setTempFilter] = useState<string>("all");
+
+  // Advanced filters
+  const [advancedFilters, setAdvancedFilters] = useState<DealFilters>({ sortBy: "created_at_desc" });
+  const [sources, setSources] = useState<string[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [isPending, startTransition] = useTransition();
+
+  // Load sources and team members on mount
+  useEffect(() => {
+    getDealSources().then(setSources);
+    getTeamMembers().then(setTeamMembers);
+  }, []);
+
+  // Apply advanced filters via server action
+  useEffect(() => {
+    const hasAdvancedFilters =
+      advancedFilters.dateFrom ||
+      advancedFilters.dateTo ||
+      (advancedFilters.amountMin && advancedFilters.amountMin > 0) ||
+      (advancedFilters.amountMax && advancedFilters.amountMax > 0) ||
+      (advancedFilters.assignedTo && advancedFilters.assignedTo !== "all") ||
+      (advancedFilters.source && advancedFilters.source !== "all") ||
+      (advancedFilters.sortBy && advancedFilters.sortBy !== "created_at_desc");
+
+    if (!hasAdvancedFilters) {
+      setDeals(initialDeals);
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await getFilteredDeals(advancedFilters);
+      if (result.error) {
+        toast.error("Erreur lors du filtrage des deals");
+        return;
+      }
+      setDeals(result.deals as Deal[]);
+    });
+  }, [advancedFilters, initialDeals]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -125,7 +171,15 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
 
   return (
     <>
-      {/* Filters */}
+      {/* Advanced Filters */}
+      <FilterPanel
+        filters={advancedFilters}
+        onFiltersChange={setAdvancedFilters}
+        sources={sources}
+        teamMembers={teamMembers}
+      />
+
+      {/* Search & Temperature Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

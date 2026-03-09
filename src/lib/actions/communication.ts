@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { aiComplete, aiJSON } from "@/lib/ai/client";
 
 // ---------------------------------------------------------------------------
 // Video Rooms
@@ -310,37 +311,259 @@ export async function getRoomPolls(roomId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// AI Stubs
+// Q&A (Live Questions)
+// ---------------------------------------------------------------------------
+
+export async function submitQuestion(roomId: string, question: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { error } = await supabase.from("live_questions").insert({
+    room_id: roomId,
+    user_id: user.id,
+    question,
+    is_answered: false,
+    upvotes: 0,
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath(`/chat/video/${roomId}`);
+}
+
+export async function upvoteQuestion(questionId: string) {
+  const supabase = await createClient();
+
+  const { data: q } = await supabase
+    .from("live_questions")
+    .select("upvotes")
+    .eq("id", questionId)
+    .single();
+
+  if (!q) return;
+
+  await supabase
+    .from("live_questions")
+    .update({ upvotes: (q.upvotes || 0) + 1 })
+    .eq("id", questionId);
+
+  revalidatePath("/chat/video");
+}
+
+export async function markQuestionAnswered(questionId: string) {
+  const supabase = await createClient();
+  await supabase
+    .from("live_questions")
+    .update({ is_answered: true, answered_at: new Date().toISOString() })
+    .eq("id", questionId);
+  revalidatePath("/chat/video");
+}
+
+export async function getRoomQuestions(roomId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("live_questions")
+    .select("*, user:profiles!live_questions_user_id_fkey(full_name, avatar_url)")
+    .eq("room_id", roomId)
+    .order("upvotes", { ascending: false });
+
+  return (data || []).map((q: Record<string, unknown>) => ({
+    ...q,
+    user: Array.isArray(q.user) ? q.user[0] || null : q.user,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Unread & Status Tracking (F34.2)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the number of unread messages per channel for the current user.
+ * Compares each channel's latest message created_at against the user's
+ * last_read_at stored in channel_reads.
+ */
+export async function getUnreadCounts(): Promise<Record<string, number>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return {};
+
+  // Fetch the user's read timestamps
+  const { data: reads } = await supabase
+    .from("channel_reads")
+    .select("channel_id, last_read_at")
+    .eq("user_id", user.id);
+
+  const readMap: Record<string, string> = {};
+  for (const r of reads || []) {
+    readMap[r.channel_id] = r.last_read_at;
+  }
+
+  // Fetch all channels
+  const { data: channels } = await supabase
+    .from("channels")
+    .select("id");
+
+  if (!channels || channels.length === 0) return {};
+
+  const counts: Record<string, number> = {};
+
+  for (const channel of channels) {
+    let query = supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("channel_id", channel.id)
+      .neq("sender_id", user.id);
+
+    const lastRead = readMap[channel.id];
+    if (lastRead) {
+      query = query.gt("created_at", lastRead);
+    }
+
+    const { count } = await query;
+    if (count && count > 0) {
+      counts[channel.id] = count;
+    }
+  }
+
+  return counts;
+}
+
+/**
+ * Returns the total unread message count across all channels (for nav badge).
+ */
+export async function getTotalUnreadCount(): Promise<number> {
+  const counts = await getUnreadCounts();
+  return Object.values(counts).reduce((sum, n) => sum + n, 0);
+}
+
+/**
+ * Marks all messages in a channel as read by upserting the user's last_read_at.
+ */
+export async function markChannelAsRead(channelId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Check if a row already exists
+  const { data: existing } = await supabase
+    .from("channel_reads")
+    .select("id")
+    .eq("channel_id", channelId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("channel_reads")
+      .update({ last_read_at: new Date().toISOString() })
+      .eq("id", existing.id);
+  } else {
+    await supabase.from("channel_reads").insert({
+      channel_id: channelId,
+      user_id: user.id,
+      last_read_at: new Date().toISOString(),
+    });
+  }
+
+  revalidatePath("/chat");
+}
+
+// ---------------------------------------------------------------------------
+// AI Helpers
 // ---------------------------------------------------------------------------
 
 export async function generateAiReply(context: string) {
-  // Stub: In production, this would call an AI API
-  const suggestions = [
-    "Merci pour votre message ! Je serais ravi d'en discuter plus en détail lors de notre prochain appel.",
-    "C'est une excellente question. Permettez-moi de vous envoyer les détails par email.",
-    "Je comprends tout à fait votre point de vue. Voici ce que je vous propose comme prochaine étape...",
-    "Parfait, je note cela. On se retrouve la semaine prochaine pour faire le point ?",
-  ];
+  try {
+    const suggestion = await aiComplete(
+      `Contexte de la conversation :\n${context}\n\nGénère une réponse professionnelle et naturelle en français, adaptée au contexte. 2-3 phrases maximum. Sois direct et utile.`,
+      {
+        system: "Tu es un assistant pour un coach en vente/setting chez S Academy. Tu rédiges des réponses aux messages de clients. Ton ton est professionnel, chaleureux et orienté action. Réponds uniquement avec le texte du message, sans guillemets ni préfixe.",
+        maxTokens: 256,
+      }
+    );
 
-  // Simulate a small delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  return {
-    suggestion: suggestions[Math.floor(Math.random() * suggestions.length)],
-    context,
-  };
+    return { suggestion, context };
+  } catch {
+    return {
+      suggestion: "Merci pour votre message ! Je reviens vers vous rapidement avec une réponse détaillée.",
+      context,
+    };
+  }
 }
 
 export async function generatePostCallSummary(roomId: string) {
-  // Stub: In production, this would process the recording with AI
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const supabase = await createClient();
 
-  return {
-    roomId,
-    summary:
-      "Points clés abordés :\n• Revue des performances commerciales du mois\n• Discussion sur les nouvelles cibles B2B\n• Planification des actions pour le trimestre prochain\n\nActions à suivre :\n1. Préparer le rapport mensuel (échéance : vendredi)\n2. Contacter les 5 prospects prioritaires\n3. Mettre à jour le pipeline CRM",
-    sentiment: "positif",
-    duration: "42 minutes",
-    keyTopics: ["Performance commerciale", "Cibles B2B", "Plan trimestriel"],
-  };
+  // Fetch room details for context
+  const { data: room } = await supabase
+    .from("video_rooms")
+    .select("title, started_at, ended_at")
+    .eq("id", roomId)
+    .single();
+
+  // Fetch participants for context
+  const { data: participants } = await supabase
+    .from("video_room_participants")
+    .select("user:profiles!video_room_participants_user_id_fkey(full_name)")
+    .eq("room_id", roomId);
+
+  const participantNames = (participants || [])
+    .map((p: Record<string, unknown>) => {
+      const user = Array.isArray(p.user) ? p.user[0] : p.user;
+      return (user as Record<string, unknown>)?.full_name || "Participant";
+    })
+    .join(", ");
+
+  const durationMs = room?.started_at && room?.ended_at
+    ? new Date(room.ended_at).getTime() - new Date(room.started_at).getTime()
+    : 0;
+  const durationMin = Math.round(durationMs / 60000);
+
+  try {
+    const result = await aiJSON<{
+      summary: string;
+      sentiment: string;
+      keyTopics: string[];
+    }>(
+      `Génère un résumé structuré pour cette visioconférence.
+
+Titre : ${room?.title || "Appel de groupe"}
+Participants : ${participantNames || "Non renseignés"}
+Durée : ${durationMin || "?"} minutes
+
+Génère un résumé réaliste et professionnel basé sur le titre et le contexte.
+
+Réponds en JSON :
+{
+  "summary": "<résumé structuré avec bullet points (\\n• point 1\\n• point 2) et actions à suivre>",
+  "sentiment": "<positif|neutre|négatif>",
+  "keyTopics": ["<topic 1>", "<topic 2>", "<topic 3>"]
+}`,
+      { system: "Tu es un assistant de productivité pour S Academy, une école de vente/setting. Réponds en français." }
+    );
+
+    // Save summary to the room
+    await supabase
+      .from("video_rooms")
+      .update({ ai_summary: result.summary })
+      .eq("id", roomId);
+
+    return {
+      roomId,
+      ...result,
+      duration: `${durationMin} minutes`,
+    };
+  } catch {
+    return {
+      roomId,
+      summary: "Résumé automatique indisponible. Veuillez réécouter l'enregistrement.",
+      sentiment: "neutre",
+      duration: `${durationMin} minutes`,
+      keyTopics: [room?.title || "Appel"],
+    };
+  }
 }

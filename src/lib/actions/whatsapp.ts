@@ -229,6 +229,114 @@ export async function updateWhatsAppSequence(
   revalidatePath("/whatsapp/sequences");
 }
 
+export async function getWhatsAppAnalytics() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  // Get the user's connection
+  const { data: connection } = await supabase
+    .from("whatsapp_connections")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  const connectionId = connection?.id;
+
+  // Total messages sent & received
+  const { data: allMessages } = await supabase
+    .from("whatsapp_messages")
+    .select("id, direction, status, sequence_id, created_at")
+    .eq("connection_id", connectionId || "");
+
+  const messages = allMessages || [];
+  const totalSent = messages.filter((m) => m.direction === "outbound").length;
+  const totalReceived = messages.filter(
+    (m) => m.direction === "inbound"
+  ).length;
+  const responseRate =
+    totalSent > 0 ? Math.round((totalReceived / totalSent) * 100) : 0;
+
+  // Messages per day over last 30 days
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const dailyMap: Record<string, { sent: number; received: number }> = {};
+  for (let i = 0; i < 30; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - (29 - i));
+    const key = d.toISOString().split("T")[0];
+    dailyMap[key] = { sent: 0, received: 0 };
+  }
+
+  for (const msg of messages) {
+    const day = msg.created_at?.split("T")[0];
+    if (day && dailyMap[day]) {
+      if (msg.direction === "outbound") {
+        dailyMap[day].sent += 1;
+      } else {
+        dailyMap[day].received += 1;
+      }
+    }
+  }
+
+  const messagesPerDay = Object.entries(dailyMap).map(([date, counts]) => ({
+    date,
+    label: new Date(date).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+    }),
+    sent: counts.sent,
+    received: counts.received,
+  }));
+
+  // Sequences data
+  const { data: sequences } = await supabase
+    .from("whatsapp_sequences")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const allSequences = sequences || [];
+  const activeSequences = allSequences.filter((s) => s.is_active).length;
+
+  // Top performing sequences by response rate
+  const sequenceStats = allSequences.map((seq) => {
+    const seqMessages = messages.filter((m) => m.sequence_id === seq.id);
+    const seqSent = seqMessages.filter(
+      (m) => m.direction === "outbound"
+    ).length;
+    const seqReceived = seqMessages.filter(
+      (m) => m.direction === "inbound"
+    ).length;
+    const seqResponseRate =
+      seqSent > 0 ? Math.round((seqReceived / seqSent) * 100) : 0;
+
+    return {
+      id: seq.id,
+      name: seq.name || "Sans nom",
+      is_active: seq.is_active,
+      total_sent: seqSent,
+      total_received: seqReceived,
+      response_rate: seqResponseRate,
+      steps_count: Array.isArray(seq.steps) ? seq.steps.length : 0,
+    };
+  });
+
+  sequenceStats.sort((a, b) => b.response_rate - a.response_rate);
+
+  return {
+    totalSent,
+    totalReceived,
+    responseRate,
+    activeSequences,
+    totalSequences: allSequences.length,
+    messagesPerDay,
+    sequenceStats,
+  };
+}
+
 export async function deleteWhatsAppSequence(id: string) {
   const supabase = await createClient();
   const { error } = await supabase

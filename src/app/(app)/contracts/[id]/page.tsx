@@ -11,7 +11,7 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
 
   const { data: contract } = await supabase
     .from("contracts")
-    .select("*, client:profiles(*)")
+    .select("*, client:profiles(full_name, email)")
     .eq("id", id)
     .single();
 

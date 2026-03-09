@@ -3,7 +3,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function getProspects(filters?: { platform?: string; status?: string; listId?: string }) {
+export interface ProspectSegmentFilters {
+  platform?: string;
+  status?: string;
+  listId?: string;
+  temperature?: string;
+  scoreMin?: number;
+  scoreMax?: number;
+  recency?: "recent" | "inactive" | "all";
+}
+
+export async function getProspects(filters?: ProspectSegmentFilters) {
   const supabase = await createClient();
   let query = supabase.from("prospects").select("*, list:prospect_lists(id, name)").order("created_at", { ascending: false });
 
@@ -11,11 +21,84 @@ export async function getProspects(filters?: { platform?: string; status?: strin
   if (filters?.status) query = query.eq("status", filters.status);
   if (filters?.listId) query = query.eq("list_id", filters.listId);
 
+  // Recency filter
+  if (filters?.recency === "recent") {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    query = query.gte("last_message_at", sevenDaysAgo.toISOString());
+  } else if (filters?.recency === "inactive") {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    query = query.or(`last_message_at.lt.${thirtyDaysAgo.toISOString()},last_message_at.is.null`);
+  }
+
   const { data } = await query;
-  return (data || []).map((d: Record<string, unknown>) => ({
+  const prospects = (data || []).map((d: Record<string, unknown>) => ({
     ...d,
     list: Array.isArray(d.list) ? d.list[0] || null : d.list,
   }));
+
+  // If we need to filter by score or temperature, fetch scores and filter in-memory
+  if (filters?.temperature || filters?.scoreMin !== undefined || filters?.scoreMax !== undefined) {
+    const prospectIds = prospects.map((p: Record<string, unknown>) => p.id as string);
+    if (prospectIds.length === 0) return prospects;
+
+    let scoreQuery = supabase
+      .from("prospect_scores")
+      .select("prospect_id, total_score, temperature")
+      .in("prospect_id", prospectIds);
+
+    if (filters.temperature) {
+      scoreQuery = scoreQuery.eq("temperature", filters.temperature);
+    }
+    if (filters.scoreMin !== undefined) {
+      scoreQuery = scoreQuery.gte("total_score", filters.scoreMin);
+    }
+    if (filters.scoreMax !== undefined) {
+      scoreQuery = scoreQuery.lte("total_score", filters.scoreMax);
+    }
+
+    const { data: scores } = await scoreQuery;
+    const matchingIds = new Set((scores || []).map((s: Record<string, unknown>) => s.prospect_id as string));
+    return prospects.filter((p: Record<string, unknown>) => matchingIds.has(p.id as string));
+  }
+
+  return prospects;
+}
+
+export async function getProspectSegmentStats() {
+  const supabase = await createClient();
+
+  const { data: allProspects } = await supabase
+    .from("prospects")
+    .select("id");
+  const totalCount = allProspects?.length || 0;
+
+  const { data: scores } = await supabase
+    .from("prospect_scores")
+    .select("prospect_id, total_score, temperature");
+
+  let hotCount = 0;
+  let warmCount = 0;
+  let coldCount = 0;
+  let totalScore = 0;
+  const scoreCount = scores?.length || 0;
+
+  for (const s of scores || []) {
+    const temp = s.temperature as string;
+    if (temp === "hot") hotCount++;
+    else if (temp === "warm") warmCount++;
+    else coldCount++;
+    totalScore += (s.total_score as number) || 0;
+  }
+
+  return {
+    total: totalCount,
+    hot: hotCount,
+    warm: warmCount,
+    cold: coldCount,
+    avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
+  };
 }
 
 export async function addProspect(formData: { name: string; profile_url?: string; platform: string; list_id?: string }) {

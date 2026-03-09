@@ -20,10 +20,12 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { markChannelAsRead } from "@/lib/actions/communication";
 
 interface ChatLayoutProps {
   initialChannels: Channel[];
   currentUserId: string;
+  initialUnreadCounts: Record<string, number>;
 }
 
 const channelIcons = {
@@ -32,7 +34,7 @@ const channelIcons = {
   announcement: Megaphone,
 };
 
-export function ChatLayout({ initialChannels, currentUserId }: ChatLayoutProps) {
+export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts }: ChatLayoutProps) {
   const [channels] = useState<Channel[]>(initialChannels);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(
     initialChannels[0] || null
@@ -41,6 +43,7 @@ export function ChatLayout({ initialChannels, currentUserId }: ChatLayoutProps) 
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [channelSearch, setChannelSearch] = useState("");
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>(initialUnreadCounts);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -68,6 +71,15 @@ export function ChatLayout({ initialChannels, currentUserId }: ChatLayoutProps) 
 
     loadMessages();
 
+    // Mark channel as read on open
+    markChannelAsRead(activeChannel!.id).then(() => {
+      setUnreadCounts((prev) => {
+        const next = { ...prev };
+        delete next[activeChannel!.id];
+        return next;
+      });
+    });
+
     // Subscribe to realtime messages
     const subscription = supabase
       .channel(`messages:${activeChannel.id}`)
@@ -89,6 +101,8 @@ export function ChatLayout({ initialChannels, currentUserId }: ChatLayoutProps) 
           if (fullMessage) {
             setMessages((prev) => [...prev, fullMessage]);
             setTimeout(scrollToBottom, 100);
+            // Keep read status current while viewing the channel
+            markChannelAsRead(activeChannel!.id);
           }
         }
       )
@@ -140,6 +154,7 @@ export function ChatLayout({ initialChannels, currentUserId }: ChatLayoutProps) 
           <div className="p-2 space-y-0.5">
             {filteredChannels.map((channel) => {
               const Icon = channelIcons[channel.type] || Hash;
+              const unread = unreadCounts[channel.id] || 0;
               return (
                 <button
                   key={channel.id}
@@ -147,12 +162,22 @@ export function ChatLayout({ initialChannels, currentUserId }: ChatLayoutProps) 
                     "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors",
                     activeChannel?.id === channel.id
                       ? "bg-brand/10 text-brand-dark font-medium"
-                      : "text-muted-foreground hover:bg-muted"
+                      : unread > 0
+                        ? "text-foreground font-semibold hover:bg-muted"
+                        : "text-muted-foreground hover:bg-muted"
                   )}
                   onClick={() => setActiveChannel(channel)}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{channel.name}</span>
+                  <span className="truncate flex-1">{channel.name}</span>
+                  {unread > 0 && (
+                    <Badge
+                      variant="default"
+                      className="bg-brand text-brand-dark text-[10px] h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full"
+                    >
+                      {unread > 99 ? "99+" : unread}
+                    </Badge>
+                  )}
                 </button>
               );
             })}

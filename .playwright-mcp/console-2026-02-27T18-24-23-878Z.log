@@ -1,0 +1,12 @@
+[    4511ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[    4511ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[   24180ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/_next/static/chunks/node_modules_4ee56ca0._.js:16702
+[   24180ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/_next/static/chunks/node_modules_4ee56ca0._.js:16702
+[   33047ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[   33047ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[   62314ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   62315ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/_next/static/chunks/node_modules_4ee56ca0._.js:16702
+[   62315ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/_next/static/chunks/node_modules_4ee56ca0._.js:16702
+[   62316ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  429885ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  429885ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0

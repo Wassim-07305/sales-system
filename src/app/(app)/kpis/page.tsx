@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { KpisView } from "./kpis-view";
+import { getSimulatorInputs } from "@/lib/actions/simulator";
 
 export default async function KpisPage() {
   const supabase = await createClient();
@@ -23,10 +24,14 @@ export default async function KpisPage() {
     .order("created_at", { ascending: false })
     .limit(1);
 
+  // Get saved simulator inputs
+  const savedSimulatorInputs = await getSimulatorInputs();
+
   return (
     <KpisView
       kpis={kpis || []}
       pendingNps={pendingNps?.[0] || null}
+      savedSimulatorInputs={savedSimulatorInputs}
     />
   );
 }

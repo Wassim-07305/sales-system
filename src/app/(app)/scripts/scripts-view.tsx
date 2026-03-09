@@ -18,6 +18,7 @@ import {
   Loader2,
   Calendar,
   Tag,
+  BarChart3,
 } from "lucide-react";
 import {
   createFlowchart,
@@ -126,6 +127,12 @@ export function ScriptsView({
         title="Scripts & Outils"
         description="Gérez vos scripts, flowcharts et mind maps"
       >
+        <Link href="/scripts/analytics">
+          <Button variant="outline" size="sm">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytiques
+          </Button>
+        </Link>
         <Link href="/scripts/templates">
           <Button variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />

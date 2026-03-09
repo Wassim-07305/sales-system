@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, Target, TrendingUp, Calendar } from "lucide-react";
+import { Phone, Target, TrendingUp, Calendar, Calculator } from "lucide-react";
 import { submitNpsScore } from "@/lib/actions/nps";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,8 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { RevenueSimulator } from "@/components/revenue-simulator";
+import type { SimulatorInputs } from "@/lib/actions/simulator";
 
 interface Kpi {
   id: string;
@@ -37,7 +39,15 @@ interface NpsSurvey {
   sent_at: string;
 }
 
-export function KpisView({ kpis, pendingNps }: { kpis: Kpi[]; pendingNps: NpsSurvey | null }) {
+export function KpisView({
+  kpis,
+  pendingNps,
+  savedSimulatorInputs,
+}: {
+  kpis: Kpi[];
+  pendingNps: NpsSurvey | null;
+  savedSimulatorInputs?: SimulatorInputs | null;
+}) {
   const router = useRouter();
   const [period, setPeriod] = useState<"30" | "60" | "90">("30");
   const [npsScore, setNpsScore] = useState<number | null>(null);
@@ -90,12 +100,43 @@ export function KpisView({ kpis, pendingNps }: { kpis: Kpi[]; pendingNps: NpsSur
     }
   }
 
+  const [activeTab, setActiveTab] = useState<"kpis" | "simulator">("kpis");
+
   return (
     <div>
       <PageHeader
         title="Mes KPIs"
-        description="Suivez vos métriques de performance"
+        description="Suivez vos metriques de performance"
       />
+
+      {/* Main tabs: KPIs vs Simulator */}
+      <div className="flex gap-2 mb-6">
+        <Button
+          size="sm"
+          variant={activeTab === "kpis" ? "default" : "outline"}
+          className={activeTab === "kpis" ? "bg-brand text-brand-dark" : ""}
+          onClick={() => setActiveTab("kpis")}
+        >
+          <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+          Mes KPIs
+        </Button>
+        <Button
+          size="sm"
+          variant={activeTab === "simulator" ? "default" : "outline"}
+          className={activeTab === "simulator" ? "bg-brand text-brand-dark" : ""}
+          onClick={() => setActiveTab("simulator")}
+        >
+          <Calculator className="h-3.5 w-3.5 mr-1.5" />
+          Simulateur revenus
+        </Button>
+      </div>
+
+      {activeTab === "simulator" && (
+        <RevenueSimulator savedInputs={savedSimulatorInputs} />
+      )}
+
+      {activeTab === "kpis" && (<>
+
 
       {/* NPS Modal */}
       {npsShown && pendingNps && (
@@ -255,11 +296,12 @@ export function KpisView({ kpis, pendingNps }: { kpis: Kpi[]; pendingNps: NpsSur
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground">
             <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">Pas encore de données</p>
-            <p className="text-sm">Vos KPIs apparaîtront ici au fur et à mesure de votre activité.</p>
+            <p className="font-medium">Pas encore de donnees</p>
+            <p className="text-sm">Vos KPIs apparaitront ici au fur et a mesure de votre activite.</p>
           </CardContent>
         </Card>
       )}
+      </>)}
     </div>
   );
 }

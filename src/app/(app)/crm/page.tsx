@@ -4,6 +4,7 @@ import { KanbanBoard } from "./kanban-board";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { CrmExportButton } from "./crm-export-button";
 
 export default async function CRMPage() {
   const supabase = await createClient();
@@ -26,6 +27,7 @@ export default async function CRMPage() {
         title="Pipeline CRM"
         description="Gérez vos deals et suivez votre pipeline"
       >
+        <CrmExportButton />
         <Button className="bg-brand text-brand-dark hover:bg-brand/90">
           <Plus className="h-4 w-4 mr-2" />
           Nouveau deal

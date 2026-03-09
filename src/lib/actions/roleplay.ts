@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { aiChat, aiJSON, type AIMessage } from "@/lib/ai/client";
 
 export async function getRoleplayProfiles() {
   const supabase = await createClient();
@@ -55,20 +56,59 @@ export async function sendRoleplayMessage(sessionId: string, content: string) {
 
   if (!session) throw new Error("Session non trouvée");
 
+  // Fetch prospect profile for context
+  const { data: fullSession } = await supabase
+    .from("roleplay_sessions")
+    .select("*, profile:roleplay_prospect_profiles(*)")
+    .eq("id", sessionId)
+    .single();
+
+  const profile = fullSession?.profile
+    ? (Array.isArray(fullSession.profile) ? fullSession.profile[0] : fullSession.profile)
+    : null;
+
   const messages = Array.isArray(session.conversation) ? session.conversation : [];
   messages.push({ role: "user", content, timestamp: new Date().toISOString() });
 
-  const aiResponses = [
-    "Hmm, intéressant. Mais je ne suis pas sûr que ce soit fait pour moi. Pourquoi devrais-je vous faire confiance ?",
-    "Je comprends, mais j'ai déjà essayé plusieurs formations sans résultat. Qu'est-ce qui rend la vôtre différente ?",
-    "Le prix me semble élevé. Est-ce qu'il y a des facilités de paiement ?",
-    "Je dois en parler avec mon associé. Vous pouvez me rappeler la semaine prochaine ?",
-    "Ok, ça m'intéresse. Comment on procède pour la suite ?",
-    "Non merci, je ne suis vraiment pas intéressé pour le moment.",
-    "Pouvez-vous m'envoyer plus d'informations par email ?",
-    "Quels résultats ont obtenu vos anciens clients ?",
+  // Build AI conversation with prospect persona
+  const systemPrompt = `Tu es un prospect simulé pour un exercice de jeu de rôles en vente/setting.
+
+PERSONA DU PROSPECT :
+- Nom : ${profile?.name || "Prospect inconnu"}
+- Niche : ${profile?.niche || "Business en ligne"}
+- Personnalité : ${profile?.persona || "Sceptique mais ouvert"}
+- Difficulté : ${profile?.difficulty || "moyen"}
+- Objections favorites : ${profile?.objections?.join(", ") || "prix, timing, confiance"}
+- Scénario : ${profile?.scenario || "B2B actif"}
+- Réseau simulé : ${profile?.network || "Instagram"}
+
+RÈGLES :
+- Tu joues le prospect de manière RÉALISTE et COHÉRENTE
+- Tu ne révèles jamais que tu es une IA
+- Tu réagis naturellement aux messages du setter
+- Tu utilises tes objections favorites au bon moment
+- Niveau de difficulté ${profile?.difficulty || "moyen"} : ${
+    profile?.difficulty === "facile" ? "Tu es plutôt réceptif, tu poses des questions mais tu es ouvert"
+    : profile?.difficulty === "difficile" ? "Tu es très sceptique, tu as beaucoup d'objections, tu ne te laisses pas convaincre facilement"
+    : "Tu es neutre, tu écoutes mais tu as besoin d'être convaincu"
+  }
+- Réponds en français, de manière concise (1 à 3 phrases max), comme dans un vrai DM ${profile?.network || "Instagram"}
+- NE METS PAS de guillemets autour de ta réponse`;
+
+  const aiMessages: AIMessage[] = [
+    { role: "system", content: systemPrompt },
   ];
-  const aiMessage = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+
+  // Add conversation history
+  for (const msg of messages) {
+    aiMessages.push({
+      role: msg.role === "user" ? "user" : "assistant",
+      content: msg.content,
+    });
+  }
+
+  const aiMessage = await aiChat(aiMessages, { temperature: 0.85, maxTokens: 256 });
+
   messages.push({ role: "assistant", content: aiMessage, timestamp: new Date().toISOString() });
 
   await supabase.from("roleplay_sessions").update({ conversation: messages }).eq("id", sessionId);
@@ -85,15 +125,62 @@ export async function endSession(sessionId: string) {
 
   if (!session) throw new Error("Session non trouvée");
 
-  const score = Math.floor(Math.random() * 40) + 60;
-  const feedback = {
-    score,
-    strengths: ["Bonne introduction", "Questions pertinentes"],
-    improvements: ["Gestion des objections à améliorer", "Closing trop rapide"],
-    objection_handling: Math.floor(Math.random() * 30) + 60,
-    rapport_building: Math.floor(Math.random() * 30) + 65,
-    closing_technique: Math.floor(Math.random() * 30) + 55,
+  // Build conversation transcript for AI analysis
+  const conversation = Array.isArray(session.conversation) ? session.conversation : [];
+  const transcript = conversation
+    .map((m: { role: string; content: string }) =>
+      `${m.role === "user" ? "SETTER" : "PROSPECT"}: ${m.content}`
+    )
+    .join("\n");
+
+  let feedback: {
+    score: number;
+    strengths: string[];
+    improvements: string[];
+    objection_handling: number;
+    rapport_building: number;
+    closing_technique: number;
   };
+
+  try {
+    feedback = await aiJSON<typeof feedback>(
+      `Analyse cette conversation de setting/vente et donne un feedback détaillé.
+
+CONVERSATION :
+${transcript}
+
+Réponds en JSON avec exactement cette structure :
+{
+  "score": <number 0-100>,
+  "strengths": ["force 1", "force 2", "force 3"],
+  "improvements": ["amélioration 1", "amélioration 2", "amélioration 3"],
+  "objection_handling": <number 0-100>,
+  "rapport_building": <number 0-100>,
+  "closing_technique": <number 0-100>
+}
+
+Critères d'évaluation :
+- Score global : qualité globale de la conversation
+- objection_handling : capacité à gérer les résistances du prospect
+- rapport_building : qualité du lien créé avec le prospect
+- closing_technique : efficacité pour amener vers un appel/CTA
+- strengths : 3 points forts concrets observés dans la conversation
+- improvements : 3 axes d'amélioration concrets et actionnables`,
+      { system: "Tu es un coach expert en vente et setting. Analyse uniquement en français." }
+    );
+  } catch {
+    // Fallback if AI fails
+    feedback = {
+      score: Math.floor(Math.random() * 40) + 60,
+      strengths: ["Bonne introduction", "Questions pertinentes"],
+      improvements: ["Gestion des objections à améliorer", "Closing trop rapide"],
+      objection_handling: Math.floor(Math.random() * 30) + 60,
+      rapport_building: Math.floor(Math.random() * 30) + 65,
+      closing_technique: Math.floor(Math.random() * 30) + 55,
+    };
+  }
+
+  const score = feedback.score;
 
   await supabase.from("roleplay_sessions").update({
     status: "completed",

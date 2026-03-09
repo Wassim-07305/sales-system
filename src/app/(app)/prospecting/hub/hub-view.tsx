@@ -36,11 +36,14 @@ import {
   Sparkles,
   MessageSquare,
   Loader2,
+  RefreshCw,
+  Mail,
 } from "lucide-react";
 import {
   analyzeProfile,
   generateAiMessage,
   suggestComments,
+  recalculateAllScores,
 } from "@/lib/actions/hub-setting";
 
 interface PlatformOverview {
@@ -76,6 +79,9 @@ export function HubView({ overview }: Props) {
   const [commentUrl, setCommentUrl] = useState("");
   const [comments, setComments] = useState<{ type: string; comment: string }[]>([]);
   const [suggestingComments, setSuggestingComments] = useState(false);
+
+  // Recalculate all scores state
+  const [recalculating, setRecalculating] = useState(false);
 
   const platformIcons: Record<string, React.ReactNode> = {
     linkedin: <Linkedin className="h-5 w-5 text-blue-600" />,
@@ -140,6 +146,19 @@ export function HubView({ overview }: Props) {
       toast.error("Erreur lors de la suggestion de commentaires");
     } finally {
       setSuggestingComments(false);
+    }
+  }
+
+  async function handleRecalculateAll() {
+    setRecalculating(true);
+    try {
+      const count = await recalculateAllScores();
+      toast.success(`${count} score(s) recalcule(s)`);
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors du recalcul des scores");
+    } finally {
+      setRecalculating(false);
     }
   }
 
@@ -209,6 +228,43 @@ export function HubView({ overview }: Props) {
       </div>
 
       {/* Quick Action Dialogs */}
+      {/* Recalculate all scores */}
+      <div className="mb-8">
+        <Button
+          onClick={handleRecalculateAll}
+          disabled={recalculating}
+          variant="outline"
+          className="w-full sm:w-auto"
+        >
+          {recalculating ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Recalculer les scores
+        </Button>
+      </div>
+
+      {/* Campagnes Drip Link */}
+      <div className="mb-8">
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow border-brand/20"
+          onClick={() => router.push("/prospecting/campaigns")}
+        >
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center">
+              <Mail className="h-6 w-6 text-brand" />
+            </div>
+            <div>
+              <p className="font-semibold text-base">Campagnes</p>
+              <p className="text-sm text-muted-foreground">
+                Automatisez vos sequences de prospection multi-etapes
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <h2 className="text-lg font-semibold mb-4">Actions rapides</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Analyze Profile Dialog */}

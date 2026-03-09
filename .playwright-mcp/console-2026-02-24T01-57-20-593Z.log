@@ -1,0 +1,524 @@
+[    1257ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[    1257ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[   43108ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/login:0
+[   43108ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/login:0
+[  110744ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/src/lib/supabase/client:0
+[  152198ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/auth/session:0
+[  177683ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  177683ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[  222323ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  222323ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[  247577ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  247577ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[  279329ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  279329ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[  280380ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/crm:0
+[  280380ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/crm:0
+[  280959ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/contacts:0
+[  280960ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/contacts:0
+[  281411ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/contracts:0
+[  281411ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/contracts:0
+[  282084ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/contracts/payments:0
+[  282084ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/contracts/payments:0
+[  282817ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/contracts/invoices:0
+[  282817ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/contracts/invoices:0
+[  283307ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/bookings:0
+[  283307ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/bookings:0
+[  283847ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/team:0
+[  283847ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/team:0
+[  285587ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/analytics:0
+[  285587ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/analytics:0
+[  285688ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  285688ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  285688ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  285688ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  286259ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/analytics/attribution:0
+[  286259ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/analytics/attribution:0
+[  287363ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/analytics/projections:0
+[  287363ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/analytics/projections:0
+[  287465ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  287466ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  288411ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/analytics/setter-reports:0
+[  288411ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/analytics/setter-reports:0
+[  288519ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SelectProvider required={undefined} scope={undefined} trigger={null} ...>
+      <SelectCollectionProvider scope={undefined}>
+        <SelectCollectionProviderProvider scope={undefined} itemMap={Map} collectionRef={{current:null}}>
+          <SelectProvider scope={undefined} onNativeOptionAdd={function Select.useCallback} ...>
+            <SelectTrigger className="w-[220px]">
+              <SelectTrigger data-slot="select-tri..." data-size="default" className={"border-i..."}>
+                <PopperAnchor asChild={true} __scopePopper={{Popper:[...]}}>
+                  <Primitive.div asChild={true} ref={function}>
+                    <Primitive.div.Slot ref={function}>
+                      <Primitive.div.SlotClone ref={function}>
+                        <Primitive.button type="button" role="combobox" aria-controls="radix-_R_2..." ...>
+                          <button
+                            type="button"
+                            role="combobox"
++                           aria-controls="radix-_R_2atpesnekndlb_"
+-                           aria-controls="radix-_R_aatpesnekndlb_"
+                            aria-expanded={false}
+                            aria-required={undefined}
+                            aria-autocomplete="none"
+                            dir="ltr"
+                            data-state="closed"
+                            disabled={false}
+                            data-disabled={undefined}
+                            data-placeholder={undefined}
+                            data-slot="select-trigger"
+                            data-size="default"
+                            className={"border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='tex..."}
+                            onClick={function handleEvent}
+                            onPointerDown={function handleEvent}
+                            onKeyDown={function handleEvent}
+                            ref={function}
+                          >
+            ...
+      ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  289081ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/analytics/heatmap:0
+[  289081ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/analytics/heatmap:0
+[  289998ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/analytics/value-reports:0
+[  289998ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/analytics/value-reports:0
+[  290175ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  290176ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  290176ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  290176ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  291166ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/prospecting:0
+[  291166ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/prospecting:0
+[  291859ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/prospecting/hub:0
+[  291859ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/prospecting/hub:0
+[  292498ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/prospecting/linkedin:0
+[  292498ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/prospecting/linkedin:0
+[  293097ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/prospecting/instagram:0
+[  293097ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/prospecting/instagram:0
+[  293235ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SegmentViewNode type="page" pagePath="(app)/pros...">
+      <SegmentTrieNode>
+      <InstagramPage>
+        <InstagramView prospects={[...]}>
+          <div>
+            <PageHeader>
+            <Tabs defaultValue="outils">
+              <Tabs data-slot="tabs" data-orientation="horizontal" orientation="horizontal" className="group/tabs..." ...>
+                <TabsProvider scope={undefined} baseId="radix-_R_2..." value="outils" ...>
+                  <Primitive.div dir="ltr" data-orientation="horizontal" data-slot="tabs" className="group/tabs..." ...>
+                    <div dir="ltr" data-orientation="horizontal" data-slot="tabs" className="group/tabs..." ref={null}>
+                      ...
+                        <div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" data-variant="default" ...>
+                          ...
+                            <Primitive.span.Slot tabIndex={-1} data-orientation="horizontal" ...>
+                              <Primitive.span.SlotClone tabIndex={-1} data-orientation="horizontal" ...>
+                                <Primitive.button type="button" role="tab" aria-selected={true} ...>
+                                  <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={true}
++                                   aria-controls="radix-_R_2inebn5rkndlb_-content-outils"
+-                                   aria-controls="radix-_R_aatpesnekndlb_-content-outils"
+                                    data-state="active"
+                                    data-disabled={undefined}
+                                    disabled={false}
++                                   id="radix-_R_2inebn5rkndlb_-trigger-outils"
+-                                   id="radix-_R_aatpesnekndlb_-trigger-outils"
+                                    data-slot="tabs-trigger"
+                                    className={"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ou..."}
+                                    onMouseDown={function}
+                                    onKeyDown={function}
+                                    onFocus={function}
+                                    tabIndex={-1}
+                                    data-orientation="horizontal"
+                                    data-radix-collection-item=""
+                                    ref={function}
+                                  >
+                          ...
+                            <Primitive.span.Slot tabIndex={-1} data-orientation="horizontal" ...>
+                              <Primitive.span.SlotClone tabIndex={-1} data-orientation="horizontal" ...>
+                                <Primitive.button type="button" role="tab" aria-selected={false} ...>
+                                  <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={false}
++                                   aria-controls="radix-_R_2inebn5rkndlb_-content-prospects"
+-                                   aria-controls="radix-_R_aatpesnekndlb_-content-prospects"
+                                    data-state="inactive"
+                                    data-disabled={undefined}
+                                    disabled={false}
++                                   id="radix-_R_2inebn5rkndlb_-trigger-prospects"
+-                                   id="radix-_R_aatpesnekndlb_-trigger-prospects"
+                                    data-slot="tabs-trigger"
+                                    className={"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ou..."}
+                                    onMouseDown={function}
+                                    onKeyDown={function}
+                                    onFocus={function}
+                                    tabIndex={-1}
+                                    data-orientation="horizontal"
+                                    data-radix-collection-item=""
+                                    ref={function}
+                                  >
+                      <TabsContent value="outils">
+                        <TabsContent data-slot="tabs-content" className="flex-1 out..." value="outils">
+                          <Presence present={true}>
+                            <Primitive.div data-state="active" data-orientation="horizontal" role="tabpanel" ...>
+                              <div
+                                data-state="active"
+                                data-orientation="horizontal"
+                                role="tabpanel"
++                               aria-labelledby="radix-_R_2inebn5rkndlb_-trigger-outils"
+-                               aria-labelledby="radix-_R_aatpesnekndlb_-trigger-outils"
+                                hidden={false}
++                               id="radix-_R_2inebn5rkndlb_-content-outils"
+-                               id="radix-_R_aatpesnekndlb_-content-outils"
+                                tabIndex={0}
+                                data-slot="tabs-content"
+                                className="flex-1 outline-none"
+                                style={{animationDuration:"0s"}}
+                                ref={function}
+                              >
+                      <TabsContent value="prospects">
+                        <TabsContent data-slot="tabs-content" className="flex-1 out..." value="prospects">
+                          <Presence present={false}>
+                            <Primitive.div data-state="inactive" data-orientation="horizontal" role="tabpanel" ...>
+                              <div
+                                data-state="inactive"
+                                data-orientation="horizontal"
+                                role="tabpanel"
++                               aria-labelledby="radix-_R_2inebn5rkndlb_-trigger-prospects"
+-                               aria-labelledby="radix-_R_aatpesnekndlb_-trigger-prospects"
+                                hidden={true}
++                               id="radix-_R_2inebn5rkndlb_-content-prospects"
+-                               id="radix-_R_aatpesnekndlb_-content-prospects"
+                                tabIndex={0}
+                                data-slot="tabs-content"
+                                className="flex-1 outline-none"
+                                style={{animationDuration:undefined}}
+                                ref={function}
+                              >
+    ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  294015ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/prospecting/scoring:0
+[  294015ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/prospecting/scoring:0
+[  294717ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/prospecting/follow-ups:0
+[  294717ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/prospecting/follow-ups:0
+[  295590ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/inbox:0
+[  295590ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/inbox:0
+[  296179ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat:0
+[  296179ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat:0
+[  296225ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat:0
+[  296225ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat:0
+[  296256ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/_next/static/chunks/node_modules_sonner_dist_index_mjs_a05b23c0._.js:898
+[  296256ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/_next/static/chunks/node_modules_sonner_dist_index_mjs_a05b23c0._.js:898
+[  296270ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat:0
+[  296270ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat:0
+[  296511ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat:0
+[  296511ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat:0
+[  296800ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat/broadcast:0
+[  296800ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat/broadcast:0
+[  297391ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat/video:0
+[  297391ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat/video:0
+[  297477ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SegmentViewNode type="page" pagePath="(app)/chat...">
+      <SegmentTrieNode>
+      <VideoPage>
+        <VideoListView rooms={[...]}>
+          <div>
+            ...
+              <Dialog open={false} onOpenChange={function bound dispatchSetState}>
+                <Dialog data-slot="dialog" open={false} onOpenChange={function bound dispatchSetState}>
+                  <DialogProvider scope={undefined} triggerRef={{current:null}} contentRef={{current:null}} ...>
+                    <DialogTrigger asChild={true}>
+                      <DialogTrigger data-slot="dialog-tri..." asChild={true}>
+                        <Primitive.button type="button" aria-haspopup="dialog" aria-expanded={false} ...>
+                          <Primitive.button.Slot type="button" aria-haspopup="dialog" aria-expanded={false} ...>
+                            <Primitive.button.SlotClone type="button" aria-haspopup="dialog" aria-expanded={false} ...>
+                              <Button className="bg-brand t..." type="button" aria-haspopup="dialog" ...>
+                                <button
+                                  data-slot="dialog-trigger"
+                                  data-variant="default"
+                                  data-size="default"
+                                  className={"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded..."}
+                                  type="button"
+                                  aria-haspopup="dialog"
+                                  aria-expanded={false}
++                                 aria-controls="radix-_R_9inebn5rkndlb_"
+-                                 aria-controls="radix-_R_16atpesnekndlb_"
+                                  data-state="closed"
+                                  onClick={function handleEvent}
+                                  ref={function}
+                                >
+                    ...
+            <Tabs defaultValue="scheduled" className="space-y-4">
+              <Tabs data-slot="tabs" data-orientation="horizontal" orientation="horizontal" className="group/tabs..." ...>
+                <TabsProvider scope={undefined} baseId="radix-_R_2..." value="scheduled" ...>
+                  <Primitive.div dir="ltr" data-orientation="horizontal" data-slot="tabs" className="group/tabs..." ...>
+                    <div dir="ltr" data-orientation="horizontal" data-slot="tabs" className="group/tabs..." ref={null}>
+                      ...
+                        <div role="tablist" aria-orientation="horizontal" data-slot="tabs-list" data-variant="default" ...>
+                          ...
+                            <Primitive.span.Slot tabIndex={-1} data-orientation="horizontal" ...>
+                              <Primitive.span.SlotClone tabIndex={-1} data-orientation="horizontal" ...>
+                                <Primitive.button type="button" role="tab" aria-selected={false} ...>
+                                  <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={false}
++                                   aria-controls="radix-_R_2inebn5rkndlb_-content-live"
+-                                   aria-controls="radix-_R_aatpesnekndlb_-content-live"
+                                    data-state="inactive"
+                                    data-disabled={undefined}
+                                    disabled={false}
++                                   id="radix-_R_2inebn5rkndlb_-trigger-live"
+-                                   id="radix-_R_aatpesnekndlb_-trigger-live"
+                                    data-slot="tabs-trigger"
+                                    className={"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ou..."}
+                                    onMouseDown={function}
+                                    onKeyDown={function}
+                                    onFocus={function}
+                                    tabIndex={-1}
+                                    data-orientation="horizontal"
+                                    data-radix-collection-item=""
+                                    ref={function}
+                                  >
+                          ...
+                            <Primitive.span.Slot tabIndex={-1} data-orientation="horizontal" ...>
+                              <Primitive.span.SlotClone tabIndex={-1} data-orientation="horizontal" ...>
+                                <Primitive.button type="button" role="tab" aria-selected={true} ...>
+                                  <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={true}
++                                   aria-controls="radix-_R_2inebn5rkndlb_-content-scheduled"
+-                                   aria-controls="radix-_R_aatpesnekndlb_-content-scheduled"
+                                    data-state="active"
+                                    data-disabled={undefined}
+                                    disabled={false}
++                                   id="radix-_R_2inebn5rkndlb_-trigger-scheduled"
+-                                   id="radix-_R_aatpesnekndlb_-trigger-scheduled"
+                                    data-slot="tabs-trigger"
+                                    className={"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ou..."}
+                                    onMouseDown={function}
+                                    onKeyDown={function}
+                                    onFocus={function}
+                                    tabIndex={-1}
+                                    data-orientation="horizontal"
+                                    data-radix-collection-item=""
+                                    ref={function}
+                                  >
+                          ...
+                            <Primitive.span.Slot tabIndex={-1} data-orientation="horizontal" ...>
+                              <Primitive.span.SlotClone tabIndex={-1} data-orientation="horizontal" ...>
+                                <Primitive.button type="button" role="tab" aria-selected={false} ...>
+                                  <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={false}
++                                   aria-controls="radix-_R_2inebn5rkndlb_-content-ended"
+-                                   aria-controls="radix-_R_aatpesnekndlb_-content-ended"
+                                    data-state="inactive"
+                                    data-disabled={undefined}
+                                    disabled={false}
++                                   id="radix-_R_2inebn5rkndlb_-trigger-ended"
+-                                   id="radix-_R_aatpesnekndlb_-trigger-ended"
+                                    data-slot="tabs-trigger"
+                                    className={"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ou..."}
+                                    onMouseDown={function}
+                                    onKeyDown={function}
+                                    onFocus={function}
+                                    tabIndex={-1}
+                                    data-orientation="horizontal"
+                                    data-radix-collection-item=""
+                                    ref={function}
+                                  >
+                      <TabsContent value="live">
+                        <TabsContent data-slot="tabs-content" className="flex-1 out..." value="live">
+                          <Presence present={false}>
+                            <Primitive.div data-state="inactive" data-orientation="horizontal" role="tabpanel" ...>
+                              <div
+                                data-state="inactive"
+                                data-orientation="horizontal"
+                                role="tabpanel"
++                               aria-labelledby="radix-_R_2inebn5rkndlb_-trigger-live"
+-                               aria-labelledby="radix-_R_aatpesnekndlb_-trigger-live"
+                                hidden={true}
++                               id="radix-_R_2inebn5rkndlb_-content-live"
+-                               id="radix-_R_aatpesnekndlb_-content-live"
+                                tabIndex={0}
+                                data-slot="tabs-content"
+                                className="flex-1 outline-none"
+                                style={{animationDuration:undefined}}
+                                ref={function}
+                              >
+                      <TabsContent value="scheduled">
+                        <TabsContent data-slot="tabs-content" className="flex-1 out..." value="scheduled">
+                          <Presence present={true}>
+                            <Primitive.div data-state="active" data-orientation="horizontal" role="tabpanel" ...>
+                              <div
+                                data-state="active"
+                                data-orientation="horizontal"
+                                role="tabpanel"
++                               aria-labelledby="radix-_R_2inebn5rkndlb_-trigger-scheduled"
+-                               aria-labelledby="radix-_R_aatpesnekndlb_-trigger-scheduled"
+                                hidden={false}
++                               id="radix-_R_2inebn5rkndlb_-content-scheduled"
+-                               id="radix-_R_aatpesnekndlb_-content-scheduled"
+                                tabIndex={0}
+                                data-slot="tabs-content"
+                                className="flex-1 outline-none"
+                                style={{animationDuration:"0s"}}
+                                ref={function}
+                              >
+                      <TabsContent value="ended">
+                        <TabsContent data-slot="tabs-content" className="flex-1 out..." value="ended">
+                          <Presence present={false}>
+                            <Primitive.div data-state="inactive" data-orientation="horizontal" role="tabpanel" ...>
+                              <div
+                                data-state="inactive"
+                                data-orientation="horizontal"
+                                role="tabpanel"
++                               aria-labelledby="radix-_R_2inebn5rkndlb_-trigger-ended"
+-                               aria-labelledby="radix-_R_aatpesnekndlb_-trigger-ended"
+                                hidden={true}
++                               id="radix-_R_2inebn5rkndlb_-content-ended"
+-                               id="radix-_R_aatpesnekndlb_-content-ended"
+                                tabIndex={0}
+                                data-slot="tabs-content"
+                                className="flex-1 outline-none"
+                                style={{animationDuration:undefined}}
+                                ref={function}
+                              >
+    ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  298201ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/community:0
+[  298201ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/community:0
+[  299161ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/community/forum:0
+[  299161ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/community/forum:0
+[  299885ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/roleplay:0
+[  299885ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/roleplay:0
+[  300467ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/roleplay/profiles:0
+[  300467ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/roleplay/profiles:0
+[  301273ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/scripts:0
+[  301273ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/scripts:0
+[  302602ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/whatsapp:0
+[  302602ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/whatsapp:0
+[  303649ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/whatsapp/sequences:0
+[  303649ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/whatsapp/sequences:0
+[  304289ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/whatsapp/settings:0
+[  304289ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/whatsapp/settings:0
+[  305478ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/automation:0
+[  305478ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/automation:0
+[  306166ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/automation/nurturing:0
+[  306166ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/automation/nurturing:0
+[  306754ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/automation/upsell:0
+[  306754ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/automation/upsell:0
+[  307477ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/automation/placement:0
+[  307477ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/automation/placement:0
+[  308377ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/marketplace:0
+[  308377ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/marketplace:0
+[  309329ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/challenges:0
+[  309330ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/challenges:0
+[  309950ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/challenges/team:0
+[  309950ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/challenges/team:0
+[  310486ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/academy:0
+[  310486ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/academy:0
+[  311076ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/academy/library:0
+[  311076ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/academy/library:0
+[  311836ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/academy/revision:0
+[  311836ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/academy/revision:0
+[  312402ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/content:0
+[  312402ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/content:0
+[  313081ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/customers:0
+[  313081ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/customers:0
+[  313689ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/kpis:0
+[  313689ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/kpis:0
+[  314426ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings:0
+[  314426ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings:0
+[  315128ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings/ai-modes:0
+[  315128ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings/ai-modes:0
+[  316883ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings/white-label:0
+[  316883ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings/white-label:0
+[  318337ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings/white-label/permissions:0
+[  318337ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings/white-label/permissions:0
+[  319145ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings/branding:0
+[  319145ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings/branding:0
+[  319794ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings/subscription:0
+[  319794ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings/subscription:0
+[  320676ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/settings/onboarding:0
+[  320676ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/settings/onboarding:0
+[  322235ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  322235ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[  323891ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  323891ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0
+[  325764ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/referral:0
+[  325764ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/referral:0
+[  326689ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/notifications:0
+[  326689ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/notifications:0
+[  327125ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/profile:0
+[  327125ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/profile:0
+[  328430ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/dashboard:0
+[  328430ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/dashboard:0

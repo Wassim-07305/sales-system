@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Flame, Target, Clock, Medal, Star, Zap, CheckCircle2 } from "lucide-react";
+import { Trophy, Flame, Target, Clock, Medal, Star, Zap, CheckCircle2, BarChart3, Gift } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { LevelUpModal } from "./level-up-modal";
+import { BadgesDisplay } from "./badges-display";
+import { StreakDisplay } from "./streak-display";
+import type { BadgeDefinition } from "@/lib/badge-definitions";
 
 interface GamProfile {
   user_id: string;
@@ -44,6 +49,7 @@ interface Props {
   progressMap: Record<string, { current_value: number; completed: boolean }>;
   leaderboard: LeaderboardEntry[];
   currentUserId: string;
+  allBadges: BadgeDefinition[];
 }
 
 const LEVELS = [
@@ -54,7 +60,7 @@ const LEVELS = [
   { level: 5, name: "Setter Légende", minPoints: 1000, maxPoints: 99999 },
 ];
 
-export function ChallengesView({ gamProfile, challenges, progressMap, leaderboard, currentUserId }: Props) {
+export function ChallengesView({ gamProfile, challenges, progressMap, leaderboard, currentUserId, allBadges }: Props) {
   const [showLevelUp] = useState(false);
 
   const currentLevel = LEVELS.find((l) => l.level === (gamProfile?.level || 1)) || LEVELS[0];
@@ -71,7 +77,20 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
       <PageHeader
         title="Défis & Gamification"
         description="Relevez des challenges et grimpez dans le classement"
-      />
+      >
+        <Link href="/challenges/rewards">
+          <Button variant="outline" size="sm">
+            <Gift className="h-4 w-4 mr-2" />
+            R\u00e9compenses
+          </Button>
+        </Link>
+        <Link href="/challenges/analytics">
+          <Button variant="outline" size="sm">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </Button>
+        </Link>
+      </PageHeader>
 
       {/* Profile banner */}
       <Card className="mb-6 bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
@@ -118,6 +137,23 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
         </CardContent>
       </Card>
 
+      {/* Streak + Badges section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-1">
+          <StreakDisplay
+            currentStreak={gamProfile?.current_streak || 0}
+            userId={currentUserId}
+          />
+        </div>
+        <div className="lg:col-span-2">
+          <BadgesDisplay
+            allBadges={allBadges}
+            earnedBadges={gamProfile?.badges || []}
+            userId={currentUserId}
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Challenges */}
         <div className="lg:col-span-2 space-y-4">
@@ -128,7 +164,7 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
           {activeChallenges.map((challenge) => {
             const prog = progressMap[challenge.id];
             const current = prog?.current_value || 0;
-            const percent = Math.round((current / challenge.target_value) * 100);
+            const percent = challenge.target_value > 0 ? Math.round((current / challenge.target_value) * 100) : 0;
             return (
               <Card key={challenge.id}>
                 <CardContent className="p-5">

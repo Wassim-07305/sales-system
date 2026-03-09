@@ -11,13 +11,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2 } from "lucide-react";
+import { Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar } from "lucide-react";
 import { createCommunityPost, toggleLike, getComments, addComment } from "@/lib/actions/community";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
+import { ReputationBadge } from "@/components/community/reputation-badge";
+import { LeaderboardCard, type LeaderboardEntry } from "@/components/community/leaderboard-card";
 
 interface Post {
   id: string;
@@ -46,7 +48,7 @@ const typeColors: Record<string, string> = {
 
 const typeLabels: Record<string, string> = { win: "Win", question: "Question", discussion: "Discussion" };
 
-export function CommunityView({ posts, userId, isAdmin }: { posts: Post[]; userId: string; isAdmin: boolean }) {
+export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputations = {} }: { posts: Post[]; userId: string; isAdmin: boolean; leaderboard?: LeaderboardEntry[]; reputations?: Record<string, number> }) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -112,7 +114,12 @@ export function CommunityView({ posts, userId, isAdmin }: { posts: Post[]; userI
               {post.author?.full_name?.charAt(0) || "?"}
             </div>
             <div>
-              <p className="text-sm font-medium">{post.author?.full_name || "Anonyme"}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium">{post.author?.full_name || "Anonyme"}</p>
+                {post.author?.id && reputations[post.author.id] !== undefined && (
+                  <ReputationBadge score={reputations[post.author.id]} />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
               </p>
@@ -176,6 +183,9 @@ export function CommunityView({ posts, userId, isAdmin }: { posts: Post[]; userI
     <div>
       <PageHeader title="Communauté" description="Échangez avec les autres membres">
         <div className="flex gap-2">
+          <Link href="/community/events">
+            <Button variant="outline" size="sm"><Calendar className="h-4 w-4 mr-2" />Événements</Button>
+          </Link>
           <Link href="/community/members">
             <Button variant="outline" size="sm"><Users className="h-4 w-4 mr-2" />Membres</Button>
           </Link>
@@ -191,48 +201,58 @@ export function CommunityView({ posts, userId, isAdmin }: { posts: Post[]; userI
         </div>
       </PageHeader>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="all">Tout</TabsTrigger>
-          <TabsTrigger value="win"><Trophy className="h-4 w-4 mr-1" />Wins</TabsTrigger>
-          <TabsTrigger value="question">Questions</TabsTrigger>
-          <TabsTrigger value="discussion">Discussions</TabsTrigger>
-        </TabsList>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 min-w-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="all">Tout</TabsTrigger>
+              <TabsTrigger value="win"><Trophy className="h-4 w-4 mr-1" />Wins</TabsTrigger>
+              <TabsTrigger value="question">Questions</TabsTrigger>
+              <TabsTrigger value="discussion">Discussions</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="all">
-          <div className="space-y-4">
-            {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+            <TabsContent value="all">
+              <div className="space-y-4">
+                {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="win">
+              <div className="grid md:grid-cols-2 gap-4">
+                {filtered.map((post) => <PostCard key={post.id} post={post} isWinGrid />)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="question">
+              <div className="space-y-4">
+                {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="discussion">
+              <div className="space-y-4">
+                {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {filtered.length === 0 && (
+            <Card className="mt-4">
+              <CardContent className="p-12 text-center text-muted-foreground">
+                <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="font-medium">Aucun post</p>
+                <p className="text-sm">Soyez le premier à publier !</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {leaderboard.length > 0 && (
+          <div className="lg:w-72 shrink-0">
+            <LeaderboardCard entries={leaderboard} />
           </div>
-        </TabsContent>
-
-        <TabsContent value="win">
-          <div className="grid md:grid-cols-2 gap-4">
-            {filtered.map((post) => <PostCard key={post.id} post={post} isWinGrid />)}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="question">
-          <div className="space-y-4">
-            {filtered.map((post) => <PostCard key={post.id} post={post} />)}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="discussion">
-          <div className="space-y-4">
-            {filtered.map((post) => <PostCard key={post.id} post={post} />)}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {filtered.length === 0 && (
-        <Card className="mt-4">
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">Aucun post</p>
-            <p className="text-sm">Soyez le premier à publier !</p>
-          </CardContent>
-        </Card>
-      )}
+        )}
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>

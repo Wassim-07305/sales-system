@@ -12,6 +12,7 @@ import {
   Heart,
   FileBarChart,
   ArrowRight,
+  History,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -86,12 +87,20 @@ export function PortalView({ data }: { data: PortalData | null }) {
         title="Portail Entrepreneur"
         description="Vue d'ensemble de votre activité"
       >
-        <Link href="/portal/reports">
-          <Button variant="outline">
-            <FileBarChart className="h-4 w-4 mr-2" />
-            Rapports
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/portal/timeline">
+            <Button variant="outline">
+              <History className="h-4 w-4 mr-2" />
+              Mon parcours
+            </Button>
+          </Link>
+          <Link href="/portal/reports">
+            <Button variant="outline">
+              <FileBarChart className="h-4 w-4 mr-2" />
+              Rapports
+            </Button>
+          </Link>
+        </div>
       </PageHeader>
 
       {/* Stats Cards */}

@@ -110,6 +110,18 @@ export function AnalyticsView({
               Sources
             </Button>
           </Link>
+          <Link href="/analytics/projections">
+            <Button variant="outline" size="sm">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Projections
+            </Button>
+          </Link>
+          <Link href="/analytics/benchmarking">
+            <Button variant="outline" size="sm">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Benchmarking
+            </Button>
+          </Link>
         </div>
       </PageHeader>
 

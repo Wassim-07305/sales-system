@@ -18,12 +18,13 @@ import {
   ThumbsUp,
   Heart,
   Star,
-  ShieldCheck,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { saveDailyJournal } from "@/lib/actions/dashboard";
 import { toast } from "sonner";
+import { ReadinessGauge } from "@/components/readiness-gauge";
+import type { ReadinessBreakdown } from "@/lib/actions/readiness";
 
 interface ClientDashboardData {
   courseProgress: Array<{
@@ -72,9 +73,11 @@ function getEventIcon(type: string) {
 export function ClientDashboard({
   data,
   userName,
+  readiness,
 }: {
   data: ClientDashboardData;
   userName: string;
+  readiness?: ReadinessBreakdown;
 }) {
   const [mood, setMood] = useState<number>(data.todayJournal?.mood || 0);
   const [wins, setWins] = useState(data.todayJournal?.wins || "");
@@ -151,15 +154,24 @@ export function ClientDashboard({
                 </span>
               </div>
             )}
-            {data.profile.is_ready_to_place && (
-              <div className="flex items-center gap-2 bg-brand/20 rounded-lg px-3 py-2">
-                <ShieldCheck className="h-4 w-4 text-brand" />
-                <span className="text-sm font-medium">Pret a placer</span>
+            {readiness && (
+              <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                <Star className="h-4 w-4 text-brand" />
+                <span className="text-sm">
+                  Placement : {readiness.overall}%
+                </span>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Readiness Gauge */}
+      {readiness && (
+        <div className="mb-6">
+          <ReadinessGauge readiness={readiness} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Course Progress */}

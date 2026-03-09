@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +12,14 @@ import {
   Sparkles,
   Building2,
   Zap,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { createCheckoutSession, createPortalSession } from "@/lib/actions/stripe";
+import type { PlanId } from "@/lib/stripe/client";
 
 interface Props {
   currentTier: string;
@@ -95,12 +100,37 @@ const COMPARISON_FEATURES = [
 ];
 
 export function SubscriptionView({ currentTier }: Props) {
+  const [isPending, startTransition] = useTransition();
+
   function handleUpgrade(planId: string) {
     if (planId === "enterprise") {
-      toast.info("Bientôt disponible — Notre équipe vous contactera prochainement.");
-    } else {
-      toast.info("Bientôt disponible — La souscription sera disponible prochainement.");
+      toast.info("Contactez-nous pour un devis personnalise.");
+      return;
     }
+
+    startTransition(async () => {
+      try {
+        const { url } = await createCheckoutSession(planId as PlanId);
+        if (url) {
+          window.location.href = url;
+        }
+      } catch {
+        toast.error("Erreur lors de la creation de la session de paiement.");
+      }
+    });
+  }
+
+  function handleManageBilling() {
+    startTransition(async () => {
+      try {
+        const { url } = await createPortalSession();
+        if (url) {
+          window.location.href = url;
+        }
+      } catch {
+        toast.error("Aucun abonnement actif a gerer.");
+      }
+    });
   }
 
   return (
@@ -134,7 +164,25 @@ export function SubscriptionView({ currentTier }: Props) {
                     : "Enterprise"}
               </h2>
             </div>
-            <Badge className="ml-auto bg-brand text-brand-dark">Actif</Badge>
+            <div className="ml-auto flex items-center gap-3">
+              <Badge className="bg-brand text-brand-dark">Actif</Badge>
+              {currentTier !== "free" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleManageBilling}
+                  disabled={isPending}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                  )}
+                  Gerer la facturation
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -192,7 +240,7 @@ export function SubscriptionView({ currentTier }: Props) {
                 </ul>
                 <Button
                   onClick={() => handleUpgrade(plan.id)}
-                  disabled={isCurrent || plan.ctaDisabled}
+                  disabled={isCurrent || plan.ctaDisabled || isPending}
                   className={cn(
                     "w-full",
                     isCurrent
@@ -203,6 +251,9 @@ export function SubscriptionView({ currentTier }: Props) {
                   )}
                   variant={isCurrent || plan.popular ? "default" : "outline"}
                 >
+                  {isPending && !isCurrent ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : null}
                   {isCurrent ? "Plan actuel" : plan.cta}
                 </Button>
               </CardContent>

@@ -22,7 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Profile, UserRole } from "@/lib/types/database";
-import { Search, Plus, Mail, Phone } from "lucide-react";
+import { Search, Plus, Mail, Phone, Download } from "lucide-react";
+import { ImportExportDialog } from "./import-export-dialog";
+import { ExportDialog } from "@/components/export-dialog";
 
 interface ContactsListProps {
   initialContacts: Profile[];
@@ -40,6 +42,7 @@ const roleBadgeColors: Record<UserRole, string> = {
 export function ContactsList({ initialContacts }: ContactsListProps) {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const filtered = initialContacts.filter((c) => {
     const matchesSearch =
@@ -76,6 +79,12 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
             <SelectItem value="closer">Closer</SelectItem>
           </SelectContent>
         </Select>
+        <ImportExportDialog />
+        <Button variant="outline" size="sm" onClick={() => setExportOpen(true)}>
+          <Download className="h-4 w-4 mr-2" />
+          Export avancé
+        </Button>
+        <ExportDialog type="contacts" open={exportOpen} onOpenChange={setExportOpen} />
       </div>
 
       {/* Table */}

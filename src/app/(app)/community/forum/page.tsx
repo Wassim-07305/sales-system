@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getUserReputationBatch } from "@/lib/actions/community";
 import { ForumView } from "./forum-view";
 
 export default async function ForumPage() {
@@ -29,11 +30,18 @@ export default async function ForumPage() {
     .select("id, title")
     .order("order_index");
 
+  // Batch fetch reputations for post authors
+  const authorIds = [...new Set(
+    normalizedPosts.map((p: any) => (p.author as any)?.id).filter(Boolean)
+  )] as string[];
+  const reputations = await getUserReputationBatch(authorIds);
+
   return (
     <ForumView
       posts={normalizedPosts as any}
       modules={(modules || []) as any}
       userId={user.id}
+      reputations={reputations}
     />
   );
 }

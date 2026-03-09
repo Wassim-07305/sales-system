@@ -253,6 +253,13 @@ export interface Message {
   sender?: Profile;
 }
 
+export interface ChannelRead {
+  id: string;
+  channel_id: string;
+  user_id: string;
+  last_read_at: string;
+}
+
 export interface Notification {
   id: string;
   user_id: string;
@@ -959,6 +966,7 @@ export interface Database {
       marketplace_applications: { Row: MarketplaceApplication; Insert: Partial<MarketplaceApplication> & { listing_id: string; setter_id: string }; Update: Partial<MarketplaceApplication> };
       setter_maturity_scores: { Row: SetterMaturityScore; Insert: Partial<SetterMaturityScore> & { setter_id: string }; Update: Partial<SetterMaturityScore> };
       push_subscriptions: { Row: PushSubscription; Insert: Partial<PushSubscription> & { user_id: string; endpoint: string }; Update: Partial<PushSubscription> };
+      channel_reads: { Row: ChannelRead; Insert: Partial<ChannelRead> & { channel_id: string; user_id: string }; Update: Partial<ChannelRead> };
     };
   };
 }

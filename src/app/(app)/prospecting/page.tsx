@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getProspects, getDailyQuota, getProspectLists } from "@/lib/actions/prospecting";
+import { getProspects, getDailyQuota, getProspectLists, getProspectSegmentStats } from "@/lib/actions/prospecting";
 import { ProspectingView } from "./prospecting-view";
 
 export default async function ProspectingPage() {
@@ -11,7 +11,28 @@ export default async function ProspectingPage() {
   const prospects = await getProspects();
   const quota = await getDailyQuota();
   const lists = await getProspectLists();
+  const segmentStats = await getProspectSegmentStats();
+
+  // Fetch scores for all prospects
+  const prospectIds = prospects.map((p: Record<string, unknown>) => p.id as string);
+  const { data: scores } = await supabase
+    .from("prospect_scores")
+    .select("prospect_id, total_score, temperature")
+    .in("prospect_id", prospectIds.length > 0 ? prospectIds : ["__none__"]);
+
+  const scoresMap: Record<string, { total_score: number; temperature: string }> = {};
+  for (const s of scores || []) {
+    scoresMap[s.prospect_id as string] = {
+      total_score: (s.total_score as number) ?? 0,
+      temperature: (s.temperature as string) ?? "cold",
+    };
+  }
+
+  const prospectsWithScores = prospects.map((p: Record<string, unknown>) => ({
+    ...p,
+    computed_score: scoresMap[p.id as string] ?? null,
+  }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <ProspectingView prospects={prospects as any} quota={quota} lists={lists} />;
+  return <ProspectingView prospects={prospectsWithScores as any} quota={quota} lists={lists} segmentStats={segmentStats} />;
 }

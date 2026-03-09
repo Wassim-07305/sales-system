@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { sendBookingConfirmation } from "@/lib/actions/email";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, Calendar, Clock, ArrowRight } from "lucide-react";
 
@@ -77,6 +78,22 @@ export function BookingForm({ slug }: BookingFormProps) {
       toast.error("Erreur lors de la réservation");
       setLoading(false);
       return;
+    }
+
+    // Send confirmation email (fire-and-forget)
+    if (email) {
+      sendBookingConfirmation({
+        email,
+        name,
+        date: scheduledAt.toLocaleDateString("fr-FR", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        type: "Appel decouverte",
+      }).catch(() => {});
     }
 
     setStep("confirmed");

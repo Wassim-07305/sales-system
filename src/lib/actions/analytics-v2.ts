@@ -94,27 +94,31 @@ export async function getMultiTouchAttribution(): Promise<DealAttribution[]> {
   return result.sort((a, b) => b.dealValue - a.dealValue);
 }
 
-// ---------- Revenue Projections ----------
+// ---------- Revenue Projections (F20) ----------
 
-export interface MonthlyProjection {
+export interface RevenueProjectionMonth {
   month: string;
-  projected: number;
-  cumulative: number;
+  actual: number | null;
+  projected: number | null;
+  trend: number | null;
 }
 
-export interface ProjectionResult {
-  monthly: MonthlyProjection[];
-  totalProjected: number;
-  avgMonthly: number;
-  growthRate: number;
-  deals: { title: string; value: number; probability: number; projected: number }[];
+export interface RevenueProjectionResult {
+  chartData: RevenueProjectionMonth[];
+  projectedNextMonth: number;
+  projectedNextQuarter: number;
+  pipelineWeightedValue: number;
+  trendSlope: number;
+  trendIntercept: number;
+  historicalMonths: { month: string; value: number }[];
+  projectedMonths: { month: string; value: number }[];
+  pipelineDeals: { title: string; value: number; probability: number; weighted: number }[];
 }
 
-export async function getRevenueProjections(
-  scenario: "conservative" | "moderate" | "optimistic" = "moderate"
-): Promise<ProjectionResult> {
+export async function getRevenueProjections(): Promise<RevenueProjectionResult> {
   const supabase = await createClient();
 
+  // Get pipeline stages to identify signed deals
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, name, position")
@@ -123,67 +127,124 @@ export async function getRevenueProjections(
   const signedStage = stages?.find((s) => s.name === "Client Signé");
   const totalStages = (stages || []).length;
 
+  // Fetch all deals
   const { data: allDeals } = await supabase
     .from("deals")
     .select("id, title, value, stage_id, created_at");
 
-  const deals = (allDeals || []).filter((d) => d.stage_id !== signedStage?.id);
+  const deals = allDeals || [];
 
-  // Multipliers per scenario
-  const multiplier = { conservative: 0.7, moderate: 1.0, optimistic: 1.3 }[scenario];
+  // ---- Historical: last 6 months of closed (signed) deals ----
+  const now = new Date();
+  const historicalMonths: { month: string; label: string; value: number }[] = [];
 
-  // Calculate probability per deal based on stage position
+  for (let i = 5; i >= 0; i--) {
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+    const monthDeals = deals.filter(
+      (d) =>
+        d.stage_id === signedStage?.id &&
+        d.created_at >= start.toISOString() &&
+        d.created_at <= end.toISOString()
+    );
+    const value = monthDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+    historicalMonths.push({
+      month: start.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }),
+      label: start.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
+      value,
+    });
+  }
+
+  // ---- Simple linear regression on historical data ----
+  // x = 0..5 (month index), y = revenue
+  const n = historicalMonths.length;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += historicalMonths[i].value;
+    sumXY += i * historicalMonths[i].value;
+    sumX2 += i * i;
+  }
+
+  const denom = n * sumX2 - sumX * sumX;
+  const slope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+  const intercept = denom !== 0 ? (sumY - slope * sumX) / n : sumY / n;
+
+  // ---- Project next 3 months ----
+  const projectedMonths: { month: string; label: string; value: number }[] = [];
+  for (let i = 1; i <= 3; i++) {
+    const futureDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const projectedValue = Math.max(0, Math.round(intercept + slope * (n - 1 + i)));
+    projectedMonths.push({
+      month: futureDate.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }),
+      label: futureDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
+      value: projectedValue,
+    });
+  }
+
+  // ---- Pipeline-weighted projection: open deals * probability ----
   const stagePositionMap = new Map<string, number>();
   (stages || []).forEach((s) => {
     stagePositionMap.set(s.id, s.position);
   });
 
-  const dealProjections = deals.map((deal) => {
+  const openDeals = deals.filter((d) => d.stage_id !== signedStage?.id);
+  const pipelineDeals = openDeals.map((deal) => {
     const position = stagePositionMap.get(deal.stage_id) || 0;
-    const baseProbability = totalStages > 1 ? (position / (totalStages - 1)) * 100 : 50;
-    const probability = Math.min(baseProbability * multiplier, 100);
-    const projected = (deal.value || 0) * (probability / 100);
-
+    const probability =
+      totalStages > 1 ? Math.round((position / (totalStages - 1)) * 100) : 50;
+    const weighted = Math.round((deal.value || 0) * (probability / 100));
     return {
       title: deal.title || "Sans titre",
       value: deal.value || 0,
-      probability: Math.round(probability),
-      projected: Math.round(projected),
+      probability,
+      weighted,
     };
-  });
+  }).sort((a, b) => b.weighted - a.weighted);
 
-  const totalProjected = dealProjections.reduce((sum, d) => sum + d.projected, 0);
+  const pipelineWeightedValue = pipelineDeals.reduce((sum, d) => sum + d.weighted, 0);
 
-  // Spread projections across 6 months (weighted towards earlier months for pipeline deals)
-  const now = new Date();
-  const monthly: MonthlyProjection[] = [];
-  let cumulative = 0;
+  // ---- Build unified chart data ----
+  const chartData: RevenueProjectionMonth[] = [];
 
-  // Weight distribution: heavier in months 2-3 for pipeline deals
-  const weights = [0.10, 0.20, 0.25, 0.20, 0.15, 0.10];
-
-  for (let i = 0; i < 6; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i + 1, 1);
-    const monthValue = Math.round(totalProjected * weights[i]);
-    cumulative += monthValue;
-    monthly.push({
-      month: d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }),
-      projected: monthValue,
-      cumulative,
+  // Historical months: actual + trend line
+  for (let i = 0; i < n; i++) {
+    chartData.push({
+      month: historicalMonths[i].month,
+      actual: historicalMonths[i].value,
+      projected: null,
+      trend: Math.max(0, Math.round(intercept + slope * i)),
     });
   }
 
-  // Growth rate: compare first half to second half
-  const firstHalf = monthly.slice(0, 3).reduce((s, m) => s + m.projected, 0);
-  const secondHalf = monthly.slice(3).reduce((s, m) => s + m.projected, 0);
-  const growthRate = firstHalf > 0 ? ((secondHalf - firstHalf) / firstHalf) * 100 : 0;
+  // Last historical month also gets a projected value to connect the lines
+  if (chartData.length > 0) {
+    chartData[chartData.length - 1].projected = chartData[chartData.length - 1].actual;
+  }
+
+  // Projected months
+  for (let i = 0; i < projectedMonths.length; i++) {
+    chartData.push({
+      month: projectedMonths[i].month,
+      actual: null,
+      projected: projectedMonths[i].value,
+      trend: Math.max(0, Math.round(intercept + slope * (n + i))),
+    });
+  }
+
+  const projectedNextMonth = projectedMonths[0]?.value || 0;
+  const projectedNextQuarter = projectedMonths.reduce((sum, m) => sum + m.value, 0);
 
   return {
-    monthly,
-    totalProjected,
-    avgMonthly: Math.round(totalProjected / 6),
-    growthRate: Math.round(growthRate),
-    deals: dealProjections.sort((a, b) => b.projected - a.projected),
+    chartData,
+    projectedNextMonth,
+    projectedNextQuarter,
+    pipelineWeightedValue,
+    trendSlope: Math.round(slope),
+    trendIntercept: Math.round(intercept),
+    historicalMonths: historicalMonths.map((m) => ({ month: m.label, value: m.value })),
+    projectedMonths: projectedMonths.map((m) => ({ month: m.label, value: m.value })),
+    pipelineDeals,
   };
 }
 
@@ -487,4 +548,97 @@ export async function generateValueReport(): Promise<ValueReportResult> {
     clients: clientMetrics,
     healthDistribution,
   };
+}
+
+// ---------- Cohort Analysis ----------
+
+export interface CohortData {
+  cohort: string; // YYYY-MM
+  created: number;
+  signed: number;
+  signedValue: number;
+  conversionRate: number;
+  avgCycleDays: number;
+}
+
+export async function getCohortData(): Promise<CohortData[]> {
+  const supabase = await createClient();
+
+  const { data: stages } = await supabase
+    .from("pipeline_stages")
+    .select("id, name");
+
+  const signedStage = stages?.find((s) => s.name === "Client Signe" || s.name === "Client Signé");
+
+  // Look back 6 months
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+  const { data: allDeals } = await supabase
+    .from("deals")
+    .select("id, stage_id, value, created_at, updated_at")
+    .gte("created_at", sixMonthsAgo.toISOString())
+    .order("created_at", { ascending: true });
+
+  if (!allDeals || allDeals.length === 0) return [];
+
+  // Group deals by creation month (cohort)
+  const cohortMap = new Map<
+    string,
+    {
+      created: number;
+      signed: number;
+      signedValue: number;
+      cycleDaysSum: number;
+      signedCount: number;
+    }
+  >();
+
+  for (const deal of allDeals) {
+    const createdDate = new Date(deal.created_at);
+    const cohortKey = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, "0")}`;
+
+    if (!cohortMap.has(cohortKey)) {
+      cohortMap.set(cohortKey, {
+        created: 0,
+        signed: 0,
+        signedValue: 0,
+        cycleDaysSum: 0,
+        signedCount: 0,
+      });
+    }
+
+    const cohort = cohortMap.get(cohortKey)!;
+    cohort.created++;
+
+    if (deal.stage_id === signedStage?.id) {
+      cohort.signed++;
+      cohort.signedValue += deal.value || 0;
+
+      // Calculate cycle time in days
+      const created = new Date(deal.created_at).getTime();
+      const updated = new Date(deal.updated_at).getTime();
+      const cycleDays = Math.max(1, Math.round((updated - created) / (1000 * 60 * 60 * 24)));
+      cohort.cycleDaysSum += cycleDays;
+      cohort.signedCount++;
+    }
+  }
+
+  // Build result sorted by cohort month
+  const result: CohortData[] = [];
+  const sortedKeys = Array.from(cohortMap.keys()).sort();
+
+  for (const key of sortedKeys) {
+    const c = cohortMap.get(key)!;
+    result.push({
+      cohort: key,
+      created: c.created,
+      signed: c.signed,
+      signedValue: c.signedValue,
+      conversionRate: c.created > 0 ? Math.round((c.signed / c.created) * 100) : 0,
+      avgCycleDays: c.signedCount > 0 ? Math.round(c.cycleDaysSum / c.signedCount) : 0,
+    });
+  }
+
+  return result;
 }

@@ -29,6 +29,7 @@ import {
   Plus,
   ArrowLeft,
   BookOpen,
+  Search,
 } from "lucide-react";
 import { createCommunityPost } from "@/lib/actions/community";
 import { useRouter } from "next/navigation";
@@ -36,6 +37,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
+import { ReputationBadge } from "@/components/community/reputation-badge";
 
 interface Post {
   id: string;
@@ -65,9 +67,10 @@ interface Props {
   posts: Post[];
   modules: Module[];
   userId: string;
+  reputations?: Record<string, number>;
 }
 
-export function ForumView({ posts, modules, userId }: Props) {
+export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -123,6 +126,12 @@ export function ForumView({ posts, modules, userId }: Props) {
               Communauté
             </Button>
           </Link>
+          <Link href="/community/search">
+            <Button variant="outline" size="sm">
+              <Search className="h-4 w-4 mr-2" />
+              Rechercher
+            </Button>
+          </Link>
           <Button
             onClick={() => setDialogOpen(true)}
             className="bg-brand text-brand-dark hover:bg-brand/90"
@@ -153,12 +162,16 @@ export function ForumView({ posts, modules, userId }: Props) {
                       <p className="font-medium truncate">
                         {post.title || "Sans titre"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {post.author?.full_name || "Anonyme"} &middot;{" "}
-                        {formatDistanceToNow(new Date(post.created_at), {
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <span>{post.author?.full_name || "Anonyme"}</span>
+                        {post.author?.id && reputations[post.author.id] !== undefined && (
+                          <ReputationBadge score={reputations[post.author.id]} />
+                        )}
+                        <span>&middot;</span>
+                        <span>{formatDistanceToNow(new Date(post.created_at), {
                           addSuffix: true,
                           locale: fr,
-                        })}
+                        })}</span>
                       </p>
                     </div>
                     {post.module_id && (
@@ -224,7 +237,12 @@ export function ForumView({ posts, modules, userId }: Props) {
                           {post.content}
                         </p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{post.author?.full_name || "Anonyme"}</span>
+                          <span className="flex items-center gap-1.5">
+                            {post.author?.full_name || "Anonyme"}
+                            {post.author?.id && reputations[post.author.id] !== undefined && (
+                              <ReputationBadge score={reputations[post.author.id]} />
+                            )}
+                          </span>
                           <span>
                             {formatDistanceToNow(new Date(post.created_at), {
                               addSuffix: true,

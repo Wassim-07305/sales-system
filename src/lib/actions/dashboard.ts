@@ -330,3 +330,244 @@ export async function saveDailyJournal(data: {
     { onConflict: "user_id,date" }
   );
 }
+
+export async function getSetterHubData(userId: string) {
+  const supabase = await createClient();
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const startOfWeek = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000).toISOString();
+
+  // Today's DM quota
+  const { data: todayQuota } = await supabase
+    .from("daily_quotas")
+    .select("dms_sent, dms_target, replies_received, bookings_from_dms")
+    .eq("user_id", userId)
+    .eq("date", today)
+    .maybeSingle();
+
+  // Week DM stats
+  const { data: weekQuotas } = await supabase
+    .from("daily_quotas")
+    .select("dms_sent, replies_received, bookings_from_dms")
+    .eq("user_id", userId)
+    .gte("date", startOfWeek.split("T")[0]);
+
+  const weekDms = (weekQuotas || []).reduce((s, q) => s + q.dms_sent, 0);
+  const weekReplies = (weekQuotas || []).reduce((s, q) => s + q.replies_received, 0);
+  const weekBookingsFromDms = (weekQuotas || []).reduce((s, q) => s + q.bookings_from_dms, 0);
+
+  // Active prospects
+  const { data: prospects } = await supabase
+    .from("prospects")
+    .select("id, status")
+    .eq("assigned_setter_id", userId);
+
+  const activeProspects = (prospects || []).filter((p) => p.status === "contacted").length;
+  const hotProspects = (prospects || []).filter((p) => p.status === "hot").length;
+  const totalProspects = (prospects || []).length;
+
+  // Monthly revenue from deals
+  const { data: signedStage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .eq("name", "Client Signe")
+    .single();
+
+  const { data: monthDeals } = await supabase
+    .from("deals")
+    .select("id, value, stage_id")
+    .eq("assigned_to", userId)
+    .gte("created_at", startOfMonth);
+
+  const monthRevenue = (monthDeals || [])
+    .filter((d) => d.stage_id === signedStage?.id)
+    .reduce((s, d) => s + (d.value || 0), 0);
+
+  const monthDealsCount = (monthDeals || []).length;
+  const monthClosedCount = (monthDeals || []).filter((d) => d.stage_id === signedStage?.id).length;
+
+  // Bookings this month
+  const { data: monthBookings } = await supabase
+    .from("bookings")
+    .select("id, status")
+    .gte("scheduled_at", startOfMonth)
+    .lte("scheduled_at", now.toISOString());
+
+  const totalBookings = (monthBookings || []).length;
+  const completedBookings = (monthBookings || []).filter((b) => b.status === "completed").length;
+  const showUpRate = totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0;
+
+  // Response rate
+  const responseRate = weekDms > 0 ? Math.round((weekReplies / weekDms) * 100) : 0;
+
+  // Gamification
+  const { data: gamProfile } = await supabase
+    .from("gamification_profiles")
+    .select("total_points, level_name, current_streak")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return {
+    today: {
+      dmsSent: todayQuota?.dms_sent || 0,
+      dmsTarget: todayQuota?.dms_target || 30,
+      repliesReceived: todayQuota?.replies_received || 0,
+      bookingsFromDms: todayQuota?.bookings_from_dms || 0,
+    },
+    week: {
+      totalDms: weekDms,
+      totalReplies: weekReplies,
+      responseRate,
+      bookingsFromDms: weekBookingsFromDms,
+    },
+    prospects: {
+      total: totalProspects,
+      active: activeProspects,
+      hot: hotProspects,
+    },
+    month: {
+      revenue: monthRevenue,
+      dealsCreated: monthDealsCount,
+      dealsClosed: monthClosedCount,
+      closingRate: monthDealsCount > 0 ? Math.round((monthClosedCount / monthDealsCount) * 100) : 0,
+      showUpRate,
+    },
+    gamification: {
+      points: gamProfile?.total_points || 0,
+      levelName: gamProfile?.level_name || "Debutant",
+      streak: gamProfile?.current_streak || 0,
+    },
+  };
+}
+
+export async function getTeamKPIs() {
+  const supabase = await createClient();
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+
+  // Get the "Client Signé" stage id
+  const { data: signedStage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .eq("name", "Client Signé")
+    .single();
+
+  const signedStageId = signedStage?.id;
+
+  // --- CURRENT MONTH ---
+
+  // All bookings this month
+  const { data: monthBookings } = await supabase
+    .from("bookings")
+    .select("id, status, assigned_to")
+    .gte("scheduled_at", startOfMonth);
+
+  const totalBookings = (monthBookings || []).length;
+  const confirmedBookings = (monthBookings || []).filter(
+    (b) => b.status === "completed" || b.status === "confirmed"
+  ).length;
+  const showUpRate = totalBookings > 0 ? Math.round((confirmedBookings / totalBookings) * 100) : 0;
+
+  // All deals this month
+  const { data: monthDeals } = await supabase
+    .from("deals")
+    .select("id, value, stage_id, assigned_to, setter_id, closer_id")
+    .gte("created_at", startOfMonth);
+
+  const closedDeals = (monthDeals || []).filter((d) => d.stage_id === signedStageId);
+  const closingRate = (monthDeals || []).length > 0
+    ? Math.round((closedDeals.length / (monthDeals || []).length) * 100)
+    : 0;
+  const totalRevenue = closedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+
+  // --- LAST MONTH (for trends) ---
+
+  const { data: lastMonthBookings } = await supabase
+    .from("bookings")
+    .select("id, status")
+    .gte("scheduled_at", startOfLastMonth)
+    .lte("scheduled_at", endOfLastMonth);
+
+  const lastTotalBookings = (lastMonthBookings || []).length;
+  const lastConfirmed = (lastMonthBookings || []).filter(
+    (b) => b.status === "completed" || b.status === "confirmed"
+  ).length;
+  const lastShowUpRate = lastTotalBookings > 0
+    ? Math.round((lastConfirmed / lastTotalBookings) * 100)
+    : 0;
+
+  const { data: lastMonthDeals } = await supabase
+    .from("deals")
+    .select("id, value, stage_id")
+    .gte("created_at", startOfLastMonth)
+    .lte("created_at", endOfLastMonth);
+
+  const lastClosedDeals = (lastMonthDeals || []).filter((d) => d.stage_id === signedStageId);
+  const lastClosingRate = (lastMonthDeals || []).length > 0
+    ? Math.round((lastClosedDeals.length / (lastMonthDeals || []).length) * 100)
+    : 0;
+  const lastRevenue = lastClosedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+
+  // --- PER-MEMBER BREAKDOWN ---
+
+  const { data: teamMembers } = await supabase
+    .from("profiles")
+    .select("id, full_name, role, avatar_url")
+    .in("role", ["setter", "closer"])
+    .order("created_at");
+
+  const memberKPIs = (teamMembers || []).map((member) => {
+    // Bookings assigned to this member
+    const memberBookings = (monthBookings || []).filter(
+      (b) => b.assigned_to === member.id
+    );
+    const memberConfirmed = memberBookings.filter(
+      (b) => b.status === "completed" || b.status === "confirmed"
+    ).length;
+    const memberShowUp = memberBookings.length > 0
+      ? Math.round((memberConfirmed / memberBookings.length) * 100)
+      : 0;
+
+    // Deals where member is assigned_to, setter, or closer
+    const memberDeals = (monthDeals || []).filter(
+      (d) => d.assigned_to === member.id || d.setter_id === member.id || d.closer_id === member.id
+    );
+    const memberClosed = memberDeals.filter((d) => d.stage_id === signedStageId);
+    const memberClosingRate = memberDeals.length > 0
+      ? Math.round((memberClosed.length / memberDeals.length) * 100)
+      : 0;
+    const memberRevenue = memberClosed.reduce((sum, d) => sum + (d.value || 0), 0);
+
+    return {
+      id: member.id,
+      fullName: member.full_name,
+      role: member.role,
+      avatarUrl: member.avatar_url,
+      bookings: memberBookings.length,
+      showUpRate: memberShowUp,
+      closingRate: memberClosingRate,
+      revenue: memberRevenue,
+      dealsClosed: memberClosed.length,
+      dealsTotal: memberDeals.length,
+    };
+  });
+
+  return {
+    summary: {
+      totalBookings,
+      showUpRate,
+      closingRate,
+      totalRevenue,
+    },
+    trends: {
+      bookingsDelta: totalBookings - lastTotalBookings,
+      showUpDelta: showUpRate - lastShowUpRate,
+      closingDelta: closingRate - lastClosingRate,
+      revenueDelta: totalRevenue - lastRevenue,
+    },
+    members: memberKPIs,
+  };
+}
