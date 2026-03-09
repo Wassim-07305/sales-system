@@ -263,10 +263,10 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
         setResults(result.data);
         setTotalCount(result.totalCount);
         setHasExecuted(true);
-        toast.success(`${result.totalCount} resultat${result.totalCount > 1 ? "s" : ""} trouve${result.totalCount > 1 ? "s" : ""}`);
+        toast.success(`${result.totalCount} résultat${result.totalCount > 1 ? "s" : ""} trouvé${result.totalCount > 1 ? "s" : ""}`);
       }
     } catch {
-      toast.error("Erreur lors de l'execution de la requete");
+      toast.error("Erreur lors de l'exécution de la requête");
     } finally {
       setLoading(false);
     }
@@ -722,7 +722,7 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Filter className="size-10 text-muted-foreground mb-3" />
                 <p className="text-muted-foreground text-sm">
-                  Aucun resultat pour cette requete
+                  Aucun résultat pour cette requête
                 </p>
               </div>
             ) : (
@@ -757,8 +757,8 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
 
             {hasExecuted && totalCount > results.length && (
               <p className="text-xs text-muted-foreground mt-3 text-center">
-                Affichage de {results.length} sur {totalCount} resultats.
-                Augmentez la limite pour voir plus de donnees.
+                Affichage de {results.length} sur {totalCount} résultats.
+                Augmentez la limite pour voir plus de données.
               </p>
             )}
           </Card>

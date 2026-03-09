@@ -128,7 +128,7 @@ export function SubscriptionView({ currentTier }: Props) {
           window.location.href = url;
         }
       } catch {
-        toast.error("Aucun abonnement actif a gerer.");
+        toast.error("Aucun abonnement actif à gérer.");
       }
     });
   }

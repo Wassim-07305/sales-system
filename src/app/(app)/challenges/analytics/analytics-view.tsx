@@ -248,7 +248,7 @@ export function GamificationAnalyticsView({ data }: Props) {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                  Aucune donnee d&apos;humeur disponible
+                  Aucune donnée d&apos;humeur disponible
                 </div>
               )}
             </div>

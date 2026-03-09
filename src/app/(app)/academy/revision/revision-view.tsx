@@ -115,7 +115,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
         />
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <BookOpen className="h-12 w-12 mb-4 opacity-30" />
-          <p className="text-sm">Aucune carte de revision disponible</p>
+          <p className="text-sm">Aucune carte de révision disponible</p>
         </div>
       </div>
     );
@@ -124,8 +124,8 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
   return (
     <div>
       <PageHeader
-        title="Revisions"
-        description="Mode flashcards pour reviser vos cours"
+        title="Révisions"
+        description="Mode flashcards pour réviser vos cours"
       >
         <Select value={selectedCourse} onValueChange={handleCourseChange}>
           <SelectTrigger className="w-56">
@@ -146,7 +146,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <BookOpen className="h-12 w-12 mb-4 opacity-30" />
           <p className="text-sm">
-            Aucune carte de revision pour ce cours
+            Aucune carte de révision pour ce cours
           </p>
         </div>
       ) : sessionFinished ? (
@@ -155,7 +155,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
           <Card>
             <CardContent className="p-8 text-center">
               <Trophy className="h-16 w-16 text-brand mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Session terminee !</h2>
+              <h2 className="text-2xl font-bold mb-2">Session terminée !</h2>
               <p className="text-muted-foreground mb-6">
                 Vous avez revu {totalCards} cartes
               </p>
@@ -273,7 +273,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
               >
                 <CardContent className="p-8 min-h-[280px] flex flex-col items-center justify-center text-center">
                   <Badge className="mb-4 text-xs bg-brand/10 text-brand border-brand/20">
-                    Reponse
+                    Réponse
                   </Badge>
                   <p className="text-lg leading-relaxed">
                     {currentCard?.answer}
@@ -308,7 +308,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
 
           {isFlipped && hasScored && (
             <div className="text-center text-sm text-muted-foreground">
-              Reponse enregistree. Passez a la carte suivante.
+              Réponse enregistrée. Passez à la carte suivante.
             </div>
           )}
 
@@ -321,7 +321,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
               className="gap-2"
             >
               <ChevronLeft className="h-4 w-4" />
-              Precedente
+              Précédente
             </Button>
 
             <Button
