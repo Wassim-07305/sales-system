@@ -175,6 +175,108 @@ export async function sendNotificationDigest(userId: string) {
   });
 }
 
+/**
+ * Send booking reminder email to prospect 24h before appointment.
+ */
+export async function sendBookingReminder(params: {
+  email: string;
+  name: string;
+  date: string;
+  type: string;
+  meetingLink?: string;
+}) {
+  const linkSection = params.meetingLink
+    ? `
+      <div style="text-align:center;margin:24px 0">
+        <a href="${params.meetingLink}"
+           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+          Rejoindre le rendez-vous
+        </a>
+      </div>`
+    : "";
+
+  return sendEmail({
+    to: params.email,
+    subject: `Rappel : Votre rendez-vous demain - ${params.type}`,
+    html: emailLayout(`
+      <h1 style="color:#14080e;margin:0 0 16px">Rappel de rendez-vous</h1>
+      <p>Bonjour ${params.name},</p>
+      <p>Nous vous rappelons que vous avez un rendez-vous <strong>demain</strong> :</p>
+      <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0">
+        <p style="margin:0 0 8px"><strong>Date :</strong> ${params.date}</p>
+        <p style="margin:0"><strong>Type :</strong> ${params.type}</p>
+      </div>
+      ${linkSection}
+      <p>Merci de vous assurer d'etre disponible a l'heure convenue.</p>
+      <p style="color:#666;font-size:14px;margin-top:24px">
+        Si vous ne pouvez pas honorer ce rendez-vous, merci de nous prevenir au plus vite.
+      </p>
+    `),
+  });
+}
+
+/**
+ * Send booking reminders to all prospects with appointments in the next 24h.
+ * Can be called via cron job.
+ */
+export async function sendBookingReminders() {
+  const supabase = await createClient();
+  const now = new Date();
+  const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const in25h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+
+  // Get bookings scheduled between 24h and 25h from now (1h window)
+  const { data: bookings } = await supabase
+    .from("bookings")
+    .select("id, prospect_name, prospect_email, scheduled_at, slot_type, meeting_link, reminder_sent")
+    .gte("scheduled_at", in24h.toISOString())
+    .lt("scheduled_at", in25h.toISOString())
+    .eq("status", "confirmed")
+    .eq("reminder_sent", false);
+
+  if (!bookings || bookings.length === 0) {
+    return { sent: 0 };
+  }
+
+  let sentCount = 0;
+
+  for (const booking of bookings) {
+    if (!booking.prospect_email) continue;
+
+    try {
+      const scheduledDate = new Date(booking.scheduled_at);
+      const formattedDate = scheduledDate.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      await sendBookingReminder({
+        email: booking.prospect_email,
+        name: booking.prospect_name || "Cher prospect",
+        date: formattedDate,
+        type: booking.slot_type || "Appel decouverte",
+        meetingLink: booking.meeting_link || undefined,
+      });
+
+      // Mark reminder as sent
+      await supabase
+        .from("bookings")
+        .update({ reminder_sent: true })
+        .eq("id", booking.id);
+
+      sentCount++;
+    } catch (error) {
+      console.error(`Failed to send reminder for booking ${booking.id}:`, error);
+    }
+  }
+
+  return { sent: sentCount };
+}
+
 /** Wraps HTML content in a branded email layout. */
 function emailLayout(content: string): string {
   return `

@@ -10,6 +10,7 @@ interface UIState {
   sidebarMobileOpen: boolean;
   notificationsPanelOpen: boolean;
   searchOpen: boolean;
+  quickNoteOpen: boolean;
   theme: Theme;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -17,6 +18,7 @@ interface UIState {
   setMobileSidebarOpen: (open: boolean) => void;
   setNotificationsPanelOpen: (open: boolean) => void;
   setSearchOpen: (open: boolean) => void;
+  setQuickNoteOpen: (open: boolean) => void;
   setTheme: (theme: Theme) => void;
 }
 
@@ -27,6 +29,7 @@ export const useUIStore = create<UIState>()(
       sidebarMobileOpen: false,
       notificationsPanelOpen: false,
       searchOpen: false,
+      quickNoteOpen: false,
       theme: "light" as Theme,
       toggleSidebar: () =>
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
@@ -36,6 +39,7 @@ export const useUIStore = create<UIState>()(
       setMobileSidebarOpen: (open) => set({ sidebarMobileOpen: open }),
       setNotificationsPanelOpen: (open) => set({ notificationsPanelOpen: open }),
       setSearchOpen: (open) => set({ searchOpen: open }),
+      setQuickNoteOpen: (open) => set({ quickNoteOpen: open }),
       setTheme: (theme) => set({ theme }),
     }),
     {

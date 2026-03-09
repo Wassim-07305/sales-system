@@ -102,3 +102,74 @@ export async function getTeamMembers() {
 
   return data || [];
 }
+
+/**
+ * Add a quick note to a deal (creates a deal_activity entry).
+ */
+export async function addQuickNote(params: {
+  dealId: string;
+  content: string;
+  type?: "note" | "call" | "email" | "meeting" | "task";
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Non authentifié" };
+
+  const { error } = await supabase.from("deal_activities").insert({
+    deal_id: params.dealId,
+    user_id: user.id,
+    type: params.type || "note",
+    content: params.content.trim(),
+    created_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  // Update deal's last_contact_at
+  await supabase
+    .from("deals")
+    .update({
+      last_contact_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", params.dealId);
+
+  return { success: true };
+}
+
+/**
+ * Get recent deals for quick note selector.
+ */
+export async function getRecentDeals(limit = 10) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("deals")
+    .select("id, title, value, contact:profiles!deals_contact_id_fkey(full_name)")
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  return data || [];
+}
+
+/**
+ * Search deals by title for quick note selector.
+ */
+export async function searchDeals(query: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("deals")
+    .select("id, title, value, contact:profiles!deals_contact_id_fkey(full_name)")
+    .ilike("title", `%${query}%`)
+    .order("updated_at", { ascending: false })
+    .limit(10);
+
+  return data || [];
+}
