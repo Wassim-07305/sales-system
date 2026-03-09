@@ -58,7 +58,7 @@ interface AdminDashboardData {
 
 function getStageBadgeVariant(stage: string) {
   switch (stage) {
-    case "Client Signe":
+    case "Client Signé":
       return "default";
     case "Closing":
       return "destructive";
@@ -97,7 +97,7 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
     <div>
       <PageHeader
         title="Dashboard"
-        description="Vue d'ensemble de votre activite"
+        description="Vue d'ensemble de votre activité"
       />
 
       {/* Stats Grid */}
@@ -126,7 +126,7 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
         {/* Recent Deals */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Deals recents</CardTitle>
+            <CardTitle className="text-lg">Deals récents</CardTitle>
           </CardHeader>
           <CardContent>
             {data.recentDeals.length === 0 ? (
@@ -171,7 +171,7 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
           <CardContent>
             {data.upcomingBookings.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun RDV a venir.
+                Aucun RDV à venir.
               </p>
             ) : (
               <div className="space-y-4">
@@ -212,13 +212,13 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Trophy className="h-4 w-4 text-brand" />
-              Performance equipe
+              Performance équipe
             </CardTitle>
           </CardHeader>
           <CardContent>
             {data.setterStats.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun setter enregistre.
+                Aucun setter enregistré.
               </p>
             ) : (
               <div className="space-y-4">
@@ -261,7 +261,7 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
           <CardContent>
             {data.alerts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucune alerte. Tout est a jour !
+                Aucune alerte. Tout est à jour !
               </p>
             ) : (
               <div className="space-y-4">
@@ -273,7 +273,7 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
                     <div>
                       <p className="text-sm font-medium">{alert.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {alert.stage} — Derniere MAJ :{" "}
+                        {alert.stage} — Dernière MAJ :{" "}
                         {format(new Date(alert.updated_at), "dd MMM yyyy", {
                           locale: fr,
                         })}
