@@ -1,0 +1,295 @@
+"use client";
+
+import { useCallback, useState, useTransition, memo } from "react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
+  Panel,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  Handle,
+  Position,
+  type Node,
+  type Edge,
+  type OnConnect,
+  type NodeTypes,
+  type NodeProps,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  MessageSquare,
+  HelpCircle,
+  ShieldAlert,
+  Reply,
+  CheckCircle,
+  Presentation,
+} from "lucide-react";
+import Link from "next/link";
+import { updateFlowchart } from "@/lib/actions/scripts-v2";
+
+interface FlowchartData {
+  id: string;
+  title: string;
+  description: string | null;
+  nodes: Node[];
+  edges: Edge[];
+  category: string | null;
+  is_template: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+const nodeTypeConfig: Record<
+  string,
+  { label: string; bg: string; border: string; text: string; icon: typeof MessageSquare }
+> = {
+  opening: {
+    label: "Accroche",
+    bg: "bg-green-50",
+    border: "border-green-400",
+    text: "text-green-800",
+    icon: MessageSquare,
+  },
+  question: {
+    label: "Question",
+    bg: "bg-blue-50",
+    border: "border-blue-400",
+    text: "text-blue-800",
+    icon: HelpCircle,
+  },
+  objection: {
+    label: "Objection",
+    bg: "bg-red-50",
+    border: "border-red-400",
+    text: "text-red-800",
+    icon: ShieldAlert,
+  },
+  response: {
+    label: "Réponse",
+    bg: "bg-yellow-50",
+    border: "border-yellow-400",
+    text: "text-yellow-800",
+    icon: Reply,
+  },
+  closing: {
+    label: "Closing",
+    bg: "bg-purple-50",
+    border: "border-purple-400",
+    text: "text-purple-800",
+    icon: CheckCircle,
+  },
+};
+
+function ScriptNodeComponent({ data }: NodeProps) {
+  const nodeData = data as { label: string; type: string };
+  const config = nodeTypeConfig[nodeData.type] || nodeTypeConfig.opening;
+  const Icon = config.icon;
+
+  return (
+    <div
+      className={`px-4 py-3 rounded-lg border-2 shadow-sm min-w-[180px] ${config.bg} ${config.border}`}
+    >
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!bg-gray-400 !w-3 !h-3"
+      />
+      <div className="flex items-center gap-2 mb-1">
+        <Icon className={`h-3.5 w-3.5 ${config.text}`} />
+        <span className={`text-[10px] font-semibold uppercase ${config.text}`}>
+          {config.label}
+        </span>
+      </div>
+      <p className="text-sm font-medium text-gray-900">{nodeData.label}</p>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!bg-gray-400 !w-3 !h-3"
+      />
+    </div>
+  );
+}
+
+const MemoizedScriptNode = memo(ScriptNodeComponent);
+
+const nodeTypes: NodeTypes = {
+  opening: MemoizedScriptNode,
+  question: MemoizedScriptNode,
+  objection: MemoizedScriptNode,
+  response: MemoizedScriptNode,
+  closing: MemoizedScriptNode,
+};
+
+const categories = [
+  { value: "prospection", label: "Prospection" },
+  { value: "closing", label: "Closing" },
+  { value: "objection", label: "Objection" },
+  { value: "relance", label: "Relance" },
+  { value: "discovery", label: "Découverte" },
+];
+
+export function FlowchartEditor({ flowchart }: { flowchart: FlowchartData }) {
+  const [title, setTitle] = useState(flowchart.title);
+  const [category, setCategory] = useState(flowchart.category || "");
+  const [isPending, startTransition] = useTransition();
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    (flowchart.nodes as Node[]) || []
+  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    (flowchart.edges as Edge[]) || []
+  );
+
+  const onConnect: OnConnect = useCallback(
+    (params) => {
+      setEdges((eds) => addEdge(params, eds));
+    },
+    [setEdges]
+  );
+
+  function handleSave() {
+    startTransition(async () => {
+      try {
+        await updateFlowchart(flowchart.id, {
+          title,
+          nodes,
+          edges,
+          category: category || undefined,
+        });
+      } catch {
+        // Silently fail
+      }
+    });
+  }
+
+  function addNode(type: string) {
+    const id = `${type}-${Date.now()}`;
+    const config = nodeTypeConfig[type];
+    const newNode: Node = {
+      id,
+      type,
+      position: {
+        x: 250 + Math.random() * 200 - 100,
+        y: 100 + nodes.length * 120,
+      },
+      data: { label: config.label, type },
+    };
+    setNodes((nds) => [...nds, newNode]);
+  }
+
+  return (
+    <div className="h-[calc(100vh-120px)] flex flex-col">
+      {/* Toolbar */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b bg-background">
+        <Link href="/scripts">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Retour
+          </Button>
+        </Link>
+
+        <div className="h-6 w-px bg-border" />
+
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="max-w-[250px] h-8 text-sm font-medium"
+          placeholder="Titre du flowchart"
+        />
+
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger className="w-[160px] h-8">
+            <SelectValue placeholder="Catégorie" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((cat) => (
+              <SelectItem key={cat.value} value={cat.value}>
+                {cat.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="flex-1" />
+
+        <Link href={`/scripts/present/${flowchart.id}`}>
+          <Button variant="outline" size="sm">
+            <Presentation className="h-4 w-4 mr-1" />
+            Présenter
+          </Button>
+        </Link>
+
+        <Button
+          onClick={handleSave}
+          disabled={isPending}
+          size="sm"
+          className="bg-brand text-brand-dark hover:bg-brand/90"
+        >
+          {isPending ? (
+            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4 mr-1" />
+          )}
+          Sauvegarder
+        </Button>
+      </div>
+
+      {/* Canvas */}
+      <div className="flex-1">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+          className="bg-gray-50"
+        >
+          <Background gap={20} size={1} />
+          <Controls />
+          <MiniMap
+            nodeStrokeWidth={3}
+            className="!bg-background !border !shadow-sm"
+          />
+
+          {/* Add Node Panel */}
+          <Panel position="top-left">
+            <div className="bg-background border rounded-lg shadow-sm p-3 space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Ajouter un noeud
+              </p>
+              {Object.entries(nodeTypeConfig).map(([type, config]) => {
+                const Icon = config.icon;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => addNode(type)}
+                    className={`flex items-center gap-2 w-full px-3 py-1.5 rounded text-xs font-medium border transition-colors hover:opacity-80 ${config.bg} ${config.border} ${config.text}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {config.label}
+                  </button>
+                );
+              })}
+            </div>
+          </Panel>
+        </ReactFlow>
+      </div>
+    </div>
+  );
+}

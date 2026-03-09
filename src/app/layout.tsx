@@ -1,0 +1,86 @@
+import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
+import { Toaster } from "sonner";
+import "./globals.css";
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Sales System",
+  description: "Application Sales System par Damien Reynaud",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icon-180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Sales System",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7af17a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="fr">
+      <body className={`${jakarta.variable} ${playfair.variable} font-sans antialiased`}>
+        {/* Force cleanup of old next-pwa service worker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(reg) {
+                    reg.update();
+                    reg.unregister();
+                  });
+                });
+                caches.keys().then(function(keys) {
+                  keys.forEach(function(k) { caches.delete(k); });
+                });
+              }
+            `,
+          }}
+        />
+        {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: "#14080e",
+              color: "#ffffff",
+              border: "1px solid #2a1a22",
+            },
+          }}
+        />
+      </body>
+    </html>
+  );
+}
