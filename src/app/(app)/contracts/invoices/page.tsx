@@ -11,15 +11,23 @@ export default async function InvoicesPage() {
   const invoices = await getInvoices();
 
   // Fetch contracts for the generate invoice dialog
-  const { data: contracts } = await supabase
+  const { data: contractsRaw } = await supabase
     .from("contracts")
     .select("id, amount, status, client:profiles(id, full_name)")
     .order("created_at", { ascending: false });
 
+  // Transform to match Contract interface (Supabase returns single relation as array)
+  const contracts: Contract[] = (contractsRaw || []).map((c) => ({
+    id: c.id,
+    amount: c.amount,
+    status: c.status,
+    client: Array.isArray(c.client) ? c.client[0] : c.client,
+  }));
+
   return (
     <InvoicesView
       invoices={invoices as Invoice[]}
-      contracts={(contracts || []) as Contract[]}
+      contracts={contracts}
     />
   );
 }
