@@ -111,12 +111,12 @@ const STATUS_CONFIG: Record<
     icon: TrendingUp,
   },
   completed: {
-    label: "Termine",
+    label: "Terminé",
     color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     icon: CheckCircle,
   },
   at_risk: {
-    label: "A risque",
+    label: "À risque",
     color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
     icon: AlertTriangle,
   },
@@ -150,7 +150,7 @@ export function CoachingView({
     <div className="space-y-6">
       <PageHeader
         title="Coaching"
-        description="Objectifs, plan de developpement et notes de coaching"
+        description="Objectifs, plan de développement et notes de coaching"
       />
 
       {/* Summary Cards */}
@@ -159,13 +159,13 @@ export function CoachingView({
           icon={Target}
           label="Objectifs actifs"
           value={objectives.filter((o) => o.status === "in_progress" || o.status === "at_risk").length}
-          subLabel={`${objectives.filter((o) => o.status === "completed").length} termines`}
+          subLabel={`${objectives.filter((o) => o.status === "completed").length} terminés`}
         />
         <SummaryCard
           icon={AlertTriangle}
-          label="A risque"
+          label="À risque"
           value={objectives.filter((o) => o.status === "at_risk").length}
-          subLabel="Necessitent attention"
+          subLabel="Nécessitent attention"
           variant="warning"
         />
         <SummaryCard
@@ -178,7 +178,7 @@ export function CoachingView({
           icon={MessageSquare}
           label="Sessions coaching"
           value={coachingNotes.length}
-          subLabel="Notes recues"
+          subLabel="Notes reçues"
         />
       </div>
 
@@ -191,7 +191,7 @@ export function CoachingView({
           </TabsTrigger>
           <TabsTrigger value="development" className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]">
             <TrendingUp className="w-4 h-4 mr-2" />
-            Plan de developpement
+            Plan de développement
           </TabsTrigger>
           <TabsTrigger value="notes" className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]">
             <BookOpen className="w-4 h-4 mr-2" />

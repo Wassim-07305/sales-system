@@ -195,7 +195,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
       return <Badge className="bg-green-100 text-green-700 border-green-200">Active</Badge>;
     }
     if (campaign.executions_count && campaign.executions_count > 0 && campaign.completed_count === campaign.executions_count) {
-      return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Terminee</Badge>;
+      return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Terminée</Badge>;
     }
     return <Badge variant="outline" className="text-muted-foreground">En pause</Badge>;
   }

@@ -335,7 +335,7 @@ export function GamificationAnalyticsView({ data }: Props) {
                     variant={ch.isActive ? "default" : "outline"}
                     className={ch.isActive ? "bg-[#7af17a]/10 text-[#7af17a] shrink-0" : "shrink-0"}
                   >
-                    {ch.isActive ? "Actif" : "Termine"}
+                    {ch.isActive ? "Actif" : "Terminé"}
                   </Badge>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
