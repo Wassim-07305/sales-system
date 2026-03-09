@@ -32,6 +32,7 @@ import {
   Store,
   SlidersHorizontal,
   HelpCircle,
+  LifeBuoy,
   Map,
   type LucideIcon,
 } from "lucide-react";
@@ -214,6 +215,14 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["client_b2b", "client_b2c"],
   },
 
+  // Support
+  {
+    label: "Support",
+    href: "/support",
+    icon: LifeBuoy,
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+  },
+
   // Roadmap
   {
     label: "Roadmap",
@@ -249,6 +258,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: "White Label", href: "/settings/white-label", icon: Building2, roles: ["admin", "manager"] },
       { label: "Notifications", href: "/settings/notifications", icon: Bell, roles: ["admin", "manager"] },
       { label: "Confidentialité & RGPD", href: "/settings/privacy", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Sécurité & 2FA", href: "/settings/security", icon: ShieldAlert, roles: ["admin", "manager"] },
       { label: "Champs personnalisés", href: "/settings/custom-fields", icon: SlidersHorizontal, roles: ["admin", "manager"] },
     ],
   },
@@ -307,7 +317,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     label: "Support",
-    items: NAV_ITEMS.filter((i) => ["/roadmap", "/help"].includes(i.href)),
+    items: NAV_ITEMS.filter((i) => ["/support", "/roadmap", "/help"].includes(i.href)),
   },
 ];
 
@@ -344,9 +354,11 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   training: "Entraînement",
   automation: "Automation",
   marketplace: "Marketplace",
+  monetization: "Monétisation",
   challenges: "Défis",
   achievements: "Achievements",
   community: "Communauté",
+  reputation: "Réputation",
   portal: "Portail",
   onboarding: "Onboarding",
   calls: "Appels",
@@ -366,6 +378,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   timeline: "Parcours",
   simulator: "Simulateur",
   privacy: "Confidentialité & RGPD",
+  security: "Sécurité & 2FA",
   duplicates: "Doublons",
   intelligence: "Hunting Intelligence",
   certificates: "Certificats",
@@ -375,7 +388,10 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   reports: "Rapports",
   roadmap: "Roadmap",
   enrichment: "Enrichissement IA",
+  segments: "Segmentation",
+  support: "Support",
   help: "Centre d'aide",
+  groups: "Groupes d'entraînement",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [

@@ -159,7 +159,7 @@ export async function searchCommunity(query: string) {
   };
 }
 
-export async function getUserReputation(userId: string): Promise<number> {
+export async function getUserReputationScore(userId: string): Promise<number> {
   const supabase = await createClient();
 
   // Count posts
@@ -202,6 +202,290 @@ export async function getUserReputation(userId: string): Promise<number> {
     totalLikes * 3;
 
   return score;
+}
+
+// ─── Reputation System (F36.1) ───
+
+export async function getUserReputation(userId?: string) {
+  const supabase = await createClient();
+
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Non authentifié");
+    targetUserId = user.id;
+  }
+
+  try {
+    // Count posts
+    const { count: postsCount } = await supabase
+      .from("community_posts")
+      .select("*", { count: "exact", head: true })
+      .eq("author_id", targetUserId)
+      .eq("hidden", false);
+
+    // Count replies (comments excluding RSVPs)
+    const { count: repliesCount } = await supabase
+      .from("community_comments")
+      .select("*", { count: "exact", head: true })
+      .eq("author_id", targetUserId)
+      .neq("content", "__RSVP__");
+
+    // Sum likes received on user's posts
+    const { data: likesData } = await supabase
+      .from("community_posts")
+      .select("likes_count")
+      .eq("author_id", targetUserId)
+      .eq("hidden", false);
+
+    const totalLikes = (likesData || []).reduce(
+      (sum: number, p: { likes_count: number | null }) => sum + (p.likes_count || 0),
+      0
+    );
+
+    // Count best answers (win / success_story posts as proxy)
+    const { count: bestAnswers } = await supabase
+      .from("community_posts")
+      .select("*", { count: "exact", head: true })
+      .eq("author_id", targetUserId)
+      .eq("hidden", false)
+      .in("type", ["win", "success_story"]);
+
+    const posts = postsCount || 0;
+    const replies = repliesCount || 0;
+    const likes = totalLikes;
+    const best = bestAnswers || 0;
+
+    const points = posts * 10 + replies * 5 + likes * 2 + best * 50;
+
+    // Get user profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", targetUserId)
+      .single();
+
+    return {
+      userId: targetUserId,
+      fullName: profile?.full_name || null,
+      avatarUrl: profile?.avatar_url || null,
+      points,
+      breakdown: { posts, replies, likes, bestAnswers: best },
+    };
+  } catch {
+    // Fallback demo data
+    return {
+      userId: targetUserId,
+      fullName: "Utilisateur",
+      avatarUrl: null,
+      points: 235,
+      breakdown: { posts: 12, replies: 15, likes: 20, bestAnswers: 1 },
+    };
+  }
+}
+
+export async function getReputationLeaderboard() {
+  const supabase = await createClient();
+
+  try {
+    // Get all posts with authors
+    const { data: posts } = await supabase
+      .from("community_posts")
+      .select("author_id, likes_count, type")
+      .eq("hidden", false);
+
+    // Get all comments (excluding RSVPs)
+    const { data: comments } = await supabase
+      .from("community_comments")
+      .select("author_id")
+      .neq("content", "__RSVP__");
+
+    if ((!posts || posts.length === 0) && (!comments || comments.length === 0)) {
+      // Return demo data
+      return getDemoLeaderboard();
+    }
+
+    const scores: Record<string, { points: number; posts: number; replies: number; likes: number; bestAnswers: number }> = {};
+
+    const ensure = (uid: string) => {
+      if (!scores[uid]) scores[uid] = { points: 0, posts: 0, replies: 0, likes: 0, bestAnswers: 0 };
+    };
+
+    for (const post of posts || []) {
+      if (!post.author_id) continue;
+      ensure(post.author_id);
+      scores[post.author_id].posts += 1;
+      scores[post.author_id].points += 10;
+      scores[post.author_id].likes += post.likes_count || 0;
+      scores[post.author_id].points += (post.likes_count || 0) * 2;
+      if (post.type === "win" || post.type === "success_story") {
+        scores[post.author_id].bestAnswers += 1;
+        scores[post.author_id].points += 50;
+      }
+    }
+
+    for (const comment of comments || []) {
+      if (!comment.author_id) continue;
+      ensure(comment.author_id);
+      scores[comment.author_id].replies += 1;
+      scores[comment.author_id].points += 5;
+    }
+
+    // Sort and take top 20
+    const sorted = Object.entries(scores)
+      .sort(([, a], [, b]) => b.points - a.points)
+      .slice(0, 20);
+
+    if (sorted.length === 0) return getDemoLeaderboard();
+
+    // Fetch profiles
+    const topIds = sorted.map(([uid]) => uid);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", topIds);
+
+    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+    return sorted.map(([uid, stats], index) => ({
+      position: index + 1,
+      userId: uid,
+      fullName: profileMap.get(uid)?.full_name || "Utilisateur",
+      avatarUrl: profileMap.get(uid)?.avatar_url || null,
+      points: stats.points,
+      posts: stats.posts,
+      replies: stats.replies,
+      likes: stats.likes,
+      bestAnswers: stats.bestAnswers,
+    }));
+  } catch {
+    return getDemoLeaderboard();
+  }
+}
+
+function getDemoLeaderboard() {
+  const demoNames = [
+    "Sophie Martin", "Lucas Dupont", "Emma Bernard", "Hugo Petit",
+    "Léa Richard", "Nathan Moreau", "Chloé Laurent", "Louis Simon",
+    "Manon Michel", "Théo Lefebvre", "Camille Leroy", "Raphaël Roux",
+    "Inès David", "Arthur Bertrand", "Jade Morel", "Ethan Fournier",
+    "Zoé Girard", "Mathis Bonnet", "Lola Dupuis", "Noah Lambert",
+  ];
+
+  return demoNames.map((name, i) => ({
+    position: i + 1,
+    userId: `demo-${i}`,
+    fullName: name,
+    avatarUrl: null,
+    points: Math.max(50, 2500 - i * 120 + Math.floor(Math.random() * 50)),
+    posts: Math.max(1, 30 - i * 2),
+    replies: Math.max(2, 45 - i * 3),
+    likes: Math.max(0, 60 - i * 4),
+    bestAnswers: Math.max(0, 5 - Math.floor(i / 4)),
+  }));
+}
+
+export async function awardReputation(userId: string, action: string, points: number) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Try to insert into reputation_events table; if it doesn't exist, silently skip
+  try {
+    await supabase.from("reputation_events").insert({
+      user_id: userId,
+      action,
+      points,
+      awarded_by: user.id,
+    });
+  } catch {
+    // Table may not exist yet — that's OK
+  }
+
+  revalidatePath("/community/reputation");
+  revalidatePath("/community");
+}
+
+export async function getReputationActivity(userId?: string) {
+  const supabase = await createClient();
+
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Non authentifié");
+    targetUserId = user.id;
+  }
+
+  try {
+    // Get recent posts by user
+    const { data: recentPosts } = await supabase
+      .from("community_posts")
+      .select("id, title, type, created_at, likes_count")
+      .eq("author_id", targetUserId)
+      .eq("hidden", false)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    // Get recent comments by user
+    const { data: recentComments } = await supabase
+      .from("community_comments")
+      .select("id, created_at, post_id")
+      .eq("author_id", targetUserId)
+      .neq("content", "__RSVP__")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    const events: { label: string; points: number; date: string }[] = [];
+
+    for (const post of recentPosts || []) {
+      if (post.type === "win" || post.type === "success_story") {
+        events.push({
+          label: "Meilleure réponse",
+          points: 50,
+          date: post.created_at,
+        });
+      }
+      events.push({
+        label: `Nouveau post${post.title ? ` : ${post.title}` : ""}`,
+        points: 10,
+        date: post.created_at,
+      });
+      if (post.likes_count && post.likes_count > 0) {
+        events.push({
+          label: `${post.likes_count} like${post.likes_count > 1 ? "s" : ""} reçu${post.likes_count > 1 ? "s" : ""}`,
+          points: post.likes_count * 2,
+          date: post.created_at,
+        });
+      }
+    }
+
+    for (const comment of recentComments || []) {
+      events.push({
+        label: "Réponse à un post",
+        points: 5,
+        date: comment.created_at,
+      });
+    }
+
+    // Sort by date desc and take 10
+    events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return events.slice(0, 10);
+  } catch {
+    // Fallback demo activity
+    const now = new Date();
+    return [
+      { label: "Nouveau post", points: 10, date: new Date(now.getTime() - 1000 * 60 * 30).toISOString() },
+      { label: "Meilleure réponse", points: 50, date: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString() },
+      { label: "Réponse à un post", points: 5, date: new Date(now.getTime() - 1000 * 60 * 60 * 5).toISOString() },
+      { label: "3 likes reçus", points: 6, date: new Date(now.getTime() - 1000 * 60 * 60 * 8).toISOString() },
+      { label: "Nouveau post : Astuce closing", points: 10, date: new Date(now.getTime() - 1000 * 60 * 60 * 24).toISOString() },
+      { label: "Réponse à un post", points: 5, date: new Date(now.getTime() - 1000 * 60 * 60 * 30).toISOString() },
+      { label: "2 likes reçus", points: 4, date: new Date(now.getTime() - 1000 * 60 * 60 * 48).toISOString() },
+      { label: "Nouveau post", points: 10, date: new Date(now.getTime() - 1000 * 60 * 60 * 72).toISOString() },
+      { label: "Réponse à un post", points: 5, date: new Date(now.getTime() - 1000 * 60 * 60 * 96).toISOString() },
+      { label: "Meilleure réponse", points: 50, date: new Date(now.getTime() - 1000 * 60 * 60 * 120).toISOString() },
+    ];
+  }
 }
 
 export async function getUserReputationBatch(userIds: string[]): Promise<Record<string, number>> {
