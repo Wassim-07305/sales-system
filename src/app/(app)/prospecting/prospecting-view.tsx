@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import {
   Plus, Search, Send, MessageCircle, Target, Linkedin, Instagram,
   RefreshCw, Loader2, SlidersHorizontal, ChevronDown, ChevronUp,
-  X, Flame, Thermometer, Snowflake, Users, TrendingUp,
+  X, Flame, Thermometer, Snowflake, Users, TrendingUp, ExternalLink, Eye,
 } from "lucide-react";
 import { addProspect, updateProspectStatus, incrementDmsSent } from "@/lib/actions/prospecting";
 import { recalculateAllScores } from "@/lib/actions/hub-setting";
@@ -585,11 +585,12 @@ export function ProspectingView({
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="text-left p-4 font-medium">Nom</th>
-                  <th className="text-left p-4 font-medium">Température</th>
+                  <th className="text-left p-4 font-medium">Temperature</th>
                   <th className="text-left p-4 font-medium">Score</th>
                   <th className="text-left p-4 font-medium">Plateforme</th>
                   <th className="text-left p-4 font-medium">Statut</th>
                   <th className="text-left p-4 font-medium">Dernier message</th>
+                  <th className="text-left p-4 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -601,9 +602,9 @@ export function ProspectingView({
                   return (
                     <tr key={prospect.id} className="border-b last:border-0 hover:bg-muted/30">
                       <td className="p-4 font-medium">
-                        {prospect.profile_url ? (
-                          <a href={prospect.profile_url} target="_blank" rel="noopener noreferrer" className="hover:text-brand">{prospect.name}</a>
-                        ) : prospect.name}
+                        <Link href={`/prospecting/${prospect.id}`} className="hover:text-brand hover:underline">
+                          {prospect.name}
+                        </Link>
                       </td>
                       <td className="p-4">
                         {tempConf && TempIcon ? (
@@ -663,6 +664,22 @@ export function ProspectingView({
                         {prospect.last_message_at
                           ? formatDistanceToNow(new Date(prospect.last_message_at), { addSuffix: true, locale: fr })
                           : "—"}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/prospecting/${prospect.id}`}>
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          {prospect.profile_url && (
+                            <Button variant="ghost" size="sm" asChild>
+                              <a href={prospect.profile_url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
