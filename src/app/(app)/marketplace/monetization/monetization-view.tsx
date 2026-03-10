@@ -42,7 +42,7 @@ interface MonetizationOverview {
   commissionsThisMonth: number;
   activeSubscriptions: number;
   nextPayout: number;
-  nextPayoutDate: string;
+  nextPayoutDate: string | null;
   revenueByMonth: { month: string; revenue: number }[];
   topExtensions: {
     name: string;
@@ -121,7 +121,9 @@ export function MonetizationView({
       icon: CreditCard,
       color: "text-amber-400",
       bgColor: "bg-amber-400/10",
-      subtitle: new Date(overview.nextPayoutDate).toLocaleDateString("fr-FR"),
+      subtitle: overview.nextPayoutDate
+        ? new Date(overview.nextPayoutDate).toLocaleDateString("fr-FR")
+        : "Aucun en attente",
     },
   ];
 

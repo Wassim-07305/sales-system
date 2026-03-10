@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getPartners, getPartnerRevenue } from "@/lib/actions/partners";
+import { getPartners, getPartnerStats, getPartnerPayouts } from "@/lib/actions/partners";
 import { PartnersView } from "./partners-view";
 
 export default async function PartnersPage() {
@@ -8,15 +8,19 @@ export default async function PartnersPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [partners, revenueData] = await Promise.all([
+  const [partners, stats, payouts] = await Promise.all([
     getPartners(),
-    getPartnerRevenue(),
+    getPartnerStats(),
+    getPartnerPayouts(),
   ]);
 
   return (
     <PartnersView
       partners={partners}
-      revenueData={revenueData}
+      revenueData={{
+        monthly: stats.monthlyData,
+        payouts: payouts,
+      }}
     />
   );
 }

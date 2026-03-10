@@ -14,8 +14,37 @@ export interface Partner {
   installations: number;
   revenue_generated: number;
   rating: number;
+  notes: string | null;
+  contact_phone: string | null;
+  website: string | null;
   created_at: string;
   approved_at: string | null;
+}
+
+export interface PartnerPayout {
+  id: string;
+  partner_id: string;
+  partner_name?: string;
+  amount: number;
+  period: string;
+  status: "paid" | "pending" | "processing" | "failed";
+  payment_method: string | null;
+  payment_reference: string | null;
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface PartnerReferral {
+  id: string;
+  partner_id: string;
+  referred_email: string | null;
+  referred_name: string | null;
+  deal_id: string | null;
+  deal_value: number;
+  commission_amount: number;
+  status: "pending" | "converted" | "paid" | "expired";
+  created_at: string;
+  converted_at: string | null;
 }
 
 export interface PartnerRevenue {
@@ -25,297 +54,499 @@ export interface PartnerRevenue {
   partners_count: number;
 }
 
-export interface PartnerPayout {
-  id: string;
-  partner_name: string;
-  amount: number;
-  period: string;
-  status: "paid" | "pending" | "processing";
-  paid_at: string | null;
+export interface PartnerStats {
+  totalPartners: number;
+  activePartners: number;
+  pendingPartners: number;
+  totalRevenue: number;
+  totalCommissions: number;
+  monthlyData: PartnerRevenue[];
 }
 
-// Mock data for demo when tables don't exist
-const MOCK_PARTNERS: Partner[] = [
-  {
-    id: "p1",
-    name: "Jean Dupont",
-    email: "jean@techpartner.fr",
-    company: "TechPartner SAS",
-    type: "technology",
-    commission_rate: 15,
-    status: "active",
-    installations: 47,
-    revenue_generated: 34500,
-    rating: 4.8,
-    created_at: "2025-06-15T10:00:00Z",
-    approved_at: "2025-06-20T14:00:00Z",
-  },
-  {
-    id: "p2",
-    name: "Marie Laurent",
-    email: "marie@consultpro.fr",
-    company: "ConsultPro",
-    type: "consulting",
-    commission_rate: 20,
-    status: "active",
-    installations: 32,
-    revenue_generated: 28900,
-    rating: 4.6,
-    created_at: "2025-07-01T09:00:00Z",
-    approved_at: "2025-07-05T11:00:00Z",
-  },
-  {
-    id: "p3",
-    name: "Pierre Martin",
-    email: "pierre@refnetwork.fr",
-    company: "RefNetwork",
-    type: "referral",
-    commission_rate: 10,
-    status: "active",
-    installations: 65,
-    revenue_generated: 42100,
-    rating: 4.9,
-    created_at: "2025-05-10T08:00:00Z",
-    approved_at: "2025-05-12T16:00:00Z",
-  },
-  {
-    id: "p4",
-    name: "Sophie Bernard",
-    email: "sophie@digitalwave.fr",
-    company: "DigitalWave",
-    type: "technology",
-    commission_rate: 18,
-    status: "active",
-    installations: 21,
-    revenue_generated: 15800,
-    rating: 4.3,
-    created_at: "2025-08-20T12:00:00Z",
-    approved_at: "2025-08-25T10:00:00Z",
-  },
-  {
-    id: "p5",
-    name: "Luc Moreau",
-    email: "luc@growthlab.fr",
-    company: "GrowthLab",
-    type: "consulting",
-    commission_rate: 22,
-    status: "pending",
-    installations: 0,
-    revenue_generated: 0,
-    rating: 0,
-    created_at: "2026-03-01T14:00:00Z",
-    approved_at: null,
-  },
-  {
-    id: "p6",
-    name: "Camille Petit",
-    email: "camille@salesboost.fr",
-    company: "SalesBoost",
-    type: "referral",
-    commission_rate: 12,
-    status: "pending",
-    installations: 0,
-    revenue_generated: 0,
-    rating: 0,
-    created_at: "2026-02-28T09:00:00Z",
-    approved_at: null,
-  },
-  {
-    id: "p7",
-    name: "Antoine Lefevre",
-    email: "antoine@innovtech.fr",
-    company: "InnovTech",
-    type: "technology",
-    commission_rate: 16,
-    status: "inactive",
-    installations: 8,
-    revenue_generated: 5200,
-    rating: 3.9,
-    created_at: "2025-04-01T10:00:00Z",
-    approved_at: "2025-04-05T09:00:00Z",
-  },
-];
-
-const MOCK_REVENUE: PartnerRevenue[] = [
-  { month: "Oct 2025", revenue: 18500, commission: 2960, partners_count: 3 },
-  { month: "Nov 2025", revenue: 22300, commission: 3568, partners_count: 4 },
-  { month: "Déc 2025", revenue: 19800, commission: 3168, partners_count: 4 },
-  { month: "Jan 2026", revenue: 25600, commission: 4096, partners_count: 4 },
-  { month: "Fév 2026", revenue: 28900, commission: 4624, partners_count: 4 },
-  { month: "Mar 2026", revenue: 31200, commission: 4992, partners_count: 4 },
-];
-
-const MOCK_PAYOUTS: PartnerPayout[] = [
-  { id: "pay1", partner_name: "TechPartner SAS", amount: 1725, period: "Mar 2026", status: "pending", paid_at: null },
-  { id: "pay2", partner_name: "ConsultPro", amount: 1445, period: "Mar 2026", status: "processing", paid_at: null },
-  { id: "pay3", partner_name: "RefNetwork", amount: 1405, period: "Mar 2026", status: "pending", paid_at: null },
-  { id: "pay4", partner_name: "DigitalWave", amount: 790, period: "Fév 2026", status: "paid", paid_at: "2026-03-05T10:00:00Z" },
-  { id: "pay5", partner_name: "TechPartner SAS", amount: 1580, period: "Fév 2026", status: "paid", paid_at: "2026-03-05T10:00:00Z" },
-  { id: "pay6", partner_name: "ConsultPro", amount: 1320, period: "Fév 2026", status: "paid", paid_at: "2026-03-05T10:00:00Z" },
-];
-
-export async function getPartners() {
+// ─── GET ALL PARTNERS ────────────────────────────────────────────
+export async function getPartners(): Promise<Partner[]> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Non authentifie");
 
-  try {
-    const { data, error } = await supabase
-      .from("partners")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("partners")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-    if (error) throw error;
-    return data as Partner[];
-  } catch {
-    // Table doesn't exist — return mock data
-    return MOCK_PARTNERS;
+  if (error) {
+    console.error("Error fetching partners:", error);
+    return [];
   }
+
+  return (data || []) as Partner[];
 }
 
-export async function getPartnerDetails(partnerId: string) {
+// ─── GET PARTNER DETAILS ─────────────────────────────────────────
+export async function getPartnerDetails(partnerId: string): Promise<Partner | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Non authentifie");
 
-  try {
-    const { data, error } = await supabase
-      .from("partners")
-      .select("*")
-      .eq("id", partnerId)
-      .single();
+  const { data, error } = await supabase
+    .from("partners")
+    .select("*")
+    .eq("id", partnerId)
+    .single();
 
-    if (error) throw error;
-    return data as Partner;
-  } catch {
-    // Fallback to mock
-    return MOCK_PARTNERS.find((p) => p.id === partnerId) || null;
+  if (error) {
+    console.error("Error fetching partner:", error);
+    return null;
   }
+
+  return data as Partner;
 }
 
+// ─── CREATE PARTNER ──────────────────────────────────────────────
 export async function createPartner(data: {
   name: string;
   email: string;
   company: string;
   type: "technology" | "consulting" | "referral";
   commissionRate: number;
-}) {
+  contactPhone?: string;
+  website?: string;
+  notes?: string;
+}): Promise<Partner> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Non authentifie");
 
-  try {
-    const { data: partner, error } = await supabase
-      .from("partners")
-      .insert({
-        name: data.name,
-        email: data.email,
-        company: data.company,
-        type: data.type,
-        commission_rate: data.commissionRate,
-        status: "pending",
-        installations: 0,
-        revenue_generated: 0,
-        rating: 0,
-      })
-      .select()
-      .single();
+  // Check if email already exists
+  const { data: existing } = await supabase
+    .from("partners")
+    .select("id")
+    .eq("email", data.email)
+    .single();
 
-    if (error) throw error;
-    revalidatePath("/marketplace/partners");
-    return partner as Partner;
-  } catch {
-    // Mock creation
-    const newPartner: Partner = {
-      id: `p${Date.now()}`,
+  if (existing) {
+    throw new Error("Un partenaire avec cet email existe deja");
+  }
+
+  const { data: partner, error } = await supabase
+    .from("partners")
+    .insert({
       name: data.name,
       email: data.email,
       company: data.company,
       type: data.type,
       commission_rate: data.commissionRate,
+      contact_phone: data.contactPhone || null,
+      website: data.website || null,
+      notes: data.notes || null,
       status: "pending",
       installations: 0,
       revenue_generated: 0,
       rating: 0,
-      created_at: new Date().toISOString(),
-      approved_at: null,
-    };
-    revalidatePath("/marketplace/partners");
-    return newPartner;
+      created_by: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating partner:", error);
+    throw new Error("Erreur lors de la creation du partenaire");
   }
+
+  revalidatePath("/marketplace/partners");
+  return partner as Partner;
 }
 
-export async function updatePartner(id: string, updates: Partial<Partner>) {
+// ─── UPDATE PARTNER ──────────────────────────────────────────────
+export async function updatePartner(
+  id: string,
+  updates: Partial<{
+    name: string;
+    email: string;
+    company: string;
+    type: "technology" | "consulting" | "referral";
+    commission_rate: number;
+    status: "active" | "pending" | "inactive";
+    contact_phone: string | null;
+    website: string | null;
+    notes: string | null;
+    rating: number;
+  }>
+): Promise<Partner> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Non authentifie");
 
-  try {
-    const { data, error } = await supabase
-      .from("partners")
-      .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from("partners")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
 
-    if (error) throw error;
-    revalidatePath("/marketplace/partners");
-    return data as Partner;
-  } catch {
-    // Mock update
-    const partner = MOCK_PARTNERS.find((p) => p.id === id);
-    if (!partner) throw new Error("Partenaire introuvable");
-    revalidatePath("/marketplace/partners");
-    return { ...partner, ...updates } as Partner;
+  if (error) {
+    console.error("Error updating partner:", error);
+    throw new Error("Erreur lors de la mise a jour du partenaire");
   }
+
+  revalidatePath("/marketplace/partners");
+  return data as Partner;
 }
 
-export async function getPartnerRevenue() {
+// ─── DELETE PARTNER ──────────────────────────────────────────────
+export async function deletePartner(id: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Non authentifie");
 
-  try {
-    const { data, error } = await supabase
-      .from("partner_revenue")
-      .select("*")
-      .order("month", { ascending: true });
+  const { error } = await supabase
+    .from("partners")
+    .delete()
+    .eq("id", id);
 
-    if (error) throw error;
-    return {
-      monthly: data as PartnerRevenue[],
-      payouts: [] as PartnerPayout[],
-    };
-  } catch {
-    // Return mock data
-    return {
-      monthly: MOCK_REVENUE,
-      payouts: MOCK_PAYOUTS,
-    };
+  if (error) {
+    console.error("Error deleting partner:", error);
+    throw new Error("Erreur lors de la suppression du partenaire");
   }
+
+  revalidatePath("/marketplace/partners");
 }
 
-export async function approvePartner(id: string) {
+// ─── APPROVE PARTNER ─────────────────────────────────────────────
+export async function approvePartner(id: string): Promise<Partner> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  if (!user) throw new Error("Non authentifie");
 
-  try {
-    const { data, error } = await supabase
-      .from("partners")
-      .update({ status: "active", approved_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from("partners")
+    .update({
+      status: "active",
+      approved_at: new Date().toISOString(),
+      approved_by: user.id,
+    })
+    .eq("id", id)
+    .select()
+    .single();
 
-    if (error) throw error;
-    revalidatePath("/marketplace/partners");
-    return data as Partner;
-  } catch {
-    // Mock approve
-    const partner = MOCK_PARTNERS.find((p) => p.id === id);
-    if (!partner) throw new Error("Partenaire introuvable");
-    revalidatePath("/marketplace/partners");
-    return { ...partner, status: "active" as const, approved_at: new Date().toISOString() };
+  if (error) {
+    console.error("Error approving partner:", error);
+    throw new Error("Erreur lors de l'approbation du partenaire");
   }
+
+  revalidatePath("/marketplace/partners");
+  return data as Partner;
+}
+
+// ─── DEACTIVATE PARTNER ──────────────────────────────────────────
+export async function deactivatePartner(id: string): Promise<Partner> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { data, error } = await supabase
+    .from("partners")
+    .update({ status: "inactive", updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error deactivating partner:", error);
+    throw new Error("Erreur lors de la desactivation du partenaire");
+  }
+
+  revalidatePath("/marketplace/partners");
+  return data as Partner;
+}
+
+// ─── GET PARTNER STATS ───────────────────────────────────────────
+export async function getPartnerStats(): Promise<PartnerStats> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  // Get partners counts
+  const { data: partners } = await supabase
+    .from("partners")
+    .select("id, status, revenue_generated, commission_rate");
+
+  const allPartners = partners || [];
+  const activePartners = allPartners.filter((p) => p.status === "active");
+  const pendingPartners = allPartners.filter((p) => p.status === "pending");
+
+  const totalRevenue = allPartners.reduce((sum, p) => sum + (p.revenue_generated || 0), 0);
+  const totalCommissions = allPartners.reduce(
+    (sum, p) => sum + ((p.revenue_generated || 0) * (p.commission_rate || 0) / 100),
+    0
+  );
+
+  // Get monthly data from referrals
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+  const { data: referrals } = await supabase
+    .from("partner_referrals")
+    .select("deal_value, commission_amount, partner_id, converted_at")
+    .gte("converted_at", sixMonthsAgo.toISOString())
+    .eq("status", "converted");
+
+  // Group by month
+  const monthlyMap = new Map<string, { revenue: number; commission: number; partners: Set<string> }>();
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthKey = date.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+    monthlyMap.set(monthKey, { revenue: 0, commission: 0, partners: new Set() });
+  }
+
+  (referrals || []).forEach((ref) => {
+    if (ref.converted_at) {
+      const date = new Date(ref.converted_at);
+      const monthKey = date.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+      const entry = monthlyMap.get(monthKey);
+      if (entry) {
+        entry.revenue += ref.deal_value || 0;
+        entry.commission += ref.commission_amount || 0;
+        entry.partners.add(ref.partner_id);
+      }
+    }
+  });
+
+  const monthlyData = Array.from(monthlyMap.entries()).map(([month, data]) => ({
+    month,
+    revenue: data.revenue,
+    commission: data.commission,
+    partners_count: data.partners.size,
+  }));
+
+  return {
+    totalPartners: allPartners.length,
+    activePartners: activePartners.length,
+    pendingPartners: pendingPartners.length,
+    totalRevenue,
+    totalCommissions,
+    monthlyData,
+  };
+}
+
+// ─── GET PARTNER PAYOUTS ─────────────────────────────────────────
+export async function getPartnerPayouts(partnerId?: string): Promise<PartnerPayout[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  let query = supabase
+    .from("partner_payouts")
+    .select("*, partners(name)")
+    .order("created_at", { ascending: false });
+
+  if (partnerId) {
+    query = query.eq("partner_id", partnerId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error fetching payouts:", error);
+    return [];
+  }
+
+  return (data || []).map((p) => ({
+    ...p,
+    partner_name: (p.partners as { name: string } | null)?.name || "Inconnu",
+  })) as PartnerPayout[];
+}
+
+// ─── CREATE PAYOUT ───────────────────────────────────────────────
+export async function createPayout(data: {
+  partnerId: string;
+  amount: number;
+  period: string;
+  paymentMethod?: string;
+  notes?: string;
+}): Promise<PartnerPayout> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { data: payout, error } = await supabase
+    .from("partner_payouts")
+    .insert({
+      partner_id: data.partnerId,
+      amount: data.amount,
+      period: data.period,
+      payment_method: data.paymentMethod || null,
+      notes: data.notes || null,
+      status: "pending",
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating payout:", error);
+    throw new Error("Erreur lors de la creation du paiement");
+  }
+
+  revalidatePath("/marketplace/partners");
+  return payout as PartnerPayout;
+}
+
+// ─── PROCESS PAYOUT ──────────────────────────────────────────────
+export async function processPayout(
+  payoutId: string,
+  status: "processing" | "paid" | "failed",
+  paymentReference?: string
+): Promise<PartnerPayout> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const updates: Record<string, unknown> = {
+    status,
+    processed_by: user.id,
+  };
+
+  if (status === "paid") {
+    updates.paid_at = new Date().toISOString();
+  }
+
+  if (paymentReference) {
+    updates.payment_reference = paymentReference;
+  }
+
+  const { data, error } = await supabase
+    .from("partner_payouts")
+    .update(updates)
+    .eq("id", payoutId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error processing payout:", error);
+    throw new Error("Erreur lors du traitement du paiement");
+  }
+
+  revalidatePath("/marketplace/partners");
+  return data as PartnerPayout;
+}
+
+// ─── GET PARTNER REFERRALS ───────────────────────────────────────
+export async function getPartnerReferrals(partnerId: string): Promise<PartnerReferral[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { data, error } = await supabase
+    .from("partner_referrals")
+    .select("*")
+    .eq("partner_id", partnerId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching referrals:", error);
+    return [];
+  }
+
+  return (data || []) as PartnerReferral[];
+}
+
+// ─── RECORD REFERRAL ─────────────────────────────────────────────
+export async function recordReferral(data: {
+  partnerId: string;
+  referredEmail: string;
+  referredName: string;
+}): Promise<PartnerReferral> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { data: referral, error } = await supabase
+    .from("partner_referrals")
+    .insert({
+      partner_id: data.partnerId,
+      referred_email: data.referredEmail,
+      referred_name: data.referredName,
+      status: "pending",
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error recording referral:", error);
+    throw new Error("Erreur lors de l'enregistrement du referral");
+  }
+
+  revalidatePath("/marketplace/partners");
+  return referral as PartnerReferral;
+}
+
+// ─── CONVERT REFERRAL ────────────────────────────────────────────
+export async function convertReferral(
+  referralId: string,
+  dealId: string,
+  dealValue: number
+): Promise<PartnerReferral> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  // Get partner commission rate
+  const { data: referral } = await supabase
+    .from("partner_referrals")
+    .select("partner_id")
+    .eq("id", referralId)
+    .single();
+
+  if (!referral) throw new Error("Referral introuvable");
+
+  const { data: partner } = await supabase
+    .from("partners")
+    .select("commission_rate")
+    .eq("id", referral.partner_id)
+    .single();
+
+  const commissionRate = partner?.commission_rate || 10;
+  const commissionAmount = (dealValue * commissionRate) / 100;
+
+  // Update referral
+  const { data: updated, error } = await supabase
+    .from("partner_referrals")
+    .update({
+      deal_id: dealId,
+      deal_value: dealValue,
+      commission_amount: commissionAmount,
+      status: "converted",
+      converted_at: new Date().toISOString(),
+    })
+    .eq("id", referralId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error converting referral:", error);
+    throw new Error("Erreur lors de la conversion du referral");
+  }
+
+  // Update partner stats
+  await supabase
+    .from("partners")
+    .update({
+      revenue_generated: supabase.rpc("increment_numeric", {
+        row_id: referral.partner_id,
+        table_name: "partners",
+        column_name: "revenue_generated",
+        amount: dealValue,
+      }),
+      installations: supabase.rpc("increment_int", {
+        row_id: referral.partner_id,
+        table_name: "partners",
+        column_name: "installations",
+        amount: 1,
+      }),
+    })
+    .eq("id", referral.partner_id);
+
+  revalidatePath("/marketplace/partners");
+  return updated as PartnerReferral;
 }
