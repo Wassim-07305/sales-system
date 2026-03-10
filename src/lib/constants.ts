@@ -31,6 +31,7 @@ import {
   Zap,
   Store,
   SlidersHorizontal,
+  Code,
   HelpCircle,
   LifeBuoy,
   Map,
@@ -260,6 +261,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: "Confidentialité & RGPD", href: "/settings/privacy", icon: Shield, roles: ["admin", "manager"] },
       { label: "Sécurité & 2FA", href: "/settings/security", icon: ShieldAlert, roles: ["admin", "manager"] },
       { label: "Champs personnalisés", href: "/settings/custom-fields", icon: SlidersHorizontal, roles: ["admin", "manager"] },
+      { label: "API REST", href: "/settings/api", icon: Code, roles: ["admin", "manager"] },
     ],
   },
 ];
@@ -392,6 +394,10 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   support: "Support",
   help: "Centre d'aide",
   groups: "Groupes d'entraînement",
+  api: "API REST",
+  coaching: "Coaching",
+  partners: "Partenaires",
+  moderation: "Modération",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [

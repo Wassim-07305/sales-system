@@ -458,6 +458,247 @@ export async function updateTicketStatus(
   }
 }
 
+// ─── SLA Enforcement ─────────────────────────────────────────────────
+
+export async function getSlaConfig() {
+  return {
+    urgent: { firstResponse: 1, resolution: 4 },
+    high: { firstResponse: 4, resolution: 24 },
+    medium: { firstResponse: 8, resolution: 48 },
+    low: { firstResponse: 24, resolution: 72 },
+  };
+}
+
+export async function getSlaStatus(ticket: {
+  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "in_progress" | "waiting" | "resolved" | "closed";
+  created_at: string;
+  updated_at: string;
+  messages?: { sender_type: string; created_at: string }[];
+}) {
+  const slaConfig = await getSlaConfig();
+  const config = slaConfig[ticket.priority];
+  const now = new Date();
+  const createdAt = new Date(ticket.created_at);
+
+  // Find first support response time
+  const firstSupportMsg = (ticket.messages || []).find(
+    (m) => m.sender_type === "support"
+  );
+  const firstResponseAt = firstSupportMsg
+    ? new Date(firstSupportMsg.created_at)
+    : null;
+
+  // Response SLA
+  const responseDeadline = new Date(
+    createdAt.getTime() + config.firstResponse * 60 * 60 * 1000
+  );
+  let responseStatus: "ok" | "warning" | "breached";
+  let responseTimeLeft: string;
+
+  if (firstResponseAt) {
+    // Already responded — check if it was within SLA
+    if (firstResponseAt <= responseDeadline) {
+      responseStatus = "ok";
+      responseTimeLeft = "Repondu dans les delais";
+    } else {
+      responseStatus = "breached";
+      const exceededMs = firstResponseAt.getTime() - responseDeadline.getTime();
+      responseTimeLeft = `SLA depasse de ${formatDuration(exceededMs)}`;
+    }
+  } else if (ticket.status === "resolved" || ticket.status === "closed") {
+    // Resolved/closed without support response — mark as ok
+    responseStatus = "ok";
+    responseTimeLeft = "Resolu";
+  } else {
+    const remainingMs = responseDeadline.getTime() - now.getTime();
+    if (remainingMs <= 0) {
+      responseStatus = "breached";
+      responseTimeLeft = `SLA depasse de ${formatDuration(Math.abs(remainingMs))}`;
+    } else {
+      const warningThreshold = config.firstResponse * 60 * 60 * 1000 * 0.25;
+      responseStatus = remainingMs <= warningThreshold ? "warning" : "ok";
+      responseTimeLeft = `Reponse dans ${formatDuration(remainingMs)}`;
+    }
+  }
+
+  // Resolution SLA
+  const resolutionDeadline = new Date(
+    createdAt.getTime() + config.resolution * 60 * 60 * 1000
+  );
+  let resolutionStatus: "ok" | "warning" | "breached";
+  let resolutionTimeLeft: string;
+
+  if (ticket.status === "resolved" || ticket.status === "closed") {
+    const resolvedAt = new Date(ticket.updated_at);
+    if (resolvedAt <= resolutionDeadline) {
+      resolutionStatus = "ok";
+      resolutionTimeLeft = "Resolu dans les delais";
+    } else {
+      resolutionStatus = "breached";
+      const exceededMs = resolvedAt.getTime() - resolutionDeadline.getTime();
+      resolutionTimeLeft = `SLA depasse de ${formatDuration(exceededMs)}`;
+    }
+  } else {
+    const remainingMs = resolutionDeadline.getTime() - now.getTime();
+    if (remainingMs <= 0) {
+      resolutionStatus = "breached";
+      resolutionTimeLeft = `SLA depasse de ${formatDuration(Math.abs(remainingMs))}`;
+    } else {
+      const warningThreshold = config.resolution * 60 * 60 * 1000 * 0.25;
+      resolutionStatus = remainingMs <= warningThreshold ? "warning" : "ok";
+      resolutionTimeLeft = `Resolution dans ${formatDuration(remainingMs)}`;
+    }
+  }
+
+  return {
+    responseStatus,
+    resolutionStatus,
+    responseTimeLeft,
+    resolutionTimeLeft,
+  };
+}
+
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.floor(ms / (1000 * 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0 && minutes > 0) return `${hours}h${String(minutes).padStart(2, "0")}`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}min`;
+}
+
+export async function getSlaMetrics() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      complianceRate: 0,
+      avgResponseTime: "—",
+      avgResolutionTime: "—",
+      breachedCount: 0,
+    };
+  }
+
+  // Try to get real tickets with messages
+  let ticketsWithMessages: {
+    priority: "low" | "medium" | "high" | "urgent";
+    status: "open" | "in_progress" | "waiting" | "resolved" | "closed";
+    created_at: string;
+    updated_at: string;
+    messages?: { sender_type: string; created_at: string }[];
+  }[] = [];
+
+  try {
+    const { data, error } = await supabase
+      .from("support_tickets")
+      .select("*, support_ticket_messages(sender_type, created_at)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    if (data && data.length > 0) {
+      ticketsWithMessages = data.map((t: Record<string, unknown>) => ({
+        ...t,
+        priority: t.priority as "low" | "medium" | "high" | "urgent",
+        status: t.status as "open" | "in_progress" | "waiting" | "resolved" | "closed",
+        created_at: t.created_at as string,
+        updated_at: t.updated_at as string,
+        messages: (t.support_ticket_messages || []) as { sender_type: string; created_at: string }[],
+      }));
+    }
+  } catch {
+    // Fallback to demo data
+  }
+
+  if (ticketsWithMessages.length === 0) {
+    ticketsWithMessages = DEMO_TICKETS.map((t) => ({
+      priority: t.priority,
+      status: t.status,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
+      messages: t.messages.map((m) => ({
+        sender_type: m.sender_type,
+        created_at: m.created_at,
+      })),
+    }));
+  }
+
+  const slaConfig = await getSlaConfig();
+  let breachedCount = 0;
+  let totalResponseMs = 0;
+  let responseCount = 0;
+  let totalResolutionMs = 0;
+  let resolutionCount = 0;
+
+  for (const ticket of ticketsWithMessages) {
+    const config = slaConfig[ticket.priority];
+    const createdAt = new Date(ticket.created_at);
+    const responseDeadline = new Date(
+      createdAt.getTime() + config.firstResponse * 60 * 60 * 1000
+    );
+    const resolutionDeadline = new Date(
+      createdAt.getTime() + config.resolution * 60 * 60 * 1000
+    );
+
+    const firstSupportMsg = (ticket.messages || []).find(
+      (m) => m.sender_type === "support"
+    );
+
+    // Check response breach
+    let responseBreach = false;
+    if (firstSupportMsg) {
+      const respTime = new Date(firstSupportMsg.created_at);
+      totalResponseMs += respTime.getTime() - createdAt.getTime();
+      responseCount++;
+      if (respTime > responseDeadline) responseBreach = true;
+    } else if (ticket.status !== "resolved" && ticket.status !== "closed") {
+      if (new Date() > responseDeadline) responseBreach = true;
+    }
+
+    // Check resolution breach
+    let resolutionBreach = false;
+    if (ticket.status === "resolved" || ticket.status === "closed") {
+      const resolvedAt = new Date(ticket.updated_at);
+      totalResolutionMs += resolvedAt.getTime() - createdAt.getTime();
+      resolutionCount++;
+      if (resolvedAt > resolutionDeadline) resolutionBreach = true;
+    } else {
+      if (new Date() > resolutionDeadline) resolutionBreach = true;
+    }
+
+    if (responseBreach || resolutionBreach) breachedCount++;
+  }
+
+  const complianceRate =
+    ticketsWithMessages.length > 0
+      ? Math.round(
+          ((ticketsWithMessages.length - breachedCount) /
+            ticketsWithMessages.length) *
+            100
+        )
+      : 100;
+
+  const avgResponseTime =
+    responseCount > 0
+      ? formatDuration(totalResponseMs / responseCount)
+      : "—";
+
+  const avgResolutionTime =
+    resolutionCount > 0
+      ? formatDuration(totalResolutionMs / resolutionCount)
+      : "—";
+
+  return {
+    complianceRate,
+    avgResponseTime,
+    avgResolutionTime,
+    breachedCount,
+  };
+}
+
 export async function getTicketStats() {
   const supabase = await createClient();
   const {

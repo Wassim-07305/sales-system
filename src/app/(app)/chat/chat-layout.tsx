@@ -21,6 +21,9 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { markChannelAsRead } from "@/lib/actions/communication";
+import { usePresence } from "@/lib/hooks/use-presence";
+import { TypingIndicator } from "@/components/typing-indicator";
+import { OnlineStatus } from "@/components/online-status";
 
 interface ChatLayoutProps {
   initialChannels: Channel[];
@@ -45,7 +48,14 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
   const [channelSearch, setChannelSearch] = useState("");
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>(initialUnreadCounts);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
+
+  const { onlineUsers, typingUsers, setTyping } = usePresence(
+    activeChannel?.id ? `chat:${activeChannel.id}` : null,
+    currentUserId,
+    "Utilisateur"
+  );
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -126,8 +136,16 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
 
     if (!error) {
       setNewMessage("");
+      setTyping(false);
     }
   }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    setTyping(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => setTyping(false), 2000);
+  };
 
   const filteredChannels = channels.filter(
     (c) =>
@@ -203,6 +221,12 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
                   — {activeChannel.description}
                 </span>
               )}
+              {onlineUsers.length > 0 && (
+                <div className="ml-auto flex items-center gap-1.5">
+                  <OnlineStatus isOnline={true} />
+                  <span className="text-xs text-muted-foreground">{onlineUsers.length} en ligne</span>
+                </div>
+              )}
             </div>
 
             {/* Messages */}
@@ -254,8 +278,13 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
               </div>
             </ScrollArea>
 
-            {/* Message input */}
+            {/* Typing indicator + Message input */}
             <div className="p-4 border-t">
+              {typingUsers.length > 0 && (
+                <div className="mb-2">
+                  <TypingIndicator users={typingUsers} />
+                </div>
+              )}
               <form
                 onSubmit={handleSendMessage}
                 className="flex items-center gap-2"
@@ -268,7 +297,7 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
                 </Button>
                 <Input
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder={`Message dans #${activeChannel.name}...`}
                   className="flex-1"
                 />
