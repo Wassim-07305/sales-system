@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getTeamKPIs } from "@/lib/actions/dashboard";
 import { PageHeader } from "@/components/layout/page-header";
@@ -164,14 +165,14 @@ export default async function TeamPage() {
                       className="border-b last:border-0 hover:bg-muted/50 transition-colors"
                     >
                       <td className="py-3 pr-4">
-                        <div className="flex items-center gap-3">
+                        <Link href={`/contacts/${member.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                           <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-xs">
                             {member.fullName?.charAt(0) || "?"}
                           </div>
-                          <span className="font-medium">
+                          <span className="font-medium hover:text-brand hover:underline">
                             {member.fullName || "—"}
                           </span>
-                        </div>
+                        </Link>
                       </td>
                       <td className="py-3 px-4">
                         <Badge variant="outline" className="capitalize">
