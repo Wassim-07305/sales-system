@@ -302,6 +302,77 @@ export async function getScriptTemplates() {
   return data || [];
 }
 
+export async function createFlowchartFromTemplate(templateId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Récupérer le template
+  const { data: template } = await supabase
+    .from("script_templates")
+    .select("*")
+    .eq("id", templateId)
+    .single();
+
+  if (!template) throw new Error("Template introuvable");
+
+  // Extraire les données du flowchart
+  const flowchartData = template.flowchart_data as {
+    nodes?: unknown[];
+    edges?: unknown[];
+  } | null;
+
+  const defaultNodes = [
+    {
+      id: "opening-1",
+      type: "opening",
+      position: { x: 250, y: 50 },
+      data: { label: "Accroche", type: "opening" },
+    },
+    {
+      id: "question-1",
+      type: "question",
+      position: { x: 250, y: 200 },
+      data: { label: "Question de découverte", type: "question" },
+    },
+    {
+      id: "closing-1",
+      type: "closing",
+      position: { x: 250, y: 350 },
+      data: { label: "Closing", type: "closing" },
+    },
+  ];
+
+  const defaultEdges = [
+    { id: "e-opening-question", source: "opening-1", target: "question-1" },
+    { id: "e-question-closing", source: "question-1", target: "closing-1" },
+  ];
+
+  const nodes = flowchartData?.nodes || defaultNodes;
+  const edges = flowchartData?.edges || defaultEdges;
+
+  // Créer le flowchart
+  const { data: flowchart, error } = await supabase
+    .from("script_flowcharts")
+    .insert({
+      title: `${template.title} (copie)`,
+      description: template.content || null,
+      category: template.category || null,
+      nodes,
+      edges,
+      is_template: false,
+      created_by: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/scripts");
+  return flowchart;
+}
+
 // ---------------------
 // AI Script Generation
 // ---------------------

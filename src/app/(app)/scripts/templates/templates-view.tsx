@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,8 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Search, Copy, ArrowLeft } from "lucide-react";
+import { FileText, Search, Copy, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { createFlowchartFromTemplate } from "@/lib/actions/scripts-v2";
 
 interface ScriptTemplate {
   id: string;
@@ -61,10 +64,12 @@ const networkColors: Record<string, string> = {
 };
 
 export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterNiche, setFilterNiche] = useState("all");
   const [filterNetwork, setFilterNetwork] = useState("all");
+  const [isCreating, setIsCreating] = useState<string | null>(null);
 
   // Extract unique values for filters
   const uniqueNiches = Array.from(
@@ -92,10 +97,19 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
     return true;
   });
 
-  function handleUseTemplate(template: ScriptTemplate) {
-    alert(
-      `Template "${template.title}" sélectionné. Cette fonctionnalité sera bientôt disponible.`
-    );
+  async function handleUseTemplate(template: ScriptTemplate) {
+    setIsCreating(template.id);
+    try {
+      const flowchart = await createFlowchartFromTemplate(template.id);
+      toast.success(`Script "${flowchart.title}" créé avec succès`);
+      router.push(`/scripts/flowchart/${flowchart.id}`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Erreur lors de la création"
+      );
+    } finally {
+      setIsCreating(null);
+    }
   }
 
   return (
@@ -219,9 +233,14 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
                 variant="outline"
                 size="sm"
                 className="w-full mt-auto"
+                disabled={isCreating === template.id}
               >
-                <Copy className="h-3.5 w-3.5 mr-2" />
-                Utiliser ce template
+                {isCreating === template.id ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5 mr-2" />
+                )}
+                {isCreating === template.id ? "Création..." : "Utiliser ce template"}
               </Button>
             </CardContent>
           </Card>
