@@ -78,6 +78,23 @@ export function AnalyticsView({
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
 
+  function handleExportCSV() {
+    const rows = [["Mois", "CA (€)", "Deals conclus"]];
+    for (let i = 0; i < filteredRevenue.length; i++) {
+      const rev = filteredRevenue[i];
+      const deal = filteredDeals[i];
+      rows.push([rev?.month || "", String(rev?.value || 0), String(deal?.count || 0)]);
+    }
+    const csv = rows.map((r) => r.join(";")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analytics-${activePeriod}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function handlePeriodChange(key: PeriodKey) {
     setActivePeriod(key);
     if (key === "custom") {
@@ -157,6 +174,10 @@ export function AnalyticsView({
               Benchmarking
             </Button>
           </Link>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
       </PageHeader>
 
