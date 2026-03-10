@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import type { Profile, UserRole } from "@/lib/types/database";
 import { Search, Plus, Mail, Phone, Download } from "lucide-react";
+import { toast } from "sonner";
 import { ImportExportDialog } from "./import-export-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 
@@ -147,10 +148,32 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center gap-1 justify-end">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          if (contact.email) {
+                            window.open(`mailto:${contact.email}`, "_blank");
+                          } else {
+                            toast.error("Aucune adresse email");
+                          }
+                        }}
+                      >
                         <Mail className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          if (contact.phone) {
+                            window.open(`tel:${contact.phone}`, "_self");
+                          } else {
+                            toast.error("Aucun numéro de téléphone");
+                          }
+                        }}
+                      >
                         <Phone className="h-4 w-4" />
                       </Button>
                     </div>

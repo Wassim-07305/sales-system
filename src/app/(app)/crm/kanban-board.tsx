@@ -20,6 +20,7 @@ import { DealCard } from "./deal-card";
 import { NewDealDialog } from "./new-deal-dialog";
 import { DealPanel } from "./deal-panel";
 import { FilterPanel } from "./filter-panel";
+import { PipelineStats } from "./pipeline-stats";
 import { toast } from "sonner";
 import type { Deal, PipelineStage } from "@/lib/types/database";
 import { PIPELINE_DEFAULT_STAGES } from "@/lib/constants";
@@ -173,6 +174,9 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         sources={sources}
         teamMembers={teamMembers}
       />
+
+      {/* Pipeline Stats */}
+      <PipelineStats deals={filteredDeals} />
 
       {/* Search & Temperature Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
