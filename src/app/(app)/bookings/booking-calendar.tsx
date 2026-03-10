@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Clock, User, Phone } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Phone, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookingCalendarProps {
@@ -117,9 +118,10 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                   </div>
                   <div className="space-y-1">
                     {dayBookings.map((booking) => (
-                      <div
+                      <Link
                         key={booking.id}
-                        className="p-1.5 rounded bg-brand/10 text-xs cursor-pointer hover:bg-brand/20 transition-colors"
+                        href={`/bookings/${booking.id}`}
+                        className="block p-1.5 rounded bg-brand/10 text-xs cursor-pointer hover:bg-brand/20 transition-colors"
                       >
                         <p className="font-medium truncate">
                           {booking.prospect_name}
@@ -127,7 +129,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                         <p className="text-muted-foreground">
                           {format(new Date(booking.scheduled_at), "HH:mm")}
                         </p>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -187,6 +189,11 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                           {statusLabels[booking.status]}
                         </Badge>
                         <Badge variant="outline">{booking.slot_type}</Badge>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/bookings/${booking.id}`}>
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   ))}

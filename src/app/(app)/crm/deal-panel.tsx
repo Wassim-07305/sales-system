@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
   Calendar,
   FileText,
   Clock,
+  ExternalLink,
 } from "lucide-react";
 import { updateDealStage, updateDealTemperature, updateDealNotes } from "@/lib/actions/crm";
 
@@ -75,7 +77,15 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
     <Sheet open onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="pb-4">
-          <SheetTitle className="text-xl">{deal.title}</SheetTitle>
+          <div className="flex items-center justify-between">
+            <SheetTitle className="text-xl">{deal.title}</SheetTitle>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/crm/${deal.id}`}>
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Voir detail
+              </Link>
+            </Button>
+          </div>
         </SheetHeader>
 
         {/* Contact info */}
