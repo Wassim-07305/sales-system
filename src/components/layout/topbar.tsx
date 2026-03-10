@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Check, ExternalLink } from "lucide-react";
+import { Bell, Check, ExternalLink, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import { markNotificationRead, markAllNotificationsRead } from "@/lib/actions/notifications";
+import { useUIStore } from "@/stores/ui-store";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -50,6 +51,7 @@ const typeIcons: Record<string, string> = {
 export function Topbar({ title, userId }: TopbarProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { setSearchOpen } = useUIStore();
 
   useEffect(() => {
     const supabase = createClient();
@@ -114,6 +116,18 @@ export function Topbar({ title, userId }: TopbarProps) {
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-6">
       <h1 className="text-xl font-semibold">{title}</h1>
       <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 text-muted-foreground"
+          onClick={() => setSearchOpen(true)}
+        >
+          <Search className="h-4 w-4" />
+          <span className="hidden sm:inline">Rechercher...</span>
+          <kbd className="hidden sm:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
