@@ -197,6 +197,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
             <SelectItem value="cold">Cold</SelectItem>
           </SelectContent>
         </Select>
+        <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
       </div>
 
       {/* Kanban */}
