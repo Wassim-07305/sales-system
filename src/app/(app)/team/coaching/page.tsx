@@ -20,10 +20,18 @@ export default async function CoachingPage() {
   const notes = await getCoachingNotes(user!.id);
   const members = isManager ? await getTeamMembersForFeedback() : [];
 
+  // Default empty plan if none exists
+  const defaultPlan = {
+    userId: user!.id,
+    skills: [],
+    actions: [],
+    resources: [],
+  };
+
   return (
     <CoachingView
       objectives={objectives}
-      developmentPlan={plan}
+      developmentPlan={plan || defaultPlan}
       coachingNotes={notes}
       members={members}
       userRole={userRole}

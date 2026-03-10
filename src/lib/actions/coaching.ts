@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-// Types
+// ─── Types ───────────────────────────────────────────────────────
 export interface CoachingObjective {
   id: string;
   title: string;
@@ -14,13 +14,17 @@ export interface CoachingObjective {
   targetDate: string;
   status: "in_progress" | "completed" | "overdue" | "at_risk";
   assigneeId: string;
+  assigneeName?: string;
   createdBy: string;
+  createdByName?: string;
   notes: string[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface DevelopmentPlan {
+  id?: string;
+  userId: string;
   skills: { name: string; level: number; target: number }[];
   actions: { id: string; title: string; description: string; priority: "high" | "medium" | "low"; done: boolean }[];
   resources: { title: string; url: string; type: string }[];
@@ -38,7 +42,17 @@ export interface CoachingNote {
   createdAt: string;
 }
 
-// Helper: compute status from dates and progress
+export interface CoachingStats {
+  totalObjectives: number;
+  completedObjectives: number;
+  overdueObjectives: number;
+  averageProgress: number;
+  totalNotes: number;
+  lastCoachingDate: string | null;
+}
+
+// ─── Helper Functions ────────────────────────────────────────────
+
 function computeStatus(
   currentValue: number,
   targetValue: number,
@@ -47,15 +61,23 @@ function computeStatus(
 ): CoachingObjective["status"] {
   if (existingStatus === "completed") return "completed";
   if (currentValue >= targetValue) return "completed";
+
   const now = new Date();
   const target = new Date(targetDate);
+
   if (now > target) return "overdue";
-  const totalDays = (target.getTime() - new Date(targetDate).getTime() + (target.getTime() - now.getTime())) || 1;
-  const daysLeft = (target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-  const progressPercent = (currentValue / targetValue) * 100;
-  const timePercent = ((totalDays - daysLeft * (1000 * 60 * 60 * 24)) / totalDays) * 100;
-  // If we're behind schedule by more than 20%, mark as at_risk
-  if (progressPercent < (100 - daysLeft / 30 * 100) * 0.7) return "at_risk";
+
+  // Calculate progress percentage
+  const progressPercent = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
+
+  // Calculate time percentage elapsed
+  const totalTime = target.getTime() - (now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const timeElapsed = now.getTime() - (now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const timePercent = totalTime > 0 ? (timeElapsed / totalTime) * 100 : 100;
+
+  // If progress is significantly behind schedule, mark as at_risk
+  if (progressPercent < timePercent * 0.6) return "at_risk";
+
   return "in_progress";
 }
 
@@ -67,38 +89,112 @@ export async function getObjectives(userId?: string): Promise<CoachingObjective[
 
   const targetId = userId || user.id;
 
-  // Try querying the coaching_objectives table
   const { data, error } = await supabase
     .from("coaching_objectives")
-    .select("*")
+    .select(`
+      *,
+      assignee:profiles!coaching_objectives_assignee_id_fkey(id, full_name),
+      creator:profiles!coaching_objectives_created_by_fkey(id, full_name)
+    `)
     .eq("assignee_id", targetId)
     .order("created_at", { ascending: false });
 
-  if (error || !data) {
-    // Table doesn't exist or error — return mock data for demo
-    return getMockObjectives(targetId);
+  if (error) {
+    console.error("Error fetching coaching objectives:", error);
+    return [];
   }
 
-  return data.map((row: Record<string, unknown>) => ({
-    id: row.id as string,
-    title: row.title as string,
-    description: row.description as string,
-    category: row.category as CoachingObjective["category"],
-    targetValue: row.target_value as number,
-    currentValue: row.current_value as number,
-    targetDate: row.target_date as string,
-    status: computeStatus(
-      row.current_value as number,
-      row.target_value as number,
-      row.target_date as string,
-      row.status as string
-    ),
-    assigneeId: row.assignee_id as string,
-    createdBy: row.created_by as string,
-    notes: JSON.parse((row.notes as string) || "[]"),
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-  }));
+  if (!data) return [];
+
+  return data.map((row) => {
+    const assignee = Array.isArray(row.assignee) ? row.assignee[0] : row.assignee;
+    const creator = Array.isArray(row.creator) ? row.creator[0] : row.creator;
+
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description || "",
+      category: row.category as CoachingObjective["category"],
+      targetValue: row.target_value,
+      currentValue: row.current_value,
+      targetDate: row.target_date,
+      status: computeStatus(
+        row.current_value,
+        row.target_value,
+        row.target_date,
+        row.status
+      ),
+      assigneeId: row.assignee_id,
+      assigneeName: assignee?.full_name || null,
+      createdBy: row.created_by,
+      createdByName: creator?.full_name || null,
+      notes: row.notes || [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  });
+}
+
+// ─── GET ALL OBJECTIVES (FOR MANAGERS) ──────────────────────────
+export async function getAllObjectives(): Promise<CoachingObjective[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  // Check role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
+    throw new Error("Acces refuse : role admin ou manager requis");
+  }
+
+  const { data, error } = await supabase
+    .from("coaching_objectives")
+    .select(`
+      *,
+      assignee:profiles!coaching_objectives_assignee_id_fkey(id, full_name),
+      creator:profiles!coaching_objectives_created_by_fkey(id, full_name)
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching all coaching objectives:", error);
+    return [];
+  }
+
+  if (!data) return [];
+
+  return data.map((row) => {
+    const assignee = Array.isArray(row.assignee) ? row.assignee[0] : row.assignee;
+    const creator = Array.isArray(row.creator) ? row.creator[0] : row.creator;
+
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description || "",
+      category: row.category as CoachingObjective["category"],
+      targetValue: row.target_value,
+      currentValue: row.current_value,
+      targetDate: row.target_date,
+      status: computeStatus(
+        row.current_value,
+        row.target_value,
+        row.target_date,
+        row.status
+      ),
+      assigneeId: row.assignee_id,
+      assigneeName: assignee?.full_name || null,
+      createdBy: row.created_by,
+      createdByName: creator?.full_name || null,
+      notes: row.notes || [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  });
 }
 
 // ─── CREATE OBJECTIVE ────────────────────────────────────────────
@@ -109,7 +205,7 @@ export async function createObjective(data: {
   targetValue: number;
   targetDate: string;
   assigneeId?: string;
-}): Promise<void> {
+}): Promise<CoachingObjective> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
@@ -121,71 +217,142 @@ export async function createObjective(data: {
       .select("role")
       .eq("id", user.id)
       .single();
+
     if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
       throw new Error("Acces refuse : role admin ou manager requis");
     }
   }
 
-  const { error } = await supabase.from("coaching_objectives").insert({
-    title: data.title,
-    description: data.description,
-    category: data.category,
-    target_value: data.targetValue,
-    current_value: 0,
-    target_date: data.targetDate,
-    status: "in_progress",
-    assignee_id: data.assigneeId || user.id,
-    created_by: user.id,
-    notes: "[]",
-  });
+  const { data: objective, error } = await supabase
+    .from("coaching_objectives")
+    .insert({
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      target_value: data.targetValue,
+      current_value: 0,
+      target_date: data.targetDate,
+      status: "in_progress",
+      assignee_id: data.assigneeId || user.id,
+      created_by: user.id,
+      notes: [],
+    })
+    .select()
+    .single();
 
   if (error) {
-    // If table doesn't exist, silently succeed for demo
-    if (error.code === "42P01") return;
-    throw new Error(error.message);
+    console.error("Error creating objective:", error);
+    throw new Error("Erreur lors de la creation de l'objectif");
   }
 
   revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
+
+  return {
+    id: objective.id,
+    title: objective.title,
+    description: objective.description || "",
+    category: objective.category as CoachingObjective["category"],
+    targetValue: objective.target_value,
+    currentValue: objective.current_value,
+    targetDate: objective.target_date,
+    status: "in_progress",
+    assigneeId: objective.assignee_id,
+    createdBy: objective.created_by,
+    notes: objective.notes || [],
+    createdAt: objective.created_at,
+    updatedAt: objective.updated_at,
+  };
+}
+
+// ─── UPDATE OBJECTIVE ────────────────────────────────────────────
+export async function updateObjective(
+  id: string,
+  updates: Partial<{
+    title: string;
+    description: string;
+    category: "calls" | "deals" | "revenue" | "skills" | "other";
+    targetValue: number;
+    targetDate: string;
+  }>
+): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (updates.title !== undefined) updateData.title = updates.title;
+  if (updates.description !== undefined) updateData.description = updates.description;
+  if (updates.category !== undefined) updateData.category = updates.category;
+  if (updates.targetValue !== undefined) updateData.target_value = updates.targetValue;
+  if (updates.targetDate !== undefined) updateData.target_date = updates.targetDate;
+
+  const { error } = await supabase
+    .from("coaching_objectives")
+    .update(updateData)
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error updating objective:", error);
+    throw new Error("Erreur lors de la mise a jour de l'objectif");
+  }
+
+  revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
 }
 
 // ─── UPDATE PROGRESS ─────────────────────────────────────────────
 export async function updateObjectiveProgress(
   id: string,
   currentValue: number,
-  notes?: string
+  note?: string
 ): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  // Get current objective to merge notes
-  const { data: existing } = await supabase
+  // Get current objective to merge notes and compute status
+  const { data: existing, error: fetchError } = await supabase
     .from("coaching_objectives")
     .select("notes, target_value, target_date")
     .eq("id", id)
     .single();
 
-  const existingNotes: string[] = existing ? JSON.parse((existing.notes as string) || "[]") : [];
-  if (notes) {
-    existingNotes.push(`[${new Date().toISOString().slice(0, 10)}] ${notes}`);
+  if (fetchError || !existing) {
+    throw new Error("Objectif introuvable");
   }
 
-  const newStatus = existing
-    ? computeStatus(currentValue, existing.target_value as number, existing.target_date as string)
-    : "in_progress";
+  const existingNotes: string[] = existing.notes || [];
+  if (note) {
+    existingNotes.push(`[${new Date().toISOString().slice(0, 10)}] ${note}`);
+  }
+
+  const newStatus = computeStatus(
+    currentValue,
+    existing.target_value,
+    existing.target_date
+  );
 
   const { error } = await supabase
     .from("coaching_objectives")
     .update({
       current_value: currentValue,
-      notes: JSON.stringify(existingNotes),
+      notes: existingNotes,
       status: newStatus,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
 
-  if (error && error.code !== "42P01") throw new Error(error.message);
+  if (error) {
+    console.error("Error updating objective progress:", error);
+    throw new Error("Erreur lors de la mise a jour de la progression");
+  }
+
   revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
 }
 
 // ─── COMPLETE OBJECTIVE ──────────────────────────────────────────
@@ -194,13 +361,33 @@ export async function completeObjective(id: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
+  // Get target value to set current value equal
+  const { data: existing } = await supabase
+    .from("coaching_objectives")
+    .select("target_value, notes")
+    .eq("id", id)
+    .single();
+
+  const notes = existing?.notes || [];
+  notes.push(`[${new Date().toISOString().slice(0, 10)}] Objectif marque comme complete`);
+
   const { error } = await supabase
     .from("coaching_objectives")
-    .update({ status: "completed", updated_at: new Date().toISOString() })
+    .update({
+      status: "completed",
+      current_value: existing?.target_value || 0,
+      notes,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", id);
 
-  if (error && error.code !== "42P01") throw new Error(error.message);
+  if (error) {
+    console.error("Error completing objective:", error);
+    throw new Error("Erreur lors de la completion de l'objectif");
+  }
+
   revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
 }
 
 // ─── DELETE OBJECTIVE ────────────────────────────────────────────
@@ -214,38 +401,50 @@ export async function deleteObjective(id: string): Promise<void> {
     .delete()
     .eq("id", id);
 
-  if (error && error.code !== "42P01") throw new Error(error.message);
+  if (error) {
+    console.error("Error deleting objective:", error);
+    throw new Error("Erreur lors de la suppression de l'objectif");
+  }
+
   revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
 }
 
 // ─── DEVELOPMENT PLAN ────────────────────────────────────────────
-export async function getDevelopmentPlan(userId?: string): Promise<DevelopmentPlan> {
+export async function getDevelopmentPlan(userId?: string): Promise<DevelopmentPlan | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const targetId = userId || user.id;
 
-  // Try to fetch from development_plans table
   const { data, error } = await supabase
     .from("development_plans")
     .select("*")
     .eq("user_id", targetId)
     .single();
 
-  if (error || !data) {
-    // Return mock plan
-    return getMockDevelopmentPlan();
+  if (error) {
+    if (error.code === "PGRST116") {
+      // No plan found - return null instead of error
+      return null;
+    }
+    console.error("Error fetching development plan:", error);
+    return null;
   }
 
+  if (!data) return null;
+
   return {
+    id: data.id,
+    userId: data.user_id,
     skills: (data.skills as DevelopmentPlan["skills"]) || [],
     actions: (data.actions as DevelopmentPlan["actions"]) || [],
     resources: (data.resources as DevelopmentPlan["resources"]) || [],
   };
 }
 
-// ─── SAVE DEVELOPMENT PLAN ───────────────────────────────────────
+// ─── CREATE OR UPDATE DEVELOPMENT PLAN ──────────────────────────
 export async function saveDevelopmentPlan(
   plan: Partial<DevelopmentPlan>,
   targetUserId?: string
@@ -263,6 +462,7 @@ export async function saveDevelopmentPlan(
       .select("role")
       .eq("id", user.id)
       .single();
+
     if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
       throw new Error("Acces refuse : role admin ou manager requis");
     }
@@ -279,7 +479,56 @@ export async function saveDevelopmentPlan(
       updated_at: new Date().toISOString(),
     }, { onConflict: "user_id" });
 
-  if (error && error.code !== "42P01") throw new Error(error.message);
+  if (error) {
+    console.error("Error saving development plan:", error);
+    throw new Error("Erreur lors de la sauvegarde du plan de developpement");
+  }
+
+  revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
+}
+
+// ─── UPDATE PLAN ACTION STATUS ──────────────────────────────────
+export async function togglePlanAction(
+  actionId: string,
+  done: boolean,
+  targetUserId?: string
+): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const userId = targetUserId || user.id;
+
+  // Get current plan
+  const { data: plan, error: fetchError } = await supabase
+    .from("development_plans")
+    .select("actions")
+    .eq("user_id", userId)
+    .single();
+
+  if (fetchError || !plan) {
+    throw new Error("Plan de developpement introuvable");
+  }
+
+  const actions = (plan.actions as DevelopmentPlan["actions"]) || [];
+  const updatedActions = actions.map((action) =>
+    action.id === actionId ? { ...action, done } : action
+  );
+
+  const { error } = await supabase
+    .from("development_plans")
+    .update({
+      actions: updatedActions,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Error toggling plan action:", error);
+    throw new Error("Erreur lors de la mise a jour de l'action");
+  }
+
   revalidatePath("/team/coaching");
   revalidatePath("/profile/coaching");
 }
@@ -298,22 +547,25 @@ export async function getCoachingNotes(userId: string): Promise<CoachingNote[]> 
     .eq("type", "coaching")
     .order("created_at", { ascending: false });
 
-  if (error || !data) {
-    return getMockCoachingNotes(userId);
+  if (error) {
+    console.error("Error fetching coaching notes:", error);
+    return [];
   }
 
-  return data.map((row: Record<string, unknown>) => {
+  if (!data) return [];
+
+  return data.map((row) => {
     const manager = Array.isArray(row.manager) ? row.manager[0] : row.manager;
     return {
-      id: row.id as string,
-      managerId: row.manager_id as string,
-      managerName: (manager as Record<string, unknown>)?.full_name as string || "Manager",
-      managerAvatar: (manager as Record<string, unknown>)?.avatar_url as string | null,
-      userId: row.member_id as string,
-      content: row.content as string,
-      rating: row.rating as number | null,
-      sessionDate: row.created_at as string,
-      createdAt: row.created_at as string,
+      id: row.id,
+      managerId: row.manager_id,
+      managerName: manager?.full_name || "Manager",
+      managerAvatar: manager?.avatar_url || null,
+      userId: row.member_id,
+      content: row.content,
+      rating: row.rating,
+      sessionDate: row.created_at,
+      createdAt: row.created_at,
     };
   });
 }
@@ -323,11 +575,157 @@ export async function createCoachingNote(data: {
   memberId: string;
   content: string;
   rating?: number;
-}): Promise<void> {
+  title?: string;
+}): Promise<CoachingNote> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, full_name, avatar_url")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
+    throw new Error("Acces refuse : role admin ou manager requis");
+  }
+
+  const { data: note, error } = await supabase
+    .from("feedback_sessions")
+    .insert({
+      manager_id: user.id,
+      member_id: data.memberId,
+      type: "coaching",
+      title: data.title || "Session de coaching",
+      content: data.content,
+      rating: data.rating || null,
+      action_items: [],
+      status: "sent",
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating coaching note:", error);
+    throw new Error("Erreur lors de la creation de la note");
+  }
+
+  revalidatePath("/team/coaching");
+
+  return {
+    id: note.id,
+    managerId: user.id,
+    managerName: profile.full_name || "Manager",
+    managerAvatar: profile.avatar_url,
+    userId: data.memberId,
+    content: data.content,
+    rating: data.rating || null,
+    sessionDate: note.created_at,
+    createdAt: note.created_at,
+  };
+}
+
+// ─── DELETE COACHING NOTE ────────────────────────────────────────
+export async function deleteCoachingNote(noteId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { error } = await supabase
+    .from("feedback_sessions")
+    .delete()
+    .eq("id", noteId)
+    .eq("manager_id", user.id);
+
+  if (error) {
+    console.error("Error deleting coaching note:", error);
+    throw new Error("Erreur lors de la suppression de la note");
+  }
+
+  revalidatePath("/team/coaching");
+}
+
+// ─── GET COACHING STATS ──────────────────────────────────────────
+export async function getCoachingStats(userId?: string): Promise<CoachingStats> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const targetId = userId || user.id;
+
+  // Get objectives
+  const { data: objectives } = await supabase
+    .from("coaching_objectives")
+    .select("status, current_value, target_value")
+    .eq("assignee_id", targetId);
+
+  const total = objectives?.length || 0;
+  const completed = objectives?.filter((o) => o.status === "completed").length || 0;
+  const overdue = objectives?.filter((o) => o.status === "overdue").length || 0;
+
+  let averageProgress = 0;
+  if (objectives && objectives.length > 0) {
+    const totalProgress = objectives.reduce((sum, o) => {
+      const progress = o.target_value > 0 ? (o.current_value / o.target_value) * 100 : 0;
+      return sum + Math.min(progress, 100);
+    }, 0);
+    averageProgress = totalProgress / objectives.length;
+  }
+
+  // Get coaching notes count
+  const { count: notesCount } = await supabase
+    .from("feedback_sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("member_id", targetId)
+    .eq("type", "coaching");
+
+  // Get last coaching date
+  const { data: lastNote } = await supabase
+    .from("feedback_sessions")
+    .select("created_at")
+    .eq("member_id", targetId)
+    .eq("type", "coaching")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  return {
+    totalObjectives: total,
+    completedObjectives: completed,
+    overdueObjectives: overdue,
+    averageProgress: Math.round(averageProgress),
+    totalNotes: notesCount || 0,
+    lastCoachingDate: lastNote?.created_at || null,
+  };
+}
+
+// ─── GET TEAM COACHING OVERVIEW ──────────────────────────────────
+export async function getTeamCoachingOverview(): Promise<{
+  members: Array<{
+    id: string;
+    name: string;
+    avatar: string | null;
+    role: string;
+    objectives: number;
+    completed: number;
+    overdue: number;
+    averageProgress: number;
+    lastCoaching: string | null;
+  }>;
+  totals: {
+    totalMembers: number;
+    totalObjectives: number;
+    completedObjectives: number;
+    overdueObjectives: number;
+    averageTeamProgress: number;
+  };
+}> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  // Check role
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -338,166 +736,98 @@ export async function createCoachingNote(data: {
     throw new Error("Acces refuse : role admin ou manager requis");
   }
 
-  const { error } = await supabase.from("feedback_sessions").insert({
-    manager_id: user.id,
-    member_id: data.memberId,
-    type: "coaching",
-    title: "Session de coaching",
-    content: data.content,
-    rating: data.rating || null,
-    action_items: "[]",
-    status: "sent",
+  // Get all team members (setters and closers)
+  const { data: members } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url, role")
+    .in("role", ["setter", "closer"])
+    .order("full_name");
+
+  if (!members) {
+    return {
+      members: [],
+      totals: {
+        totalMembers: 0,
+        totalObjectives: 0,
+        completedObjectives: 0,
+        overdueObjectives: 0,
+        averageTeamProgress: 0,
+      },
+    };
+  }
+
+  // Get all objectives
+  const { data: allObjectives } = await supabase
+    .from("coaching_objectives")
+    .select("assignee_id, status, current_value, target_value");
+
+  // Get last coaching sessions
+  const { data: lastSessions } = await supabase
+    .from("feedback_sessions")
+    .select("member_id, created_at")
+    .eq("type", "coaching")
+    .order("created_at", { ascending: false });
+
+  const objectivesByMember = new Map<string, typeof allObjectives>();
+  const lastCoachingByMember = new Map<string, string>();
+
+  (allObjectives || []).forEach((obj) => {
+    const existing = objectivesByMember.get(obj.assignee_id) || [];
+    existing.push(obj);
+    objectivesByMember.set(obj.assignee_id, existing);
   });
 
-  if (error) throw new Error(error.message);
-  revalidatePath("/team/coaching");
-}
+  (lastSessions || []).forEach((session) => {
+    if (!lastCoachingByMember.has(session.member_id)) {
+      lastCoachingByMember.set(session.member_id, session.created_at);
+    }
+  });
 
-// ─── MOCK DATA ───────────────────────────────────────────────────
-function getMockObjectives(userId: string): CoachingObjective[] {
-  const now = new Date();
-  return [
-    {
-      id: "obj-1",
-      title: "Atteindre 50 appels par semaine",
-      description: "Augmenter le volume d'appels sortants pour generer plus de rendez-vous qualifies",
-      category: "calls",
-      targetValue: 50,
-      currentValue: 35,
-      targetDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      status: "in_progress",
-      assigneeId: userId,
-      createdBy: userId,
-      notes: ["[2026-03-01] Bonne progression cette semaine, 32 appels realises"],
-      createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: now.toISOString(),
-    },
-    {
-      id: "obj-2",
-      title: "Closer 10 deals ce mois",
-      description: "Objectif mensuel de closing pour atteindre le quota trimestriel",
-      category: "deals",
-      targetValue: 10,
-      currentValue: 6,
-      targetDate: new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      status: "in_progress",
-      assigneeId: userId,
-      createdBy: userId,
-      notes: [],
-      createdAt: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: now.toISOString(),
-    },
-    {
-      id: "obj-3",
-      title: "Generer 25 000 EUR de CA",
-      description: "Objectif de chiffre d'affaires pour le trimestre en cours",
-      category: "revenue",
-      targetValue: 25000,
-      currentValue: 18500,
-      targetDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      status: "in_progress",
-      assigneeId: userId,
-      createdBy: userId,
-      notes: ["[2026-03-05] Bon deal signe a 4500 EUR"],
-      createdAt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: now.toISOString(),
-    },
-    {
-      id: "obj-4",
-      title: "Ameliorer le taux de closing",
-      description: "Passer de 20% a 30% de taux de conversion proposition > closing",
-      category: "skills",
-      targetValue: 30,
-      currentValue: 24,
-      targetDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      status: "overdue",
-      assigneeId: userId,
-      createdBy: userId,
-      notes: [],
-      createdAt: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: now.toISOString(),
-    },
-    {
-      id: "obj-5",
-      title: "Completer la formation negociation",
-      description: "Terminer le module avance de negociation dans l'Academy",
-      category: "skills",
-      targetValue: 100,
-      currentValue: 100,
-      targetDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      status: "completed",
-      assigneeId: userId,
-      createdBy: userId,
-      notes: ["[2026-03-06] Module termine avec succes"],
-      createdAt: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: now.toISOString(),
-    },
-  ];
-}
+  let totalObjectives = 0;
+  let totalCompleted = 0;
+  let totalOverdue = 0;
+  let totalProgress = 0;
 
-function getMockDevelopmentPlan(): DevelopmentPlan {
+  const memberStats = members.map((member) => {
+    const objectives = objectivesByMember.get(member.id) || [];
+    const completed = objectives.filter((o) => o.status === "completed").length;
+    const overdue = objectives.filter((o) => o.status === "overdue").length;
+
+    let avgProgress = 0;
+    if (objectives.length > 0) {
+      const progress = objectives.reduce((sum, o) => {
+        const p = o.target_value > 0 ? (o.current_value / o.target_value) * 100 : 0;
+        return sum + Math.min(p, 100);
+      }, 0);
+      avgProgress = progress / objectives.length;
+    }
+
+    totalObjectives += objectives.length;
+    totalCompleted += completed;
+    totalOverdue += overdue;
+    totalProgress += avgProgress;
+
+    return {
+      id: member.id,
+      name: member.full_name || member.id,
+      avatar: member.avatar_url,
+      role: member.role,
+      objectives: objectives.length,
+      completed,
+      overdue,
+      averageProgress: Math.round(avgProgress),
+      lastCoaching: lastCoachingByMember.get(member.id) || null,
+    };
+  });
+
   return {
-    skills: [
-      { name: "Prospection", level: 7, target: 9 },
-      { name: "Decouverte", level: 6, target: 8 },
-      { name: "Negociation", level: 5, target: 8 },
-      { name: "Closing", level: 6, target: 9 },
-      { name: "Relation client", level: 8, target: 9 },
-      { name: "Objections", level: 4, target: 7 },
-      { name: "Presentation", level: 7, target: 8 },
-      { name: "Suivi", level: 6, target: 8 },
-    ],
-    actions: [
-      { id: "a1", title: "Pratiquer le traitement des objections", description: "Faire 3 sessions de roleplay par semaine sur les objections prix", priority: "high", done: false },
-      { id: "a2", title: "Suivre le module negociation avancee", description: "Completer le cours dans l'Academy avant fin mars", priority: "high", done: false },
-      { id: "a3", title: "Analyser 5 appels de closing reussis", description: "Ecouter et prendre des notes sur les techniques utilisees", priority: "medium", done: true },
-      { id: "a4", title: "Mettre en place un script de decouverte", description: "Creer un script structure pour les appels de decouverte", priority: "medium", done: false },
-      { id: "a5", title: "Lire 'SPIN Selling'", description: "Lire le livre et appliquer les techniques SPIN", priority: "low", done: false },
-    ],
-    resources: [
-      { title: "Module Negociation Avancee", url: "/academy", type: "course" },
-      { title: "Templates Scripts de Vente", url: "/scripts/templates", type: "template" },
-      { title: "Roleplay - Objections", url: "/roleplay", type: "training" },
-      { title: "Guide de Closing", url: "/resources", type: "guide" },
-    ],
+    members: memberStats,
+    totals: {
+      totalMembers: members.length,
+      totalObjectives,
+      completedObjectives: totalCompleted,
+      overdueObjectives: totalOverdue,
+      averageTeamProgress: members.length > 0 ? Math.round(totalProgress / members.length) : 0,
+    },
   };
-}
-
-function getMockCoachingNotes(userId: string): CoachingNote[] {
-  const now = new Date();
-  return [
-    {
-      id: "note-1",
-      managerId: "manager-1",
-      managerName: "Damien Reynaud",
-      managerAvatar: null,
-      userId,
-      content: "Bonne progression sur les appels de decouverte. Points a travailler : poser plus de questions ouvertes, eviter de presenter trop tot. Continuer les roleplay hebdomadaires.",
-      rating: 4,
-      sessionDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: "note-2",
-      managerId: "manager-1",
-      managerName: "Damien Reynaud",
-      managerAvatar: null,
-      userId,
-      content: "Session de travail sur le closing. Amelioration nette sur la gestion du silence. Prochaine etape : maitriser les techniques d'urgence sans pression.",
-      rating: 3,
-      sessionDate: new Date(now.getTime() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(now.getTime() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: "note-3",
-      managerId: "manager-1",
-      managerName: "Damien Reynaud",
-      managerAvatar: null,
-      userId,
-      content: "Revue mensuelle des KPIs. Volume d'appels en hausse (+15%), taux de conversion stable. Objectif : travailler la qualification en amont pour ameliorer la qualite des RDV.",
-      rating: 4,
-      sessionDate: new Date(now.getTime() - 16 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(now.getTime() - 16 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  ];
 }
