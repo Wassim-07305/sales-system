@@ -1,8 +1,13 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import {
   DollarSign,
@@ -14,6 +19,8 @@ import {
   AlertTriangle,
   Funnel,
   PieChart as PieChartIcon,
+  CalendarDays,
+  Download,
 } from "lucide-react";
 import {
   AreaChart,
@@ -49,6 +56,16 @@ interface TeamMember {
   revenue: number;
 }
 
+type PeriodKey = "1m" | "3m" | "6m" | "12m" | "custom";
+
+const PERIOD_OPTIONS: { key: PeriodKey; label: string }[] = [
+  { key: "1m", label: "Ce mois" },
+  { key: "3m", label: "3 mois" },
+  { key: "6m", label: "6 mois" },
+  { key: "12m", label: "12 mois" },
+  { key: "custom", label: "Personnalisé" },
+];
+
 export function AnalyticsView({
   analytics,
   teamPerformance,
@@ -56,6 +73,24 @@ export function AnalyticsView({
   analytics: AnalyticsData;
   teamPerformance: TeamMember[];
 }) {
+  const [activePeriod, setActivePeriod] = useState<PeriodKey>("6m");
+  const [showCustom, setShowCustom] = useState(false);
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+
+  function handlePeriodChange(key: PeriodKey) {
+    setActivePeriod(key);
+    if (key === "custom") {
+      setShowCustom(true);
+    } else {
+      setShowCustom(false);
+    }
+  }
+
+  // Filtrer les données de graphique selon la période sélectionnée
+  const monthsToShow = activePeriod === "1m" ? 1 : activePeriod === "3m" ? 3 : activePeriod === "12m" ? 12 : 6;
+  const filteredRevenue = analytics.revenueByMonth.slice(-monthsToShow);
+  const filteredDeals = analytics.dealsByMonth.slice(-monthsToShow);
   const stats = [
     {
       title: "CA du mois",
@@ -97,7 +132,7 @@ export function AnalyticsView({
   return (
     <div>
       <PageHeader title="Analytics" description="Tableaux de bord et métriques de performance">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/analytics/funnel">
             <Button variant="outline" size="sm">
               <Funnel className="h-4 w-4 mr-2" />
@@ -124,6 +159,51 @@ export function AnalyticsView({
           </Link>
         </div>
       </PageHeader>
+
+      {/* Sélecteur de période */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground mr-1">Période :</span>
+        {PERIOD_OPTIONS.map((opt) => (
+          <Button
+            key={opt.key}
+            variant={activePeriod === opt.key ? "default" : "outline"}
+            size="sm"
+            className={activePeriod === opt.key ? "bg-brand text-brand-dark hover:bg-brand/90" : ""}
+            onClick={() => handlePeriodChange(opt.key)}
+          >
+            {opt.label}
+          </Button>
+        ))}
+      </div>
+
+      {showCustom && (
+        <div className="flex items-end gap-3 mb-6 p-4 rounded-lg border bg-muted/30">
+          <div className="space-y-1">
+            <Label className="text-xs">Du</Label>
+            <Input
+              type="date"
+              value={customFrom}
+              onChange={(e) => setCustomFrom(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Au</Label>
+            <Input
+              type="date"
+              value={customTo}
+              onChange={(e) => setCustomTo(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <Badge variant="outline" className="mb-1">
+            {customFrom && customTo
+              ? `${new Date(customFrom).toLocaleDateString("fr-FR")} → ${new Date(customTo).toLocaleDateString("fr-FR")}`
+              : "Sélectionnez une plage"}
+          </Badge>
+        </div>
+      )}
 
       {/* Big numbers */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
@@ -155,12 +235,12 @@ export function AnalyticsView({
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         <Card>
           <CardHeader>
-            <CardTitle>Évolution du CA (6 mois)</CardTitle>
+            <CardTitle>Évolution du CA ({activePeriod === "custom" ? "personnalisé" : `${monthsToShow} mois`})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={analytics.revenueByMonth}>
+                <AreaChart data={filteredRevenue}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
@@ -179,7 +259,7 @@ export function AnalyticsView({
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.dealsByMonth}>
+                <BarChart data={filteredDeals}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                   <XAxis dataKey="month" />
                   <YAxis allowDecimals={false} />
