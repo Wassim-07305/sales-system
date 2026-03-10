@@ -37,6 +37,54 @@ function first3Chars(s: string | null | undefined): string {
   return normalizeStr(s).slice(0, 3);
 }
 
+// ─── Créer un contact ─────────────────────────────────────────────
+
+export async function createContact(params: {
+  full_name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  role?: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  if (!params.full_name || !params.email) {
+    return { error: "Le nom et l'email sont requis" };
+  }
+
+  // Vérifier les doublons par email
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", params.email)
+    .maybeSingle();
+
+  if (existing) {
+    return { error: "Un contact avec cet email existe déjà" };
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert({
+      full_name: params.full_name,
+      email: params.email,
+      phone: params.phone || null,
+      company: params.company || null,
+      role: params.role || "client_b2b",
+    })
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/contacts");
+  return { contact: data };
+}
+
 /**
  * Find potential duplicate contacts by matching email, phone, or similar names.
  * Returns groups of potential duplicates with a confidence score.

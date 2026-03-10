@@ -159,8 +159,16 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Aucun contact trouvé
+                  <TableCell colSpan={6} className="text-center py-12">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-1">
+                        <Search className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <p className="font-medium">Aucun contact trouvé</p>
+                      <p className="text-sm text-muted-foreground">
+                        {search ? "Essayez avec d'autres termes de recherche" : "Ajoutez votre premier contact ou importez un fichier CSV"}
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

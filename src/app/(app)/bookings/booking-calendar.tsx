@@ -143,9 +143,15 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
             </CardHeader>
             <CardContent>
               {upcomingBookings.length === 0 ? (
-                <p className="text-center text-muted-foreground py-4">
-                  Aucun rendez-vous à venir
-                </p>
+                <div className="text-center py-12">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <p className="font-medium">Aucun rendez-vous à venir</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Programmez un RDV avec le bouton &quot;Nouveau RDV&quot; ci-dessus
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {upcomingBookings.map((booking) => (

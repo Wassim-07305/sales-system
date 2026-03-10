@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import Link from "next/link";
 import { BookingsExportButton } from "./bookings-export-button";
+import { NewBookingDialog } from "./new-booking-dialog";
 
 export default async function BookingsPage() {
   const supabase = await createClient();
@@ -24,6 +25,7 @@ export default async function BookingsPage() {
         description="Calendrier et gestion des rendez-vous"
       >
         <div className="flex items-center gap-2">
+          <NewBookingDialog />
           <BookingsExportButton />
           <Button variant="outline" asChild>
             <Link href="/bookings/calendar-sync">
