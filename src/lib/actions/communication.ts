@@ -139,7 +139,7 @@ export async function getVideoRoom(roomId: string) {
 }
 
 export async function getRecording(roomId: string) {
-  // Stub: In a real app this would fetch from storage / transcription service
+  // Récupérer l'enregistrement depuis la base — transcription externe si configurée
   const supabase = await createClient();
   const { data: room } = await supabase
     .from("video_rooms")

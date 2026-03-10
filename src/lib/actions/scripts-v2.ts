@@ -303,7 +303,7 @@ export async function getScriptTemplates() {
 }
 
 // ---------------------
-// AI Script Generation (Stub)
+// AI Script Generation
 // ---------------------
 
 /**

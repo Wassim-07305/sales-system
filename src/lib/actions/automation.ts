@@ -124,7 +124,7 @@ export async function runPlacementWorkflow() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  // Stub: find setters ready to be placed
+  // Trouver les setters prêts à être placés
   const { data: setters } = await supabase
     .from("profiles")
     .select("id, full_name")

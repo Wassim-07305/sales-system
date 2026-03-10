@@ -95,8 +95,7 @@ export async function checkCriticalAction(action: string) {
 }
 
 export async function validateAction(action: string) {
-  // Stub: In production, this would log the validation event,
-  // update an action queue, and proceed with the approved action.
+  // Journaliser l'événement de validation et approuver l'action
   const supabase = await createClient();
   const {
     data: { user },

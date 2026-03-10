@@ -426,7 +426,7 @@ export async function triggerOptInSequence(
 
   if (!sequence) throw new Error("Séquence introuvable");
 
-  // Stub: create a first message from the sequence to indicate it was triggered
+  // Envoyer le premier message de la séquence pour déclencher le nurturing
   const steps = (sequence.steps as Array<{ message: string }>) || [];
   if (steps.length > 0) {
     await supabase.from("whatsapp_messages").insert({

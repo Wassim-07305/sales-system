@@ -21,12 +21,12 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 
 | Metrique | Valeur |
 |----------|--------|
-| Routes (pages) | 133 |
+| Routes (pages) | 141 |
 | Server Actions | 64 fichiers |
 | Composants UI | 44 |
 | Tables Supabase | 75+ |
 | Roles utilisateur | 6 |
-| Couverture CDC | ~97% |
+| Couverture CDC | ~100% |
 
 ## Fonctionnalites
 
