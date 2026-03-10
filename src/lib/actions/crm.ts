@@ -3,6 +3,52 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+// ─── Queries ────────────────────────────────────────────────────────
+
+export async function getDealById(dealId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { deal: null, error: "Non authentifié" };
+
+  const { data, error } = await supabase
+    .from("deals")
+    .select(`
+      *,
+      contact:profiles!deals_contact_id_fkey(*),
+      assigned_user:profiles!deals_assigned_to_fkey(*),
+      stage:pipeline_stages(*)
+    `)
+    .eq("id", dealId)
+    .single();
+
+  if (error) return { deal: null, error: error.message };
+  return { deal: data, error: null };
+}
+
+export async function getDealActivities(dealId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("deal_activities")
+    .select("*, user:profiles(*)")
+    .eq("deal_id", dealId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  return data || [];
+}
+
+export async function getPipelineStages() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pipeline_stages")
+    .select("*")
+    .order("position", { ascending: true });
+  return data || [];
+}
+
 export interface DealFilters {
   dateFrom?: string;
   dateTo?: string;
@@ -175,6 +221,77 @@ export async function updateDealNotes(dealId: string, notes: string) {
   const { error } = await supabase
     .from("deals")
     .update({ notes, updated_at: new Date().toISOString() })
+    .eq("id", dealId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/crm");
+  revalidatePath(`/crm/${dealId}`);
+  return { success: true };
+}
+
+export async function updateDeal(dealId: string, data: {
+  title?: string;
+  value?: number;
+  probability?: number;
+  source?: string;
+  next_action?: string;
+  next_action_date?: string;
+  assigned_to?: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase
+    .from("deals")
+    .update({ ...data, updated_at: new Date().toISOString() })
+    .eq("id", dealId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/crm");
+  revalidatePath(`/crm/${dealId}`);
+  return { success: true };
+}
+
+export async function addDealActivity(dealId: string, type: string, content: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase
+    .from("deal_activities")
+    .insert({
+      deal_id: dealId,
+      user_id: user.id,
+      type,
+      content,
+    });
+
+  if (error) return { error: error.message };
+
+  // Update last_contact_at on the deal
+  await supabase
+    .from("deals")
+    .update({ last_contact_at: new Date().toISOString() })
+    .eq("id", dealId);
+
+  revalidatePath(`/crm/${dealId}`);
+  return { success: true };
+}
+
+export async function deleteDeal(dealId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Delete activities first
+  await supabase.from("deal_activities").delete().eq("deal_id", dealId);
+
+  const { error } = await supabase
+    .from("deals")
+    .delete()
     .eq("id", dealId);
 
   if (error) return { error: error.message };
