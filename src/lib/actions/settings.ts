@@ -147,3 +147,68 @@ export async function updateProfile(params: {
   revalidatePath("/profile");
   return { success: true };
 }
+
+// ─── Branding personnel ──────────────────────────────────────────────
+
+export async function saveBrandingSettings(params: {
+  full_name: string;
+  bio: string;
+  avatar_url: string;
+  color_palette: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Mettre à jour le profil
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({
+      full_name: params.full_name || null,
+      bio: params.bio || null,
+      avatar_url: params.avatar_url || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (profileError) return { error: profileError.message };
+
+  // Sauvegarder la palette dans user_settings
+  const { error: settingsError } = await supabase.from("user_settings").upsert(
+    {
+      user_id: user.id,
+      key: "color_palette",
+      value: params.color_palette,
+    },
+    { onConflict: "user_id,key" }
+  );
+
+  if (settingsError) {
+    console.error("Erreur sauvegarde palette:", settingsError);
+  }
+
+  revalidatePath("/settings/branding");
+  revalidatePath("/profile");
+  return { success: true };
+}
+
+export async function getBrandingSettings() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { color_palette: "default" };
+
+  const { data } = await supabase
+    .from("user_settings")
+    .select("value")
+    .eq("user_id", user.id)
+    .eq("key", "color_palette")
+    .single();
+
+  return {
+    color_palette: data?.value || "default",
+  };
+}

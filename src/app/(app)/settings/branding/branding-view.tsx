@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { saveBrandingSettings } from "@/lib/actions/settings";
 
 interface Profile {
   full_name: string | null;
@@ -27,6 +28,7 @@ interface Profile {
 
 interface Props {
   profile: Profile | null;
+  initialPalette?: string;
 }
 
 const COLOR_PALETTES = [
@@ -74,17 +76,27 @@ const COLOR_PALETTES = [
   },
 ];
 
-export function BrandingView({ profile }: Props) {
+export function BrandingView({ profile, initialPalette = "default" }: Props) {
   const [isPending, startTransition] = useTransition();
   const [displayName, setDisplayName] = useState(profile?.full_name || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
-  const [selectedPalette, setSelectedPalette] = useState("default");
+  const [selectedPalette, setSelectedPalette] = useState(initialPalette);
 
   function handleSave() {
     startTransition(async () => {
-      // Stub: would save branding preferences
-      toast.success("Branding mis à jour avec succès !");
+      const result = await saveBrandingSettings({
+        full_name: displayName,
+        bio,
+        avatar_url: avatarUrl,
+        color_palette: selectedPalette,
+      });
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Branding mis à jour avec succès !");
+      }
     });
   }
 

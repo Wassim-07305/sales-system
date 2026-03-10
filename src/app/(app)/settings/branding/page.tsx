@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { BrandingView } from "./branding-view";
+import { getBrandingSettings } from "@/lib/actions/settings";
 
 export default async function BrandingPage() {
   const supabase = await createClient();
@@ -16,5 +17,13 @@ export default async function BrandingPage() {
     .eq("id", user.id)
     .single();
 
-  return <BrandingView profile={profile as any} />;
+  // Fetch saved color palette
+  const brandingSettings = await getBrandingSettings();
+
+  return (
+    <BrandingView
+      profile={profile}
+      initialPalette={brandingSettings.color_palette}
+    />
+  );
 }
