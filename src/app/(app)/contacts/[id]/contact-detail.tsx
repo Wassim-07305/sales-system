@@ -20,6 +20,7 @@ import {
   History,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { ClientTimeline } from "@/components/client-timeline";
 
 interface ContactDetailProps {
@@ -109,20 +110,43 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (contact.phone) {
+                    window.open(`tel:${contact.phone}`, "_self");
+                  } else {
+                    toast.error("Aucun numéro de téléphone");
+                  }
+                }}
+              >
                 <Phone className="h-4 w-4 mr-1" />
                 Appeler
               </Button>
-              <Button variant="outline" size="sm">
-                <MessageSquare className="h-4 w-4 mr-1" />
-                Message
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (contact.email) {
+                    window.open(`mailto:${contact.email}`, "_blank");
+                  } else {
+                    toast.error("Aucune adresse email");
+                  }
+                }}
+              >
+                <Mail className="h-4 w-4 mr-1" />
+                Email
               </Button>
               <Button
                 size="sm"
                 className="bg-brand text-brand-dark hover:bg-brand/90"
+                asChild
               >
-                <FileText className="h-4 w-4 mr-1" />
-                Contrat
+                <Link href={`/contracts/new?contact_id=${contact.id}`}>
+                  <FileText className="h-4 w-4 mr-1" />
+                  Contrat
+                </Link>
               </Button>
             </div>
           </div>
