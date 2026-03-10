@@ -2,12 +2,20 @@ import OpenAI from "openai";
 
 // ---------------------------------------------------------------------------
 // OpenRouter AI Client — centralized for the whole app
+// Lazy initialization to avoid build-time errors when env vars are missing
 // ---------------------------------------------------------------------------
 
-const openrouter = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+let _openrouter: OpenAI | null = null;
+
+function getOpenRouterClient(): OpenAI {
+  if (!_openrouter) {
+    _openrouter = new OpenAI({
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey: process.env.OPENROUTER_API_KEY || "missing-key",
+    });
+  }
+  return _openrouter;
+}
 
 // Default model — fast & cheap for most tasks
 const DEFAULT_MODEL = "anthropic/claude-3.5-haiku";
@@ -38,7 +46,7 @@ export async function aiComplete(
   }
   messages.push({ role: "user", content: prompt });
 
-  const response = await openrouter.chat.completions.create({
+  const response = await getOpenRouterClient().chat.completions.create({
     model: options?.model || DEFAULT_MODEL,
     messages,
     max_tokens: options?.maxTokens || 1024,
@@ -59,7 +67,7 @@ export async function aiChat(
     temperature?: number;
   }
 ): Promise<string> {
-  const response = await openrouter.chat.completions.create({
+  const response = await getOpenRouterClient().chat.completions.create({
     model: options?.model || SMART_MODEL,
     messages,
     max_tokens: options?.maxTokens || 512,
