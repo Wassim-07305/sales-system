@@ -17,6 +17,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DownloadPdfButton } from "./download-pdf-button";
+import { ContractsExportButton } from "./contracts-export-button";
 
 const statusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
@@ -49,6 +50,7 @@ export default async function ContractsPage() {
         description="Gérez vos contrats et signatures"
       >
         <div className="flex items-center gap-2">
+          <ContractsExportButton />
           <Link href="/contracts/cash-flow">
             <Button variant="outline" size="sm">
               <DollarSign className="h-4 w-4 mr-2" />

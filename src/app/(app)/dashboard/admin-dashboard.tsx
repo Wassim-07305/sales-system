@@ -10,7 +10,12 @@ import {
   Calendar,
   AlertTriangle,
   Trophy,
+  BarChart3,
+  Percent,
+  Target,
+  Settings2,
 } from "lucide-react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -69,7 +74,111 @@ function getStageBadgeVariant(stage: string) {
   }
 }
 
-export function AdminDashboard({ data }: { data: AdminDashboardData }) {
+interface CustomWidget {
+  id: string;
+  type: string;
+  position: number;
+  config: Record<string, unknown>;
+}
+
+interface WidgetDataItem {
+  value: unknown;
+  label: string;
+  suffix?: string;
+}
+
+const WIDGET_ICONS: Record<string, typeof DollarSign> = {
+  revenue_month: DollarSign,
+  deals_count: BarChart3,
+  conversion_rate: Percent,
+  pipeline_value: Target,
+  top_sources: TrendingUp,
+  recent_deals: Trophy,
+};
+
+function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }) {
+  const Icon = WIDGET_ICONS[type] || BarChart3;
+
+  if (type === "top_sources" && Array.isArray(data.value)) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center">
+              <Icon className="h-4 w-4 text-brand" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">{data.label}</p>
+          </div>
+          <div className="space-y-2">
+            {(data.value as Array<{ name: string; count: number }>).map((s, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <span>{s.name}</span>
+                <Badge variant="secondary">{s.count}</Badge>
+              </div>
+            ))}
+            {(data.value as Array<unknown>).length === 0 && (
+              <p className="text-xs text-muted-foreground">Aucune donnée</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (type === "recent_deals" && Array.isArray(data.value)) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center">
+              <Icon className="h-4 w-4 text-brand" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">{data.label}</p>
+          </div>
+          <div className="space-y-2">
+            {(data.value as Array<{ title: string; value: number; stage: string }>).map((d, i) => (
+              <div key={i} className="flex items-center justify-between text-sm border-b last:border-0 pb-1">
+                <span className="truncate">{d.title}</span>
+                <span className="font-semibold text-brand">{formatCurrency(d.value || 0)}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Widget simple (nombre)
+  const displayValue = typeof data.value === "number"
+    ? type.includes("revenue") || type.includes("pipeline")
+      ? formatCurrency(data.value)
+      : `${data.value}${data.suffix || ""}`
+    : "—";
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+            <Icon className="h-5 w-5 text-brand" />
+          </div>
+        </div>
+        <p className="text-2xl font-bold">{displayValue}</p>
+        <p className="text-sm text-muted-foreground mt-1">{data.label}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function AdminDashboard({
+  data,
+  customWidgets,
+  widgetData,
+}: {
+  data: AdminDashboardData;
+  customWidgets?: CustomWidget[];
+  widgetData?: Record<string, unknown>;
+}) {
   const statCards = [
     {
       title: "CA du mois",
@@ -289,6 +398,33 @@ export function AdminDashboard({ data }: { data: AdminDashboardData }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Widgets personnalisés */}
+      {customWidgets && customWidgets.length > 0 && widgetData && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Settings2 className="h-4 w-4" />
+              Widgets personnalisés
+            </h3>
+            <Link
+              href="/settings/dashboard-builder"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Configurer
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {customWidgets.map((widget) => (
+              <CustomWidgetCard
+                key={widget.id}
+                type={widget.type}
+                data={(widgetData[widget.type] as WidgetDataItem) || { value: null, label: widget.type }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

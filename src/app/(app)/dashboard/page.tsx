@@ -9,6 +9,7 @@ import {
   getSetterDashboardData,
 } from "@/lib/actions/dashboard";
 import { calculateReadinessScore } from "@/lib/actions/readiness";
+import { getDashboardWidgets, getWidgetData } from "@/lib/actions/dashboard-builder";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function DashboardPage() {
@@ -30,8 +31,28 @@ export default async function DashboardPage() {
   switch (role) {
     case "admin":
     case "manager": {
-      const data = await getAdminDashboardData();
-      return <AdminDashboard data={data} />;
+      const [data, customWidgets] = await Promise.all([
+        getAdminDashboardData(),
+        getDashboardWidgets(),
+      ]);
+
+      // Récupérer les données de chaque widget personnalisé
+      const widgetDataMap: Record<string, unknown> = {};
+      for (const widget of customWidgets) {
+        try {
+          widgetDataMap[widget.type] = await getWidgetData(widget.type);
+        } catch {
+          widgetDataMap[widget.type] = { value: null, label: widget.type };
+        }
+      }
+
+      return (
+        <AdminDashboard
+          data={data}
+          customWidgets={customWidgets as any}
+          widgetData={widgetDataMap}
+        />
+      );
     }
     case "setter":
     case "closer": {
