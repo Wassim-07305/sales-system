@@ -209,14 +209,78 @@ export async function generateMonthlyReport() {
 
   if (existing) return { error: "Le rapport de ce mois existe déjà" };
 
-  // Generate mock metrics
-  const mockMetrics = {
-    revenue: Math.round(Math.random() * 50000 + 10000),
-    deals_closed: Math.floor(Math.random() * 20 + 5),
-    new_prospects: Math.floor(Math.random() * 50 + 10),
-    conversion_rate: Math.round(Math.random() * 30 + 10),
-    setter_performance: Math.round(Math.random() * 40 + 60),
-    avg_deal_value: Math.round(Math.random() * 3000 + 1000),
+  // Get date range for this month
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  // Get setters matched to this entrepreneur
+  const { data: setters } = await supabase
+    .from("profiles")
+    .select("id, health_score")
+    .eq("matched_entrepreneur_id", user.id)
+    .in("role", ["setter", "closer"]);
+
+  const setterIds = (setters || []).map((s) => s.id);
+
+  // Calculate real metrics from deals
+  let revenue = 0;
+  let dealsClosed = 0;
+  let newProspects = 0;
+  let totalDeals = 0;
+
+  if (setterIds.length > 0) {
+    // Get closed deals this month
+    const { data: closedDeals } = await supabase
+      .from("deals")
+      .select("value")
+      .in("assigned_to", setterIds)
+      .eq("stage", "Client Signé")
+      .gte("updated_at", startOfMonth.toISOString())
+      .lte("updated_at", endOfMonth.toISOString());
+
+    dealsClosed = closedDeals?.length || 0;
+    revenue = (closedDeals || []).reduce((sum, d) => sum + (d.value || 0), 0);
+
+    // Get new prospects this month
+    const { count: prospectsCount } = await supabase
+      .from("deals")
+      .select("id", { count: "exact", head: true })
+      .in("assigned_to", setterIds)
+      .gte("created_at", startOfMonth.toISOString())
+      .lte("created_at", endOfMonth.toISOString());
+
+    newProspects = prospectsCount || 0;
+
+    // Get total deals for conversion rate
+    const { count: totalCount } = await supabase
+      .from("deals")
+      .select("id", { count: "exact", head: true })
+      .in("assigned_to", setterIds)
+      .gte("created_at", startOfMonth.toISOString())
+      .lte("created_at", endOfMonth.toISOString());
+
+    totalDeals = totalCount || 0;
+  }
+
+  // Calculate conversion rate
+  const conversionRate = totalDeals > 0 ? Math.round((dealsClosed / totalDeals) * 100) : 0;
+
+  // Calculate average setter performance (health score)
+  const avgSetterPerformance = setters && setters.length > 0
+    ? Math.round(setters.reduce((sum, s) => sum + (s.health_score || 0), 0) / setters.length)
+    : 0;
+
+  // Calculate average deal value
+  const avgDealValue = dealsClosed > 0 ? Math.round(revenue / dealsClosed) : 0;
+
+  const metrics = {
+    revenue,
+    deals_closed: dealsClosed,
+    new_prospects: newProspects,
+    conversion_rate: conversionRate,
+    setter_performance: avgSetterPerformance,
+    avg_deal_value: avgDealValue,
+    active_setters: setterIds.length,
   };
 
   const { data: report, error } = await supabase
@@ -224,7 +288,7 @@ export async function generateMonthlyReport() {
     .insert({
       entrepreneur_id: user.id,
       report_month: reportMonth,
-      metrics: mockMetrics,
+      metrics,
     })
     .select()
     .single();
