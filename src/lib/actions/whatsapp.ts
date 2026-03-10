@@ -157,16 +157,66 @@ export async function sendWhatsAppMessage(data: {
 
   if (!connection) throw new Error("Aucune connexion WhatsApp");
 
-  // Stub: create message record (actual sending would use WhatsApp API)
+  // Récupérer le numéro du prospect
+  const { data: prospect } = await supabase
+    .from("prospects")
+    .select("phone")
+    .eq("id", data.prospectId)
+    .single();
+
+  let waMessageId: string | null = null;
+  let status = "sent";
+
+  // Envoyer via l'API WhatsApp Business si configurée
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (accessToken && phoneNumberId && prospect?.phone) {
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: prospect.phone.replace(/[^0-9]/g, ""),
+            type: "text",
+            text: { body: data.content },
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        waMessageId = result.messages?.[0]?.id || null;
+        status = "sent";
+      } else {
+        const errorBody = await response.json();
+        console.error("WhatsApp API error:", errorBody);
+        status = "failed";
+      }
+    } catch (err) {
+      console.error("WhatsApp send error:", err);
+      status = "failed";
+    }
+  }
+
+  // Enregistrer le message en base
   const { error } = await supabase.from("whatsapp_messages").insert({
     connection_id: connection.id,
     prospect_id: data.prospectId,
     direction: "outbound",
     content: data.content,
-    status: "sent",
+    status,
+    wa_message_id: waMessageId,
   });
 
   if (error) throw new Error(error.message);
+  if (status === "failed") throw new Error("Échec de l'envoi WhatsApp");
   revalidatePath("/whatsapp");
 }
 

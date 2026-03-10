@@ -39,7 +39,6 @@ export async function getCalendarSyncStatus(): Promise<CalendarSyncStatus> {
     };
   }
 
-  // Check if Google client ID is configured
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   if (!googleClientId) {
     return {
@@ -50,14 +49,207 @@ export async function getCalendarSyncStatus(): Promise<CalendarSyncStatus> {
     };
   }
 
-  // TODO: When Google OAuth is configured, check for stored tokens
-  // For now, return disconnected state
+  // Vérifier si des tokens Google sont stockés pour l'utilisateur
+  const { data: tokenData } = await supabase
+    .from("user_settings")
+    .select("value")
+    .eq("user_id", user.id)
+    .eq("key", "google_calendar_tokens")
+    .single();
+
+  if (!tokenData?.value) {
+    return {
+      connected: false,
+      lastSyncAt: null,
+      syncedEventsCount: 0,
+      googleEmail: null,
+    };
+  }
+
+  const tokens = tokenData.value as Record<string, unknown>;
+  const expiresAt = tokens.expires_at as number;
+  const isExpired = expiresAt ? Date.now() > expiresAt : true;
+
+  // Récupérer les stats de sync
+  const { data: syncData } = await supabase
+    .from("user_settings")
+    .select("value")
+    .eq("user_id", user.id)
+    .eq("key", "calendar_sync_stats")
+    .single();
+
+  const syncStats = (syncData?.value as Record<string, unknown>) || {};
+
   return {
-    connected: false,
-    lastSyncAt: null,
-    syncedEventsCount: 0,
-    googleEmail: null,
+    connected: !isExpired,
+    lastSyncAt: (syncStats.last_sync_at as string) || null,
+    syncedEventsCount: (syncStats.synced_count as number) || 0,
+    googleEmail: (tokens.email as string) || null,
   };
+}
+
+export async function connectGoogleCalendar(authCode: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "Utilisateur non authentifié" };
+  }
+
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return {
+      success: false,
+      message: "Configuration Google Calendar manquante (GOOGLE_CLIENT_SECRET)",
+    };
+  }
+
+  try {
+    // Échanger le code d'autorisation contre des tokens
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code: authCode,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/google/callback`,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.json();
+      return {
+        success: false,
+        message: `Erreur Google: ${error.error_description || error.error}`,
+      };
+    }
+
+    const tokens = await tokenResponse.json();
+
+    // Récupérer l'email Google
+    const userInfoResponse = await fetch(
+      "https://www.googleapis.com/oauth2/v2/userinfo",
+      { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+    );
+    const userInfo = userInfoResponse.ok ? await userInfoResponse.json() : {};
+
+    // Stocker les tokens
+    await supabase.from("user_settings").upsert(
+      {
+        user_id: user.id,
+        key: "google_calendar_tokens",
+        value: {
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          expires_at: Date.now() + tokens.expires_in * 1000,
+          email: userInfo.email || null,
+        } as unknown as Record<string, unknown>,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,key" }
+    );
+
+    revalidatePath("/bookings/calendar-sync");
+    return { success: true, message: "Google Calendar connecté avec succès" };
+  } catch (err) {
+    console.error("Google Calendar connect error:", err);
+    return { success: false, message: "Erreur lors de la connexion" };
+  }
+}
+
+export async function disconnectGoogleCalendar(): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "Utilisateur non authentifié" };
+  }
+
+  await supabase
+    .from("user_settings")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("key", "google_calendar_tokens");
+
+  revalidatePath("/bookings/calendar-sync");
+  return { success: true, message: "Google Calendar déconnecté" };
+}
+
+async function getGoogleAccessToken(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<string | null> {
+  const { data: tokenData } = await supabase
+    .from("user_settings")
+    .select("value")
+    .eq("user_id", userId)
+    .eq("key", "google_calendar_tokens")
+    .single();
+
+  if (!tokenData?.value) return null;
+
+  const tokens = tokenData.value as Record<string, unknown>;
+  let accessToken = tokens.access_token as string;
+  const expiresAt = tokens.expires_at as number;
+  const refreshToken = tokens.refresh_token as string;
+
+  // Rafraîchir le token si expiré
+  if (Date.now() > expiresAt && refreshToken) {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) return null;
+
+    try {
+      const refreshResponse = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          refresh_token: refreshToken,
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: "refresh_token",
+        }),
+      });
+
+      if (refreshResponse.ok) {
+        const newTokens = await refreshResponse.json();
+        accessToken = newTokens.access_token;
+
+        // Mettre à jour les tokens stockés
+        await supabase.from("user_settings").upsert(
+          {
+            user_id: userId,
+            key: "google_calendar_tokens",
+            value: {
+              ...tokens,
+              access_token: accessToken,
+              expires_at: Date.now() + newTokens.expires_in * 1000,
+            } as unknown as Record<string, unknown>,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,key" }
+        );
+      } else {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  return accessToken;
 }
 
 export async function syncCalendarEvents(): Promise<{
@@ -71,34 +263,165 @@ export async function syncCalendarEvents(): Promise<{
   } = await supabase.auth.getUser();
 
   if (!user) {
+    return { success: false, message: "Utilisateur non authentifié" };
+  }
+
+  const accessToken = await getGoogleAccessToken(supabase, user.id);
+  if (!accessToken) {
     return {
       success: false,
-      message: "Utilisateur non authentifie",
+      message: "Google Calendar non connecté. Connectez votre compte Google d'abord.",
     };
   }
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  if (!googleClientId) {
+  // Récupérer les paramètres de sync
+  const settings = await getCalendarSettings();
+
+  try {
+    let syncedCount = 0;
+
+    // Export : envoyer les bookings vers Google Calendar
+    if (settings.syncDirection === "export_only" || settings.syncDirection === "bidirectional") {
+      // Récupérer les bookings non synchronisés
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("*, contact:contacts(id, first_name, last_name, email)")
+        .eq("user_id", user.id)
+        .is("google_event_id", null)
+        .gte("date", new Date().toISOString().split("T")[0]);
+
+      for (const booking of bookings || []) {
+        const contact = Array.isArray(booking.contact) ? booking.contact[0] : booking.contact;
+        const contactName = contact
+          ? `${contact.first_name || ""} ${contact.last_name || ""}`.trim()
+          : "Contact";
+
+        const startDateTime = booking.date && booking.time
+          ? `${booking.date}T${booking.time}:00`
+          : booking.date;
+
+        const endDate = new Date(startDateTime);
+        endDate.setMinutes(endDate.getMinutes() + (booking.duration || 30));
+
+        const eventBody = {
+          summary: `${booking.type || "RDV"} — ${contactName}`,
+          description: booking.notes || `Rendez-vous via Sales System`,
+          start: {
+            dateTime: startDateTime,
+            timeZone: "Europe/Paris",
+          },
+          end: {
+            dateTime: endDate.toISOString().replace("Z", ""),
+            timeZone: "Europe/Paris",
+          },
+        };
+
+        const calendarId = settings.defaultCalendarId || "primary";
+        const createResponse = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(eventBody),
+          }
+        );
+
+        if (createResponse.ok) {
+          const event = await createResponse.json();
+          // Marquer le booking comme synchronisé
+          await supabase
+            .from("bookings")
+            .update({ google_event_id: event.id })
+            .eq("id", booking.id);
+          syncedCount++;
+        }
+      }
+    }
+
+    // Import : récupérer les événements Google Calendar
+    if (settings.syncDirection === "import_only" || settings.syncDirection === "bidirectional") {
+      const calendarId = settings.defaultCalendarId || "primary";
+      const now = new Date().toISOString();
+      const oneMonthLater = new Date();
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+      const eventsResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?` +
+          new URLSearchParams({
+            timeMin: now,
+            timeMax: oneMonthLater.toISOString(),
+            singleEvents: "true",
+            orderBy: "startTime",
+            maxResults: "50",
+          }),
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      if (eventsResponse.ok) {
+        const eventsData = await eventsResponse.json();
+        const events = eventsData.items || [];
+
+        for (const event of events) {
+          // Vérifier si l'événement est déjà importé
+          const { data: existing } = await supabase
+            .from("bookings")
+            .select("id")
+            .eq("google_event_id", event.id)
+            .single();
+
+          if (!existing && event.start?.dateTime) {
+            const startDate = new Date(event.start.dateTime);
+            const endDate = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+            const durationMinutes = endDate
+              ? Math.round((endDate.getTime() - startDate.getTime()) / 60000)
+              : 30;
+
+            await supabase.from("bookings").insert({
+              user_id: user.id,
+              date: startDate.toISOString().split("T")[0],
+              time: startDate.toTimeString().substring(0, 5),
+              duration: durationMinutes,
+              type: "google_import",
+              notes: event.summary || "Événement Google Calendar",
+              status: "confirmed",
+              google_event_id: event.id,
+            });
+            syncedCount++;
+          }
+        }
+      }
+    }
+
+    // Mettre à jour les stats de sync
+    await supabase.from("user_settings").upsert(
+      {
+        user_id: user.id,
+        key: "calendar_sync_stats",
+        value: {
+          last_sync_at: new Date().toISOString(),
+          synced_count: syncedCount,
+        } as unknown as Record<string, unknown>,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,key" }
+    );
+
+    revalidatePath("/bookings/calendar-sync");
+    return {
+      success: true,
+      message: `Synchronisation réussie : ${syncedCount} événement${syncedCount > 1 ? "s" : ""} synchronisé${syncedCount > 1 ? "s" : ""}`,
+      syncedCount,
+    };
+  } catch (err) {
+    console.error("Calendar sync error:", err);
     return {
       success: false,
-      message:
-        "Configuration Google Calendar requise. Ajoutez NEXT_PUBLIC_GOOGLE_CLIENT_ID dans vos variables d'environnement.",
+      message: "Erreur lors de la synchronisation. Vérifiez votre connexion Google.",
     };
   }
-
-  // TODO: Implement actual Google Calendar sync when OAuth credentials are available
-  // Steps would be:
-  // 1. Retrieve stored Google OAuth tokens for this user
-  // 2. Fetch bookings from Supabase
-  // 3. Create/update Google Calendar events
-  // 4. If bidirectional, also import Google Calendar events as bookings
-  // 5. Update last_sync_at timestamp
-
-  return {
-    success: false,
-    message:
-      "Configuration Google Calendar requise. Les identifiants OAuth ne sont pas encore configures.",
-  };
 }
 
 export async function getCalendarSettings(): Promise<CalendarSettings> {
@@ -111,8 +434,6 @@ export async function getCalendarSettings(): Promise<CalendarSettings> {
     return DEFAULT_SETTINGS;
   }
 
-  // Try to read settings from user_settings or a JSON column
-  // For now, we use a simple approach checking a hypothetical user_settings table
   const { data: settings } = await supabase
     .from("user_settings")
     .select("value")
@@ -146,10 +467,9 @@ export async function saveCalendarSettings(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { success: false, message: "Utilisateur non authentifie" };
+    return { success: false, message: "Utilisateur non authentifié" };
   }
 
-  // Upsert into user_settings table
   const { error } = await supabase.from("user_settings").upsert(
     {
       user_id: user.id,
@@ -161,15 +481,13 @@ export async function saveCalendarSettings(
   );
 
   if (error) {
-    // If user_settings table doesn't exist yet, return graceful message
     console.error("Error saving calendar settings:", error);
     return {
       success: false,
-      message:
-        "Impossible de sauvegarder les parametres. La table user_settings n'existe peut-etre pas encore.",
+      message: "Impossible de sauvegarder les paramètres.",
     };
   }
 
   revalidatePath("/bookings/calendar-sync");
-  return { success: true, message: "Parametres sauvegardes avec succes" };
+  return { success: true, message: "Paramètres sauvegardés avec succès" };
 }
