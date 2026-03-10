@@ -134,16 +134,17 @@ function ReportedMessagesTab({ messages }: { messages: ReportedMessage[] }) {
   const [isPending, startTransition] = useTransition();
 
   function handleAction(
-    messageId: string,
-    action: "approve" | "delete" | "warn"
+    reportId: string,
+    action: "resolve" | "dismiss" | "review",
+    resolution?: string
   ) {
     startTransition(async () => {
       try {
-        await moderateMessage(messageId, action);
+        await moderateMessage(reportId, action, resolution);
         const labels = {
-          approve: "Message approuvé",
-          delete: "Message supprimé",
-          warn: "Avertissement envoyé",
+          resolve: "Signalement résolu",
+          dismiss: "Signalement rejeté",
+          review: "Signalement en revue",
         };
         toast.success(labels[action]);
         router.refresh();
@@ -213,29 +214,44 @@ function ReportedMessageCard({
   resolved,
 }: {
   message: ReportedMessage;
-  onAction: (id: string, action: "approve" | "delete" | "warn") => void;
+  onAction: (id: string, action: "resolve" | "dismiss" | "review", resolution?: string) => void;
   isPending: boolean;
   resolved?: boolean;
 }) {
-  const statusBadge = {
+  const statusBadge: Record<string, React.ReactNode> = {
     pending: (
       <Badge variant="outline" className="text-amber-500 border-amber-500/30">
         En attente
       </Badge>
     ),
-    approved: (
+    reviewed: (
+      <Badge variant="outline" className="text-blue-500 border-blue-500/30">
+        En revue
+      </Badge>
+    ),
+    resolved: (
       <Badge variant="outline" className="text-green-500 border-green-500/30">
-        Approuvé
+        Résolu
       </Badge>
     ),
-    deleted: (
-      <Badge variant="outline" className="text-red-500 border-red-500/30">
-        Supprimé
+    dismissed: (
+      <Badge variant="outline" className="text-gray-500 border-gray-500/30">
+        Rejeté
       </Badge>
     ),
-    warned: (
+  };
+
+  const priorityBadge: Record<string, React.ReactNode> = {
+    low: null,
+    medium: null,
+    high: (
       <Badge variant="outline" className="text-orange-500 border-orange-500/30">
-        Averti
+        Priorité haute
+      </Badge>
+    ),
+    critical: (
+      <Badge variant="outline" className="text-red-500 border-red-500/30">
+        Critique
       </Badge>
     ),
   };
@@ -253,6 +269,7 @@ function ReportedMessageCard({
                 dans #{message.channel_name}
               </span>
               {statusBadge[message.status]}
+              {priorityBadge[message.priority]}
             </div>
 
             <div className="bg-muted/50 rounded-md p-3 text-sm">
@@ -279,18 +296,18 @@ function ReportedMessageCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30"
-                onClick={() => onAction(message.id, "approve")}
+                className="text-gray-600 hover:text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-950/30"
+                onClick={() => onAction(message.id, "dismiss")}
                 disabled={isPending}
               >
                 <Check className="size-3.5 mr-1" />
-                Approuver
+                Rejeter
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                onClick={() => onAction(message.id, "delete")}
+                onClick={() => onAction(message.id, "resolve", "deleted")}
                 disabled={isPending}
               >
                 <Trash2 className="size-3.5 mr-1" />
@@ -299,12 +316,12 @@ function ReportedMessageCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-                onClick={() => onAction(message.id, "warn")}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30"
+                onClick={() => onAction(message.id, "resolve", "approved")}
                 disabled={isPending}
               >
-                <AlertTriangle className="size-3.5 mr-1" />
-                Avertir
+                <Check className="size-3.5 mr-1" />
+                Résoudre
               </Button>
             </div>
           )}
@@ -335,7 +352,9 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
   function handleMute(userId: string) {
     startTransition(async () => {
       try {
-        await muteUser(userId, "all", parseInt(muteDuration));
+        // Convert minutes to hours for the new API
+        const durationHours = parseInt(muteDuration) / 60;
+        await muteUser(userId, durationHours, "Mute manuel depuis le panneau de moderation");
         toast.success(`Utilisateur muté pour ${muteDuration} minutes`);
         router.refresh();
       } catch {
@@ -347,7 +366,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
   function handleUnmute(userId: string) {
     startTransition(async () => {
       try {
-        await unmuteUser(userId, "all");
+        await unmuteUser(userId);
         toast.success("Utilisateur démuté");
         router.refresh();
       } catch {
@@ -394,7 +413,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
             Actif
           </Badge>
         );
-      case "muté":
+      case "mute":
         return (
           <Badge variant="outline" className="text-amber-500 border-amber-500/30">
             Muté
@@ -404,6 +423,12 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
         return (
           <Badge variant="outline" className="text-red-500 border-red-500/30">
             Banni
+          </Badge>
+        );
+      case "restreint":
+        return (
+          <Badge variant="outline" className="text-orange-500 border-orange-500/30">
+            Restreint
           </Badge>
         );
     }
@@ -476,7 +501,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                         {statusBadge(u.status)}
                       </div>
                       <p className="text-xs text-muted-foreground">{u.email}</p>
-                      {u.status === "muté" && u.muted_until && (
+                      {u.status === "mute" && u.muted_until && (
                         <p className="text-xs text-amber-500 mt-0.5">
                           Muté jusqu&apos;au{" "}
                           {format(new Date(u.muted_until), "dd/MM HH:mm", {
@@ -519,7 +544,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                         </Button>
                       </>
                     )}
-                    {u.status === "muté" && (
+                    {u.status === "mute" && (
                       <Button
                         size="sm"
                         variant="outline"
