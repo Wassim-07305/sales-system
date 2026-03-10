@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { Deal, PipelineStage, DealTemperature } from "@/lib/types/database";
 import {
@@ -20,6 +19,7 @@ import {
   FileText,
   Clock,
 } from "lucide-react";
+import { updateDealStage, updateDealTemperature, updateDealNotes } from "@/lib/actions/crm";
 
 interface DealPanelProps {
   deal: Deal;
@@ -39,13 +39,8 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
   const [saving, setSaving] = useState(false);
 
   async function handleStageChange(stageId: string) {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("deals")
-      .update({ stage_id: stageId, updated_at: new Date().toISOString() })
-      .eq("id", deal.id);
-
-    if (error) {
+    const result = await updateDealStage(deal.id, stageId);
+    if (result.error) {
       toast.error("Erreur");
       return;
     }
@@ -55,13 +50,8 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
   }
 
   async function handleTempChange(temp: DealTemperature) {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("deals")
-      .update({ temperature: temp, updated_at: new Date().toISOString() })
-      .eq("id", deal.id);
-
-    if (error) {
+    const result = await updateDealTemperature(deal.id, temp);
+    if (result.error) {
       toast.error("Erreur");
       return;
     }
@@ -71,13 +61,8 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
 
   async function saveNotes() {
     setSaving(true);
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("deals")
-      .update({ notes, updated_at: new Date().toISOString() })
-      .eq("id", deal.id);
-
-    if (error) {
+    const result = await updateDealNotes(deal.id, notes);
+    if (result.error) {
       toast.error("Erreur");
     } else {
       onUpdate({ ...deal, notes });

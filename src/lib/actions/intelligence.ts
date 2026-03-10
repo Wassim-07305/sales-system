@@ -111,6 +111,28 @@ export async function getCompetitors() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // Essayer de charger depuis Supabase
+  try {
+    const { data, error } = await supabase
+      .from("competitors")
+      .select("*")
+      .order("name");
+
+    if (!error && data && data.length > 0) {
+      return data.map((c: Record<string, unknown>) => ({
+        id: c.id as string,
+        name: c.name as string,
+        website: (c.website as string) || "",
+        strengths: (c.strengths as string) || "",
+        weaknesses: (c.weaknesses as string) || "",
+        pricingTier: (c.pricing_tier as string) || "",
+        notes: (c.notes as string) || "",
+      }));
+    }
+  } catch {
+    // Table n'existe pas — fallback aux données de référence
+  }
+
   return DEMO_COMPETITORS;
 }
 
@@ -125,8 +147,37 @@ export async function addCompetitor(data: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  // In a real implementation, this would persist to Supabase.
-  // For now we return a simulated entry.
+  // Persister dans Supabase
+  try {
+    const { data: inserted, error } = await supabase
+      .from("competitors")
+      .insert({
+        name: data.name,
+        website: data.website,
+        notes: data.notes,
+        strengths: "À analyser",
+        weaknesses: "À analyser",
+        pricing_tier: "Non renseigné",
+      })
+      .select()
+      .single();
+
+    if (!error && inserted) {
+      revalidatePath("/prospecting/intelligence");
+      return {
+        id: inserted.id,
+        name: inserted.name,
+        website: inserted.website || "",
+        strengths: inserted.strengths || "À analyser",
+        weaknesses: inserted.weaknesses || "À analyser",
+        pricingTier: inserted.pricing_tier || "Non renseigné",
+        notes: inserted.notes || "",
+      };
+    }
+  } catch {
+    // Table n'existe pas — mode démo
+  }
+
   const newCompetitor = {
     id: `comp-${Date.now()}`,
     name: data.name,

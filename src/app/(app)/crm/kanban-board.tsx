@@ -20,7 +20,6 @@ import { DealCard } from "./deal-card";
 import { NewDealDialog } from "./new-deal-dialog";
 import { DealPanel } from "./deal-panel";
 import { FilterPanel } from "./filter-panel";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { Deal, PipelineStage } from "@/lib/types/database";
 import { PIPELINE_DEFAULT_STAGES } from "@/lib/constants";
@@ -33,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search, Filter } from "lucide-react";
-import { getFilteredDeals, getDealSources, getTeamMembers, type DealFilters } from "@/lib/actions/crm";
+import { getFilteredDeals, getDealSources, getTeamMembers, updateDealStage, type DealFilters } from "@/lib/actions/crm";
 
 interface TeamMember {
   id: string;
@@ -148,14 +147,10 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
       prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d))
     );
 
-    // Persist
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("deals")
-      .update({ stage_id: newStageId, updated_at: new Date().toISOString() })
-      .eq("id", dealId);
+    // Persist via server action
+    const result = await updateDealStage(dealId, newStageId);
 
-    if (error) {
+    if (result.error) {
       toast.error("Erreur lors du déplacement du deal");
       setDeals((prev) =>
         prev.map((d) =>

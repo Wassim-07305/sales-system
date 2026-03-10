@@ -18,10 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { Deal, PipelineStage, DealTemperature } from "@/lib/types/database";
 import { Plus, Loader2 } from "lucide-react";
+import { createDeal } from "@/lib/actions/crm";
 
 interface NewDealDialogProps {
   stages: PipelineStage[];
@@ -42,27 +42,21 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
     if (!title) return;
 
     setLoading(true);
-    const supabase = createClient();
+    const result = await createDeal({
+      title,
+      value: parseFloat(value) || 0,
+      stage_id: stageId,
+      temperature,
+      source: source || undefined,
+    });
 
-    const { data, error } = await supabase
-      .from("deals")
-      .insert({
-        title,
-        value: parseFloat(value) || 0,
-        stage_id: stageId,
-        temperature,
-        source: source || null,
-      })
-      .select("*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)")
-      .single();
-
-    if (error) {
+    if (result.error) {
       toast.error("Erreur lors de la création du deal");
       setLoading(false);
       return;
     }
 
-    onDealCreated(data);
+    onDealCreated(result.deal as Deal);
     toast.success("Deal créé !");
     setOpen(false);
     setTitle("");
