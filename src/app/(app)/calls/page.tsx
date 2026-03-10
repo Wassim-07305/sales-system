@@ -61,9 +61,11 @@ export default async function CallsPage() {
                     </div>
                   </div>
                   {call.meeting_link && (
-                    <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90">
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Rejoindre
+                    <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90" asChild>
+                      <a href={call.meeting_link} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Rejoindre
+                      </a>
                     </Button>
                   )}
                 </CardContent>
@@ -92,22 +94,32 @@ export default async function CallsPage() {
                 </div>
               </div>
               {call.replay_url ? (
-                <Button variant="outline" size="sm">
-                  <Video className="h-4 w-4 mr-1" />
-                  Voir le replay
+                <Button variant="outline" size="sm" asChild>
+                  <a href={call.replay_url} target="_blank" rel="noopener noreferrer">
+                    <Video className="h-4 w-4 mr-1" />
+                    Voir le replay
+                  </a>
                 </Button>
               ) : (
                 <Badge variant="outline" className="text-muted-foreground">
-                  Replay bientôt
+                  Replay bientot
                 </Badge>
               )}
             </CardContent>
           </Card>
         ))}
         {pastCalls.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">
-            Aucun replay disponible
-          </p>
+          <Card>
+            <CardContent className="py-12 text-center">
+              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Video className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="font-medium mb-1">Aucun replay disponible</p>
+              <p className="text-sm text-muted-foreground">
+                Les replays des calls seront accessibles ici
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
