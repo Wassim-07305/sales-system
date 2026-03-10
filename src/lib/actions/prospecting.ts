@@ -219,3 +219,163 @@ export async function deleteProspect(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/prospecting");
 }
+
+// ─── Detail Page Actions ────────────────────────────────────────────
+
+export async function getProspectById(prospectId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { prospect: null, error: "Non authentifie" };
+
+  const { data, error } = await supabase
+    .from("prospects")
+    .select("*, list:prospect_lists(*), assigned_setter:profiles!prospects_assigned_setter_id_fkey(id, full_name, avatar_url)")
+    .eq("id", prospectId)
+    .single();
+
+  if (error) return { prospect: null, error: error.message };
+
+  // Normalize joined data
+  const prospect = {
+    ...data,
+    list: Array.isArray(data.list) ? data.list[0] || null : data.list,
+    assigned_setter: Array.isArray(data.assigned_setter) ? data.assigned_setter[0] || null : data.assigned_setter,
+  };
+
+  return { prospect, error: null };
+}
+
+export async function getProspectScore(prospectId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("prospect_scores")
+    .select("*")
+    .eq("prospect_id", prospectId)
+    .single();
+  return data;
+}
+
+export async function updateProspect(prospectId: string, data: {
+  name?: string;
+  profile_url?: string;
+  platform?: string;
+  status?: string;
+  notes?: string;
+  list_id?: string;
+  assigned_setter_id?: string;
+  auto_follow_up?: boolean;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifie" };
+
+  const { error } = await supabase
+    .from("prospects")
+    .update(data)
+    .eq("id", prospectId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/prospecting");
+  revalidatePath(`/prospecting/${prospectId}`);
+  return { success: true };
+}
+
+export async function addProspectMessage(prospectId: string, message: string, direction: "sent" | "received") {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifie" };
+
+  // Get current conversation history
+  const { data: prospect } = await supabase
+    .from("prospects")
+    .select("conversation_history")
+    .eq("id", prospectId)
+    .single();
+
+  const history = Array.isArray(prospect?.conversation_history)
+    ? prospect.conversation_history
+    : [];
+
+  const newMessage = {
+    id: crypto.randomUUID(),
+    content: message,
+    direction,
+    timestamp: new Date().toISOString(),
+    user_id: user.id,
+  };
+
+  const { error } = await supabase
+    .from("prospects")
+    .update({
+      conversation_history: [...history, newMessage],
+      last_message_at: new Date().toISOString(),
+    })
+    .eq("id", prospectId);
+
+  if (error) return { error: error.message };
+
+  // Update daily quota if sent
+  if (direction === "sent") {
+    await incrementDmsSent();
+  } else {
+    await incrementReplies();
+  }
+
+  revalidatePath(`/prospecting/${prospectId}`);
+  return { success: true };
+}
+
+export async function convertProspectToDeal(prospectId: string, dealData: {
+  title: string;
+  value: number;
+  stage_id: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifie" };
+
+  // Get prospect data
+  const { data: prospect } = await supabase
+    .from("prospects")
+    .select("name, profile_url")
+    .eq("id", prospectId)
+    .single();
+
+  if (!prospect) return { error: "Prospect non trouve" };
+
+  // Create deal
+  const { data: deal, error: dealError } = await supabase
+    .from("deals")
+    .insert({
+      title: dealData.title,
+      value: dealData.value,
+      stage_id: dealData.stage_id,
+      source: "prospecting",
+      temperature: "warm",
+      notes: `Converti depuis prospect: ${prospect.name}`,
+    })
+    .select()
+    .single();
+
+  if (dealError) return { error: dealError.message };
+
+  // Update prospect status
+  await supabase
+    .from("prospects")
+    .update({ status: "booked" })
+    .eq("id", prospectId);
+
+  revalidatePath("/prospecting");
+  revalidatePath("/crm");
+  return { success: true, dealId: deal.id };
+}
+
+export async function getSettersForAssignment() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url")
+    .in("role", ["setter", "closer", "manager", "admin"]);
+  return data || [];
+}
