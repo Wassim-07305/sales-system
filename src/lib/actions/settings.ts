@@ -98,3 +98,52 @@ export async function changePassword(newPassword: string) {
 
   return { success: true };
 }
+
+// ─── Profil utilisateur ─────────────────────────────────────────────
+
+export async function getProfile() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  return data;
+}
+
+export async function updateProfile(params: {
+  full_name: string;
+  phone: string;
+  company: string;
+  niche: string;
+  goals: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: params.full_name,
+      phone: params.phone,
+      company: params.company,
+      niche: params.niche,
+      goals: params.goals,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/profile");
+  return { success: true };
+}
