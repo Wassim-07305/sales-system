@@ -166,15 +166,44 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
 
         {/* Quick actions */}
         <div className="flex gap-2 mb-4">
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => {
+              if (deal.contact?.phone) {
+                window.open(`tel:${deal.contact.phone}`, "_self");
+              } else {
+                toast.error("Aucun numéro de téléphone");
+              }
+            }}
+          >
             <Phone className="h-4 w-4 mr-1" />
             Appeler
           </Button>
-          <Button variant="outline" size="sm" className="flex-1">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Message
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            asChild
+          >
+            <Link href={`/inbox?contact=${deal.contact?.id || ""}`}>
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Message
+            </Link>
           </Button>
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={() => {
+              if (deal.contact?.email) {
+                window.open(`mailto:${deal.contact.email}?subject=Re: ${deal.title}`, "_blank");
+              } else {
+                toast.error("Aucune adresse email");
+              }
+            }}
+          >
             <Mail className="h-4 w-4 mr-1" />
             Email
           </Button>
