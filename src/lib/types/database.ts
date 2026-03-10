@@ -892,6 +892,38 @@ export interface PushSubscription {
   created_at: string;
 }
 
+export type CoachingObjectiveCategory = "calls" | "deals" | "revenue" | "skills" | "other";
+
+export type CoachingObjectiveStatus = "in_progress" | "completed" | "overdue" | "at_risk";
+
+export interface CoachingObjective {
+  id: string;
+  assignee_id: string;
+  created_by: string | null;
+  title: string;
+  description: string | null;
+  category: CoachingObjectiveCategory;
+  target_value: number;
+  current_value: number;
+  target_date: string;
+  status: CoachingObjectiveStatus;
+  notes: unknown[];
+  created_at: string;
+  updated_at: string;
+  assignee?: Profile;
+  creator?: Profile;
+}
+
+export interface DevelopmentPlan {
+  id: string;
+  user_id: string;
+  skills: Array<{ name: string; level: number; target: number }>;
+  actions: Array<{ id: string; title: string; description: string; priority: "high" | "medium" | "low"; done: boolean }>;
+  resources: Array<{ title: string; url: string; type: string }>;
+  created_at: string;
+  updated_at: string;
+}
+
 // Supabase Database type (simplified for now - will be generated from Supabase CLI later)
 export interface Database {
   public: {
@@ -967,6 +999,8 @@ export interface Database {
       setter_maturity_scores: { Row: SetterMaturityScore; Insert: Partial<SetterMaturityScore> & { setter_id: string }; Update: Partial<SetterMaturityScore> };
       push_subscriptions: { Row: PushSubscription; Insert: Partial<PushSubscription> & { user_id: string; endpoint: string }; Update: Partial<PushSubscription> };
       channel_reads: { Row: ChannelRead; Insert: Partial<ChannelRead> & { channel_id: string; user_id: string }; Update: Partial<ChannelRead> };
+      coaching_objectives: { Row: CoachingObjective; Insert: Partial<CoachingObjective> & { assignee_id: string; title: string; category: CoachingObjectiveCategory; target_value: number; target_date: string }; Update: Partial<CoachingObjective> };
+      development_plans: { Row: DevelopmentPlan; Insert: Partial<DevelopmentPlan> & { user_id: string }; Update: Partial<DevelopmentPlan> };
     };
   };
 }

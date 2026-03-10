@@ -239,10 +239,49 @@ export async function getDevelopmentPlan(userId?: string): Promise<DevelopmentPl
   }
 
   return {
-    skills: JSON.parse((data.skills as string) || "[]"),
-    actions: JSON.parse((data.actions as string) || "[]"),
-    resources: JSON.parse((data.resources as string) || "[]"),
+    skills: (data.skills as DevelopmentPlan["skills"]) || [],
+    actions: (data.actions as DevelopmentPlan["actions"]) || [],
+    resources: (data.resources as DevelopmentPlan["resources"]) || [],
   };
+}
+
+// ─── SAVE DEVELOPMENT PLAN ───────────────────────────────────────
+export async function saveDevelopmentPlan(
+  plan: Partial<DevelopmentPlan>,
+  targetUserId?: string
+): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const userId = targetUserId || user.id;
+
+  // Check role if updating another user's plan
+  if (targetUserId && targetUserId !== user.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || (profile.role !== "admin" && profile.role !== "manager")) {
+      throw new Error("Acces refuse : role admin ou manager requis");
+    }
+  }
+
+  // Upsert the development plan
+  const { error } = await supabase
+    .from("development_plans")
+    .upsert({
+      user_id: userId,
+      skills: plan.skills || [],
+      actions: plan.actions || [],
+      resources: plan.resources || [],
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+
+  if (error && error.code !== "42P01") throw new Error(error.message);
+  revalidatePath("/team/coaching");
+  revalidatePath("/profile/coaching");
 }
 
 // ─── COACHING NOTES ──────────────────────────────────────────────
