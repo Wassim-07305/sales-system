@@ -181,13 +181,46 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
     revenue,
   }));
 
-  // Calculate top extensions
-  const extensionMap = new Map<string, { name: string; installs: number; revenue: number }>();
+  // Calculate top extensions with real growth
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+
+  // Get last month's installs for growth calculation
+  const { data: lastMonthInstalls } = await supabase
+    .from("extension_installs")
+    .select("extension_id")
+    .gte("installed_at", startOfLastMonth)
+    .lte("installed_at", endOfLastMonth);
+
+  // Count installs per extension last month
+  const lastMonthInstallsMap = new Map<string, number>();
+  (lastMonthInstalls || []).forEach((install) => {
+    const count = lastMonthInstallsMap.get(install.extension_id) || 0;
+    lastMonthInstallsMap.set(install.extension_id, count + 1);
+  });
+
+  // Count installs per extension this month
+  const thisMonthInstallsMap = new Map<string, number>();
+  (installs || []).filter((install) => {
+    const date = new Date(install.installed_at);
+    return date >= new Date(startOfMonth);
+  }).forEach((install) => {
+    const count = thisMonthInstallsMap.get(install.extension_id) || 0;
+    thisMonthInstallsMap.set(install.extension_id, count + 1);
+  });
+
+  const extensionMap = new Map<string, { name: string; installs: number; revenue: number; thisMonth: number; lastMonth: number }>();
 
   (installs || []).forEach((install) => {
     const key = install.extension_id;
     if (!extensionMap.has(key)) {
-      extensionMap.set(key, { name: install.extension_name, installs: 0, revenue: 0 });
+      extensionMap.set(key, {
+        name: install.extension_name,
+        installs: 0,
+        revenue: 0,
+        thisMonth: thisMonthInstallsMap.get(key) || 0,
+        lastMonth: lastMonthInstallsMap.get(key) || 0,
+      });
     }
     const ext = extensionMap.get(key)!;
     ext.installs++;
@@ -196,7 +229,13 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
   (subscriptions || []).forEach((sub) => {
     const key = sub.extension_name;
     if (!extensionMap.has(key)) {
-      extensionMap.set(key, { name: sub.extension_name, installs: 0, revenue: 0 });
+      extensionMap.set(key, {
+        name: sub.extension_name,
+        installs: 0,
+        revenue: 0,
+        thisMonth: 0,
+        lastMonth: 0,
+      });
     }
     const ext = extensionMap.get(key)!;
     ext.revenue += sub.price || 0;
@@ -205,10 +244,21 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
   const topExtensions = Array.from(extensionMap.values())
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 6)
-    .map((ext) => ({
-      ...ext,
-      growth: Math.random() * 20 - 5, // TODO: Calculate real growth
-    }));
+    .map((ext) => {
+      // Calculate growth percentage based on installs
+      let growth = 0;
+      if (ext.lastMonth > 0) {
+        growth = ((ext.thisMonth - ext.lastMonth) / ext.lastMonth) * 100;
+      } else if (ext.thisMonth > 0) {
+        growth = 100; // 100% growth if no installs last month but some this month
+      }
+      return {
+        name: ext.name,
+        installs: ext.installs,
+        revenue: ext.revenue,
+        growth: Math.round(growth * 10) / 10,
+      };
+    });
 
   return {
     totalRevenue,
