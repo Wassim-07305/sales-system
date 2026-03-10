@@ -120,7 +120,7 @@ export async function connectGoogleCalendar(authCode: string): Promise<{
         code: authCode,
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/google/callback`,
+        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/auth/callback/google`,
         grant_type: "authorization_code",
       }),
     });

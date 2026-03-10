@@ -44,6 +44,7 @@ import type {
 import {
   syncCalendarEvents,
   saveCalendarSettings,
+  disconnectGoogleCalendar,
 } from "@/lib/actions/calendar-sync";
 
 interface CalendarSyncPanelProps {
@@ -55,11 +56,12 @@ export function CalendarSyncPanel({
   initialStatus,
   initialSettings,
 }: CalendarSyncPanelProps) {
-  const [status] = useState<CalendarSyncStatus>(initialStatus);
+  const [status, setStatus] = useState<CalendarSyncStatus>(initialStatus);
   const [settings, setSettings] = useState<CalendarSettings>(initialSettings);
   const [showSetupGuide, setShowSetupGuide] = useState(false);
   const [isSyncing, startSyncTransition] = useTransition();
   const [isSaving, startSaveTransition] = useTransition();
+  const [isDisconnecting, startDisconnectTransition] = useTransition();
 
   function handleSync() {
     startSyncTransition(async () => {
@@ -77,6 +79,43 @@ export function CalendarSyncPanel({
       const result = await saveCalendarSettings(settings);
       if (result.success) {
         toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    });
+  }
+
+  function handleConnectGoogle() {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      setShowSetupGuide(true);
+      toast.error("Configuration Google Calendar requise. Suivez le guide ci-dessous.");
+      return;
+    }
+
+    const redirectUri = `${window.location.origin}/api/auth/callback/google`;
+    const scope = encodeURIComponent(
+      "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email"
+    );
+    const authUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+
+    window.location.href = authUrl;
+  }
+
+  function handleDisconnect() {
+    startDisconnectTransition(async () => {
+      const result = await disconnectGoogleCalendar();
+      if (result.success) {
+        toast.success(result.message);
+        setStatus({
+          connected: false,
+          lastSyncAt: null,
+          syncedEventsCount: 0,
+          googleEmail: null,
+        });
       } else {
         toast.error(result.message);
       }
@@ -159,11 +198,15 @@ export function CalendarSyncPanel({
         </CardContent>
         <CardFooter className="flex gap-2">
           {status.connected ? (
-            <Button variant="outline" disabled>
-              Deconnecter
+            <Button
+              variant="outline"
+              onClick={handleDisconnect}
+              disabled={isDisconnecting}
+            >
+              {isDisconnecting ? "Déconnexion..." : "Déconnecter"}
             </Button>
           ) : (
-            <Button onClick={() => setShowSetupGuide(!showSetupGuide)}>
+            <Button onClick={handleConnectGoogle}>
               <Calendar className="h-4 w-4 mr-2" />
               Connecter Google Calendar
             </Button>

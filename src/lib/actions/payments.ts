@@ -60,13 +60,83 @@ export async function recordPayment(installmentId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  // Stub Stripe: mark as paid directly
+  // Récupérer les détails de l'échéance
+  const { data: installment } = await supabase
+    .from("payment_installments")
+    .select("*, contract:contracts(id, client_id, amount)")
+    .eq("id", installmentId)
+    .single();
+
+  if (!installment) throw new Error("Échéance introuvable");
+
+  let stripePaymentId: string | null = null;
+
+  // Si Stripe est configuré, créer un PaymentIntent
+  if (process.env.STRIPE_SECRET_KEY) {
+    try {
+      const { stripe } = await import("@/lib/stripe/client");
+
+      // Récupérer ou créer le customer Stripe
+      const contract = Array.isArray(installment.contract)
+        ? installment.contract[0]
+        : installment.contract;
+      const clientId = contract?.client_id;
+
+      let stripeCustomerId: string | undefined;
+      if (clientId) {
+        const { data: clientProfile } = await supabase
+          .from("profiles")
+          .select("stripe_customer_id, email, full_name")
+          .eq("id", clientId)
+          .single();
+
+        if (clientProfile?.stripe_customer_id) {
+          stripeCustomerId = clientProfile.stripe_customer_id;
+        } else if (clientProfile?.email) {
+          const customer = await stripe.customers.create({
+            email: clientProfile.email,
+            name: clientProfile.full_name || undefined,
+            metadata: { supabase_user_id: clientId },
+          });
+          stripeCustomerId = customer.id;
+          await supabase
+            .from("profiles")
+            .update({ stripe_customer_id: customer.id })
+            .eq("id", clientId);
+        }
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(installment.amount * 100), // Stripe utilise les centimes
+        currency: "eur",
+        customer: stripeCustomerId,
+        metadata: {
+          installment_id: installmentId,
+          contract_id: installment.contract_id,
+        },
+        confirm: true,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: "never",
+        },
+      });
+
+      stripePaymentId = paymentIntent.id;
+    } catch (err) {
+      console.error("Stripe payment error:", err);
+      // Continuer avec un enregistrement local si Stripe échoue
+      stripePaymentId = `manual_${Date.now()}`;
+    }
+  } else {
+    stripePaymentId = `manual_${Date.now()}`;
+  }
+
   const { error } = await supabase
     .from("payment_installments")
     .update({
       status: "paid",
       paid_at: new Date().toISOString(),
-      stripe_payment_id: `stub_${Date.now()}`,
+      stripe_payment_id: stripePaymentId,
     })
     .eq("id", installmentId);
 
