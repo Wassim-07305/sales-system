@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getRevenueProjections } from "@/lib/actions/analytics-v2";
+import { getRevenueProjections, getAIForecasting } from "@/lib/actions/analytics-v2";
+import type { AIForecastResult } from "@/lib/actions/analytics-v2";
 import { ProjectionsView } from "./projections-view";
 
 export default async function ProjectionsPage() {
@@ -18,7 +19,14 @@ export default async function ProjectionsPage() {
     redirect("/dashboard");
   }
 
-  const projections = await getRevenueProjections();
+  // Fetch projections and AI forecasting in parallel
+  let aiData: AIForecastResult | null = null;
+  const [projections] = await Promise.all([
+    getRevenueProjections(),
+    getAIForecasting()
+      .then((data) => { aiData = data; })
+      .catch(() => { aiData = null; }),
+  ]);
 
-  return <ProjectionsView data={projections} />;
+  return <ProjectionsView data={projections} aiData={aiData} />;
 }

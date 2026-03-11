@@ -58,6 +58,9 @@ import {
   getChannelMembers,
   getAllUsers,
 } from "@/lib/actions/chat-admin";
+import { usePresence } from "@/lib/hooks/use-presence";
+import { TypingIndicator } from "@/components/typing-indicator";
+import { OnlineStatus } from "@/components/online-status";
 
 interface ChatLayoutProps {
   initialChannels: Channel[];
@@ -94,20 +97,20 @@ export function ChatLayout({
 
   const [channels, setChannels] = useState<Channel[]>(initialChannels);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(
-    initialChannels[0] || null
+    initialChannels[0] || null,
   );
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [channelSearch, setChannelSearch] = useState("");
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>(
-    initialUnreadCounts
-  );
+  const [unreadCounts, setUnreadCounts] =
+    useState<Record<string, number>>(initialUnreadCounts);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Admin state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -126,6 +129,12 @@ export function ChatLayout({
   >("group");
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [memberSearch, setMemberSearch] = useState("");
+
+  const { onlineUsers, typingUsers, setTyping } = usePresence(
+    activeChannel?.id ? `chat:${activeChannel.id}` : null,
+    currentUserId,
+    "Utilisateur",
+  );
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -198,7 +207,7 @@ export function ChatLayout({
             // Keep read status current while viewing the channel
             markChannelAsRead(activeChannel!.id);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -226,9 +235,7 @@ export function ChatLayout({
       setImageUrl(data.publicUrl);
       setImagePreview(data.publicUrl);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Erreur upload image"
-      );
+      toast.error(err instanceof Error ? err.message : "Erreur upload image");
     } finally {
       setUploadingImage(false);
     }
@@ -263,7 +270,15 @@ export function ChatLayout({
     }
 
     setNewMessage("");
+    setTyping(false);
   }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    setTyping(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => setTyping(false), 2000);
+  };
 
   // Admin: create channel
   async function handleCreateChannel() {
@@ -290,7 +305,7 @@ export function ChatLayout({
       setChannels(data || []);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Erreur lors de la création"
+        err instanceof Error ? err.message : "Erreur lors de la création",
       );
     } finally {
       setSaving(false);
@@ -317,7 +332,7 @@ export function ChatLayout({
       setChannels(data || []);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Erreur lors de la suppression"
+        err instanceof Error ? err.message : "Erreur lors de la suppression",
       );
     } finally {
       setSaving(false);
@@ -342,7 +357,7 @@ export function ChatLayout({
       setChannels(data || []);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Erreur lors de la mise à jour"
+        err instanceof Error ? err.message : "Erreur lors de la mise à jour",
       );
     } finally {
       setSaving(false);
@@ -380,7 +395,7 @@ export function ChatLayout({
     setSelectedMemberIds((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   }
 
@@ -389,13 +404,13 @@ export function ChatLayout({
   const filteredChannels = channels.filter(
     (c) =>
       !channelSearch ||
-      c.name.toLowerCase().includes(channelSearch.toLowerCase())
+      c.name.toLowerCase().includes(channelSearch.toLowerCase()),
   );
 
   const filteredUsers = allUsers.filter(
     (u) =>
       !memberSearch ||
-      (u.full_name || "").toLowerCase().includes(memberSearch.toLowerCase())
+      (u.full_name || "").toLowerCase().includes(memberSearch.toLowerCase()),
   );
 
   return (
@@ -441,7 +456,7 @@ export function ChatLayout({
                         ? "bg-brand/10 text-brand-dark font-medium"
                         : unread > 0
                           ? "text-foreground font-semibold hover:bg-muted"
-                          : "text-muted-foreground hover:bg-muted"
+                          : "text-muted-foreground hover:bg-muted",
                     )}
                     onClick={() => setActiveChannel(channel)}
                   >
@@ -512,7 +527,15 @@ export function ChatLayout({
                   — {activeChannel.description}
                 </span>
               )}
-              <div className="ml-auto flex items-center gap-1">
+              <div className="ml-auto flex items-center gap-2">
+                {onlineUsers.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <OnlineStatus isOnline={true} />
+                    <span className="text-xs text-muted-foreground">
+                      {onlineUsers.length} en ligne
+                    </span>
+                  </div>
+                )}
                 {isAdmin && (
                   <>
                     <Button
@@ -557,28 +580,23 @@ export function ChatLayout({
                         key={message.id}
                         className={cn(
                           "flex gap-3",
-                          isOwn && "flex-row-reverse"
+                          isOwn && "flex-row-reverse",
                         )}
                       >
                         <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
                           {message.sender?.full_name?.charAt(0) || "?"}
                         </div>
                         <div
-                          className={cn(
-                            "max-w-[70%]",
-                            isOwn && "text-right"
-                          )}
+                          className={cn("max-w-[70%]", isOwn && "text-right")}
                         >
                           <div className="flex items-center gap-2 mb-0.5">
                             <span className="text-xs font-medium">
                               {message.sender?.full_name || "Inconnu"}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
-                              {format(
-                                new Date(message.created_at),
-                                "HH:mm",
-                                { locale: fr }
-                              )}
+                              {format(new Date(message.created_at), "HH:mm", {
+                                locale: fr,
+                              })}
                             </span>
                           </div>
                           {message.message_type === "image" &&
@@ -597,7 +615,7 @@ export function ChatLayout({
                                 "inline-block rounded-2xl px-4 py-2 text-sm",
                                 isOwn
                                   ? "bg-brand-dark text-white rounded-br-md"
-                                  : "bg-muted rounded-bl-md"
+                                  : "bg-muted rounded-bl-md",
                               )}
                             >
                               {message.content}
@@ -635,8 +653,13 @@ export function ChatLayout({
               </div>
             )}
 
-            {/* Message input */}
+            {/* Typing indicator + Message input */}
             <div className="p-4 border-t">
+              {typingUsers.length > 0 && (
+                <div className="mb-2">
+                  <TypingIndicator users={typingUsers} />
+                </div>
+              )}
               <form
                 onSubmit={handleSendMessage}
                 className="flex items-center gap-2"
@@ -674,7 +697,7 @@ export function ChatLayout({
                 />
                 <Input
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder={`Message dans #${activeChannel.name}...`}
                   className="flex-1"
                 />

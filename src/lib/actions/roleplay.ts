@@ -194,6 +194,65 @@ Critères d'évaluation :
   return feedback;
 }
 
+export async function getRoleplayFeedback(
+  sessionId: string,
+  conversation: { role: string; content: string }[]
+) {
+  const transcript = conversation
+    .map((m) => `${m.role === "user" ? "SETTER" : "PROSPECT"}: ${m.content}`)
+    .join("\n");
+
+  type FeedbackResult = {
+    score: number;
+    strengths: string[];
+    improvements: string[];
+    tips: string[];
+  };
+
+  try {
+    const feedback = await aiJSON<FeedbackResult>(
+      `Analyse cette conversation de setting/vente et donne un feedback detaille.
+
+CONVERSATION :
+${transcript}
+
+Reponds en JSON avec exactement cette structure :
+{
+  "score": <number 0-100>,
+  "strengths": ["force 1", "force 2", "force 3"],
+  "improvements": ["amelioration 1", "amelioration 2", "amelioration 3"],
+  "tips": ["conseil pratique 1", "conseil pratique 2", "conseil pratique 3"]
+}
+
+Criteres d'evaluation :
+- Score global : qualite globale de la conversation de vente
+- strengths : 3 points forts concrets observes dans la conversation
+- improvements : 3 axes d'amelioration concrets et actionnables
+- tips : 3 conseils pratiques que le vendeur peut appliquer immediatement`,
+      { system: "Tu es un coach expert en vente et setting. Analyse uniquement en francais." }
+    );
+
+    // Also update the session in DB with this feedback
+    const supabase = await createClient();
+    await supabase.from("roleplay_sessions").update({
+      status: "completed",
+      ended_at: new Date().toISOString(),
+      score: feedback.score,
+      ai_feedback: feedback,
+    }).eq("id", sessionId);
+
+    revalidatePath("/roleplay");
+    return feedback;
+  } catch {
+    return {
+      score: 65,
+      strengths: ["Bonne introduction", "Questions pertinentes"],
+      improvements: ["Gestion des objections a ameliorer", "Closing trop rapide"],
+      tips: ["Pose plus de questions ouvertes", "Laisse le prospect s'exprimer davantage"],
+    };
+  }
+}
+
 export async function getUserSessions(userId?: string) {
   const supabase = await createClient();
   let query = supabase

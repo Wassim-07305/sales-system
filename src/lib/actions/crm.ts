@@ -7,17 +7,21 @@ import { revalidatePath } from "next/cache";
 
 export async function getDealById(dealId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { deal: null, error: "Non authentifié" };
 
   const { data, error } = await supabase
     .from("deals")
-    .select(`
+    .select(
+      `
       *,
       contact:profiles!deals_contact_id_fkey(*),
       assigned_user:profiles!deals_assigned_to_fkey(*),
       stage:pipeline_stages(*)
-    `)
+    `,
+    )
     .eq("id", dealId)
     .single();
 
@@ -27,7 +31,9 @@ export async function getDealById(dealId: string) {
 
 export async function getDealActivities(dealId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data } = await supabase
@@ -56,17 +62,27 @@ export interface DealFilters {
   amountMax?: number;
   assignedTo?: string;
   source?: string;
-  sortBy?: "value_asc" | "value_desc" | "created_at_asc" | "created_at_desc" | "title_asc" | "title_desc";
+  sortBy?:
+    | "value_asc"
+    | "value_desc"
+    | "created_at_asc"
+    | "created_at_desc"
+    | "title_asc"
+    | "title_desc";
 }
 
 export async function getFilteredDeals(filters: DealFilters) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { deals: [], error: "Non authentifié" };
 
   let query = supabase
     .from("deals")
-    .select("*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)");
+    .select(
+      "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",
+    );
 
   // Date range filter
   if (filters.dateFrom) {
@@ -125,7 +141,9 @@ export async function getFilteredDeals(filters: DealFilters) {
 
 export async function getDealSources() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data } = await supabase
@@ -133,13 +151,17 @@ export async function getDealSources() {
     .select("source")
     .not("source", "is", null);
 
-  const sources = [...new Set((data || []).map((d) => d.source).filter(Boolean))] as string[];
+  const sources = [
+    ...new Set((data || []).map((d) => d.source).filter(Boolean)),
+  ] as string[];
   return sources;
 }
 
 export async function getTeamMembers() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data } = await supabase
@@ -148,6 +170,48 @@ export async function getTeamMembers() {
     .in("role", ["setter", "closer", "manager", "admin"]);
 
   return data || [];
+}
+
+export async function getRecentDeals(limit = 10) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("deals")
+    .select("id, title, value, stage_id, contact:contacts(full_name)")
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  return data || [];
+}
+
+export async function searchDeals(query: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("deals")
+    .select("id, title, value, stage_id, contact:contacts(full_name)")
+    .ilike("title", `%${query}%`)
+    .limit(20);
+  return data || [];
+}
+
+export async function addQuickNote(params: {
+  dealId: string;
+  content: string;
+  type: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase.from("deal_activities").insert({
+    deal_id: params.dealId,
+    user_id: user.id,
+    type: params.type,
+    content: params.content,
+  });
+
+  if (error) return { error: error.message };
+  return { success: true };
 }
 
 // ─── Mutations CRM ──────────────────────────────────────────────────
@@ -160,7 +224,9 @@ export async function createDeal(params: {
   source?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { data, error } = await supabase
@@ -172,7 +238,9 @@ export async function createDeal(params: {
       temperature: params.temperature,
       source: params.source || null,
     })
-    .select("*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)")
+    .select(
+      "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",
+    )
     .single();
 
   if (error) return { error: error.message };
@@ -183,7 +251,9 @@ export async function createDeal(params: {
 
 export async function updateDealStage(dealId: string, stageId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -197,9 +267,14 @@ export async function updateDealStage(dealId: string, stageId: string) {
   return { success: true };
 }
 
-export async function updateDealTemperature(dealId: string, temperature: string) {
+export async function updateDealTemperature(
+  dealId: string,
+  temperature: string,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -215,7 +290,9 @@ export async function updateDealTemperature(dealId: string, temperature: string)
 
 export async function updateDealNotes(dealId: string, notes: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -230,17 +307,22 @@ export async function updateDealNotes(dealId: string, notes: string) {
   return { success: true };
 }
 
-export async function updateDeal(dealId: string, data: {
-  title?: string;
-  value?: number;
-  probability?: number;
-  source?: string;
-  next_action?: string;
-  next_action_date?: string;
-  assigned_to?: string;
-}) {
+export async function updateDeal(
+  dealId: string,
+  data: {
+    title?: string;
+    value?: number;
+    probability?: number;
+    source?: string;
+    next_action?: string;
+    next_action_date?: string;
+    assigned_to?: string;
+  },
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -255,19 +337,23 @@ export async function updateDeal(dealId: string, data: {
   return { success: true };
 }
 
-export async function addDealActivity(dealId: string, type: string, content: string) {
+export async function addDealActivity(
+  dealId: string,
+  type: string,
+  content: string,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { error } = await supabase
-    .from("deal_activities")
-    .insert({
-      deal_id: dealId,
-      user_id: user.id,
-      type,
-      content,
-    });
+  const { error } = await supabase.from("deal_activities").insert({
+    deal_id: dealId,
+    user_id: user.id,
+    type,
+    content,
+  });
 
   if (error) return { error: error.message };
 
@@ -283,16 +369,15 @@ export async function addDealActivity(dealId: string, type: string, content: str
 
 export async function deleteDeal(dealId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Delete activities first
   await supabase.from("deal_activities").delete().eq("deal_id", dealId);
 
-  const { error } = await supabase
-    .from("deals")
-    .delete()
-    .eq("id", dealId);
+  const { error } = await supabase.from("deals").delete().eq("id", dealId);
 
   if (error) return { error: error.message };
 

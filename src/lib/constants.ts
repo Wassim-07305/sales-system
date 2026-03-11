@@ -31,6 +31,7 @@ import {
   Zap,
   Store,
   SlidersHorizontal,
+  Code,
   HelpCircle,
   Sparkles,
   type LucideIcon,
@@ -263,14 +264,60 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Settings,
     roles: ["admin", "manager"],
     children: [
-      { label: "Général", href: "/settings", icon: Settings, roles: ["admin", "manager"] },
-      { label: "Onboarding", href: "/settings/onboarding", icon: BookOpen, roles: ["admin", "manager"] },
-      { label: "Modes IA", href: "/settings/ai-modes", icon: Bot, roles: ["admin", "manager"] },
-      { label: "White Label", href: "/settings/white-label", icon: Building2, roles: ["admin", "manager"] },
-      { label: "Notifications", href: "/settings/notifications", icon: Bell, roles: ["admin", "manager"] },
-      { label: "Confidentialité & RGPD", href: "/settings/privacy", icon: Shield, roles: ["admin", "manager"] },
-      { label: "Sécurité & 2FA", href: "/settings/security", icon: ShieldAlert, roles: ["admin", "manager"] },
-      { label: "Champs personnalisés", href: "/settings/custom-fields", icon: SlidersHorizontal, roles: ["admin", "manager"] },
+      {
+        label: "Général",
+        href: "/settings",
+        icon: Settings,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Onboarding",
+        href: "/settings/onboarding",
+        icon: BookOpen,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Modes IA",
+        href: "/settings/ai-modes",
+        icon: Bot,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "White Label",
+        href: "/settings/white-label",
+        icon: Building2,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Notifications",
+        href: "/settings/notifications",
+        icon: Bell,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Confidentialité & RGPD",
+        href: "/settings/privacy",
+        icon: Shield,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Sécurité & 2FA",
+        href: "/settings/security",
+        icon: ShieldAlert,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Champs personnalisés",
+        href: "/settings/custom-fields",
+        icon: SlidersHorizontal,
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "API REST",
+        href: "/settings/api",
+        icon: Code,
+        roles: ["admin", "manager"],
+      },
     ],
   },
 ];
@@ -291,45 +338,63 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Ventes",
     items: NAV_ITEMS.filter((i) =>
-      ["/crm", "/contacts", "/bookings", "/contracts", "/analytics", "/analytics/performance"].includes(i.href)
+      [
+        "/crm",
+        "/contacts",
+        "/bookings",
+        "/contracts",
+        "/analytics",
+        "/analytics/performance",
+      ].includes(i.href),
     ),
   },
   {
     label: "Communication",
     items: NAV_ITEMS.filter((i) =>
-      ["/inbox", "/chat", "/whatsapp"].includes(i.href)
+      ["/inbox", "/chat", "/whatsapp"].includes(i.href),
     ),
   },
   {
     label: "Prospection",
     items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href)
+      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href),
     ),
   },
   {
     label: "Formation",
     items: NAV_ITEMS.filter((i) =>
-      ["/academy", "/community", "/challenges"].includes(i.href)
+      ["/academy", "/community", "/challenges"].includes(i.href),
     ),
   },
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/team", "/team/assignments", "/content", "/customers", "/marketplace"].includes(i.href)
+      [
+        "/team",
+        "/team/assignments",
+        "/content",
+        "/customers",
+        "/marketplace",
+      ].includes(i.href),
     ),
   },
   {
     label: "Espace Client",
     items: NAV_ITEMS.filter((i) =>
-      ["/portal", "/calls", "/resources", "/kpis", "/referral", "/prospects"].includes(
-        i.href
-      )
+      [
+        "/portal",
+        "/calls",
+        "/resources",
+        "/kpis",
+        "/referral",
+        "/prospects",
+      ].includes(i.href),
     ),
   },
   {
     label: "Outils IA",
     items: NAV_ITEMS.filter((i) =>
-      ["/settings-ia", "/ai-scripts"].includes(i.href)
+      ["/settings-ia", "/ai-scripts"].includes(i.href),
     ),
   },
   {
@@ -347,6 +412,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   contracts: "Contrats",
   analytics: "Analytics",
   projections: "Projections",
+  nps: "NPS & Satisfaction",
   academy: "Academy",
   team: "Équipe",
   assignments: "Affectations",
@@ -413,6 +479,11 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   prospects: "Mes Prospects",
   "settings-ia": "Settings IA",
   "ai-scripts": "Scripts IA",
+  api: "API REST",
+  coaching: "Coaching",
+  partners: "Partenaires",
+  moderation: "Modération",
+  migration: "Migration CRM",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [

@@ -51,7 +51,7 @@ Génère un JSON avec ces champs:
 - points_cles (string[]): 3-5 points clés à utiliser en approche commerciale
 - confiance (number): score de confiance de 0 à 100 sur la fiabilité des données générées`;
 
-  const enrichmentData = await aiJSON<{
+  let enrichmentData: {
     secteur: string;
     taille_entreprise: string;
     poste_probable: string;
@@ -62,10 +62,17 @@ Génère un JSON avec ces champs:
     site_web_probable: string;
     points_cles: string[];
     confiance: number;
-  }>(prompt, {
-    system:
-      "Tu es un assistant d'enrichissement de données commerciales. Réponds uniquement en JSON valide. Base tes estimations sur les indices disponibles (nom, email, entreprise). Sois réaliste et indique un score de confiance honnête.",
-  });
+  };
+
+  try {
+    enrichmentData = await aiJSON<typeof enrichmentData>(prompt, {
+      system:
+        "Tu es un assistant d'enrichissement de données commerciales. Réponds uniquement en JSON valide. Base tes estimations sur les indices disponibles (nom, email, entreprise). Sois réaliste et indique un score de confiance honnête.",
+    });
+  } catch (aiError) {
+    console.error("[enrichProspect] Erreur IA:", aiError);
+    throw new Error("L'enrichissement IA a échoué. Veuillez réessayer plus tard.");
+  }
 
   // Save enrichment data to prospect metadata
   const existingMetadata =
@@ -169,25 +176,30 @@ Génère un JSON avec ces champs:
 - approche_recommandee (string): conseil pour l'approche commerciale
 - confiance (number): score de confiance de 0 à 100`;
 
-  const insights = await aiJSON<{
-    nom: string;
-    secteur: string;
-    taille_estimee: string;
-    description: string;
-    concurrents: string[];
-    defis_cles: string[];
-    opportunites: string[];
-    technologies_probables: string[];
-    budget_potentiel: string;
-    approche_recommandee: string;
-    confiance: number;
-  }>(prompt, {
-    system:
-      "Tu es un analyste en intelligence commerciale. Réponds uniquement en JSON valide. Sois réaliste dans tes estimations. Si tu ne connais pas l'entreprise, base-toi sur le nom pour deviner le secteur et donne un score de confiance bas.",
-    model: "anthropic/claude-3.5-sonnet",
-  });
+  try {
+    const insights = await aiJSON<{
+      nom: string;
+      secteur: string;
+      taille_estimee: string;
+      description: string;
+      concurrents: string[];
+      defis_cles: string[];
+      opportunites: string[];
+      technologies_probables: string[];
+      budget_potentiel: string;
+      approche_recommandee: string;
+      confiance: number;
+    }>(prompt, {
+      system:
+        "Tu es un analyste en intelligence commerciale. Réponds uniquement en JSON valide. Sois réaliste dans tes estimations. Si tu ne connais pas l'entreprise, base-toi sur le nom pour deviner le secteur et donne un score de confiance bas.",
+      model: "anthropic/claude-3.5-sonnet",
+    });
 
-  return insights;
+    return insights;
+  } catch (aiError) {
+    console.error("[generateCompanyInsights] Erreur IA:", aiError);
+    throw new Error("L'analyse IA de l'entreprise a échoué. Veuillez réessayer plus tard.");
+  }
 }
 
 // ─── getProspectsForEnrichment ───────────────────────────────────────

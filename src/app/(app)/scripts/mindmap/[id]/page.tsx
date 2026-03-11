@@ -18,5 +18,17 @@ export default async function MindMapPage({
   const mindMap = await getMindMap(id);
   if (!mindMap) redirect("/scripts");
 
-  return <MindMapEditor mindMap={mindMap as any} />;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  return (
+    <MindMapEditor
+      mindMap={mindMap as any}
+      userId={user.id}
+      userName={profile?.full_name || "Utilisateur"}
+    />
+  );
 }

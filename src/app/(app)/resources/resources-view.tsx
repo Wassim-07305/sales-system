@@ -6,14 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileText,
   Video,
   Download,
   Search,
-  Link as LinkIcon,
+  FolderOpen,
+  FileSpreadsheet,
   Image,
+  Headphones,
   File,
   ExternalLink,
 } from "lucide-react";
@@ -24,65 +25,157 @@ interface Resource {
   id: string;
   title: string;
   description: string | null;
-  resource_type: string;
-  url: string;
   category: string | null;
-  tags: string[];
-  target_roles: string[];
-  download_count: number;
+  file_type: string;
+  file_url: string | null;
+  file_size: number | null;
+  thumbnail_url: string | null;
+  download_count?: number;
   created_at: string;
 }
 
-const typeIcons: Record<string, typeof FileText> = {
-  pdf: FileText,
-  video: Video,
-  image: Image,
-  link: LinkIcon,
-  document: FileText,
-};
-
-function getTypeIcon(type: string) {
-  return typeIcons[type] || File;
-}
-
-function getTypeLabel(type: string) {
-  const labels: Record<string, string> = {
-    pdf: "PDF",
-    video: "Vidéo",
-    image: "Image",
-    link: "Lien",
-    document: "Document",
-  };
-  return labels[type] || type.toUpperCase();
-}
-
-export function ResourcesView({
-  resources,
-  categories,
-}: {
+interface Props {
   resources: Resource[];
   categories: string[];
-}) {
+}
+
+function getFileIcon(fileType: string) {
+  switch (fileType.toLowerCase()) {
+    case "pdf":
+      return FileText;
+    case "video":
+    case "mp4":
+    case "webm":
+      return Video;
+    case "xlsx":
+    case "csv":
+      return FileSpreadsheet;
+    case "png":
+    case "jpg":
+    case "jpeg":
+    case "webp":
+      return Image;
+    case "mp3":
+    case "audio":
+      return Headphones;
+    default:
+      return File;
+  }
+}
+
+function formatFileSize(bytes: number | null): string {
+  if (!bytes) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const categoryColors: Record<string, string> = {
+  formation: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  scripts:
+    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  templates:
+    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  replays:
+    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  outils: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+};
+
+// Fallback resources if database is empty
+const fallbackResources: Resource[] = [
+  {
+    id: "1",
+    title: "Guide de démarrage rapide",
+    description:
+      "Tout ce qu'il faut savoir pour bien commencer avec la plateforme",
+    category: "formation",
+    file_type: "pdf",
+    file_url: null,
+    file_size: 2500000,
+    thumbnail_url: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    title: "Template de scripts d'appel",
+    description: "Scripts personnalisables pour vos appels de closing",
+    category: "scripts",
+    file_type: "pdf",
+    file_url: null,
+    file_size: 1100000,
+    thumbnail_url: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    title: "Replay — Masterclass Closing",
+    description: "Session complète sur les techniques de closing avancées",
+    category: "replays",
+    file_type: "video",
+    file_url: null,
+    file_size: null,
+    thumbnail_url: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "4",
+    title: "Checklist prospection quotidienne",
+    description:
+      "Liste des actions à effectuer chaque jour pour maximiser vos résultats",
+    category: "outils",
+    file_type: "pdf",
+    file_url: null,
+    file_size: 500000,
+    thumbnail_url: null,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "5",
+    title: "Modèle de suivi des leads",
+    description: "Fichier Excel pour tracker vos prospects et conversions",
+    category: "templates",
+    file_type: "xlsx",
+    file_url: null,
+    file_size: 350000,
+    thumbnail_url: null,
+    created_at: new Date().toISOString(),
+  },
+];
+
+export function ResourcesView({ resources, categories }: Props) {
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const filtered = resources.filter((r) => {
-    const matchSearch =
+  // Use fallback if no resources from DB
+  const displayResources = resources.length > 0 ? resources : fallbackResources;
+  const displayCategories =
+    categories.length > 0
+      ? categories
+      : ([
+          ...new Set(fallbackResources.map((r) => r.category).filter(Boolean)),
+        ] as string[]);
+
+  // Filter resources
+  const filteredResources = displayResources.filter((resource) => {
+    const matchesSearch =
       !search ||
-      r.title.toLowerCase().includes(search.toLowerCase()) ||
-      r.description?.toLowerCase().includes(search.toLowerCase()) ||
-      r.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-    const matchCategory =
-      activeCategory === "all" || r.category === activeCategory;
-    return matchSearch && matchCategory;
+      resource.title.toLowerCase().includes(search.toLowerCase()) ||
+      resource.description?.toLowerCase().includes(search.toLowerCase());
+
+    const matchesCategory =
+      !selectedCategory || resource.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
   });
 
   const handleDownload = (resource: Resource) => {
     startTransition(async () => {
       try {
         await incrementDownload(resource.id);
-        window.open(resource.url, "_blank");
+        if (resource.file_url) {
+          window.open(resource.file_url, "_blank");
+        }
       } catch {
         toast.error("Erreur lors du téléchargement");
       }
@@ -93,110 +186,179 @@ export function ResourcesView({
     <div>
       <PageHeader
         title="Ressources"
-        description="Documents, replays et fichiers utiles"
+        description="Documents, replays et fichiers utiles pour votre réussite"
       />
 
-      <div className="space-y-4">
-        {/* Barre de recherche */}
-        <div className="relative">
+      {/* Search and filters */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher une ressource..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-9"
           />
         </div>
 
-        {/* Filtres catégories */}
-        {categories.length > 0 && (
-          <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-            <TabsList>
-              <TabsTrigger value="all">Tous</TabsTrigger>
-              {categories.map((cat) => (
-                <TabsTrigger key={cat} value={cat}>
-                  {cat}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        )}
+        {/* Category filter pills */}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={selectedCategory === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedCategory(null)}
+            className={
+              selectedCategory === null
+                ? "bg-brand text-brand-dark hover:bg-brand/90"
+                : ""
+            }
+          >
+            Tous
+          </Button>
+          {displayCategories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
+              size="sm"
+              onClick={() =>
+                setSelectedCategory(
+                  selectedCategory === category ? null : category,
+                )
+              }
+              className={
+                selectedCategory === category
+                  ? "bg-brand text-brand-dark hover:bg-brand/90"
+                  : ""
+              }
+            >
+              {category.charAt(0).toUpperCase() + category.slice(1)}
+            </Button>
+          ))}
+        </div>
+      </div>
 
-        {/* Liste */}
-        {filtered.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <File className="h-12 w-12 mx-auto mb-3 opacity-40" />
-              <p className="font-medium">Aucune ressource trouvée</p>
-              <p className="text-sm mt-1">
-                {search
-                  ? "Essayez avec d'autres mots-clés"
-                  : "Aucune ressource disponible pour le moment"}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((resource) => {
-              const Icon = getTypeIcon(resource.resource_type);
-              return (
-                <Card key={resource.id}>
-                  <CardContent className="p-4 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
-                        <Icon className="h-5 w-5 text-brand" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">
-                          {resource.title}
+      {/* Resources grid */}
+      {filteredResources.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="font-semibold text-lg mb-2">
+              Aucune ressource trouvée
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {search || selectedCategory
+                ? "Essayez de modifier vos critères de recherche"
+                : "Les ressources seront bientôt disponibles"}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredResources.map((resource) => {
+            const Icon = getFileIcon(resource.file_type);
+            const categoryColor =
+              categoryColors[resource.category?.toLowerCase() || ""] ||
+              "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+
+            return (
+              <Card
+                key={resource.id}
+                className="group hover:shadow-md transition-shadow duration-200"
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center shrink-0 group-hover:bg-brand/20 transition-colors">
+                      <Icon className="h-6 w-6 text-brand" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm leading-tight mb-1 line-clamp-2">
+                        {resource.title}
+                      </h3>
+                      {resource.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                          {resource.description}
                         </p>
-                        {resource.description && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {resource.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {getTypeLabel(resource.resource_type)}
+                      )}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {resource.category && (
+                          <Badge
+                            variant="secondary"
+                            className={`text-[10px] ${categoryColor}`}
+                          >
+                            {resource.category}
                           </Badge>
-                          {resource.category && (
-                            <Badge variant="outline" className="text-xs">
-                              {resource.category}
-                            </Badge>
-                          )}
-                          {resource.download_count > 0 && (
-                            <span className="text-xs text-muted-foreground">
+                        )}
+                        <span className="text-[10px] text-muted-foreground uppercase">
+                          {resource.file_type}
+                        </span>
+                        {resource.file_size && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {formatFileSize(resource.file_size)}
+                          </span>
+                        )}
+                        {resource.download_count != null &&
+                          resource.download_count > 0 && (
+                            <span className="text-[10px] text-muted-foreground">
                               {resource.download_count} téléchargement
                               {resource.download_count > 1 ? "s" : ""}
                             </span>
                           )}
-                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(resource)}
-                      className="shrink-0"
-                    >
-                      {resource.resource_type === "link" ? (
-                        <>
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          Ouvrir
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-4 w-4 mr-1" />
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t flex gap-2">
+                    {resource.file_url ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          asChild
+                        >
+                          <a
+                            href={resource.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1.5" />
+                            Ouvrir
+                          </a>
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-brand text-brand-dark hover:bg-brand/90"
+                          onClick={() => handleDownload(resource)}
+                        >
+                          <Download className="h-4 w-4 mr-1.5" />
                           Télécharger
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        disabled
+                      >
+                        <Download className="h-4 w-4 mr-1.5" />
+                        Bientôt disponible
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Stats footer */}
+      <div className="mt-6 text-center text-sm text-muted-foreground">
+        {filteredResources.length} ressource
+        {filteredResources.length > 1 ? "s" : ""}{" "}
+        {search || selectedCategory ? "trouvée" : "disponible"}
+        {filteredResources.length > 1 ? "s" : ""}
       </div>
     </div>
   );
