@@ -21,9 +21,12 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Save, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, Share2, Users } from "lucide-react";
 import Link from "next/link";
 import { updateMindMap } from "@/lib/actions/scripts-v2";
+import { ShareDialog } from "../../share-dialog";
+import { usePresence } from "@/lib/hooks/use-presence";
+import { useRealtimeSync } from "@/lib/hooks/use-realtime-sync";
 
 interface MindMapData {
   id: string;
@@ -130,9 +133,24 @@ const nodeTypes: NodeTypes = {
   branch: MemoizedBranchNode,
 };
 
-export function MindMapEditor({ mindMap }: { mindMap: MindMapData }) {
+interface MindMapEditorProps {
+  mindMap: MindMapData;
+  userId?: string;
+  userName?: string;
+}
+
+export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps) {
   const [title, setTitle] = useState(mindMap.title);
   const [isPending, startTransition] = useTransition();
+  const [shareOpen, setShareOpen] = useState(false);
+
+  // Real-time collaboration presence
+  const { onlineUsers } = usePresence(
+    userId ? `script:${mindMap.id}` : null,
+    userId || "",
+    userName || ""
+  );
+
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState("");
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -156,6 +174,21 @@ export function MindMapEditor({ mindMap }: { mindMap: MindMapData }) {
     [setEdges]
   );
 
+  // Real-time sync of nodes/edges
+  const handleRemoteUpdate = useCallback(
+    (data: { nodes: Node[]; edges: Edge[] }) => {
+      setNodes(data.nodes);
+      setEdges(data.edges);
+    },
+    [setNodes, setEdges]
+  );
+
+  const { broadcastChanges } = useRealtimeSync({
+    scriptId: userId ? mindMap.id : null,
+    userId: userId || "",
+    onRemoteUpdate: handleRemoteUpdate,
+  });
+
   function handleSave() {
     startTransition(async () => {
       try {
@@ -164,6 +197,7 @@ export function MindMapEditor({ mindMap }: { mindMap: MindMapData }) {
           nodes,
           edges,
         });
+        broadcastChanges(nodes, edges);
       } catch {
         // Silently fail
       }
@@ -256,6 +290,36 @@ export function MindMapEditor({ mindMap }: { mindMap: MindMapData }) {
 
         <div className="flex-1" />
 
+        {/* Online collaborators */}
+        {onlineUsers.length > 0 && (
+          <div className="flex items-center gap-1.5 mr-2">
+            <Users className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="flex -space-x-1.5">
+              {onlineUsers.slice(0, 3).map((u) => (
+                <div
+                  key={u.userId}
+                  className="h-6 w-6 rounded-full bg-brand/20 border-2 border-background flex items-center justify-center"
+                  title={u.userName}
+                >
+                  <span className="text-[10px] font-semibold text-brand">
+                    {u.userName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              ))}
+              {onlineUsers.length > 3 && (
+                <div className="h-6 w-6 rounded-full bg-muted border-2 border-background flex items-center justify-center">
+                  <span className="text-[10px] font-medium">+{onlineUsers.length - 3}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+          <Share2 className="h-4 w-4 mr-1" />
+          Partager
+        </Button>
+
         <Button
           onClick={handleSave}
           disabled={isPending}
@@ -270,6 +334,13 @@ export function MindMapEditor({ mindMap }: { mindMap: MindMapData }) {
           Sauvegarder
         </Button>
       </div>
+
+      <ShareDialog
+        scriptId={mindMap.id}
+        scriptType="mindmap"
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
 
       {/* Canvas */}
       <div className="flex-1 relative">

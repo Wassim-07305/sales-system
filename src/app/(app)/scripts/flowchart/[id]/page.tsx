@@ -18,5 +18,17 @@ export default async function FlowchartPage({
   const flowchart = await getFlowchart(id);
   if (!flowchart) redirect("/scripts");
 
-  return <FlowchartEditor flowchart={flowchart as any} />;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  return (
+    <FlowchartEditor
+      flowchart={flowchart as any}
+      userId={user.id}
+      userName={profile?.full_name || "Utilisateur"}
+    />
+  );
 }

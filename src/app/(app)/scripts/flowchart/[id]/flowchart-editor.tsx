@@ -38,9 +38,14 @@ import {
   Reply,
   CheckCircle,
   Presentation,
+  Share2,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { updateFlowchart } from "@/lib/actions/scripts-v2";
+import { ShareDialog } from "../../share-dialog";
+import { usePresence } from "@/lib/hooks/use-presence";
+import { useRealtimeSync } from "@/lib/hooks/use-realtime-sync";
 
 interface FlowchartData {
   id: string;
@@ -143,16 +148,46 @@ const categories = [
   { value: "discovery", label: "Découverte" },
 ];
 
-export function FlowchartEditor({ flowchart }: { flowchart: FlowchartData }) {
+interface FlowchartEditorProps {
+  flowchart: FlowchartData;
+  userId?: string;
+  userName?: string;
+}
+
+export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditorProps) {
   const [title, setTitle] = useState(flowchart.title);
   const [category, setCategory] = useState(flowchart.category || "");
   const [isPending, startTransition] = useTransition();
+  const [shareOpen, setShareOpen] = useState(false);
+
+  // Real-time collaboration presence
+  const { onlineUsers } = usePresence(
+    userId ? `script:${flowchart.id}` : null,
+    userId || "",
+    userName || ""
+  );
+
   const [nodes, setNodes, onNodesChange] = useNodesState(
     (flowchart.nodes as Node[]) || []
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
     (flowchart.edges as Edge[]) || []
   );
+
+  // Real-time sync of nodes/edges
+  const handleRemoteUpdate = useCallback(
+    (data: { nodes: Node[]; edges: Edge[] }) => {
+      setNodes(data.nodes);
+      setEdges(data.edges);
+    },
+    [setNodes, setEdges]
+  );
+
+  const { broadcastChanges } = useRealtimeSync({
+    scriptId: userId ? flowchart.id : null,
+    userId: userId || "",
+    onRemoteUpdate: handleRemoteUpdate,
+  });
 
   const onConnect: OnConnect = useCallback(
     (params) => {
@@ -170,6 +205,7 @@ export function FlowchartEditor({ flowchart }: { flowchart: FlowchartData }) {
           edges,
           category: category || undefined,
         });
+        broadcastChanges(nodes, edges);
       } catch {
         // Silently fail
       }
@@ -226,6 +262,36 @@ export function FlowchartEditor({ flowchart }: { flowchart: FlowchartData }) {
 
         <div className="flex-1" />
 
+        {/* Online collaborators */}
+        {onlineUsers.length > 0 && (
+          <div className="flex items-center gap-1.5 mr-2">
+            <Users className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="flex -space-x-1.5">
+              {onlineUsers.slice(0, 3).map((u) => (
+                <div
+                  key={u.userId}
+                  className="h-6 w-6 rounded-full bg-brand/20 border-2 border-background flex items-center justify-center"
+                  title={u.userName}
+                >
+                  <span className="text-[10px] font-semibold text-brand">
+                    {u.userName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              ))}
+              {onlineUsers.length > 3 && (
+                <div className="h-6 w-6 rounded-full bg-muted border-2 border-background flex items-center justify-center">
+                  <span className="text-[10px] font-medium">+{onlineUsers.length - 3}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+          <Share2 className="h-4 w-4 mr-1" />
+          Partager
+        </Button>
+
         <Link href={`/scripts/present/${flowchart.id}`}>
           <Button variant="outline" size="sm">
             <Presentation className="h-4 w-4 mr-1" />
@@ -247,6 +313,13 @@ export function FlowchartEditor({ flowchart }: { flowchart: FlowchartData }) {
           Sauvegarder
         </Button>
       </div>
+
+      <ShareDialog
+        scriptId={flowchart.id}
+        scriptType="flowchart"
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
 
       {/* Canvas */}
       <div className="flex-1">

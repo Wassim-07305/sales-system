@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~89% (69 faits / 7 partiels / 5 manquants)
+> **Couverture globale** : ~90% (70 faits / 6 partiels / 5 manquants)
 
 ---
 
@@ -98,7 +98,7 @@
 | F21 | Éditeur Flowchart (@xyflow/react) | ✅ Fait | `scripts/flowchart/` |
 | F22 | Mode Présentation & Mind Maps | ✅ Fait | `scripts/mindmap/`, `scripts/present/` |
 | F23 | Génération IA & Templates | ✅ Fait | `scripts/templates/` |
-| F23.1 | Partage & Collaboration Scripts | ⚠️ Partiel | Templates OK — collab real-time manquante |
+| F23.1 | Partage & Collaboration Scripts | ✅ Fait | ShareDialog intégré flowchart/mindmap, présence temps réel, sync Realtime broadcast |
 | F23.2 | Analytics Scripts & Performance | ✅ Fait | `scripts/analytics/` |
 | F23.3 | Mode Entraînement & Simulation | ✅ Fait | `scripts/training/` |
 
