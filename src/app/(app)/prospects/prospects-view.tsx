@@ -95,6 +95,7 @@ export function ProspectsView({
           notes: notes || null,
           created_at: new Date().toISOString(),
           created_by: null,
+          created_by_name: null,
           list: null,
         };
         setProspects((prev) => [newProspect, ...prev]);

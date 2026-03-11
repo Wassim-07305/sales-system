@@ -32,8 +32,6 @@ import {
   Store,
   SlidersHorizontal,
   HelpCircle,
-  LifeBuoy,
-  Map,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
@@ -90,6 +88,12 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Équipe",
     href: "/team",
+    icon: UsersRound,
+    roles: ["admin", "manager"],
+  },
+  {
+    label: "Affectations",
+    href: "/team/assignments",
     icon: UsersRound,
     roles: ["admin", "manager"],
   },
@@ -238,22 +242,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["client_b2b", "client_b2c"],
   },
 
-  // Support
-  {
-    label: "Support",
-    href: "/support",
-    icon: LifeBuoy,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-
-  // Roadmap
-  {
-    label: "Roadmap",
-    href: "/roadmap",
-    icon: Map,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-
   // Help
   {
     label: "Centre d'aide",
@@ -327,7 +315,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/team", "/content", "/customers", "/marketplace"].includes(i.href)
+      ["/team", "/team/assignments", "/content", "/customers", "/marketplace"].includes(i.href)
     ),
   },
   {
@@ -345,8 +333,8 @@ export const NAV_SECTIONS: NavSection[] = [
     ),
   },
   {
-    label: "Support",
-    items: NAV_ITEMS.filter((i) => ["/support", "/roadmap", "/help"].includes(i.href)),
+    label: "Aide",
+    items: NAV_ITEMS.filter((i) => ["/help"].includes(i.href)),
   },
 ];
 
@@ -361,6 +349,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   projections: "Projections",
   academy: "Academy",
   team: "Équipe",
+  assignments: "Affectations",
   prospecting: "Prospection",
   hub: "Hub",
   linkedin: "LinkedIn",
