@@ -453,3 +453,68 @@ export async function hasCompletedCommitments(userId: string) {
 
   return !!data;
 }
+
+// --- Onboarding simple (B2C / B2B) ---
+
+export async function completeSimpleOnboarding(data: {
+  full_name?: string;
+  phone?: string;
+  company?: string;
+  avatar_url?: string;
+  bio?: string;
+  skills?: string;
+  business_description?: string;
+  qualification_questions?: string;
+  prospection_channels?: string[];
+  linkedin_url?: string;
+  instagram_username?: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Update profile
+  await supabase
+    .from("profiles")
+    .update({
+      full_name: data.full_name || null,
+      phone: data.phone || null,
+      company: data.company || null,
+      avatar_url: data.avatar_url || null,
+      niche: data.skills || data.business_description || null,
+      onboarding_completed: true,
+      onboarding_step: 99,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  // Save extended settings
+  const settingsEntries = [
+    { key: "bio", value: data.bio || "" },
+    { key: "skills", value: data.skills || "" },
+    { key: "business_description", value: data.business_description || "" },
+    {
+      key: "qualification_questions",
+      value: data.qualification_questions || "",
+    },
+    {
+      key: "prospection_channels",
+      value: JSON.stringify(data.prospection_channels || []),
+    },
+    { key: "linkedin_url", value: data.linkedin_url || "" },
+    { key: "instagram_username", value: data.instagram_username || "" },
+  ].filter((e) => e.value !== "" && e.value !== "[]");
+
+  for (const entry of settingsEntries) {
+    await supabase.from("user_settings").upsert(
+      { user_id: user.id, key: entry.key, value: entry.value },
+      { onConflict: "user_id,key" }
+    );
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/profile");
+  return { success: true };
+}

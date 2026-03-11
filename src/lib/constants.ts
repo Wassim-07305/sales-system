@@ -34,6 +34,7 @@ import {
   HelpCircle,
   LifeBuoy,
   Map,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -72,7 +73,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Bookings",
     href: "/bookings",
     icon: CalendarDays,
-    roles: ["admin", "manager", "setter", "closer"],
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
   {
     label: "Contrats",
@@ -84,7 +85,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Academy",
     href: "/academy",
     icon: GraduationCap,
-    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+    roles: ["admin", "manager", "setter", "closer", "client_b2c"],
   },
   {
     label: "Équipe",
@@ -126,7 +127,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Communauté",
     href: "/community",
     icon: UsersRound,
-    roles: ["admin", "manager", "client_b2b", "client_b2c"],
+    roles: ["admin", "manager", "client_b2c"],
   },
 
   // Inbox (DM conversations)
@@ -212,6 +213,28 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Parrainage",
     href: "/referral",
     icon: Gift,
+    roles: ["client_b2b", "client_b2c"],
+  },
+
+  // Client B2B/B2C - CRM simplifié
+  {
+    label: "Mes Prospects",
+    href: "/prospects",
+    icon: Target,
+    roles: ["client_b2b", "client_b2c"],
+  },
+  // Client B2B - Settings IA
+  {
+    label: "Settings IA",
+    href: "/settings-ia",
+    icon: Bot,
+    roles: ["client_b2b"],
+  },
+  // Client B2B + B2C - Scripts IA
+  {
+    label: "Scripts IA",
+    href: "/ai-scripts",
+    icon: Sparkles,
     roles: ["client_b2b", "client_b2c"],
   },
 
@@ -310,9 +333,15 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Espace Client",
     items: NAV_ITEMS.filter((i) =>
-      ["/portal", "/calls", "/resources", "/kpis", "/referral"].includes(
+      ["/portal", "/calls", "/resources", "/kpis", "/referral", "/bookings", "/prospects"].includes(
         i.href
       )
+    ),
+  },
+  {
+    label: "Outils IA",
+    items: NAV_ITEMS.filter((i) =>
+      ["/settings-ia", "/ai-scripts"].includes(i.href)
     ),
   },
   {
@@ -392,6 +421,9 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   support: "Support",
   help: "Centre d'aide",
   groups: "Groupes d'entraînement",
+  prospects: "Mes Prospects",
+  "settings-ia": "Settings IA",
+  "ai-scripts": "Scripts IA",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [

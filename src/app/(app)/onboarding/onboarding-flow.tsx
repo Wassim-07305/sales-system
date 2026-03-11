@@ -1,593 +1,602 @@
 "use client";
 
-import { useState } from "react";
-import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { completeOnboardingStep, submitOnboardingQuiz } from "@/lib/actions/onboarding";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { completeSimpleOnboarding } from "@/lib/actions/onboarding";
 import {
   CheckCircle2,
-  Circle,
-  Play,
-  FileText,
-  Calendar,
   ArrowRight,
-  ClipboardList,
+  ArrowLeft,
   Loader2,
-  Brain,
-  Trophy,
-  Sparkles,
-  PartyPopper,
+  Camera,
+  Building2,
+  User,
+  FileText,
+  Target,
+  Link,
 } from "lucide-react";
 
-interface Step {
+interface OnboardingFlowProps {
+  role: string;
+  userId: string;
+}
+
+interface StepDef {
   id: string;
   title: string;
-  description: string | null;
-  position: number;
-  step_type: string;
-  content: Record<string, unknown>;
-  is_required: boolean;
+  icon: React.ElementType;
+  description: string;
 }
 
-interface Props {
-  steps: Step[];
-  progressMap: Record<string, { completed: boolean; response_data: Record<string, unknown> }>;
-  quizResult?: { score: number; color_code: string } | null;
-}
+const B2C_STEPS: StepDef[] = [
+  {
+    id: "photo",
+    title: "Photo de profil",
+    icon: User,
+    description: "Ajoutez une photo pour personnaliser votre compte",
+  },
+  {
+    id: "identity",
+    title: "Vos informations",
+    icon: User,
+    description: "Dites-nous qui vous êtes",
+  },
+  {
+    id: "skills",
+    title: "Votre profil",
+    icon: Target,
+    description: "Décrivez votre expertise",
+  },
+];
 
-const typeIcons: Record<string, React.ReactNode> = {
-  video: <Play className="h-4 w-4" />,
-  action: <FileText className="h-4 w-4" />,
-  booking: <Calendar className="h-4 w-4" />,
-  questionnaire: <ClipboardList className="h-4 w-4" />,
-  quiz: <Brain className="h-4 w-4" />,
-};
+const B2B_STEPS: StepDef[] = [
+  {
+    id: "photo",
+    title: "Photo & Entreprise",
+    icon: Building2,
+    description: "Votre identité professionnelle",
+  },
+  {
+    id: "business",
+    title: "Votre business",
+    icon: FileText,
+    description: "Décrivez votre activité en détail",
+  },
+  {
+    id: "qualification",
+    title: "Qualification",
+    icon: Target,
+    description: "Vos questions de qualification",
+  },
+  {
+    id: "channels",
+    title: "Prospection",
+    icon: Target,
+    description: "Vos canaux de prospection",
+  },
+  {
+    id: "social",
+    title: "Réseaux sociaux",
+    icon: Link,
+    description: "Vos comptes LinkedIn et Instagram",
+  },
+];
 
-const colorCodeLabels: Record<string, { label: string; className: string }> = {
-  green: { label: "Excellent", className: "bg-green-500 text-white" },
-  orange: { label: "Bon potentiel", className: "bg-orange-500 text-white" },
-  red: { label: "En progression", className: "bg-red-500 text-white" },
-};
+const CHANNELS = [
+  "LinkedIn",
+  "Instagram",
+  "Email",
+  "Téléphone",
+  "Réseaux",
+  "Bouche à oreille",
+];
 
-export function OnboardingFlow({ steps, progressMap, quizResult }: Props) {
+export function OnboardingFlow({ role, userId }: OnboardingFlowProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Record<string, string>>({});
-  const [expandedStep, setExpandedStep] = useState<string | null>(null);
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
-  const [quizScore, setQuizScore] = useState<{ score: number; colorCode: string } | null>(
-    quizResult ? { score: quizResult.score, colorCode: quizResult.color_code } : null
-  );
-  const [showConfetti, setShowConfetti] = useState(false);
+  const steps = role === "client_b2b" ? B2B_STEPS : B2C_STEPS;
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completing, setCompleting] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
 
-  const completedCount = steps.filter((s) => progressMap[s.id]?.completed).length;
-  const progressPercent = steps.length > 0 ? Math.round((completedCount / steps.length) * 100) : 0;
+  // Form data
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
+  const [bio, setBio] = useState("");
+  const [skills, setSkills] = useState("");
+  const [businessDesc, setBusinessDesc] = useState("");
+  const [qualificationQ, setQualificationQ] = useState("");
+  const [channels, setChannels] = useState<string[]>([]);
+  const [otherChannel, setOtherChannel] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [instagramUsername, setInstagramUsername] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Find the first uncompleted step
-  const currentStepIndex = steps.findIndex((s) => !progressMap[s.id]?.completed);
-  const allCompleted = currentStepIndex === -1 && steps.length > 0;
+  const progress =
+    steps.length === 1 ? 100 : (currentStep / (steps.length - 1)) * 100;
+  const isLastStep = currentStep === steps.length - 1;
 
-  // Trigger confetti when all completed
-  if (allCompleted && !showConfetti) {
-    setShowConfetti(true);
-  }
-
-  async function handleComplete(step: Step) {
-    setLoading(step.id);
+  async function handleAvatarUpload(file: File) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+    setUploadingAvatar(true);
     try {
-      const responseData = step.step_type === "questionnaire" ? formData : {};
-      await completeOnboardingStep(step.id, responseData);
-      toast.success(`${step.title} — Complété !`);
-      setExpandedStep(null);
-      router.refresh();
+      const supabase = createClient();
+      const ext = file.name.split(".").pop();
+      const path = `${userId}/avatar.${ext}`;
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(path);
+      setAvatarUrl(urlData.publicUrl);
+      setAvatarPreview(URL.createObjectURL(file));
+      toast.success("Photo uploadée avec succès !");
     } catch {
-      toast.error("Erreur lors de la validation");
+      toast.error("Erreur lors de l'upload de la photo");
     } finally {
-      setLoading(null);
+      setUploadingAvatar(false);
     }
   }
 
-  async function handleQuizSubmit(step: Step) {
-    setLoading(step.id);
+  function toggleChannel(channel: string) {
+    setChannels((prev) =>
+      prev.includes(channel)
+        ? prev.filter((c) => c !== channel)
+        : [...prev, channel]
+    );
+  }
+
+  function goNext() {
+    setDirection("forward");
+    setAnimating(true);
+    setTimeout(() => {
+      setCurrentStep((s) => s + 1);
+      setAnimating(false);
+    }, 200);
+  }
+
+  function goPrev() {
+    setDirection("back");
+    setAnimating(true);
+    setTimeout(() => {
+      setCurrentStep((s) => s - 1);
+      setAnimating(false);
+    }, 200);
+  }
+
+  async function handleComplete() {
+    setCompleting(true);
     try {
-      const questions = (step.content.quiz_questions as Array<{
-        question: string;
-        options: string[];
-        correct_index: number;
-      }>) || [];
-
-      // Convert quiz answers to text for scoring
-      const textAnswers: Record<string, string> = {};
-      questions.forEach((q, i) => {
-        const selectedIndex = quizAnswers[`q_${i}`];
-        if (selectedIndex !== undefined) {
-          textAnswers[`q_${i}`] = q.options[selectedIndex] || "";
-        }
+      const allChannels = [
+        ...channels,
+        ...(otherChannel.trim() ? [otherChannel.trim()] : []),
+      ];
+      const result = await completeSimpleOnboarding({
+        full_name: fullName || undefined,
+        phone: phone || undefined,
+        company: company || undefined,
+        avatar_url: avatarUrl || undefined,
+        bio: bio || undefined,
+        skills: skills || undefined,
+        business_description: businessDesc || undefined,
+        qualification_questions: qualificationQ || undefined,
+        prospection_channels: allChannels.length > 0 ? allChannels : undefined,
+        linkedin_url: linkedinUrl || undefined,
+        instagram_username: instagramUsername || undefined,
       });
-
-      // Calculate correct answers score
-      let correctCount = 0;
-      questions.forEach((q, i) => {
-        if (quizAnswers[`q_${i}`] === q.correct_index) {
-          correctCount++;
-        }
-      });
-
-      const score = questions.length > 0
-        ? Math.round((correctCount / questions.length) * 100)
-        : 0;
-
-      const result = await submitOnboardingQuiz(textAnswers);
-      // Use the actual correct-answer score for display
-      const colorCode = score >= 80 ? "green" : score >= 50 ? "orange" : "red";
-      setQuizScore({ score, colorCode });
-      setQuizSubmitted(true);
-
-      // Also mark the onboarding step as completed
-      await completeOnboardingStep(step.id, { quiz_score: score, color_code: colorCode });
-
-      toast.success(`Quiz terminé ! Score : ${score}%`);
-      router.refresh();
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Profil complété ! Bienvenue sur la plateforme 🎉");
+        router.push("/dashboard");
+      }
     } catch {
-      toast.error("Erreur lors de la soumission du quiz");
+      toast.error("Une erreur est survenue, veuillez réessayer");
     } finally {
-      setLoading(null);
+      setCompleting(false);
     }
   }
 
-  function renderQuizContent(step: Step) {
-    const questions = (step.content.quiz_questions as Array<{
-      question: string;
-      options: string[];
-      correct_index: number;
-    }>) || [];
+  const step = steps[currentStep];
+  const StepIcon = step.icon;
 
-    if (quizSubmitted && quizScore) {
-      const colorInfo = colorCodeLabels[quizScore.colorCode] || colorCodeLabels.orange;
+  // Render step content
+  function renderStepContent() {
+    const stepId = step.id;
+
+    if (stepId === "photo") {
       return (
-        <div className="space-y-4">
-          <div className="text-center py-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-brand/10 mb-4">
-              <Trophy className="h-10 w-10 text-brand" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Quiz terminé !</h3>
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <span className="text-3xl font-bold">{quizScore.score}%</span>
-              <Badge className={cn("text-sm px-3 py-1", colorInfo.className)}>
-                {colorInfo.label}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              {quizScore.colorCode === "green"
-                ? "Félicitations ! Vous maîtrisez déjà les fondamentaux."
-                : quizScore.colorCode === "orange"
-                  ? "Bon début ! Quelques points à approfondir pour exceller."
-                  : "Pas de souci, la formation va vous aider à progresser rapidement."}
+        <div className="space-y-6">
+          {/* Avatar upload */}
+          <div className="flex flex-col items-center gap-4">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="relative group w-28 h-28 rounded-full overflow-hidden border-2 border-white/20 hover:border-[#7af17a]/60 transition-all duration-300 bg-white/5 flex items-center justify-center"
+            >
+              {avatarPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarPreview}
+                  alt="Aperçu"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Camera className="h-8 w-8 text-white/40 group-hover:text-[#7af17a] transition-colors" />
+              )}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                {uploadingAvatar ? (
+                  <Loader2 className="h-6 w-6 text-white animate-spin" />
+                ) : (
+                  <Camera className="h-6 w-6 text-white" />
+                )}
+              </div>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleAvatarUpload(file);
+              }}
+            />
+            <p className="text-sm text-white/50">
+              Cliquez pour choisir une photo (max 5 Mo)
             </p>
           </div>
-          <div className="flex justify-center">
-            <Button
-              className="bg-brand text-brand-dark hover:bg-brand/90"
-              onClick={() => {
-                setExpandedStep(null);
-              }}
-            >
-              Continuer
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
+
+          {/* Company name for B2B */}
+          {role === "client_b2b" && (
+            <div className="space-y-2">
+              <Label className="text-white/80">Nom de l&apos;entreprise</Label>
+              <Input
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Ex : AgenceX, SaaS Corp..."
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50"
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (stepId === "identity") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-white/80">Prénom et Nom</Label>
+            <Input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Ex : Jean Dupont"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white/80">Téléphone</Label>
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Ex : +33 6 12 34 56 78"
+              type="tel"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50"
+            />
           </div>
         </div>
       );
     }
 
-    const allAnswered = questions.every((_, i) => quizAnswers[`q_${i}`] !== undefined);
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Brain className="h-4 w-4" />
-          <span>{questions.length} questions — Choisissez la meilleure réponse</span>
-        </div>
-
-        {questions.map((q, qIndex) => (
-          <div key={qIndex} className="space-y-2">
-            <p className="font-medium text-sm">
-              {qIndex + 1}. {q.question}
+    if (stepId === "skills") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-white/80">
+              Bio courte{" "}
+              <span className="text-white/40 text-xs">({bio.length}/200)</span>
+            </Label>
+            <Textarea
+              value={bio}
+              onChange={(e) =>
+                setBio(e.target.value.slice(0, 200))
+              }
+              placeholder="Parlez-nous de vous en quelques mots..."
+              rows={3}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50 resize-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white/80">Compétences</Label>
+            <Input
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder="Ex : cold calling, LinkedIn, closing..."
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50"
+            />
+            <p className="text-xs text-white/40">
+              Séparez vos compétences par des virgules
             </p>
-            <div className="grid gap-2">
-              {q.options.map((option, oIndex) => {
-                const isSelected = quizAnswers[`q_${qIndex}`] === oIndex;
+          </div>
+        </div>
+      );
+    }
+
+    if (stepId === "business") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-white/80">
+              Ce que vous faites exactement
+            </Label>
+            <Textarea
+              value={businessDesc}
+              onChange={(e) => setBusinessDesc(e.target.value)}
+              placeholder="Décrivez votre activité, votre offre, votre marché cible..."
+              rows={5}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50 resize-none"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (stepId === "qualification") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-white/80">
+              Vos questions de qualification
+            </Label>
+            <p className="text-xs text-white/40">
+              Quelles questions posez-vous pour qualifier un prospect ?
+            </p>
+            <Textarea
+              value={qualificationQ}
+              onChange={(e) => setQualificationQ(e.target.value)}
+              placeholder={"Ex :\n- Quel est votre budget ?\n- Depuis combien de temps cherchez-vous une solution ?\n- Qui prend la décision finale ?"}
+              rows={6}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50 resize-none"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (stepId === "channels") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <Label className="text-white/80">
+              Vos canaux de prospection principaux
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              {CHANNELS.map((channel) => {
+                const selected = channels.includes(channel);
                 return (
                   <button
-                    key={oIndex}
+                    key={channel}
                     type="button"
+                    onClick={() => toggleChannel(channel)}
                     className={cn(
-                      "w-full text-left px-4 py-3 rounded-lg border text-sm transition-all",
-                      isSelected
-                        ? "border-brand bg-brand/10 font-medium"
-                        : "border-border hover:border-brand/50 hover:bg-brand/5"
+                      "flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-200",
+                      selected
+                        ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a]"
+                        : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white/80"
                     )}
-                    onClick={() =>
-                      setQuizAnswers((prev) => ({
-                        ...prev,
-                        [`q_${qIndex}`]: oIndex,
-                      }))
-                    }
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "inline-flex items-center justify-center w-6 h-6 rounded-full border text-xs font-medium shrink-0",
-                          isSelected
-                            ? "border-brand bg-brand text-brand-dark"
-                            : "border-muted-foreground/30"
-                        )}
-                      >
-                        {String.fromCharCode(65 + oIndex)}
-                      </span>
-                      {option}
-                    </span>
+                    {selected ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <div className="h-4 w-4 rounded-full border border-current shrink-0" />
+                    )}
+                    {channel}
                   </button>
                 );
               })}
             </div>
           </div>
-        ))}
-
-        <div className="pt-2">
-          <Button
-            className="bg-brand text-brand-dark hover:bg-brand/90 w-full"
-            onClick={() => handleQuizSubmit(step)}
-            disabled={!allAnswered || loading === step.id}
-          >
-            {loading === step.id && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Valider le quiz ({Object.keys(quizAnswers).length}/{questions.length} répondu{questions.length > 1 ? "es" : "e"})
-          </Button>
-          {!allAnswered && (
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Répondez à toutes les questions pour valider
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  function renderStepContent(step: Step) {
-    const content = step.content as Record<string, unknown>;
-
-    if (step.step_type === "quiz") {
-      return renderQuizContent(step);
-    }
-
-    if (step.step_type === "video") {
-      const videoUrl = (content.video_url as string) || "";
-      return (
-        <div className="space-y-3">
-          {videoUrl && (
-            <div className="aspect-video bg-black/5 rounded-lg flex items-center justify-center border">
-              <div className="text-center text-muted-foreground">
-                <Play className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-sm">Vidéo de bienvenue</p>
-                <p className="text-xs">{(content.duration as string) || ""}</p>
-              </div>
-            </div>
-          )}
-          <Button
-            className="bg-brand text-brand-dark hover:bg-brand/90"
-            onClick={() => handleComplete(step)}
-            disabled={loading === step.id}
-          >
-            {loading === step.id && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            J&apos;ai regardé la vidéo
-          </Button>
+          <div className="space-y-2">
+            <Label className="text-white/80">
+              Autre canal{" "}
+              <span className="text-white/40 text-xs">(optionnel)</span>
+            </Label>
+            <Input
+              value={otherChannel}
+              onChange={(e) => setOtherChannel(e.target.value)}
+              placeholder="Ex : TikTok, YouTube, Podcast..."
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50"
+            />
+          </div>
         </div>
       );
     }
 
-    if (step.step_type === "questionnaire") {
-      const questions = (content.questions as Array<{
-        key: string;
-        label: string;
-        type: string;
-        options?: string[];
-      }>) || [];
-
+    if (stepId === "social") {
       return (
         <div className="space-y-4">
-          {questions.map((q) => (
-            <div key={q.key}>
-              <Label className="text-sm">{q.label}</Label>
-              {q.type === "textarea" ? (
-                <Textarea
-                  value={formData[q.key] || ""}
-                  onChange={(e) => setFormData({ ...formData, [q.key]: e.target.value })}
-                  placeholder="Votre réponse..."
-                  className="mt-1"
-                />
-              ) : q.type === "select" && q.options ? (
-                <Select
-                  value={formData[q.key] || ""}
-                  onValueChange={(v) => setFormData({ ...formData, [q.key]: v })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {q.options.map((opt) => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input
-                  value={formData[q.key] || ""}
-                  onChange={(e) => setFormData({ ...formData, [q.key]: e.target.value })}
-                  placeholder="Votre réponse..."
-                  className="mt-1"
-                />
-              )}
+          <div className="space-y-2">
+            <Label className="text-white/80">URL LinkedIn</Label>
+            <Input
+              value={linkedinUrl}
+              onChange={(e) => setLinkedinUrl(e.target.value)}
+              placeholder="https://linkedin.com/in/votre-profil"
+              type="url"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white/80">Username Instagram</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-sm">
+                @
+              </span>
+              <Input
+                value={instagramUsername}
+                onChange={(e) =>
+                  setInstagramUsername(e.target.value.replace(/^@/, ""))
+                }
+                placeholder="votre_username"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#7af17a]/50 pl-7"
+              />
             </div>
-          ))}
-          <Button
-            className="bg-brand text-brand-dark hover:bg-brand/90"
-            onClick={() => handleComplete(step)}
-            disabled={loading === step.id}
-          >
-            {loading === step.id && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Valider mes réponses
-          </Button>
+          </div>
         </div>
       );
     }
 
-    // action or booking
-    const actionUrl = (content.action_url as string) || "";
-    const actionLabel = (content.action_label as string) || "Continuer";
-
-    return (
-      <div className="flex gap-3">
-        {actionUrl && (
-          <Button
-            variant="outline"
-            onClick={() => router.push(actionUrl)}
-          >
-            {actionLabel}
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
-        )}
-        <Button
-          className="bg-brand text-brand-dark hover:bg-brand/90"
-          onClick={() => handleComplete(step)}
-          disabled={loading === step.id}
-        >
-          {loading === step.id && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          Marquer comme fait
-        </Button>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Confetti animation when all steps completed */}
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-          {Array.from({ length: 40 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute animate-confetti"
-              style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
-              }}
-            >
-              <div
-                className="w-2 h-2 rounded-sm"
-                style={{
-                  backgroundColor: ["#7af17a", "#14080e", "#f59e0b", "#3b82f6", "#ef4444", "#a855f7"][
-                    Math.floor(Math.random() * 6)
-                  ],
-                  transform: `rotate(${Math.random() * 360}deg)`,
-                }}
-              />
-            </div>
-          ))}
-          <style jsx>{`
-            @keyframes confetti-fall {
-              0% {
-                transform: translateY(-10vh) rotate(0deg);
-                opacity: 1;
-              }
-              100% {
-                transform: translateY(110vh) rotate(720deg);
-                opacity: 0;
-              }
-            }
-            .animate-confetti {
-              animation: confetti-fall linear forwards;
-            }
-          `}</style>
-        </div>
-      )}
-
-      <PageHeader
-        title="Onboarding"
-        description="Bienvenue ! Suivez ces étapes pour bien démarrer."
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background texture */}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage: `radial-gradient(circle at 20% 20%, rgba(122,241,122,0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(122,241,122,0.03) 0%, transparent 50%)`,
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.01'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
       />
 
-      {/* Quiz score badge at top if available */}
-      {(quizResult || quizScore) && (
-        <Card className="mb-4 border-brand/30 bg-brand/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-brand/20">
-                  <Trophy className="h-5 w-5 text-brand" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Résultat du quiz</p>
-                  <p className="text-xs text-muted-foreground">
-                    Votre niveau a été évalué
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold">
-                  {quizScore?.score ?? quizResult?.score}%
-                </span>
-                <Badge
-                  className={cn(
-                    "text-xs",
-                    colorCodeLabels[quizScore?.colorCode ?? quizResult?.color_code ?? "orange"]?.className
-                  )}
-                >
-                  {colorCodeLabels[quizScore?.colorCode ?? quizResult?.color_code ?? "orange"]?.label}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">Progression</h3>
-            <span className="text-sm font-medium">{progressPercent}%</span>
+      {/* Main card */}
+      <div className="relative w-full max-w-lg">
+        {/* Progress bar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-white/40 font-medium tracking-wider uppercase">
+              Étape {currentStep + 1} sur {steps.length}
+            </span>
+            <span className="text-xs text-[#7af17a] font-semibold">
+              {Math.round(progress)}%
+            </span>
           </div>
-          <Progress value={progressPercent} className="h-3 mb-2" />
-          <p className="text-xs text-muted-foreground">
-            {completedCount}/{steps.length} étapes complétées
-          </p>
-        </CardContent>
-      </Card>
+          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#7af17a] rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
 
-      {/* All steps completed celebration */}
-      {allCompleted && (
-        <Card className="mb-6 border-brand bg-gradient-to-r from-brand/10 to-brand/5">
-          <CardContent className="p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand/20 mb-4">
-              <PartyPopper className="h-8 w-8 text-brand" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Bravo, onboarding terminé !</h3>
-            <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-              Vous avez complété toutes les étapes. Vous êtes prêt à démarrer !
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button
-                className="bg-brand text-brand-dark hover:bg-brand/90"
-                onClick={() => router.push("/onboarding/welcome-pack")}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Voir mon Welcome Pack
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push("/dashboard")}
-              >
-                Aller au dashboard
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-3">
-        {steps.map((step, i) => {
-          const isCompleted = progressMap[step.id]?.completed;
-          const isCurrent = i === currentStepIndex;
-          const isExpanded = expandedStep === step.id || (isCurrent && expandedStep === null);
-
-          return (
-            <Card
-              key={step.id}
+        {/* Stepper dots */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          {steps.map((s, i) => (
+            <div
+              key={s.id}
               className={cn(
-                "transition-all cursor-pointer",
-                isCurrent && "ring-2 ring-brand",
-                isCompleted && "opacity-70"
+                "transition-all duration-300 rounded-full",
+                i === currentStep
+                  ? "w-6 h-2 bg-[#7af17a]"
+                  : i < currentStep
+                  ? "w-2 h-2 bg-[#7af17a]/50"
+                  : "w-2 h-2 bg-white/15"
               )}
-              onClick={() => !isCompleted && setExpandedStep(step.id)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="shrink-0">
-                    {isCompleted ? (
-                      <CheckCircle2 className="h-6 w-6 text-brand" />
-                    ) : isCurrent ? (
-                      <div className="h-6 w-6 rounded-full border-2 border-brand flex items-center justify-center">
-                        <div className="h-2.5 w-2.5 rounded-full bg-brand" />
-                      </div>
-                    ) : (
-                      <Circle className="h-6 w-6 text-muted-foreground/30" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      {typeIcons[step.step_type]}
-                      <h4 className="font-medium text-sm">{step.title}</h4>
-                      {step.step_type === "quiz" && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                          Quiz
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {step.description}
-                    </p>
-                  </div>
-                  {isCurrent && !isExpanded && (
-                    <Button
-                      size="sm"
-                      className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedStep(step.id);
-                      }}
-                    >
-                      Commencer
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
+            />
+          ))}
+        </div>
+
+        {/* Card */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+          {/* Step header */}
+          <div
+            className={cn(
+              "transition-all duration-200",
+              animating
+                ? direction === "forward"
+                  ? "opacity-0 translate-x-4"
+                  : "opacity-0 -translate-x-4"
+                : "opacity-100 translate-x-0"
+            )}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-[#7af17a]/10 border border-[#7af17a]/20 flex items-center justify-center">
+                <StepIcon className="h-5 w-5 text-[#7af17a]" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">{step.title}</h2>
+                <p className="text-sm text-white/50">{step.description}</p>
+              </div>
+            </div>
+
+            <div className="h-px bg-white/10 my-6" />
+
+            {/* Step content */}
+            <div className="min-h-[200px]">{renderStepContent()}</div>
+
+            <div className="h-px bg-white/10 my-6" />
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between gap-3">
+              {currentStep > 0 ? (
+                <Button
+                  variant="ghost"
+                  onClick={goPrev}
+                  disabled={completing}
+                  className="text-white/60 hover:text-white hover:bg-white/10 gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Précédent
+                </Button>
+              ) : (
+                <div />
+              )}
+
+              {isLastStep ? (
+                <Button
+                  onClick={handleComplete}
+                  disabled={completing}
+                  className="bg-[#7af17a] text-black hover:bg-[#7af17a]/90 font-semibold gap-2 flex-1 max-w-xs"
+                >
+                  {completing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4" />
                   )}
-                </div>
+                  Terminer et accéder au dashboard
+                </Button>
+              ) : (
+                <Button
+                  onClick={goNext}
+                  className="bg-[#7af17a] text-black hover:bg-[#7af17a]/90 font-semibold gap-2"
+                >
+                  Continuer
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
 
-                {isExpanded && !isCompleted && (
-                  <div className="mt-4 pt-4 border-t" onClick={(e) => e.stopPropagation()}>
-                    {renderStepContent(step)}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+        {/* Footer */}
+        <p className="text-center text-xs text-white/20 mt-6">
+          Vous pouvez modifier ces informations à tout moment dans vos paramètres
+        </p>
       </div>
-
-      {steps.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            Aucune étape d&apos;onboarding configurée.
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
