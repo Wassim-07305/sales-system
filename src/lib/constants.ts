@@ -332,6 +332,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   contracts: "Contrats",
   analytics: "Analytics",
   projections: "Projections",
+  nps: "NPS & Satisfaction",
   academy: "Academy",
   team: "Équipe",
   prospecting: "Prospection",

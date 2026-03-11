@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Funnel,
   PieChart as PieChartIcon,
+  SmilePlus,
 } from "lucide-react";
 import {
   AreaChart,
@@ -120,6 +121,12 @@ export function AnalyticsView({
             <Button variant="outline" size="sm">
               <BarChart3 className="h-4 w-4 mr-2" />
               Benchmarking
+            </Button>
+          </Link>
+          <Link href="/analytics/nps">
+            <Button variant="outline" size="sm">
+              <SmilePlus className="h-4 w-4 mr-2" />
+              NPS & CSAT
             </Button>
           </Link>
         </div>

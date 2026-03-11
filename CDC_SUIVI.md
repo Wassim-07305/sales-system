@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~88% (68 faits / 7 partiels / 5 manquants)
+> **Couverture globale** : ~89% (69 faits / 7 partiels / 5 manquants)
 
 ---
 
@@ -116,6 +116,7 @@
 | F28.2 | Benchmarking & Comparaisons | ✅ Fait | `analytics/benchmarking/` |
 | F28.3 | Query Builder & Rapports Custom | ✅ Fait | `analytics/reports/` |
 | F28.4 | Prévisions IA & Forecasting | ✅ Fait | `analytics-v2.ts` (confidence intervals, AI churn/anomalies via OpenRouter), `projections-view.tsx` (what-if, insights IA) |
+| F28.5 | NPS/CSAT Automatisé | ✅ Fait | `lib/actions/nps.ts` (analytics, auto post-closing), `analytics/nps/` (dashboard NPS, distribution, tendances, CSAT) |
 
 ## 10. Academy (Formation)
 
