@@ -62,61 +62,61 @@ const TABLE_COLUMNS: Record<string, { key: string; label: string }[]> = {
     { key: "name", label: "Nom" },
     { key: "value", label: "Valeur" },
     { key: "status", label: "Statut" },
-    { key: "stage", label: "Étape" },
+    { key: "stage", label: "Etape" },
     { key: "setter_id", label: "Setter" },
     { key: "closer_id", label: "Closer" },
-    { key: "created_at", label: "Date de création" },
-    { key: "updated_at", label: "Dernière modification" },
+    { key: "created_at", label: "Date de creation" },
+    { key: "updated_at", label: "Derniere modification" },
   ],
   contacts: [
     { key: "id", label: "ID" },
-    { key: "first_name", label: "Prénom" },
+    { key: "first_name", label: "Prenom" },
     { key: "last_name", label: "Nom" },
     { key: "email", label: "Email" },
-    { key: "phone", label: "Téléphone" },
+    { key: "phone", label: "Telephone" },
     { key: "company", label: "Entreprise" },
     { key: "position", label: "Poste" },
     { key: "source", label: "Source" },
     { key: "status", label: "Statut" },
-    { key: "created_at", label: "Date de création" },
+    { key: "created_at", label: "Date de creation" },
   ],
   bookings: [
     { key: "id", label: "ID" },
     { key: "prospect_name", label: "Nom du prospect" },
-    { key: "assigned_to", label: "Assigné à" },
-    { key: "scheduled_at", label: "Date prévue" },
-    { key: "duration_minutes", label: "Durée (min)" },
+    { key: "assigned_to", label: "Assigne a" },
+    { key: "scheduled_at", label: "Date prevue" },
+    { key: "duration_minutes", label: "Duree (min)" },
     { key: "status", label: "Statut" },
-    { key: "created_at", label: "Date de création" },
+    { key: "created_at", label: "Date de creation" },
   ],
   contracts: [
     { key: "id", label: "ID" },
     { key: "deal_id", label: "Deal" },
     { key: "status", label: "Statut" },
     { key: "amount", label: "Montant" },
-    { key: "start_date", label: "Date de début" },
+    { key: "start_date", label: "Date de debut" },
     { key: "end_date", label: "Date de fin" },
-    { key: "created_at", label: "Date de création" },
+    { key: "created_at", label: "Date de creation" },
   ],
   calls: [
     { key: "id", label: "ID" },
     { key: "contact_id", label: "Contact" },
     { key: "user_id", label: "Utilisateur" },
     { key: "direction", label: "Direction" },
-    { key: "duration", label: "Durée" },
-    { key: "outcome", label: "Résultat" },
+    { key: "duration", label: "Duree" },
+    { key: "outcome", label: "Resultat" },
     { key: "notes", label: "Notes" },
-    { key: "created_at", label: "Date de création" },
+    { key: "created_at", label: "Date de creation" },
   ],
 };
 
 const OPERATOR_LABELS: Record<string, string> = {
-  eq: "égal à",
-  neq: "différent de",
-  gt: "supérieur à",
-  lt: "inférieur à",
-  gte: "supérieur ou égal à",
-  lte: "inférieur ou égal à",
+  eq: "egal a",
+  neq: "different de",
+  gt: "superieur a",
+  lt: "inferieur a",
+  gte: "superieur ou egal a",
+  lte: "inferieur ou egal a",
   like: "contient",
 };
 
@@ -263,10 +263,10 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
         setResults(result.data);
         setTotalCount(result.totalCount);
         setHasExecuted(true);
-        toast.success(`${result.totalCount} résultat${result.totalCount > 1 ? "s" : ""} trouvé${result.totalCount > 1 ? "s" : ""}`);
+        toast.success(`${result.totalCount} resultat${result.totalCount > 1 ? "s" : ""} trouve${result.totalCount > 1 ? "s" : ""}`);
       }
     } catch {
-      toast.error("Erreur lors de l'exécution de la requête");
+      toast.error("Erreur lors de l'execution de la requete");
     } finally {
       setLoading(false);
     }
@@ -722,7 +722,7 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Filter className="size-10 text-muted-foreground mb-3" />
                 <p className="text-muted-foreground text-sm">
-                  Aucun résultat pour cette requête
+                  Aucun resultat pour cette requete
                 </p>
               </div>
             ) : (
@@ -757,8 +757,8 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
 
             {hasExecuted && totalCount > results.length && (
               <p className="text-xs text-muted-foreground mt-3 text-center">
-                Affichage de {results.length} sur {totalCount} résultats.
-                Augmentez la limite pour voir plus de données.
+                Affichage de {results.length} sur {totalCount} resultats.
+                Augmentez la limite pour voir plus de donnees.
               </p>
             )}
           </Card>

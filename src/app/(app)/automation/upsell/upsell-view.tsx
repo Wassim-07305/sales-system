@@ -230,7 +230,7 @@ export function UpsellView({ rules, executions }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label>Offre d&apos;upsell</Label>
+                <Label>Offre d'upsell</Label>
                 <Textarea
                   placeholder="Décrivez l'offre à proposer automatiquement..."
                   value={upsellOffer}
@@ -341,7 +341,7 @@ export function UpsellView({ rules, executions }: Props) {
           <Card>
             <CardContent className="p-12 text-center text-muted-foreground">
               <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              Aucune règle d&apos;upsell. Créez-en une pour commencer.
+              Aucune règle d'upsell. Créez-en une pour commencer.
             </CardContent>
           </Card>
         )}

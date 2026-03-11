@@ -39,9 +39,9 @@ import type { CashFlowData } from "@/lib/actions/cash-flow";
 
 const statusLabels: Record<string, string> = {
   pending: "En attente",
-  paid: "Payé",
+  paid: "Paye",
   overdue: "En retard",
-  failed: "Échoué",
+  failed: "Echoue",
 };
 
 const statusColors: Record<string, string> = {
@@ -74,7 +74,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
     <div>
       <PageHeader
         title="Cash Flow & Reconnaissance de Revenu"
-        description="Suivi des encaissements, prévisions et reconnaissance de revenu"
+        description="Suivi des encaissements, previsions et reconnaissance de revenu"
       >
         <Link href="/contracts">
           <Button variant="outline" size="sm">
@@ -97,7 +97,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
               {receivedThisMonth.toLocaleString("fr-FR")} &euro;
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Revenu encaissé (ce mois)
+              Revenu encaisse (ce mois)
             </p>
           </CardContent>
         </Card>
@@ -113,7 +113,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
               {expectedThisMonth.toLocaleString("fr-FR")} &euro;
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              À recevoir (ce mois)
+              A recevoir (ce mois)
             </p>
           </CardContent>
         </Card>
@@ -128,7 +128,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
             <p className="text-2xl font-bold">
               {overdueTotal.toLocaleString("fr-FR")} &euro;
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Impayés</p>
+            <p className="text-sm text-muted-foreground mt-1">Impayes</p>
           </CardContent>
         </Card>
 
@@ -152,7 +152,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
       {/* Area Chart - Cash Flow Timeline */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Flux de trésorerie — 6 derniers mois + 3 mois à venir</CardTitle>
+          <CardTitle>Flux de tresorerie — 6 derniers mois + 3 mois a venir</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -190,7 +190,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                 <Tooltip
                   formatter={((value: number, name: string) => {
                     const labels: Record<string, string> = {
-                      received: "Encaissé",
+                      received: "Encaisse",
                       expected: "Attendu",
                     };
                     return [
@@ -202,7 +202,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                 <Legend
                   formatter={(value: string) => {
                     const labels: Record<string, string> = {
-                      received: "Encaissé",
+                      received: "Encaisse",
                       expected: "Attendu",
                     };
                     return labels[value] || value;
@@ -240,14 +240,14 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Paiements à venir</CardTitle>
+              <CardTitle>Paiements a venir</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {upcomingPayments.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <p className="font-medium">Aucun paiement à venir</p>
+                  <p className="font-medium">Aucun paiement a venir</p>
                   <p className="text-sm">
-                    Les échéances de paiement apparaîtront ici.
+                    Les echeances de paiement apparaitront ici.
                   </p>
                 </div>
               ) : (
@@ -258,7 +258,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                         <TableHead>Contrat</TableHead>
                         <TableHead>Client</TableHead>
                         <TableHead className="text-right">Montant</TableHead>
-                        <TableHead>Échéance</TableHead>
+                        <TableHead>Echeance</TableHead>
                         <TableHead>Statut</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -310,7 +310,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
           <CardContent>
             {pieData.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <p className="text-sm">Aucune donnée disponible</p>
+                <p className="text-sm">Aucune donnee disponible</p>
               </div>
             ) : (
               <>

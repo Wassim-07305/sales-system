@@ -278,7 +278,7 @@ export function HubView({ overview }: Props) {
                 <div>
                   <p className="font-medium">Analyser profil</p>
                   <p className="text-xs text-muted-foreground">
-                    Analyse IA d&apos;un profil social
+                    Analyse IA d'un profil social
                   </p>
                 </div>
               </CardContent>

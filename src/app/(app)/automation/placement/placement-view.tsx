@@ -74,8 +74,8 @@ export function PlacementView({ rules, executions }: Props) {
         const result = await runPlacementWorkflow();
         toast.success(`Placement terminé : ${result.matched} match(es) créé(s)`);
         router.refresh();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors du placement");
+      } catch (err: any) {
+        toast.error(err?.message || "Erreur lors du placement");
       }
     });
   }

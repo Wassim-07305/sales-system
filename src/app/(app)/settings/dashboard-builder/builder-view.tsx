@@ -61,8 +61,8 @@ const WIDGET_TYPES = [
   },
   {
     type: "recent_deals",
-    title: "Deals Récents",
-    description: "Derniers deals créés",
+    title: "Deals Recents",
+    description: "Derniers deals crees",
     icon: Clock,
   },
 ];

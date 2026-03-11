@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import {
   LifeBuoy,
   MessageSquare,
@@ -13,6 +13,8 @@ import {
   Loader2,
   Plus,
   Filter,
+  Timer,
+  Shield,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,6 +45,9 @@ import {
   addTicketReply,
   updateTicketStatus,
   getAllTickets,
+  getSlaStatus,
+  getSlaMetrics,
+  getSlaConfig,
 } from "@/lib/actions/support";
 
 // ─── Local types (not exported from server action) ───────────────────
@@ -75,6 +80,27 @@ interface TicketStats {
   in_progress: number;
   resolved: number;
   avg_resolution_hours: number;
+}
+
+interface SlaStatusInfo {
+  responseStatus: "ok" | "warning" | "breached";
+  resolutionStatus: "ok" | "warning" | "breached";
+  responseTimeLeft: string;
+  resolutionTimeLeft: string;
+}
+
+interface SlaMetricsInfo {
+  complianceRate: number;
+  avgResponseTime: string;
+  avgResolutionTime: string;
+  breachedCount: number;
+}
+
+interface SlaConfigInfo {
+  urgent: { firstResponse: number; resolution: number };
+  high: { firstResponse: number; resolution: number };
+  medium: { firstResponse: number; resolution: number };
+  low: { firstResponse: number; resolution: number };
 }
 
 interface SupportViewProps {
@@ -125,6 +151,18 @@ const CATEGORIES = [
   "Autre",
 ];
 
+const SLA_STATUS_COLORS: Record<string, string> = {
+  ok: "#7af17a",
+  warning: "#f59e0b",
+  breached: "#ef4444",
+};
+
+const SLA_STATUS_LABELS: Record<string, string> = {
+  ok: "OK",
+  warning: "Attention",
+  breached: "Depassement",
+};
+
 // ─── Component ───────────────────────────────────────────────────────
 
 export function SupportView({
@@ -150,15 +188,53 @@ export function SupportView({
   const [allTickets, setAllTickets] = useState<Ticket[] | null>(null);
   const [allTicketsLoaded, setAllTicketsLoaded] = useState(false);
 
+  // SLA state
+  const [slaStatuses, setSlaStatuses] = useState<Record<string, SlaStatusInfo>>({});
+  const [slaMetricsData, setSlaMetricsData] = useState<SlaMetricsInfo | null>(null);
+  const [slaConfigData, setSlaConfigData] = useState<SlaConfigInfo | null>(null);
+
   const isAdmin = userRole === "admin" || userRole === "manager";
 
-  const filteredTickets = tickets.filter((t) =>
-    statusFilter === "all" ? true : t.status === statusFilter
-  );
+  // Load SLA data on mount
+  useEffect(() => {
+    async function loadSlaData() {
+      const [metrics, config] = await Promise.all([
+        getSlaMetrics(),
+        getSlaConfig(),
+      ]);
+      setSlaMetricsData(metrics);
+      setSlaConfigData(config);
 
-  const filteredAllTickets = (allTickets || []).filter((t) =>
-    statusFilter === "all" ? true : t.status === statusFilter
-  );
+      // Compute SLA status for each ticket
+      const statuses: Record<string, SlaStatusInfo> = {};
+      for (const ticket of initialTickets) {
+        const status = await getSlaStatus(ticket);
+        statuses[ticket.id] = status;
+      }
+      setSlaStatuses(statuses);
+    }
+    loadSlaData();
+  }, [initialTickets]);
+
+  function slaSort(a: Ticket, b: Ticket): number {
+    const slaA = slaStatuses[a.id];
+    const slaB = slaStatuses[b.id];
+    const scoreA = slaA
+      ? (slaA.responseStatus === "breached" || slaA.resolutionStatus === "breached" ? 0 : 1)
+      : 1;
+    const scoreB = slaB
+      ? (slaB.responseStatus === "breached" || slaB.resolutionStatus === "breached" ? 0 : 1)
+      : 1;
+    return scoreA - scoreB;
+  }
+
+  const filteredTickets = tickets
+    .filter((t) => (statusFilter === "all" ? true : t.status === statusFilter))
+    .sort(slaSort);
+
+  const filteredAllTickets = (allTickets || [])
+    .filter((t) => (statusFilter === "all" ? true : t.status === statusFilter))
+    .sort(slaSort);
 
   function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString("fr-FR", {

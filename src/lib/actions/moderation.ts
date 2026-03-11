@@ -306,8 +306,8 @@ export async function getModeratedUsers(): Promise<ModeratedUser[]> {
   if (!profiles) return [];
 
   // Try to fetch active mutes/bans
-  const mutes: Record<string, { until: string | null; channel_id: string | null }> = {};
-  const bans: Record<string, string> = {};
+  let mutes: Record<string, { until: string | null; channel_id: string | null }> = {};
+  let bans: Record<string, string> = {};
 
   try {
     const { data: muteData } = await supabase

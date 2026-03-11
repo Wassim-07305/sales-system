@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { sendRoleplayMessage, endSession } from "@/lib/actions/roleplay";
+import { sendRoleplayMessage, endSession, getRoleplayFeedback } from "@/lib/actions/roleplay";
 import { cn } from "@/lib/utils";
 import {
   Send,
@@ -19,6 +19,10 @@ import {
   Eye,
   Linkedin,
   Instagram,
+  Trophy,
+  CheckCircle2,
+  AlertTriangle,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -46,6 +50,13 @@ interface Session {
   profile: Profile | null;
 }
 
+interface Feedback {
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  tips: string[];
+}
+
 interface Props {
   session: Session;
 }
@@ -65,9 +76,11 @@ export function SessionView({ session }: Props) {
   const [isSending, startSending] = useTransition();
   const [isEnding, startEnding] = useTransition();
   const [elapsed, setElapsed] = useState(0);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [isFeedbackLoading, startFeedbackLoading] = useTransition();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const isCompleted = session.status === "completed";
+  const isCompleted = session.status === "completed" || feedback !== null;
 
   // Elapsed timer
   useEffect(() => {
@@ -129,6 +142,22 @@ export function SessionView({ session }: Props) {
     });
   }
 
+  function handleFeedback() {
+    startFeedbackLoading(async () => {
+      try {
+        const conversation = messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+        const result = await getRoleplayFeedback(session.id, conversation);
+        setFeedback(result);
+        toast.success("Feedback genere avec succes !");
+      } catch {
+        toast.error("Erreur lors de la generation du feedback");
+      }
+    });
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -180,28 +209,52 @@ export function SessionView({ session }: Props) {
               <Clock className="h-4 w-4" />
               {formatElapsed(elapsed)}
             </div>
-            {isCompleted ? (
+            {isCompleted && !feedback ? (
               <Link href={`/roleplay/debrief/${session.id}`}>
                 <Button variant="outline" size="sm">
                   <Eye className="h-4 w-4 mr-2" />
-                  Voir le d\u00e9briefing
+                  Voir le debriefing
+                </Button>
+              </Link>
+            ) : feedback ? (
+              <Link href={`/roleplay/debrief/${session.id}`}>
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Debriefing complet
                 </Button>
               </Link>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEnd}
-                disabled={isEnding}
-                className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-              >
-                {isEnding ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Square className="h-4 w-4 mr-2" />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEnd}
+                  disabled={isEnding || isFeedbackLoading}
+                  className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                >
+                  {isEnding ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Square className="h-4 w-4 mr-2" />
+                  )}
+                  Terminer
+                </Button>
+                {messages.length >= 2 && (
+                  <Button
+                    size="sm"
+                    onClick={handleFeedback}
+                    disabled={isFeedbackLoading || isEnding}
+                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                  >
+                    {isFeedbackLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trophy className="h-4 w-4 mr-2" />
+                    )}
+                    Terminer &amp; obtenir le feedback
+                  </Button>
                 )}
-                Terminer
-              </Button>
+              </div>
             )}
           </div>
         </div>
@@ -315,6 +368,111 @@ export function SessionView({ session }: Props) {
           </div>
         )}
       </Card>
+
+      {/* Inline Feedback Panel */}
+      {feedback && (
+        <Card className="mt-4 shrink-0">
+          <div className="p-6 space-y-6">
+            {/* Score */}
+            <div className="flex items-center gap-4">
+              <div
+                className={cn(
+                  "h-16 w-16 rounded-full border-3 flex flex-col items-center justify-center shrink-0",
+                  feedback.score >= 80
+                    ? "text-green-600 border-green-200 bg-green-50"
+                    : feedback.score >= 60
+                      ? "text-orange-600 border-orange-200 bg-orange-50"
+                      : "text-red-600 border-red-200 bg-red-50"
+                )}
+              >
+                <span className="text-xl font-bold">{feedback.score}</span>
+                <span className="text-[9px] opacity-70">/100</span>
+              </div>
+              <div>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-brand" />
+                  Feedback de la session
+                </h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {feedback.score >= 80
+                    ? "Excellente performance !"
+                    : feedback.score >= 60
+                      ? "Bonne session, quelques axes d'amelioration."
+                      : "Session d'entrainement — continue a progresser !"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Strengths */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Points forts
+                </h4>
+                <ul className="space-y-1.5">
+                  {feedback.strengths.map((s, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-muted-foreground"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mt-0.5 shrink-0" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Improvements */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-orange-700 flex items-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4" />
+                  Axes d&apos;amelioration
+                </h4>
+                <ul className="space-y-1.5">
+                  {feedback.improvements.map((s, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-muted-foreground"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 text-orange-500 mt-0.5 shrink-0" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Tips */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-blue-700 flex items-center gap-1.5">
+                  <Lightbulb className="h-4 w-4" />
+                  Conseils pratiques
+                </h4>
+                <ul className="space-y-1.5">
+                  {feedback.tips.map((s, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-muted-foreground"
+                    >
+                      <Lightbulb className="h-3.5 w-3.5 text-blue-500 mt-0.5 shrink-0" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link href={`/roleplay/debrief/${session.id}`}>
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Voir le debriefing complet
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

@@ -35,7 +35,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export interface Installment {
+interface Installment {
   id: string;
   contract_id: string;
   amount: number;

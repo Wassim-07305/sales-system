@@ -100,13 +100,13 @@ export function ClientDashboard({
 
   function handleSaveJournal() {
     if (mood === 0) {
-      toast.error("Sélectionne ton humeur du jour.");
+      toast.error("Selectionne ton humeur du jour.");
       return;
     }
     startTransition(async () => {
       try {
         await saveDailyJournal({ mood, wins, challenges, goals });
-        toast.success("Journal sauvegardé !");
+        toast.success("Journal sauvegarde !");
       } catch {
         toast.error("Erreur lors de la sauvegarde.");
       }
@@ -124,26 +124,26 @@ export function ClientDashboard({
       <Card className="mb-6 bg-brand-dark text-white border-0">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
-            Continue sur ta lancée, {userName.split(" ")[0]} !
+            Continue sur ta lancee, {userName.split(" ")[0]} !
           </h2>
           <p className="text-white/70 text-sm mb-4">
-            Tu as complété {overallProgress}% de ta formation.
+            Tu as complete {overallProgress}% de ta formation.
             {overallProgress < 100
-              ? " Continue pour débloquer la suite."
-              : " Félicitations, tu as tout terminé !"}
+              ? " Continue pour debloquer la suite."
+              : " Felicitations, tu as tout termine !"}
           </p>
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
               <BookOpen className="h-4 w-4 text-brand" />
               <span className="text-sm">
-                {completedLessons}/{totalLessons} leçons
+                {completedLessons}/{totalLessons} lecons
               </span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
               <Calendar className="h-4 w-4 text-brand" />
               <span className="text-sm">
-                {data.upcomingEvents.length} événement
-                {data.upcomingEvents.length > 1 ? "s" : ""} à venir
+                {data.upcomingEvents.length} evenement
+                {data.upcomingEvents.length > 1 ? "s" : ""} a venir
               </span>
             </div>
             {data.quizAttemptsToday > 0 && (
@@ -185,7 +185,7 @@ export function ClientDashboard({
           <CardContent className="space-y-6">
             {data.courseProgress.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucune formation en cours. Inscris-toi à un cours pour
+                Aucune formation en cours. Inscris-toi a un cours pour
                 commencer !
               </p>
             ) : (
@@ -213,7 +213,7 @@ export function ClientDashboard({
                     </div>
                     <Progress value={percent} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-1">
-                      {course.completed}/{course.total} leçons terminées
+                      {course.completed}/{course.total} lecons terminees
                     </p>
                   </div>
                 );
@@ -225,12 +225,12 @@ export function ClientDashboard({
         {/* Upcoming Events */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Prochains événements</CardTitle>
+            <CardTitle className="text-lg">Prochains evenements</CardTitle>
           </CardHeader>
           <CardContent>
             {data.upcomingEvents.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun événement à venir.
+                Aucun evenement a venir.
               </p>
             ) : (
               <div className="space-y-4">
@@ -271,7 +271,7 @@ export function ClientDashboard({
         <CardHeader>
           <CardTitle className="text-lg">
             {hasJournal
-              ? "Journal du jour (déjà rempli)"
+              ? "Journal du jour (deja rempli)"
               : "Journal du jour"}
           </CardTitle>
         </CardHeader>
@@ -308,7 +308,7 @@ export function ClientDashboard({
               {data.todayJournal?.struggles && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">
-                    Défis
+                    Defis
                   </p>
                   <p className="text-sm">{data.todayJournal.struggles}</p>
                 </div>
@@ -374,7 +374,7 @@ export function ClientDashboard({
                   Tes victoires du jour
                 </label>
                 <Textarea
-                  placeholder="Qu'est-ce qui s'est bien passé aujourd'hui ?"
+                  placeholder="Qu'est-ce qui s'est bien passe aujourd'hui ?"
                   value={wins}
                   onChange={(e) => setWins(e.target.value)}
                   rows={2}
@@ -384,10 +384,10 @@ export function ClientDashboard({
               {/* Challenges */}
               <div>
                 <label className="text-sm font-medium mb-1 block">
-                  Tes défis
+                  Tes defis
                 </label>
                 <Textarea
-                  placeholder="Quelles difficultés as-tu rencontrées ?"
+                  placeholder="Quelles difficultes as-tu rencontrees ?"
                   value={challenges}
                   onChange={(e) => setChallenges(e.target.value)}
                   rows={2}

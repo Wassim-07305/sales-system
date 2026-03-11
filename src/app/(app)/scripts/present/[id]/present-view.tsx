@@ -161,7 +161,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
         <div className="text-center text-white">
           <p className="text-xl mb-4">Aucun noeud dans ce flowchart</p>
           <Link href={`/scripts/flowchart/${flowchart.id}`}>
-            <Button variant="outline">Retour à l&apos;éditeur</Button>
+            <Button variant="outline">Retour à l'éditeur</Button>
           </Link>
         </div>
       </div>

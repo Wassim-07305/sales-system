@@ -33,17 +33,17 @@ function formatMonth(cohort: string): string {
   const [year, month] = cohort.split("-");
   const months = [
     "Janvier",
-    "Février",
+    "Fevrier",
     "Mars",
     "Avril",
     "Mai",
     "Juin",
     "Juillet",
-    "Août",
+    "Aout",
     "Septembre",
     "Octobre",
     "Novembre",
-    "Décembre",
+    "Decembre",
   ];
   return `${months[parseInt(month, 10) - 1]} ${year}`;
 }
@@ -59,7 +59,7 @@ export function CohortView({ data }: { data: CohortData[] }) {
     <div>
       <PageHeader
         title="Analyse par Cohortes"
-        description="Performance des deals regroupés par mois de création"
+        description="Performance des deals regroupes par mois de creation"
       >
         <Link href="/analytics">
           <Button variant="outline" size="sm">
@@ -84,7 +84,7 @@ export function CohortView({ data }: { data: CohortData[] }) {
           <CardContent className="p-5">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm">Deals Signés</span>
+              <span className="text-sm">Deals Signes</span>
             </div>
             <p className="text-2xl font-bold">{totalSigned}</p>
           </CardContent>
@@ -119,9 +119,9 @@ export function CohortView({ data }: { data: CohortData[] }) {
           {data.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">Aucune donnée de cohorte</p>
+              <p className="font-medium">Aucune donnee de cohorte</p>
               <p className="text-sm mt-1">
-                Les cohortes apparaîtront une fois les deals créés.
+                Les cohortes apparaitront une fois les deals crees.
               </p>
             </div>
           ) : (
@@ -129,8 +129,8 @@ export function CohortView({ data }: { data: CohortData[] }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Cohorte</TableHead>
-                  <TableHead className="text-right">Deals Créés</TableHead>
-                  <TableHead className="text-right">Deals Signés</TableHead>
+                  <TableHead className="text-right">Deals Crees</TableHead>
+                  <TableHead className="text-right">Deals Signes</TableHead>
                   <TableHead className="text-right">CA</TableHead>
                   <TableHead className="text-right">Taux Conversion</TableHead>
                   <TableHead className="text-right">Cycle Moyen</TableHead>

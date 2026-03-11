@@ -463,24 +463,25 @@ export async function getReviewStats() {
 }
 
 export async function analyzeTranscript(transcript: string) {
-  const analysis = await aiJSON<{
-    score: number;
-    scoreBreakdown: { ouverture: number; decouverte: number; argumentation: number; closing: number };
-    keywords: string[];
-    sentiment: "positif" | "neutre" | "négatif" | "mixte";
-    strengths: string[];
-    improvements: string[];
-    sentimentTimeline: { time: string; sentiment: "positif" | "neutre" | "négatif" }[];
-    objections: string[];
-    recommendations: string[];
-    talkRatio: { vendeur: number; prospect: number };
-    keyMoments: string[];
-    prospectName: string;
-    durationEstimate: number;
-  }>(
-    `Analyse ce transcript d'appel commercial en français. Évalue la performance du vendeur.\n\nTranscript:\n${transcript}`,
-    {
-      system: `Tu es un expert en analyse d'appels commerciaux B2B. Analyse le transcript fourni et retourne un JSON avec:
+  try {
+    const analysis = await aiJSON<{
+      score: number;
+      scoreBreakdown: { ouverture: number; decouverte: number; argumentation: number; closing: number };
+      keywords: string[];
+      sentiment: "positif" | "neutre" | "négatif" | "mixte";
+      strengths: string[];
+      improvements: string[];
+      sentimentTimeline: { time: string; sentiment: "positif" | "neutre" | "négatif" }[];
+      objections: string[];
+      recommendations: string[];
+      talkRatio: { vendeur: number; prospect: number };
+      keyMoments: string[];
+      prospectName: string;
+      durationEstimate: number;
+    }>(
+      `Analyse ce transcript d'appel commercial en français. Évalue la performance du vendeur.\n\nTranscript:\n${transcript}`,
+      {
+        system: `Tu es un expert en analyse d'appels commerciaux B2B. Analyse le transcript fourni et retourne un JSON avec:
 - score: note globale de 1 à 10 (décimal autorisé)
 - scoreBreakdown: { ouverture: 1-10, decouverte: 1-10, argumentation: 1-10, closing: 1-10 }
 - keywords: liste des mots-clés importants (5-8 max)
@@ -494,12 +495,16 @@ export async function analyzeTranscript(transcript: string) {
 - keyMoments: moments clés de l'appel (3-5 items)
 - prospectName: nom du prospect détecté dans le transcript
 - durationEstimate: durée estimée en minutes`,
-      model: "anthropic/claude-3.5-sonnet",
-      maxTokens: 2048,
-    }
-  );
+        model: "anthropic/claude-3.5-sonnet",
+        maxTokens: 2048,
+      }
+    );
 
-  return analysis;
+    return analysis;
+  } catch (aiError) {
+    console.error("[analyzeTranscript] Erreur IA:", aiError);
+    throw new Error("L'analyse IA du transcript a échoué. Veuillez réessayer plus tard.");
+  }
 }
 
 export async function submitTranscript(callId: string, transcript: string) {

@@ -9,11 +9,17 @@ export interface QueryFilter {
   value: string;
 }
 
+export interface AggregationConfig {
+  function: "count" | "sum" | "avg" | "min" | "max";
+  column: string;
+}
+
 export interface QueryConfig {
   table: "deals" | "contacts" | "bookings" | "contracts" | "calls";
   columns: string[];
   filters: QueryFilter[];
-  groupBy?: string;
+  aggregation?: AggregationConfig;
+  groupBy?: string[];
   orderBy?: { column: string; direction: "asc" | "desc" };
   limit?: number;
 }
@@ -24,6 +30,8 @@ export interface SavedReport {
   config: QueryConfig;
   created_at: string;
   user_id: string;
+  last_run_at?: string;
+  last_result_count?: number;
 }
 
 const ALLOWED_TABLES = ["deals", "contacts", "bookings", "contracts", "calls"] as const;
@@ -37,6 +45,42 @@ const ALLOWED_COLUMNS: Record<string, string[]> = {
 };
 
 const ALLOWED_OPERATORS = ["eq", "gt", "lt", "gte", "lte", "like", "neq"] as const;
+
+const AGGREGATION_FUNCTIONS = ["count", "sum", "avg", "min", "max"] as const;
+
+// Numeric columns per table (for sum/avg/min/max)
+const NUMERIC_COLUMNS: Record<string, string[]> = {
+  deals: ["value"],
+  contacts: [],
+  bookings: ["duration_minutes"],
+  contracts: ["amount"],
+  calls: ["duration"],
+};
+
+// Column labels in French for query preview
+const COLUMN_LABELS: Record<string, Record<string, string>> = {
+  deals: { id: "ID", name: "nom", value: "valeur", status: "statut", stage: "etape", setter_id: "setter", closer_id: "closer", created_at: "date de creation", updated_at: "derniere modification" },
+  contacts: { id: "ID", first_name: "prenom", last_name: "nom", email: "email", phone: "telephone", company: "entreprise", position: "poste", source: "source", status: "statut", created_at: "date de creation" },
+  bookings: { id: "ID", prospect_name: "nom du prospect", assigned_to: "assigne a", scheduled_at: "date prevue", duration_minutes: "duree", status: "statut", created_at: "date de creation" },
+  contracts: { id: "ID", deal_id: "deal", status: "statut", amount: "montant", start_date: "date de debut", end_date: "date de fin", created_at: "date de creation" },
+  calls: { id: "ID", contact_id: "contact", user_id: "utilisateur", direction: "direction", duration: "duree", outcome: "resultat", notes: "notes", created_at: "date de creation" },
+};
+
+const TABLE_LABELS_FR: Record<string, string> = {
+  deals: "Deals",
+  contacts: "Contacts",
+  bookings: "Rendez-vous",
+  contracts: "Contrats",
+  calls: "Appels",
+};
+
+const AGGREGATION_LABELS_FR: Record<string, string> = {
+  count: "nombre",
+  sum: "somme",
+  avg: "moyenne",
+  min: "minimum",
+  max: "maximum",
+};
 
 function validateConfig(config: QueryConfig): string | null {
   if (!ALLOWED_TABLES.includes(config.table)) {

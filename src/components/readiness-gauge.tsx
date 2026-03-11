@@ -127,15 +127,15 @@ export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown })
         {/* Next step hint */}
         {!readiness.isReady && (
           <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-xs font-medium mb-1">Prochaine étape recommandée</p>
+            <p className="text-xs font-medium mb-1">Prochaine etape recommandee</p>
             <p className="text-xs text-muted-foreground">
               {readiness.courseCompletion < 60
                 ? "Continue les modules de formation pour progresser rapidement."
                 : readiness.quizPerformance < 60
-                ? "Valide plus de quiz pour prouver ta maîtrise des concepts."
+                ? "Valide plus de quiz pour prouver ta maitrise des concepts."
                 : readiness.roleplayScore < 60
-                ? "Fais des sessions de roleplay IA pour t'entraîner."
-                : "Tu y es presque ! Termine les dernières étapes."}
+                ? "Fais des sessions de roleplay IA pour t'entrainer."
+                : "Tu y es presque ! Termine les dernieres etapes."}
             </p>
           </div>
         )}

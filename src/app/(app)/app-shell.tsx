@@ -8,7 +8,6 @@ import { NotificationsPanel } from "@/components/layout/notifications-panel";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
-import { KeyboardShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
 import type { UserRole } from "@/lib/types/database";
 
 interface AppShellProps {
@@ -68,7 +67,6 @@ export function AppShell({
           onUnreadCountChange={handleUnreadCountChange}
         />
         <GlobalSearch />
-        <KeyboardShortcutsProvider><span /></KeyboardShortcutsProvider>
       </div>
     </ThemeProvider>
   );

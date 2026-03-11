@@ -732,7 +732,7 @@ export function CourseView({
                   {completedLessonIds.has(selectedLesson.id) ? (
                     <Badge className="bg-brand/10 text-brand border-brand/20 gap-1.5 py-1.5 px-3">
                       <CheckCircle2 className="h-3.5 w-3.5" />
-                      Terminé
+                      Termine
                     </Badge>
                   ) : (
                     !activeQuiz && (

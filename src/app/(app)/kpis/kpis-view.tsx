@@ -106,7 +106,7 @@ export function KpisView({
     <div>
       <PageHeader
         title="Mes KPIs"
-        description="Suivez vos métriques de performance"
+        description="Suivez vos metriques de performance"
       />
 
       {/* Main tabs: KPIs vs Simulator */}
@@ -296,8 +296,8 @@ export function KpisView({
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground">
             <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">Pas encore de données</p>
-            <p className="text-sm">Vos KPIs apparaîtront ici au fur et à mesure de votre activité.</p>
+            <p className="font-medium">Pas encore de donnees</p>
+            <p className="text-sm">Vos KPIs apparaitront ici au fur et a mesure de votre activite.</p>
           </CardContent>
         </Card>
       )}
