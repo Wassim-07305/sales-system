@@ -101,6 +101,8 @@ export interface RevenueProjectionMonth {
   actual: number | null;
   projected: number | null;
   trend: number | null;
+  optimistic: number | null;
+  pessimistic: number | null;
 }
 
 export interface RevenueProjectionResult {
@@ -113,6 +115,34 @@ export interface RevenueProjectionResult {
   historicalMonths: { month: string; value: number }[];
   projectedMonths: { month: string; value: number }[];
   pipelineDeals: { title: string; value: number; probability: number; weighted: number }[];
+}
+
+// ---------- AI Forecasting (F28.4) ----------
+
+export interface AIForecastDealInsight {
+  dealTitle: string;
+  dealValue: number;
+  churnRisk: "low" | "medium" | "high";
+  churnRiskScore: number;
+  nextBestAction: string;
+  isAnomaly: boolean;
+  anomalyReason: string | null;
+}
+
+export interface AIForecastResult {
+  dealInsights: AIForecastDealInsight[];
+  globalInsights: {
+    summary: string;
+    topRisks: string[];
+    opportunities: string[];
+    recommendedActions: string[];
+  };
+  whatIfScenarios: {
+    conversionUp10: number;
+    conversionUp20: number;
+    conversionDown10: number;
+    avgDealValueUp15: number;
+  };
 }
 
 export async function getRevenueProjections(): Promise<RevenueProjectionResult> {
@@ -170,6 +200,16 @@ export async function getRevenueProjections(): Promise<RevenueProjectionResult> 
   const slope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
   const intercept = denom !== 0 ? (sumY - slope * sumX) / n : sumY / n;
 
+  // ---- Standard error for confidence intervals ----
+  let ssRes = 0;
+  for (let i = 0; i < n; i++) {
+    const predicted = intercept + slope * i;
+    ssRes += (historicalMonths[i].value - predicted) ** 2;
+  }
+  const stdError = n > 2 ? Math.sqrt(ssRes / (n - 2)) : 0;
+  // ~90% confidence multiplier
+  const confidenceMultiplier = 1.645;
+
   // ---- Project next 3 months ----
   const projectedMonths: { month: string; label: string; value: number }[] = [];
   for (let i = 1; i <= 3; i++) {
@@ -214,21 +254,30 @@ export async function getRevenueProjections(): Promise<RevenueProjectionResult> 
       actual: historicalMonths[i].value,
       projected: null,
       trend: Math.max(0, Math.round(intercept + slope * i)),
+      optimistic: null,
+      pessimistic: null,
     });
   }
 
   // Last historical month also gets a projected value to connect the lines
   if (chartData.length > 0) {
-    chartData[chartData.length - 1].projected = chartData[chartData.length - 1].actual;
+    const last = chartData[chartData.length - 1];
+    last.projected = last.actual;
+    last.optimistic = last.actual;
+    last.pessimistic = last.actual;
   }
 
-  // Projected months
+  // Projected months with confidence intervals
   for (let i = 0; i < projectedMonths.length; i++) {
+    const futureIdx = n + i;
+    const margin = confidenceMultiplier * stdError * Math.sqrt(1 + (1 / n) + ((futureIdx - (sumX / n)) ** 2) / (sumX2 - (sumX ** 2) / n || 1));
     chartData.push({
       month: projectedMonths[i].month,
       actual: null,
       projected: projectedMonths[i].value,
-      trend: Math.max(0, Math.round(intercept + slope * (n + i))),
+      trend: Math.max(0, Math.round(intercept + slope * futureIdx)),
+      optimistic: Math.max(0, Math.round(projectedMonths[i].value + margin)),
+      pessimistic: Math.max(0, Math.round(projectedMonths[i].value - margin)),
     });
   }
 
@@ -246,6 +295,179 @@ export async function getRevenueProjections(): Promise<RevenueProjectionResult> 
     projectedMonths: projectedMonths.map((m) => ({ month: m.label, value: m.value })),
     pipelineDeals,
   };
+}
+
+// ---------- AI Forecasting Server Action (F28.4) ----------
+
+export async function getAIForecasting(): Promise<AIForecastResult> {
+  const supabase = await createClient();
+
+  const { data: stages } = await supabase
+    .from("pipeline_stages")
+    .select("id, name, position")
+    .order("position");
+
+  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const totalStages = (stages || []).length;
+
+  const { data: allDeals } = await supabase
+    .from("deals")
+    .select("id, title, value, stage_id, created_at, updated_at, assigned_to, contact_id");
+
+  const deals = allDeals || [];
+  const openDeals = deals.filter((d) => d.stage_id !== signedStage?.id);
+  const signedDeals = deals.filter((d) => d.stage_id === signedStage?.id);
+
+  // Stage position map for probability
+  const stagePositionMap = new Map<string, number>();
+  const stageNameMap = new Map<string, string>();
+  (stages || []).forEach((s) => {
+    stagePositionMap.set(s.id, s.position);
+    stageNameMap.set(s.id, s.name);
+  });
+
+  // Calculate stats for anomaly detection
+  const dealValues = deals.map((d) => d.value || 0).filter((v) => v > 0);
+  const avgDealValue = dealValues.length > 0 ? dealValues.reduce((a, b) => a + b, 0) / dealValues.length : 0;
+  const stdDev = dealValues.length > 1
+    ? Math.sqrt(dealValues.reduce((sum, v) => sum + (v - avgDealValue) ** 2, 0) / (dealValues.length - 1))
+    : 0;
+
+  // Total pipeline value & conversion rate for what-if
+  const totalPipelineValue = openDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+  const currentConversionRate = deals.length > 0 ? signedDeals.length / deals.length : 0;
+  const avgWeightedPipeline = openDeals.reduce((sum, d) => {
+    const pos = stagePositionMap.get(d.stage_id) || 0;
+    const prob = totalStages > 1 ? pos / (totalStages - 1) : 0.5;
+    return sum + (d.value || 0) * prob;
+  }, 0);
+
+  // Build deal summaries for AI prompt
+  const dealSummaries = openDeals.slice(0, 20).map((d) => {
+    const pos = stagePositionMap.get(d.stage_id) || 0;
+    const stageName = stageNameMap.get(d.stage_id) || "Inconnu";
+    const daysSinceCreation = Math.round((Date.now() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    const daysSinceUpdate = Math.round((Date.now() - new Date(d.updated_at).getTime()) / (1000 * 60 * 60 * 24));
+    const isValueAnomaly = stdDev > 0 && Math.abs((d.value || 0) - avgDealValue) > 2 * stdDev;
+    return {
+      title: d.title || "Sans titre",
+      value: d.value || 0,
+      stage: stageName,
+      stagePosition: pos,
+      totalStages,
+      daysSinceCreation,
+      daysSinceUpdate,
+      isValueAnomaly,
+    };
+  });
+
+  // Try AI analysis — fallback to heuristic if AI unavailable
+  let dealInsights: AIForecastDealInsight[];
+  let globalInsights: AIForecastResult["globalInsights"];
+
+  try {
+    const { aiJSON } = await import("@/lib/ai/client");
+
+    const aiResult = await aiJSON<{
+      deals: {
+        title: string;
+        churnRisk: "low" | "medium" | "high";
+        churnRiskScore: number;
+        nextBestAction: string;
+        isAnomaly: boolean;
+        anomalyReason: string | null;
+      }[];
+      summary: string;
+      topRisks: string[];
+      opportunities: string[];
+      recommendedActions: string[];
+    }>(
+      `Analyse ces deals CRM et fournis des insights stratégiques.
+
+Deals en cours:
+${JSON.stringify(dealSummaries, null, 2)}
+
+Stats globales:
+- Valeur moyenne deal: ${Math.round(avgDealValue)} €
+- Écart-type: ${Math.round(stdDev)} €
+- Taux de conversion global: ${Math.round(currentConversionRate * 100)}%
+- Deals signés: ${signedDeals.length}
+- Deals en cours: ${openDeals.length}
+
+Pour chaque deal, évalue:
+1. churnRisk (low/medium/high) + churnRiskScore (0-100): risque de perdre ce deal
+2. nextBestAction: action concrète recommandée (en français, max 80 caractères)
+3. isAnomaly + anomalyReason: si le deal est atypique (valeur, durée, stagnation)
+
+Pour les insights globaux, fournis:
+- summary: résumé en 1-2 phrases de l'état du pipeline
+- topRisks: 2-3 risques principaux
+- opportunities: 2-3 opportunités identifiées
+- recommendedActions: 3-4 actions prioritaires
+
+Réponds en JSON avec la structure: { deals: [...], summary, topRisks, opportunities, recommendedActions }`,
+      {
+        system: "Tu es un expert en analyse commerciale B2B. Analyse les données CRM et fournis des recommandations actionnables.",
+        model: "anthropic/claude-3.5-haiku",
+        maxTokens: 2048,
+      }
+    );
+
+    dealInsights = dealSummaries.map((ds, i) => {
+      const aiDeal = aiResult.deals?.[i];
+      return {
+        dealTitle: ds.title,
+        dealValue: ds.value,
+        churnRisk: aiDeal?.churnRisk || (ds.daysSinceUpdate > 14 ? "high" : ds.daysSinceUpdate > 7 ? "medium" : "low"),
+        churnRiskScore: aiDeal?.churnRiskScore || (ds.daysSinceUpdate > 14 ? 80 : ds.daysSinceUpdate > 7 ? 50 : 20),
+        nextBestAction: aiDeal?.nextBestAction || "Planifier un suivi",
+        isAnomaly: aiDeal?.isAnomaly ?? ds.isValueAnomaly,
+        anomalyReason: aiDeal?.anomalyReason || (ds.isValueAnomaly ? "Valeur atypique" : null),
+      };
+    });
+
+    globalInsights = {
+      summary: aiResult.summary || "Analyse du pipeline en cours.",
+      topRisks: aiResult.topRisks || [],
+      opportunities: aiResult.opportunities || [],
+      recommendedActions: aiResult.recommendedActions || [],
+    };
+  } catch {
+    // Fallback: heuristic-based analysis
+    dealInsights = dealSummaries.map((ds) => ({
+      dealTitle: ds.title,
+      dealValue: ds.value,
+      churnRisk: (ds.daysSinceUpdate > 14 ? "high" : ds.daysSinceUpdate > 7 ? "medium" : "low") as "low" | "medium" | "high",
+      churnRiskScore: ds.daysSinceUpdate > 14 ? 80 : ds.daysSinceUpdate > 7 ? 50 : 20,
+      nextBestAction: ds.daysSinceUpdate > 7 ? "Relancer le prospect" : "Continuer le suivi",
+      isAnomaly: ds.isValueAnomaly,
+      anomalyReason: ds.isValueAnomaly ? "Valeur significativement différente de la moyenne" : null,
+    }));
+
+    globalInsights = {
+      summary: `${openDeals.length} deals en cours pour une valeur totale de ${totalPipelineValue.toLocaleString("fr-FR")} €.`,
+      topRisks: openDeals.filter((d) => {
+        const days = Math.round((Date.now() - new Date(d.updated_at).getTime()) / 86400000);
+        return days > 14;
+      }).length > 0
+        ? [`${openDeals.filter((d) => Math.round((Date.now() - new Date(d.updated_at).getTime()) / 86400000) > 14).length} deals stagnants depuis plus de 14 jours`]
+        : [],
+      opportunities: signedDeals.length > 0
+        ? [`Taux de conversion de ${Math.round(currentConversionRate * 100)}% — potentiel d'amélioration`]
+        : [],
+      recommendedActions: ["Relancer les deals inactifs", "Prioriser les deals à forte valeur"],
+    };
+  }
+
+  // What-if scenarios
+  const whatIfScenarios = {
+    conversionUp10: Math.round(avgWeightedPipeline * 1.1),
+    conversionUp20: Math.round(avgWeightedPipeline * 1.2),
+    conversionDown10: Math.round(avgWeightedPipeline * 0.9),
+    avgDealValueUp15: Math.round(avgWeightedPipeline * 1.15),
+  };
+
+  return { dealInsights, globalInsights, whatIfScenarios };
 }
 
 // ---------- Setter Reports ----------
