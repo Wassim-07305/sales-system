@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Bell, Shield, Palette, ChevronRight } from "lucide-react";
+import { Settings, Bell, Shield, Palette, ChevronRight, Database } from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -109,6 +109,27 @@ export default function SettingsPage() {
           <Link href="/settings/privacy">
             <Button variant="outline" className="w-full justify-between">
               Accéder aux paramètres de confidentialité
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
+      {/* Migration CRM */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            Migration CRM
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Importez vos données depuis HubSpot, Pipedrive ou Salesforce avec mapping automatique des champs.
+          </p>
+          <Link href="/settings/migration">
+            <Button variant="outline" className="w-full justify-between">
+              Lancer une migration
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>

@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~90% (70 faits / 6 partiels / 5 manquants)
+> **Couverture globale** : ~91% (68 faits / 7 partiels / 5 manquants)
 
 ---
 
@@ -223,7 +223,7 @@
 | F54.6 | Support & SLA | ✅ Fait | `support/` + SLA enforcement |
 | F54.7 | API Custom & Webhooks | ✅ Fait | `api/v1/` routes |
 | F54.8 | Custom Fields & Metadata | ✅ Fait | `settings/custom-fields/` |
-| F54.9 | Data Migration Services | ⚠️ Partiel | Import CSV OK — migration CRM complète manquante |
+| F54.9 | Data Migration Services | ✅ Fait | `settings/migration/` wizard 4 étapes, presets HubSpot/Pipedrive/Salesforce, mapping colonnes, import batch contacts+deals, historique |
 | F54.11 | Roadmap Public & Feedback | ✅ Fait | `roadmap/` |
 | F54.12 | Migrations Futures | ❌ Manquant | Documentation/planning, pas du code |
 
@@ -243,8 +243,8 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 67 | 84% |
-| ⚠️ Partiel | 8 | 10% |
+| ✅ Fait | 68 | 85% |
+| ⚠️ Partiel | 7 | 9% |
 | ❌ Manquant | 5 | 6% |
 | **Total** | **80** | **100%** |
 
@@ -264,5 +264,5 @@
 4. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait
 5. **F32.1** — Upload vidéo + transcription (Supabase Storage + Whisper API)
 6. **F43.2** — WhatsApp Business API réelle
-7. **F54.9** — Migration CRM complète
+7. ~~**F54.9** — Migration CRM complète~~ ✅ Fait
 8. **F56** — Monitoring (Sentry gratuit)

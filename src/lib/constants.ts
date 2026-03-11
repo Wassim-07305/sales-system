@@ -399,6 +399,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   coaching: "Coaching",
   partners: "Partenaires",
   moderation: "Modération",
+  migration: "Migration CRM",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [
