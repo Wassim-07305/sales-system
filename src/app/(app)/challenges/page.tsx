@@ -8,6 +8,16 @@ export default async function ChallengesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profileCheck } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profileCheck || !["admin", "manager", "setter", "closer"].includes(profileCheck.role)) {
+    redirect("/dashboard");
+  }
+
   // Get gamification profile
   let { data: gamProfile } = await supabase
     .from("gamification_profiles")

@@ -8,6 +8,16 @@ export default async function KpisPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profileRole } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profileRole || !["client_b2b", "client_b2c"].includes(profileRole.role)) {
+    redirect("/dashboard");
+  }
+
   // Get KPIs for this client
   const { data: kpis } = await supabase
     .from("client_kpis")

@@ -8,6 +8,16 @@ export default async function ProspectingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const prospects = await getProspects();
   const quota = await getDailyQuota();
   const lists = await getProspectLists();

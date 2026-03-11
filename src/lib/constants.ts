@@ -333,7 +333,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Espace Client",
     items: NAV_ITEMS.filter((i) =>
-      ["/portal", "/calls", "/resources", "/kpis", "/referral", "/bookings", "/prospects"].includes(
+      ["/portal", "/calls", "/resources", "/kpis", "/referral", "/prospects"].includes(
         i.href
       )
     ),

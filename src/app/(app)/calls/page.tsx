@@ -13,6 +13,16 @@ export default async function CallsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["client_b2b", "client_b2c"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const { data: calls } = await supabase
     .from("group_calls")
     .select("*")

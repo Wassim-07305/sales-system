@@ -13,6 +13,16 @@ export default async function WhatsAppPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager", "setter"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const connection = await getWhatsAppConnection();
   const conversations = await getConversations();
 

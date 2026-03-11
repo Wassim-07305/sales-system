@@ -9,6 +9,16 @@ export default async function CRMPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("*")

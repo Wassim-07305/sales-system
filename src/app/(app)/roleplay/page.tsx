@@ -8,6 +8,16 @@ export default async function RoleplayPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const profiles = await getRoleplayProfiles();
   const sessions = await getUserSessions(user.id);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

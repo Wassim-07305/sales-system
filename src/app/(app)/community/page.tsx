@@ -14,6 +14,10 @@ export default async function CommunityPage() {
     .eq("id", user.id)
     .single();
 
+  if (!profile || !["admin", "manager", "client_b2c"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const [posts, leaderboard] = await Promise.all([
     getCommunityPosts(),
     getCommunityLeaderboard(),
