@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Menu, Sun, Moon, Monitor, User, LogOut, Search } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Bell, Menu, Sun, Moon, Monitor, User, LogOut, Search, Settings } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { BREADCRUMB_LABELS } from "@/lib/constants";
 import { useUIStore } from "@/stores/ui-store";
@@ -20,6 +21,8 @@ interface HeaderProps {
 export function Header({ userName, email, avatarUrl, role, userId, unreadCount }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const {
     toggleMobileSidebar,
     setNotificationsPanelOpen,
@@ -27,6 +30,16 @@ export function Header({ userName, email, avatarUrl, role, userId, unreadCount }
     theme,
     setTheme,
   } = useUIStore();
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Breadcrumb from pathname — skip UUID segments
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -141,8 +154,11 @@ export function Header({ userName, email, avatarUrl, role, userId, unreadCount }
         </button>
 
         {/* User dropdown */}
-        <div className="relative group">
-          <button className="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-secondary">
+        <div className="relative" ref={userMenuRef}>
+          <button
+            onClick={() => setUserMenuOpen((v) => !v)}
+            className="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-secondary"
+          >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -157,28 +173,37 @@ export function Header({ userName, email, avatarUrl, role, userId, unreadCount }
           </button>
 
           {/* Dropdown */}
-          <div className="invisible absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-card p-1 opacity-0 shadow-lg transition-all group-focus-within:visible group-focus-within:opacity-100">
-            <div className="px-3 py-2">
-              <p className="text-sm font-medium text-foreground">{userName}</p>
-              <p className="text-xs text-muted-foreground">{email}</p>
+          {userMenuOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-card p-1 shadow-lg">
+              <div className="px-3 py-2">
+                <p className="text-sm font-medium text-foreground">{userName}</p>
+                <p className="text-xs text-muted-foreground">{email}</p>
+              </div>
+              <div className="mx-2 border-t border-border" />
+              <button
+                onClick={() => { setUserMenuOpen(false); router.push("/profile"); }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
+              >
+                <User className="h-4 w-4" />
+                Mon profil
+              </button>
+              <button
+                onClick={() => { setUserMenuOpen(false); router.push("/settings"); }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
+              >
+                <Settings className="h-4 w-4" />
+                Paramètres
+              </button>
+              <div className="mx-2 border-t border-border" />
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Déconnexion
+              </button>
             </div>
-            <div className="mx-2 border-t border-border" />
-            <button
-              onClick={() => router.push("/profile")}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
-            >
-              <User className="h-4 w-4" />
-              Mon profil
-            </button>
-            <div className="mx-2 border-t border-border" />
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
-            >
-              <LogOut className="h-4 w-4" />
-              Déconnexion
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </header>

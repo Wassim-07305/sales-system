@@ -191,12 +191,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["client_b2b"],
   },
   {
-    label: "Onboarding",
-    href: "/onboarding",
-    icon: BookOpen,
-    roles: ["client_b2b", "client_b2c"],
-  },
-  {
     label: "Calls",
     href: "/calls",
     icon: Video,
@@ -226,7 +220,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Support",
     href: "/support",
     icon: LifeBuoy,
-    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+    roles: ["admin", "manager", "setter", "closer"],
   },
 
   // Roadmap
@@ -234,7 +228,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Roadmap",
     href: "/roadmap",
     icon: Map,
-    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+    roles: ["admin", "manager", "setter", "closer"],
   },
 
   // Help
@@ -316,7 +310,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Espace Client",
     items: NAV_ITEMS.filter((i) =>
-      ["/portal", "/onboarding", "/calls", "/resources", "/kpis", "/referral"].includes(
+      ["/portal", "/calls", "/resources", "/kpis", "/referral"].includes(
         i.href
       )
     ),

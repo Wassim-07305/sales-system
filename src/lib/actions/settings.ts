@@ -194,6 +194,24 @@ export async function saveBrandingSettings(params: {
   return { success: true };
 }
 
+export async function updateAvatarUrl(avatarUrl: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/profile");
+  return { success: true };
+}
+
 export async function getBrandingSettings() {
   const supabase = await createClient();
   const {

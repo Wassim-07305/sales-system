@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,12 @@ import {
   Paperclip,
   Mic,
   Search,
+  X,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { toast } from "sonner";
 import { markChannelAsRead } from "@/lib/actions/communication";
 
 interface ChatLayoutProps {
@@ -35,6 +38,9 @@ const channelIcons = {
 };
 
 export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts }: ChatLayoutProps) {
+  // Stable supabase client reference
+  const supabase = useMemo(() => createClient(), []);
+
   const [channels] = useState<Channel[]>(initialChannels);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(
     initialChannels[0] || null
@@ -44,8 +50,11 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
   const [loading, setLoading] = useState(false);
   const [channelSearch, setChannelSearch] = useState("");
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>(initialUnreadCounts);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const supabase = createClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,7 +81,7 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
     loadMessages();
 
     // Mark channel as read on open
-    markChannelAsRead(activeChannel!.id).then(() => {
+    markChannelAsRead(activeChannel.id).then(() => {
       setUnreadCounts((prev) => {
         const next = { ...prev };
         delete next[activeChannel!.id];
@@ -113,21 +122,61 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
     };
   }, [activeChannel, supabase, scrollToBottom]);
 
-  async function handleSendMessage(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newMessage.trim() || !activeChannel) return;
-
-    const { error } = await supabase.from("messages").insert({
-      channel_id: activeChannel.id,
-      sender_id: currentUserId,
-      content: newMessage.trim(),
-      message_type: "text",
-    });
-
-    if (!error) {
-      setNewMessage("");
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("L'image doit faire moins de 10 Mo");
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `chat/${currentUserId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("chat-media").upload(path, file, { upsert: true });
+      if (error) throw new Error(error.message);
+      const { data } = supabase.storage.from("chat-media").getPublicUrl(path);
+      setImageUrl(data.publicUrl);
+      setImagePreview(data.publicUrl);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur upload image");
+    } finally {
+      setUploadingImage(false);
     }
   }
+
+  async function handleSendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if ((!newMessage.trim() && !imageUrl) || !activeChannel) return;
+
+    if (imageUrl) {
+      // Send image message
+      await supabase.from("messages").insert({
+        channel_id: activeChannel.id,
+        sender_id: currentUserId,
+        content: newMessage.trim() || "",
+        message_type: "image",
+        file_url: imageUrl,
+      });
+      setImageUrl(null);
+      setImagePreview(null);
+    } else {
+      const { error } = await supabase.from("messages").insert({
+        channel_id: activeChannel.id,
+        sender_id: currentUserId,
+        content: newMessage.trim(),
+        message_type: "text",
+      });
+      if (error) {
+        toast.error("Erreur lors de l'envoi");
+        return;
+      }
+    }
+
+    setNewMessage("");
+  }
+
+  // TODO: support envoi de messages vocaux (enregistrement micro + upload audio)
 
   const filteredChannels = channels.filter(
     (c) =>
@@ -153,7 +202,7 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-0.5">
             {filteredChannels.map((channel) => {
-              const Icon = channelIcons[channel.type] || Hash;
+              const Icon = channelIcons[channel.type as keyof typeof channelIcons] || Hash;
               const unread = unreadCounts[channel.id] || 0;
               return (
                 <button
@@ -207,52 +256,84 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
 
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages.map((message) => {
-                  const isOwn = message.sender_id === currentUserId;
-                  return (
-                    <div
-                      key={message.id}
-                      className={cn("flex gap-3", isOwn && "flex-row-reverse")}
-                    >
-                      <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
-                        {message.sender?.full_name?.charAt(0) || "?"}
-                      </div>
+              {loading ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Chargement...
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message) => {
+                    const isOwn = message.sender_id === currentUserId;
+                    return (
                       <div
-                        className={cn(
-                          "max-w-[70%]",
-                          isOwn && "text-right"
-                        )}
+                        key={message.id}
+                        className={cn("flex gap-3", isOwn && "flex-row-reverse")}
                       >
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-medium">
-                            {message.sender?.full_name || "Inconnu"}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {format(
-                              new Date(message.created_at),
-                              "HH:mm",
-                              { locale: fr }
-                            )}
-                          </span>
+                        <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
+                          {message.sender?.full_name?.charAt(0) || "?"}
                         </div>
                         <div
                           className={cn(
-                            "inline-block rounded-2xl px-4 py-2 text-sm",
-                            isOwn
-                              ? "bg-brand-dark text-white rounded-br-md"
-                              : "bg-muted rounded-bl-md"
+                            "max-w-[70%]",
+                            isOwn && "text-right"
                           )}
                         >
-                          {message.content}
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs font-medium">
+                              {message.sender?.full_name || "Inconnu"}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {format(
+                                new Date(message.created_at),
+                                "HH:mm",
+                                { locale: fr }
+                              )}
+                            </span>
+                          </div>
+                          {message.message_type === "image" && message.file_url ? (
+                            <img
+                              src={message.file_url}
+                              alt="Image"
+                              className="rounded-xl max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(message.file_url!, "_blank")}
+                            />
+                          ) : (
+                            <div
+                              className={cn(
+                                "inline-block rounded-2xl px-4 py-2 text-sm",
+                                isOwn
+                                  ? "bg-brand-dark text-white rounded-br-md"
+                                  : "bg-muted rounded-bl-md"
+                              )}
+                            >
+                              {message.content}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
             </ScrollArea>
+
+            {/* Image preview */}
+            {imagePreview && (
+              <div className="px-4 pb-2">
+                <div className="relative inline-block">
+                  <img src={imagePreview} alt="Aperçu" className="h-20 rounded-lg object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setImagePreview(null); setImageUrl(null); }}
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-black/60 flex items-center justify-center text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Message input */}
             <div className="p-4 border-t">
@@ -260,12 +341,31 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
                 onSubmit={handleSendMessage}
                 className="flex items-center gap-2"
               >
-                <Button type="button" variant="ghost" size="icon" className="shrink-0">
-                  <Paperclip className="h-4 w-4" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Paperclip className="h-4 w-4" />
+                  )}
                 </Button>
-                <Button type="button" variant="ghost" size="icon" className="shrink-0">
-                  <Mic className="h-4 w-4" />
+                {/* TODO: support envoi de messages vocaux */}
+                <Button type="button" variant="ghost" size="icon" className="shrink-0" disabled>
+                  <Mic className="h-4 w-4 opacity-40" />
                 </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -276,7 +376,7 @@ export function ChatLayout({ initialChannels, currentUserId, initialUnreadCounts
                   type="submit"
                   size="icon"
                   className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0"
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() && !imageUrl}
                 >
                   <Send className="h-4 w-4" />
                 </Button>

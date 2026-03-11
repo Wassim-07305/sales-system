@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar } from "lucide-react";
+import { Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar, ImagePlus, X, Loader2 } from "lucide-react";
 import { createCommunityPost, toggleLike, getComments, addComment } from "@/lib/actions/community";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -55,24 +56,64 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
   const [newType, setNewType] = useState("discussion");
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [newImagePreview, setNewImagePreview] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = activeTab === "all" ? posts : posts.filter((p) => p.type === activeTab);
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("L'image doit faire moins de 10 Mo");
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop();
+      const path = `posts/${userId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("community").upload(path, file, { upsert: true });
+      if (error) throw new Error(error.message);
+      const { data } = supabase.storage.from("community").getPublicUrl(path);
+      setNewImageUrl(data.publicUrl);
+      setNewImagePreview(data.publicUrl);
+      toast.success("Image ajoutée !");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur upload image");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   async function handleCreate() {
     if (!newContent.trim()) return;
+    setIsPosting(true);
     try {
-      await createCommunityPost({ type: newType, title: newTitle || undefined, content: newContent });
+      await createCommunityPost({
+        type: newType,
+        title: newTitle || undefined,
+        content: newContent,
+        image_url: newImageUrl || undefined,
+      });
       toast.success("Post publié !");
       setDialogOpen(false);
       setNewContent("");
       setNewTitle("");
+      setNewImageUrl("");
+      setNewImagePreview("");
       router.refresh();
-    } catch {
-      toast.error("Erreur");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la publication");
+    } finally {
+      setIsPosting(false);
     }
   }
 
@@ -279,7 +320,41 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
               <Label>Contenu</Label>
               <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={5} />
             </div>
-            <Button onClick={handleCreate} className="w-full bg-brand text-brand-dark hover:bg-brand/90">Publier</Button>
+            {/* Image upload */}
+            <div>
+              <Label>Image (optionnel)</Label>
+              {newImagePreview ? (
+                <div className="relative mt-2">
+                  <img src={newImagePreview} alt="Aperçu" className="w-full rounded-lg max-h-48 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setNewImageUrl(""); setNewImagePreview(""); }}
+                    className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-4 text-sm text-muted-foreground hover:border-brand hover:text-brand transition-colors"
+                >
+                  {uploadingImage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4" />
+                  )}
+                  {uploadingImage ? "Upload en cours..." : "Ajouter une image"}
+                </button>
+              )}
+              <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </div>
+            <Button onClick={handleCreate} disabled={isPosting || !newContent.trim()} className="w-full bg-brand text-brand-dark hover:bg-brand/90">
+              {isPosting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Publier
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
