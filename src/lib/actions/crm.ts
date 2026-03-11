@@ -102,3 +102,43 @@ export async function getTeamMembers() {
 
   return data || [];
 }
+
+export async function getRecentDeals(limit = 10) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("deals")
+    .select("id, title, value, stage_id, contact:contacts(full_name)")
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  return data || [];
+}
+
+export async function searchDeals(query: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("deals")
+    .select("id, title, value, stage_id, contact:contacts(full_name)")
+    .ilike("title", `%${query}%`)
+    .limit(20);
+  return data || [];
+}
+
+export async function addQuickNote(params: {
+  dealId: string;
+  content: string;
+  type: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase.from("deal_activities").insert({
+    deal_id: params.dealId,
+    user_id: user.id,
+    type: params.type,
+    content: params.content,
+  });
+
+  if (error) return { error: error.message };
+  return { success: true };
+}

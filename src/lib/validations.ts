@@ -73,7 +73,7 @@ export const createDealActivitySchema = z.object({
   deal_id: uuidSchema,
   type: z.enum(["call", "message", "email", "note", "meeting", "status_change"]),
   content: z.string().max(5000).optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 // ============================================================
@@ -178,7 +178,7 @@ export const createBookingSchema = z.object({
   scheduled_at: z.string().datetime("Date de rendez-vous invalide"),
   duration_minutes: z.number().int().min(5).max(480).default(30),
   meeting_link: z.string().url().max(2000).optional().or(z.literal("")),
-  qualification_data: z.record(z.unknown()).default({}),
+  qualification_data: z.record(z.string(), z.unknown()).default({}),
   notes: z.string().max(5000).optional(),
 });
 
