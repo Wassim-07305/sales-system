@@ -94,6 +94,12 @@ body {
 
 .dot-green { background: #7af17a; }
 .dot-red { background: #ef4444; }
+.dot-amber { background: #f59e0b; animation: pulse-dot 1.2s ease-in-out infinite; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 
 .stats {
   display: grid;

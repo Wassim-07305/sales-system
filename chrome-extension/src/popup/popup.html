@@ -23,18 +23,22 @@
       <div class="status-card">
         <div class="status-row">
           <span class="dot dot-green" id="ss-dot"></span>
-          <span id="ss-status">Sales System connecte</span>
+          <span id="ss-status">Sales System connecté</span>
         </div>
         <div class="status-row">
           <span class="dot" id="li-dot"></span>
           <span id="li-status">LinkedIn...</span>
+        </div>
+        <div class="status-row" id="sync-status-row">
+          <span class="dot" id="sync-dot"></span>
+          <span id="sync-status-text">Chargement...</span>
         </div>
       </div>
 
       <div class="stats">
         <div class="stat">
           <span class="stat-value" id="prospects-count">0</span>
-          <span class="stat-label">Prospects synchro</span>
+          <span class="stat-label">Prospects</span>
         </div>
         <div class="stat">
           <span class="stat-value" id="conversations-count">0</span>
@@ -43,9 +47,11 @@
       </div>
 
       <div class="stat-row" id="last-sync"></div>
+      <div class="stat-row" id="next-sync"></div>
+      <div id="sync-error" class="error hidden"></div>
 
       <button id="sync-btn" class="btn btn-primary">Synchroniser maintenant</button>
-      <button id="logout-btn" class="btn btn-secondary">Deconnexion</button>
+      <button id="logout-btn" class="btn btn-secondary">Déconnexion</button>
     </div>
   </div>
 

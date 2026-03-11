@@ -20,18 +20,37 @@ chrome.webRequest.onSendHeaders.addListener(
 );
 
 // ---- Alarms for periodic sync ----
-chrome.alarms.create("sync-conversations", {
-  periodInMinutes: SYNC_INTERVAL_MINUTES,
-});
+// Crée les alarms seulement si elles n'existent pas (évite les doublons au restart)
+async function setupAlarms(): Promise<void> {
+  const syncAlarm = await chrome.alarms.get("sync-conversations");
+  if (!syncAlarm) {
+    chrome.alarms.create("sync-conversations", {
+      delayInMinutes: SYNC_INTERVAL_MINUTES,
+      periodInMinutes: SYNC_INTERVAL_MINUTES,
+    });
+    console.log("[SS] Alarm sync-conversations créée (toutes les " + SYNC_INTERVAL_MINUTES + " min)");
+  }
 
-chrome.alarms.create("process-pending", {
-  periodInMinutes: PENDING_SEND_POLL_SECONDS / 60,
-});
+  const pendingAlarm = await chrome.alarms.get("process-pending");
+  if (!pendingAlarm) {
+    // Chrome MV3 : minimum 1 minute en production, on utilise max(1, PENDING_SEND_POLL_SECONDS/60)
+    const periodMinutes = Math.max(1, PENDING_SEND_POLL_SECONDS / 60);
+    chrome.alarms.create("process-pending", {
+      delayInMinutes: periodMinutes,
+      periodInMinutes: periodMinutes,
+    });
+    console.log("[SS] Alarm process-pending créée (toutes les " + periodMinutes + " min)");
+  }
+}
+
+setupAlarms();
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "sync-conversations") {
+    console.log("[SS] Alarm sync-conversations déclenchée");
     await runSync();
   } else if (alarm.name === "process-pending") {
+    console.log("[SS] Alarm process-pending déclenchée");
     await processPendingMessages();
   }
 });
@@ -97,6 +116,14 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("[Sales System LinkedIn Bridge] Extension installed");
+chrome.runtime.onInstalled.addListener(async () => {
+  console.log("[Sales System LinkedIn Bridge] Extension installée");
+  // Recréer les alarms lors de l'installation
+  await chrome.alarms.clearAll();
+  await setupAlarms();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  console.log("[Sales System LinkedIn Bridge] Navigateur démarré, alarms vérifiées");
+  setupAlarms();
 });

@@ -243,3 +243,55 @@ export async function markMessageSent(
     .update({ messages })
     .eq("id", conversationId);
 }
+
+// ---- Table pending_messages (messages postés depuis l'app web Sales System) ----
+
+export async function getPendingMessagesFromTable(): Promise<
+  Array<{
+    id: string;
+    linkedinConversationId: string;
+    content: string;
+  }>
+> {
+  const sb = await getSupabaseClient();
+  if (!sb) return [];
+
+  const { data, error } = await sb
+    .from("pending_messages")
+    .select("id, linkedin_conversation_id, content")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true })
+    .limit(10);
+
+  if (error) {
+    console.error("[SS] getPendingMessagesFromTable:", error.message);
+    return [];
+  }
+  if (!data) return [];
+
+  return data.map((row: Record<string, string>) => ({
+    id: row.id,
+    linkedinConversationId: row.linkedin_conversation_id,
+    content: row.content,
+  }));
+}
+
+export async function markPendingMessageSent(id: string): Promise<void> {
+  const sb = await getSupabaseClient();
+  if (!sb) return;
+
+  await sb
+    .from("pending_messages")
+    .update({ status: "sent", sent_at: new Date().toISOString() })
+    .eq("id", id);
+}
+
+export async function markPendingMessageFailed(id: string, errorMsg: string): Promise<void> {
+  const sb = await getSupabaseClient();
+  if (!sb) return;
+
+  await sb
+    .from("pending_messages")
+    .update({ status: "failed", error: errorMsg })
+    .eq("id", id);
+}

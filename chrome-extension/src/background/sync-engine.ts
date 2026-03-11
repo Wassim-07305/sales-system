@@ -5,6 +5,9 @@ import {
   getPendingMessages,
   markMessageSent,
   getConversationByLinkedinId,
+  getPendingMessagesFromTable,
+  markPendingMessageSent,
+  markPendingMessageFailed,
 } from "./supabase-client";
 import { setSyncState, getSyncState, getAuth, getLinkedInAuth } from "../shared/storage";
 
@@ -117,8 +120,22 @@ export async function processPendingMessages(): Promise<void> {
 
   if (!auth.isAuthenticated || !liAuth.csrfToken) return;
 
-  const pending = await getPendingMessages();
+  // 1. Messages postés depuis l'app web (table pending_messages)
+  const tablePending = await getPendingMessagesFromTable();
+  for (const msg of tablePending) {
+    console.log("[SS] Envoi message pending (table) vers conv:", msg.linkedinConversationId);
+    const sent = await sendLinkedInMessage(msg.linkedinConversationId, msg.content);
+    if (sent) {
+      await markPendingMessageSent(msg.id);
+      console.log("[SS] Message envoyé et marqué sent:", msg.id);
+    } else {
+      await markPendingMessageFailed(msg.id, "Echec envoi LinkedIn API");
+      console.error("[SS] Echec envoi message:", msg.id);
+    }
+  }
 
+  // 2. Messages avec flag pending_send dans dm_conversations (flow legacy)
+  const pending = await getPendingMessages();
   for (const msg of pending) {
     const sent = await sendLinkedInMessage(msg.linkedinConversationId, msg.content);
     if (sent) {
