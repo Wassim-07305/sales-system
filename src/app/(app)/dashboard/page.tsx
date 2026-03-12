@@ -7,9 +7,13 @@ import {
   getAdminDashboardData,
   getClientDashboardData,
   getSetterDashboardData,
+  getB2BDashboardData,
 } from "@/lib/actions/dashboard";
 import { calculateReadinessScore } from "@/lib/actions/readiness";
-import { getDashboardWidgets, getWidgetData } from "@/lib/actions/dashboard-builder";
+import {
+  getDashboardWidgets,
+  getWidgetData,
+} from "@/lib/actions/dashboard-builder";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function DashboardPage() {
@@ -59,7 +63,16 @@ export default async function DashboardPage() {
       const data = await getSetterDashboardData(user.id);
       return <SetterDashboard data={data} />;
     }
-    case "client_b2b":
+    case "client_b2b": {
+      const b2bData = await getB2BDashboardData(user.id);
+      return (
+        <ClientDashboard
+          role="client_b2b"
+          b2bData={b2bData}
+          userName={profile?.full_name || "Utilisateur"}
+        />
+      );
+    }
     case "client_b2c": {
       const [data, readiness] = await Promise.all([
         getClientDashboardData(user.id),
@@ -67,6 +80,7 @@ export default async function DashboardPage() {
       ]);
       return (
         <ClientDashboard
+          role="client_b2c"
           data={data}
           userName={profile?.full_name || "Utilisateur"}
           readiness={readiness}
@@ -80,6 +94,7 @@ export default async function DashboardPage() {
       ]);
       return (
         <ClientDashboard
+          role="client_b2c"
           data={data}
           userName={profile?.full_name || "Utilisateur"}
           readiness={readiness}

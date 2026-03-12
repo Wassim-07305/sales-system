@@ -4,18 +4,26 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
 
-export async function completeOnboardingStep(stepId: string, responseData?: Record<string, unknown>) {
+export async function completeOnboardingStep(
+  stepId: string,
+  responseData?: Record<string, unknown>,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  await supabase.from("client_onboarding").upsert({
-    client_id: user.id,
-    step_id: stepId,
-    completed: true,
-    completed_at: new Date().toISOString(),
-    response_data: responseData || {},
-  }, { onConflict: "client_id,step_id" });
+  await supabase.from("client_onboarding").upsert(
+    {
+      client_id: user.id,
+      step_id: stepId,
+      completed: true,
+      completed_at: new Date().toISOString(),
+      response_data: responseData || {},
+    },
+    { onConflict: "client_id,step_id" },
+  );
 
   // Check if all required steps are completed
   const { data: allSteps } = await supabase
@@ -43,7 +51,9 @@ export async function completeOnboardingStep(stepId: string, responseData?: Reco
   const completedCount = completedSteps?.length || 0;
   await supabase
     .from("profiles")
-    .update({ onboarding_step: completedCount + (completedIds.has(stepId) ? 0 : 1) })
+    .update({
+      onboarding_step: completedCount + (completedIds.has(stepId) ? 0 : 1),
+    })
     .eq("id", user.id);
 
   revalidatePath("/onboarding");
@@ -97,7 +107,9 @@ export async function deleteOnboardingStep(stepId: string) {
 
 export async function submitOnboardingQuiz(answers: Record<string, string>) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // Calculate score based on answers
@@ -166,11 +178,17 @@ export async function getWelcomePack(userId: string) {
     profile,
     pack,
     quizResult,
-    personalizedTips: await generatePersonalizedTips(role, quizResult?.color_code || "orange"),
+    personalizedTips: await generatePersonalizedTips(
+      role,
+      quizResult?.color_code || "orange",
+    ),
   };
 }
 
-async function generatePersonalizedTips(role: string, colorCode: string): Promise<string[]> {
+async function generatePersonalizedTips(
+  role: string,
+  colorCode: string,
+): Promise<string[]> {
   try {
     const result = await aiJSON<{ tips: string[] }>(
       `Génère 4 conseils personnalisés pour un nouvel utilisateur de S Academy.
@@ -186,7 +204,10 @@ Les conseils doivent être :
 - Adaptés au niveau du profil
 - Orientés vers les premières actions à faire sur la plateforme
 - En français, tutoiement`,
-      { system: "Tu es le coach de S Academy, une plateforme de formation au setting/vente." }
+      {
+        system:
+          "Tu es le coach de S Academy, une plateforme de formation au setting/vente.",
+      },
     );
     return result.tips;
   } catch {
@@ -238,7 +259,11 @@ export async function triggerAutoBooking(userId: string) {
     .limit(1);
 
   if (existing && existing.length > 0) {
-    return { success: true, message: "Un appel d'onboarding est deja programme", bookingId: existing[0].id };
+    return {
+      success: true,
+      message: "Un appel d'onboarding est deja programme",
+      bookingId: existing[0].id,
+    };
   }
 
   // Find available booking slots in the next 7 days
@@ -305,12 +330,16 @@ export async function triggerAutoBooking(userId: string) {
         type: "onboarding_call",
         link: "/bookings",
         read: false,
-      }))
+      })),
     );
   }
 
   revalidatePath("/bookings");
-  return { success: true, message: "Appel d'onboarding programme", bookingId: booking?.id };
+  return {
+    success: true,
+    message: "Appel d'onboarding programme",
+    bookingId: booking?.id,
+  };
 }
 
 export async function scrapeAndGenerateScript(linkedinUrl: string) {
@@ -330,9 +359,10 @@ Le script doit :
 
 Écris uniquement le texte du message, sans guillemets.`,
       {
-        system: "Tu es un expert en copywriting LinkedIn. Tu crées des messages d'approche qui génèrent des taux de réponse élevés. Ton ton est professionnel mais humain.",
+        system:
+          "Tu es un expert en copywriting LinkedIn. Tu crées des messages d'approche qui génèrent des taux de réponse élevés. Ton ton est professionnel mais humain.",
         maxTokens: 512,
-      }
+      },
     );
 
     return {
@@ -347,7 +377,8 @@ Le script doit :
   } catch {
     return {
       success: true,
-      script: "Bonjour [Nom], j'ai vu votre profil et votre parcours m'a interpellé. Seriez-vous ouvert à un échange de 15 minutes cette semaine ?",
+      script:
+        "Bonjour [Nom], j'ai vu votre profil et votre parcours m'a interpellé. Seriez-vous ouvert à un échange de 15 minutes cette semaine ?",
       profileData: { name: "Prospect", industry: "Non défini" },
     };
   }
@@ -359,12 +390,42 @@ export async function getOnboardingChecklist(userId: string) {
   const supabase = await createClient();
 
   const checklistItems = [
-    { id: "checklist_profile", label: "Completer ton profil", link: "/profile", icon: "user" },
-    { id: "checklist_module1", label: "Commencer le Module 1", link: "/academy", icon: "book" },
-    { id: "checklist_roleplay", label: "Faire ta premiere session de roleplay", link: "/roleplay", icon: "target" },
-    { id: "checklist_journal", label: "Remplir ton journal du jour", link: "/dashboard", icon: "edit" },
-    { id: "checklist_booking", label: "Reserver ton appel d'onboarding", link: "/bookings", icon: "calendar" },
-    { id: "checklist_community", label: "Te presenter dans la communaute", link: "/community/forum", icon: "users" },
+    {
+      id: "checklist_profile",
+      label: "Completer ton profil",
+      link: "/profile",
+      icon: "user",
+    },
+    {
+      id: "checklist_module1",
+      label: "Commencer le Module 1",
+      link: "/academy",
+      icon: "book",
+    },
+    {
+      id: "checklist_roleplay",
+      label: "Faire ta premiere session de roleplay",
+      link: "/roleplay",
+      icon: "target",
+    },
+    {
+      id: "checklist_journal",
+      label: "Remplir ton journal du jour",
+      link: "/dashboard",
+      icon: "edit",
+    },
+    {
+      id: "checklist_booking",
+      label: "Reserver ton appel d'onboarding",
+      link: "/bookings",
+      icon: "calendar",
+    },
+    {
+      id: "checklist_community",
+      label: "Te presenter dans la communaute",
+      link: "/community/forum",
+      icon: "users",
+    },
   ];
 
   const { data: completed } = await supabase
@@ -384,7 +445,9 @@ export async function getOnboardingChecklist(userId: string) {
 
 export async function toggleChecklistItem(itemId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: existing } = await supabase
@@ -397,7 +460,10 @@ export async function toggleChecklistItem(itemId: string) {
   if (existing) {
     await supabase
       .from("client_onboarding")
-      .update({ completed: !existing.completed, completed_at: new Date().toISOString() })
+      .update({
+        completed: !existing.completed,
+        completed_at: new Date().toISOString(),
+      })
       .eq("client_id", user.id)
       .eq("step_id", itemId);
   } else {
@@ -422,23 +488,62 @@ export async function submitCommitments(commitments: {
   availability_confirmed: boolean;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  if (!commitments.charter_accepted || !commitments.objectives_confirmed || !commitments.availability_confirmed) {
+  if (
+    !commitments.charter_accepted ||
+    !commitments.objectives_confirmed ||
+    !commitments.availability_confirmed
+  ) {
     throw new Error("Tous les engagements doivent etre valides");
   }
 
-  await supabase.from("client_onboarding").upsert({
-    client_id: user.id,
-    step_id: "double_validation",
-    completed: true,
-    completed_at: new Date().toISOString(),
-    response_data: commitments,
-  }, { onConflict: "client_id,step_id" });
+  await supabase.from("client_onboarding").upsert(
+    {
+      client_id: user.id,
+      step_id: "double_validation",
+      completed: true,
+      completed_at: new Date().toISOString(),
+      response_data: commitments,
+    },
+    { onConflict: "client_id,step_id" },
+  );
 
   revalidatePath("/onboarding");
   return { success: true };
+}
+
+export async function uploadAvatar(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifie" };
+
+  const file = formData.get("file") as File;
+  if (!file) return { error: "Aucun fichier" };
+  if (file.size > 10 * 1024 * 1024)
+    return { error: "Le fichier depasse 10 Mo" };
+
+  const ext = file.name.split(".").pop() || "png";
+  const path = `${user.id}/avatar.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const { error } = await supabase.storage
+    .from("avatars")
+    .upload(path, buffer, {
+      upsert: true,
+      contentType: file.type,
+    });
+
+  if (error) return { error: error.message };
+
+  const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+
+  return { success: true, url: urlData.publicUrl };
 }
 
 export async function hasCompletedCommitments(userId: string) {
@@ -508,10 +613,12 @@ export async function completeSimpleOnboarding(data: {
   ].filter((e) => e.value !== "" && e.value !== "[]");
 
   for (const entry of settingsEntries) {
-    await supabase.from("user_settings").upsert(
-      { user_id: user.id, key: entry.key, value: entry.value },
-      { onConflict: "user_id,key" }
-    );
+    await supabase
+      .from("user_settings")
+      .upsert(
+        { user_id: user.id, key: entry.key, value: entry.value },
+        { onConflict: "user_id,key" },
+      );
   }
 
   revalidatePath("/dashboard");

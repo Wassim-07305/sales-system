@@ -318,6 +318,12 @@ export const NAV_ITEMS: NavItem[] = [
         icon: Code,
         roles: ["admin", "manager"],
       },
+      {
+        label: "Sync Calendrier",
+        href: "/bookings/calendar-sync",
+        icon: CalendarDays,
+        roles: ["admin", "manager"],
+      },
     ],
   },
 ];

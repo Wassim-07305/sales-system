@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   BookOpen,
@@ -18,13 +19,25 @@ import {
   ThumbsUp,
   Heart,
   Star,
+  Send,
+  MessageSquare,
+  Target,
+  TrendingUp,
+  Users,
+  BarChart3,
+  Phone,
+  ArrowRight,
+  Activity,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { saveDailyJournal } from "@/lib/actions/dashboard";
 import { toast } from "sonner";
 import { ReadinessGauge } from "@/components/readiness-gauge";
 import type { ReadinessBreakdown } from "@/lib/actions/readiness";
+import type { B2BDashboardData } from "@/lib/actions/dashboard";
+
+// ─── B2C Types (existing) ──────────────────────────────────────
 
 interface ClientDashboardData {
   courseProgress: Array<{
@@ -52,6 +65,26 @@ interface ClientDashboardData {
   quizAttemptsToday: number;
 }
 
+// ─── Shared types ──────────────────────────────────────────────
+
+type ClientDashboardProps =
+  | {
+      role: "client_b2b";
+      b2bData: B2BDashboardData;
+      userName: string;
+      data?: never;
+      readiness?: never;
+    }
+  | {
+      role: "client_b2c";
+      data: ClientDashboardData;
+      userName: string;
+      readiness?: ReadinessBreakdown;
+      b2bData?: never;
+    };
+
+// ─── Mood icons (B2C only) ─────────────────────────────────────
+
 const MOOD_ICONS = [
   { value: 1, icon: Frown, label: "Difficile", color: "text-red-500" },
   { value: 2, icon: Meh, label: "Moyen", color: "text-orange-400" },
@@ -70,7 +103,368 @@ function getEventIcon(type: string) {
   }
 }
 
-export function ClientDashboard({
+function getActivityIcon(type: string) {
+  switch (type) {
+    case "message":
+      return MessageSquare;
+    case "booking":
+      return Calendar;
+    case "call":
+      return Phone;
+    default:
+      return ArrowRight;
+  }
+}
+
+function getActivityLabel(type: string) {
+  switch (type) {
+    case "message":
+      return "Message";
+    case "booking":
+      return "RDV";
+    case "call":
+      return "Appel";
+    default:
+      return "Pipeline";
+  }
+}
+
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+// ─── Main Component ────────────────────────────────────────────
+
+export function ClientDashboard(props: ClientDashboardProps) {
+  if (props.role === "client_b2b") {
+    return (
+      <B2BClientDashboard data={props.b2bData} userName={props.userName} />
+    );
+  }
+
+  return (
+    <B2CClientDashboard
+      data={props.data}
+      userName={props.userName}
+      readiness={props.readiness}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// B2B DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+
+function B2BClientDashboard({
+  data,
+  userName,
+}: {
+  data: B2BDashboardData;
+  userName: string;
+}) {
+  return (
+    <div>
+      <PageHeader
+        title="Tableau de bord"
+        description={`Bienvenue, ${userName}`}
+      />
+
+      {/* Welcome Card with quick stats */}
+      <Card className="mb-6 bg-brand-dark text-white border-0">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-bold mb-2">
+            Bonjour {userName.split(" ")[0]}, voici votre activite du mois
+          </h2>
+          <p className="text-white/70 text-sm mb-4">
+            Suivez les performances de votre setter et l&apos;avancement de
+            votre pipeline commercial.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+              <Send className="h-4 w-4 text-brand shrink-0" />
+              <div>
+                <p className="text-lg font-bold leading-tight">
+                  {data.stats.messagesSent}
+                </p>
+                <p className="text-[11px] text-white/60">Messages envoyes</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+              <MessageSquare className="h-4 w-4 text-brand shrink-0" />
+              <div>
+                <p className="text-lg font-bold leading-tight">
+                  {data.stats.responseRate}%
+                </p>
+                <p className="text-[11px] text-white/60">Taux de reponse</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+              <Calendar className="h-4 w-4 text-brand shrink-0" />
+              <div>
+                <p className="text-lg font-bold leading-tight">
+                  {data.stats.bookingsBooked}
+                </p>
+                <p className="text-[11px] text-white/60">RDV decroches</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+              <Target className="h-4 w-4 text-brand shrink-0" />
+              <div>
+                <p className="text-lg font-bold leading-tight">
+                  {data.stats.closingRate}%
+                </p>
+                <p className="text-[11px] text-white/60">Taux de closing</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Performance Setter */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users className="h-4 w-4 text-brand" />
+              Performance Setter
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3 mb-5">
+              <Avatar className="h-10 w-10">
+                <AvatarImage
+                  src={data.setterPerformance.avatarUrl || undefined}
+                />
+                <AvatarFallback className="bg-brand/20 text-brand font-semibold">
+                  {data.setterPerformance.setterName
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-sm">
+                  {data.setterPerformance.setterName}
+                </p>
+                {data.setterPerformance.lastActivityAt && (
+                  <p className="text-xs text-muted-foreground">
+                    Derniere activite :{" "}
+                    {formatDistanceToNow(
+                      new Date(data.setterPerformance.lastActivityAt),
+                      { addSuffix: true, locale: fr },
+                    )}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Send className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Messages / jour
+                  </span>
+                </div>
+                <p className="text-2xl font-bold">
+                  {data.setterPerformance.messagesPerDay}
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Prospects contactes
+                  </span>
+                </div>
+                <p className="text-2xl font-bold">
+                  {data.setterPerformance.prospectsContacted}
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Conversations actives
+                  </span>
+                </div>
+                <p className="text-2xl font-bold">
+                  {data.setterPerformance.activeConversations}
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Taux de reponse
+                  </span>
+                </div>
+                <p className="text-2xl font-bold">{data.stats.responseRate}%</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pipeline Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-brand" />
+              Pipeline commercial
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-muted-foreground">
+                Valeur totale
+              </span>
+              <span className="text-xl font-bold">
+                {formatCurrency(data.pipelineTotal)}
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {data.pipeline
+                .filter((s) => s.count > 0)
+                .map((stage) => (
+                  <div key={stage.stageName}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: stage.stageColor }}
+                        />
+                        <span className="text-sm">{stage.stageName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {stage.count}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground w-20 text-right">
+                          {formatCurrency(stage.value)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+              {data.pipeline.every((s) => s.count === 0) && (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  Aucun deal en cours dans le pipeline.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Prochains rendez-vous */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-brand" />
+              Prochains rendez-vous
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {data.upcomingBookings.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Aucun rendez-vous a venir.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {data.upcomingBookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="flex items-start gap-3 py-2 border-b last:border-0"
+                  >
+                    <div className="mt-0.5">
+                      <Calendar className="h-4 w-4 text-brand" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{booking.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(
+                          new Date(booking.time),
+                          "EEEE dd MMMM 'a' HH:mm",
+                          { locale: fr },
+                        )}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {booking.type}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Activite recente */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Activity className="h-4 w-4 text-brand" />
+              Activite recente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {data.recentActivity.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Aucune activite recente.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {data.recentActivity.map((activity) => {
+                  const Icon = getActivityIcon(activity.type);
+                  return (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 py-2 border-b last:border-0"
+                    >
+                      <div className="mt-0.5 rounded-full bg-muted p-1.5">
+                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">
+                          {activity.description ||
+                            getActivityLabel(activity.type)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(activity.date), {
+                            addSuffix: true,
+                            locale: fr,
+                          })}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] shrink-0">
+                        {getActivityLabel(activity.type)}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// B2C DASHBOARD (existing, preserved as-is)
+// ═══════════════════════════════════════════════════════════════
+
+function B2CClientDashboard({
   data,
   userName,
   readiness,
@@ -82,7 +476,7 @@ export function ClientDashboard({
   const [mood, setMood] = useState<number>(data.todayJournal?.mood || 0);
   const [wins, setWins] = useState(data.todayJournal?.wins || "");
   const [challenges, setChallenges] = useState(
-    data.todayJournal?.struggles || ""
+    data.todayJournal?.struggles || "",
   );
   const [goals, setGoals] = useState(data.todayJournal?.goals_tomorrow || "");
   const [isPending, startTransition] = useTransition();
@@ -93,7 +487,7 @@ export function ClientDashboard({
   const totalLessons = data.courseProgress.reduce((s, c) => s + c.total, 0);
   const completedLessons = data.courseProgress.reduce(
     (s, c) => s + c.completed,
-    0
+    0,
   );
   const overallProgress =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -115,10 +509,7 @@ export function ClientDashboard({
 
   return (
     <div>
-      <PageHeader
-        title="Mon Espace"
-        description={`Bienvenue, ${userName}`}
-      />
+      <PageHeader title="Mon Espace" description={`Bienvenue, ${userName}`} />
 
       {/* Welcome card */}
       <Card className="mb-6 bg-brand-dark text-white border-0">
@@ -185,8 +576,8 @@ export function ClientDashboard({
           <CardContent className="space-y-6">
             {data.courseProgress.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucune formation en cours. Inscris-toi a un cours pour
-                commencer !
+                Aucune formation en cours. Inscris-toi a un cours pour commencer
+                !
               </p>
             ) : (
               data.courseProgress.map((course) => {
@@ -250,7 +641,7 @@ export function ClientDashboard({
                           {format(
                             new Date(event.date),
                             "EEEE dd MMMM 'a' HH:mm",
-                            { locale: fr }
+                            { locale: fr },
                           )}
                         </p>
                       </div>
@@ -270,9 +661,7 @@ export function ClientDashboard({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            {hasJournal
-              ? "Journal du jour (deja rempli)"
-              : "Journal du jour"}
+            {hasJournal ? "Journal du jour (deja rempli)" : "Journal du jour"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -288,9 +677,7 @@ export function ClientDashboard({
                       <MoodIcon
                         key={m.value}
                         className={`h-5 w-5 ${
-                          isSelected
-                            ? m.color
-                            : "text-muted-foreground/30"
+                          isSelected ? m.color : "text-muted-foreground/30"
                         }`}
                       />
                     );
@@ -318,9 +705,7 @@ export function ClientDashboard({
                   <p className="text-xs font-medium text-muted-foreground mb-1">
                     Objectifs demain
                   </p>
-                  <p className="text-sm">
-                    {data.todayJournal.goals_tomorrow}
-                  </p>
+                  <p className="text-sm">{data.todayJournal.goals_tomorrow}</p>
                 </div>
               )}
             </div>
@@ -341,16 +726,12 @@ export function ClientDashboard({
                         type="button"
                         onClick={() => setMood(m.value)}
                         className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                          isSelected
-                            ? "bg-brand/10"
-                            : "hover:bg-muted"
+                          isSelected ? "bg-brand/10" : "hover:bg-muted"
                         }`}
                       >
                         <MoodIcon
                           className={`h-6 w-6 ${
-                            isSelected
-                              ? m.color
-                              : "text-muted-foreground"
+                            isSelected ? m.color : "text-muted-foreground"
                           }`}
                         />
                         <span

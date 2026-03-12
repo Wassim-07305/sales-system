@@ -5,7 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 export async function getAdminDashboardData() {
   const supabase = await createClient();
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
 
   // Get the "Client Signé" stage id
   const { data: signedStage } = await supabase
@@ -28,7 +32,7 @@ export async function getAdminDashboardData() {
 
   const pipelineTotal = (monthlyDeals || []).reduce(
     (sum, d) => sum + (d.value || 0),
-    0
+    0,
   );
 
   // Active clients count
@@ -49,7 +53,7 @@ export async function getAdminDashboardData() {
   const { data: recentDeals } = await supabase
     .from("deals")
     .select(
-      "id, title, value, stage_id, contact_id, pipeline_stages(name), profiles!deals_contact_id_fkey(full_name)"
+      "id, title, value, stage_id, contact_id, pipeline_stages(name), profiles!deals_contact_id_fkey(full_name)",
     )
     .order("created_at", { ascending: false })
     .limit(6);
@@ -76,7 +80,7 @@ export async function getAdminDashboardData() {
 
   // Alerts: prospects without activity in 7 days
   const sevenDaysAgo = new Date(
-    Date.now() - 7 * 24 * 60 * 60 * 1000
+    Date.now() - 7 * 24 * 60 * 60 * 1000,
   ).toISOString();
   const { data: staleDeals } = await supabase
     .from("deals")
@@ -96,11 +100,15 @@ export async function getAdminDashboardData() {
       const stage = Array.isArray(d.pipeline_stages)
         ? d.pipeline_stages[0]
         : d.pipeline_stages;
-      const contact = Array.isArray(
-        (d as Record<string, unknown>).profiles
-      )
-        ? ((d as Record<string, unknown>).profiles as Array<{ full_name: string | null }>)[0]
-        : (d as Record<string, unknown>).profiles as { full_name: string | null } | null;
+      const contact = Array.isArray((d as Record<string, unknown>).profiles)
+        ? (
+            (d as Record<string, unknown>).profiles as Array<{
+              full_name: string | null;
+            }>
+          )[0]
+        : ((d as Record<string, unknown>).profiles as {
+            full_name: string | null;
+          } | null);
       return {
         id: d.id,
         title: d.title,
@@ -148,12 +156,22 @@ export async function getClientDashboardData(userId: string) {
     const lesson = Array.isArray(e.lessons) ? e.lessons[0] : e.lessons;
     const course = lesson
       ? Array.isArray((lesson as Record<string, unknown>).courses)
-        ? ((lesson as Record<string, unknown>).courses as Array<{ title: string }>)[0]
-        : ((lesson as Record<string, unknown>).courses as { title: string } | null)
+        ? (
+            (lesson as Record<string, unknown>).courses as Array<{
+              title: string;
+            }>
+          )[0]
+        : ((lesson as Record<string, unknown>).courses as {
+            title: string;
+          } | null)
       : null;
     if (course) {
       if (!courseMap[course.title])
-        courseMap[course.title] = { title: course.title, completed: 0, total: 0 };
+        courseMap[course.title] = {
+          title: course.title,
+          completed: 0,
+          total: 0,
+        };
       courseMap[course.title].total++;
       if (e.completed) courseMap[course.title].completed++;
     }
@@ -215,18 +233,20 @@ export async function getSetterDashboardData(userId: string) {
   const startOfMonth = new Date(
     now.getFullYear(),
     now.getMonth(),
-    1
+    1,
   ).toISOString();
   const startOfLastMonth = new Date(
     now.getFullYear(),
     now.getMonth() - 1,
-    1
+    1,
   ).toISOString();
   const endOfLastMonth = new Date(
     now.getFullYear(),
     now.getMonth(),
     0,
-    23, 59, 59
+    23,
+    59,
+    59,
   ).toISOString();
 
   // Get the "Client Signé" stage id
@@ -284,7 +304,7 @@ export async function getSetterDashboardData(userId: string) {
     .lt("scheduled_at", new Date().toISOString());
 
   const showedUp = (pastBookings || []).filter(
-    (b) => b.status === "completed"
+    (b) => b.status === "completed",
   ).length;
   const showUpRate = pastBookings?.length
     ? Math.round((showedUp / pastBookings.length) * 100)
@@ -292,7 +312,7 @@ export async function getSetterDashboardData(userId: string) {
 
   // Closing rate
   const closedDeals = (myDeals || []).filter(
-    (d) => d.stage_id === signedStageId
+    (d) => d.stage_id === signedStageId,
   ).length;
   const closingRate = myDeals?.length
     ? Math.round((closedDeals / myDeals.length) * 100)
@@ -316,7 +336,9 @@ export async function getSetterDashboardData(userId: string) {
   // Active coaching objectives (not completed)
   const { data: objectives } = await supabase
     .from("coaching_objectives")
-    .select("id, title, category, target_value, current_value, target_date, status")
+    .select(
+      "id, title, category, target_value, current_value, target_date, status",
+    )
     .eq("assignee_id", userId)
     .neq("status", "completed")
     .order("target_date", { ascending: true })
@@ -331,13 +353,14 @@ export async function getSetterDashboardData(userId: string) {
     .gte("created_at", weekAgo.toISOString());
 
   // Group by day for chart
-  const dailyPerformance: { day: string; deals: number; revenue: number }[] = [];
+  const dailyPerformance: { day: string; deals: number; revenue: number }[] =
+    [];
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
     const dayStr = date.toISOString().split("T")[0];
     const dayLabel = date.toLocaleDateString("fr-FR", { weekday: "short" });
     const dayDeals = (weekDeals || []).filter(
-      (d) => d.created_at.split("T")[0] === dayStr
+      (d) => d.created_at.split("T")[0] === dayStr,
     );
     const dayRevenue = dayDeals
       .filter((d) => d.stage_id === signedStageId)
@@ -356,9 +379,12 @@ export async function getSetterDashboardData(userId: string) {
       closingRate,
       revenue,
       lastMonthRevenue,
-      revenueTrend: lastMonthRevenue > 0
-        ? Math.round(((revenue - lastMonthRevenue) / lastMonthRevenue) * 100)
-        : revenue > 0 ? 100 : 0,
+      revenueTrend:
+        lastMonthRevenue > 0
+          ? Math.round(((revenue - lastMonthRevenue) / lastMonthRevenue) * 100)
+          : revenue > 0
+            ? 100
+            : 0,
       activeConversations: activeConversations || 0,
       dealsClosed: closedDeals,
       dealsTotal: (myDeals || []).length,
@@ -418,7 +444,7 @@ export async function saveDailyJournal(data: {
       struggles: data.challenges,
       goals_tomorrow: data.goals,
     },
-    { onConflict: "user_id,date" }
+    { onConflict: "user_id,date" },
   );
 }
 
@@ -426,8 +452,14 @@ export async function getSetterHubData(userId: string) {
   const supabase = await createClient();
   const now = new Date();
   const today = now.toISOString().split("T")[0];
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const startOfWeek = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+  const startOfWeek = new Date(
+    now.getTime() - now.getDay() * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   // Today's DM quota
   const { data: todayQuota } = await supabase
@@ -445,8 +477,14 @@ export async function getSetterHubData(userId: string) {
     .gte("date", startOfWeek.split("T")[0]);
 
   const weekDms = (weekQuotas || []).reduce((s, q) => s + q.dms_sent, 0);
-  const weekReplies = (weekQuotas || []).reduce((s, q) => s + q.replies_received, 0);
-  const weekBookingsFromDms = (weekQuotas || []).reduce((s, q) => s + q.bookings_from_dms, 0);
+  const weekReplies = (weekQuotas || []).reduce(
+    (s, q) => s + q.replies_received,
+    0,
+  );
+  const weekBookingsFromDms = (weekQuotas || []).reduce(
+    (s, q) => s + q.bookings_from_dms,
+    0,
+  );
 
   // Active prospects
   const { data: prospects } = await supabase
@@ -454,8 +492,12 @@ export async function getSetterHubData(userId: string) {
     .select("id, status")
     .eq("assigned_setter_id", userId);
 
-  const activeProspects = (prospects || []).filter((p) => p.status === "contacted").length;
-  const hotProspects = (prospects || []).filter((p) => p.status === "hot").length;
+  const activeProspects = (prospects || []).filter(
+    (p) => p.status === "contacted",
+  ).length;
+  const hotProspects = (prospects || []).filter(
+    (p) => p.status === "hot",
+  ).length;
   const totalProspects = (prospects || []).length;
 
   // Monthly revenue from deals
@@ -476,7 +518,9 @@ export async function getSetterHubData(userId: string) {
     .reduce((s, d) => s + (d.value || 0), 0);
 
   const monthDealsCount = (monthDeals || []).length;
-  const monthClosedCount = (monthDeals || []).filter((d) => d.stage_id === signedStage?.id).length;
+  const monthClosedCount = (monthDeals || []).filter(
+    (d) => d.stage_id === signedStage?.id,
+  ).length;
 
   // Bookings this month
   const { data: monthBookings } = await supabase
@@ -486,11 +530,17 @@ export async function getSetterHubData(userId: string) {
     .lte("scheduled_at", now.toISOString());
 
   const totalBookings = (monthBookings || []).length;
-  const completedBookings = (monthBookings || []).filter((b) => b.status === "completed").length;
-  const showUpRate = totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0;
+  const completedBookings = (monthBookings || []).filter(
+    (b) => b.status === "completed",
+  ).length;
+  const showUpRate =
+    totalBookings > 0
+      ? Math.round((completedBookings / totalBookings) * 100)
+      : 0;
 
   // Response rate
-  const responseRate = weekDms > 0 ? Math.round((weekReplies / weekDms) * 100) : 0;
+  const responseRate =
+    weekDms > 0 ? Math.round((weekReplies / weekDms) * 100) : 0;
 
   // Gamification
   const { data: gamProfile } = await supabase
@@ -521,7 +571,10 @@ export async function getSetterHubData(userId: string) {
       revenue: monthRevenue,
       dealsCreated: monthDealsCount,
       dealsClosed: monthClosedCount,
-      closingRate: monthDealsCount > 0 ? Math.round((monthClosedCount / monthDealsCount) * 100) : 0,
+      closingRate:
+        monthDealsCount > 0
+          ? Math.round((monthClosedCount / monthDealsCount) * 100)
+          : 0,
       showUpRate,
     },
     gamification: {
@@ -545,7 +598,12 @@ export interface PerformanceMetric {
 export interface PersonalPerformanceReport {
   period: string;
   metrics: PerformanceMetric[];
-  weeklyData: Array<{ week: string; revenue: number; deals: number; bookings: number }>;
+  weeklyData: Array<{
+    week: string;
+    revenue: number;
+    deals: number;
+    bookings: number;
+  }>;
   objectivesProgress: Array<{
     id: string;
     title: string;
@@ -561,12 +619,29 @@ export interface PersonalPerformanceReport {
   };
 }
 
-export async function getPersonalPerformanceReport(userId: string): Promise<PersonalPerformanceReport> {
+export async function getPersonalPerformanceReport(
+  userId: string,
+): Promise<PersonalPerformanceReport> {
   const supabase = await createClient();
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+  const startOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+  ).toISOString();
+  const endOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   // Get signed stage
   const { data: signedStage } = await supabase
@@ -614,17 +689,31 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
     .filter((d) => d.stage_id === signedStageId)
     .reduce((sum, d) => sum + (d.value || 0), 0);
 
-  const currentDeals = (monthDeals || []).filter((d) => d.stage_id === signedStageId).length;
-  const lastDeals = (lastMonthDeals || []).filter((d) => d.stage_id === signedStageId).length;
+  const currentDeals = (monthDeals || []).filter(
+    (d) => d.stage_id === signedStageId,
+  ).length;
+  const lastDeals = (lastMonthDeals || []).filter(
+    (d) => d.stage_id === signedStageId,
+  ).length;
 
   const currentBookings = (monthBookings || []).length;
   const lastBookingsCount = (lastBookings || []).length;
 
-  const currentShowUp = (monthBookings || []).filter((b) => b.status === "completed").length;
-  const lastShowUp = (lastBookings || []).filter((b) => b.status === "completed").length;
+  const currentShowUp = (monthBookings || []).filter(
+    (b) => b.status === "completed",
+  ).length;
+  const lastShowUp = (lastBookings || []).filter(
+    (b) => b.status === "completed",
+  ).length;
 
-  const showUpRate = currentBookings > 0 ? Math.round((currentShowUp / currentBookings) * 100) : 0;
-  const lastShowUpRate = lastBookingsCount > 0 ? Math.round((lastShowUp / lastBookingsCount) * 100) : 0;
+  const showUpRate =
+    currentBookings > 0
+      ? Math.round((currentShowUp / currentBookings) * 100)
+      : 0;
+  const lastShowUpRate =
+    lastBookingsCount > 0
+      ? Math.round((lastShowUp / lastBookingsCount) * 100)
+      : 0;
 
   // Default targets (could come from coaching_objectives or team quotas)
   const revenueTarget = 25000;
@@ -638,7 +727,10 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
       current: currentRevenue,
       target: revenueTarget,
       previous: lastRevenue,
-      trend: lastRevenue > 0 ? Math.round(((currentRevenue - lastRevenue) / lastRevenue) * 100) : 0,
+      trend:
+        lastRevenue > 0
+          ? Math.round(((currentRevenue - lastRevenue) / lastRevenue) * 100)
+          : 0,
       unit: "€",
     },
     {
@@ -646,7 +738,10 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
       current: currentDeals,
       target: dealsTarget,
       previous: lastDeals,
-      trend: lastDeals > 0 ? Math.round(((currentDeals - lastDeals) / lastDeals) * 100) : 0,
+      trend:
+        lastDeals > 0
+          ? Math.round(((currentDeals - lastDeals) / lastDeals) * 100)
+          : 0,
       unit: "",
     },
     {
@@ -654,7 +749,12 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
       current: currentBookings,
       target: bookingsTarget,
       previous: lastBookingsCount,
-      trend: lastBookingsCount > 0 ? Math.round(((currentBookings - lastBookingsCount) / lastBookingsCount) * 100) : 0,
+      trend:
+        lastBookingsCount > 0
+          ? Math.round(
+              ((currentBookings - lastBookingsCount) / lastBookingsCount) * 100,
+            )
+          : 0,
       unit: "",
     },
     {
@@ -668,9 +768,16 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
   ];
 
   // Weekly data for the last 4 weeks
-  const weeklyData: Array<{ week: string; revenue: number; deals: number; bookings: number }> = [];
+  const weeklyData: Array<{
+    week: string;
+    revenue: number;
+    deals: number;
+    bookings: number;
+  }> = [];
   for (let i = 3; i >= 0; i--) {
-    const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+    const weekStart = new Date(
+      now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000,
+    );
     const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
     const weekLabel = `S${Math.ceil((now.getDate() - i * 7) / 7)}`;
 
@@ -694,14 +801,18 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
   // Get active objectives
   const { data: objectives } = await supabase
     .from("coaching_objectives")
-    .select("id, title, category, target_value, current_value, target_date, status")
+    .select(
+      "id, title, category, target_value, current_value, target_date, status",
+    )
     .eq("assignee_id", userId)
     .neq("status", "completed")
     .order("target_date");
 
   const objectivesProgress = (objectives || []).map((o) => {
     const targetDate = new Date(o.target_date);
-    const daysLeft = Math.ceil((targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysLeft = Math.ceil(
+      (targetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+    );
     return {
       id: o.id,
       title: o.title,
@@ -724,12 +835,14 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
     .eq("stage_id", signedStageId || "")
     .gte("created_at", startOfMonth);
 
-  const setterRevenues = (allSetters || []).map((s) => {
-    const rev = (allDeals || [])
-      .filter((d) => d.assigned_to === s.id)
-      .reduce((sum, d) => sum + (d.value || 0), 0);
-    return { id: s.id, revenue: rev };
-  }).sort((a, b) => b.revenue - a.revenue);
+  const setterRevenues = (allSetters || [])
+    .map((s) => {
+      const rev = (allDeals || [])
+        .filter((d) => d.assigned_to === s.id)
+        .reduce((sum, d) => sum + (d.value || 0), 0);
+      return { id: s.id, revenue: rev };
+    })
+    .sort((a, b) => b.revenue - a.revenue);
 
   const position = setterRevenues.findIndex((s) => s.id === userId) + 1;
 
@@ -749,9 +862,24 @@ export async function getPersonalPerformanceReport(userId: string): Promise<Pers
 export async function getTeamKPIs() {
   const supabase = await createClient();
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+  const startOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+  ).toISOString();
+  const endOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   // Get the "Client Signé" stage id
   const { data: signedStage } = await supabase
@@ -772,9 +900,12 @@ export async function getTeamKPIs() {
 
   const totalBookings = (monthBookings || []).length;
   const confirmedBookings = (monthBookings || []).filter(
-    (b) => b.status === "completed" || b.status === "confirmed"
+    (b) => b.status === "completed" || b.status === "confirmed",
   ).length;
-  const showUpRate = totalBookings > 0 ? Math.round((confirmedBookings / totalBookings) * 100) : 0;
+  const showUpRate =
+    totalBookings > 0
+      ? Math.round((confirmedBookings / totalBookings) * 100)
+      : 0;
 
   // All deals this month
   const { data: monthDeals } = await supabase
@@ -782,10 +913,13 @@ export async function getTeamKPIs() {
     .select("id, value, stage_id, assigned_to, setter_id, closer_id")
     .gte("created_at", startOfMonth);
 
-  const closedDeals = (monthDeals || []).filter((d) => d.stage_id === signedStageId);
-  const closingRate = (monthDeals || []).length > 0
-    ? Math.round((closedDeals.length / (monthDeals || []).length) * 100)
-    : 0;
+  const closedDeals = (monthDeals || []).filter(
+    (d) => d.stage_id === signedStageId,
+  );
+  const closingRate =
+    (monthDeals || []).length > 0
+      ? Math.round((closedDeals.length / (monthDeals || []).length) * 100)
+      : 0;
   const totalRevenue = closedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
 
   // --- LAST MONTH (for trends) ---
@@ -798,11 +932,12 @@ export async function getTeamKPIs() {
 
   const lastTotalBookings = (lastMonthBookings || []).length;
   const lastConfirmed = (lastMonthBookings || []).filter(
-    (b) => b.status === "completed" || b.status === "confirmed"
+    (b) => b.status === "completed" || b.status === "confirmed",
   ).length;
-  const lastShowUpRate = lastTotalBookings > 0
-    ? Math.round((lastConfirmed / lastTotalBookings) * 100)
-    : 0;
+  const lastShowUpRate =
+    lastTotalBookings > 0
+      ? Math.round((lastConfirmed / lastTotalBookings) * 100)
+      : 0;
 
   const { data: lastMonthDeals } = await supabase
     .from("deals")
@@ -810,11 +945,19 @@ export async function getTeamKPIs() {
     .gte("created_at", startOfLastMonth)
     .lte("created_at", endOfLastMonth);
 
-  const lastClosedDeals = (lastMonthDeals || []).filter((d) => d.stage_id === signedStageId);
-  const lastClosingRate = (lastMonthDeals || []).length > 0
-    ? Math.round((lastClosedDeals.length / (lastMonthDeals || []).length) * 100)
-    : 0;
-  const lastRevenue = lastClosedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+  const lastClosedDeals = (lastMonthDeals || []).filter(
+    (d) => d.stage_id === signedStageId,
+  );
+  const lastClosingRate =
+    (lastMonthDeals || []).length > 0
+      ? Math.round(
+          (lastClosedDeals.length / (lastMonthDeals || []).length) * 100,
+        )
+      : 0;
+  const lastRevenue = lastClosedDeals.reduce(
+    (sum, d) => sum + (d.value || 0),
+    0,
+  );
 
   // --- PER-MEMBER BREAKDOWN ---
 
@@ -827,24 +970,34 @@ export async function getTeamKPIs() {
   const memberKPIs = (teamMembers || []).map((member) => {
     // Bookings assigned to this member
     const memberBookings = (monthBookings || []).filter(
-      (b) => b.assigned_to === member.id
+      (b) => b.assigned_to === member.id,
     );
     const memberConfirmed = memberBookings.filter(
-      (b) => b.status === "completed" || b.status === "confirmed"
+      (b) => b.status === "completed" || b.status === "confirmed",
     ).length;
-    const memberShowUp = memberBookings.length > 0
-      ? Math.round((memberConfirmed / memberBookings.length) * 100)
-      : 0;
+    const memberShowUp =
+      memberBookings.length > 0
+        ? Math.round((memberConfirmed / memberBookings.length) * 100)
+        : 0;
 
     // Deals where member is assigned_to, setter, or closer
     const memberDeals = (monthDeals || []).filter(
-      (d) => d.assigned_to === member.id || d.setter_id === member.id || d.closer_id === member.id
+      (d) =>
+        d.assigned_to === member.id ||
+        d.setter_id === member.id ||
+        d.closer_id === member.id,
     );
-    const memberClosed = memberDeals.filter((d) => d.stage_id === signedStageId);
-    const memberClosingRate = memberDeals.length > 0
-      ? Math.round((memberClosed.length / memberDeals.length) * 100)
-      : 0;
-    const memberRevenue = memberClosed.reduce((sum, d) => sum + (d.value || 0), 0);
+    const memberClosed = memberDeals.filter(
+      (d) => d.stage_id === signedStageId,
+    );
+    const memberClosingRate =
+      memberDeals.length > 0
+        ? Math.round((memberClosed.length / memberDeals.length) * 100)
+        : 0;
+    const memberRevenue = memberClosed.reduce(
+      (sum, d) => sum + (d.value || 0),
+      0,
+    );
 
     return {
       id: member.id,
@@ -874,5 +1027,266 @@ export async function getTeamKPIs() {
       revenueDelta: totalRevenue - lastRevenue,
     },
     members: memberKPIs,
+  };
+}
+
+// ─── B2B CLIENT DASHBOARD ──────────────────────────────────────
+
+export interface B2BDashboardData {
+  stats: {
+    messagesSent: number;
+    responseRate: number;
+    bookingsBooked: number;
+    closingRate: number;
+  };
+  setterPerformance: {
+    setterId: string | null;
+    setterName: string;
+    avatarUrl: string | null;
+    messagesPerDay: number;
+    prospectsContacted: number;
+    activeConversations: number;
+    lastActivityAt: string | null;
+  };
+  pipeline: Array<{
+    stageName: string;
+    stageColor: string;
+    count: number;
+    value: number;
+  }>;
+  pipelineTotal: number;
+  upcomingBookings: Array<{
+    id: string;
+    name: string;
+    time: string;
+    type: string;
+  }>;
+  recentActivity: Array<{
+    id: string;
+    type: "message" | "booking" | "deal_move" | "call";
+    description: string;
+    date: string;
+  }>;
+}
+
+export async function getB2BDashboardData(
+  userId: string,
+): Promise<B2BDashboardData> {
+  const supabase = await createClient();
+  const now = new Date();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+
+  // Get matched setter for this B2B client
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("matched_entrepreneur_id")
+    .eq("id", userId)
+    .single();
+
+  // The B2B client may have a matched setter via matched_entrepreneur_id
+  // or deals assigned with setter_id
+  let setterId: string | null = null;
+  let setterName = "Non assigne";
+  let setterAvatar: string | null = null;
+
+  // Check if there's a setter linked via deals
+  const { data: clientDeals } = await supabase
+    .from("deals")
+    .select("id, setter_id, assigned_to")
+    .eq("contact_id", userId)
+    .limit(1);
+
+  if (clientDeals && clientDeals.length > 0) {
+    setterId = clientDeals[0].setter_id || clientDeals[0].assigned_to || null;
+  }
+
+  // Fallback: check matched_entrepreneur_id
+  if (!setterId && profile?.matched_entrepreneur_id) {
+    setterId = profile.matched_entrepreneur_id;
+  }
+
+  if (setterId) {
+    const { data: setterProfile } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", setterId)
+      .single();
+    if (setterProfile) {
+      setterName = setterProfile.full_name || "Setter";
+      setterAvatar = setterProfile.avatar_url;
+    }
+  }
+
+  // Get setter's DM stats this month (from daily_quotas)
+  let messagesThisMonth = 0;
+  let messagesPerDay = 0;
+  let repliesThisMonth = 0;
+
+  if (setterId) {
+    const { data: quotas } = await supabase
+      .from("daily_quotas")
+      .select("dms_sent, replies_received, date")
+      .eq("user_id", setterId)
+      .gte("date", startOfMonth.split("T")[0]);
+
+    messagesThisMonth = (quotas || []).reduce(
+      (s, q) => s + (q.dms_sent || 0),
+      0,
+    );
+    repliesThisMonth = (quotas || []).reduce(
+      (s, q) => s + (q.replies_received || 0),
+      0,
+    );
+    const daysWithActivity = (quotas || []).filter(
+      (q) => q.dms_sent > 0,
+    ).length;
+    messagesPerDay =
+      daysWithActivity > 0
+        ? Math.round(messagesThisMonth / daysWithActivity)
+        : 0;
+  }
+
+  const responseRate =
+    messagesThisMonth > 0
+      ? Math.round((repliesThisMonth / messagesThisMonth) * 100)
+      : 0;
+
+  // Prospects contacted by setter
+  let prospectsContacted = 0;
+  let activeConversations = 0;
+  let lastActivityAt: string | null = null;
+
+  if (setterId) {
+    const { data: prospects } = await supabase
+      .from("prospects")
+      .select("id, status, updated_at")
+      .eq("assigned_setter_id", setterId)
+      .order("updated_at", { ascending: false });
+
+    prospectsContacted = (prospects || []).length;
+    activeConversations = (prospects || []).filter(
+      (p) => p.status === "contacted" || p.status === "replied",
+    ).length;
+    lastActivityAt =
+      prospects && prospects.length > 0 ? prospects[0].updated_at : null;
+  }
+
+  // Pipeline overview - get all stages and count deals
+  const { data: stages } = await supabase
+    .from("pipeline_stages")
+    .select("id, name, color, position")
+    .order("position");
+
+  const { data: allDeals } = await supabase
+    .from("deals")
+    .select("id, stage_id, value")
+    .eq("contact_id", userId);
+
+  // If no deals linked to contact_id, try via setter
+  let dealsForPipeline = allDeals || [];
+  if (dealsForPipeline.length === 0 && setterId) {
+    const { data: setterDeals } = await supabase
+      .from("deals")
+      .select("id, stage_id, value")
+      .eq("assigned_to", setterId);
+    dealsForPipeline = setterDeals || [];
+  }
+
+  const pipeline = (stages || []).map((stage) => {
+    const stageDeals = dealsForPipeline.filter((d) => d.stage_id === stage.id);
+    return {
+      stageName: stage.name,
+      stageColor: stage.color || "#6b7280",
+      count: stageDeals.length,
+      value: stageDeals.reduce((sum, d) => sum + (d.value || 0), 0),
+    };
+  });
+
+  const pipelineTotal = dealsForPipeline.reduce(
+    (sum, d) => sum + (d.value || 0),
+    0,
+  );
+
+  // Get "Client Signe" stage for closing rate
+  const signedStage = (stages || []).find(
+    (s) => s.name === "Client Signe" || s.name === "Client Signé",
+  );
+  const closedDeals = signedStage
+    ? dealsForPipeline.filter((d) => d.stage_id === signedStage.id).length
+    : 0;
+  const closingRate =
+    dealsForPipeline.length > 0
+      ? Math.round((closedDeals / dealsForPipeline.length) * 100)
+      : 0;
+
+  // Upcoming bookings
+  const { data: bookings } = await supabase
+    .from("bookings")
+    .select("id, prospect_name, scheduled_at, slot_type")
+    .gte("scheduled_at", now.toISOString())
+    .order("scheduled_at")
+    .limit(5);
+
+  // Bookings count this month
+  const { count: bookingsMonthCount } = await supabase
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .gte("scheduled_at", startOfMonth);
+
+  // Recent activity - deal activities
+  const dealIds = dealsForPipeline.map((d) => d.id);
+  let recentActivity: B2BDashboardData["recentActivity"] = [];
+
+  if (dealIds.length > 0) {
+    const { data: dealActivities } = await supabase
+      .from("deal_activities")
+      .select("id, type, description, created_at")
+      .in("deal_id", dealIds)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    recentActivity = (dealActivities || []).map((a) => ({
+      id: a.id,
+      type: (a.type === "message"
+        ? "message"
+        : a.type === "meeting"
+          ? "booking"
+          : a.type === "call"
+            ? "call"
+            : "deal_move") as "message" | "booking" | "deal_move" | "call",
+      description: a.description || "",
+      date: a.created_at,
+    }));
+  }
+
+  return {
+    stats: {
+      messagesSent: messagesThisMonth,
+      responseRate,
+      bookingsBooked: bookingsMonthCount || 0,
+      closingRate,
+    },
+    setterPerformance: {
+      setterId,
+      setterName,
+      avatarUrl: setterAvatar,
+      messagesPerDay,
+      prospectsContacted,
+      activeConversations,
+      lastActivityAt,
+    },
+    pipeline,
+    pipelineTotal,
+    upcomingBookings: (bookings || []).map((b) => ({
+      id: b.id,
+      name: b.prospect_name || "RDV",
+      time: b.scheduled_at,
+      type: b.slot_type,
+    })),
+    recentActivity,
   };
 }

@@ -2,15 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { BookingCalendar } from "./booking-calendar";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
-import Link from "next/link";
 import { BookingsExportButton } from "./bookings-export-button";
 import { NewBookingDialog } from "./new-booking-dialog";
 
 export default async function BookingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: bookings } = await supabase
@@ -27,12 +26,6 @@ export default async function BookingsPage() {
         <div className="flex items-center gap-2">
           <NewBookingDialog />
           <BookingsExportButton />
-          <Button variant="outline" asChild>
-            <Link href="/bookings/calendar-sync">
-              <Calendar className="h-4 w-4 mr-2" />
-              Sync Calendrier
-            </Link>
-          </Button>
         </div>
       </PageHeader>
       <BookingCalendar initialBookings={bookings || []} />

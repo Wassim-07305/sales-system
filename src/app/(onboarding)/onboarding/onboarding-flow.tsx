@@ -4,8 +4,10 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { createClient } from "@/lib/supabase/client";
-import { completeSimpleOnboarding } from "@/lib/actions/onboarding";
+import {
+  completeSimpleOnboarding,
+  uploadAvatar,
+} from "@/lib/actions/onboarding";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -211,23 +213,20 @@ export function OnboardingFlow({
   }, [step, isLast, goNext]);
 
   async function handleAvatarUpload(file: File) {
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("L'image ne doit pas depasser 5 Mo");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("L'image ne doit pas depasser 10 Mo");
       return;
     }
     setUploadingAvatar(true);
     try {
-      const supabase = createClient();
-      const ext = file.name.split(".").pop();
-      const path = `${userId}/avatar.${ext}`;
-      const { error } = await supabase.storage
-        .from("avatars")
-        .upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(path);
-      setAvatarUrl(urlData.publicUrl);
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadAvatar(formData);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      setAvatarUrl(result.url || "");
       setAvatarPreview(URL.createObjectURL(file));
       toast.success("Photo uploadee !");
     } catch {
@@ -388,7 +387,7 @@ export function OnboardingFlow({
           }}
         />
         <p className="text-sm text-white/40">
-          Clique pour choisir une photo (max 5 Mo)
+          Clique pour choisir une photo (max 10 Mo)
         </p>
       </div>
     );
