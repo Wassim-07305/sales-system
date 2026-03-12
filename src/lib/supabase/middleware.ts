@@ -58,17 +58,35 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect clients with incomplete onboarding to /onboarding
-  if (user && !pathname.startsWith("/onboarding") && !isPublicRoute) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role, onboarding_completed")
-      .eq("id", user.id)
-      .single();
+  // Skip DB query for API routes and paths that don't need onboarding check
+  const skipOnboardingCheck = pathname.startsWith("/api") || pathname.startsWith("/onboarding");
+  if (user && !skipOnboardingCheck && !isPublicRoute) {
+    // Check cookie cache first to avoid DB query on every request
+    const cachedRole = request.cookies.get("x-user-role")?.value;
+    const cachedOnboarding = request.cookies.get("x-onboarding-done")?.value;
+
+    let role = cachedRole;
+    let onboardingCompleted = cachedOnboarding === "1";
+
+    if (!cachedRole) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, onboarding_completed")
+        .eq("id", user.id)
+        .single();
+
+      role = profile?.role || "";
+      onboardingCompleted = profile?.onboarding_completed ?? true;
+
+      // Cache role in cookie for 5 minutes to reduce DB queries
+      supabaseResponse.cookies.set("x-user-role", role || "", { maxAge: 300, path: "/" });
+      supabaseResponse.cookies.set("x-onboarding-done", onboardingCompleted ? "1" : "0", { maxAge: 300, path: "/" });
+    }
 
     if (
-      profile &&
-      ["client_b2b", "client_b2c"].includes(profile.role) &&
-      !profile.onboarding_completed
+      role &&
+      ["client_b2b", "client_b2c"].includes(role) &&
+      !onboardingCompleted
     ) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";

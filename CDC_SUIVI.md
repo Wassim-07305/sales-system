@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~92% (69 faits / 6 partiels / 5 manquants)
+> **Couverture globale** : ~93% (70 faits / 5 partiels / 5 manquants)
 
 ---
 
@@ -231,7 +231,7 @@
 
 | # | Feature | Statut | Fichiers clés |
 |---|---------|--------|---------------|
-| F55 | Performance Optimization | ⚠️ Infra | Vercel CDN + lazy loading OK — Redis/APM = infra |
+| F55 | Performance Optimization | ✅ Fait | `optimizePackageImports` (recharts, lucide, dnd-kit), dynamic imports react-pdf, middleware cookie cache (role/onboarding), `next/image` community, `staleTimes` client cache, `transpilePackages` ESM |
 | F56 | Monitoring & Alerting | ❌ Manquant | 🔒 Sentry = service tiers |
 | F57 | Feature Releases & Updates | ⚠️ Infra | CI/CD pipeline à configurer |
 | F56.1 | Backup & Disaster Recovery | ✅ Infra | Géré par Supabase |
@@ -243,8 +243,8 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 69 | 86% |
-| ⚠️ Partiel | 6 | 8% |
+| ✅ Fait | 70 | 88% |
+| ⚠️ Partiel | 5 | 6% |
 | ❌ Manquant | 5 | 6% |
 | **Total** | **80** | **100%** |
 

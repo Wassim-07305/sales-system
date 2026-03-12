@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -173,7 +174,7 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
           {post.title && <h3 className="font-semibold mb-2">{post.title}</h3>}
           <p className="text-sm mb-4 whitespace-pre-wrap">{post.content}</p>
           {post.image_url && (
-            <img src={post.image_url} alt="" className="rounded-lg mb-4 max-h-64 object-cover w-full" />
+            <Image src={post.image_url} alt="" width={800} height={400} className="rounded-lg mb-4 max-h-64 object-cover w-full" loading="lazy" />
           )}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <button

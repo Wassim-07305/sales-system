@@ -1,12 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@react-pdf/renderer"],
   experimental: {
     // Cache les pages dynamiques côté client pendant 30s
-    // → revisiter une page déjà vue = instantané
     staleTimes: {
       dynamic: 30,
     },
+    // Tree-shake heavy packages (only import used exports)
+    optimizePackageImports: [
+      "recharts",
+      "lucide-react",
+      "@dnd-kit/core",
+      "@dnd-kit/sortable",
+      "date-fns",
+    ],
   },
   images: {
     remotePatterns: [

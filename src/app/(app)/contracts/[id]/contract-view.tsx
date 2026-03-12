@@ -12,7 +12,12 @@ import { ArrowLeft, Send, PenTool, Download, CheckCircle2, ShieldX, FileSignatur
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ContractPdf } from "./contract-pdf";
+import dynamic from "next/dynamic";
+
+const ContractPdf = dynamic(
+  () => import("./contract-pdf").then((mod) => mod.ContractPdf),
+  { ssr: false }
+);
 
 interface Props {
   contract: {
