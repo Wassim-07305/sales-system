@@ -20,5 +20,6 @@ export default async function PermissionsPage() {
 
   const permissions = await getPermissions();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <PermissionsView permissions={permissions as any} />;
 }

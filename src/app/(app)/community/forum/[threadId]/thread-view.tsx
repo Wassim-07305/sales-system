@@ -50,6 +50,7 @@ interface Props {
   reputations?: Record<string, number>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function ThreadView({ post, comments, userId, reputations = {} }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

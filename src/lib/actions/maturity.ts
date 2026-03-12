@@ -17,7 +17,7 @@ export async function calculateSetterMaturity(setterId: string) {
   // 1. Message quality — based on DM quotas completion
   const { data: dmQuotas } = await supabase
     .from("daily_quotas")
-    .select("dm_sent, dm_target")
+    .select("dms_sent, dms_target")
     .eq("user_id", setterId)
     .order("date", { ascending: false })
     .limit(30);
@@ -26,8 +26,8 @@ export async function calculateSetterMaturity(setterId: string) {
   if (dmQuotas && dmQuotas.length > 0) {
     const avgCompletion =
       dmQuotas.reduce((sum, q) => {
-        const target = q.dm_target || 1;
-        return sum + Math.min((q.dm_sent || 0) / target, 1);
+        const target = q.dms_target || 1;
+        return sum + Math.min((q.dms_sent || 0) / target, 1);
       }, 0) / dmQuotas.length;
     messageQuality = Math.round(avgCompletion * 100);
   }
@@ -61,11 +61,21 @@ export async function calculateSetterMaturity(setterId: string) {
 
   const consistency = Math.round(Math.min(((journalCount || 0) / 30) * 100, 100));
 
-  // 4. Volume — based on prospects count
-  const { count: prospectsCount } = await supabase
-    .from("prospects")
-    .select("*", { count: "exact", head: true })
-    .eq("setter_id", setterId);
+  // 4. Volume — based on prospects count (via prospect_lists owned by setter)
+  const { data: setterLists } = await supabase
+    .from("prospect_lists")
+    .select("id")
+    .eq("user_id", setterId);
+
+  const listIds = (setterLists || []).map((l) => l.id);
+  let prospectsCount: number | null = 0;
+  if (listIds.length > 0) {
+    const { count } = await supabase
+      .from("prospects")
+      .select("*", { count: "exact", head: true })
+      .in("list_id", listIds);
+    prospectsCount = count;
+  }
 
   let volume = 30;
   if (prospectsCount !== null) {
@@ -90,10 +100,10 @@ export async function calculateSetterMaturity(setterId: string) {
     );
   }
 
-  // 6. Response rate — from daily quotas (responses vs targets)
+  // 6. Response rate — based on replies vs DMs sent ratio
   const { data: recentQuotas } = await supabase
     .from("daily_quotas")
-    .select("calls_made, calls_target")
+    .select("dms_sent, replies_received")
     .eq("user_id", setterId)
     .order("date", { ascending: false })
     .limit(14);
@@ -102,8 +112,8 @@ export async function calculateSetterMaturity(setterId: string) {
   if (recentQuotas && recentQuotas.length > 0) {
     const avgRate =
       recentQuotas.reduce((sum, q) => {
-        const target = q.calls_target || 1;
-        return sum + Math.min((q.calls_made || 0) / target, 1);
+        const sent = q.dms_sent || 1;
+        return sum + Math.min((q.replies_received || 0) / sent, 1);
       }, 0) / recentQuotas.length;
     responseRate = Math.round(avgRate * 100);
   }

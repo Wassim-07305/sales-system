@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { startTransition, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users,
@@ -76,15 +76,17 @@ export function GlobalSearch() {
   // Debounced search
   useEffect(() => {
     if (query.length < 2) {
-      setResults([]);
+      startTransition(() => setResults([]));
       return;
     }
 
-    setSearching(true);
+    startTransition(() => setSearching(true));
     const timeout = setTimeout(async () => {
       const data = await globalSearch(query);
-      setResults(data);
-      setSearching(false);
+      startTransition(() => {
+        setResults(data);
+        setSearching(false);
+      });
     }, 300);
 
     return () => clearTimeout(timeout);
@@ -93,8 +95,10 @@ export function GlobalSearch() {
   // Reset on close
   useEffect(() => {
     if (!searchOpen) {
-      setQuery("");
-      setResults([]);
+      startTransition(() => {
+        setQuery("");
+        setResults([]);
+      });
     }
   }, [searchOpen]);
 

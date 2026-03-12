@@ -20,7 +20,6 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import {
-  LineChart,
   Line,
   Area,
   XAxis,
@@ -176,6 +175,7 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                       `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
                       labels[String(name)] || String(name),
                     ];
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   }) as any}
                 />
                 <Legend

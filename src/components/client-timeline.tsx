@@ -8,7 +8,6 @@ import {
   UserPlus,
   ClipboardCheck,
   BookOpen,
-  Brain,
   CheckCircle2,
   XCircle,
   Swords,

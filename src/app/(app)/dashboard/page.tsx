@@ -53,6 +53,7 @@ export default async function DashboardPage() {
       return (
         <AdminDashboard
           data={data}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           customWidgets={customWidgets as any}
           widgetData={widgetDataMap}
         />

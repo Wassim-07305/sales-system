@@ -46,6 +46,7 @@ import {
   MoreVertical,
   Trash2,
   Users,
+  MessageSquare,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -102,6 +103,8 @@ export function ChatLayout({
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [channelSearch, setChannelSearch] = useState("");
   const [unreadCounts, setUnreadCounts] =
     useState<Record<string, number>>(initialUnreadCounts);
@@ -154,6 +157,30 @@ export function ChatLayout({
     }
   }
 
+  const PAGE_SIZE = 50;
+
+  // Load older messages (pagination)
+  const loadOlderMessages = useCallback(async () => {
+    if (!activeChannel || !messages.length || loadingMore) return;
+    setLoadingMore(true);
+    const oldestDate = messages[0]?.created_at;
+    const { data } = await supabase
+      .from("messages")
+      .select("*, sender:profiles(*)")
+      .eq("channel_id", activeChannel.id)
+      .lt("created_at", oldestDate)
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+
+    if (data && data.length > 0) {
+      setMessages((prev) => [...data.reverse(), ...prev]);
+      setHasMore(data.length === PAGE_SIZE);
+    } else {
+      setHasMore(false);
+    }
+    setLoadingMore(false);
+  }, [activeChannel, messages, loadingMore, supabase]);
+
   // Load messages for active channel
   useEffect(() => {
     if (!activeChannel) return;
@@ -164,10 +191,12 @@ export function ChatLayout({
         .from("messages")
         .select("*, sender:profiles(*)")
         .eq("channel_id", activeChannel!.id)
-        .order("created_at", { ascending: true })
-        .limit(100);
+        .order("created_at", { ascending: false })
+        .limit(PAGE_SIZE);
 
-      setMessages(data || []);
+      const sorted = (data || []).reverse();
+      setMessages(sorted);
+      setHasMore((data || []).length === PAGE_SIZE);
       setLoading(false);
       setTimeout(scrollToBottom, 100);
     }
@@ -573,6 +602,30 @@ export function ChatLayout({
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {messages.length === 0 && !hasMore && (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <MessageSquare className="h-10 w-10 opacity-30 mb-3" />
+                      <p className="text-sm">Aucun message dans ce channel.</p>
+                      <p className="text-xs mt-1">Envoyez le premier message pour lancer la conversation !</p>
+                    </div>
+                  )}
+                  {hasMore && (
+                    <div className="text-center py-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={loadOlderMessages}
+                        disabled={loadingMore}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {loadingMore ? (
+                          <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Chargement...</>
+                        ) : (
+                          "Charger les messages précédents"
+                        )}
+                      </Button>
+                    </div>
+                  )}
                   {messages.map((message) => {
                     const isOwn = message.sender_id === currentUserId;
                     return (

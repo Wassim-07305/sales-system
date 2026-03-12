@@ -29,7 +29,7 @@ export default async function SetterReportsPage() {
 
   return (
     <ReportsView
-      data={reportData as any}
+      data={reportData}
       setters={(setters || []).map((s) => ({ id: s.id, name: s.full_name || "Setter" }))}
     />
   );

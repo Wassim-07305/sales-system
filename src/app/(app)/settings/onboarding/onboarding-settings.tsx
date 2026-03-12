@@ -19,7 +19,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { saveOnboardingStep, deleteOnboardingStep } from "@/lib/actions/onboarding";
 import { toast } from "sonner";

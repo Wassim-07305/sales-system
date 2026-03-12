@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { createVideoRoom } from "@/lib/actions/communication";
 import { toast } from "sonner";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface VideoRoom {

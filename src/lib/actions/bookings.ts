@@ -46,6 +46,33 @@ export async function createBooking(params: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Empêcher les bookings dans le passé
+  if (new Date(params.scheduled_at) < new Date()) {
+    return { error: "Impossible de créer un booking dans le passé" };
+  }
+
+  // Vérifier les conflits horaires pour le même utilisateur
+  const scheduledStart = new Date(params.scheduled_at);
+  const scheduledEnd = new Date(scheduledStart.getTime() + params.duration_minutes * 60 * 1000);
+
+  const { data: existing } = await supabase
+    .from("bookings")
+    .select("id, scheduled_at, duration_minutes")
+    .eq("assigned_to", user.id)
+    .neq("status", "cancelled")
+    .gte("scheduled_at", new Date(scheduledStart.getTime() - 24 * 60 * 60 * 1000).toISOString())
+    .lte("scheduled_at", scheduledEnd.toISOString());
+
+  const hasConflict = (existing || []).some((b) => {
+    const bStart = new Date(b.scheduled_at);
+    const bEnd = new Date(bStart.getTime() + (b.duration_minutes || 30) * 60 * 1000);
+    return scheduledStart < bEnd && scheduledEnd > bStart;
+  });
+
+  if (hasConflict) {
+    return { error: "Un booking existe déjà sur ce créneau horaire" };
+  }
+
   const { data, error } = await supabase
     .from("bookings")
     .insert({
@@ -64,6 +91,22 @@ export async function createBooking(params: {
 
   if (error) return { error: error.message };
 
+  // Notify assigned user about new booking
+  try {
+    const scheduledDate = new Date(params.scheduled_at).toLocaleDateString("fr-FR", {
+      day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+    });
+    await supabase.from("notifications").insert({
+      user_id: user.id,
+      title: "Nouveau booking confirmé",
+      body: `RDV avec ${params.prospect_name} le ${scheduledDate}`,
+      type: "booking",
+      link: `/bookings/${data.id}`,
+    });
+  } catch {
+    // Non-blocking
+  }
+
   revalidatePath("/bookings");
   return { booking: data };
 }
@@ -75,9 +118,12 @@ export async function updateBookingStatus(bookingId: string, status: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  const validStatuses = ["confirmed", "completed", "cancelled", "rescheduled", "no_show"];
+  if (!validStatuses.includes(status)) return { error: "Statut invalide" };
+
   const { error } = await supabase
     .from("bookings")
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ status })
     .eq("id", bookingId);
 
   if (error) return { error: error.message };
@@ -104,7 +150,7 @@ export async function updateBooking(bookingId: string, data: {
 
   const { error } = await supabase
     .from("bookings")
-    .update({ ...data, updated_at: new Date().toISOString() })
+    .update({ ...data })
     .eq("id", bookingId);
 
   if (error) return { error: error.message };
@@ -119,16 +165,47 @@ export async function rescheduleBooking(bookingId: string, newDate: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Empêcher les reschedule dans le passé
+  if (new Date(newDate) < new Date()) {
+    return { error: "Impossible de replanifier dans le passé" };
+  }
+
+  // Get booking details for notification
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("prospect_name, assigned_to")
+    .eq("id", bookingId)
+    .single();
+
+  if (!booking) return { error: "Booking introuvable" };
+
   const { error } = await supabase
     .from("bookings")
     .update({
       scheduled_at: newDate,
       status: "rescheduled",
-      updated_at: new Date().toISOString(),
     })
     .eq("id", bookingId);
 
   if (error) return { error: error.message };
+
+  // Notify assigned user about reschedule
+  if (booking?.assigned_to) {
+    try {
+      const formattedDate = new Date(newDate).toLocaleDateString("fr-FR", {
+        day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+      });
+      await supabase.from("notifications").insert({
+        user_id: booking.assigned_to,
+        title: "Booking replanifié",
+        body: `Le RDV avec ${booking.prospect_name || "un prospect"} a été déplacé au ${formattedDate}`,
+        type: "booking",
+        link: `/bookings/${bookingId}`,
+      });
+    } catch {
+      // Non-blocking
+    }
+  }
 
   revalidatePath("/bookings");
   revalidatePath(`/bookings/${bookingId}`);

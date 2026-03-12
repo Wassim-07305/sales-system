@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw, RotateCcw, Home } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
 
 export default function AppError({

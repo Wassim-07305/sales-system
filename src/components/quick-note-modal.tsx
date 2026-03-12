@@ -27,7 +27,6 @@ import {
   Users,
   CheckSquare,
   Loader2,
-  Search,
   X,
 } from "lucide-react";
 import {

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 export async function getConversations(search?: string) {
   const supabase = await createClient();
-  let query = supabase
+  const query = supabase
     .from("dm_conversations")
     .select("*, prospect:prospects(id, name, platform, profile_url, status)")
     .order("last_message_at", { ascending: false });

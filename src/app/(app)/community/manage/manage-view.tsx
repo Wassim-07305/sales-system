@@ -38,6 +38,7 @@ export function ManageView({ posts }: { posts: Post[] }) {
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce post ? Cette action est irréversible.")) return;
     await deleteCommunityPost(id);
     toast.success("Post supprimé");
     router.refresh();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Star, Sparkles } from "lucide-react";
 
@@ -11,7 +11,7 @@ interface Props {
 
 export function LevelUpModal({ level, levelName }: Props) {
   const [visible, setVisible] = useState(true);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string }>>([]);
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string; delay: number; duration: number }>>([]);
 
   useEffect(() => {
     // Generate confetti particles
@@ -21,8 +21,10 @@ export function LevelUpModal({ level, levelName }: Props) {
       x: Math.random() * 100,
       y: Math.random() * 100,
       color: colors[Math.floor(Math.random() * colors.length)],
+      delay: Math.random() * 2,
+      duration: 1 + Math.random() * 2,
     }));
-    setParticles(newParticles);
+    startTransition(() => setParticles(newParticles));
   }, []);
 
   if (!visible) return null;
@@ -42,8 +44,8 @@ export function LevelUpModal({ level, levelName }: Props) {
               height: 8,
               borderRadius: "50%",
               backgroundColor: p.color,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${1 + Math.random() * 2}s`,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
             }}
           />
         ))}

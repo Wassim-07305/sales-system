@@ -10,5 +10,6 @@ export default async function VideoPage() {
 
   const rooms = await getVideoRooms();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <VideoListView rooms={rooms as any} />;
 }

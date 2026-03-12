@@ -16,5 +16,6 @@ export default async function VideoRoomPage({
   const room = await getVideoRoom(id);
   if (!room) redirect("/chat/video");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <VideoRoomView room={room as any} currentUserId={user.id} />;
 }

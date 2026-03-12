@@ -161,11 +161,10 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                   <XAxis dataKey="score" />
                   <YAxis allowDecimals={false} />
                   <Tooltip
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    formatter={((value: any) => [
+                    formatter={(value) => [
                       `${value} réponse${Number(value) > 1 ? "s" : ""}`,
                       "Nombre",
-                    ]) as any}
+                    ]}
                   />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {distribution.map((_, i) => (
@@ -202,15 +201,14 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                   <XAxis dataKey="month" />
                   <YAxis domain={[-100, 100]} />
                   <Tooltip
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    formatter={((value: any, name: any) => {
+                    formatter={(value, name) => {
                       const labels: Record<string, string> = {
                         nps: "NPS",
                         responses: "Réponses",
                         avg: "Moyenne",
                       };
                       return [value, labels[String(name)] || String(name)];
-                    }) as any}
+                    }}
                   />
                   <Line
                     type="monotone"

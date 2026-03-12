@@ -26,6 +26,7 @@ export default async function FlowchartPage({
 
   return (
     <FlowchartEditor
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       flowchart={flowchart as any}
       userId={user.id}
       userName={profile?.full_name || "Utilisateur"}

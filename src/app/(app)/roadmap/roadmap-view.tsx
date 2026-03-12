@@ -140,6 +140,114 @@ const STATUS_CONFIG = {
   },
 };
 
+// ── Feature card ────────────────────────────────────────────────────
+function FeatureCard({
+  item,
+  showStatus = false,
+  onVote,
+  voting,
+}: {
+  item: RoadmapItem;
+  showStatus?: boolean;
+  onVote: (featureId: string) => void;
+  voting: boolean;
+}) {
+  const config = STATUS_CONFIG[item.status];
+  const categoryColor =
+    CATEGORY_COLORS[item.category] ||
+    "bg-gray-500/20 text-gray-400 border-gray-500/30";
+
+  return (
+    <Card className="bg-[#1a0f14]/60 border-white/5 hover:border-white/10 transition-colors">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm text-white leading-tight">
+              {item.title}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+              {item.description}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onVote(item.id)}
+            disabled={voting}
+            className={cn(
+              "flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 shrink-0 rounded-lg transition-colors",
+              item.votedByUser
+                ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
+                : "hover:bg-white/5 text-muted-foreground hover:text-white"
+            )}
+          >
+            <ThumbsUp
+              className={cn(
+                "h-3.5 w-3.5",
+                item.votedByUser && "fill-current"
+              )}
+            />
+            <span className="text-xs font-medium">{item.votes}</span>
+          </Button>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge
+            variant="outline"
+            className={cn("text-[10px] px-1.5 py-0", categoryColor)}
+          >
+            {item.category}
+          </Badge>
+          {showStatus && (
+            <Badge
+              variant="outline"
+              className={cn("text-[10px] px-1.5 py-0", config.bg, config.color)}
+            >
+              <config.icon className="h-2.5 w-2.5 mr-1" />
+              {config.label}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Status column ───────────────────────────────────────────────────
+function StatusColumn({
+  status,
+  items,
+  onVote,
+  voting,
+}: {
+  status: "planned" | "in_progress" | "done";
+  items: RoadmapItem[];
+  onVote: (featureId: string) => void;
+  voting: boolean;
+}) {
+  const config = STATUS_CONFIG[status];
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 mb-4">
+        <div className={cn("h-2.5 w-2.5 rounded-full", config.dot)} />
+        <h2 className={cn("font-semibold text-sm", config.color)}>
+          {config.label}
+        </h2>
+        <Badge
+          variant="outline"
+          className="text-[10px] px-1.5 py-0 border-white/10 text-muted-foreground"
+        >
+          {items.length}
+        </Badge>
+      </div>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <FeatureCard key={item.id} item={item} onVote={onVote} voting={voting} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────
 
 export function RoadmapView({
@@ -235,106 +343,6 @@ export function RoadmapView({
     });
   }
 
-  // ── Feature card ────────────────────────────────────────────────────
-  function FeatureCard({
-    item,
-    showStatus = false,
-  }: {
-    item: RoadmapItem;
-    showStatus?: boolean;
-  }) {
-    const config = STATUS_CONFIG[item.status];
-    const categoryColor =
-      CATEGORY_COLORS[item.category] ||
-      "bg-gray-500/20 text-gray-400 border-gray-500/30";
-
-    return (
-      <Card className="bg-[#1a0f14]/60 border-white/5 hover:border-white/10 transition-colors">
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm text-white leading-tight">
-                {item.title}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                {item.description}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleVote(item.id)}
-              disabled={isPending}
-              className={cn(
-                "flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 shrink-0 rounded-lg transition-colors",
-                item.votedByUser
-                  ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
-                  : "hover:bg-white/5 text-muted-foreground hover:text-white"
-              )}
-            >
-              <ThumbsUp
-                className={cn(
-                  "h-3.5 w-3.5",
-                  item.votedByUser && "fill-current"
-                )}
-              />
-              <span className="text-xs font-medium">{item.votes}</span>
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge
-              variant="outline"
-              className={cn("text-[10px] px-1.5 py-0", categoryColor)}
-            >
-              {item.category}
-            </Badge>
-            {showStatus && (
-              <Badge
-                variant="outline"
-                className={cn("text-[10px] px-1.5 py-0", config.bg, config.color)}
-              >
-                <config.icon className="h-2.5 w-2.5 mr-1" />
-                {config.label}
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // ── Status column ───────────────────────────────────────────────────
-  function StatusColumn({
-    status,
-    items,
-  }: {
-    status: "planned" | "in_progress" | "done";
-    items: RoadmapItem[];
-  }) {
-    const config = STATUS_CONFIG[status];
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-4">
-          <div className={cn("h-2.5 w-2.5 rounded-full", config.dot)} />
-          <h2 className={cn("font-semibold text-sm", config.color)}>
-            {config.label}
-          </h2>
-          <Badge
-            variant="outline"
-            className="text-[10px] px-1.5 py-0 border-white/10 text-muted-foreground"
-          >
-            {items.length}
-          </Badge>
-        </div>
-        <div className="space-y-2">
-          {items.map((item) => (
-            <FeatureCard key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -425,14 +433,14 @@ export function RoadmapView({
           {/* Column view (when "all" is selected) */}
           {statusFilter === "all" ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <StatusColumn status="planned" items={grouped.planned} />
-              <StatusColumn status="in_progress" items={grouped.in_progress} />
-              <StatusColumn status="done" items={grouped.done} />
+              <StatusColumn status="planned" items={grouped.planned} onVote={handleVote} voting={isPending} />
+              <StatusColumn status="in_progress" items={grouped.in_progress} onVote={handleVote} voting={isPending} />
+              <StatusColumn status="done" items={grouped.done} onVote={handleVote} voting={isPending} />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredItems.map((item) => (
-                <FeatureCard key={item.id} item={item} showStatus />
+                <FeatureCard key={item.id} item={item} showStatus onVote={handleVote} voting={isPending} />
               ))}
             </div>
           )}

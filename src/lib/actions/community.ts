@@ -53,6 +53,8 @@ export async function createCommunityPost(formData: {
 
 export async function toggleLike(postId: string, increment: boolean) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
   const { data: post } = await supabase.from("community_posts").select("likes_count").eq("id", postId).single();
   if (!post) return;
   const newCount = Math.max(0, (post.likes_count || 0) + (increment ? 1 : -1));
@@ -84,6 +86,34 @@ export async function addComment(postId: string, content: string) {
     content,
   });
   if (error) throw new Error(error.message);
+
+  // Notify original post author (if different from commenter)
+  try {
+    const { data: post } = await supabase
+      .from("community_posts")
+      .select("author_id, title")
+      .eq("id", postId)
+      .single();
+
+    if (post && post.author_id !== user.id) {
+      const { data: commenter } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      await supabase.from("notifications").insert({
+        user_id: post.author_id,
+        title: "Nouvelle réponse",
+        body: `${commenter?.full_name || "Quelqu'un"} a répondu à votre post${post.title ? ` "${post.title}"` : ""}`,
+        type: "community",
+        link: `/community/${postId}`,
+      });
+    }
+  } catch {
+    // Non-blocking
+  }
+
   revalidatePath("/community");
 }
 
@@ -102,29 +132,54 @@ export async function getMembers(search?: string) {
 
 export async function hidePost(postId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) return { error: "Accès refusé" };
+
   await supabase.from("community_posts").update({ hidden: true }).eq("id", postId);
   revalidatePath("/community");
   revalidatePath("/community/manage");
+  return { success: true };
 }
 
 export async function unhidePost(postId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) return { error: "Accès refusé" };
+
   await supabase.from("community_posts").update({ hidden: false }).eq("id", postId);
   revalidatePath("/community");
   revalidatePath("/community/manage");
+  return { success: true };
 }
 
 export async function deleteCommunityPost(postId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) return { error: "Accès refusé" };
+
   await supabase.from("community_posts").delete().eq("id", postId);
   revalidatePath("/community");
   revalidatePath("/community/manage");
+  return { success: true };
 }
 
 export async function deleteComment(commentId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
   await supabase.from("community_comments").delete().eq("id", commentId);
   revalidatePath("/community");
+  return { success: true };
 }
 
 export async function searchCommunity(query: string) {
@@ -256,7 +311,7 @@ export async function getUserReputation(userId?: string) {
     const likes = totalLikes;
     const best = bestAnswers || 0;
 
-    const points = posts * 10 + replies * 5 + likes * 2 + best * 50;
+    const points = posts * 10 + replies * 5 + likes * 3 + best * 20;
 
     // Get user profile
     const { data: profile } = await supabase

@@ -26,6 +26,7 @@ export default async function MindMapPage({
 
   return (
     <MindMapEditor
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mindMap={mindMap as any}
       userId={user.id}
       userName={profile?.full_name || "Utilisateur"}

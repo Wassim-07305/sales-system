@@ -47,7 +47,6 @@ import {
   Phone,
   DollarSign,
   Handshake,
-  MoreHorizontal,
   Trash2,
   Send,
 } from "lucide-react";
@@ -143,7 +142,6 @@ export function CoachingView({
   userRole,
   userId,
 }: Props) {
-  const router = useRouter();
   const isManager = userRole === "admin" || userRole === "manager";
 
   return (
@@ -328,7 +326,7 @@ function ObjectivesTab({
         setDialogOpen(false);
         resetForm();
         router.refresh();
-      } catch (err) {
+      } catch {
         toast.error("Erreur lors de la creation de l'objectif");
       }
     });
@@ -344,7 +342,7 @@ function ObjectivesTab({
         setProgressValue("");
         setProgressNote("");
         router.refresh();
-      } catch (err) {
+      } catch {
         toast.error("Erreur lors de la mise a jour");
       }
     });
@@ -356,7 +354,7 @@ function ObjectivesTab({
         await completeObjective(id);
         toast.success("Objectif marque comme termine");
         router.refresh();
-      } catch (err) {
+      } catch {
         toast.error("Erreur lors de la completion");
       }
     });
@@ -368,7 +366,7 @@ function ObjectivesTab({
         await deleteObjective(id);
         toast.success("Objectif supprime");
         router.refresh();
-      } catch (err) {
+      } catch {
         toast.error("Erreur lors de la suppression");
       }
     });
@@ -727,6 +725,10 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {plan.skills.length === 0 ? (
+            <p className="text-sm text-white/40 text-center py-4">Aucune competence evaluee pour le moment.</p>
+          ) : (
+          <>
           <div className="space-y-4">
             {plan.skills.map((skill) => {
               const levelPct = (skill.level / 10) * 100;
@@ -774,6 +776,8 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
               <span>Objectif</span>
             </div>
           </div>
+          </>
+          )}
         </CardContent>
       </Card>
 
@@ -786,6 +790,9 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {plan.actions.length === 0 ? (
+            <p className="text-sm text-white/40 text-center py-4">Aucune action recommandee pour le moment.</p>
+          ) : (
           <div className="space-y-3">
             {plan.actions.map((action) => {
               const priorityCfg = PRIORITY_CONFIG[action.priority];
@@ -837,6 +844,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
               );
             })}
           </div>
+          )}
         </CardContent>
       </Card>
 
@@ -918,7 +926,7 @@ function NotesTab({
         setNoteRating(0);
         setNoteMemberId("");
         router.refresh();
-      } catch (err) {
+      } catch {
         toast.error("Erreur lors de la creation de la note");
       }
     });
@@ -957,7 +965,7 @@ function NotesTab({
           {/* Timeline line */}
           <div className="absolute left-[19px] top-6 bottom-6 w-px bg-white/10" />
 
-          {notes.map((note, idx) => (
+          {notes.map((note) => (
             <div key={note.id} className="relative flex gap-4 pb-6 last:pb-0">
               {/* Timeline dot */}
               <div className="relative z-10 mt-1">

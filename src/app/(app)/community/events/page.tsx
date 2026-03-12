@@ -35,7 +35,9 @@ export default async function EventsPage() {
 
   return (
     <EventsView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       upcoming={upcoming as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       past={past as any}
       participantCounts={participantCounts}
       userRsvpIds={Array.from(userRsvps)}

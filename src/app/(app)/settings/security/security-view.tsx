@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   Shield,
@@ -159,7 +159,7 @@ export function SecurityView({
         toast.error(result.error ?? "Code invalide");
         return;
       }
-      toast.success("Authentification a deux facteurs activee");
+      toast.success("Authentification à deux facteurs activée");
       setShowEnrollDialog(false);
       setEnrollData(null);
       setTotpCode("");
@@ -185,10 +185,10 @@ export function SecurityView({
     startTransition(async () => {
       const result = await unenrollMfa(verifiedFactor.id);
       if (!result.success) {
-        toast.error(result.error ?? "Erreur lors de la desactivation");
+        toast.error(result.error ?? "Erreur lors de la désactivation");
         return;
       }
-      toast.success("Authentification a deux facteurs desactivee");
+      toast.success("Authentification à deux facteurs désactivée");
       setShowDisableDialog(false);
       setMfaStatus({
         enrolled: false,
@@ -219,14 +219,14 @@ export function SecurityView({
         sessionTimeout: Number(sessionTimeout),
         ipWhitelist: ips,
       });
-      toast.success("Parametres de securite mis a jour");
+      toast.success("Paramètres de sécurité mis à jour");
     });
   }
 
   function copySecret() {
     if (!enrollData) return;
     navigator.clipboard.writeText(enrollData.secret);
-    toast.success("Cle secrete copiee dans le presse-papiers");
+    toast.success("Clé secrète copiée dans le presse-papiers");
   }
 
   // -------------------------------------------------------------------------
@@ -243,16 +243,16 @@ export function SecurityView({
     });
   }
 
-  function formatRelative(iso: string) {
+  const formatRelative = useCallback((iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "A l'instant";
+    if (minutes < 1) return "À l'instant";
     if (minutes < 60) return `Il y a ${minutes} min`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `Il y a ${hours}h`;
     const days = Math.floor(hours / 24);
     return `Il y a ${days}j`;
-  }
+  }, []);
 
   // -------------------------------------------------------------------------
   // Render
@@ -271,9 +271,9 @@ export function SecurityView({
                 <Shield className="h-5 w-5 text-[#7af17a]" />
               </div>
               <div>
-                <CardTitle className="text-lg">Authentification a deux facteurs (2FA)</CardTitle>
+                <CardTitle className="text-lg">Authentification à deux facteurs (2FA)</CardTitle>
                 <CardDescription>
-                  Ajoutez une couche de securite supplementaire a votre compte
+                  Ajoutez une couche de sécurité supplémentaire à votre compte
                 </CardDescription>
               </div>
             </div>
@@ -285,7 +285,7 @@ export function SecurityView({
                   : ""
               }
             >
-              {mfaStatus.enrolled ? "Active" : "Desactive"}
+              {mfaStatus.enrolled ? "Activée" : "Désactivée"}
             </Badge>
           </div>
         </CardHeader>
@@ -304,7 +304,7 @@ export function SecurityView({
                 disabled={isPending}
               >
                 <AlertTriangle className="h-4 w-4 mr-2" />
-                Desactiver la 2FA
+                Désactiver la 2FA
               </Button>
             </div>
           ) : (
@@ -312,7 +312,7 @@ export function SecurityView({
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
                 <span>
-                  Votre compte n&apos;est pas protege par la 2FA.
+                  Votre compte n&apos;est pas protégé par la 2FA.
                   Nous vous recommandons de l&apos;activer.
                 </span>
               </div>
@@ -341,7 +341,7 @@ export function SecurityView({
             <div>
               <CardTitle className="text-lg">Sessions actives</CardTitle>
               <CardDescription>
-                Appareils actuellement connectes a votre compte
+                Appareils actuellement connectés à votre compte
               </CardDescription>
             </div>
           </div>
@@ -352,7 +352,7 @@ export function SecurityView({
               <TableRow>
                 <TableHead>Appareil</TableHead>
                 <TableHead>IP</TableHead>
-                <TableHead>Derniere activite</TableHead>
+                <TableHead>Dernière activité</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -381,7 +381,7 @@ export function SecurityView({
                         size="sm"
                         className="text-destructive hover:text-destructive"
                         onClick={() =>
-                          toast.info("Revocation de session non disponible en demo")
+                          toast.info("Révocation de session non disponible en démo")
                         }
                       >
                         <Trash2 className="h-4 w-4" />
@@ -407,7 +407,7 @@ export function SecurityView({
             <div>
               <CardTitle className="text-lg">Historique de connexion</CardTitle>
               <CardDescription>
-                Les dernieres tentatives de connexion a votre compte
+                Les dernières tentatives de connexion à votre compte
               </CardDescription>
             </div>
           </div>
@@ -436,12 +436,12 @@ export function SecurityView({
                         className="border-[#7af17a]/30 text-[#7af17a]"
                       >
                         <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Reussi
+                        Réussi
                       </Badge>
                     ) : (
                       <Badge variant="destructive">
                         <XCircle className="h-3 w-3 mr-1" />
-                        Echoue
+                        Échoué
                       </Badge>
                     )}
                   </TableCell>
@@ -468,9 +468,9 @@ export function SecurityView({
               <Key className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <CardTitle className="text-lg">Parametres de securite</CardTitle>
+              <CardTitle className="text-lg">Paramètres de sécurité</CardTitle>
               <CardDescription>
-                Configurez les regles de securite avancees
+                Configurez les règles de sécurité avancées
               </CardDescription>
             </div>
           </div>
@@ -495,7 +495,7 @@ export function SecurityView({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Duree d&apos;inactivite avant deconnexion automatique
+              Durée d&apos;inactivité avant déconnexion automatique
             </p>
           </div>
 
@@ -529,13 +529,13 @@ export function SecurityView({
               Mot de passe
             </Label>
             <p className="text-sm text-muted-foreground">
-              Modifiez votre mot de passe pour renforcer la securite de votre compte.
+              Modifiez votre mot de passe pour renforcer la sécurité de votre compte.
             </p>
             <Button
               variant="outline"
               onClick={() =>
                 toast.info(
-                  "Un e-mail de reinitialisation sera envoye a votre adresse"
+                  "Un e-mail de réinitialisation sera envoyé à votre adresse"
                 )
               }
             >
@@ -549,7 +549,7 @@ export function SecurityView({
           <div className="flex justify-end">
             <Button onClick={handleSaveSettings} disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Enregistrer les parametres
+              Enregistrer les paramètres
             </Button>
           </div>
         </CardContent>
@@ -586,7 +586,7 @@ export function SecurityView({
               {/* Secret key */}
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">
-                  Cle secrete (saisie manuelle)
+                  Clé secrète (saisie manuelle)
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -602,7 +602,7 @@ export function SecurityView({
 
               {/* Verification code */}
               <div className="space-y-1">
-                <Label htmlFor="totp-code">Code de verification</Label>
+                <Label htmlFor="totp-code">Code de vérification</Label>
                 <Input
                   id="totp-code"
                   placeholder="000000"
@@ -632,7 +632,7 @@ export function SecurityView({
               disabled={isPending || totpCode.length < 6}
             >
               {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Verifier et activer
+              Vérifier et activer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -646,11 +646,11 @@ export function SecurityView({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Desactiver la 2FA
+              Désactiver la 2FA
             </DialogTitle>
             <DialogDescription>
-              Etes-vous sur de vouloir desactiver l&apos;authentification a deux
-              facteurs ? Votre compte sera moins securise.
+              Êtes-vous sûr de vouloir désactiver l&apos;authentification à deux
+              facteurs ? Votre compte sera moins sécurisé.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -666,7 +666,7 @@ export function SecurityView({
               disabled={isPending}
             >
               {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Confirmer la desactivation
+              Confirmer la désactivation
             </Button>
           </DialogFooter>
         </DialogContent>

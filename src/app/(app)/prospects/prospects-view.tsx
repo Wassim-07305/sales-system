@@ -125,6 +125,7 @@ export function ProspectsView({
   };
 
   const handleDelete = (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce prospect ? Cette action est irréversible.")) return;
     startTransition(async () => {
       try {
         await deleteProspect(id);

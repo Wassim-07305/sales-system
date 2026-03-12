@@ -20,5 +20,5 @@ export default async function ValueReportsPage() {
 
   const report = await generateValueReport();
 
-  return <ValueReportsView data={report as any} />;
+  return <ValueReportsView data={report} />;
 }

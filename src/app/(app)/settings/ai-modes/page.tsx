@@ -8,6 +8,16 @@ export default async function AiModesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
+
   const config = await getAiModeConfig();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

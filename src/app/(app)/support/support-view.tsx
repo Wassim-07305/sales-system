@@ -13,8 +13,6 @@ import {
   Loader2,
   Plus,
   Filter,
-  Timer,
-  Shield,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -151,17 +149,6 @@ const CATEGORIES = [
   "Autre",
 ];
 
-const SLA_STATUS_COLORS: Record<string, string> = {
-  ok: "#7af17a",
-  warning: "#f59e0b",
-  breached: "#ef4444",
-};
-
-const SLA_STATUS_LABELS: Record<string, string> = {
-  ok: "OK",
-  warning: "Attention",
-  breached: "Depassement",
-};
 
 // ─── Component ───────────────────────────────────────────────────────
 
@@ -190,8 +177,8 @@ export function SupportView({
 
   // SLA state
   const [slaStatuses, setSlaStatuses] = useState<Record<string, SlaStatusInfo>>({});
-  const [slaMetricsData, setSlaMetricsData] = useState<SlaMetricsInfo | null>(null);
-  const [slaConfigData, setSlaConfigData] = useState<SlaConfigInfo | null>(null);
+  const [, setSlaMetricsData] = useState<SlaMetricsInfo | null>(null);
+  const [, setSlaConfigData] = useState<SlaConfigInfo | null>(null);
 
   const isAdmin = userRole === "admin" || userRole === "manager";
 

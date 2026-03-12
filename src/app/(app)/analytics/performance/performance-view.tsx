@@ -37,7 +37,7 @@ interface PerformanceMetric {
   current: number;
   target: number;
   previous: number;
-  trend: number;
+  trend: number | null;
   unit: string;
 }
 
@@ -88,6 +88,7 @@ function formatCurrency(amount: number) {
 export function PerformanceView({
   report,
   userName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userRole,
 }: {
   report: PersonalPerformanceReport;
@@ -149,10 +150,18 @@ export function PerformanceView({
       </Card>
 
       {/* Metrics Cards */}
+      {report.metrics.length === 0 && (
+        <Card className="mb-6">
+          <CardContent className="p-8 text-center">
+            <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-muted-foreground">Aucune metrique disponible pour cette periode.</p>
+          </CardContent>
+        </Card>
+      )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {report.metrics.map((metric) => {
           const progressPct = Math.min(100, Math.round((metric.current / metric.target) * 100));
-          const isPositiveTrend = metric.trend >= 0;
+          const isPositiveTrend = (metric.trend ?? 0) >= 0;
 
           return (
             <Card key={metric.label}>
@@ -161,7 +170,7 @@ export function PerformanceView({
                   <span className="text-sm text-muted-foreground">
                     {metric.label}
                   </span>
-                  {metric.trend !== 0 && (
+                  {metric.trend != null && metric.trend !== 0 && (
                     <Badge
                       variant="outline"
                       className={

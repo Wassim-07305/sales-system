@@ -10,12 +10,15 @@ export default async function BrandingPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Fetch user profile for current branding info
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, avatar_url, bio, niche")
+    .select("full_name, avatar_url, bio, niche, role")
     .eq("id", user.id)
     .single();
+
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    redirect("/dashboard");
+  }
 
   // Fetch saved color palette
   const brandingSettings = await getBrandingSettings();

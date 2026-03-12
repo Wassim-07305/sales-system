@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 export function NavigationProgress() {
   const pathname = usePathname();
@@ -40,7 +40,9 @@ export function NavigationProgress() {
   useEffect(() => {
     if (pathname !== prevPathname.current) {
       prevPathname.current = pathname;
-      setLoading(false);
+      startTransition(() => {
+        setLoading(false);
+      });
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
   }, [pathname]);

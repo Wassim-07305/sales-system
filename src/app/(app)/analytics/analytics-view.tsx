@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -251,6 +250,24 @@ export function AnalyticsView({
         </div>
       )}
 
+      {/* Empty state banner when no data */}
+      {analytics.caThisMonth === 0 && analytics.pipelineValue === 0 && analytics.activeClients === 0 && (
+        <Card className="mb-6 border-brand/20 bg-brand/5">
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="h-10 w-10 mx-auto text-brand/50 mb-3" />
+            <p className="font-medium text-lg">Bienvenue dans vos Analytics</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Commencez par créer des deals dans le CRM pour voir vos métriques de performance ici.
+            </p>
+            <Link href="/crm">
+              <Button size="sm" className="mt-4 bg-brand text-brand-dark hover:bg-brand/90">
+                Accéder au CRM
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Big numbers */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         {stats.map((stat) => {
@@ -303,6 +320,11 @@ export function AnalyticsView({
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
+              {filteredRevenue.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Aucune donnée de CA disponible
+                </div>
+              ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={filteredRevenue}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
@@ -324,6 +346,7 @@ export function AnalyticsView({
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -334,6 +357,11 @@ export function AnalyticsView({
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
+              {filteredDeals.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  Aucun deal conclu sur cette période
+                </div>
+              ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={filteredDeals}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
@@ -348,6 +376,7 @@ export function AnalyticsView({
                   />
                 </BarChart>
               </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>

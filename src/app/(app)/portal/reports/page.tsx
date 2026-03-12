@@ -20,5 +20,6 @@ export default async function PortalReportsPage() {
 
   const reports = await getReports();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <PortalReportsView reports={reports as any} />;
 }

@@ -26,10 +26,11 @@ export default async function WhatsAppPage() {
   const connection = await getWhatsAppConnection();
   const conversations = await getConversations();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <WhatsAppView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       connection={connection as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conversations={conversations as any}
     />
   );

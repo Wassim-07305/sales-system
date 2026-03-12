@@ -42,6 +42,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { updateFlowchart } from "@/lib/actions/scripts-v2";
 import { ShareDialog } from "../../share-dialog";
 import { usePresence } from "@/lib/hooks/use-presence";
@@ -207,12 +208,12 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
         });
         broadcastChanges(nodes, edges);
       } catch {
-        // Silently fail
+        toast.error("Erreur lors de la sauvegarde du flowchart");
       }
     });
   }
 
-  function addNode(type: string) {
+  const addNode = useCallback((type: string) => {
     const id = `${type}-${Date.now()}`;
     const config = nodeTypeConfig[type];
     const newNode: Node = {
@@ -225,7 +226,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
       data: { label: config.label, type },
     };
     setNodes((nds) => [...nds, newNode]);
-  }
+  }, [nodes.length, setNodes]);
 
   return (
     <div className="h-[calc(100vh-120px)] flex flex-col">

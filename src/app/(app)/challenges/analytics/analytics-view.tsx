@@ -195,6 +195,7 @@ export function GamificationAnalyticsView({ data }: Props) {
                       borderRadius: 8,
                       fontSize: 13,
                     }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={((value: any) => [`${value} utilisateurs`, "Nombre"]) as any}
                   />
                   <Bar dataKey="count" fill="#7af17a" radius={[4, 4, 0, 0]} />
@@ -235,6 +236,7 @@ export function GamificationAnalyticsView({ data }: Props) {
                         borderRadius: 8,
                         fontSize: 13,
                       }}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={((value: any) => [`${value}/5`, "Humeur"]) as any}
                     />
                     <Line

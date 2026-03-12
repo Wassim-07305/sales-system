@@ -134,8 +134,9 @@ export function MarketplaceView({ listings, myApplications }: Props) {
         setSelectedListing(null);
         setMessage("");
         router.refresh();
-      } catch (err: any) {
-        toast.error(err?.message || "Erreur lors de l'envoi");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Erreur lors de l'envoi";
+        toast.error(message);
       }
     });
   }

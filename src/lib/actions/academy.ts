@@ -40,7 +40,7 @@ export async function getCourseWithPrerequisites(courseId: string, userId: strin
         return {
           courseId: p.prerequisite_course_id as string,
           title: (prereqCourseTitle as string) || "Cours requis",
-          completed: true,
+          completed: false,
         };
 
       const { data: completed } = await supabase
@@ -128,7 +128,7 @@ export async function getQuizAttempts(lessonId: string, userId: string) {
   return {
     allAttempts: attempts || [],
     todayAttempts: todayAttempts.length,
-    bestScore: Math.max(0, ...(attempts || []).map((a) => a.score)),
+    bestScore: Math.max(0, ...(attempts || []).map((a) => a.score ?? 0)),
   };
 }
 
@@ -368,24 +368,64 @@ export async function getCourseDetail(courseId: string) {
   };
 }
 
-export async function markLessonComplete(lessonId: string) {
+export async function markLessonComplete(lessonId: string, quizScore?: number) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  const upsertData: Record<string, unknown> = {
+    user_id: user.id,
+    lesson_id: lessonId,
+    completed: true,
+    completed_at: new Date().toISOString(),
+  };
+  if (quizScore !== undefined) {
+    upsertData.quiz_score = quizScore;
+  }
+
   const { error } = await supabase
     .from("lesson_progress")
-    .upsert(
-      {
-        user_id: user.id,
-        lesson_id: lessonId,
-        completed: true,
-        completed_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,lesson_id" }
-    );
+    .upsert(upsertData, { onConflict: "user_id,lesson_id" });
 
   if (error) throw new Error(error.message);
+
+  // Award gamification points for lesson completion
+  try {
+    const { addPoints, updateChallengeProgress, checkBadgeEligibility } = await import("@/lib/actions/gamification");
+    await addPoints(user.id, 15, "Leçon complétée");
+    await updateChallengeProgress(user.id, "lessons_completed", 1);
+
+    // Check if the whole course is now complete
+    const { data: lesson } = await supabase
+      .from("lessons")
+      .select("course_id")
+      .eq("id", lessonId)
+      .single();
+
+    if (lesson?.course_id) {
+      const { data: allLessons } = await supabase
+        .from("lessons")
+        .select("id")
+        .eq("course_id", lesson.course_id);
+
+      const { data: completedLessons } = await supabase
+        .from("lesson_progress")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("completed", true)
+        .in("lesson_id", (allLessons || []).map((l) => l.id));
+
+      if (allLessons && completedLessons && completedLessons.length >= allLessons.length) {
+        await addPoints(user.id, 50, "Cours complété !");
+        await updateChallengeProgress(user.id, "courses_completed", 1);
+      }
+    }
+
+    await checkBadgeEligibility(user.id);
+  } catch {
+    // Non-blocking: don't fail lesson completion if gamification errors
+  }
+
   revalidatePath("/academy");
 }
 

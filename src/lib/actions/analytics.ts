@@ -73,8 +73,12 @@ export async function getAnalyticsData() {
   // Revenue last 6 months
   const revenueByMonth: { month: string; value: number }[] = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+    const d = new Date(now);
+    d.setMonth(d.getMonth() - i, 1);
+    d.setHours(0, 0, 0, 0);
+    const end = new Date(d);
+    end.setMonth(end.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999);
     const monthDeals = deals.filter(
       (deal) => deal.stage_id === signedStage?.id && deal.created_at >= d.toISOString() && deal.created_at <= end.toISOString()
     );
@@ -87,8 +91,12 @@ export async function getAnalyticsData() {
   // Deals closed by month
   const dealsByMonth: { month: string; count: number }[] = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+    const d = new Date(now);
+    d.setMonth(d.getMonth() - i, 1);
+    d.setHours(0, 0, 0, 0);
+    const end = new Date(d);
+    end.setMonth(end.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999);
     const count = deals.filter(
       (deal) => deal.stage_id === signedStage?.id && deal.created_at >= d.toISOString() && deal.created_at <= end.toISOString()
     ).length;
@@ -206,7 +214,6 @@ export async function getTeamPerformance() {
   const performance = (teamMembers || []).map((member) => {
     const memberBookings = (bookings || []).filter((b) => b.assigned_to === member.id);
     const completedBookings = memberBookings.filter((b) => b.status === "completed");
-    const noShowBookings = memberBookings.filter((b) => b.status === "no_show");
     const showUpRate = memberBookings.length > 0
       ? (completedBookings.length / memberBookings.length) * 100
       : 0;
@@ -244,7 +251,7 @@ export async function generateWeeklySummary() {
     .single();
   if (!profile || profile.role !== "admin") return;
 
-  const performance = await getTeamPerformance();
+  await getTeamPerformance();
   const analytics = await getAnalyticsData();
 
   const summary = `Résumé hebdo : CA ${analytics.caThisMonth.toLocaleString("fr-FR")}€ | ${analytics.activeClients} clients actifs | Pipeline ${analytics.pipelineValue.toLocaleString("fr-FR")}€`;
@@ -358,7 +365,11 @@ export async function getBenchmarkData(period: "current" | "previous" | "quarter
     dealsCount: members.reduce((s, m) => s + m.dealsCount, 0) / memberCount,
     revenue: members.reduce((s, m) => s + m.revenue, 0) / memberCount,
     avgDealValue: members.reduce((s, m) => s + m.avgDealValue, 0) / memberCount,
-    conversionRate: members.reduce((s, m) => s + m.conversionRate, 0) / memberCount,
+    conversionRate: (() => {
+      const totalClosed = members.reduce((s, m) => s + m.dealsCount, 0);
+      const totalDeals = members.reduce((s, m) => s + m.totalDeals, 0);
+      return totalDeals > 0 ? (totalClosed / totalDeals) * 100 : 0;
+    })(),
   };
 
   // Month vs previous month summary

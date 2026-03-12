@@ -73,6 +73,7 @@ interface Props {
   userId: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function FeedbackView({ stats, members, userRole, userId }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

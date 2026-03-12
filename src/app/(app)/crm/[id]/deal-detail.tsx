@@ -38,7 +38,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { Deal, DealActivity, PipelineStage, Profile, DealActivityType } from "@/lib/types/database";
+import type { Deal, DealActivity, PipelineStage, DealActivityType } from "@/lib/types/database";
 import {
   ArrowLeft,
   User,
@@ -212,8 +212,6 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
     router.push("/crm");
   }
 
-  const currentStage = stages.find((s) => s.id === currentDeal.stage_id);
-
   return (
     <div>
       <PageHeader
@@ -318,6 +316,13 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
               </div>
             </DialogContent>
           </Dialog>
+
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/contracts/new?dealId=${currentDeal.id}&clientId=${currentDeal.contact_id || ""}&amount=${currentDeal.value}`}>
+              <FileText className="h-4 w-4 mr-1" />
+              Contrat
+            </Link>
+          </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>

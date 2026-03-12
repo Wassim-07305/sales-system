@@ -739,6 +739,7 @@ export function ReviewsView({
                         border: "1px solid #333",
                         borderRadius: "8px",
                       }}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={((value: number) => [`${value}/10`, "Score"]) as any}
                     />
                     <Line
@@ -786,6 +787,7 @@ export function ReviewsView({
                           border: "1px solid #333",
                           borderRadius: "8px",
                         }}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={((value: number) => [value, "Occurrences"]) as any}
                       />
                       <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
@@ -816,6 +818,7 @@ export function ReviewsView({
                           border: "1px solid #333",
                           borderRadius: "8px",
                         }}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={((value: number) => [value, "Appels"]) as any}
                       />
                       <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />

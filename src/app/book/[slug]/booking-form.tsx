@@ -23,6 +23,7 @@ interface BookingFormProps {
 
 type Step = "qualify" | "schedule" | "confirmed" | "disqualified";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function BookingForm({ slug }: BookingFormProps) {
   const [step, setStep] = useState<Step>("qualify");
   const [loading, setLoading] = useState(false);
@@ -71,6 +72,7 @@ export function BookingForm({ slug }: BookingFormProps) {
       prospect_phone: phone,
       scheduled_at: scheduledAt.toISOString(),
       slot_type: "discovery",
+      duration_minutes: 30,
       qualification_data: { revenue, challenge, urgency },
     });
 

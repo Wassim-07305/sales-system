@@ -440,6 +440,7 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
               <Text style={styles.signatureLabel}>Signature du client</Text>
               {contract.signature_data ? (
                 <>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <Image
                     src={contract.signature_data}
                     style={styles.signatureImage}

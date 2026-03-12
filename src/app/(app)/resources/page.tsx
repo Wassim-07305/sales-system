@@ -13,5 +13,6 @@ export default async function ResourcesPage() {
     getResourceCategories(),
   ]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <ResourcesView resources={resources as any} categories={categories} />;
 }

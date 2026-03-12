@@ -47,7 +47,7 @@ export async function applyToListing(listingId: string, message: string) {
     .select("id")
     .eq("listing_id", listingId)
     .eq("setter_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (existing) throw new Error("Vous avez déjà postulé à cette offre.");
 

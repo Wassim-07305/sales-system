@@ -790,7 +790,7 @@ export async function getCohortData(): Promise<CohortData[]> {
     .from("pipeline_stages")
     .select("id, name");
 
-  const signedStage = stages?.find((s) => s.name === "Client Signe" || s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Client Signé");
 
   // Look back 6 months
   const now = new Date();

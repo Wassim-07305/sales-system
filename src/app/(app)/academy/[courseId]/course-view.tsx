@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback, useEffect, useTransition } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect, useTransition, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -145,6 +145,7 @@ export function CourseView({
   quizMap,
   prerequisites,
   allPrereqsMet,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userId,
   quizAttempts: initialQuizAttempts = {},
 }: CourseViewProps) {
@@ -1103,11 +1104,15 @@ function VideoPlayer({
     hasRestoredRef.current = false;
     const stored = getStoredPosition(lesson.id);
     if (stored > 5) {
-      setResumeTime(stored);
-      setShowResumeBar(true);
+      startTransition(() => {
+        setResumeTime(stored);
+        setShowResumeBar(true);
+      });
     } else {
-      setResumeTime(null);
-      setShowResumeBar(false);
+      startTransition(() => {
+        setResumeTime(null);
+        setShowResumeBar(false);
+      });
     }
   }, [lesson.id]);
 
@@ -1163,7 +1168,7 @@ function VideoPlayer({
         case " ":
         case "k":
           e.preventDefault();
-          video.paused ? video.play() : video.pause();
+          if (video.paused) { video.play(); } else { video.pause(); }
           break;
         case "ArrowLeft":
           e.preventDefault();

@@ -67,6 +67,7 @@ async function processInstagramWebhook(
 
     for (const event of messaging) {
       const senderId = (event.sender as Record<string, unknown>)?.id as string;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const recipientId = (event.recipient as Record<string, unknown>)?.id as string;
       const message = event.message as Record<string, unknown> | undefined;
       const timestamp = event.timestamp as number;

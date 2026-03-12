@@ -8,12 +8,14 @@ export default async function PaymentsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const installments = await getPaymentInstallments();
+  const installmentsResult = await getPaymentInstallments();
   const overdue = await getOverduePayments();
 
   return (
     <PaymentsView
-      installments={installments as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      installments={installmentsResult.data as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       overdue={overdue as any}
     />
   );

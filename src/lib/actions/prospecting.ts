@@ -103,6 +103,9 @@ export async function getProspectSegmentStats() {
 
 export async function addProspect(formData: { name: string; profile_url?: string; platform: string; list_id?: string }) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
   const { error } = await supabase.from("prospects").insert({
     name: formData.name,
     profile_url: formData.profile_url || null,
@@ -110,15 +113,20 @@ export async function addProspect(formData: { name: string; profile_url?: string
     list_id: formData.list_id || null,
     status: "new",
   });
-  if (error) throw new Error(error.message);
+  if (error) return { error: "Impossible d'ajouter le prospect." };
   revalidatePath("/prospecting");
+  return { success: true };
 }
 
 export async function updateProspectStatus(prospectId: string, status: string) {
   const supabase = await createClient();
+  const validStatuses = ["new", "contacted", "replied", "hot", "booked", "lost"];
+  if (!validStatuses.includes(status)) return { error: "Statut invalide" };
+
   const { error } = await supabase.from("prospects").update({ status }).eq("id", prospectId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: "Impossible de mettre à jour le statut." };
   revalidatePath("/prospecting");
+  return { success: true };
 }
 
 export async function getDailyQuota() {
@@ -194,30 +202,46 @@ export async function getTemplates() {
 
 export async function createTemplate(formData: { name: string; platform: string; step: string; niche?: string; content: string; variant: string }) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
   const { error } = await supabase.from("dm_templates").insert(formData);
-  if (error) throw new Error(error.message);
+  if (error) return { error: "Impossible de créer le template." };
   revalidatePath("/prospecting/templates");
+  return { success: true };
 }
 
 export async function updateTemplate(id: string, formData: { name?: string; platform?: string; step?: string; niche?: string; content?: string; variant?: string }) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
   const { error } = await supabase.from("dm_templates").update(formData).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: "Impossible de mettre à jour le template." };
   revalidatePath("/prospecting/templates");
+  return { success: true };
 }
 
 export async function deleteTemplate(id: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
   const { error } = await supabase.from("dm_templates").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: "Impossible de supprimer le template." };
   revalidatePath("/prospecting/templates");
+  return { success: true };
 }
 
 export async function deleteProspect(id: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
   const { error } = await supabase.from("prospects").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: "Impossible de supprimer le prospect." };
   revalidatePath("/prospecting");
+  return { success: true };
 }
 
 // ─── Detail Page Actions ────────────────────────────────────────────
@@ -225,7 +249,7 @@ export async function deleteProspect(id: string) {
 export async function getProspectById(prospectId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { prospect: null, error: "Non authentifie" };
+  if (!user) return { prospect: null, error: "Non authentifié" };
 
   const { data, error } = await supabase
     .from("prospects")
@@ -267,7 +291,7 @@ export async function updateProspect(prospectId: string, data: {
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifie" };
+  if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
     .from("prospects")
@@ -284,7 +308,7 @@ export async function updateProspect(prospectId: string, data: {
 export async function addProspectMessage(prospectId: string, message: string, direction: "sent" | "received") {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifie" };
+  if (!user) return { error: "Non authentifié" };
 
   // Get current conversation history
   const { data: prospect } = await supabase
@@ -333,7 +357,7 @@ export async function convertProspectToDeal(prospectId: string, dealData: {
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifie" };
+  if (!user) return { error: "Non authentifié" };
 
   // Get prospect data
   const { data: prospect } = await supabase
@@ -342,7 +366,7 @@ export async function convertProspectToDeal(prospectId: string, dealData: {
     .eq("id", prospectId)
     .single();
 
-  if (!prospect) return { error: "Prospect non trouve" };
+  if (!prospect) return { error: "Prospect introuvable" };
 
   // Create deal
   const { data: deal, error: dealError } = await supabase

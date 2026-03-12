@@ -57,11 +57,11 @@ export function ShareDialog({
 
   useEffect(() => {
     if (isOpen && scriptId) {
-      setIsLoading(true);
+      startTransition(() => setIsLoading(true));
       getScriptShares(scriptId)
-        .then((data) => setShares(data))
+        .then((data) => startTransition(() => setShares(data)))
         .catch(() => toast.error("Erreur lors du chargement des partages"))
-        .finally(() => setIsLoading(false));
+        .finally(() => startTransition(() => setIsLoading(false)));
     }
   }, [isOpen, scriptId]);
 

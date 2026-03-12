@@ -17,7 +17,6 @@ import {
   Clock,
 } from "lucide-react";
 import {
-  connectWhatsApp,
   disconnectWhatsApp,
   sendWhatsAppMessage,
 } from "@/lib/actions/whatsapp";

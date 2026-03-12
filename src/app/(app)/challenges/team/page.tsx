@@ -20,7 +20,7 @@ export default async function TeamChallengesPage() {
   // Fetch all progress for team challenges
   const challengeIds = (challenges || []).map((c) => c.id);
 
-  let progressMap: Record<
+  const progressMap: Record<
     string,
     { total: number; contributions: Array<{ user_id: string; full_name: string | null; value: number }> }
   > = {};
@@ -49,7 +49,9 @@ export default async function TeamChallengesPage() {
 
   return (
     <TeamChallengesView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       challenges={(challenges || []) as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       progressMap={progressMap as any}
     />
   );

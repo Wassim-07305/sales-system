@@ -20,5 +20,6 @@ export default async function WhiteLabelPage() {
 
   const config = await getWhiteLabelConfig();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <WhiteLabelView config={config as any} />;
 }

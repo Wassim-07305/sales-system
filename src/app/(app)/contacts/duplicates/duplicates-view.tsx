@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   type DuplicateGroup,
   type DuplicateConfidence,
-  type ContactRecord,
   mergeContacts,
 } from "@/lib/actions/contacts";
 import {
@@ -50,15 +49,12 @@ const confidenceConfig: Record<
 };
 
 const MERGE_FIELDS = [
-  { key: "first_name", label: "Prénom" },
-  { key: "last_name", label: "Nom" },
+  { key: "full_name", label: "Nom complet" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Téléphone" },
   { key: "company", label: "Entreprise" },
-  { key: "position", label: "Poste" },
-  { key: "source", label: "Source" },
-  { key: "status", label: "Statut" },
-  { key: "notes", label: "Notes" },
+  { key: "role", label: "Rôle" },
+  { key: "niche", label: "Niche" },
 ] as const;
 
 export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
@@ -219,9 +215,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                       {group.contacts
                         .map(
                           (c) =>
-                            [c.first_name, c.last_name]
-                              .filter(Boolean)
-                              .join(" ") || c.email || "Sans nom"
+                            c.full_name || c.email || "Sans nom"
                         )
                         .join(" / ")}
                     </span>

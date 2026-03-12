@@ -18,7 +18,7 @@ interface HeaderProps {
   unreadCount: number;
 }
 
-export function Header({ userName, email, avatarUrl, role, userId, unreadCount }: HeaderProps) {
+export function Header({ userName, email, avatarUrl, role, unreadCount }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -51,6 +51,8 @@ export function Header({ userName, email, avatarUrl, role, userId, unreadCount }
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    document.cookie = "x-user-role=; path=/; max-age=0";
+    document.cookie = "x-onboarding-done=; path=/; max-age=0";
     router.push("/login");
     router.refresh();
   }

@@ -1,7 +1,8 @@
 # Suivi Cahier des Charges — Sales System
 
-> **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~95% (72 faits / 3 partiels / 5 manquants)
+> **Dernière mise à jour** : 2026-03-12
+> **Couverture globale** : ~91% (72 faits / 4 partiels / 5 manquants)
+> **Note** : Les 9 features manquantes/partielles dépendent exclusivement d'APIs tierces externes
 
 ---
 
@@ -243,26 +244,29 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 72 | 90% |
-| ⚠️ Partiel | 3 | 4% |
-| ❌ Manquant | 5 | 6% |
-| **Total** | **80** | **100%** |
+| ✅ Fait | 72 | 89% |
+| ⚠️ Partiel (API tierce) | 4 | 5% |
+| ❌ Manquant (API tierce) | 5 | 6% |
+| **Total** | **81** | **100%** |
 
 ## Features nécessitant une API tierce (non faisables en interne)
 
-1. **F14.6** — Sage/SAP/QuickBooks (comptabilité)
-2. **F16** — LinkedIn Chrome Extension + API
-3. **F17** — Instagram Meta API
-4. **F34.4** — Slack/Teams/Telegram/Discord
-5. **F54.2** — Zapier & Make
+### ❌ Manquants (5)
+1. **F14.6** — Sage/SAP/QuickBooks (comptabilité) — API payante tierce
+2. **F34.4** — Slack/Teams/Telegram/Discord — APIs tierces
+3. **F54.2** — Zapier & Make — APIs no-code tierces
+4. **F56** — Monitoring Sentry — Service tiers
+5. **F54.12** — Migrations Futures — Documentation/planning, pas du code
 
-## Features améliorables sans API tierce
-
+### ⚠️ Partiels (4) — UI implémentée, API tierce manquante
 1. **F10.1** — Google Calendar OAuth (faisable avec Google Cloud Console)
-2. ~~**F10.2** — Email reminders~~ ✅ Fait (Resend)
-3. **F23.1** — Collab real-time scripts (Supabase Realtime)
-4. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait
-5. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait
-6. **F43.2** — WhatsApp Business API réelle
-7. ~~**F54.9** — Migration CRM complète~~ ✅ Fait
-8. **F56** — Monitoring (Sentry gratuit)
+2. **F16** — LinkedIn Chrome Extension + API LinkedIn
+3. **F17** — Instagram Meta API
+4. **F43.2** — WhatsApp Business API réelle + GDPR
+
+### ✅ Anciennement partiels, maintenant complétés
+1. ~~**F10.2** — Email reminders~~ ✅ Fait (Resend)
+2. ~~**F23.1** — Collab real-time scripts~~ ✅ Fait (Supabase Realtime)
+3. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait (OpenRouter)
+4. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait (Supabase Storage)
+5. ~~**F54.9** — Migration CRM complète~~ ✅ Fait

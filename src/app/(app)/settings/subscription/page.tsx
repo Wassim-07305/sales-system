@@ -18,5 +18,5 @@ export default async function SubscriptionPage() {
 
   const currentTier = profile?.subscription_tier || "free";
 
-  return <SubscriptionView currentTier={currentTier as any} />;
+  return <SubscriptionView currentTier={currentTier} />;
 }

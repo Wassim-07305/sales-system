@@ -18,5 +18,6 @@ export default async function PresentPage({
   const flowchart = await getFlowchart(id);
   if (!flowchart) redirect("/scripts");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <PresentView flowchart={flowchart as any} />;
 }

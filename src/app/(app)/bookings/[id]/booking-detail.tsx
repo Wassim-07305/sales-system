@@ -43,7 +43,6 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  User,
   Mail,
   Phone,
   Video,
@@ -53,8 +52,9 @@ import {
   XCircle,
   RefreshCw,
   ExternalLink,
-  MapPin,
   FileText,
+  Loader2,
+  TrendingUp,
 } from "lucide-react";
 import {
   updateBookingStatus,
@@ -62,6 +62,7 @@ import {
   rescheduleBooking,
   deleteBooking,
 } from "@/lib/actions/bookings";
+import { createDealFromBooking } from "@/lib/actions/crm";
 
 interface BookingDetailProps {
   booking: Booking;
@@ -90,6 +91,9 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statusLoading, setStatusLoading] = useState<string | null>(null);
+  const [convertingToDeal, setConvertingToDeal] = useState(false);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
 
@@ -112,7 +116,9 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
   const isPastBooking = isPast(scheduledDate);
 
   async function handleStatusChange(status: BookingStatus) {
+    setStatusLoading(status);
     const result = await updateBookingStatus(currentBooking.id, status);
+    setStatusLoading(null);
     if (result.error) {
       toast.error("Erreur lors de la mise a jour");
       return;
@@ -122,7 +128,9 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
   }
 
   async function handleEditSubmit() {
+    setSaving(true);
     const result = await updateBooking(currentBooking.id, editForm);
+    setSaving(false);
 
     if (result.error) {
       toast.error("Erreur lors de la mise a jour");
@@ -143,8 +151,10 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
       return;
     }
 
+    setSaving(true);
     const newDateTime = `${newDate}T${newTime}:00`;
     const result = await rescheduleBooking(currentBooking.id, newDateTime);
+    setSaving(false);
 
     if (result.error) {
       toast.error("Erreur lors du report");
@@ -160,6 +170,24 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
     setNewDate("");
     setNewTime("");
     toast.success("Booking reprogramme");
+  }
+
+  async function handleConvertToDeal() {
+    setConvertingToDeal(true);
+    const result = await createDealFromBooking({
+      prospectName: currentBooking.prospect_name,
+      prospectEmail: currentBooking.prospect_email || undefined,
+      slotType: currentBooking.slot_type,
+    });
+    setConvertingToDeal(false);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Deal cree avec succes !");
+    if (result.deal?.id) {
+      router.push(`/crm/${result.deal.id}`);
+    }
   }
 
   async function handleDelete() {
@@ -289,8 +317,10 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 <Button
                   onClick={handleEditSubmit}
                   className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  disabled={saving}
                 >
-                  Enregistrer
+                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {saving ? "Enregistrement..." : "Enregistrer"}
                 </Button>
               </div>
             </DialogContent>
@@ -327,8 +357,10 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 <Button
                   onClick={handleReschedule}
                   className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  disabled={saving}
                 >
-                  Confirmer le report
+                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {saving ? "Report en cours..." : "Confirmer le report"}
                 </Button>
               </div>
             </DialogContent>
@@ -432,8 +464,9 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                         size="sm"
                         onClick={() => handleStatusChange("completed")}
                         className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        disabled={!!statusLoading}
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
+                        {statusLoading === "completed" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
                         Marquer termine
                       </Button>
                       <Button
@@ -441,8 +474,9 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                         size="sm"
                         onClick={() => handleStatusChange("no_show")}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={!!statusLoading}
                       >
-                        <XCircle className="h-4 w-4 mr-1" />
+                        {statusLoading === "no_show" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
                         No-show
                       </Button>
                     </>
@@ -451,11 +485,33 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleStatusChange("cancelled")}
+                    disabled={!!statusLoading}
                   >
-                    <XCircle className="h-4 w-4 mr-1" />
+                    {statusLoading === "cancelled" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
                     Annuler
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Convert to deal — shown when booking is completed */}
+          {currentBooking.status === "completed" && (
+            <Card className="border-brand/20 bg-brand/5">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Booking termine</p>
+                  <p className="text-sm text-muted-foreground">Convertir ce prospect en deal dans le CRM</p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleConvertToDeal}
+                  disabled={convertingToDeal}
+                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                >
+                  {convertingToDeal ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <TrendingUp className="h-4 w-4 mr-1" />}
+                  {convertingToDeal ? "Conversion..." : "Convertir en deal"}
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -556,10 +612,10 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-lg">
-                  {currentBooking.prospect_name.charAt(0)}
+                  {(currentBooking.prospect_name || "?").charAt(0)}
                 </div>
                 <div>
-                  <p className="font-medium">{currentBooking.prospect_name}</p>
+                  <p className="font-medium">{currentBooking.prospect_name || "Prospect"}</p>
                 </div>
               </div>
 

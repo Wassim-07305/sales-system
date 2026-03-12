@@ -215,6 +215,7 @@ export function MonetizationView({
                         borderRadius: "8px",
                         color: "#fff",
                       }}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={((value: number) => [`${value.toLocaleString("fr-FR")} €`, "Revenu"]) as any}
                     />
                     <Area
@@ -246,29 +247,37 @@ export function MonetizationView({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {overview.topExtensions.map((ext) => (
-                    <TableRow key={ext.name}>
-                      <TableCell className="font-medium">{ext.name}</TableCell>
-                      <TableCell className="text-right">{ext.installs}</TableCell>
-                      <TableCell className="text-right">
-                        {ext.revenue.toLocaleString("fr-FR")} €
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span
-                          className={`inline-flex items-center gap-1 ${
-                            ext.growth >= 0 ? "text-green-400" : "text-red-400"
-                          }`}
-                        >
-                          {ext.growth >= 0 ? (
-                            <ArrowUpRight className="h-3 w-3" />
-                          ) : (
-                            <ArrowDownRight className="h-3 w-3" />
-                          )}
-                          {Math.abs(ext.growth)}%
-                        </span>
+                  {overview.topExtensions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                        Aucune extension pour le moment
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    overview.topExtensions.map((ext) => (
+                      <TableRow key={ext.name}>
+                        <TableCell className="font-medium">{ext.name}</TableCell>
+                        <TableCell className="text-right">{ext.installs}</TableCell>
+                        <TableCell className="text-right">
+                          {ext.revenue.toLocaleString("fr-FR")} €
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span
+                            className={`inline-flex items-center gap-1 ${
+                              ext.growth >= 0 ? "text-green-400" : "text-red-400"
+                            }`}
+                          >
+                            {ext.growth >= 0 ? (
+                              <ArrowUpRight className="h-3 w-3" />
+                            ) : (
+                              <ArrowDownRight className="h-3 w-3" />
+                            )}
+                            {Math.abs(ext.growth)}%
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -360,33 +369,41 @@ export function MonetizationView({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {payouts.map((payout) => (
-                    <TableRow key={payout.id}>
-                      <TableCell>
-                        {new Date(payout.date).toLocaleDateString("fr-FR", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                  {payouts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                        Aucun paiement enregistré
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {payout.amount.toLocaleString("fr-FR")} €
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={payout.status === "paye" ? "default" : "secondary"}
-                          className={
-                            payout.status === "paye"
-                              ? "bg-green-500/20 text-green-400 border-green-500/30"
-                              : "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                          }
-                        >
-                          {payout.status === "paye" ? "Payé" : "En attente"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{payout.method}</TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    payouts.map((payout) => (
+                      <TableRow key={payout.id}>
+                        <TableCell>
+                          {new Date(payout.date).toLocaleDateString("fr-FR", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {payout.amount.toLocaleString("fr-FR")} €
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={payout.status === "paye" ? "default" : "secondary"}
+                            className={
+                              payout.status === "paye"
+                                ? "bg-green-500/20 text-green-400 border-green-500/30"
+                                : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                            }
+                          >
+                            {payout.status === "paye" ? "Payé" : "En attente"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{payout.method}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

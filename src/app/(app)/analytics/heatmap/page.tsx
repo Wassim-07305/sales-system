@@ -20,5 +20,5 @@ export default async function HeatmapPage() {
 
   const heatmapData = await getContentHeatmap();
 
-  return <HeatmapView data={heatmapData as any} />;
+  return <HeatmapView data={heatmapData} />;
 }

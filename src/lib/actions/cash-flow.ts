@@ -167,6 +167,7 @@ export async function getCashFlowData(): Promise<CashFlowData> {
       contract_id: p.contract_id,
       contract_ref: `#${(p.contract_id || "").slice(0, 8)}`,
       client_name:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (p.contract as any)?.client?.full_name || "Client inconnu",
       amount: p.amount || 0,
       due_date: p.due_date,

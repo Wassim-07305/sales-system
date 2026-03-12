@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { Upload, X, FileIcon, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, X, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 

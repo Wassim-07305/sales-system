@@ -212,6 +212,42 @@ export async function updateAvatarUrl(avatarUrl: string) {
   return { success: true };
 }
 
+// ─── Sauvegarder les préférences de notification ────────────────────
+
+export async function saveNotificationPreferences(params: {
+  push_enabled: boolean;
+  email_notifications: boolean;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const entries = [
+    { key: "push_enabled", value: String(params.push_enabled) },
+    { key: "email_notifications", value: String(params.email_notifications) },
+  ];
+
+  for (const entry of entries) {
+    const { error } = await supabase.from("user_settings").upsert(
+      {
+        user_id: user.id,
+        key: entry.key,
+        value: entry.value,
+      },
+      { onConflict: "user_id,key" }
+    );
+    if (error) {
+      console.error("Erreur sauvegarde notification:", entry.key, error);
+      return { error: error.message };
+    }
+  }
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
 export async function getBrandingSettings() {
   const supabase = await createClient();
   const {

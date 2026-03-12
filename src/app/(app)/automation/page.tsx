@@ -13,8 +13,8 @@ export default async function AutomationPage() {
 
   return (
     <AutomationView
-      rules={rules as any}
-      executions={executions as any}
+      rules={rules as React.ComponentProps<typeof AutomationView>["rules"]}
+      executions={executions as React.ComponentProps<typeof AutomationView>["executions"]}
     />
   );
 }

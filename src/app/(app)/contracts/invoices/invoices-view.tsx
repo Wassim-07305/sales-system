@@ -95,13 +95,14 @@ export function InvoicesView({ invoices, contracts }: Props) {
 
     startTransition(async () => {
       try {
-        await generateInvoice(selectedContractId, parseFloat(amount));
+        const result = await generateInvoice(selectedContractId, parseFloat(amount));
+        if (result.error) { toast.error(result.error); return; }
         toast.success("Facture générée avec succès");
         setDialogOpen(false);
         setSelectedContractId("");
         setAmount("");
         router.refresh();
-      } catch (err) {
+      } catch {
         toast.error("Erreur lors de la génération de la facture");
       }
     });
@@ -124,7 +125,11 @@ export function InvoicesView({ invoices, contracts }: Props) {
       >
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+            <Button
+              className="bg-brand text-brand-dark hover:bg-brand/90"
+              disabled={contracts.length === 0}
+              title={contracts.length === 0 ? "Créez d'abord un contrat signé" : undefined}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Générer une facture
             </Button>

@@ -20,5 +20,6 @@ export default async function TrainingSessionPage({
 
   const history = await getTrainingHistory(id);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <TrainingSession script={script as any} history={history as any} />;
 }

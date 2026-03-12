@@ -10,8 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Calendar, CalendarDays, List, Linkedin, Instagram, Youtube, Pencil, Trash2, Newspaper } from "lucide-react";
-import { createContentPost, updateContentPost, deleteContentPost, markPostsAsPublished } from "@/lib/actions/content";
+import { Plus, Calendar, CalendarDays, List, Linkedin, Instagram, Youtube, Trash2, Newspaper } from "lucide-react";
+import { createContentPost, updateContentPost, deleteContentPost } from "@/lib/actions/content";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -56,7 +56,6 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
   const [editingPost, setEditingPost] = useState<ContentPost | null>(null);
   const [filterPlatform, setFilterPlatform] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "", content: "", platform: "linkedin", framework: "educational", scheduled_at: "", status: "draft",
   });
@@ -116,6 +115,7 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce post ? Cette action est irréversible.")) return;
     try {
       await deleteContentPost(id);
       toast.success("Post supprimé");

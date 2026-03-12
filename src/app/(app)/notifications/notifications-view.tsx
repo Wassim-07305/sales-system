@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Bell, Check, ExternalLink } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import Link from "next/link";
 
 interface Notification {
   id: string;

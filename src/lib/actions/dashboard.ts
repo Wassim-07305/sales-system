@@ -82,12 +82,24 @@ export async function getAdminDashboardData() {
   const sevenDaysAgo = new Date(
     Date.now() - 7 * 24 * 60 * 60 * 1000,
   ).toISOString();
-  const { data: staleDeals } = await supabase
-    .from("deals")
-    .select("id, title, stage_id, updated_at, pipeline_stages(name)")
-    .lt("updated_at", sevenDaysAgo)
-    .not("stage_id", "eq", signedStageId || "")
-    .limit(5);
+  let staleDeals: { id: string; title: string; stage_id: string | null; updated_at: string; pipeline_stages: { name: string } | { name: string }[] | null }[] | null = null;
+  if (signedStageId) {
+    const { data } = await supabase
+      .from("deals")
+      .select("id, title, stage_id, updated_at, pipeline_stages(name)")
+      .lt("updated_at", sevenDaysAgo)
+      .neq("stage_id", signedStageId)
+      .limit(5);
+    staleDeals = data;
+  } else {
+    // No "Client Signé" stage found — return all stale deals without stage filter
+    const { data } = await supabase
+      .from("deals")
+      .select("id, title, stage_id, updated_at, pipeline_stages(name)")
+      .lt("updated_at", sevenDaysAgo)
+      .limit(5);
+    staleDeals = data;
+  }
 
   return {
     stats: {
@@ -294,7 +306,7 @@ export async function getSetterDashboardData(userId: string) {
     .from("gamification_profiles")
     .select("level, level_name, total_points, current_streak")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   // Show-up rate this month
   const { data: pastBookings } = await supabase
@@ -415,7 +427,7 @@ export async function getSetterDashboardData(userId: string) {
       currentValue: o.current_value,
       targetDate: o.target_date,
       status: o.status,
-      progress: Math.round((o.current_value / o.target_value) * 100),
+      progress: Math.round((o.current_value / (o.target_value || 1)) * 100),
     })),
     dailyPerformance,
   };
@@ -446,6 +458,14 @@ export async function saveDailyJournal(data: {
     },
     { onConflict: "user_id,date" },
   );
+
+  // Auto-update gamification streak after journal save
+  try {
+    const { checkAndUpdateStreak } = await import("@/lib/actions/gamification");
+    await checkAndUpdateStreak(user.id);
+  } catch {
+    // Non-blocking
+  }
 }
 
 export async function getSetterHubData(userId: string) {
@@ -476,13 +496,13 @@ export async function getSetterHubData(userId: string) {
     .eq("user_id", userId)
     .gte("date", startOfWeek.split("T")[0]);
 
-  const weekDms = (weekQuotas || []).reduce((s, q) => s + q.dms_sent, 0);
+  const weekDms = (weekQuotas || []).reduce((s, q) => s + (q.dms_sent || 0), 0);
   const weekReplies = (weekQuotas || []).reduce(
-    (s, q) => s + q.replies_received,
+    (s, q) => s + (q.replies_received || 0),
     0,
   );
   const weekBookingsFromDms = (weekQuotas || []).reduce(
-    (s, q) => s + q.bookings_from_dms,
+    (s, q) => s + (q.bookings_from_dms || 0),
     0,
   );
 
@@ -504,7 +524,7 @@ export async function getSetterHubData(userId: string) {
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signe")
+    .eq("name", "Client Signé")
     .single();
 
   const { data: monthDeals } = await supabase
@@ -591,7 +611,7 @@ export interface PerformanceMetric {
   current: number;
   target: number;
   previous: number;
-  trend: number;
+  trend: number | null;
   unit: string;
 }
 
@@ -628,6 +648,14 @@ export async function getPersonalPerformanceReport(
     now.getFullYear(),
     now.getMonth(),
     1,
+  ).toISOString();
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
   ).toISOString();
   const startOfLastMonth = new Date(
     now.getFullYear(),
@@ -671,7 +699,8 @@ export async function getPersonalPerformanceReport(
     .from("bookings")
     .select("id, status")
     .eq("assigned_to", userId)
-    .gte("scheduled_at", startOfMonth);
+    .gte("scheduled_at", startOfMonth)
+    .lte("scheduled_at", endOfMonth);
 
   // Last month's bookings
   const { data: lastBookings } = await supabase
@@ -715,11 +744,22 @@ export async function getPersonalPerformanceReport(
       ? Math.round((lastShowUp / lastBookingsCount) * 100)
       : 0;
 
-  // Default targets (could come from coaching_objectives or team quotas)
-  const revenueTarget = 25000;
-  const dealsTarget = 10;
-  const bookingsTarget = 30;
-  const showUpTarget = 80;
+  // Fetch user's coaching objectives for personalized targets, fallback to defaults
+  const { data: targetObjectives } = await supabase
+    .from("coaching_objectives")
+    .select("target_type, target_value")
+    .eq("user_id", userId)
+    .eq("status", "active");
+
+  const getTarget = (type: string, fallback: number) => {
+    const obj = (targetObjectives || []).find((o) => o.target_type === type);
+    return obj?.target_value ?? fallback;
+  };
+
+  const revenueTarget = getTarget("revenue", 10000);
+  const dealsTarget = getTarget("deals", 5);
+  const bookingsTarget = getTarget("bookings", 15);
+  const showUpTarget = getTarget("show_up_rate", 80);
 
   const metrics: PerformanceMetric[] = [
     {
@@ -730,7 +770,7 @@ export async function getPersonalPerformanceReport(
       trend:
         lastRevenue > 0
           ? Math.round(((currentRevenue - lastRevenue) / lastRevenue) * 100)
-          : 0,
+          : null,
       unit: "€",
     },
     {
@@ -741,7 +781,7 @@ export async function getPersonalPerformanceReport(
       trend:
         lastDeals > 0
           ? Math.round(((currentDeals - lastDeals) / lastDeals) * 100)
-          : 0,
+          : null,
       unit: "",
     },
     {
@@ -754,7 +794,7 @@ export async function getPersonalPerformanceReport(
           ? Math.round(
               ((currentBookings - lastBookingsCount) / lastBookingsCount) * 100,
             )
-          : 0,
+          : null,
       unit: "",
     },
     {
@@ -762,7 +802,7 @@ export async function getPersonalPerformanceReport(
       current: showUpRate,
       target: showUpTarget,
       previous: lastShowUpRate,
-      trend: showUpRate - lastShowUpRate,
+      trend: lastBookingsCount > 0 ? showUpRate - lastShowUpRate : null,
       unit: "%",
     },
   ];
@@ -817,7 +857,7 @@ export async function getPersonalPerformanceReport(
       id: o.id,
       title: o.title,
       category: o.category,
-      progress: Math.round((o.current_value / o.target_value) * 100),
+      progress: Math.round((o.current_value / (o.target_value || 1)) * 100),
       status: o.status,
       daysLeft: Math.max(0, daysLeft),
     };
@@ -880,6 +920,14 @@ export async function getTeamKPIs() {
     59,
     59,
   ).toISOString();
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   // Get the "Client Signé" stage id
   const { data: signedStage } = await supabase
@@ -896,7 +944,8 @@ export async function getTeamKPIs() {
   const { data: monthBookings } = await supabase
     .from("bookings")
     .select("id, status, assigned_to")
-    .gte("scheduled_at", startOfMonth);
+    .gte("scheduled_at", startOfMonth)
+    .lte("scheduled_at", endOfMonth);
 
   const totalBookings = (monthBookings || []).length;
   const confirmedBookings = (monthBookings || []).filter(
@@ -1079,6 +1128,14 @@ export async function getB2BDashboardData(
     now.getMonth(),
     1,
   ).toISOString();
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   // Get matched setter for this B2B client
   const { data: profile } = await supabase
@@ -1211,9 +1268,9 @@ export async function getB2BDashboardData(
     0,
   );
 
-  // Get "Client Signe" stage for closing rate
+  // Get "Client Signé" stage for closing rate
   const signedStage = (stages || []).find(
-    (s) => s.name === "Client Signe" || s.name === "Client Signé",
+    (s) => s.name === "Client Signé",
   );
   const closedDeals = signedStage
     ? dealsForPipeline.filter((d) => d.stage_id === signedStage.id).length
@@ -1235,7 +1292,8 @@ export async function getB2BDashboardData(
   const { count: bookingsMonthCount } = await supabase
     .from("bookings")
     .select("id", { count: "exact", head: true })
-    .gte("scheduled_at", startOfMonth);
+    .gte("scheduled_at", startOfMonth)
+    .lte("scheduled_at", endOfMonth);
 
   // Recent activity - deal activities
   const dealIds = dealsForPipeline.map((d) => d.id);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,8 +61,6 @@ interface Props {
 
 export function HubView({ overview }: Props) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
   // Analyze profile state
   const [profileUrl, setProfileUrl] = useState("");
   const [profileResult, setProfileResult] = useState<Record<string, unknown> | null>(null);
@@ -258,7 +256,7 @@ export function HubView({ overview }: Props) {
             <div>
               <p className="font-semibold text-base">Campagnes</p>
               <p className="text-sm text-muted-foreground">
-                Automatisez vos sequences de prospection multi-etapes
+                Automatisez vos sequences de prospection multi-étapes
               </p>
             </div>
           </CardContent>
@@ -278,7 +276,7 @@ export function HubView({ overview }: Props) {
                 <div>
                   <p className="font-medium">Analyser profil</p>
                   <p className="text-xs text-muted-foreground">
-                    Analyse IA d'un profil social
+                    Analyse IA d&apos;un profil social
                   </p>
                 </div>
               </CardContent>

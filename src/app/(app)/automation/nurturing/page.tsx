@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getAutomationRules, getAutomationExecutions } from "@/lib/actions/automation";
 import { NurturingView } from "./nurturing-view";
 
+type NurturingViewProps = React.ComponentProps<typeof NurturingView>;
+
 export default async function NurturingPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -12,15 +14,15 @@ export default async function NurturingPage() {
   const executions = await getAutomationExecutions();
 
   // Filter executions to nurturing rules only
-  const ruleIds = new Set(rules.map((r: any) => r.id));
-  const nurturingExecutions = (executions as any[]).filter(
+  const ruleIds = new Set(rules.map((r: { id: string }) => r.id));
+  const nurturingExecutions = (executions as NurturingViewProps["executions"]).filter(
     (e) => ruleIds.has(e.rule_id)
   );
 
   return (
     <NurturingView
-      rules={rules as any}
-      executions={nurturingExecutions as any}
+      rules={rules as NurturingViewProps["rules"]}
+      executions={nurturingExecutions}
     />
   );
 }

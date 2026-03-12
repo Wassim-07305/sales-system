@@ -11,5 +11,6 @@ export default async function TemplatesPage() {
   if (!user) redirect("/login");
 
   const templates = await getScriptTemplates();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <TemplatesView templates={templates as any} />;
 }

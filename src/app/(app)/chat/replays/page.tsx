@@ -11,8 +11,10 @@ export default async function ReplaysPage() {
   const rooms = await getVideoRooms();
   // Filtrer uniquement les rooms terminées avec un enregistrement
   const replays = (rooms || []).filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (r: any) => r.status === "ended" && r.recording_url
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <ReplaysListView replays={replays as any} />;
 }

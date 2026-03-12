@@ -3,8 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { PageHeader } from "@/components/layout/page-header";
 import type { Profile, Deal, DealActivity } from "@/lib/types/database";
 import type { TimelineEvent } from "@/lib/actions/timeline";
 import {
@@ -17,7 +15,6 @@ import {
   Calendar,
   DollarSign,
   ArrowLeft,
-  History,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";

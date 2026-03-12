@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
 import {
@@ -63,7 +64,7 @@ interface AdminDashboardData {
 
 function getStageBadgeVariant(stage: string) {
   switch (stage) {
-    case "Client Signe":
+    case "Client Signé":
       return "default";
     case "Closing":
       return "destructive";
@@ -208,6 +209,24 @@ export function AdminDashboard({
         title="Dashboard"
         description="Vue d'ensemble de votre activite"
       />
+
+      {/* Welcome banner when all metrics are zero */}
+      {data.stats.monthlyRevenue === 0 && data.stats.pipelineTotal === 0 && data.stats.activeClients === 0 && data.stats.weeklyBookings === 0 && (
+        <Card className="mb-6 border-brand/20 bg-brand/5">
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="h-10 w-10 mx-auto text-brand/50 mb-3" />
+            <p className="font-medium text-lg">Bienvenue sur votre Dashboard</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Votre espace est pret. Commencez par creer un deal dans le CRM pour voir vos metriques ici.
+            </p>
+            <Link href="/crm">
+              <Button size="sm" className="mt-4 bg-brand text-brand-dark hover:bg-brand/90">
+                Acceder au CRM
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

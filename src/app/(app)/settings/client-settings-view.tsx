@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, Bell, Lock, CreditCard, Save } from "lucide-react";
-import { changePassword } from "@/lib/actions/settings";
+import { changePassword, saveNotificationPreferences } from "@/lib/actions/settings";
 
 interface ClientSettingsViewProps {
   userEmail: string;
@@ -23,6 +23,21 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, startChangingPassword] = useTransition();
+  const [isSavingNotifs, startSavingNotifs] = useTransition();
+
+  function handleSaveNotifications() {
+    startSavingNotifs(async () => {
+      const result = await saveNotificationPreferences({
+        push_enabled: pushEnabled,
+        email_notifications: emailNotif,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Préférences de notification sauvegardées");
+      }
+    });
+  }
 
   function handleChangePassword() {
     if (!newPassword) return;
@@ -78,9 +93,14 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => toast.success("Préférences de notification sauvegardées")}
+            onClick={handleSaveNotifications}
+            disabled={isSavingNotifs}
           >
-            <Save className="h-3.5 w-3.5 mr-2" />
+            {isSavingNotifs ? (
+              <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5 mr-2" />
+            )}
             Sauvegarder
           </Button>
         </CardContent>

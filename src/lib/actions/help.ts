@@ -611,7 +611,8 @@ export async function getFAQ(): Promise<FAQItem[]> {
 
 export async function submitFeedback(
   articleId: string,
-  helpful: boolean
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _helpful: boolean
 ): Promise<void> {
   const supabase = await createClient();
   const {

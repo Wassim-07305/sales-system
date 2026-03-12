@@ -20,5 +20,6 @@ export default async function BroadcastPage() {
 
   const broadcasts = await getBroadcasts();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <BroadcastView broadcasts={broadcasts as any} />;
 }

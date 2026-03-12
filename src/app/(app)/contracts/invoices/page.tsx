@@ -18,7 +18,9 @@ export default async function InvoicesPage() {
 
   return (
     <InvoicesView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       invoices={invoices as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       contracts={(contracts || []) as any}
     />
   );

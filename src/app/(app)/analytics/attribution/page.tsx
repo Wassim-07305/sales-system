@@ -20,5 +20,5 @@ export default async function AttributionPage() {
 
   const data = await getMultiTouchAttribution();
 
-  return <AttributionView data={data as any} />;
+  return <AttributionView data={data} />;
 }

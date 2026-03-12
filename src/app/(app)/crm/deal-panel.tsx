@@ -11,13 +11,10 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import type { Deal, PipelineStage, DealTemperature } from "@/lib/types/database";
 import {
-  User,
   DollarSign,
   Phone,
   MessageSquare,
   Mail,
-  Calendar,
-  FileText,
   Clock,
   ExternalLink,
 } from "lucide-react";

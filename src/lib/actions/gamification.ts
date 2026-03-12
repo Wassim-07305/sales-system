@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
 import { REWARDS_CATALOG } from "@/lib/reward-definitions";
-import type { Reward } from "@/lib/reward-definitions";
+
 
 const LEVELS = [
   { level: 1, name: "Setter Débutant", minPoints: 0 },
@@ -112,7 +112,7 @@ export async function updateChallengeProgress(userId: string, metric: string, va
 
     if (!progress || progress.completed) continue;
 
-    const newValue = Math.min(value, challenge.target_value);
+    const newValue = Math.min((progress.current_value || 0) + value, challenge.target_value);
     const justCompleted = newValue >= challenge.target_value && !progress.completed;
 
     await supabase
@@ -258,7 +258,7 @@ export async function checkBadgeEligibility(userId: string) {
   const { count: postsCount } = await supabase
     .from("community_posts")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", userId);
+    .eq("author_id", userId);
   await tryAward("team_player", (postsCount ?? 0) >= 10);
 
   // 7. speed_demon – 3 deals created in the last 7 days
@@ -669,7 +669,7 @@ export async function getAchievements() {
     supabase
       .from("community_posts")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id),
+      .eq("author_id", user.id),
   ]);
 
   const currentStreak = profile?.current_streak ?? 0;
@@ -765,7 +765,7 @@ export async function checkAchievementProgress(userId: string) {
     supabase
       .from("community_posts")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", userId),
+      .eq("author_id", userId),
   ]);
 
   const currentStreak = profile.current_streak ?? 0;

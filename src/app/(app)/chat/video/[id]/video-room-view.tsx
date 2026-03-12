@@ -3,14 +3,12 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
@@ -26,13 +24,11 @@ import {
   MonitorUp,
   PhoneOff,
   Play,
-  Pause,
   Users,
   MessageSquare,
   BarChart3,
   Plus,
   Send,
-  Radio,
   Circle,
   ArrowLeft,
 } from "lucide-react";
@@ -120,7 +116,6 @@ export function VideoRoomView({
   const isHost = room.host_id === currentUserId;
   const isLive = room.status === "live";
   const isScheduled = room.status === "scheduled";
-  const isEnded = room.status === "ended";
   const activeParticipants = room.participants.filter((p) => !p.left_at);
 
   function handleSendChat() {

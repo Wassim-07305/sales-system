@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { logAuditEvent } from "@/lib/actions/audit-log";
 
 // ─── Queries ────────────────────────────────────────────────────────
 
@@ -176,7 +177,7 @@ export async function getRecentDeals(limit = 10) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("deals")
-    .select("id, title, value, stage_id, contact:contacts(full_name)")
+    .select("id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)")
     .order("updated_at", { ascending: false })
     .limit(limit);
   return data || [];
@@ -186,7 +187,7 @@ export async function searchDeals(query: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("deals")
-    .select("id, title, value, stage_id, contact:contacts(full_name)")
+    .select("id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)")
     .ilike("title", `%${query}%`)
     .limit(20);
   return data || [];
@@ -229,6 +230,10 @@ export async function createDeal(params: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  if (!params.value || params.value <= 0) {
+    return { error: "La valeur du deal doit être supérieure à 0" };
+  }
+
   const { data, error } = await supabase
     .from("deals")
     .insert({
@@ -244,6 +249,8 @@ export async function createDeal(params: {
     .single();
 
   if (error) return { error: error.message };
+
+  logAuditEvent({ action: "create", entity_type: "deal", entity_id: data.id, details: { title: params.title } }).catch(() => {});
 
   revalidatePath("/crm");
   return { deal: data };
@@ -270,6 +277,8 @@ export async function updateDealStage(dealId: string, stageId: string) {
 
   if (error) return { error: error.message };
 
+  logAuditEvent({ action: "update", entity_type: "deal", entity_id: dealId, details: { stage_id: stageId } }).catch(() => {});
+
   // Send email notification (fire-and-forget)
   if (deal?.assigned_to) {
     const { data: newStage } = await supabase
@@ -286,6 +295,17 @@ export async function updateDealStage(dealId: string, stageId: string) {
     if (assignee?.email && newStage?.name) {
       const stageData = deal.pipeline_stages;
       const oldStageName = (Array.isArray(stageData) ? stageData[0]?.name : (stageData as { name: string } | null)?.name) || "—";
+
+      // In-app notification
+      await supabase.from("notifications").insert({
+        user_id: deal.assigned_to,
+        title: "Deal déplacé",
+        body: `"${deal.title}" est passé de ${oldStageName} à ${newStage.name}`,
+        type: "deal",
+        link: `/crm/${dealId}`,
+      });
+
+      // Email notification (fire-and-forget)
       import("@/lib/actions/email").then(({ sendDealStageEmail }) =>
         sendDealStageEmail({
           email: assignee.email,
@@ -409,6 +429,9 @@ export async function deleteDeal(dealId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Unlink contracts from this deal (prevent orphans)
+  await supabase.from("contracts").update({ deal_id: null }).eq("deal_id", dealId);
+
   // Delete activities first
   await supabase.from("deal_activities").delete().eq("deal_id", dealId);
 
@@ -416,6 +439,51 @@ export async function deleteDeal(dealId: string) {
 
   if (error) return { error: error.message };
 
+  logAuditEvent({ action: "delete", entity_type: "deal", entity_id: dealId }).catch(() => {});
+
   revalidatePath("/crm");
   return { success: true };
+}
+
+export async function createDealFromBooking(params: {
+  prospectName: string;
+  prospectEmail?: string;
+  slotType: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Get the first pipeline stage (Prospect)
+  const { data: firstStage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .order("position", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (!firstStage) return { error: "Aucun stage pipeline configuré" };
+
+  const title = `${params.prospectName} — ${params.slotType === "discovery" ? "Découverte" : params.slotType === "closing" ? "Closing" : "Suivi"}`;
+
+  const { data, error } = await supabase
+    .from("deals")
+    .insert({
+      title,
+      value: 0,
+      stage_id: firstStage.id,
+      temperature: "warm",
+      source: "booking",
+    })
+    .select(
+      "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",
+    )
+    .single();
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/crm");
+  return { deal: data };
 }

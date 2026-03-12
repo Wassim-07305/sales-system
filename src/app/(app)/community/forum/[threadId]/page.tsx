@@ -37,14 +37,18 @@ export default async function ThreadPage({
 
   // Batch fetch reputations for post author + comment authors
   const authorIds = [...new Set([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (normalizedPost.author as any)?.id,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(comments as any[]).map((c: any) => c.author?.id),
   ].filter(Boolean))] as string[];
   const reputations = await getUserReputationBatch(authorIds);
 
   return (
     <ThreadView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       post={normalizedPost as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       comments={comments as any}
       userId={user.id}
       reputations={reputations}

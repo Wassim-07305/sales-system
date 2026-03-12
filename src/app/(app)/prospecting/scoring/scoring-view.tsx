@@ -72,13 +72,13 @@ interface Props {
 
 const statusLabels: Record<string, string> = {
   new: "Nouveau",
-  contacted: "Contacte",
-  replied: "Repondu",
-  interested: "Interesse",
+  contacted: "Contacté",
+  replied: "Répondu",
+  interested: "Intéressé",
   booked: "RDV pris",
   converted: "Converti",
   lost: "Perdu",
-  not_interested: "Pas interesse",
+  not_interested: "Pas intéressé",
 };
 
 const platformLabels: Record<string, string> = {
@@ -216,8 +216,8 @@ export function ScoringView({ prospects }: Props) {
   return (
     <div>
       <PageHeader
-        title="Scoring avance des prospects"
-        description="Evaluez et priorisez vos prospects avec un scoring multi-criteres"
+        title="Scoring avancé des prospects"
+        description="Evaluez et priorisez vos prospects avec un scoring multi-critères"
       >
         <div className="flex gap-2">
           <Button
@@ -226,7 +226,7 @@ export function ScoringView({ prospects }: Props) {
             onClick={() => setShowRules(!showRules)}
           >
             <Info className="h-4 w-4 mr-2" />
-            {showRules ? "Masquer les regles" : "Regles de scoring"}
+            {showRules ? "Masquer les règles" : "Règles de scoring"}
           </Button>
           <Button
             onClick={handleRecalculateAll}
@@ -249,7 +249,7 @@ export function ScoringView({ prospects }: Props) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Info className="h-5 w-5 text-brand" />
-              Comment le score est calcule
+              Comment le score est calculé
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -260,7 +260,7 @@ export function ScoringView({ prospects }: Props) {
                   <div>
                     <p className="font-medium">Statut du pipeline (30 pts max)</p>
                     <p className="text-muted-foreground">
-                      Nouveau (4), Contacte (12), Repondu (20), Interesse (25), RDV pris (28), Converti (30)
+                      Nouveau (4), Contacté (12), Répondu (20), Intéressé (25), RDV pris (28), Converti (30)
                     </p>
                   </div>
                 </div>
@@ -394,7 +394,8 @@ export function ScoringView({ prospects }: Props) {
                 <XAxis dataKey="range" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip
-                  formatter={((value: any) => [`${Number(value || 0)} prospect(s)`, "Nombre"]) as any}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={((value: number) => [`${Number(value || 0)} prospect(s)`, "Nombre"]) as any}
                   contentStyle={{ backgroundColor: "#14080e", border: "none", borderRadius: 8, color: "#fff" }}
                   labelStyle={{ color: "#ccc" }}
                 />

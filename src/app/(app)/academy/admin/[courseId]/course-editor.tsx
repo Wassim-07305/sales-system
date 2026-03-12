@@ -105,7 +105,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
     new Set(modules.map((m) => m.id))
   );
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   // Dialogs
   const [moduleDialogOpen, setModuleDialogOpen] = useState(false);

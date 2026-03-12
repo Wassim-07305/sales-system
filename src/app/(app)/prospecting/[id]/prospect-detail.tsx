@@ -50,7 +50,6 @@ import {
   ExternalLink,
   Thermometer,
   Target,
-  Clock,
   Linkedin,
   Instagram,
   ArrowRightCircle,

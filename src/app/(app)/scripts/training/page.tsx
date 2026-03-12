@@ -13,5 +13,6 @@ export default async function ScriptTrainingPage() {
   const scripts = await getScriptsForTraining();
   const history = await getTrainingHistory();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <TrainingView scripts={scripts as any} history={history as any} />;
 }

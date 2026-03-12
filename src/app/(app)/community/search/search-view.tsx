@@ -54,9 +54,11 @@ export function CommunitySearchView() {
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
-      setPosts([]);
-      setComments([]);
-      setHasSearched(false);
+      startTransition(() => {
+        setPosts([]);
+        setComments([]);
+        setHasSearched(false);
+      });
       return;
     }
 
@@ -75,11 +77,11 @@ export function CommunitySearchView() {
 
   return (
     <div>
-      <PageHeader title="Rechercher" description="Rechercher dans la communaute">
+      <PageHeader title="Rechercher" description="Rechercher dans la communauté">
         <Link href="/community">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Communaute
+            Communauté
           </Button>
         </Link>
       </PageHeader>
@@ -102,8 +104,8 @@ export function CommunitySearchView() {
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground">
             <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">Aucun resultat</p>
-            <p className="text-sm">Essayez avec d&apos;autres mots-cles</p>
+            <p className="font-medium">Aucun résultat</p>
+            <p className="text-sm">Essayez avec d&apos;autres mots-clés</p>
           </CardContent>
         </Card>
       )}

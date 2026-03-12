@@ -333,9 +333,6 @@ export interface NavSection {
   items: NavItem[];
 }
 
-// Items du footer sidebar (hors navigation principale)
-const FOOTER_HREFS = ["/profile", "/settings"];
-
 export const NAV_SECTIONS: NavSection[] = [
   {
     label: "",

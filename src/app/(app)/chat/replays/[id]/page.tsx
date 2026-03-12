@@ -18,5 +18,6 @@ export default async function ReplayPage({
 
   const recording = await getRecording(id);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <ReplayView room={room as any} recording={recording as any} />;
 }

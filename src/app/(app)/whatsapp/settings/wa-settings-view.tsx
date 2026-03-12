@@ -19,7 +19,6 @@ import {
   Check,
   ArrowLeft,
   Link2,
-  Key,
   Webhook,
 } from "lucide-react";
 import { connectWhatsApp, disconnectWhatsApp } from "@/lib/actions/whatsapp";

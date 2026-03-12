@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useUIStore } from "@/stores/ui-store";
 import { QuickNoteModal } from "@/components/quick-note-modal";
 
@@ -23,7 +23,6 @@ export function KeyboardShortcutsProvider({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const {
     setSearchOpen,
     setQuickNoteOpen,
@@ -33,8 +32,8 @@ export function KeyboardShortcutsProvider({
   } = useUIStore();
 
   // Track "g" key for navigation shortcuts
-  let gPressed = false;
-  let gTimeout: NodeJS.Timeout | null = null;
+  const gPressedRef = useRef(false);
+  const gTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -87,17 +86,17 @@ export function KeyboardShortcutsProvider({
 
       // G-key navigation (press G, then another key)
       if (e.key === "g" && !isMod) {
-        gPressed = true;
-        if (gTimeout) clearTimeout(gTimeout);
-        gTimeout = setTimeout(() => {
-          gPressed = false;
+        gPressedRef.current = true;
+        if (gTimeoutRef.current) clearTimeout(gTimeoutRef.current);
+        gTimeoutRef.current = setTimeout(() => {
+          gPressedRef.current = false;
         }, 500);
         return;
       }
 
-      if (gPressed && !isMod) {
-        gPressed = false;
-        if (gTimeout) clearTimeout(gTimeout);
+      if (gPressedRef.current && !isMod) {
+        gPressedRef.current = false;
+        if (gTimeoutRef.current) clearTimeout(gTimeoutRef.current);
 
         switch (e.key) {
           case "d":

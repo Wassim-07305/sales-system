@@ -7,17 +7,13 @@ export type DuplicateConfidence = "high" | "medium" | "low";
 
 export interface ContactRecord {
   id: string;
-  user_id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
+  email: string;
+  full_name: string | null;
   phone: string | null;
   company: string | null;
-  position: string | null;
-  source: string | null;
-  status: string | null;
-  notes: string | null;
-  tags: string[] | null;
+  role: string;
+  avatar_url: string | null;
+  niche: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -97,8 +93,8 @@ export async function findDuplicateContacts() {
   if (!user) return { groups: [], error: "Non authentifié" };
 
   const { data: contacts, error } = await supabase
-    .from("contacts")
-    .select("*")
+    .from("profiles")
+    .select("id, email, full_name, phone, company, role, avatar_url, niche, created_at, updated_at")
     .order("created_at", { ascending: true });
 
   if (error) return { groups: [], error: error.message };
@@ -169,26 +165,23 @@ export async function findDuplicateContacts() {
         continue;
       }
 
-      // Same first_name + last_name (case-insensitive) → high
+      // Same full_name (case-insensitive) → high
       if (
-        a.first_name &&
-        b.first_name &&
-        a.last_name &&
-        b.last_name &&
-        normalizeStr(a.first_name) === normalizeStr(b.first_name) &&
-        normalizeStr(a.last_name) === normalizeStr(b.last_name)
+        a.full_name &&
+        b.full_name &&
+        normalizeStr(a.full_name) === normalizeStr(b.full_name)
       ) {
-        addToGroup(a, b, "high", "Nom et prénom identiques");
+        addToGroup(a, b, "high", "Nom complet identique");
         continue;
       }
 
-      // Same last_name + same company → medium
+      // Same full_name + same company → medium
       if (
-        a.last_name &&
-        b.last_name &&
+        a.full_name &&
+        b.full_name &&
         a.company &&
         b.company &&
-        normalizeStr(a.last_name) === normalizeStr(b.last_name) &&
+        normalizeStr(a.full_name).split(" ").pop() === normalizeStr(b.full_name).split(" ").pop() &&
         normalizeStr(a.company) === normalizeStr(b.company)
       ) {
         addToGroup(a, b, "medium", "Même nom de famille et entreprise");
@@ -197,15 +190,15 @@ export async function findDuplicateContacts() {
 
       // Similar name (first 3 chars match + same company) → low
       if (
-        a.first_name &&
-        b.first_name &&
+        a.full_name &&
+        b.full_name &&
         a.company &&
         b.company &&
-        first3Chars(a.first_name) === first3Chars(b.first_name) &&
-        first3Chars(a.first_name).length >= 3 &&
+        first3Chars(a.full_name) === first3Chars(b.full_name) &&
+        first3Chars(a.full_name).length >= 3 &&
         normalizeStr(a.company) === normalizeStr(b.company)
       ) {
-        addToGroup(a, b, "low", "Prénom similaire et même entreprise");
+        addToGroup(a, b, "low", "Nom similaire et même entreprise");
         continue;
       }
     }
@@ -224,8 +217,8 @@ export async function findDuplicateContacts() {
 
 /**
  * Merge secondary contacts into a primary contact.
- * Updates all related deals, bookings, calls to point to primary.
- * Deletes secondary contacts after merge.
+ * Updates all related deals to point to primary.
+ * Deletes secondary profiles after merge.
  */
 export async function mergeContacts(
   primaryId: string,
@@ -242,10 +235,10 @@ export async function mergeContacts(
     return { success: false, error: "Paramètres invalides" };
   }
 
-  // Fetch all contacts involved
+  // Fetch all profiles involved
   const allIds = [primaryId, ...secondaryIds];
   const { data: contacts, error: fetchError } = await supabase
-    .from("contacts")
+    .from("profiles")
     .select("*")
     .in("id", allIds);
 
@@ -264,11 +257,11 @@ export async function mergeContacts(
     }
   }
 
-  // Update the primary contact with merged field values
+  // Update the primary profile with merged field values
   if (Object.keys(mergedFields).length > 0) {
     mergedFields.updated_at = new Date().toISOString();
     const { error: updateError } = await supabase
-      .from("contacts")
+      .from("profiles")
       .update(mergedFields)
       .eq("id", primaryId);
 
@@ -278,29 +271,27 @@ export async function mergeContacts(
   }
 
   // Reassign related records to the primary contact
+  const errors: string[] = [];
+
   for (const secondaryId of secondaryIds) {
     // Update deals
-    await supabase
+    const { error: dealsError } = await supabase
       .from("deals")
       .update({ contact_id: primaryId })
       .eq("contact_id", secondaryId);
 
-    // Update bookings
-    await supabase
-      .from("bookings")
-      .update({ contact_id: primaryId })
-      .eq("contact_id", secondaryId);
-
-    // Update calls
-    await supabase
-      .from("calls")
-      .update({ contact_id: primaryId })
-      .eq("contact_id", secondaryId);
+    if (dealsError) {
+      errors.push(`Erreur mise à jour deals: ${dealsError.message}`);
+    }
   }
 
-  // Delete secondary contacts
+  if (errors.length > 0) {
+    return { success: false, error: errors.join("; ") };
+  }
+
+  // Delete secondary profiles
   const { error: deleteError } = await supabase
-    .from("contacts")
+    .from("profiles")
     .delete()
     .in("id", secondaryIds);
 

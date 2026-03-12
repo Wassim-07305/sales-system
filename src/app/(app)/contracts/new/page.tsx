@@ -1,7 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { NewContractForm } from "./new-contract-form";
 
-export default async function NewContractPage() {
+export default async function NewContractPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ dealId?: string; clientId?: string; amount?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
 
   const { data: templates } = await supabase
@@ -33,6 +38,9 @@ export default async function NewContractPage() {
       templates={templates || []}
       clients={clients || []}
       deals={deals}
+      initialDealId={params.dealId}
+      initialClientId={params.clientId}
+      initialAmount={params.amount}
     />
   );
 }

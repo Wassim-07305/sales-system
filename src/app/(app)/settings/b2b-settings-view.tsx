@@ -26,7 +26,7 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-import { changePassword } from "@/lib/actions/settings";
+import { changePassword, saveNotificationPreferences } from "@/lib/actions/settings";
 
 interface B2BSettingsViewProps {
   userEmail: string;
@@ -39,6 +39,21 @@ export function B2BSettingsView({ userEmail }: B2BSettingsViewProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, startChangingPassword] = useTransition();
+  const [isSavingNotifs, startSavingNotifs] = useTransition();
+
+  function handleSaveNotifications() {
+    startSavingNotifs(async () => {
+      const result = await saveNotificationPreferences({
+        push_enabled: pushEnabled,
+        email_notifications: emailNotif,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Préférences de notification sauvegardées");
+      }
+    });
+  }
 
   function handleChangePassword() {
     if (!newPassword) return;
@@ -103,11 +118,14 @@ export function B2BSettingsView({ userEmail }: B2BSettingsViewProps) {
           <Button
             size="sm"
             variant="outline"
-            onClick={() =>
-              toast.success("Préférences de notification sauvegardées")
-            }
+            onClick={handleSaveNotifications}
+            disabled={isSavingNotifs}
           >
-            <Save className="h-3.5 w-3.5 mr-2" />
+            {isSavingNotifs ? (
+              <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5 mr-2" />
+            )}
             Sauvegarder
           </Button>
         </CardContent>

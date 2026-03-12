@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { sendContract, revokeSignature } from "@/lib/actions/contracts";
 import { SignatureDialog } from "@/components/signature-dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Send, PenTool, Download, CheckCircle2, ShieldX, FileSignature } from "lucide-react";
+import { ArrowLeft, Send, PenTool, Download, CheckCircle2, ShieldX, FileSignature, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -51,8 +51,12 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
   async function handleSend() {
     setLoading(true);
     try {
-      await sendContract(contract.id);
-      toast.success("Contrat envoyé au client");
+      const result = await sendContract(contract.id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Contrat envoyé au client");
+      }
     } catch {
       toast.error("Erreur lors de l'envoi");
     } finally {
@@ -64,12 +68,14 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
     if (!confirm("Êtes-vous sûr de vouloir révoquer cette signature ?")) return;
     setLoading(true);
     try {
-      await revokeSignature(contract.id);
-      toast.success("Signature révoquée");
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Erreur lors de la révocation"
-      );
+      const result = await revokeSignature(contract.id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Signature révoquée");
+      }
+    } catch {
+      toast.error("Erreur lors de la révocation");
     } finally {
       setLoading(false);
     }
@@ -180,8 +186,8 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
                   onClick={handleSend}
                   disabled={loading}
                 >
-                  <Send className="h-4 w-4 mr-2" />
-                  Envoyer au client
+                  {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+                  {loading ? "Envoi en cours..." : "Envoyer au client"}
                 </Button>
               )}
 
@@ -214,8 +220,8 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
                       onClick={handleRevoke}
                       disabled={loading}
                     >
-                      <ShieldX className="h-4 w-4 mr-2" />
-                      Révoquer la signature
+                      {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldX className="h-4 w-4 mr-2" />}
+                      {loading ? "Révocation..." : "Révoquer la signature"}
                     </Button>
                   )}
                 </>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,8 +100,9 @@ export function PaymentsView({ installments, overdue }: Props) {
   function handleRecordPayment(installmentId: string) {
     startTransition(async () => {
       try {
-        await recordPayment(installmentId);
-        toast.success("Paiement enregistre avec succes");
+        const result = await recordPayment(installmentId);
+        if (result.error) { toast.error(result.error); return; }
+        toast.success("Paiement enregistré avec succès");
         router.refresh();
       } catch {
         toast.error("Erreur lors de l'enregistrement du paiement");

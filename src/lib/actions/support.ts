@@ -276,7 +276,8 @@ export async function getTickets() {
     // Table doesn't exist or query failed — fallback to demo
   }
 
-  return DEMO_TICKETS.map(({ messages: _messages, ...ticket }) => ticket);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return DEMO_TICKETS.map(({ messages, ...ticket }) => ticket);
 }
 
 export async function getAllTickets() {
@@ -308,7 +309,8 @@ export async function getAllTickets() {
     // Fallback to demo
   }
 
-  return DEMO_TICKETS.map(({ messages: _messages, ...ticket }) => ticket);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return DEMO_TICKETS.map(({ messages, ...ticket }) => ticket);
 }
 
 export async function createTicket(data: {

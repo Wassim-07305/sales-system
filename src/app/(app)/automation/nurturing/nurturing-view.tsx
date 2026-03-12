@@ -35,7 +35,6 @@ import {
   Plus,
   Trash2,
   Zap,
-  Clock,
   Mail,
   MessageSquare,
 } from "lucide-react";
@@ -210,7 +209,7 @@ export function NurturingView({ rules, executions }: Props) {
                   onChange={(e) => setDelay(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Temps d'attente après l'événement déclencheur
+                  Temps d&apos;attente après l&apos;événement déclencheur
                 </p>
               </div>
 
@@ -282,7 +281,7 @@ export function NurturingView({ rules, executions }: Props) {
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">
-                      {rule.is_active ? "Active" : "Inactive"}
+                      {rule.is_active ? "Activée" : "Désactivée"}
                     </span>
                     <Switch
                       checked={rule.is_active}

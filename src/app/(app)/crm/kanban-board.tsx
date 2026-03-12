@@ -11,10 +11,6 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { KanbanColumn } from "./kanban-column";
 import { DealCard } from "./deal-card";
 import { NewDealDialog } from "./new-deal-dialog";
@@ -32,7 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, BarChart3 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { getFilteredDeals, getDealSources, getTeamMembers, updateDealStage, type DealFilters } from "@/lib/actions/crm";
 
 interface TeamMember {
@@ -66,7 +64,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
   const [advancedFilters, setAdvancedFilters] = useState<DealFilters>({ sortBy: "created_at_desc" });
   const [sources, setSources] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   // Load sources and team members on mount
   useEffect(() => {
@@ -86,7 +84,9 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
       (advancedFilters.sortBy && advancedFilters.sortBy !== "created_at_desc");
 
     if (!hasAdvancedFilters) {
-      setDeals(initialDeals);
+      startTransition(() => {
+        setDeals(initialDeals);
+      });
       return;
     }
 
@@ -203,6 +203,35 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         </Select>
         <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
       </div>
+
+      {/* Empty state: zero deals */}
+      {deals.length === 0 && (
+        <Card className="mb-6 border-brand/20 bg-brand/5">
+          <CardContent className="p-8 text-center">
+            <BarChart3 className="h-10 w-10 mx-auto text-brand/50 mb-3" />
+            <p className="font-medium text-lg">Votre pipeline est vide</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Créez votre premier deal pour commencer à suivre vos opportunités.
+            </p>
+            <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No results message */}
+      {filteredDeals.length === 0 && deals.length > 0 && (
+        <div className="text-center py-8 mb-4">
+          <p className="text-muted-foreground">Aucun deal ne correspond aux filtres actuels.</p>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => { setSearchQuery(""); setTempFilter("all"); }}
+            className="text-brand"
+          >
+            Réinitialiser les filtres
+          </Button>
+        </div>
+      )}
 
       {/* Kanban */}
       <DndContext

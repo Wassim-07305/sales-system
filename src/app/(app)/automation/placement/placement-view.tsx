@@ -28,8 +28,6 @@ import {
   Plus,
   Trash2,
   Play,
-  Zap,
-  CheckCircle2,
   ArrowRightLeft,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -74,6 +72,7 @@ export function PlacementView({ rules, executions }: Props) {
         const result = await runPlacementWorkflow();
         toast.success(`Placement terminé : ${result.matched} match(es) créé(s)`);
         router.refresh();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         toast.error(err?.message || "Erreur lors du placement");
       }

@@ -89,7 +89,7 @@ const statusColors: Record<string, string> = {
 
 export function InstagramView({ prospects }: Props) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   // Search & filter
   const [search, setSearch] = useState("");

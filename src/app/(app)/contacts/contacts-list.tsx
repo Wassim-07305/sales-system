@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Profile, UserRole } from "@/lib/types/database";
-import { Search, Plus, Mail, Phone, Download } from "lucide-react";
+import { Search, Mail, Phone, Download } from "lucide-react";
 import { toast } from "sonner";
 import { ImportExportDialog } from "./import-export-dialog";
 import { ExportDialog } from "@/components/export-dialog";

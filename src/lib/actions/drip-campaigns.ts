@@ -52,8 +52,8 @@ export async function getDripCampaigns(): Promise<DripCampaign[]> {
     .filter(Boolean);
 
   // Fetch prospect counts per list
-  let listCounts: Record<string, number> = {};
-  let listNames: Record<string, string> = {};
+  const listCounts: Record<string, number> = {};
+  const listNames: Record<string, string> = {};
   if (listIds.length > 0) {
     const { data: lists } = await supabase
       .from("prospect_lists")

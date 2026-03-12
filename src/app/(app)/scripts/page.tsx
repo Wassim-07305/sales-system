@@ -20,8 +20,11 @@ export default async function ScriptsPage() {
 
   return (
     <ScriptsView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       scripts={(scripts || []) as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       flowcharts={flowcharts as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mindMaps={mindMaps as any}
     />
   );

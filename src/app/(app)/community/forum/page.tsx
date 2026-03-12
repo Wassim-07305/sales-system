@@ -32,13 +32,16 @@ export default async function ForumPage() {
 
   // Batch fetch reputations for post authors
   const authorIds = [...new Set(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     normalizedPosts.map((p: any) => (p.author as any)?.id).filter(Boolean)
   )] as string[];
   const reputations = await getUserReputationBatch(authorIds);
 
   return (
     <ForumView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       posts={normalizedPosts as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       modules={(modules || []) as any}
       userId={user.id}
       reputations={reputations}

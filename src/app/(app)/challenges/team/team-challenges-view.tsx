@@ -8,7 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Users,
   Trophy,
-  Target,
   Clock,
   Zap,
   ArrowLeft,

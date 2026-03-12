@@ -19,11 +19,6 @@ const phoneSchema = z
   .optional()
   .or(z.literal(""));
 
-const paginationSchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-});
-
 // ============================================================
 // CRM — Deals
 // ============================================================
@@ -270,4 +265,4 @@ export type CreateProspectInput = z.infer<typeof createProspectSchema>;
 export type UpdateProspectInput = z.infer<typeof updateProspectSchema>;
 export type CreateCommunityPostInput = z.infer<typeof createCommunityPostSchema>;
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
-export type PaginationInput = z.infer<typeof paginationSchema>;
+

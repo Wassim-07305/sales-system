@@ -63,27 +63,27 @@ const B2C_STEPS: StepDef[] = [
     id: "identity",
     type: "text",
     title: "Comment tu t'appelles ?",
-    subtitle: "Ton prenom et nom complet",
+    subtitle: "Ton prénom et nom complet",
   },
   {
     id: "phone",
     type: "text",
-    title: "Ton numero de telephone",
+    title: "Ton numéro de téléphone",
     subtitle: "Pour qu'on puisse te contacter",
   },
   {
     id: "bio",
     type: "textarea",
-    title: "Presente-toi en quelques mots",
-    subtitle: "Ta bio courte (max 200 caracteres)",
+    title: "Présente-toi en quelques mots",
+    subtitle: "Ta bio courte (max 200 caractères)",
   },
   {
     id: "skills",
     type: "text",
-    title: "Tes competences",
-    subtitle: "Separe-les par des virgules",
+    title: "Tes compétences",
+    subtitle: "Sépare-les par des virgules",
   },
-  { id: "summary", type: "summary", title: "Ton profil est pret !" },
+  { id: "summary", type: "summary", title: "Ton profil est prêt !" },
 ];
 
 const B2B_STEPS: StepDef[] = [
@@ -92,7 +92,7 @@ const B2B_STEPS: StepDef[] = [
     id: "avatar",
     type: "avatar",
     title: "Ta photo de profil",
-    subtitle: "L'identite visuelle de ton entreprise",
+    subtitle: "L'identité visuelle de ton entreprise",
   },
   {
     id: "company",
@@ -103,8 +103,8 @@ const B2B_STEPS: StepDef[] = [
   {
     id: "business",
     type: "textarea",
-    title: "Decris ton activite",
-    subtitle: "Ton offre, ton marche cible, ce que tu fais exactement",
+    title: "Décris ton activité",
+    subtitle: "Ton offre, ton marché cible, ce que tu fais exactement",
   },
   {
     id: "qualification",
@@ -116,24 +116,24 @@ const B2B_STEPS: StepDef[] = [
     id: "channels",
     type: "chips",
     title: "Tes canaux de prospection",
-    subtitle: "Selectionne ceux que tu utilises",
+    subtitle: "Sélectionne ceux que tu utilises",
   },
   {
     id: "social",
     type: "social",
-    title: "Tes reseaux sociaux",
+    title: "Tes réseaux sociaux",
     subtitle: "LinkedIn et Instagram pour le setting IA",
   },
-  { id: "summary", type: "summary", title: "Ton profil est pret !" },
+  { id: "summary", type: "summary", title: "Ton profil est prêt !" },
 ];
 
 const CHANNELS = [
   "LinkedIn",
   "Instagram",
   "Email",
-  "Telephone",
-  "Reseaux",
-  "Bouche a oreille",
+  "Téléphone",
+  "Réseaux",
+  "Bouche à oreille",
 ];
 
 // ---------------------------------------------------------------------------
@@ -142,9 +142,11 @@ const CHANNELS = [
 
 export function OnboardingFlow({
   role,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userId,
   userName,
 }: OnboardingFlowProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
   const steps = role === "client_b2b" ? B2B_STEPS : B2C_STEPS;
   const [step, setStep] = useState(0);
@@ -169,7 +171,6 @@ export function OnboardingFlow({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentStep = steps[step];
-  const isFirst = step === 0;
   const isLast = step === steps.length - 1;
   const totalReal = steps.length - 2; // exclude welcome + summary
   const currentReal = Math.max(0, Math.min(step - 1, totalReal));
@@ -197,8 +198,6 @@ export function OnboardingFlow({
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       if (e.key === "Enter" && !e.shiftKey) {
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === "TEXTAREA") return;
         e.preventDefault();
         if (isLast) {
           handleComplete();
@@ -214,7 +213,7 @@ export function OnboardingFlow({
 
   async function handleAvatarUpload(file: File) {
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("L'image ne doit pas depasser 10 Mo");
+      toast.error("L'image ne doit pas dépasser 10 Mo");
       return;
     }
     setUploadingAvatar(true);
@@ -228,7 +227,7 @@ export function OnboardingFlow({
       }
       setAvatarUrl(result.url || "");
       setAvatarPreview(URL.createObjectURL(file));
-      toast.success("Photo uploadee !");
+      toast.success("Photo chargée !");
     } catch {
       toast.error("Erreur lors de l'upload");
     } finally {
@@ -362,7 +361,7 @@ export function OnboardingFlow({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatarPreview}
-              alt="Apercu"
+              alt="Aperçu"
               className="w-full h-full object-cover"
             />
           ) : (
@@ -563,19 +562,19 @@ export function OnboardingFlow({
             {
               icon: User,
               label: "Photo",
-              value: avatarPreview ? "Uploadee" : "Non definie",
+              value: avatarPreview ? "__avatar__" : "Non définie",
             },
             {
               icon: FileText,
               label: "Entreprise",
-              value: company || "Non defini",
+              value: company || "Non défini",
             },
             {
               icon: FileText,
               label: "Business",
               value: businessDesc
                 ? businessDesc.slice(0, 50) + "..."
-                : "Non defini",
+                : "Non défini",
             },
             {
               icon: Target,
@@ -585,26 +584,26 @@ export function OnboardingFlow({
             {
               icon: Link2,
               label: "LinkedIn",
-              value: linkedinUrl || "Non defini",
+              value: linkedinUrl || "Non défini",
             },
           ]
         : [
             {
               icon: User,
               label: "Photo",
-              value: avatarPreview ? "Uploadee" : "Non definie",
+              value: avatarPreview ? "__avatar__" : "Non définie",
             },
-            { icon: User, label: "Nom", value: fullName || "Non defini" },
-            { icon: Phone, label: "Telephone", value: phone || "Non defini" },
+            { icon: User, label: "Nom", value: fullName || "Non défini" },
+            { icon: Phone, label: "Téléphone", value: phone || "Non défini" },
             {
               icon: FileText,
               label: "Bio",
-              value: bio ? bio.slice(0, 50) + "..." : "Non definie",
+              value: bio ? bio.slice(0, 50) + "..." : "Non définie",
             },
             {
               icon: Target,
-              label: "Competences",
-              value: skills || "Non defini",
+              label: "Compétences",
+              value: skills || "Non défini",
             },
           ];
 
@@ -626,7 +625,15 @@ export function OnboardingFlow({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/40">{item.label}</p>
-                  <p className="text-sm text-white truncate">{item.value}</p>
+                  {item.value === "__avatar__" ? (
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={avatarPreview} alt="" className="w-6 h-6 rounded-full object-cover" />
+                      <CheckCircle2 className="h-4 w-4 text-[#7af17a]" />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white truncate">{item.value}</p>
+                  )}
                 </div>
               </motion.div>
             );
@@ -646,7 +653,7 @@ export function OnboardingFlow({
           ) : (
             <>
               <Sparkles className="h-5 w-5" />
-              Terminer et acceder au dashboard
+              Terminer et accéder au dashboard
             </>
           )}
         </motion.button>
@@ -784,7 +791,7 @@ export function OnboardingFlow({
                   {currentStep.title}
                 </h2>
                 <p className="text-white/40 mt-2">
-                  Voici un resume de ton profil
+                  Voici un résumé de ton profil
                 </p>
               </div>
             )}
@@ -804,7 +811,7 @@ export function OnboardingFlow({
                   >
                     OK
                     <span className="text-xs px-1.5 py-0.5 rounded bg-white/10 text-white/40 group-hover:text-white/60 transition-colors">
-                      Entree
+                      Entrée
                     </span>
                   </button>
                 </div>
@@ -816,7 +823,7 @@ export function OnboardingFlow({
       {/* Footer hint */}
       <div className="fixed bottom-6 left-0 right-0 z-40 text-center">
         <p className="text-xs text-white/20">
-          Tu pourras modifier ces informations dans tes parametres
+          Tu pourras modifier ces informations dans tes paramètres
         </p>
       </div>
     </div>

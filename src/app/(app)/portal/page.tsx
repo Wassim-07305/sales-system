@@ -20,5 +20,6 @@ export default async function PortalPage() {
 
   const data = await getPortalData();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <PortalView data={data as any} />;
 }

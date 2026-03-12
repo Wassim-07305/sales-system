@@ -39,6 +39,8 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    document.cookie = "x-user-role=; path=/; max-age=0";
+    document.cookie = "x-onboarding-done=; path=/; max-age=0";
     router.push("/login");
     router.refresh();
   }

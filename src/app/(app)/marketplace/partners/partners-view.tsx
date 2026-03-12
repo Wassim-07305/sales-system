@@ -33,17 +33,14 @@ import {
   Handshake,
   Building,
   DollarSign,
-  Users,
   CheckCircle,
   XCircle,
   Plus,
   ChevronDown,
   ChevronUp,
   Star,
-  Clock,
   Pencil,
   Ban,
-  Download,
 } from "lucide-react";
 import {
   BarChart,
@@ -533,6 +530,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                         borderRadius: "8px",
                         color: "white",
                       }}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={((value: any) => [`${Number(value || 0).toLocaleString("fr-FR")} \u20ac`, undefined]) as any}
                       labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                     />

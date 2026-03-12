@@ -87,6 +87,7 @@ const temperatureConfig: Record<string, { label: string; color: string; icon: ty
 export function ProspectingView({
   prospects,
   quota,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   lists,
   segmentStats,
 }: {

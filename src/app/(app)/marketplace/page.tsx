@@ -13,7 +13,9 @@ export default async function MarketplacePage() {
 
   return (
     <MarketplaceView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       listings={listings as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       myApplications={myApplications as any}
     />
   );

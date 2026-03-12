@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { createContract, sendContract } from "@/lib/actions/contracts";
 import { toast } from "sonner";
-import { ArrowLeft, Eye, Send, Save } from "lucide-react";
+import { ArrowLeft, Eye, Send, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -25,22 +25,23 @@ interface Props {
   templates: Array<{ id: string; name: string; content: string }>;
   clients: Array<{ id: string; full_name: string | null; email: string; company: string | null }>;
   deals: Array<{ id: string; title: string; value: number; contact: { id: string; full_name: string | null; email: string } | null }>;
+  initialDealId?: string;
+  initialClientId?: string;
+  initialAmount?: string;
 }
 
-export function NewContractForm({ templates, clients, deals }: Props) {
+export function NewContractForm({ templates, clients, deals, initialDealId, initialClientId, initialAmount }: Props) {
   const router = useRouter();
   const [templateId, setTemplateId] = useState("");
-  const [clientId, setClientId] = useState("");
-  const [dealId, setDealId] = useState("");
-  const [amount, setAmount] = useState("");
+  const [clientId, setClientId] = useState(initialClientId || "");
+  const [dealId, setDealId] = useState(initialDealId || "");
+  const [amount, setAmount] = useState(initialAmount || "");
   const [paymentSchedule, setPaymentSchedule] = useState("");
   const [offerName, setOfferName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const selectedTemplate = templates.find((t) => t.id === templateId);
   const selectedClient = clients.find((c) => c.id === clientId);
-  const selectedDeal = deals.find((d) => d.id === dealId);
-
   // Auto-fill from deal
   function handleDealChange(id: string) {
     setDealId(id);
@@ -75,7 +76,7 @@ export function NewContractForm({ templates, clients, deals }: Props) {
 
     setLoading(true);
     try {
-      const contract = await createContract({
+      const result = await createContract({
         templateId,
         clientId,
         dealId: dealId || undefined,
@@ -84,15 +85,24 @@ export function NewContractForm({ templates, clients, deals }: Props) {
         paymentSchedule,
       });
 
-      if (send) {
-        await sendContract(contract.id);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      if (send && result.data) {
+        const sendResult = await sendContract(result.data.id);
+        if (sendResult.error) {
+          toast.error(sendResult.error);
+          return;
+        }
         toast.success("Contrat envoyé au client");
       } else {
         toast.success("Contrat sauvegardé en brouillon");
       }
 
       router.push("/contracts");
-    } catch (err) {
+    } catch {
       toast.error("Erreur lors de la création du contrat");
     } finally {
       setLoading(false);
@@ -201,16 +211,16 @@ export function NewContractForm({ templates, clients, deals }: Props) {
               onClick={() => handleSave(false)}
               disabled={loading}
             >
-              <Save className="h-4 w-4 mr-2" />
-              Sauvegarder brouillon
+              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              {loading ? "Sauvegarde..." : "Sauvegarder brouillon"}
             </Button>
             <Button
               className="flex-1 bg-brand text-brand-dark hover:bg-brand/90"
               onClick={() => handleSave(true)}
               disabled={loading}
             >
-              <Send className="h-4 w-4 mr-2" />
-              Envoyer au client
+              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              {loading ? "Envoi en cours..." : "Envoyer au client"}
             </Button>
           </div>
         </div>

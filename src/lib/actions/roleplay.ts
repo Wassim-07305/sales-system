@@ -99,8 +99,13 @@ RÈGLES :
     { role: "system", content: systemPrompt },
   ];
 
-  // Add conversation history
-  for (const msg of messages) {
+  // Add conversation history (pruned to last 20 messages to avoid context overflow)
+  const MAX_HISTORY = 20;
+  const recentMessages = messages.length > MAX_HISTORY
+    ? messages.slice(-MAX_HISTORY)
+    : messages;
+
+  for (const msg of recentMessages) {
     aiMessages.push({
       role: msg.role === "user" ? "user" : "assistant",
       content: msg.content,

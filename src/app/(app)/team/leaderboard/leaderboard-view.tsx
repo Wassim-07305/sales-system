@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Crown, ArrowLeft } from "lucide-react";
+import { Medal, Crown, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 interface LeaderboardEntry {
@@ -23,10 +22,7 @@ interface Props {
 }
 
 export function LeaderboardView({ leaderboard, currentUserId }: Props) {
-  const [period] = useState<"week" | "month" | "all">("all");
-
   const top3 = leaderboard.slice(0, 3);
-  const rest = leaderboard.slice(3);
 
   const rankIcons = [
     <Crown key="1" className="h-8 w-8 text-yellow-500" />,
@@ -47,6 +43,19 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
           </Button>
         </Link>
       </PageHeader>
+
+      {/* Empty state */}
+      {leaderboard.length === 0 && (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Crown className="h-10 w-10 mx-auto text-yellow-500/30 mb-3" />
+            <p className="font-medium text-lg">Aucun classement disponible</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Le leaderboard se remplira automatiquement lorsque les membres de l&apos;equipe accumuleront des points.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Top 3 podium */}
       {top3.length > 0 && (

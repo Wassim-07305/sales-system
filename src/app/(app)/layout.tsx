@@ -23,14 +23,28 @@ export default async function AppLayout({
     .eq("id", user.id)
     .single();
 
-  // If no profile yet, create one with defaults
-  const userProfile = profile || {
-    id: user.id,
-    email: user.email || "",
-    full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Utilisateur",
-    avatar_url: null,
-    role: "client_b2c" as UserRole,
-  };
+  // If no profile yet, create one with defaults and persist to DB
+  let userProfile = profile;
+  if (!userProfile) {
+    const fallback = {
+      id: user.id,
+      email: user.email || "",
+      full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Utilisateur",
+      avatar_url: null,
+      role: "client_b2c" as UserRole,
+      onboarding_completed: false,
+    };
+
+    await supabase.from("profiles").upsert({
+      id: user.id,
+      email: fallback.email,
+      full_name: fallback.full_name,
+      role: fallback.role,
+      onboarding_completed: false,
+    });
+
+    userProfile = fallback;
+  }
 
   return (
     <AppShell
