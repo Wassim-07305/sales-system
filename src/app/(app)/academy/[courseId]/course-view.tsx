@@ -42,6 +42,7 @@ interface LessonData {
   title: string;
   description: string | null;
   video_url: string | null;
+  subtitle_url: string | null;
   duration_minutes: number | null;
   attachments: Array<{ name: string; url: string; type: string }>;
   content_html: string | null;
@@ -1044,6 +1045,40 @@ export function CourseView({
 }
 
 // ---------------------------------------------------------------------------
+// Video position persistence (localStorage)
+// ---------------------------------------------------------------------------
+
+function getStoredPosition(lessonId: string): number {
+  try {
+    return parseFloat(localStorage.getItem(`video-pos:${lessonId}`) || "0") || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function storePosition(lessonId: string, time: number) {
+  try {
+    localStorage.setItem(`video-pos:${lessonId}`, String(Math.floor(time)));
+  } catch {
+    // quota exceeded
+  }
+}
+
+function clearStoredPosition(lessonId: string) {
+  try {
+    localStorage.removeItem(`video-pos:${lessonId}`);
+  } catch {
+    // ignore
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Playback speed options
+// ---------------------------------------------------------------------------
+
+const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+// ---------------------------------------------------------------------------
 // Video player sub-component
 // ---------------------------------------------------------------------------
 
@@ -1056,7 +1091,134 @@ function VideoPlayer({
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onTimeUpdate: () => void;
 }) {
-  // Pas de vidéo → rien du tout (les documents s'affichent directement après)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [resumeTime, setResumeTime] = useState<number | null>(null);
+  const [showResumeBar, setShowResumeBar] = useState(false);
+  const hasRestoredRef = useRef(false);
+  const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Check for stored position on mount / lesson change
+  useEffect(() => {
+    hasRestoredRef.current = false;
+    const stored = getStoredPosition(lesson.id);
+    if (stored > 5) {
+      setResumeTime(stored);
+      setShowResumeBar(true);
+    } else {
+      setResumeTime(null);
+      setShowResumeBar(false);
+    }
+  }, [lesson.id]);
+
+  // Periodic save of current position
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !lesson.video_url) return;
+
+    saveIntervalRef.current = setInterval(() => {
+      if (video.currentTime > 5 && !video.ended) {
+        storePosition(lesson.id, video.currentTime);
+      }
+    }, 5000);
+
+    return () => {
+      if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
+    };
+  }, [lesson.id, lesson.video_url, videoRef]);
+
+  // Clear stored position when video ends
+  const handleEnded = useCallback(() => {
+    clearStoredPosition(lesson.id);
+  }, [lesson.id]);
+
+  // Resume playback from stored position
+  const handleResume = useCallback(() => {
+    const video = videoRef.current;
+    if (video && resumeTime) {
+      video.currentTime = resumeTime;
+      video.play();
+    }
+    setShowResumeBar(false);
+  }, [videoRef, resumeTime]);
+
+  // Apply playback speed when video loads or speed changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed, videoRef, lesson.id]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+
+      switch (e.key) {
+        case " ":
+        case "k":
+          e.preventDefault();
+          video.paused ? video.play() : video.pause();
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          video.currentTime = Math.max(0, video.currentTime - 10);
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          video.currentTime = Math.min(video.duration, video.currentTime + 10);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+          break;
+        case "f":
+          e.preventDefault();
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            video.requestFullscreen();
+          }
+          break;
+        case "m":
+          e.preventDefault();
+          video.muted = !video.muted;
+          break;
+        case ">":
+          e.preventDefault();
+          {
+            const idx = PLAYBACK_SPEEDS.indexOf(playbackSpeed);
+            if (idx < PLAYBACK_SPEEDS.length - 1) {
+              setPlaybackSpeed(PLAYBACK_SPEEDS[idx + 1]);
+            }
+          }
+          break;
+        case "<":
+          e.preventDefault();
+          {
+            const idx = PLAYBACK_SPEEDS.indexOf(playbackSpeed);
+            if (idx > 0) {
+              setPlaybackSpeed(PLAYBACK_SPEEDS[idx - 1]);
+            }
+          }
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [videoRef, playbackSpeed, lesson.id]);
+
+  // Pas de vidéo → rien du tout
   if (!lesson.video_url) {
     return null;
   }
@@ -1077,14 +1239,91 @@ function VideoPlayer({
   }
 
   return (
-    <div className="aspect-video rounded-xl overflow-hidden bg-black">
-      <video
-        ref={videoRef}
-        src={embed.src}
-        className="w-full h-full"
-        controls
-        onTimeUpdate={onTimeUpdate}
-      />
+    <div className="relative">
+      {/* Resume bar */}
+      {showResumeBar && resumeTime && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-black/80 text-white rounded-lg px-4 py-2 flex items-center gap-3 text-sm backdrop-blur-sm">
+          <Clock className="h-4 w-4 text-brand" />
+          <span>
+            Reprendre à {Math.floor(resumeTime / 60)}:{String(Math.floor(resumeTime % 60)).padStart(2, "0")}
+          </span>
+          <button
+            onClick={handleResume}
+            className="px-3 py-1 bg-brand text-brand-dark rounded-md text-xs font-medium hover:bg-brand/90"
+          >
+            Reprendre
+          </button>
+          <button
+            onClick={() => setShowResumeBar(false)}
+            className="p-1 hover:bg-white/10 rounded"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
+      <div className="aspect-video rounded-xl overflow-hidden bg-black">
+        <video
+          ref={videoRef}
+          src={embed.src}
+          className="w-full h-full"
+          controls
+          onTimeUpdate={onTimeUpdate}
+          onEnded={handleEnded}
+          crossOrigin="anonymous"
+        >
+          {lesson.subtitle_url && (
+            <track
+              kind="subtitles"
+              src={lesson.subtitle_url}
+              srcLang="fr"
+              label="Français"
+              default
+            />
+          )}
+        </video>
+      </div>
+
+      {/* Playback speed control */}
+      <div className="flex items-center justify-between mt-2">
+        <div className="relative">
+          <button
+            onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+          >
+            <Play className="h-3 w-3" />
+            Vitesse : {playbackSpeed}x
+          </button>
+          {showSpeedMenu && (
+            <div className="absolute bottom-full left-0 mb-1 bg-popover border rounded-lg shadow-lg p-1 z-20">
+              {PLAYBACK_SPEEDS.map((speed) => (
+                <button
+                  key={speed}
+                  onClick={() => {
+                    setPlaybackSpeed(speed);
+                    setShowSpeedMenu(false);
+                  }}
+                  className={cn(
+                    "block w-full text-left px-3 py-1.5 rounded text-xs transition-colors",
+                    speed === playbackSpeed
+                      ? "bg-brand/10 text-brand font-medium"
+                      : "hover:bg-muted text-foreground"
+                  )}
+                >
+                  {speed}x
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <span>Espace : lecture/pause</span>
+          <span>← → : ±10s</span>
+          <span>&lt; &gt; : vitesse</span>
+          <span>F : plein écran</span>
+        </div>
+      </div>
     </div>
   );
 }

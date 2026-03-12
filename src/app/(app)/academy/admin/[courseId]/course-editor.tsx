@@ -256,6 +256,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
             description: savedLesson.description,
             position: m.lessons.length,
             video_url: null,
+            subtitle_url: null,
             transcript: null,
             duration_minutes: null,
             attachments: [],
@@ -742,6 +743,7 @@ function LessonEditor({
   const [title, setTitle] = useState(lesson.title);
   const [description, setDescription] = useState(lesson.description || "");
   const [videoUrl, setVideoUrl] = useState(lesson.video_url || "");
+  const [subtitleUrl, setSubtitleUrl] = useState(lesson.subtitle_url || "");
   const [duration, setDuration] = useState<string>(
     lesson.duration_minutes?.toString() || ""
   );
@@ -761,6 +763,7 @@ function LessonEditor({
         title: title.trim(),
         description: description.trim() || undefined,
         video_url: videoUrl.trim() || null,
+        subtitle_url: subtitleUrl.trim() || null,
         duration_minutes: durationNum,
       });
       onUpdate({
@@ -768,6 +771,7 @@ function LessonEditor({
         title: title.trim(),
         description: description.trim() || null,
         video_url: videoUrl.trim() || null,
+        subtitle_url: subtitleUrl.trim() || null,
         duration_minutes: durationNum,
       });
       toast.success("Lecon mise a jour");
@@ -926,6 +930,42 @@ function LessonEditor({
                 videoUrl && videoUrl.includes("supabase") ? videoUrl : undefined
               }
               label="Glissez une video ou cliquez pour uploader"
+            />
+
+            {/* Sous-titres */}
+            <div className="relative flex items-center mt-4">
+              <div className="flex-1 border-t" />
+              <span className="px-3 text-xs text-muted-foreground bg-background">Sous-titres (optionnel)</span>
+              <div className="flex-1 border-t" />
+            </div>
+
+            {subtitleUrl && (
+              <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Sous-titres actuels :</p>
+                <p className="text-sm truncate">{subtitleUrl.split("/").pop()}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => setSubtitleUrl("")}
+                >
+                  <X className="h-3.5 w-3.5 mr-1.5" />
+                  Retirer les sous-titres
+                </Button>
+              </div>
+            )}
+
+            <FileUpload
+              bucket="academy"
+              path="resources"
+              accept=".vtt,.srt"
+              maxSize={10}
+              onUpload={(url) => setSubtitleUrl(url)}
+              onRemove={() => setSubtitleUrl("")}
+              currentUrl={
+                subtitleUrl && subtitleUrl.includes("supabase") ? subtitleUrl : undefined
+              }
+              label="Uploader un fichier de sous-titres (.vtt, .srt)"
             />
           </div>
         </CardContent>

@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~91% (68 faits / 7 partiels / 5 manquants)
+> **Couverture globale** : ~92% (69 faits / 6 partiels / 5 manquants)
 
 ---
 
@@ -126,7 +126,7 @@
 | F30 | Progression & Suivi | ✅ Fait | Tracking complétion |
 | F31 | Gamification Academy | ✅ Fait | `academy/certificates/`, badges, points |
 | F32 | Gestion Admin des Contenus | ✅ Fait | `academy/admin/` |
-| F32.1 | Vidéos & Uploads Multimédias | ⚠️ Partiel | Embed YouTube/Vimeo OK — 🔒 Upload + Whisper manquants |
+| F32.1 | Vidéos & Uploads Multimédias | ✅ Fait | Upload Supabase Storage (500MB), player avancé (vitesse, raccourcis clavier, reprise position), sous-titres VTT, embed YouTube/Vimeo/Loom |
 | F32.2 | Quizzes Avancés & Évaluations | ✅ Fait | `academy/revision/` |
 | F32.3 | Ressources et Documents | ✅ Fait | `academy/library/` |
 | F32.4 | Apprentissage Adaptatif | ✅ Fait | `academy/diagnostic/`, `academy/path/` |
@@ -243,8 +243,8 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 68 | 85% |
-| ⚠️ Partiel | 7 | 9% |
+| ✅ Fait | 69 | 86% |
+| ⚠️ Partiel | 6 | 8% |
 | ❌ Manquant | 5 | 6% |
 | **Total** | **80** | **100%** |
 
@@ -262,7 +262,7 @@
 2. **F10.2** — Email reminders (SMTP : Resend, SendGrid, etc.)
 3. **F23.1** — Collab real-time scripts (Supabase Realtime)
 4. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait
-5. **F32.1** — Upload vidéo + transcription (Supabase Storage + Whisper API)
+5. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait
 6. **F43.2** — WhatsApp Business API réelle
 7. ~~**F54.9** — Migration CRM complète~~ ✅ Fait
 8. **F56** — Monitoring (Sentry gratuit)

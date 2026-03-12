@@ -181,6 +181,7 @@ export interface Lesson {
   description: string | null;
   position: number;
   video_url: string | null;
+  subtitle_url: string | null;
   transcript: string | null;
   duration_minutes: number | null;
   attachments: Array<{ name: string; url: string; type: string }>;

@@ -238,6 +238,7 @@ export async function updateLesson(lessonId: string, data: {
   title?: string;
   description?: string;
   video_url?: string | null;
+  subtitle_url?: string | null;
   duration_minutes?: number | null;
   content_html?: string | null;
   attachments?: Array<{ name: string; url: string; type: string }>;

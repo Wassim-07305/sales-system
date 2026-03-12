@@ -80,6 +80,7 @@ type CourseViewCourse = {
       title: string;
       description: string | null;
       video_url: string | null;
+      subtitle_url: string | null;
       duration_minutes: number | null;
       attachments: Array<{ name: string; url: string; type: string }>;
       content_html: string | null;
