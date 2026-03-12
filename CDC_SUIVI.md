@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~93% (70 faits / 5 partiels / 5 manquants)
+> **Couverture globale** : ~94% (71 faits / 4 partiels / 5 manquants)
 
 ---
 
@@ -233,7 +233,7 @@
 |---|---------|--------|---------------|
 | F55 | Performance Optimization | ✅ Fait | `optimizePackageImports` (recharts, lucide, dnd-kit), dynamic imports react-pdf, middleware cookie cache (role/onboarding), `next/image` community, `staleTimes` client cache, `transpilePackages` ESM |
 | F56 | Monitoring & Alerting | ❌ Manquant | 🔒 Sentry = service tiers |
-| F57 | Feature Releases & Updates | ⚠️ Infra | CI/CD pipeline à configurer |
+| F57 | Feature Releases & Updates | ✅ Fait | `.github/workflows/ci.yml` — lint, build, deploy preview (PR) + production (main) via Vercel |
 | F56.1 | Backup & Disaster Recovery | ✅ Infra | Géré par Supabase |
 | F56.2 | High Availability | ✅ Infra | Géré par Vercel/Supabase |
 
@@ -243,8 +243,8 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 70 | 88% |
-| ⚠️ Partiel | 5 | 6% |
+| ✅ Fait | 71 | 89% |
+| ⚠️ Partiel | 4 | 5% |
 | ❌ Manquant | 5 | 6% |
 | **Total** | **80** | **100%** |
 
