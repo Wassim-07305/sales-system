@@ -11,17 +11,20 @@ export default async function OnboardingPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, onboarding_completed")
+    .select("role, onboarding_completed, full_name")
     .eq("id", user.id)
     .single();
 
-  // If already completed, redirect to dashboard
   if (profile?.onboarding_completed) redirect("/dashboard");
 
   const role = profile?.role || "client_b2c";
-
-  // Only clients go through onboarding
   if (role !== "client_b2b" && role !== "client_b2c") redirect("/dashboard");
 
-  return <OnboardingFlow role={role} userId={user.id} />;
+  return (
+    <OnboardingFlow
+      role={role}
+      userId={user.id}
+      userName={profile?.full_name || undefined}
+    />
+  );
 }
