@@ -175,6 +175,102 @@ export async function sendNotificationDigest(userId: string) {
   });
 }
 
+/**
+ * Send deal stage change notification email.
+ */
+export async function sendDealStageEmail(params: {
+  email: string;
+  name: string;
+  dealTitle: string;
+  oldStage: string;
+  newStage: string;
+}) {
+  return sendEmail({
+    to: params.email,
+    subject: `Deal "${params.dealTitle}" — ${params.newStage}`,
+    html: emailLayout(`
+      <h1 style="color:#14080e;margin:0 0 16px">Mise a jour de deal</h1>
+      <p>Bonjour ${params.name},</p>
+      <p>Le deal <strong>"${params.dealTitle}"</strong> a change de stage :</p>
+      <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0;text-align:center">
+        <span style="color:#666;text-decoration:line-through">${params.oldStage}</span>
+        <span style="margin:0 12px;color:#14080e">→</span>
+        <span style="color:#14080e;font-weight:700">${params.newStage}</span>
+      </div>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/crm"
+           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+          Voir le pipeline
+        </a>
+      </div>
+    `),
+  });
+}
+
+/**
+ * Send booking reminder email (24h before).
+ */
+export async function sendBookingReminder(params: {
+  email: string;
+  name: string;
+  date: string;
+  type: string;
+  prospectName: string;
+}) {
+  return sendEmail({
+    to: params.email,
+    subject: `Rappel : rendez-vous demain avec ${params.prospectName}`,
+    html: emailLayout(`
+      <h1 style="color:#14080e;margin:0 0 16px">Rappel de rendez-vous</h1>
+      <p>Bonjour ${params.name},</p>
+      <p>Vous avez un rendez-vous demain :</p>
+      <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0">
+        <p style="margin:0 0 8px"><strong>Prospect :</strong> ${params.prospectName}</p>
+        <p style="margin:0 0 8px"><strong>Date :</strong> ${params.date}</p>
+        <p style="margin:0"><strong>Type :</strong> ${params.type}</p>
+      </div>
+      <p>Preparez vos notes et soyez pret !</p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/bookings"
+           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+          Voir mes rendez-vous
+        </a>
+      </div>
+    `),
+  });
+}
+
+/**
+ * Send challenge achievement email.
+ */
+export async function sendChallengeAchievedEmail(params: {
+  email: string;
+  name: string;
+  challengeTitle: string;
+  points: number;
+}) {
+  return sendEmail({
+    to: params.email,
+    subject: `Challenge reussi : ${params.challengeTitle}`,
+    html: emailLayout(`
+      <h1 style="color:#14080e;margin:0 0 16px">Felicitations !</h1>
+      <p>Bonjour ${params.name},</p>
+      <p>Tu as complete le challenge <strong>"${params.challengeTitle}"</strong> et gagne <strong>${params.points} points</strong> !</p>
+      <div style="text-align:center;margin:32px 0">
+        <div style="display:inline-block;background:#7af17a;color:#14080e;padding:16px 32px;border-radius:50%;font-size:32px;font-weight:700">
+          +${params.points}
+        </div>
+      </div>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/challenges"
+           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+          Voir mes challenges
+        </a>
+      </div>
+    `),
+  });
+}
+
 /** Wraps HTML content in a branded email layout. */
 function emailLayout(content: string): string {
   return `

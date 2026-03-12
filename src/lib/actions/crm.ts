@@ -256,12 +256,47 @@ export async function updateDealStage(dealId: string, stageId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Get old stage name for email notification
+  const { data: deal } = await supabase
+    .from("deals")
+    .select("title, stage_id, assigned_to, pipeline_stages(name)")
+    .eq("id", dealId)
+    .single();
+
   const { error } = await supabase
     .from("deals")
     .update({ stage_id: stageId, updated_at: new Date().toISOString() })
     .eq("id", dealId);
 
   if (error) return { error: error.message };
+
+  // Send email notification (fire-and-forget)
+  if (deal?.assigned_to) {
+    const { data: newStage } = await supabase
+      .from("pipeline_stages")
+      .select("name")
+      .eq("id", stageId)
+      .single();
+    const { data: assignee } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", deal.assigned_to)
+      .single();
+
+    if (assignee?.email && newStage?.name) {
+      const stageData = deal.pipeline_stages;
+      const oldStageName = (Array.isArray(stageData) ? stageData[0]?.name : (stageData as { name: string } | null)?.name) || "—";
+      import("@/lib/actions/email").then(({ sendDealStageEmail }) =>
+        sendDealStageEmail({
+          email: assignee.email,
+          name: assignee.full_name || "",
+          dealTitle: deal.title,
+          oldStage: oldStageName,
+          newStage: newStage.name,
+        }).catch(() => {})
+      );
+    }
+  }
 
   revalidatePath("/crm");
   return { success: true };

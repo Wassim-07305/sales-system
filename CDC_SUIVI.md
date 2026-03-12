@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
 > **Dernière mise à jour** : 2026-03-11
-> **Couverture globale** : ~94% (71 faits / 4 partiels / 5 manquants)
+> **Couverture globale** : ~95% (72 faits / 3 partiels / 5 manquants)
 
 ---
 
@@ -60,7 +60,7 @@
 | F9 | Slots de Disponibilités | ✅ Fait | `bookings/page.tsx` |
 | F10 | Gestion des Appels | ✅ Fait | `calls/page.tsx` |
 | F10.1 | Sync Google Calendar & Outlook | ⚠️ Partiel | `bookings/calendar-sync/` — 🔒 OAuth Google API manquant |
-| F10.2 | Notifications & Reminders | ⚠️ Partiel | In-app OK — 🔒 SMTP/email service manquant |
+| F10.2 | Notifications & Reminders | ✅ Fait | Resend transactionnel (deal stage, booking confirmation/reminder, challenge, digest), cron `/api/cron/daily-emails`, `notification_preferences` table, settings UI |
 
 ## 6. Contrats & Facturation
 
@@ -243,8 +243,8 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 71 | 89% |
-| ⚠️ Partiel | 4 | 5% |
+| ✅ Fait | 72 | 90% |
+| ⚠️ Partiel | 3 | 4% |
 | ❌ Manquant | 5 | 6% |
 | **Total** | **80** | **100%** |
 
@@ -259,7 +259,7 @@
 ## Features améliorables sans API tierce
 
 1. **F10.1** — Google Calendar OAuth (faisable avec Google Cloud Console)
-2. **F10.2** — Email reminders (SMTP : Resend, SendGrid, etc.)
+2. ~~**F10.2** — Email reminders~~ ✅ Fait (Resend)
 3. **F23.1** — Collab real-time scripts (Supabase Realtime)
 4. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait
 5. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait
