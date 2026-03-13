@@ -1,5 +1,4 @@
 import Stripe from "stripe";
-import { getApiKey } from "@/lib/api-keys";
 
 function getStripeClientSync() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -12,10 +11,12 @@ function getStripeClientSync() {
 }
 
 /**
- * Async Stripe client getter — resolves key via getApiKey (env var + org_settings).
+ * Async Stripe client getter — resolves key from env var or Supabase org_settings.
  * Use this in server actions where you can await.
  */
 export async function getStripeClient(): Promise<Stripe> {
+  // Dynamic import to avoid "use server" module boundary issues
+  const { getApiKey } = await import("@/lib/api-keys");
   const key = await getApiKey("STRIPE_SECRET_KEY");
   if (!key) {
     throw new Error(
