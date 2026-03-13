@@ -97,7 +97,7 @@ export function TrainingView({
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Card className="bg-[#1a0f0f] border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-[#7af17a]/10">
@@ -110,7 +110,7 @@ export function TrainingView({
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-[#1a0f0f] border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-500/10">
@@ -123,7 +123,7 @@ export function TrainingView({
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-[#1a0f0f] border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-amber-500/10">
@@ -141,7 +141,7 @@ export function TrainingView({
       {/* Scripts Grid */}
       <h2 className="text-lg font-semibold mb-4">Scripts disponibles</h2>
       {trainableScripts.length === 0 ? (
-        <Card className="bg-[#1a0f0f] border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="py-12 text-center">
             <ScrollText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
@@ -166,7 +166,7 @@ export function TrainingView({
 
             return (
               <Link key={script.id} href={`/scripts/training/${script.id}`}>
-                <Card className="bg-[#1a0f0f] border-white/10 hover:border-[#7af17a]/40 transition-colors cursor-pointer h-full">
+                <Card className="bg-card border-border hover:border-[#7af17a]/40 transition-colors cursor-pointer h-full">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-base font-medium line-clamp-1">
@@ -189,7 +189,7 @@ export function TrainingView({
                         {nodeCount} noeuds
                       </span>
                       {script.category && (
-                        <Badge variant="outline" className="text-xs border-white/10">
+                        <Badge variant="outline" className="text-xs border-border">
                           {script.category}
                         </Badge>
                       )}
@@ -214,7 +214,7 @@ export function TrainingView({
           <h2 className="text-lg font-semibold mb-4">Historique récent</h2>
           <div className="space-y-2">
             {history.slice(0, 10).map((result) => (
-              <Card key={result.id} className="bg-[#1a0f0f] border-white/10">
+              <Card key={result.id} className="bg-card border-border">
                 <CardContent className="py-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div

@@ -191,7 +191,7 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
               </div>
             </div>
             <div className="mt-4">
-              <div className="flex justify-between text-xs text-white/50 mb-1">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
                 <span>{currentLevel.name}</span>
                 {!isMaxLevel && (
                   <span>
@@ -201,19 +201,19 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
               </div>
               <Progress
                 value={Math.min(progressToNext, 100)}
-                className="h-2 bg-white/10"
+                className="h-2 bg-muted"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Daily Quota Card */}
-        <Card className="bg-gradient-to-br from-[#14080e] to-[#1a0f15] border-white/10">
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Send className="h-5 w-5 text-[#7af17a]" />
-                <h3 className="font-semibold text-white">Quota du jour</h3>
+                <h3 className="font-semibold text-foreground">Quota du jour</h3>
               </div>
               <Badge
                 variant="outline"
@@ -230,29 +230,29 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-white/60">DMs envoyes</span>
-                <span className="font-medium text-white">
+                <span className="text-sm text-muted-foreground">DMs envoyes</span>
+                <span className="font-medium text-foreground">
                   {data.dailyQuota.dmsSent} / {data.dailyQuota.dmsTarget}
                 </span>
               </div>
-              <Progress value={quotaProgress} className="h-2 bg-white/10" />
+              <Progress value={quotaProgress} className="h-2 bg-muted" />
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div className="flex items-center gap-2">
                   <MailCheck className="h-4 w-4 text-blue-400" />
                   <div>
-                    <p className="text-lg font-bold text-white">
+                    <p className="text-lg font-bold text-foreground">
                       {data.dailyQuota.repliesReceived}
                     </p>
-                    <p className="text-xs text-white/50">Reponses</p>
+                    <p className="text-xs text-muted-foreground">Reponses</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarPlus className="h-4 w-4 text-purple-400" />
                   <div>
-                    <p className="text-lg font-bold text-white">
+                    <p className="text-lg font-bold text-foreground">
                       {data.dailyQuota.bookingsFromDms}
                     </p>
-                    <p className="text-xs text-white/50">Bookings</p>
+                    <p className="text-xs text-muted-foreground">Bookings</p>
                   </div>
                 </div>
               </div>
@@ -440,7 +440,7 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
                   return (
                     <div
                       key={obj.id}
-                      className="p-3 rounded-lg bg-muted/30 border border-white/5"
+                      className="p-3 rounded-lg bg-muted/30 border border-border"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">

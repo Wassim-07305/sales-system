@@ -158,7 +158,7 @@ function FeatureCard({
     "bg-gray-500/20 text-gray-400 border-gray-500/30";
 
   return (
-    <Card className="bg-[#1a0f14]/60 border-white/5 hover:border-white/10 transition-colors">
+    <Card className="bg-card/60 border-border hover:border-border transition-colors">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -234,7 +234,7 @@ function StatusColumn({
         </h2>
         <Badge
           variant="outline"
-          className="text-[10px] px-1.5 py-0 border-white/10 text-muted-foreground"
+          className="text-[10px] px-1.5 py-0 border-border text-muted-foreground"
         >
           {items.length}
         </Badge>
@@ -362,7 +362,7 @@ export function RoadmapView({
       </PageHeader>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-[#1a0f14]/80 border border-white/5">
+        <TabsList className="bg-card/80 border border-border">
           <TabsTrigger
             value="roadmap"
             className="data-[state=active]:bg-[#7af17a]/15 data-[state=active]:text-[#7af17a]"
@@ -449,7 +449,7 @@ export function RoadmapView({
         {/* ── Suggestions Tab ──────────────────────────────────────────── */}
         <TabsContent value="suggestions" className="space-y-6 mt-4">
           {/* Suggestion form */}
-          <Card className="bg-[#1a0f14]/60 border-white/5">
+          <Card className="bg-card/60 border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Plus className="h-4 w-4 text-[#7af17a]" />
@@ -471,7 +471,7 @@ export function RoadmapView({
                     value={sugTitle}
                     onChange={(e) => setSugTitle(e.target.value)}
                     placeholder="Ex : Import depuis Pipedrive"
-                    className="bg-[#14080e] border-white/10 text-sm"
+                    className="bg-card border-border text-sm"
                   />
                 </div>
                 <div className="space-y-2">
@@ -479,7 +479,7 @@ export function RoadmapView({
                     Catégorie
                   </Label>
                   <Select value={sugCategory} onValueChange={setSugCategory}>
-                    <SelectTrigger className="bg-[#14080e] border-white/10 text-sm">
+                    <SelectTrigger className="bg-card border-border text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -502,7 +502,7 @@ export function RoadmapView({
                   onChange={(e) => setSugDescription(e.target.value)}
                   placeholder="Décrivez votre idée en détail : quel problème résout-elle ? Comment devrait-elle fonctionner ?"
                   rows={3}
-                  className="bg-[#14080e] border-white/10 text-sm resize-none"
+                  className="bg-card border-border text-sm resize-none"
                 />
               </div>
               <Button
@@ -527,7 +527,7 @@ export function RoadmapView({
               Suggestions de la communauté
               <Badge
                 variant="outline"
-                className="text-[10px] px-1.5 py-0 border-white/10"
+                className="text-[10px] px-1.5 py-0 border-border"
               >
                 {sortedSuggestions.length}
               </Badge>
@@ -541,7 +541,7 @@ export function RoadmapView({
                 return (
                   <Card
                     key={sug.id}
-                    className="bg-[#1a0f14]/60 border-white/5 hover:border-white/10 transition-colors"
+                    className="bg-card/60 border-border hover:border-border transition-colors"
                   >
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-start justify-between gap-3">
@@ -602,7 +602,7 @@ export function RoadmapView({
         <TabsContent value="releases" className="space-y-6 mt-4">
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-[19px] top-0 bottom-0 w-px bg-white/10 hidden sm:block" />
+            <div className="absolute left-[19px] top-0 bottom-0 w-px bg-border hidden sm:block" />
 
             <div className="space-y-8">
               {releaseNotes.map((release, index) => (
@@ -614,7 +614,7 @@ export function RoadmapView({
                         "h-10 w-10 rounded-full flex items-center justify-center border",
                         index === 0
                           ? "bg-[#7af17a]/15 border-[#7af17a]/30 text-[#7af17a]"
-                          : "bg-[#1a0f14] border-white/10 text-muted-foreground"
+                          : "bg-card border-border text-muted-foreground"
                       )}
                     >
                       <Tag className="h-4 w-4" />
@@ -622,7 +622,7 @@ export function RoadmapView({
                   </div>
 
                   {/* Release card */}
-                  <Card className="flex-1 bg-[#1a0f14]/60 border-white/5">
+                  <Card className="flex-1 bg-card/60 border-border">
                     <CardHeader className="pb-3">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <Badge
@@ -630,7 +630,7 @@ export function RoadmapView({
                             "w-fit font-mono text-xs",
                             index === 0
                               ? "bg-[#7af17a]/15 text-[#7af17a] border-[#7af17a]/30"
-                              : "bg-white/5 text-muted-foreground border-white/10"
+                              : "bg-white/5 text-muted-foreground border-border"
                           )}
                           variant="outline"
                         >

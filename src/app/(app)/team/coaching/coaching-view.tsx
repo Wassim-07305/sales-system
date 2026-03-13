@@ -182,7 +182,7 @@ export function CoachingView({
 
       {/* Tabs */}
       <Tabs defaultValue="objectives" className="space-y-4">
-        <TabsList className="bg-[#14080e]/60 border border-white/10">
+        <TabsList className="bg-muted border border-border">
           <TabsTrigger value="objectives" className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]">
             <Target className="w-4 h-4 mr-2" />
             Objectifs SMART
@@ -239,7 +239,7 @@ function SummaryCard({
   variant?: "default" | "warning";
 }) {
   return (
-    <Card className="bg-[#14080e]/40 border-white/10">
+    <Card className="bg-card border-border">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div
@@ -254,9 +254,9 @@ function SummaryCard({
             />
           </div>
           <div>
-            <p className="text-2xl font-bold text-white">{value}</p>
-            <p className="text-sm text-white/60">{label}</p>
-            <p className="text-xs text-white/40">{subLabel}</p>
+            <p className="text-2xl font-bold text-foreground">{value}</p>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-xs text-muted-foreground">{subLabel}</p>
           </div>
         </div>
       </CardContent>
@@ -377,12 +377,12 @@ function ObjectivesTab({
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-white/60" />
+          <Filter className="w-4 h-4 text-muted-foreground" />
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px] bg-[#14080e]/60 border-white/10 text-white">
+            <SelectTrigger className="w-[180px] bg-background border-border text-foreground">
               <SelectValue placeholder="Toutes categories" />
             </SelectTrigger>
-            <SelectContent className="bg-[#14080e] border-white/10">
+            <SelectContent className="bg-popover border-border">
               <SelectItem value="all">Toutes categories</SelectItem>
               {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
@@ -403,11 +403,11 @@ function ObjectivesTab({
 
       {/* Objectives List */}
       {filtered.length === 0 ? (
-        <Card className="bg-[#14080e]/40 border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="p-8 text-center">
-            <Target className="w-12 h-12 text-white/20 mx-auto mb-3" />
-            <p className="text-white/60">Aucun objectif trouve</p>
-            <p className="text-sm text-white/40 mt-1">
+            <Target className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground">Aucun objectif trouve</p>
+            <p className="text-sm text-muted-foreground mt-1">
               Creez votre premier objectif SMART pour commencer
             </p>
           </CardContent>
@@ -427,21 +427,21 @@ function ObjectivesTab({
             return (
               <Card
                 key={obj.id}
-                className="bg-[#14080e]/40 border-white/10 hover:border-white/20 transition-colors"
+                className="bg-card border-border hover:border-border transition-colors"
               >
                 <CardContent className="p-4">
                   <div className="flex flex-col gap-3">
                     {/* Header Row */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <div className="p-2 rounded-lg bg-white/5 mt-0.5">
-                          <CatIcon className="w-4 h-4 text-white/60" />
+                        <div className="p-2 rounded-lg bg-muted mt-0.5">
+                          <CatIcon className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-white truncate">
+                          <h3 className="font-semibold text-foreground truncate">
                             {obj.title}
                           </h3>
-                          <p className="text-sm text-white/50 mt-0.5 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
                             {obj.description}
                           </p>
                         </div>
@@ -456,7 +456,7 @@ function ObjectivesTab({
                         </Badge>
                         <Badge
                           variant="outline"
-                          className="border-white/10 text-white/60 text-xs"
+                          className="border-border text-muted-foreground text-xs"
                         >
                           {CATEGORY_LABELS[obj.category]}
                         </Badge>
@@ -466,20 +466,20 @@ function ObjectivesTab({
                     {/* Progress Bar */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-white/60">
+                        <span className="text-muted-foreground">
                           {obj.currentValue} / {obj.targetValue}
                         </span>
-                        <span className="font-medium text-white">{pct}%</span>
+                        <span className="font-medium text-foreground">{pct}%</span>
                       </div>
                       <Progress
                         value={pct}
-                        className="h-2 bg-white/10"
+                        className="h-2 bg-muted"
                       />
                     </div>
 
                     {/* Date + Actions */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-xs text-white/40">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         <span>
                           Echeance :{" "}
@@ -496,7 +496,7 @@ function ObjectivesTab({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-white/60 hover:text-[#7af17a] hover:bg-[#7af17a]/10 h-8 text-xs"
+                              className="text-muted-foreground hover:text-[#7af17a] hover:bg-[#7af17a]/10 h-8 text-xs"
                               onClick={() => {
                                 setEditingProgress(isEditing ? null : obj.id);
                                 setProgressValue(String(obj.currentValue));
@@ -509,7 +509,7 @@ function ObjectivesTab({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-white/60 hover:text-emerald-400 hover:bg-emerald-500/10 h-8 text-xs"
+                              className="text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 h-8 text-xs"
                               onClick={() => handleComplete(obj.id)}
                               disabled={isPending}
                             >
@@ -522,7 +522,7 @@ function ObjectivesTab({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-white/60 hover:text-red-400 hover:bg-red-500/10 h-8 text-xs"
+                            className="text-muted-foreground hover:text-red-400 hover:bg-red-500/10 h-8 text-xs"
                             onClick={() => handleDelete(obj.id)}
                             disabled={isPending}
                           >
@@ -534,14 +534,14 @@ function ObjectivesTab({
 
                     {/* Inline Progress Update */}
                     {isEditing && (
-                      <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-white/10">
+                      <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-border">
                         <div className="flex-1">
                           <Input
                             type="number"
                             placeholder="Nouvelle valeur"
                             value={progressValue}
                             onChange={(e) => setProgressValue(e.target.value)}
-                            className="bg-white/5 border-white/10 text-white h-9"
+                            className="bg-input border-border text-foreground h-9"
                           />
                         </div>
                         <div className="flex-1">
@@ -549,7 +549,7 @@ function ObjectivesTab({
                             placeholder="Note (optionnel)"
                             value={progressNote}
                             onChange={(e) => setProgressNote(e.target.value)}
-                            className="bg-white/5 border-white/10 text-white h-9"
+                            className="bg-input border-border text-foreground h-9"
                           />
                         </div>
                         <Button
@@ -569,11 +569,11 @@ function ObjectivesTab({
 
                     {/* Notes */}
                     {obj.notes.length > 0 && (
-                      <div className="pt-2 border-t border-white/10 space-y-1">
+                      <div className="pt-2 border-t border-border space-y-1">
                         {obj.notes.slice(-2).map((note, i) => (
                           <p
                             key={i}
-                            className="text-xs text-white/40 pl-3 border-l-2 border-white/10"
+                            className="text-xs text-muted-foreground pl-3 border-l-2 border-border"
                           >
                             {note}
                           </p>
@@ -590,45 +590,45 @@ function ObjectivesTab({
 
       {/* Add Objective Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#14080e] border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-popover border-border text-foreground max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-foreground">
               Nouvel objectif SMART
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div className="space-y-2">
-              <Label className="text-white/70">Titre *</Label>
+              <Label className="text-muted-foreground">Titre *</Label>
               <Input
                 placeholder="Ex: Atteindre 50 appels par semaine"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-input border-border text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-white/70">Description</Label>
+              <Label className="text-muted-foreground">Description</Label>
               <Textarea
                 placeholder="Decrivez l'objectif en detail..."
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
-                className="bg-white/5 border-white/10 text-white resize-none"
+                className="bg-input border-border text-foreground resize-none"
                 rows={3}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white/70">Categorie *</Label>
+                <Label className="text-muted-foreground">Categorie *</Label>
                 <Select
                   value={newCategory}
                   onValueChange={(v) =>
                     setNewCategory(v as CoachingObjective["category"])
                   }
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                  <SelectTrigger className="bg-input border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#14080e] border-white/10">
+                  <SelectContent className="bg-popover border-border">
                     {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                       <SelectItem key={key} value={key}>
                         {label}
@@ -638,37 +638,37 @@ function ObjectivesTab({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/70">Valeur cible *</Label>
+                <Label className="text-muted-foreground">Valeur cible *</Label>
                 <Input
                   type="number"
                   placeholder="Ex: 50"
                   value={newTargetValue}
                   onChange={(e) => setNewTargetValue(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-input border-border text-foreground"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white/70">Date cible *</Label>
+                <Label className="text-muted-foreground">Date cible *</Label>
                 <Input
                   type="date"
                   value={newTargetDate}
                   onChange={(e) => setNewTargetDate(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-input border-border text-foreground"
                 />
               </div>
               {isManager && members.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="text-white/70">Assigner a</Label>
+                  <Label className="text-muted-foreground">Assigner a</Label>
                   <Select
                     value={newAssigneeId}
                     onValueChange={setNewAssigneeId}
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                    <SelectTrigger className="bg-input border-border text-foreground">
                       <SelectValue placeholder="Moi-meme" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#14080e] border-white/10">
+                    <SelectContent className="bg-popover border-border">
                       <SelectItem value={userId}>Moi-meme</SelectItem>
                       {members.map((m) => (
                         <SelectItem key={m.id} value={m.id}>
@@ -687,7 +687,7 @@ function ObjectivesTab({
                   setDialogOpen(false);
                   resetForm();
                 }}
-                className="text-white/60 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 Annuler
               </Button>
@@ -717,16 +717,16 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
   return (
     <div className="space-y-6">
       {/* Skills Assessment */}
-      <Card className="bg-[#14080e]/40 border-white/10">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-[#7af17a]" />
             Evaluation des competences
           </CardTitle>
         </CardHeader>
         <CardContent>
           {plan.skills.length === 0 ? (
-            <p className="text-sm text-white/40 text-center py-4">Aucune competence evaluee pour le moment.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune competence evaluee pour le moment.</p>
           ) : (
           <>
           <div className="space-y-4">
@@ -736,15 +736,15 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
               return (
                 <div key={skill.name} className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-white/80">{skill.name}</span>
-                    <span className="text-white/50">
+                    <span className="text-foreground/80">{skill.name}</span>
+                    <span className="text-muted-foreground">
                       {skill.level}/10{" "}
                       <span className="text-[#7af17a]">
                         (objectif : {skill.target})
                       </span>
                     </span>
                   </div>
-                  <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
+                  <div className="relative h-3 bg-muted rounded-full overflow-hidden">
                     {/* Target marker */}
                     <div
                       className="absolute top-0 h-full border-r-2 border-dashed border-[#7af17a]/50 z-10"
@@ -766,7 +766,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
               );
             })}
           </div>
-          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10 text-xs text-white/40">
+          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-2 rounded bg-[#7af17a]" />
               <span>Niveau actuel</span>
@@ -782,16 +782,16 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
       </Card>
 
       {/* Recommended Actions */}
-      <Card className="bg-[#14080e]/40 border-white/10">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Target className="w-5 h-5 text-[#7af17a]" />
             Actions recommandees
           </CardTitle>
         </CardHeader>
         <CardContent>
           {plan.actions.length === 0 ? (
-            <p className="text-sm text-white/40 text-center py-4">Aucune action recommandee pour le moment.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune action recommandee pour le moment.</p>
           ) : (
           <div className="space-y-3">
             {plan.actions.map((action) => {
@@ -802,14 +802,14 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                   className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
                     action.done
                       ? "bg-emerald-500/5 border-emerald-500/20 opacity-60"
-                      : "bg-white/5 border-white/10"
+                      : "bg-muted border-border"
                   }`}
                 >
                   <div
                     className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       action.done
                         ? "border-emerald-500 bg-emerald-500"
-                        : "border-white/30"
+                        : "border-muted-foreground/30"
                     }`}
                   >
                     {action.done && (
@@ -821,8 +821,8 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                       <span
                         className={`font-medium text-sm ${
                           action.done
-                            ? "text-white/50 line-through"
-                            : "text-white"
+                            ? "text-muted-foreground line-through"
+                            : "text-foreground"
                         }`}
                       >
                         {action.title}
@@ -836,7 +836,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-white/40 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {action.description}
                     </p>
                   </div>
@@ -850,9 +850,9 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
 
       {/* Resources */}
       {plan.resources.length > 0 && (
-        <Card className="bg-[#14080e]/40 border-white/10">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-[#7af17a]" />
               Ressources recommandees
             </CardTitle>
@@ -863,20 +863,20 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                 <a
                   key={i}
                   href={resource.url}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:border-[#7af17a]/30 hover:bg-[#7af17a]/5 transition-colors group"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted border border-border hover:border-[#7af17a]/30 hover:bg-[#7af17a]/5 transition-colors group"
                 >
                   <div className="p-2 rounded-lg bg-[#7af17a]/10 group-hover:bg-[#7af17a]/20">
                     <GraduationCap className="w-4 h-4 text-[#7af17a]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {resource.title}
                     </p>
-                    <p className="text-xs text-white/40 capitalize">
+                    <p className="text-xs text-muted-foreground capitalize">
                       {resource.type}
                     </p>
                   </div>
-                  <ExternalLink className="w-4 h-4 text-white/30 group-hover:text-[#7af17a] shrink-0" />
+                  <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-[#7af17a] shrink-0" />
                 </a>
               ))}
             </div>
@@ -949,11 +949,11 @@ function NotesTab({
 
       {/* Notes Timeline */}
       {notes.length === 0 ? (
-        <Card className="bg-[#14080e]/40 border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="p-8 text-center">
-            <MessageSquare className="w-12 h-12 text-white/20 mx-auto mb-3" />
-            <p className="text-white/60">Aucune note de coaching</p>
-            <p className="text-sm text-white/40 mt-1">
+            <MessageSquare className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground">Aucune note de coaching</p>
+            <p className="text-sm text-muted-foreground mt-1">
               {isManager
                 ? "Ajoutez une note apres chaque session de coaching"
                 : "Les notes de vos sessions apparaitront ici"}
@@ -963,13 +963,13 @@ function NotesTab({
       ) : (
         <div className="relative space-y-0">
           {/* Timeline line */}
-          <div className="absolute left-[19px] top-6 bottom-6 w-px bg-white/10" />
+          <div className="absolute left-[19px] top-6 bottom-6 w-px bg-border" />
 
           {notes.map((note) => (
             <div key={note.id} className="relative flex gap-4 pb-6 last:pb-0">
               {/* Timeline dot */}
               <div className="relative z-10 mt-1">
-                <div className="w-10 h-10 rounded-full bg-[#14080e] border-2 border-white/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-background border-2 border-border flex items-center justify-center">
                   {note.managerAvatar ? (
                     <img
                       src={note.managerAvatar}
@@ -977,7 +977,7 @@ function NotesTab({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-xs font-bold text-white/60">
+                    <span className="text-xs font-bold text-muted-foreground">
                       {note.managerName
                         .split(" ")
                         .map((n) => n[0])
@@ -989,14 +989,14 @@ function NotesTab({
               </div>
 
               {/* Note Card */}
-              <Card className="flex-1 bg-[#14080e]/40 border-white/10">
+              <Card className="flex-1 bg-card border-border">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-white">
+                      <span className="font-medium text-sm text-foreground">
                         {note.managerName}
                       </span>
-                      <span className="text-xs text-white/40">
+                      <span className="text-xs text-muted-foreground">
                         {new Date(note.sessionDate).toLocaleDateString(
                           "fr-FR",
                           {
@@ -1015,14 +1015,14 @@ function NotesTab({
                             className={`w-3.5 h-3.5 ${
                               i < note.rating!
                                 ? "text-amber-400 fill-amber-400"
-                                : "text-white/20"
+                                : "text-muted-foreground/30"
                             }`}
                           />
                         ))}
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     {note.content}
                   </p>
                 </CardContent>
@@ -1034,21 +1034,21 @@ function NotesTab({
 
       {/* Add Note Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#14080e] border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-popover border-border text-foreground max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-foreground">
               Nouvelle note de coaching
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             {members.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-white/70">Membre</Label>
+                <Label className="text-muted-foreground">Membre</Label>
                 <Select value={noteMemberId} onValueChange={setNoteMemberId}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                  <SelectTrigger className="bg-input border-border text-foreground">
                     <SelectValue placeholder="Selectionner un membre" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#14080e] border-white/10">
+                  <SelectContent className="bg-popover border-border">
                     {members.map((m) => (
                       <SelectItem key={m.id} value={m.id}>
                         {m.full_name || "Sans nom"} ({m.role})
@@ -1059,17 +1059,17 @@ function NotesTab({
               </div>
             )}
             <div className="space-y-2">
-              <Label className="text-white/70">Contenu de la note *</Label>
+              <Label className="text-muted-foreground">Contenu de la note *</Label>
               <Textarea
                 placeholder="Points abordes, axes d'amelioration, points positifs..."
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
-                className="bg-white/5 border-white/10 text-white resize-none"
+                className="bg-input border-border text-foreground resize-none"
                 rows={5}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-white/70">Evaluation de la session</Label>
+              <Label className="text-muted-foreground">Evaluation de la session</Label>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <button
@@ -1082,7 +1082,7 @@ function NotesTab({
                       className={`w-6 h-6 ${
                         i < noteRating
                           ? "text-amber-400 fill-amber-400"
-                          : "text-white/20 hover:text-white/40"
+                          : "text-muted-foreground/30 hover:text-muted-foreground/60"
                       }`}
                     />
                   </button>
@@ -1091,7 +1091,7 @@ function NotesTab({
                   <button
                     type="button"
                     onClick={() => setNoteRating(0)}
-                    className="ml-2 text-xs text-white/40 hover:text-white/60"
+                    className="ml-2 text-xs text-muted-foreground hover:text-foreground"
                   >
                     Effacer
                   </button>
@@ -1107,7 +1107,7 @@ function NotesTab({
                   setNoteRating(0);
                   setNoteMemberId("");
                 }}
-                className="text-white/60 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 Annuler
               </Button>

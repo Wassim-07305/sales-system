@@ -301,7 +301,7 @@ export function TrainingSession({
         </PageHeader>
 
         <div className="max-w-xl mx-auto">
-          <Card className="bg-[#1a0f0f] border-white/10">
+          <Card className="bg-card border-border">
             <CardHeader className="text-center">
               <div className="mx-auto p-3 rounded-full bg-[#7af17a]/10 w-fit mb-2">
                 <Brain className="h-8 w-8 text-[#7af17a]" />
@@ -366,7 +366,7 @@ export function TrainingSession({
               <Timer className="h-4 w-4" />
               {formatTime(elapsedSeconds)}
             </div>
-            <Badge variant="outline" className="border-white/10">
+            <Badge variant="outline" className="border-border">
               {currentIndex + 1} / {totalQuestions}
             </Badge>
           </div>
@@ -378,7 +378,7 @@ export function TrainingSession({
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-[#1a0f0f] border-white/10">
+          <Card className="bg-card border-border">
             <CardHeader>
               <div className="flex items-center gap-2 mb-1">
                 <Badge className="bg-[#7af17a]/20 text-[#7af17a] border-0 text-xs">
@@ -390,7 +390,7 @@ export function TrainingSession({
             <CardContent className="space-y-3">
               {question.options.map((option, optIdx) => {
                 let optionStyle =
-                  "border-white/10 hover:border-[#7af17a]/40 hover:bg-[#7af17a]/5 cursor-pointer";
+                  "border-border hover:border-[#7af17a]/40 hover:bg-[#7af17a]/5 cursor-pointer";
 
                 if (showFeedback) {
                   if (option === question.correctAnswer) {
@@ -400,7 +400,7 @@ export function TrainingSession({
                     optionStyle =
                       "border-red-500/60 bg-red-500/10 cursor-default";
                   } else {
-                    optionStyle = "border-white/5 opacity-50 cursor-default";
+                    optionStyle = "border-border opacity-50 cursor-default";
                   }
                 }
 
@@ -466,7 +466,7 @@ export function TrainingSession({
 
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Score Card */}
-        <Card className="bg-[#1a0f0f] border-white/10">
+        <Card className="bg-card border-border">
           <CardContent className="pt-8 pb-8 text-center">
             <div
               className={`mx-auto p-4 rounded-full w-fit mb-4 ${
@@ -504,7 +504,7 @@ export function TrainingSession({
         </Card>
 
         {/* Detailed Answers */}
-        <Card className="bg-[#1a0f0f] border-white/10">
+        <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-base">Détail des réponses</CardTitle>
           </CardHeader>
@@ -554,7 +554,7 @@ export function TrainingSession({
           <Button
             variant="outline"
             onClick={startTraining}
-            className="border-white/10"
+            className="border-border"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Recommencer

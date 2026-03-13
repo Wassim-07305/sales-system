@@ -10,7 +10,7 @@ export default function ReferralLoading() {
       </div>
 
       {/* Referral link card */}
-      <div className="rounded-lg border p-6 bg-gradient-to-r from-zinc-900 to-zinc-800">
+      <div className="rounded-lg border p-6 bg-gradient-to-r from-muted to-muted/80">
         <div className="flex items-center gap-3 mb-4">
           <Skeleton className="h-12 w-12 rounded-full bg-zinc-700" />
           <div className="space-y-2">

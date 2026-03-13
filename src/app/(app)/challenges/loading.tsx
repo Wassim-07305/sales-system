@@ -13,7 +13,7 @@ export default function ChallengesLoading() {
           <Skeleton className="h-10 w-28" />
         </div>
       </div>
-      <div className="rounded-lg border-0 bg-gradient-to-r from-zinc-900 to-zinc-800 p-6">
+      <div className="rounded-lg border-0 bg-gradient-to-r from-muted to-muted/80 p-6">
         <div className="flex items-center gap-6">
           <Skeleton className="h-16 w-16 rounded-full bg-zinc-700" />
           <div className="flex-1 space-y-3">

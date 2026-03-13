@@ -174,7 +174,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
   const Icon = config.icon;
 
   return (
-    <div className="min-h-screen bg-[#14080e] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-4">
         <h2 className="text-white/70 text-sm font-medium">

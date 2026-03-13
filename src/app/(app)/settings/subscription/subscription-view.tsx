@@ -155,7 +155,7 @@ export function SubscriptionView({ currentTier }: Props) {
               <CreditCard className="h-6 w-6 text-brand" />
             </div>
             <div>
-              <p className="text-white/60 text-sm">Plan actuel</p>
+              <p className="text-muted-foreground text-sm">Plan actuel</p>
               <h2 className="text-xl font-bold capitalize">
                 {currentTier === "free"
                   ? "Free"
@@ -172,7 +172,7 @@ export function SubscriptionView({ currentTier }: Props) {
                   size="sm"
                   onClick={handleManageBilling}
                   disabled={isPending}
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="border-border text-foreground hover:bg-muted"
                 >
                   {isPending ? (
                     <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />

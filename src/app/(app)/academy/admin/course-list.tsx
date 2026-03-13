@@ -173,7 +173,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
                 )}
               >
                 {/* Thumbnail */}
-                <div className="relative h-[180px] bg-gradient-to-br from-[#14080e] to-[#14080e]/80 overflow-hidden">
+                <div className="relative h-[180px] bg-gradient-to-br from-muted to-muted/80 overflow-hidden">
                   {course.thumbnail_url ? (
                     <Image
                       src={course.thumbnail_url}

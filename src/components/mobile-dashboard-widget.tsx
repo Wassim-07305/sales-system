@@ -62,7 +62,7 @@ export function MobileDashboardWidget({
             <div
               key={item.label}
               className={cn(
-                "flex-shrink-0 w-[140px] rounded-xl border border-white/10 bg-white/5 p-3 space-y-2",
+                "flex-shrink-0 w-[140px] rounded-xl border border-border bg-card p-3 space-y-2",
               )}
             >
               <div className="flex items-center gap-2">
@@ -76,10 +76,10 @@ export function MobileDashboardWidget({
                 </div>
               </div>
               <div>
-                <p className="text-lg font-bold text-white leading-tight">
+                <p className="text-lg font-bold text-foreground leading-tight">
                   {item.value}
                 </p>
-                <p className="text-[11px] text-white/40 leading-tight mt-0.5">
+                <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
                   {item.label}
                 </p>
               </div>

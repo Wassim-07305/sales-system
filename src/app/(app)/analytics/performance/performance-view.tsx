@@ -121,7 +121,7 @@ export function PerformanceView({
       </PageHeader>
 
       {/* Ranking Banner */}
-      <Card className="bg-gradient-to-r from-[#14080e] to-[#1a0f15] border-white/10">
+      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-border">
         <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
@@ -129,10 +129,10 @@ export function PerformanceView({
                 <Medal className="h-7 w-7 text-white" />
               </div>
               <div>
-                <p className="text-sm text-white/60">Classement equipe</p>
-                <p className="text-3xl font-bold text-white">
+                <p className="text-sm text-muted-foreground">Classement equipe</p>
+                <p className="text-3xl font-bold text-foreground">
                   #{report.ranking.position}
-                  <span className="text-lg text-white/50 font-normal">
+                  <span className="text-lg text-muted-foreground font-normal">
                     {" "}
                     / {report.ranking.total}
                   </span>
@@ -140,8 +140,8 @@ export function PerformanceView({
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-white/60">Base sur</p>
-              <p className="text-lg font-medium text-white">
+              <p className="text-sm text-muted-foreground">Base sur</p>
+              <p className="text-lg font-medium text-foreground">
                 {report.ranking.metric}
               </p>
             </div>
@@ -358,7 +358,7 @@ export function PerformanceView({
                 return (
                   <div
                     key={obj.id}
-                    className="p-4 rounded-lg bg-muted/30 border border-white/5"
+                    className="p-4 rounded-lg bg-muted/30 border border-border"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>

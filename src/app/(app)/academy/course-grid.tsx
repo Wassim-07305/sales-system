@@ -226,7 +226,7 @@ function CourseCard({
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#14080e] to-[#14080e]/80">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/80">
               <BookOpen className="size-12 text-brand/30" />
             </div>
           )}

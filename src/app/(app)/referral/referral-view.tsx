@@ -137,23 +137,23 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
             </div>
             <div>
               <h3 className="text-lg font-bold">Votre lien de parrainage</h3>
-              <p className="text-white/70 text-sm">Partagez ce lien et gagnez 10% de commission sur chaque vente.</p>
+              <p className="text-muted-foreground text-sm">Partagez ce lien et gagnez 10% de commission sur chaque vente.</p>
             </div>
           </div>
           <div className="flex gap-2 mb-3">
-            <Input value={referralLink} readOnly className="bg-white/10 border-white/20 text-white" />
+            <Input value={referralLink} readOnly className="bg-muted border-border text-foreground" />
             <Button onClick={copyLink} className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0">
               <Copy className="h-4 w-4 mr-1" />
               Copier
             </Button>
-            <Button onClick={shareLink} variant="outline" className="border-white/20 text-white hover:bg-white/10 shrink-0">
+            <Button onClick={shareLink} variant="outline" className="border-border text-foreground hover:bg-muted shrink-0">
               <Share2 className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex items-center gap-2 text-sm text-white/60">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Code :</span>
-            <code className="bg-white/10 px-2 py-0.5 rounded font-mono text-white/90">{referralCode}</code>
-            <button onClick={copyCode} className="hover:text-white transition-colors">
+            <code className="bg-muted px-2 py-0.5 rounded font-mono text-foreground">{referralCode}</code>
+            <button onClick={copyCode} className="hover:text-foreground transition-colors">
               <Copy className="h-3 w-3" />
             </button>
           </div>

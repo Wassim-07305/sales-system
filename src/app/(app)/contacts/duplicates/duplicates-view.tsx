@@ -134,7 +134,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="bg-[#14080e]/50 border-[#14080e]">
+        <Card className="bg-muted border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-[#7af17a]/10">
@@ -151,7 +151,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-[#14080e]/50 border-[#14080e]">
+        <Card className="bg-muted border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-[#7af17a]/10">
