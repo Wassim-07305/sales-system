@@ -225,24 +225,24 @@ export function RevenueSimulator({
         {/* Results Panel */}
         <div className="space-y-4">
           {/* Revenue highlight */}
-          <Card className="bg-primary text-primary-foreground border-0">
+          <Card className="bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
             <CardContent className="p-6 text-center">
-              <p className="text-sm text-primary-foreground/60 mb-1">Tes revenus mensuels estimes</p>
+              <p className="text-sm text-muted-foreground mb-1">Tes revenus mensuels estimes</p>
               <p className="text-4xl font-bold text-brand">
                 {results.monthlySetterCommission.toLocaleString("fr-FR")} €
               </p>
-              <p className="text-xs text-primary-foreground/50 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 soit {results.yearlySetterCommission.toLocaleString("fr-FR")} €/an
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3 text-left">
-                <div className="bg-primary-foreground/10 rounded-lg p-3">
-                  <p className="text-[10px] text-primary-foreground/50">CA genere/mois</p>
+                <div className="bg-background/60 rounded-lg p-3">
+                  <p className="text-[10px] text-muted-foreground">CA genere/mois</p>
                   <p className="font-semibold">
                     {results.monthlyGrossRevenue.toLocaleString("fr-FR")} €
                   </p>
                 </div>
-                <div className="bg-primary-foreground/10 rounded-lg p-3">
-                  <p className="text-[10px] text-primary-foreground/50">Deals closes/mois</p>
+                <div className="bg-background/60 rounded-lg p-3">
+                  <p className="text-[10px] text-muted-foreground">Deals closes/mois</p>
                   <p className="font-semibold">{results.monthlyClosedDeals}</p>
                 </div>
               </div>

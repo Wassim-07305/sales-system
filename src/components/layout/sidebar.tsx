@@ -89,7 +89,7 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
               className="shrink-0"
             />
             {!isCollapsed && (
-              <span className="font-serif text-lg font-bold text-white whitespace-nowrap">
+              <span className="font-serif text-lg font-bold text-sidebar-foreground whitespace-nowrap">
                 Sales<span className="text-brand">System</span>
               </span>
             )}
@@ -162,7 +162,7 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
                           <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
                           <TooltipContent
                             side="right"
-                            className="bg-sidebar text-white border-sidebar-border"
+                            className="bg-sidebar text-sidebar-foreground border-sidebar-border"
                           >
                             {item.label}
                           </TooltipContent>
@@ -225,7 +225,7 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
                 isCollapsed && "md:hidden"
               )}
             >
-              <p className="truncate text-sm font-semibold text-white">
+              <p className="truncate text-sm font-semibold text-sidebar-foreground">
                 {userName}
               </p>
               <p className="truncate text-xs text-sidebar-foreground/50 capitalize">
@@ -263,7 +263,7 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
               {isCollapsed && (
                 <TooltipContent
                   side="right"
-                  className="bg-sidebar text-white border-sidebar-border"
+                  className="bg-sidebar text-sidebar-foreground border-sidebar-border"
                 >
                   Paramètres
                 </TooltipContent>
@@ -298,7 +298,7 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
               {isCollapsed && (
                 <TooltipContent
                   side="right"
-                  className="bg-sidebar text-white border-sidebar-border"
+                  className="bg-sidebar text-sidebar-foreground border-sidebar-border"
                 >
                   Profil
                 </TooltipContent>
@@ -330,7 +330,7 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
             {isCollapsed && (
               <TooltipContent
                 side="right"
-                className="bg-sidebar text-white border-sidebar-border"
+                className="bg-sidebar text-sidebar-foreground border-sidebar-border"
               >
                 Déconnexion
               </TooltipContent>
