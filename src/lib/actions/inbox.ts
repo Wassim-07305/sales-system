@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { aiJSON } from "@/lib/ai/client";
 
 export async function getConversations(search?: string) {
   const supabase = await createClient();
@@ -138,27 +139,14 @@ export async function generateQuickReplies(conversationContext: string, prospect
   if (!user) return { suggestions: [] };
 
   try {
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 512,
-          system: "Tu es un expert en setting (prospection commerciale). Génère exactement 3 réponses courtes et naturelles à envoyer au prospect. Format JSON: {\"suggestions\": [\"msg1\", \"msg2\", \"msg3\"]}. Tutoiement. Max 2 phrases par suggestion. En français.",
-          messages: [{ role: "user", content: `Contexte de la conversation avec ${prospectName}:\n${conversationContext}\n\nGénère 3 suggestions de réponse.` }],
-        }),
-      });
-      const result = await response.json();
-      const text = result.content?.[0]?.text || "";
-      const parsed = JSON.parse(text);
-      return { suggestions: parsed.suggestions || [] };
-    }
+    const parsed = await aiJSON<{ suggestions: string[] }>(
+      `Contexte de la conversation avec ${prospectName}:\n${conversationContext}\n\nGénère 3 suggestions de réponse.`,
+      {
+        system: "Tu es un expert en setting (prospection commerciale). Génère exactement 3 réponses courtes et naturelles à envoyer au prospect. Format JSON: {\"suggestions\": [\"msg1\", \"msg2\", \"msg3\"]}. Tutoiement. Max 2 phrases par suggestion. En français.",
+        maxTokens: 512,
+      }
+    );
+    return { suggestions: parsed.suggestions || [] };
   } catch {
     // fallback
   }

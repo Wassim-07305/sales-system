@@ -20,6 +20,19 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 /**
+ * Convert an ArrayBuffer to a base64 string.
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer | null): string {
+  if (!buffer) return "";
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
+/**
  * Check if the browser supports push notifications.
  */
 export function isPushSupported(): boolean {
@@ -37,6 +50,22 @@ export function isPushSupported(): boolean {
 export function getPushPermissionStatus(): NotificationPermission | "unsupported" {
   if (!isPushSupported()) return "unsupported";
   return Notification.permission;
+}
+
+/**
+ * Ensure the service worker is registered and ready.
+ * Returns the ServiceWorkerRegistration.
+ */
+async function ensureServiceWorker(): Promise<ServiceWorkerRegistration> {
+  // Check if already registered
+  const existingReg = await navigator.serviceWorker.getRegistration("/");
+  if (existingReg) {
+    return navigator.serviceWorker.ready;
+  }
+
+  // Register the SW
+  await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+  return navigator.serviceWorker.ready;
 }
 
 /**
@@ -59,6 +88,14 @@ export async function requestPushPermission(): Promise<{
     };
   }
 
+  if (!VAPID_PUBLIC_KEY) {
+    return {
+      success: false,
+      permission: Notification.permission,
+      error: "Clé VAPID non configurée. Contactez l'administrateur.",
+    };
+  }
+
   // Request permission
   const permission = await Notification.requestPermission();
 
@@ -67,30 +104,13 @@ export async function requestPushPermission(): Promise<{
   }
 
   try {
-    // Register service worker (assumes /sw.js exists via next-pwa)
-    const registration = await navigator.serviceWorker.ready;
+    // Ensure service worker is registered and active
+    const registration = await ensureServiceWorker();
 
     // Check if already subscribed
     let subscription = await registration.pushManager.getSubscription();
 
     if (!subscription) {
-      if (!VAPID_PUBLIC_KEY) {
-        // No VAPID key configured — we still record the permission grant
-        console.warn(
-          "[Push] VAPID public key non configurée. Abonnement push simulé."
-        );
-        // Send a stub subscription to the server so we track the intent
-        await fetch("/api/push", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            endpoint: `https://stub-push.salessystem.local/${Date.now()}`,
-            keys: { p256dh: "stub", auth: "stub" },
-          }),
-        });
-        return { success: true, permission };
-      }
-
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
@@ -135,24 +155,16 @@ export async function requestPushPermission(): Promise<{
  */
 export async function unsubscribePushClient(): Promise<{ success: boolean }> {
   try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      await subscription.unsubscribe();
+    const registration = await navigator.serviceWorker.getRegistration("/");
+    if (registration) {
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        await subscription.unsubscribe();
+      }
     }
     await fetch("/api/push", { method: "DELETE" });
     return { success: true };
   } catch {
     return { success: false };
   }
-}
-
-function arrayBufferToBase64(buffer: ArrayBuffer | null): string {
-  if (!buffer) return "";
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return window.btoa(binary);
 }

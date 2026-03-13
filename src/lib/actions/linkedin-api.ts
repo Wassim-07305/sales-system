@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getApiKey } from "@/lib/api-keys";
 
 // ---------------------------------------------------------------------------
 // LinkedIn API stubs
@@ -12,7 +13,7 @@ const LINKEDIN_API_BASE = "https://api.linkedin.com/v2";
 
 /** Resolve the LinkedIn access token: env var → user_settings row → null */
 async function resolveToken(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
-  const envToken = process.env.LINKEDIN_ACCESS_TOKEN;
+  const envToken = await getApiKey("LINKEDIN_ACCESS_TOKEN");
   if (envToken) return envToken;
 
   const { data } = await supabase

@@ -22,6 +22,7 @@ import {
   Webhook,
 } from "lucide-react";
 import { connectWhatsApp, disconnectWhatsApp } from "@/lib/actions/whatsapp";
+import { saveApiKey, deleteApiKey } from "@/lib/api-keys";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -32,6 +33,11 @@ interface WhatsAppConnection {
   status: "connected" | "disconnected" | "pending";
   api_config: Record<string, unknown>;
   connected_at: string | null;
+}
+
+interface IntegrationKeys {
+  ghl_api_key?: string | null;
+  iclosed_api_key?: string | null;
 }
 
 const statusConfig = {
@@ -54,8 +60,10 @@ const statusConfig = {
 
 export function WaSettingsView({
   connection,
+  integrationKeys,
 }: {
   connection: WhatsAppConnection | null;
+  integrationKeys?: IntegrationKeys;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -63,8 +71,12 @@ export function WaSettingsView({
     connection?.phone_number || ""
   );
   const [copied, setCopied] = useState(false);
-  const [ghlEnabled, setGhlEnabled] = useState(false);
-  const [iClosedEnabled, setIClosedEnabled] = useState(false);
+  const [ghlEnabled, setGhlEnabled] = useState(!!integrationKeys?.ghl_api_key);
+  const [iClosedEnabled, setIClosedEnabled] = useState(!!integrationKeys?.iclosed_api_key);
+  const [ghlKey, setGhlKey] = useState(integrationKeys?.ghl_api_key || "");
+  const [iClosedKey, setIClosedKey] = useState(integrationKeys?.iclosed_api_key || "");
+  const [ghlSaved, setGhlSaved] = useState(!!integrationKeys?.ghl_api_key);
+  const [iClosedSaved, setIClosedSaved] = useState(!!integrationKeys?.iclosed_api_key);
 
   const status = connection?.status || "disconnected";
   const statusInfo = statusConfig[status];
@@ -108,6 +120,58 @@ export function WaSettingsView({
     setCopied(true);
     toast.success("URL copiée");
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleSaveGhlKey() {
+    if (!ghlKey.trim()) {
+      toast.error("Veuillez entrer une clé API");
+      return;
+    }
+    startTransition(async () => {
+      const result = await saveApiKey("GHL_API_KEY", ghlKey.trim());
+      if (result.success) {
+        setGhlSaved(true);
+        toast.success("Clé API GoHighLevel enregistrée");
+      } else {
+        toast.error(result.error || "Erreur lors de la sauvegarde");
+      }
+    });
+  }
+
+  async function handleDisconnectGhl() {
+    startTransition(async () => {
+      await deleteApiKey("GHL_API_KEY");
+      setGhlEnabled(false);
+      setGhlKey("");
+      setGhlSaved(false);
+      toast.success("GoHighLevel déconnecté");
+    });
+  }
+
+  async function handleSaveIClosedKey() {
+    if (!iClosedKey.trim()) {
+      toast.error("Veuillez entrer une clé API");
+      return;
+    }
+    startTransition(async () => {
+      const result = await saveApiKey("ICLOSED_API_KEY", iClosedKey.trim());
+      if (result.success) {
+        setIClosedSaved(true);
+        toast.success("Clé API iClosed enregistrée");
+      } else {
+        toast.error(result.error || "Erreur lors de la sauvegarde");
+      }
+    });
+  }
+
+  async function handleDisconnectIClosed() {
+    startTransition(async () => {
+      await deleteApiKey("ICLOSED_API_KEY");
+      setIClosedEnabled(false);
+      setIClosedKey("");
+      setIClosedSaved(false);
+      toast.success("iClosed déconnecté");
+    });
   }
 
   return (
@@ -225,24 +289,51 @@ export function WaSettingsView({
             {/* GHL Integration */}
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="font-medium text-sm">GoHighLevel (GHL)</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-sm">GoHighLevel (GHL)</p>
+                  {ghlSaved && (
+                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 text-[10px]">
+                      <Check className="h-3 w-3 mr-0.5" />
+                      Connecté
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Synchroniser les contacts et conversations avec GHL
                 </p>
               </div>
               <Switch
                 checked={ghlEnabled}
-                onCheckedChange={setGhlEnabled}
+                onCheckedChange={(checked) => {
+                  setGhlEnabled(checked);
+                  if (!checked && ghlSaved) handleDisconnectGhl();
+                }}
               />
             </div>
             {ghlEnabled && (
-              <div>
+              <div className="space-y-2">
                 <Label className="text-xs">Clé API GHL</Label>
-                <Input
-                  disabled
-                  placeholder="Intégration bientôt disponible"
-                  className="mt-1 h-8"
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={ghlKey}
+                    onChange={(e) => { setGhlKey(e.target.value); setGhlSaved(false); }}
+                    placeholder="ghl_xxxxxxxxxxxx"
+                    className="mt-1 h-8 font-mono text-xs"
+                    type="password"
+                  />
+                  <Button
+                    size="sm"
+                    variant={ghlSaved ? "outline" : "default"}
+                    onClick={handleSaveGhlKey}
+                    disabled={isPending || ghlSaved}
+                    className="shrink-0 h-8"
+                  >
+                    {ghlSaved ? <Check className="h-4 w-4" /> : "Enregistrer"}
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  La synchronisation complète sera disponible prochainement. Votre clé est enregistrée en toute sécurité.
+                </p>
               </div>
             )}
 
@@ -251,24 +342,51 @@ export function WaSettingsView({
             {/* iClosed Integration */}
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="font-medium text-sm">iClosed</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-sm">iClosed</p>
+                  {iClosedSaved && (
+                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 text-[10px]">
+                      <Check className="h-3 w-3 mr-0.5" />
+                      Connecté
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Connecter les données de closing avec iClosed
                 </p>
               </div>
               <Switch
                 checked={iClosedEnabled}
-                onCheckedChange={setIClosedEnabled}
+                onCheckedChange={(checked) => {
+                  setIClosedEnabled(checked);
+                  if (!checked && iClosedSaved) handleDisconnectIClosed();
+                }}
               />
             </div>
             {iClosedEnabled && (
-              <div>
+              <div className="space-y-2">
                 <Label className="text-xs">Clé API iClosed</Label>
-                <Input
-                  disabled
-                  placeholder="Intégration bientôt disponible"
-                  className="mt-1 h-8"
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={iClosedKey}
+                    onChange={(e) => { setIClosedKey(e.target.value); setIClosedSaved(false); }}
+                    placeholder="ic_xxxxxxxxxxxx"
+                    className="mt-1 h-8 font-mono text-xs"
+                    type="password"
+                  />
+                  <Button
+                    size="sm"
+                    variant={iClosedSaved ? "outline" : "default"}
+                    onClick={handleSaveIClosedKey}
+                    disabled={isPending || iClosedSaved}
+                    className="shrink-0 h-8"
+                  >
+                    {iClosedSaved ? <Check className="h-4 w-4" /> : "Enregistrer"}
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  La synchronisation complète sera disponible prochainement. Votre clé est enregistrée en toute sécurité.
+                </p>
               </div>
             )}
           </CardContent>

@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       source: "/sw.js",
       headers: [
         { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, max-age=0" },
-        { key: "Clear-Site-Data", value: '"cache", "storage"' },
+        { key: "Service-Worker-Allowed", value: "/" },
       ],
     },
   ],

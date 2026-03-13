@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { stripe, PLANS, type PlanId } from "@/lib/stripe/client";
 import { headers } from "next/headers";
+import { getApiKey } from "@/lib/api-keys";
 
 /**
  * Create a Stripe Checkout session for a subscription plan.
@@ -163,12 +164,12 @@ export async function createPaymentCheckout(installmentId: string) {
 
 const STRIPE_API = "https://api.stripe.com/v1";
 
-function getStripeKey(): string | null {
-  return process.env.STRIPE_SECRET_KEY || null;
+async function getStripeKey(): Promise<string | null> {
+  return await getApiKey("STRIPE_SECRET_KEY");
 }
 
 async function stripeFetch(path: string, params?: Record<string, string>) {
-  const key = getStripeKey();
+  const key = await getStripeKey();
   if (!key) return null;
 
   const url = new URL(`${STRIPE_API}${path}`);
@@ -216,7 +217,7 @@ export async function getStripeRevenueSummary(): Promise<StripeRevenueSummary> {
   const nowTs = Math.floor(now.getTime() / 1000);
 
   // Try Stripe first
-  const key = getStripeKey();
+  const key = await getStripeKey();
   if (key) {
     try {
       // Charges this month
@@ -351,7 +352,7 @@ export interface StripeRecentPayment {
 export async function getStripeRecentPayments(
   limit = 10
 ): Promise<StripeRecentPayment[]> {
-  const key = getStripeKey();
+  const key = await getStripeKey();
   if (key) {
     try {
       const data = await stripeFetch("/charges", {
@@ -426,7 +427,7 @@ export async function getStripeSubscriptionStats(): Promise<StripeSubscriptionSt
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthTs = Math.floor(startOfMonth.getTime() / 1000);
 
-  const key = getStripeKey();
+  const key = await getStripeKey();
   if (key) {
     try {
       // Active subscriptions
@@ -489,7 +490,7 @@ export async function getStripeSubscriptionStats(): Promise<StripeSubscriptionSt
  * Check if Stripe is configured (has a secret key).
  */
 export async function isStripeConfigured(): Promise<boolean> {
-  return !!getStripeKey();
+  return !!(await getStripeKey());
 }
 
 /**

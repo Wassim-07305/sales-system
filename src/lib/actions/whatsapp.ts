@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getApiKey } from "@/lib/api-keys";
 import { revalidatePath } from "next/cache";
 
 export async function getWhatsAppConnection() {
@@ -168,8 +169,8 @@ export async function sendWhatsAppMessage(data: {
   let status = "sent";
 
   // Envoyer via l'API WhatsApp Business si configurée
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const accessToken = await getApiKey("WHATSAPP_ACCESS_TOKEN");
+  const phoneNumberId = await getApiKey("WHATSAPP_PHONE_NUMBER_ID");
 
   if (accessToken && phoneNumberId && prospect?.phone) {
     try {
@@ -505,9 +506,9 @@ export async function sendWhatsAppTemplate(
     return { error: "Le destinataire et le nom du template sont requis" };
   }
 
-  // Resolve credentials: env vars first, then stored api_config
-  let accessToken = process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
-  let phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  // Resolve credentials: getApiKey (env → org_settings) first, then stored api_config
+  let accessToken = await getApiKey("WHATSAPP_ACCESS_TOKEN");
+  let phoneNumberId = await getApiKey("WHATSAPP_PHONE_NUMBER_ID");
 
   if (!accessToken || !phoneNumberId) {
     const { data: connection } = await supabase
@@ -628,9 +629,9 @@ export async function getWhatsAppBusinessProfile() {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  // Resolve credentials
-  let accessToken = process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
-  let phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  // Resolve credentials: getApiKey (env → org_settings) first, then stored api_config
+  let accessToken = await getApiKey("WHATSAPP_ACCESS_TOKEN");
+  let phoneNumberId = await getApiKey("WHATSAPP_PHONE_NUMBER_ID");
 
   // Check stored config
   const { data: connection } = await supabase

@@ -2,14 +2,34 @@
 
 import webPush from "web-push";
 import { createClient } from "@/lib/supabase/server";
+import { getApiKey } from "@/lib/api-keys";
 
-// Configure VAPID keys
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
-const VAPID_EMAIL = process.env.VAPID_EMAIL || "mailto:admin@salessystem.com";
+/**
+ * Resolve VAPID keys: env vars first, then Supabase org_settings fallback.
+ * Caches the result in-memory for the lifetime of the server process.
+ */
+let vapidConfigured = false;
 
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  webPush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+async function ensureVapid(): Promise<boolean> {
+  if (vapidConfigured) return true;
+
+  const publicKey = await getApiKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
+  const privateKey = await getApiKey("VAPID_PRIVATE_KEY");
+  const email =
+    (await getApiKey("VAPID_EMAIL")) || "mailto:admin@salessystem.com";
+
+  if (!publicKey || !privateKey) {
+    return false;
+  }
+
+  try {
+    webPush.setVapidDetails(email, publicKey, privateKey);
+    vapidConfigured = true;
+    return true;
+  } catch (err) {
+    console.error("[Push] Erreur configuration VAPID:", err);
+    return false;
+  }
 }
 
 export async function subscribePush(subscription: {
@@ -58,7 +78,8 @@ export async function unsubscribePush() {
 export async function sendPush(
   userId: string,
   title: string,
-  body: string
+  body: string,
+  url?: string
 ) {
   const supabase = await createClient();
 
@@ -73,8 +94,9 @@ export async function sendPush(
     return { sent: false, reason: "no_subscription" };
   }
 
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    console.warn("[Push] VAPID keys non configurées");
+  const ready = await ensureVapid();
+  if (!ready) {
+    console.warn("[Push] Clés VAPID non configurées");
     return { sent: false, reason: "vapid_not_configured" };
   }
 
@@ -89,14 +111,14 @@ export async function sendPush(
       body,
       icon: "/icons/icon-192x192.png",
       badge: "/icons/icon-72x72.png",
-      data: { url: "/notifications" },
+      data: { url: url || "/notifications" },
     });
 
     await webPush.sendNotification(pushSubscription, payload);
     return { sent: true };
   } catch (err: unknown) {
     const statusCode = (err as { statusCode?: number }).statusCode;
-    // Si le navigateur a revoque l'abonnement (410 Gone), on le supprime
+    // If the browser revoked the subscription (410 Gone / 404), clean up
     if (statusCode === 410 || statusCode === 404) {
       await supabase
         .from("push_subscriptions")
@@ -112,12 +134,13 @@ export async function sendPush(
 export async function sendBulkPush(
   userIds: string[],
   title: string,
-  body: string
+  body: string,
+  url?: string
 ) {
   const results = [];
 
   for (const userId of userIds) {
-    const result = await sendPush(userId, title, body);
+    const result = await sendPush(userId, title, body, url);
     results.push({ userId, ...result });
   }
 

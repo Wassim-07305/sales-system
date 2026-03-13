@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
 import { computeScoreBreakdown } from "@/lib/scoring";
+import { getApiKey } from "@/lib/api-keys";
 
 // ─── Multi-Network Overview ────────────────────────────────────────
 
@@ -208,8 +209,8 @@ Règles :
 
 export async function scrapeStories(username: string) {
   // Si l'API Instagram est configurée, utiliser le Graph API
-  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-  const businessAccountId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
+  const accessToken = await getApiKey("INSTAGRAM_ACCESS_TOKEN");
+  const businessAccountId = await getApiKey("INSTAGRAM_BUSINESS_ACCOUNT_ID");
 
   if (accessToken && businessAccountId) {
     try {
@@ -636,32 +637,19 @@ export async function analyzeSentiment(messages: Array<{ sender: string; content
   const conversationText = lastMessages.map(m => `${m.sender}: ${m.content}`).join("\n");
 
   try {
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 256,
-          system: "Analyse le sentiment de cette conversation de prospection. Retourne du JSON: {\"sentiment\": \"positive\"|\"hesitant\"|\"negative\"|\"neutral\"|\"hot\", \"score\": 0-100, \"signals\": [\"signal1\", \"signal2\"]}",
-          messages: [{ role: "user", content: conversationText }],
-        }),
-      });
-      if (response.ok) {
-        const result = await response.json();
-        const parsed = JSON.parse(result.content?.[0]?.text || "{}");
-        return {
-          sentiment: parsed.sentiment || "neutral",
-          score: typeof parsed.score === "number" ? parsed.score : 50,
-          signals: Array.isArray(parsed.signals) ? parsed.signals : [],
-        };
-      }
-    }
+    const parsed = await aiJSON<{
+      sentiment: string;
+      score: number;
+      signals: string[];
+    }>(conversationText, {
+      system: "Analyse le sentiment de cette conversation de prospection. Retourne du JSON: {\"sentiment\": \"positive\"|\"hesitant\"|\"negative\"|\"neutral\"|\"hot\", \"score\": 0-100, \"signals\": [\"signal1\", \"signal2\"]}",
+      maxTokens: 256,
+    });
+    return {
+      sentiment: parsed.sentiment || "neutral",
+      score: typeof parsed.score === "number" ? parsed.score : 50,
+      signals: Array.isArray(parsed.signals) ? parsed.signals : [],
+    };
   } catch {
     // fallback
   }
@@ -761,35 +749,23 @@ export async function analyzeProfileComplet(profileData: {
   }
 
   try {
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 512,
-          system: "Tu es un expert en prospection commerciale. Analyse ce profil et génère un message d'accroche personnalisé. Retourne du JSON: {\"accroche\": \"message\", \"interests\": [\"intérêt1\"], \"approachAngle\": \"angle\", \"confidence\": \"high\"|\"medium\"|\"low\"}",
-          messages: [{ role: "user", content: `Profil ${platform} de ${name}:\n${dataPoints}` }],
-        }),
-      });
-      if (response.ok) {
-        const result = await response.json();
-        const parsed = JSON.parse(result.content?.[0]?.text || "{}");
-        return {
-          analysis: {
-            accroche: parsed.accroche || `Salut ${name} !`,
-            interests: Array.isArray(parsed.interests) ? parsed.interests : [],
-            approachAngle: parsed.approachAngle || "Approche directe",
-            confidence: parsed.confidence || "low",
-          },
-        };
-      }
-    }
+    const parsed = await aiJSON<{
+      accroche: string;
+      interests: string[];
+      approachAngle: string;
+      confidence: string;
+    }>(`Profil ${platform} de ${name}:\n${dataPoints}`, {
+      system: "Tu es un expert en prospection commerciale. Analyse ce profil et génère un message d'accroche personnalisé. Retourne du JSON: {\"accroche\": \"message\", \"interests\": [\"intérêt1\"], \"approachAngle\": \"angle\", \"confidence\": \"high\"|\"medium\"|\"low\"}",
+      maxTokens: 512,
+    });
+    return {
+      analysis: {
+        accroche: parsed.accroche || `Salut ${name} !`,
+        interests: Array.isArray(parsed.interests) ? parsed.interests : [],
+        approachAngle: parsed.approachAngle || "Approche directe",
+        confidence: parsed.confidence || "low",
+      },
+    };
   } catch {
     // fallback
   }

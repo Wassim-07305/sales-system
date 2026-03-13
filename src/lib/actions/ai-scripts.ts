@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { aiJSON } from "@/lib/ai/client";
 
 export interface AIScriptData {
   accroche: string;
@@ -71,22 +72,8 @@ export async function generateAIScript() {
   let script: AIScriptData;
 
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (apiKey) {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1500,
-          messages: [
-            {
-              role: "user",
-              content: `Génère un script de prospection en français pour:
+    const parsed = await aiJSON<Omit<AIScriptData, "generated_at">>(
+      `Génère un script de prospection en français pour:
 Entreprise: ${company || "Mon entreprise"}
 Description: ${businessDesc || "Services de consulting"}
 Offre: ${offer || "Formation et accompagnement"}
@@ -113,32 +100,9 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
   ],
   "cta": "Call-to-action final pour proposer un rendez-vous"
 }`,
-            },
-          ],
-        }),
-      });
-
-      if (response.ok) {
-        const result = (await response.json()) as {
-          content: { text: string }[];
-        };
-        const content = result.content[0]?.text || "";
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]) as Omit<
-            AIScriptData,
-            "generated_at"
-          >;
-          script = { ...parsed, generated_at: new Date().toISOString() };
-        } else {
-          throw new Error("JSON non trouvé");
-        }
-      } else {
-        throw new Error("API error");
-      }
-    } else {
-      throw new Error("No API key");
-    }
+      { maxTokens: 1500 }
+    );
+    script = { ...parsed, generated_at: new Date().toISOString() };
   } catch {
     // Fallback template
     script = {

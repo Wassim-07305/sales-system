@@ -32,6 +32,7 @@ import {
   Store,
   SlidersHorizontal,
   Code,
+  Plug,
   HelpCircle,
   Sparkles,
   type LucideIcon,
@@ -337,6 +338,12 @@ export const NAV_ITEMS: NavItem[] = [
         roles: ["admin", "manager"],
       },
       {
+        label: "Intégrations",
+        href: "/settings/integrations",
+        icon: Plug,
+        roles: ["admin"],
+      },
+      {
         label: "Sync Calendrier",
         href: "/bookings/calendar-sync",
         icon: CalendarDays,
@@ -507,6 +514,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   "settings-ia": "Settings IA",
   "ai-scripts": "Scripts IA",
   api: "API REST",
+  integrations: "Intégrations",
   coaching: "Coaching",
   partners: "Partenaires",
   moderation: "Modération",

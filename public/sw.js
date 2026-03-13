@@ -1,6 +1,6 @@
-// Cleanup service worker — replaces old next-pwa Workbox SW.
-// Clears all caches, claims all clients, and forces network requests.
-// The HTML cleanup script in layout.tsx handles the final unregister.
+// Service Worker for Sales System — Push Notifications
+// This SW handles push events, notification clicks, and basic lifecycle.
+
 self.addEventListener("install", function () {
   self.skipWaiting();
 });
@@ -10,58 +10,47 @@ self.addEventListener("activate", function (event) {
     caches
       .keys()
       .then(function (keys) {
-        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        return Promise.all(
+          keys.map(function (k) {
+            return caches.delete(k);
+          })
+        );
       })
       .then(function () {
         return self.clients.claim();
       })
-      .then(function () {
-        return self.clients.matchAll({ type: "window" });
-      })
-      .then(function (windowClients) {
-        windowClients.forEach(function (client) {
-          try {
-            client.navigate(client.url);
-          } catch (e) {
-            // Safari standalone may not support navigate
-          }
-        });
-      })
   );
-});
-
-// Pass ALL requests to network — no caching whatsoever
-self.addEventListener("fetch", function (event) {
-  event.respondWith(fetch(event.request));
 });
 
 // Handle incoming push notifications
 self.addEventListener("push", function (event) {
   if (!event.data) return;
 
+  var title = "Sales System";
+  var options = {
+    body: "",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/icon-72x72.png",
+    data: { url: "/" },
+    vibrate: [100, 50, 100],
+    tag: "default",
+    renotify: true,
+  };
+
   try {
     var payload = event.data.json();
-    var title = payload.title || "Sales System";
-    var options = {
-      body: payload.body || "",
-      icon: payload.icon || "/icons/icon-192x192.png",
-      badge: payload.badge || "/icons/icon-72x72.png",
-      data: payload.data || { url: "/" },
-      vibrate: [100, 50, 100],
-      tag: payload.tag || "default",
-      renotify: true,
-    };
-
-    event.waitUntil(self.registration.showNotification(title, options));
+    title = payload.title || title;
+    options.body = payload.body || options.body;
+    options.icon = payload.icon || options.icon;
+    options.badge = payload.badge || options.badge;
+    options.data = payload.data || options.data;
+    options.tag = payload.tag || options.tag;
   } catch (e) {
     // Fallback for plain text payloads
-    event.waitUntil(
-      self.registration.showNotification("Sales System", {
-        body: event.data.text(),
-        icon: "/icons/icon-192x192.png",
-      })
-    );
+    options.body = event.data.text();
   }
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 // Handle notification click — open or focus the app

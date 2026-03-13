@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getApiKey } from "@/lib/api-keys";
 
 // ---------------------------------------------------------------------------
 // Instagram Graph API stubs
@@ -12,8 +13,8 @@ const GRAPH_API_BASE = "https://graph.instagram.com/v21.0";
 
 /** Resolve the Instagram access token: env var → user_settings row → null */
 async function resolveToken(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
-  // 1. Env-level token (shared / app-wide)
-  const envToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+  // 1. Org-level / env-level token (shared / app-wide)
+  const envToken = await getApiKey("INSTAGRAM_ACCESS_TOKEN");
   if (envToken) return envToken;
 
   // 2. Per-user token stored in user_settings
@@ -206,7 +207,7 @@ export async function sendInstagramDM(recipientId: string, message: string) {
   }
 
   const token = await resolveToken(user.id, supabase);
-  const pageId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
+  const pageId = await getApiKey("INSTAGRAM_BUSINESS_ACCOUNT_ID");
 
   let externalId: string | null = null;
   let status: "sent" | "queued" | "failed" = "queued";
@@ -295,7 +296,7 @@ export async function getInstagramConversations() {
   if (!user) return { error: "Non authentifié" };
 
   const token = await resolveToken(user.id, supabase);
-  const pageId = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID;
+  const pageId = await getApiKey("INSTAGRAM_BUSINESS_ACCOUNT_ID");
 
   // --- Live API path ---
   if (token && pageId) {

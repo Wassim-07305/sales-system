@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getApiKey } from "@/lib/api-keys";
 
 export async function getPaymentInstallments(contractId?: string) {
   const supabase = await createClient();
@@ -90,7 +91,8 @@ export async function recordPayment(installmentId: string) {
   let stripePaymentId: string | null = null;
 
   // Si Stripe est configuré, créer un PaymentIntent
-  if (process.env.STRIPE_SECRET_KEY) {
+  const stripeKey = await getApiKey("STRIPE_SECRET_KEY");
+  if (stripeKey) {
     try {
       const { stripe } = await import("@/lib/stripe/client");
 

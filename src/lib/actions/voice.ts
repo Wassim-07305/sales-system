@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getApiKey } from "@/lib/api-keys";
 
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_BASE_URL = "https://api.elevenlabs.io/v1";
 
 // ─── Voice Profile ────────────────────────────────────────────
@@ -55,6 +55,8 @@ export async function deleteVoiceProfile() {
 
   if (!profile) return { success: false, error: "Aucun profil vocal trouvé" };
 
+  const ELEVENLABS_API_KEY = await getApiKey("ELEVENLABS_API_KEY");
+
   // Delete from ElevenLabs if we have a voice_id and API key
   if (profile.voice_id && ELEVENLABS_API_KEY) {
     try {
@@ -86,6 +88,8 @@ export async function cloneVoice(sampleUrl: string) {
     profile = await getVoiceProfile();
   }
   if (!profile) return { success: false, error: "Impossible de créer le profil" };
+
+  const ELEVENLABS_API_KEY = await getApiKey("ELEVENLABS_API_KEY");
 
   if (!ELEVENLABS_API_KEY) {
     // Mock mode: mark as pending, user is informed the key is missing
@@ -161,6 +165,8 @@ export async function generateVoiceMessage(text: string, prospectName?: string) 
   if (!user) return { success: false, error: "Non authentifié" };
 
   const profile = await getVoiceProfile();
+
+  const ELEVENLABS_API_KEY = await getApiKey("ELEVENLABS_API_KEY");
 
   if (!ELEVENLABS_API_KEY) {
     // Store the message request even without API key

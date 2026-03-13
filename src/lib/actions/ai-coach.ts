@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { aiChat } from "@/lib/ai/client";
 
 export async function askAiCoach(question: string) {
   const supabase = await createClient();
@@ -32,7 +33,7 @@ export async function askAiCoach(question: string) {
   const courseContext = (courses || []).map(c => `- ${c.title}: ${c.description}`).join("\n");
   const faqContext = (faqPosts || []).map(p => `Q: ${p.title}\nR: ${p.content?.slice(0, 200)}`).join("\n");
 
-  // Use Anthropic API if available, otherwise simulate
+  // Build system prompt for AI coach
   const systemPrompt = `Tu es l'assistant IA de S Academy, une plateforme de formation au setting (prospection commerciale sur les réseaux sociaux).
 
 Tu aides les setters et clients avec :
@@ -63,28 +64,17 @@ Réponds de manière concise, actionnable et encourageante. Utilise le tutoiemen
     .select("id")
     .single();
 
-  // Try to call AI - if no API key, return a helpful fallback
+  // Try to call AI via OpenRouter - fallback if unavailable
   let answer: string;
   try {
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: [{ role: "user", content: question }],
-        }),
-      });
-      const result = await response.json();
-      answer = result.content?.[0]?.text || "Je n'ai pas pu générer une réponse. Réessaie dans quelques instants.";
-    } else {
+    answer = await aiChat(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: question },
+      ],
+      { maxTokens: 1024, temperature: 0.7 }
+    );
+    if (!answer) {
       answer = getSmartFallback(question);
     }
   } catch {
