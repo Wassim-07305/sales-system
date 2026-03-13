@@ -64,7 +64,7 @@ Réponds de manière concise, actionnable et encourageante. Utilise le tutoiemen
     .select("id")
     .single();
 
-  // Try to call AI via OpenRouter - fallback if unavailable
+  // Call AI via OpenRouter
   let answer: string;
   try {
     answer = await aiChat(
@@ -75,10 +75,18 @@ Réponds de manière concise, actionnable et encourageante. Utilise le tutoiemen
       { maxTokens: 1024, temperature: 0.7 }
     );
     if (!answer) {
+      console.warn("[AI Coach] Réponse vide de OpenRouter, utilisation du fallback");
       answer = getSmartFallback(question);
     }
-  } catch {
-    answer = getSmartFallback(question);
+  } catch (err) {
+    console.error("[AI Coach] Erreur appel IA:", err instanceof Error ? err.message : err);
+    // Return error info to help debug, not just a generic fallback
+    const errorMsg = err instanceof Error ? err.message : "Erreur inconnue";
+    if (errorMsg.includes("non configurée")) {
+      answer = "⚠️ L'assistant IA n'est pas encore configuré. Demande à ton administrateur d'ajouter la clé API OpenRouter dans Paramètres > Intégrations.";
+    } else {
+      answer = getSmartFallback(question);
+    }
   }
 
   // Update conversation with answer

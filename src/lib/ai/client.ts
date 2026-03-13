@@ -2,18 +2,32 @@ import OpenAI from "openai";
 
 // ---------------------------------------------------------------------------
 // OpenRouter AI Client — centralized for the whole app
-// Lazy initialization to avoid build-time errors when env vars are missing
+// Resolves API key dynamically via getApiKey() (env → org_settings fallback)
 // ---------------------------------------------------------------------------
 
 let _openrouter: OpenAI | null = null;
+let _cachedKey: string | null = null;
 
-function getOpenRouterClient(): OpenAI {
-  if (!_openrouter) {
+async function getOpenRouterClient(): Promise<OpenAI> {
+  // Dynamic import to avoid "use server" module boundary issues
+  const { getApiKey } = await import("@/lib/api-keys");
+  const key = await getApiKey("OPENROUTER_API_KEY");
+
+  if (!key) {
+    throw new Error(
+      "OPENROUTER_API_KEY non configurée. Ajoutez-la dans les variables d'environnement ou dans Paramètres > Intégrations."
+    );
+  }
+
+  // Re-create client if key changed
+  if (!_openrouter || _cachedKey !== key) {
     _openrouter = new OpenAI({
       baseURL: "https://openrouter.ai/api/v1",
-      apiKey: process.env.OPENROUTER_API_KEY || "missing-key",
+      apiKey: key,
     });
+    _cachedKey = key;
   }
+
   return _openrouter;
 }
 
@@ -46,7 +60,8 @@ export async function aiComplete(
   }
   messages.push({ role: "user", content: prompt });
 
-  const response = await getOpenRouterClient().chat.completions.create({
+  const client = await getOpenRouterClient();
+  const response = await client.chat.completions.create({
     model: options?.model || DEFAULT_MODEL,
     messages,
     max_tokens: options?.maxTokens || 1024,
@@ -67,7 +82,8 @@ export async function aiChat(
     temperature?: number;
   }
 ): Promise<string> {
-  const response = await getOpenRouterClient().chat.completions.create({
+  const client = await getOpenRouterClient();
+  const response = await client.chat.completions.create({
     model: options?.model || SMART_MODEL,
     messages,
     max_tokens: options?.maxTokens || 512,

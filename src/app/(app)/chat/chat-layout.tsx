@@ -276,13 +276,18 @@ export function ChatLayout({
 
     if (imageUrl) {
       // Send image message
-      await supabase.from("messages").insert({
+      const { error } = await supabase.from("messages").insert({
         channel_id: activeChannel.id,
         sender_id: currentUserId,
         content: newMessage.trim() || "",
         message_type: "image",
         file_url: imageUrl,
       });
+      if (error) {
+        console.error("[Chat] Erreur envoi image:", error);
+        toast.error("Erreur lors de l'envoi de l'image");
+        return;
+      }
       setImageUrl(null);
       setImagePreview(null);
     } else {
@@ -293,7 +298,8 @@ export function ChatLayout({
         message_type: "text",
       });
       if (error) {
-        toast.error("Erreur lors de l'envoi");
+        console.error("[Chat] Erreur envoi message:", error);
+        toast.error("Erreur lors de l'envoi : " + (error.message || "vérifiez vos permissions"));
         return;
       }
     }
