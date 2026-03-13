@@ -167,8 +167,24 @@
   100% { width: 97%; }
 }
 
+/* Safe area support for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* Kanban drag styles */
 .kanban-card-dragging {
   opacity: 0.5;
   transform: rotate(2deg);
+}
+
+/* Hide scrollbar for horizontal scroll containers on mobile */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

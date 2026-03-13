@@ -1348,3 +1348,74 @@ export async function getB2BDashboardData(
     recentActivity,
   };
 }
+
+// ─── F85: Mobile Dashboard Widget Data ───────────────────────────
+
+export async function getMobileDashboardWidgetData() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { dealsEnCours: 0, caDuMois: 0, tachesDuJour: 0, prochainsRdv: 0 };
+
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+
+  // Get the "Client Signé" stage id
+  const { data: signedStage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .eq("name", "Client Signé")
+    .maybeSingle();
+
+  const signedStageId = signedStage?.id;
+
+  // Active deals (not in "Client Signé" stage)
+  let dealsEnCours = 0;
+  if (signedStageId) {
+    const { count } = await supabase
+      .from("deals")
+      .select("id", { count: "exact", head: true })
+      .neq("stage_id", signedStageId);
+    dealsEnCours = count || 0;
+  } else {
+    const { count } = await supabase
+      .from("deals")
+      .select("id", { count: "exact", head: true });
+    dealsEnCours = count || 0;
+  }
+
+  // Monthly revenue (CA du mois)
+  const { data: monthlyDeals } = await supabase
+    .from("deals")
+    .select("value, stage_id")
+    .gte("created_at", startOfMonth);
+
+  const caDuMois = (monthlyDeals || [])
+    .filter((d) => d.stage_id === signedStageId)
+    .reduce((sum, d) => sum + (d.value || 0), 0);
+
+  // Today's bookings count (tâches du jour proxy)
+  const { count: tachesDuJour } = await supabase
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .gte("scheduled_at", `${today}T00:00:00`)
+    .lt("scheduled_at", `${today}T23:59:59`);
+
+  // Upcoming bookings (prochains RDV)
+  const { count: prochainsRdv } = await supabase
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .gte("scheduled_at", now.toISOString())
+    .in("status", ["confirmed", "pending"]);
+
+  return {
+    dealsEnCours,
+    caDuMois,
+    tachesDuJour: tachesDuJour || 0,
+    prochainsRdv: prochainsRdv || 0,
+  };
+}

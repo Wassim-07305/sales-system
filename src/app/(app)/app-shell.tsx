@@ -8,7 +8,14 @@ import { NotificationsPanel } from "@/components/layout/notifications-panel";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
+import { OfflineIndicator } from "@/components/offline-indicator";
+import dynamic from "next/dynamic";
 import type { UserRole } from "@/lib/types/database";
+
+const AiCoachWidget = dynamic(
+  () => import("@/components/ai-coach-widget").then((m) => ({ default: m.AiCoachWidget })),
+  { ssr: false }
+);
 
 interface AppShellProps {
   role: UserRole;
@@ -36,12 +43,15 @@ export function AppShell({
   return (
     <ThemeProvider>
       <NavigationProgress />
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-dvh overflow-hidden bg-background">
         {/* Sidebar */}
         <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} />
 
         {/* Main area */}
         <div className="flex min-w-0 flex-1 flex-col">
+          {/* Offline indicator */}
+          <OfflineIndicator />
+
           {/* Header */}
           <Header
             userName={userName}
@@ -53,7 +63,7 @@ export function AppShell({
           />
 
           {/* Content */}
-          <main className="flex-1 overflow-y-auto p-5 pb-20 md:p-8 md:pb-8">
+          <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
             <div className="mx-auto max-w-[1400px]">{children}</div>
           </main>
         </div>
@@ -67,6 +77,7 @@ export function AppShell({
           onUnreadCountChange={handleUnreadCountChange}
         />
         <GlobalSearch />
+        <AiCoachWidget />
       </div>
     </ThemeProvider>
   );

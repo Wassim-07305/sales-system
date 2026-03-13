@@ -229,7 +229,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
   }, [nodes.length, setNodes]);
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col">
+    <div className="h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] flex flex-col">
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-4 py-3 border-b bg-background">
         <Link href="/scripts">

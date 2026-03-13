@@ -300,8 +300,8 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         {/* Active partners tab */}
         <TabsContent value="active" className="mt-4">
           <Card>
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-8"></TableHead>
@@ -437,8 +437,8 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
             <CardHeader>
               <CardTitle className="text-lg">Candidatures en attente</CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nom</TableHead>
@@ -558,8 +558,8 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
             <CardHeader>
               <CardTitle className="text-lg">Derniers versements</CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <Table>
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Partenaire</TableHead>

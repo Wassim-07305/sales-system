@@ -38,6 +38,9 @@ import {
   Loader2,
   RefreshCw,
   Mail,
+  Phone,
+  Send,
+  ArrowDownRight,
 } from "lucide-react";
 import {
   analyzeProfile,
@@ -55,11 +58,19 @@ interface PlatformOverview {
   avgScore: number;
 }
 
-interface Props {
-  overview: PlatformOverview[];
+interface WhatsAppStats {
+  conversations: number;
+  messagesSent: number;
+  messagesReceived: number;
+  connected: boolean;
 }
 
-export function HubView({ overview }: Props) {
+interface Props {
+  overview: PlatformOverview[];
+  whatsappStats?: WhatsAppStats | null;
+}
+
+export function HubView({ overview, whatsappStats }: Props) {
   const router = useRouter();
   // Analyze profile state
   const [profileUrl, setProfileUrl] = useState("");
@@ -84,16 +95,19 @@ export function HubView({ overview }: Props) {
   const platformIcons: Record<string, React.ReactNode> = {
     linkedin: <Linkedin className="h-5 w-5 text-blue-600" />,
     instagram: <Instagram className="h-5 w-5 text-pink-500" />,
+    whatsapp: <Phone className="h-5 w-5 text-green-600" />,
   };
 
   const platformLabels: Record<string, string> = {
     linkedin: "LinkedIn",
     instagram: "Instagram",
+    whatsapp: "WhatsApp",
   };
 
   const platformColors: Record<string, string> = {
     linkedin: "bg-blue-50 border-blue-200",
     instagram: "bg-pink-50 border-pink-200",
+    whatsapp: "bg-green-50 border-green-200",
   };
 
   async function handleAnalyzeProfile() {
@@ -173,7 +187,7 @@ export function HubView({ overview }: Props) {
       />
 
       {/* Platform Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {overview.map((p) => (
           <Card key={p.platform} className={`border ${platformColors[p.platform] || ""}`}>
             <CardHeader className="pb-3">
@@ -223,6 +237,50 @@ export function HubView({ overview }: Props) {
             </CardContent>
           </Card>
         ))}
+
+        {/* WhatsApp Card */}
+        <Card className={`border ${platformColors.whatsapp}`}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              {platformIcons.whatsapp}
+              WhatsApp
+              {whatsappStats?.connected ? (
+                <Badge className="bg-green-100 text-green-700 text-[10px] ml-auto">
+                  Connecté
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-[10px] ml-auto">
+                  Non connecté
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-1">
+                  <MessageCircle className="h-4 w-4 text-green-600" />
+                </div>
+                <p className="text-2xl font-bold">{whatsappStats?.conversations ?? 0}</p>
+                <p className="text-xs text-muted-foreground">Conversations</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-1">
+                  <Send className="h-4 w-4 text-blue-500" />
+                </div>
+                <p className="text-2xl font-bold">{whatsappStats?.messagesSent ?? 0}</p>
+                <p className="text-xs text-muted-foreground">Envoyés</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-1">
+                  <ArrowDownRight className="h-4 w-4 text-emerald-500" />
+                </div>
+                <p className="text-2xl font-bold">{whatsappStats?.messagesReceived ?? 0}</p>
+                <p className="text-xs text-muted-foreground">Reçus</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Action Dialogs */}
@@ -425,6 +483,7 @@ export function HubView({ overview }: Props) {
                   <SelectContent>
                     <SelectItem value="linkedin">LinkedIn</SelectItem>
                     <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getSourceTracking } from "@/lib/actions/analytics-v2";
-import { SourcesView } from "./sources-view";
+import { getTeamJournals, getMissingEodSetters } from "@/lib/actions/gamification";
+import { TeamJournalView } from "./team-journal-view";
 
-export default async function SourcesPage() {
+export default async function TeamJournalPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -18,6 +18,10 @@ export default async function SourcesPage() {
     redirect("/dashboard");
   }
 
-  const data = await getSourceTracking();
-  return <SourcesView {...data} />;
+  const [journals, missing] = await Promise.all([
+    getTeamJournals(),
+    getMissingEodSetters(),
+  ]);
+
+  return <TeamJournalView journals={journals} missingSetters={missing} />;
 }

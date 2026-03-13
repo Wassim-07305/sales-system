@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
   Linkedin,
@@ -31,6 +32,7 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
+  Bot,
 } from "lucide-react";
 import {
   analyzeProfile,
@@ -107,6 +109,23 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
   const [dmContext, setDmContext] = useState("");
   const [generatedDm, setGeneratedDm] = useState("");
   const [generatingDm, setGeneratingDm] = useState(false);
+
+  // Mode Duo IA+Humain — per-conversation auto mode
+  const [autoModeIds, setAutoModeIds] = useState<Set<string>>(new Set());
+
+  function toggleAutoMode(prospectId: string) {
+    setAutoModeIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(prospectId)) {
+        next.delete(prospectId);
+        toast.info("Mode manuel activé");
+      } else {
+        next.add(prospectId);
+        toast.success("Mode IA Auto activé");
+      }
+      return next;
+    });
+  }
 
   const filteredProspects = prospects.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -510,6 +529,20 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* Mode Duo IA+Humain toggle */}
+                      <div className="flex items-center gap-1.5">
+                        {autoModeIds.has(prospect.id) && (
+                          <Badge className="bg-purple-100 text-purple-700 text-[10px] gap-1">
+                            <Bot className="h-3 w-3" />
+                            IA Auto
+                          </Badge>
+                        )}
+                        <Switch
+                          checked={autoModeIds.has(prospect.id)}
+                          onCheckedChange={() => toggleAutoMode(prospect.id)}
+                          aria-label="Mode IA Auto"
+                        />
+                      </div>
                       <Select
                         value={prospect.status}
                         onValueChange={(val) =>

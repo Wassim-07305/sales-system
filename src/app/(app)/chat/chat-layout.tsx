@@ -443,9 +443,9 @@ export function ChatLayout({
   );
 
   return (
-    <div className="flex h-[calc(100vh-120px)] gap-4">
+    <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] gap-2 md:gap-4">
       {/* Channel list */}
-      <Card className="w-72 flex-shrink-0 flex flex-col">
+      <Card className={cn("w-full md:w-72 flex-shrink-0 flex flex-col", activeChannel ? "hidden md:flex" : "flex")}>
         <div className="p-3 border-b">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -535,24 +535,38 @@ export function ChatLayout({
               );
             })}
             {filteredChannels.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-4">
-                Aucun channel
-              </p>
+              <div className="text-center py-6 px-3">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
+                <p className="text-xs font-medium text-muted-foreground">
+                  Aucun channel disponible
+                </p>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">
+                  {isAdmin
+                    ? "Créez votre premier channel avec le bouton + ci-dessus."
+                    : "Votre administrateur n\u2019a pas encore créé de channels. Contactez-le pour démarrer."}
+                </p>
+              </div>
             )}
           </div>
         </ScrollArea>
       </Card>
 
       {/* Messages area */}
-      <Card className="flex-1 flex flex-col">
+      <Card className={cn("flex-1 flex flex-col min-h-0", !activeChannel && "hidden md:flex")}>
         {activeChannel ? (
           <>
             {/* Channel header */}
-            <div className="flex items-center gap-2 p-4 border-b">
+            <div className="flex items-center gap-2 p-3 md:p-4 border-b">
+              <button
+                onClick={() => setActiveChannel(null)}
+                className="md:hidden rounded-lg p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-5 w-5" />
+              </button>
               <Hash className="h-5 w-5 text-muted-foreground" />
-              <h2 className="font-semibold">{activeChannel.name}</h2>
+              <h2 className="font-semibold truncate">{activeChannel.name}</h2>
               {activeChannel.description && (
-                <span className="text-sm text-muted-foreground">
+                <span className="hidden md:inline text-sm text-muted-foreground truncate">
                   — {activeChannel.description}
                 </span>
               )}
@@ -707,7 +721,7 @@ export function ChatLayout({
             )}
 
             {/* Typing indicator + Message input */}
-            <div className="p-4 border-t">
+            <div className="p-3 md:p-4 border-t">
               {typingUsers.length > 0 && (
                 <div className="mb-2">
                   <TypingIndicator users={typingUsers} />
@@ -766,8 +780,20 @@ export function ChatLayout({
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            Sélectionnez un channel pour commencer
+          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2">
+            <MessageSquare className="h-10 w-10 opacity-20" />
+            {channels.length === 0 ? (
+              <>
+                <p className="text-sm font-medium">Aucun channel disponible</p>
+                <p className="text-xs text-muted-foreground/70 max-w-xs text-center">
+                  {isAdmin
+                    ? "Commencez par créer un channel dans le panneau de gauche."
+                    : "Votre administrateur n\u2019a pas encore configuré les channels de discussion."}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm">Sélectionnez un channel pour commencer</p>
+            )}
           </div>
         )}
       </Card>

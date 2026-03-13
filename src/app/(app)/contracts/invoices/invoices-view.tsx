@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { generateInvoice } from "@/lib/actions/payments";
+import { generateInvoice, generateScheduledInvoices } from "@/lib/actions/payments";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -37,6 +37,7 @@ import {
   DollarSign,
   Plus,
   Download,
+  CalendarCheck,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -83,6 +84,7 @@ const statusLabels: Record<string, string> = {
 export function InvoicesView({ invoices, contracts }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isBulkPending, startBulkTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState("");
   const [amount, setAmount] = useState("");
@@ -108,6 +110,26 @@ export function InvoicesView({ invoices, contracts }: Props) {
     });
   }
 
+  function handleBulkGenerate() {
+    startBulkTransition(async () => {
+      try {
+        const result = await generateScheduledInvoices();
+        if (result.error) {
+          toast.error(result.error);
+          return;
+        }
+        if (result.count === 0) {
+          toast.info("Tous les contrats ont déjà une facture ce mois-ci.");
+        } else {
+          toast.success(`${result.count} facture(s) générée(s) avec succès`);
+          router.refresh();
+        }
+      } catch {
+        toast.error("Erreur lors de la génération des factures");
+      }
+    });
+  }
+
   // Auto-fill amount when contract is selected
   function handleContractSelect(contractId: string) {
     setSelectedContractId(contractId);
@@ -123,6 +145,14 @@ export function InvoicesView({ invoices, contracts }: Props) {
         title="Factures"
         description="Factures auto-générées"
       >
+        <Button
+          variant="outline"
+          onClick={handleBulkGenerate}
+          disabled={isBulkPending}
+        >
+          <CalendarCheck className="h-4 w-4 mr-2" />
+          {isBulkPending ? "Génération..." : "Générer les factures du mois"}
+        </Button>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -176,8 +206,8 @@ export function InvoicesView({ invoices, contracts }: Props) {
       </PageHeader>
 
       <Card>
-        <CardContent className="p-0">
-          <Table>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>N° Facture</TableHead>

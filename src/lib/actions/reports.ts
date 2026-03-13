@@ -213,3 +213,166 @@ export async function deleteReport(
   revalidatePath("/analytics/reports");
   return {};
 }
+
+// ─── F68: Rapport Mensuel Automatisé B2B (PDF) ─────────────────────
+
+export async function generateMonthlyB2BReport(clientId: string, month?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const targetMonth = month || new Date().toISOString().slice(0, 7); // YYYY-MM
+  const startDate = `${targetMonth}-01`;
+  const endDate = new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + 1)).toISOString().split("T")[0];
+
+  // Get client profile
+  const { data: client } = await supabase
+    .from("profiles")
+    .select("full_name, email, company")
+    .eq("id", clientId)
+    .single();
+
+  // Get deals for this client's pipeline in the period
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("id, title, value, stage_id, created_at, closed_at")
+    .eq("contact_id", clientId)
+    .gte("created_at", startDate)
+    .lt("created_at", endDate);
+
+  // Get bookings
+  const { data: bookings } = await supabase
+    .from("bookings")
+    .select("id, status, scheduled_at")
+    .eq("contact_id", clientId)
+    .gte("scheduled_at", startDate)
+    .lt("scheduled_at", endDate);
+
+  // Get conversations / DMs
+  const { data: conversations } = await supabase
+    .from("dm_conversations")
+    .select("id, messages, platform")
+    .eq("prospect_id", clientId);
+
+  const totalDeals = (deals || []).length;
+  const closedDeals = (deals || []).filter(d => d.closed_at).length;
+  const totalRevenue = (deals || []).filter(d => d.closed_at).reduce((s, d) => s + (d.value || 0), 0);
+  const totalBookings = (bookings || []).length;
+  const completedBookings = (bookings || []).filter(b => b.status === "completed").length;
+  const totalMessages = (conversations || []).reduce((s, c) => s + ((c.messages as unknown[]) || []).length, 0);
+
+  const report = {
+    clientName: client?.full_name || "Client",
+    clientCompany: client?.company || "",
+    period: targetMonth,
+    generatedAt: new Date().toISOString(),
+    metrics: {
+      totalDeals,
+      closedDeals,
+      totalRevenue,
+      conversionRate: totalDeals > 0 ? Math.round((closedDeals / totalDeals) * 100) : 0,
+      totalBookings,
+      completedBookings,
+      showUpRate: totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0,
+      totalMessages,
+    },
+    recommendations: [
+      totalRevenue === 0 ? "Augmenter le volume de conversations pour générer plus d'opportunités" : null,
+      completedBookings < totalBookings * 0.7 ? "Améliorer le taux de show-up avec des rappels J-1 et H-2" : null,
+      closedDeals < totalDeals * 0.3 ? "Retravailler le script de closing — le taux de conversion est inférieur à 30%" : null,
+    ].filter(Boolean),
+  };
+
+  // Store the report
+  const { error } = await supabase
+    .from("monthly_reports")
+    .upsert({
+      client_id: clientId,
+      period: targetMonth,
+      report_data: report,
+      generated_by: user.id,
+    }, { onConflict: "client_id,period" });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/portal/reports");
+  return { report };
+}
+
+export async function getMonthlyReports(clientId?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  let query = supabase
+    .from("monthly_reports")
+    .select("*, client:profiles!client_id(full_name, company)")
+    .order("period", { ascending: false })
+    .limit(12);
+
+  if (clientId) {
+    query = query.eq("client_id", clientId);
+  }
+
+  const { data } = await query;
+  return data || [];
+}
+
+// ─── F53: Rapport Performance Setter Hebdomadaire Auto ──────────────
+
+export async function generateWeeklySetterReport(setterId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const startDate = weekAgo.toISOString();
+
+  // Get setter profile
+  const { data: setter } = await supabase
+    .from("profiles")
+    .select("full_name, email, role")
+    .eq("id", setterId)
+    .single();
+
+  // Daily journals this week
+  const { data: journals } = await supabase
+    .from("daily_journals")
+    .select("*")
+    .eq("user_id", setterId)
+    .gte("date", weekAgo.toISOString().split("T")[0])
+    .order("date", { ascending: true });
+
+  // Deals created/updated this week
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("id, value, stage_id, created_at")
+    .eq("assigned_to", setterId)
+    .gte("created_at", startDate);
+
+  const totalDms = (journals || []).reduce((s, j) => s + (j.dms_sent || 0), 0);
+  const totalReplies = (journals || []).reduce((s, j) => s + (j.replies_received || 0), 0);
+  const totalCallsBooked = (journals || []).reduce((s, j) => s + (j.calls_booked || 0), 0);
+  const totalCallsDone = (journals || []).reduce((s, j) => s + (j.calls_completed || 0), 0);
+  const totalRevenue = (journals || []).reduce((s, j) => s + (j.revenue_generated || 0), 0);
+  const eodSubmitted = (journals || []).length;
+
+  return {
+    report: {
+      setterName: setter?.full_name || "Setter",
+      period: `${weekAgo.toISOString().split("T")[0]} — ${now.toISOString().split("T")[0]}`,
+      metrics: {
+        dmsSent: totalDms,
+        repliesReceived: totalReplies,
+        responseRate: totalDms > 0 ? Math.round((totalReplies / totalDms) * 100) : 0,
+        callsBooked: totalCallsBooked,
+        callsCompleted: totalCallsDone,
+        showUpRate: totalCallsBooked > 0 ? Math.round((totalCallsDone / totalCallsBooked) * 100) : 0,
+        revenue: totalRevenue,
+        newDeals: (deals || []).length,
+        eodCompliance: `${eodSubmitted}/7`,
+      },
+    },
+  };
+}

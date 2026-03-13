@@ -185,3 +185,109 @@ export async function getMaturityHistory(setterId: string) {
 
   return data || [];
 }
+
+// ── Indicateur "Prêt à Être Placé" (F12) ──────────────────────────
+
+export async function getPlacementReadiness(userId?: string) {
+  const supabase = await createClient();
+
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    targetUserId = user.id;
+  }
+
+  // 1. Lesson completion percentage (weight: 40%)
+  const { count: totalLessons } = await supabase
+    .from("course_lessons")
+    .select("id", { count: "exact", head: true });
+
+  const { count: completedLessons } = await supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", targetUserId)
+    .eq("completed", true);
+
+  const modulesScore = totalLessons && totalLessons > 0
+    ? Math.round(((completedLessons || 0) / totalLessons) * 100)
+    : 0;
+
+  // 2. Quiz scores average (weight: 25%)
+  const { data: quizResults } = await supabase
+    .from("quiz_results")
+    .select("score")
+    .eq("user_id", targetUserId);
+
+  let quizzesScore = 0;
+  if (quizResults && quizResults.length > 0) {
+    quizzesScore = Math.round(
+      quizResults.reduce((sum, q) => sum + (q.score || 0), 0) / quizResults.length
+    );
+  }
+
+  // 3. Roleplay sessions completed (weight: 15%)
+  const { count: roleplayCount } = await supabase
+    .from("roleplay_sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", targetUserId);
+
+  // Target: 10 sessions = 100%
+  const roleplayScore = Math.min(Math.round(((roleplayCount || 0) / 10) * 100), 100);
+
+  // 4. Daily journals submitted in last 7 days (weight: 10%)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const { count: journalCount } = await supabase
+    .from("daily_journals")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", targetUserId)
+    .gte("date", sevenDaysAgo.toISOString().split("T")[0]);
+
+  const journalScore = Math.min(Math.round(((journalCount || 0) / 7) * 100), 100);
+
+  // 5. Community participation — posts + comments (weight: 10%)
+  const { count: postsCount } = await supabase
+    .from("community_posts")
+    .select("id", { count: "exact", head: true })
+    .eq("author_id", targetUserId);
+
+  const { count: commentsCount } = await supabase
+    .from("community_comments")
+    .select("id", { count: "exact", head: true })
+    .eq("author_id", targetUserId);
+
+  // Target: 20 contributions = 100%
+  const communityScore = Math.min(
+    Math.round((((postsCount || 0) + (commentsCount || 0)) / 20) * 100),
+    100
+  );
+
+  // Weighted score
+  const score = Math.round(
+    modulesScore * 0.4 +
+    quizzesScore * 0.25 +
+    roleplayScore * 0.15 +
+    journalScore * 0.1 +
+    communityScore * 0.1
+  );
+
+  let level: "not_ready" | "almost" | "ready" | "placed";
+  if (score < 40) level = "not_ready";
+  else if (score < 70) level = "almost";
+  else if (score < 90) level = "ready";
+  else level = "placed";
+
+  return {
+    score,
+    level,
+    breakdown: {
+      modules: modulesScore,
+      quizzes: quizzesScore,
+      roleplay: roleplayScore,
+      journal: journalScore,
+      community: communityScore,
+    },
+    isReady: score >= 80,
+  };
+}

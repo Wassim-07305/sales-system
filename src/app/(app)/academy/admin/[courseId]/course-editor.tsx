@@ -337,9 +337,9 @@ export function CourseEditor({ course }: CourseEditorProps) {
   // ─── Rendu ──────────────────────────────────────────────
 
   return (
-    <div className="flex h-[calc(100vh-64px)]">
+    <div className="flex h-[calc(100dvh-64px)]">
       {/* ═══ Colonne gauche : arborescence ═══ */}
-      <aside className="w-80 shrink-0 border-r overflow-y-auto bg-muted/20">
+      <aside className="hidden md:block w-80 shrink-0 border-r overflow-y-auto bg-muted/20">
         <div className="p-4 space-y-4">
           {/* Retour + titre */}
           <div className="space-y-3">
@@ -561,7 +561,17 @@ export function CourseEditor({ course }: CourseEditorProps) {
       </aside>
 
       {/* ═══ Colonne droite : editeur ═══ */}
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="md:hidden mb-4">
+          <Link
+            href="/academy/admin"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </Link>
+          <h2 className="text-lg font-semibold mt-1">{course.title}</h2>
+        </div>
         {!selection && <EmptyState />}
         {selection?.type === "module" && (
           <ModuleEditor

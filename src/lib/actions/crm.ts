@@ -487,3 +487,142 @@ export async function createDealFromBooking(params: {
   revalidatePath("/crm");
   return { deal: data };
 }
+
+// ─── F35: Automated Follow-ups ─────────────────────────────────────
+
+/**
+ * Get deals where last_contact_at is older than `daysThreshold` days.
+ * Returns contacts needing follow-up with their details.
+ */
+export async function getOverdueFollowUps(daysThreshold = 2) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié", data: [] };
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - daysThreshold);
+
+  const { data, error } = await supabase
+    .from("deals")
+    .select(
+      "id, title, value, temperature, last_contact_at, stage_id, contact:profiles!deals_contact_id_fkey(id, full_name, email, phone), assigned_user:profiles!deals_assigned_to_fkey(id, full_name)"
+    )
+    .lt("last_contact_at", cutoffDate.toISOString())
+    .not("last_contact_at", "is", null)
+    .order("last_contact_at", { ascending: true });
+
+  if (error) return { error: error.message, data: [] };
+
+  const overdueDeals = (data || []).map((deal) => {
+    const lastContact = new Date(deal.last_contact_at as string);
+    const now = new Date();
+    const daysOverdue = Math.floor(
+      (now.getTime() - lastContact.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return { ...deal, daysOverdue };
+  });
+
+  return { error: null, data: overdueDeals };
+}
+
+/**
+ * Create an automated follow-up task (deal activity) for a given deal.
+ */
+export async function createAutoFollowUp(
+  dealId: string,
+  daysOverdue: number
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { data: deal } = await supabase
+    .from("deals")
+    .select("title, assigned_to")
+    .eq("id", dealId)
+    .single();
+
+  if (!deal) return { error: "Deal introuvable" };
+
+  // Create a follow-up activity on the deal
+  const { error: activityError } = await supabase
+    .from("deal_activities")
+    .insert({
+      deal_id: dealId,
+      user_id: user.id,
+      type: "auto_follow_up",
+      content: `Relance automatique — ${daysOverdue} jour(s) sans contact. Action requise.`,
+    });
+
+  if (activityError) return { error: activityError.message };
+
+  // Create an in-app notification for the assigned user
+  const notifyUserId = deal.assigned_to || user.id;
+  await supabase.from("notifications").insert({
+    user_id: notifyUserId,
+    title: "Relance automatique",
+    body: `Le deal "${deal.title}" n'a pas eu de contact depuis ${daysOverdue} jour(s).`,
+    type: "follow_up",
+    link: `/crm/${dealId}`,
+  });
+
+  // Update next_action on the deal
+  await supabase
+    .from("deals")
+    .update({
+      next_action: "Relance automatique",
+      next_action_date: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", dealId);
+
+  revalidatePath("/crm");
+  return { success: true };
+}
+
+/**
+ * Find all overdue contacts (2+ days without response) and create
+ * follow-up entries for them. Returns the count of follow-ups created.
+ */
+export async function triggerAutomatedFollowUps(daysThreshold = 2) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié", count: 0 };
+
+  const { error: fetchError, data: overdueDeals } =
+    await getOverdueFollowUps(daysThreshold);
+
+  if (fetchError || !overdueDeals) return { error: fetchError, count: 0 };
+
+  let created = 0;
+
+  for (const deal of overdueDeals) {
+    // Skip deals that already have a recent auto follow-up (last 24h)
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+    const { data: recentActivity } = await supabase
+      .from("deal_activities")
+      .select("id")
+      .eq("deal_id", deal.id)
+      .eq("type", "auto_follow_up")
+      .gte("created_at", oneDayAgo.toISOString())
+      .limit(1)
+      .maybeSingle();
+
+    if (recentActivity) continue; // Already followed up recently
+
+    const result = await createAutoFollowUp(deal.id, deal.daysOverdue);
+    if (result.success) created++;
+  }
+
+  revalidatePath("/crm");
+  revalidatePath("/prospecting/follow-ups");
+  return { error: null, count: created };
+}

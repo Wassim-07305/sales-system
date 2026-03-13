@@ -8,7 +8,9 @@ import {
   getClientDashboardData,
   getSetterDashboardData,
   getB2BDashboardData,
+  getMobileDashboardWidgetData,
 } from "@/lib/actions/dashboard";
+import { MobileDashboardWidget } from "@/components/mobile-dashboard-widget";
 import { calculateReadinessScore } from "@/lib/actions/readiness";
 import {
   getDashboardWidgets,
@@ -32,6 +34,21 @@ export default async function DashboardPage() {
 
   const role = (profile?.role || "client_b2c") as UserRole;
 
+  // F85: Fetch mobile widget data for admin/manager/setter/closer roles
+  const mobileWidgetData =
+    role === "admin" || role === "manager" || role === "setter" || role === "closer"
+      ? await getMobileDashboardWidgetData()
+      : null;
+
+  const mobileWidget = mobileWidgetData ? (
+    <MobileDashboardWidget
+      dealsEnCours={mobileWidgetData.dealsEnCours}
+      caDuMois={mobileWidgetData.caDuMois}
+      tachesDuJour={mobileWidgetData.tachesDuJour}
+      prochainsRdv={mobileWidgetData.prochainsRdv}
+    />
+  ) : null;
+
   switch (role) {
     case "admin":
     case "manager": {
@@ -51,18 +68,26 @@ export default async function DashboardPage() {
       }
 
       return (
-        <AdminDashboard
-          data={data}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          customWidgets={customWidgets as any}
-          widgetData={widgetDataMap}
-        />
+        <>
+          {mobileWidget}
+          <AdminDashboard
+            data={data}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            customWidgets={customWidgets as any}
+            widgetData={widgetDataMap}
+          />
+        </>
       );
     }
     case "setter":
     case "closer": {
       const data = await getSetterDashboardData(user.id);
-      return <SetterDashboard data={data} />;
+      return (
+        <>
+          {mobileWidget}
+          <SetterDashboard data={data} />
+        </>
+      );
     }
     case "client_b2b": {
       const b2bData = await getB2BDashboardData(user.id);

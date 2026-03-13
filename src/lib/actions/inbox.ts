@@ -131,3 +131,43 @@ export async function importConversation(prospectId: string, platform: string, r
 export async function uploadVoiceMessage(conversationId: string, audioUrl: string) {
   await sendMessage(conversationId, audioUrl, "voice");
 }
+
+export async function generateQuickReplies(conversationContext: string, prospectName: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { suggestions: [] };
+
+  try {
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (anthropicKey) {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 512,
+          system: "Tu es un expert en setting (prospection commerciale). Génère exactement 3 réponses courtes et naturelles à envoyer au prospect. Format JSON: {\"suggestions\": [\"msg1\", \"msg2\", \"msg3\"]}. Tutoiement. Max 2 phrases par suggestion. En français.",
+          messages: [{ role: "user", content: `Contexte de la conversation avec ${prospectName}:\n${conversationContext}\n\nGénère 3 suggestions de réponse.` }],
+        }),
+      });
+      const result = await response.json();
+      const text = result.content?.[0]?.text || "";
+      const parsed = JSON.parse(text);
+      return { suggestions: parsed.suggestions || [] };
+    }
+  } catch {
+    // fallback
+  }
+
+  return {
+    suggestions: [
+      `Salut ${prospectName} ! Merci pour ta réponse. Est-ce que tu aurais 15 min cette semaine pour en discuter ?`,
+      `Super intéressant ce que tu me dis. J'ai justement un client qui avait la même problématique, je peux te montrer comment on l'a résolu.`,
+      `Je comprends ${prospectName}. Si tu veux, je t'envoie un cas concret par message pour que tu puisses voir les résultats avant de te décider.`,
+    ],
+  };
+}

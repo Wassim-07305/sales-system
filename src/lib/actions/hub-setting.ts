@@ -386,6 +386,74 @@ export async function recalculateAllScores() {
   return count;
 }
 
+// ─── Unified Hub Stats (LinkedIn + Instagram + WhatsApp) ─────────
+
+export async function getHubUnifiedStats() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { linkedin: null, instagram: null, whatsapp: null, totals: null };
+
+  // Prospects stats (LinkedIn + Instagram)
+  const { data: prospects } = await supabase
+    .from("prospects")
+    .select("platform, status")
+    .in("platform", ["linkedin", "instagram"]);
+
+  const allProspects = prospects || [];
+
+  function platformStats(platform: string) {
+    const filtered = allProspects.filter((p) => p.platform === platform);
+    return {
+      total: filtered.length,
+      contacted: filtered.filter((p) => p.status === "contacted").length,
+      replied: filtered.filter((p) => p.status === "replied").length,
+      booked: filtered.filter((p) => p.status === "booked").length,
+    };
+  }
+
+  const linkedin = platformStats("linkedin");
+  const instagram = platformStats("instagram");
+
+  // WhatsApp stats
+  const { data: connection } = await supabase
+    .from("whatsapp_connections")
+    .select("id, status")
+    .eq("user_id", user.id)
+    .single();
+
+  let whatsapp = { conversations: 0, messagesSent: 0, messagesReceived: 0, connected: false };
+
+  if (connection) {
+    whatsapp.connected = connection.status === "connected";
+
+    const { data: messages } = await supabase
+      .from("whatsapp_messages")
+      .select("id, direction, prospect_id")
+      .eq("connection_id", connection.id);
+
+    const allMessages = messages || [];
+    const uniqueProspects = new Set(allMessages.map((m) => m.prospect_id).filter(Boolean));
+
+    whatsapp = {
+      connected: connection.status === "connected",
+      conversations: uniqueProspects.size,
+      messagesSent: allMessages.filter((m) => m.direction === "outbound").length,
+      messagesReceived: allMessages.filter((m) => m.direction === "inbound").length,
+    };
+  }
+
+  const totals = {
+    totalProspects: linkedin.total + instagram.total + whatsapp.conversations,
+    totalContacted: linkedin.contacted + instagram.contacted + whatsapp.messagesSent,
+    totalReplied: linkedin.replied + instagram.replied + whatsapp.messagesReceived,
+    totalBooked: linkedin.booked + instagram.booked,
+  };
+
+  return { linkedin, instagram, whatsapp, totals };
+}
+
 // ─── Smart Follow-Ups ─────────────────────────────────────────────
 
 export async function getSmartFollowUps() {
@@ -554,6 +622,67 @@ Règles :
   }
 }
 
+// ─── Analyse de Sentiment (F75) ─────────────────────────────────────
+
+export async function analyzeSentiment(messages: Array<{ sender: string; content: string }>) {
+  const defaultResult = { sentiment: "neutral" as const, score: 50, signals: [] as string[] };
+  if (!messages.length) return defaultResult;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return defaultResult;
+
+  const lastMessages = messages.slice(-5);
+  const conversationText = lastMessages.map(m => `${m.sender}: ${m.content}`).join("\n");
+
+  try {
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (anthropicKey) {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 256,
+          system: "Analyse le sentiment de cette conversation de prospection. Retourne du JSON: {\"sentiment\": \"positive\"|\"hesitant\"|\"negative\"|\"neutral\"|\"hot\", \"score\": 0-100, \"signals\": [\"signal1\", \"signal2\"]}",
+          messages: [{ role: "user", content: conversationText }],
+        }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const parsed = JSON.parse(result.content?.[0]?.text || "{}");
+        return {
+          sentiment: parsed.sentiment || "neutral",
+          score: typeof parsed.score === "number" ? parsed.score : 50,
+          signals: Array.isArray(parsed.signals) ? parsed.signals : [],
+        };
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  // Simple keyword-based fallback
+  const text = conversationText.toLowerCase();
+  const positiveWords = ["intéressé", "oui", "super", "parfait", "ok", "quand", "comment"];
+  const negativeWords = ["non", "pas intéressé", "arrête", "spam", "stop"];
+  const hesitantWords = ["peut-être", "je sais pas", "je réfléchis", "pas sûr"];
+
+  const posCount = positiveWords.filter(w => text.includes(w)).length;
+  const negCount = negativeWords.filter(w => text.includes(w)).length;
+  const hesCount = hesitantWords.filter(w => text.includes(w)).length;
+
+  if (negCount > posCount) return { sentiment: "negative", score: 20, signals: ["Mots négatifs détectés"] };
+  if (hesCount > posCount) return { sentiment: "hesitant", score: 45, signals: ["Hésitation détectée"] };
+  if (posCount >= 2) return { sentiment: "hot", score: 85, signals: ["Signaux d'achat détectés"] };
+  if (posCount > 0) return { sentiment: "positive", score: 65, signals: ["Réponses positives"] };
+  return { sentiment: "neutral", score: 50, signals: [] };
+}
+
 // ─── Smart Follow-Up Message Generator ──────────────────────────────
 
 export async function generateFollowUpMessage(
@@ -592,4 +721,102 @@ Règles :
       ? `Bonjour ${prospectName}, je me permets de revenir vers vous. Avez-vous eu le temps de réfléchir à notre échange ?`
       : `${prospectName}, j'ai pensé à vous en voyant [contenu pertinent]. Ça pourrait vous intéresser !`;
   }
+}
+
+// ─── F72: Analyse Profil Complet (fallback sans post) ───────────────
+
+export async function analyzeProfileComplet(profileData: {
+  name: string;
+  bio?: string;
+  headline?: string;
+  experience?: string;
+  followers?: number;
+  following?: number;
+  platform: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { name, bio, headline, experience, followers, following, platform } = profileData;
+
+  // Build analysis prompt from available data
+  const dataPoints = [
+    bio && `Bio: ${bio}`,
+    headline && `Titre: ${headline}`,
+    experience && `Expérience: ${experience}`,
+    followers && `Followers: ${followers}`,
+    following && `Following: ${following}`,
+  ].filter(Boolean).join("\n");
+
+  if (!dataPoints) {
+    return {
+      analysis: {
+        accroche: `Salut ${name} ! J'ai vu ton profil ${platform} et j'ai pensé que ça pourrait t'intéresser.`,
+        interests: ["Non identifiés — profil privé ou incomplet"],
+        approachAngle: "Approche directe avec proposition de valeur claire",
+        confidence: "low",
+      },
+    };
+  }
+
+  try {
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (anthropicKey) {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 512,
+          system: "Tu es un expert en prospection commerciale. Analyse ce profil et génère un message d'accroche personnalisé. Retourne du JSON: {\"accroche\": \"message\", \"interests\": [\"intérêt1\"], \"approachAngle\": \"angle\", \"confidence\": \"high\"|\"medium\"|\"low\"}",
+          messages: [{ role: "user", content: `Profil ${platform} de ${name}:\n${dataPoints}` }],
+        }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const parsed = JSON.parse(result.content?.[0]?.text || "{}");
+        return {
+          analysis: {
+            accroche: parsed.accroche || `Salut ${name} !`,
+            interests: Array.isArray(parsed.interests) ? parsed.interests : [],
+            approachAngle: parsed.approachAngle || "Approche directe",
+            confidence: parsed.confidence || "low",
+          },
+        };
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  // Smart fallback based on available data
+  let accroche = `Salut ${name} !`;
+  const interests: string[] = [];
+
+  if (bio) {
+    const keywords = bio.split(/[\s,.|]+/).filter(w => w.length > 4);
+    if (keywords.length > 0) {
+      accroche = `Salut ${name} ! J'ai vu dans ta bio que tu t'intéresses à ${keywords.slice(0, 2).join(" et ")}. `;
+      interests.push(...keywords.slice(0, 3));
+    }
+  }
+
+  if (headline) {
+    accroche += `En tant que ${headline}, `;
+    interests.push(headline);
+  }
+
+  return {
+    analysis: {
+      accroche: accroche + "j'ai pensé que notre approche pourrait t'intéresser. Est-ce que tu aurais 15 min pour en discuter ?",
+      interests,
+      approachAngle: bio ? "Personnalisé via la bio" : "Approche directe",
+      confidence: bio ? "medium" : "low",
+    },
+  };
 }

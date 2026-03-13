@@ -15,7 +15,9 @@ import {
   Phone,
   BarChart3,
   Clock,
+  X,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   disconnectWhatsApp,
   sendWhatsAppMessage,
@@ -251,9 +253,9 @@ export function WhatsAppView({
       </div>
 
       {/* Conversations */}
-      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100vh-380px)]">
+      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-420px)] md:h-[calc(100dvh-380px)]">
         {/* Left sidebar: conversation list */}
-        <Card className="flex flex-col overflow-hidden">
+        <Card className={cn("flex flex-col overflow-hidden", selectedConv ? "hidden md:flex" : "flex")}>
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -319,12 +321,18 @@ export function WhatsAppView({
         </Card>
 
         {/* Right panel: message thread */}
-        <Card className="flex flex-col overflow-hidden">
+        <Card className={cn("flex flex-col overflow-hidden", !selectedConv && "hidden md:flex")}>
           {selectedConv ? (
             <>
               {/* Header */}
-              <div className="p-4 border-b flex items-center justify-between">
+              <div className="p-3 md:p-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedConv(null)}
+                    className="md:hidden p-1 -ml-1 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                   <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
                     {selectedConv.prospect?.name?.charAt(0) || "?"}
                   </div>

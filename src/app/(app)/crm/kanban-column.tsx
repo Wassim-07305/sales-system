@@ -37,7 +37,7 @@ export function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex-shrink-0 w-[280px] rounded-xl bg-muted/30 transition-colors",
+        "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-xl bg-muted/30 transition-colors snap-center",
         isOver && "bg-brand/5 ring-2 ring-brand/20"
       )}
     >
@@ -65,7 +65,7 @@ export function KanbanColumn({
         items={deals.map((d) => d.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="p-2 space-y-2 min-h-[100px] max-h-[calc(100vh-280px)] overflow-y-auto">
+        <div className="p-2 space-y-2 min-h-[100px] max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-280px)] overflow-y-auto">
           {deals.map((deal) => (
             <DealCard
               key={deal.id}

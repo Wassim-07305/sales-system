@@ -13,7 +13,7 @@ export default function InboxLoading() {
           <Skeleton className="h-10 w-40" />
         </div>
       </div>
-      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100vh-200px)]">
+      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-200px)]">
         <div className="rounded-lg border overflow-hidden">
           <div className="p-3 border-b">
             <Skeleton className="h-9 w-full" />

@@ -57,12 +57,12 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
 
       <aside
         className={cn(
-          "z-30 flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
+          "z-30 flex h-dvh flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
           "fixed left-0 top-0",
           "md:static",
           sidebarMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
-          "w-64 shrink-0",
+          "w-[75vw] max-w-64 shrink-0 md:w-64 md:max-w-none",
           isCollapsed && "md:w-[72px]"
         )}
       >

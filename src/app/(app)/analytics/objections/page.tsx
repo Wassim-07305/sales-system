@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getSourceTracking } from "@/lib/actions/analytics-v2";
-import { SourcesView } from "./sources-view";
+import { getRecurringObjections } from "@/lib/actions/analytics-v2";
+import { ObjectionsView } from "./objections-view";
 
-export default async function SourcesPage() {
+export default async function ObjectionsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -14,10 +14,10 @@ export default async function SourcesPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager"].includes(profile.role)) {
+  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
     redirect("/dashboard");
   }
 
-  const data = await getSourceTracking();
-  return <SourcesView {...data} />;
+  const data = await getRecurringObjections();
+  return <ObjectionsView {...data} />;
 }

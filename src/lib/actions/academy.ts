@@ -1536,3 +1536,75 @@ export async function notifyContentUpdate(courseId: string, changeDescription: s
   revalidatePath("/academy");
   return { notified: userIds.length };
 }
+
+// ---------- Recommandations Personnalisées (F74) ----------
+
+export async function getPersonalizedRecommendations() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { recommendations: [] };
+
+  // Get user's quiz scores grouped by lesson
+  const { data: progress } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id, completed, quiz_score, lessons(title, course_id, courses(title))")
+    .eq("user_id", user.id);
+
+  // Get all courses with lessons
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("id, title, description, modules(id, title, lessons(id, title))")
+    .eq("is_published", true);
+
+  // Identify weak areas (low quiz scores)
+  const weakLessons = (progress || [])
+    .filter(p => p.quiz_score !== null && p.quiz_score < 70)
+    .map(p => ({
+      lessonId: p.lesson_id,
+      score: p.quiz_score,
+      title: (p as Record<string, unknown>).lessons ? ((p as Record<string, unknown>).lessons as { title?: string }).title || "Leçon" : "Leçon",
+      courseTitle: "Cours",
+      reason: `Score de ${p.quiz_score}% — révision recommandée`,
+    }));
+
+  // Identify not-started courses
+  const completedLessonIds = new Set((progress || []).filter(p => p.completed).map(p => p.lesson_id));
+  const notStarted = (courses || [])
+    .filter(c => {
+      const lessons = c.modules?.flatMap((m: { lessons?: { id: string }[] }) => m.lessons || []) || [];
+      return lessons.length > 0 && !lessons.some((l: { id: string }) => completedLessonIds.has(l.id));
+    })
+    .map(c => ({
+      courseId: c.id,
+      title: c.title,
+      description: c.description,
+      reason: "Pas encore commencé",
+    }));
+
+  // Identify partially completed courses (stalled)
+  const partiallyCompleted = (courses || [])
+    .filter(c => {
+      const lessons = c.modules?.flatMap((m: { lessons?: { id: string }[] }) => m.lessons || []) || [];
+      const completed = lessons.filter((l: { id: string }) => completedLessonIds.has(l.id)).length;
+      return completed > 0 && completed < lessons.length;
+    })
+    .map(c => {
+      const lessons = c.modules?.flatMap((m: { lessons?: { id: string }[] }) => m.lessons || []) || [];
+      const completed = lessons.filter((l: { id: string }) => completedLessonIds.has(l.id)).length;
+      const pct = Math.round((completed / lessons.length) * 100);
+      return {
+        courseId: c.id,
+        title: c.title,
+        progress: pct,
+        reason: `${pct}% terminé — continue ta progression !`,
+      };
+    });
+
+  return {
+    recommendations: {
+      toReview: weakLessons.slice(0, 5),
+      toContinue: partiallyCompleted.slice(0, 3),
+      toDiscover: notStarted.slice(0, 3),
+    },
+  };
+}

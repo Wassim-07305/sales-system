@@ -838,6 +838,148 @@ export async function checkAchievementProgress(userId: string) {
   return newlyUnlocked;
 }
 
+// ── Journal de Bord / EOD ──────────────────────────────────────────
+
+export async function submitDailyJournal(data: {
+  dms_sent: number;
+  replies_received: number;
+  calls_booked: number;
+  calls_completed: number;
+  deals_closed: number;
+  revenue_generated: number;
+  mood: "great" | "good" | "neutral" | "tough" | "bad";
+  wins: string;
+  blockers: string;
+  plan_tomorrow: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Upsert for today
+  const { error } = await supabase
+    .from("daily_journals")
+    .upsert({
+      user_id: user.id,
+      date: today,
+      dms_sent: data.dms_sent,
+      replies_received: data.replies_received,
+      calls_booked: data.calls_booked,
+      calls_completed: data.calls_completed,
+      deals_closed: data.deals_closed,
+      revenue_generated: data.revenue_generated,
+      mood: data.mood,
+      wins: data.wins,
+      blockers: data.blockers,
+      plan_tomorrow: data.plan_tomorrow,
+      submitted_at: new Date().toISOString(),
+    }, { onConflict: "user_id,date" });
+
+  if (error) return { error: error.message };
+
+  // Notify admin/manager about the EOD
+  await supabase.from("notifications").insert({
+    user_id: user.id,
+    type: "eod_submitted",
+    title: "EOD soumis",
+    body: `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`,
+    link: "/team/journal",
+  });
+
+  // Award gamification points for daily journal
+  try {
+    await addPoints(user.id, 5, "Journal quotidien soumis");
+  } catch {
+    // ignore gamification errors
+  }
+
+  revalidatePath("/journal");
+  revalidatePath("/team/journal");
+  return { success: true };
+}
+
+export async function getDailyJournal(date?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const targetDate = date || new Date().toISOString().split("T")[0];
+
+  const { data } = await supabase
+    .from("daily_journals")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("date", targetDate)
+    .single();
+
+  return data;
+}
+
+export async function getJournalHistory(userId?: string, limit = 30) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const targetUserId = userId || user.id;
+
+  const { data } = await supabase
+    .from("daily_journals")
+    .select("*")
+    .eq("user_id", targetUserId)
+    .order("date", { ascending: false })
+    .limit(limit);
+
+  return data || [];
+}
+
+export async function getTeamJournals(date?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Only admin/manager can view team journals
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+
+  const targetDate = date || new Date().toISOString().split("T")[0];
+
+  const { data } = await supabase
+    .from("daily_journals")
+    .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
+    .eq("date", targetDate)
+    .order("submitted_at", { ascending: false });
+
+  return data || [];
+}
+
+export async function getMissingEodSetters(date?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+
+  const targetDate = date || new Date().toISOString().split("T")[0];
+
+  // Get all setters
+  const { data: setters } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url")
+    .in("role", ["setter", "closer"]);
+
+  // Get who submitted today
+  const { data: submitted } = await supabase
+    .from("daily_journals")
+    .select("user_id")
+    .eq("date", targetDate);
+
+  const submittedIds = new Set((submitted || []).map(s => s.user_id));
+  return (setters || []).filter(s => !submittedIds.has(s.id));
+}
+
 export async function getRedemptionHistory() {
   const supabase = await createClient();
   const {

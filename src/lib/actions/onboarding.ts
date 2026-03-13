@@ -103,6 +103,65 @@ export async function deleteOnboardingStep(stepId: string) {
   revalidatePath("/settings/onboarding");
 }
 
+// --- F4: Welcome Video Personnalisée ---
+
+export async function getWelcomeVideo(role?: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const userRole = role || "client_b2c";
+
+  // Try to fetch from welcome_videos table (graceful fallback if not exists)
+  try {
+    const { data, error } = await supabase
+      .from("welcome_videos")
+      .select("video_url, title, description")
+      .eq("role", userRole)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      return {
+        videoUrl: data.video_url as string,
+        title: (data.title as string) || "Ta vidéo de bienvenue",
+        description: (data.description as string) || null,
+      };
+    }
+  } catch {
+    // Table doesn't exist — fall through to fallback
+  }
+
+  // Fallback: try onboarding_content table
+  try {
+    const { data, error } = await supabase
+      .from("onboarding_content")
+      .select("content_url, title, description")
+      .eq("role", userRole)
+      .eq("type", "welcome_video")
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      return {
+        videoUrl: data.content_url as string,
+        title: (data.title as string) || "Ta vidéo de bienvenue",
+        description: (data.description as string) || null,
+      };
+    }
+  } catch {
+    // Table doesn't exist — fall through to null
+  }
+
+  // No video configured — component will show fallback card
+  return null;
+}
+
 // --- Batch 1B: Enhanced Onboarding ---
 
 export async function submitOnboardingQuiz(answers: Record<string, string>) {
@@ -624,4 +683,77 @@ export async function completeSimpleOnboarding(data: {
   revalidatePath("/dashboard");
   revalidatePath("/profile");
   return { success: true };
+}
+
+// ─── F5: Onboarding B2B Full Auto ───────────────────────────────────
+
+export async function generateB2BWorkspace(data: {
+  companyName: string;
+  offer: string;
+  targetAudience: string;
+  price: string;
+  networks: string[];
+  communicationTone: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Generate SOP document
+  const sop = {
+    company: data.companyName,
+    offer: data.offer,
+    audience: data.targetAudience,
+    price: data.price,
+    networks: data.networks,
+    tone: data.communicationTone,
+    workflow: {
+      step1: "Identifier les prospects sur " + data.networks.join(", "),
+      step2: "Analyser le profil (bio, derniers posts, activité)",
+      step3: `Premier message personnalisé — Ton : ${data.communicationTone}`,
+      step4: "Si réponse positive → qualifier (besoin, budget, timing)",
+      step5: "Si qualifié → proposer un appel découverte",
+      step6: "Appel → présentation de l'offre " + data.offer,
+      step7: "Follow-up J+1 si pas de réponse",
+      step8: "Relance J+3 avec valeur ajoutée",
+    },
+    scriptTemplate: `Salut [PRÉNOM] ! J'ai vu que [ACCROCHE PERSONNALISÉE]. Chez ${data.companyName}, on aide [${data.targetAudience}] à [BÉNÉFICE PRINCIPAL]. Est-ce que tu aurais 15 min cette semaine pour en discuter ?`,
+    objectionHandling: {
+      "Pas le temps": "Je comprends, c'est justement pour ça qu'on propose un format court de 15 min. On peut trouver un créneau qui t'arrange ?",
+      "Trop cher": `L'investissement de ${data.price} est rentabilisé dès le premier mois grâce à [RÉSULTAT CONCRET].`,
+      "J'y réfléchis": "Bien sûr ! Qu'est-ce qui te ferait passer à l'action aujourd'hui ?",
+    },
+  };
+
+  // Save SOP
+  const { error: sopError } = await supabase
+    .from("client_sops")
+    .upsert({
+      client_id: user.id,
+      sop_data: sop,
+      generated_at: new Date().toISOString(),
+    }, { onConflict: "client_id" });
+
+  if (sopError) return { error: sopError.message };
+
+  // Create default pipeline stages for this client
+  const defaultStages = [
+    { name: "Prospect identifié", color: "#6b7280", position: 0 },
+    { name: "Premier contact", color: "#3b82f6", position: 1 },
+    { name: "Conversation active", color: "#f59e0b", position: 2 },
+    { name: "Appel découverte", color: "#8b5cf6", position: 3 },
+    { name: "Proposition envoyée", color: "#f97316", position: 4 },
+    { name: "Client signé", color: "#22c55e", position: 5 },
+  ];
+
+  for (const stage of defaultStages) {
+    await supabase.from("pipeline_stages").insert({
+      ...stage,
+      team_id: user.id,
+    });
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/crm");
+  return { success: true, sop };
 }

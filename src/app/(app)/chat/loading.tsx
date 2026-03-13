@@ -18,7 +18,7 @@ export default function ChatLoading() {
         <Skeleton className="h-9 w-20" />
         <Skeleton className="h-9 w-24" />
       </div>
-      <div className="grid md:grid-cols-[280px_1fr] gap-4 h-[calc(100vh-240px)]">
+      <div className="grid md:grid-cols-[280px_1fr] gap-4 h-[calc(100dvh-240px)]">
         <div className="rounded-lg border overflow-hidden">
           <div className="p-3 border-b">
             <Skeleton className="h-9 w-full" />

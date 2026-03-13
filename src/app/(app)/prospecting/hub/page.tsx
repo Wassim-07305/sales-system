@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getMultiNetworkOverview } from "@/lib/actions/hub-setting";
+import { getMultiNetworkOverview, getHubUnifiedStats } from "@/lib/actions/hub-setting";
 import { HubView } from "./hub-view";
 
 export default async function HubPage() {
@@ -11,7 +11,10 @@ export default async function HubPage() {
 
   if (!user) redirect("/login");
 
-  const overview = await getMultiNetworkOverview();
+  const [overview, unifiedStats] = await Promise.all([
+    getMultiNetworkOverview(),
+    getHubUnifiedStats(),
+  ]);
 
-  return <HubView overview={overview} />;
+  return <HubView overview={overview} whatsappStats={unifiedStats.whatsapp} />;
 }

@@ -783,6 +783,106 @@ export interface CohortData {
   avgCycleDays: number;
 }
 
+// ---------- Source Tracking Complet (F49) ----------
+
+export async function getSourceTracking() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { sources: [], summary: null };
+
+  // Track sources from deals with utm params
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("id, title, value, source, created_at, contact:contacts(full_name, utm_source, utm_medium, utm_campaign, referrer)")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  const sourceMap: Record<string, { count: number; revenue: number; deals: string[] }> = {};
+
+  for (const deal of deals || []) {
+    const source = (deal as Record<string, unknown>).contact ? ((deal as Record<string, unknown>).contact as { utm_source?: string }).utm_source || deal.source || "direct" : deal.source || "direct";
+    if (!sourceMap[source]) sourceMap[source] = { count: 0, revenue: 0, deals: [] };
+    sourceMap[source].count++;
+    sourceMap[source].revenue += deal.value || 0;
+    sourceMap[source].deals.push(deal.title);
+  }
+
+  const sources = Object.entries(sourceMap)
+    .map(([name, data]) => ({
+      name,
+      count: data.count,
+      revenue: data.revenue,
+      avgDealValue: data.count > 0 ? Math.round(data.revenue / data.count) : 0,
+      conversionRate: 0, // would need total visitors per source
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  const totalRevenue = sources.reduce((s, x) => s + x.revenue, 0);
+  const totalDeals = sources.reduce((s, x) => s + x.count, 0);
+
+  return {
+    sources,
+    summary: { totalRevenue, totalDeals, topSource: sources[0]?.name || "N/A" },
+  };
+}
+
+// ---------- Objections Récurrentes (F76) ----------
+
+export async function getRecurringObjections() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { objections: [] };
+
+  // Fetch recent prospect conversations
+  const { data: conversations } = await supabase
+    .from("dm_conversations")
+    .select("messages")
+    .order("last_message_at", { ascending: false })
+    .limit(50);
+
+  // Extract all prospect messages
+  const prospectMessages: string[] = [];
+  for (const conv of conversations || []) {
+    const msgs = (conv.messages as Array<{ sender: string; content: string }>) || [];
+    for (const msg of msgs) {
+      if (msg.sender !== "damien" && msg.content) {
+        prospectMessages.push(msg.content);
+      }
+    }
+  }
+
+  // Pattern matching for common objections
+  const objectionPatterns = [
+    { pattern: /pas (le |de )?temps|trop occup|pas dispo/i, category: "Manque de temps", suggestion: "Propose un créneau court (15 min) et montre la valeur immédiate" },
+    { pattern: /trop cher|budget|pas les moyens|prix/i, category: "Prix / Budget", suggestion: "Reformule en ROI : 'Combien ça te coûte de ne pas agir ?'" },
+    { pattern: /pas (intéressé|besoin)|ça (m'|me )intéresse pas/i, category: "Pas intéressé", suggestion: "Identifie le vrai blocage : 'Je comprends, qu'est-ce qui te manque aujourd'hui ?'" },
+    { pattern: /je (vais )?réfléchir|faut que j'y pense|laisse.moi/i, category: "Réflexion", suggestion: "Crée l'urgence : 'Bien sûr ! Qu'est-ce qui te ferait passer à l'action maintenant ?'" },
+    { pattern: /déjà (un |quelqu'un|essayé)|j'ai déjà/i, category: "A déjà essayé", suggestion: "Différencie ton approche : 'Qu'est-ce qui n'a pas marché la dernière fois ?'" },
+    { pattern: /c'est une arnaque|spam|confiance|méfian/i, category: "Confiance / Crédibilité", suggestion: "Social proof : partage un témoignage ou un résultat concret" },
+    { pattern: /plus tard|pas maintenant|quand|un jour/i, category: "Timing", suggestion: "Fixe un RDV précis : 'OK, je te recontacte quand exactement ?'" },
+  ];
+
+  const objectionCounts: Record<string, { count: number; category: string; suggestion: string; examples: string[] }> = {};
+
+  for (const msg of prospectMessages) {
+    for (const { pattern, category, suggestion } of objectionPatterns) {
+      if (pattern.test(msg)) {
+        if (!objectionCounts[category]) {
+          objectionCounts[category] = { count: 0, category, suggestion, examples: [] };
+        }
+        objectionCounts[category].count++;
+        if (objectionCounts[category].examples.length < 3) {
+          objectionCounts[category].examples.push(msg.slice(0, 100));
+        }
+      }
+    }
+  }
+
+  const objections = Object.values(objectionCounts).sort((a, b) => b.count - a.count);
+
+  return { objections, totalMessages: prospectMessages.length };
+}
+
 export async function getCohortData(): Promise<CohortData[]> {
   const supabase = await createClient();
 

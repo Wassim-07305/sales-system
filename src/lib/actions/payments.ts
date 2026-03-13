@@ -249,6 +249,75 @@ export async function getInvoices() {
   return data || [];
 }
 
+// ─── F60: Auto Invoice Generation ──────────────────────────────────
+
+/**
+ * Find signed contracts that don't have a current-month invoice yet.
+ */
+export async function getContractsNeedingInvoice() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié", data: [] };
+
+  // Get all signed contracts
+  const { data: contracts, error: contractsError } = await supabase
+    .from("contracts")
+    .select("id, amount, client_id, status, client:profiles(id, full_name, email)")
+    .eq("status", "signed");
+
+  if (contractsError) return { error: contractsError.message, data: [] };
+  if (!contracts || contracts.length === 0) return { error: null, data: [] };
+
+  // Get all invoices for the current month
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+  const { data: existingInvoices } = await supabase
+    .from("invoices")
+    .select("contract_id")
+    .gte("created_at", monthStart)
+    .lte("created_at", monthEnd);
+
+  const invoicedContractIds = new Set(
+    (existingInvoices || []).map((inv) => inv.contract_id)
+  );
+
+  // Filter contracts that don't have a current-month invoice
+  const needingInvoice = contracts.filter(
+    (contract) => !invoicedContractIds.has(contract.id)
+  );
+
+  return { error: null, data: needingInvoice };
+}
+
+/**
+ * Bulk generate invoices for all signed contracts that don't have
+ * a current-month invoice yet. Returns the count of invoices generated.
+ */
+export async function generateScheduledInvoices() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié", count: 0 };
+
+  const { error: fetchError, data: contracts } = await getContractsNeedingInvoice();
+
+  if (fetchError || !contracts) return { error: fetchError, count: 0 };
+  if (contracts.length === 0) return { error: null, count: 0 };
+
+  let generated = 0;
+
+  for (const contract of contracts) {
+    const result = await generateInvoice(contract.id, contract.amount);
+    if (!result.error && result.data) {
+      generated++;
+    }
+  }
+
+  revalidatePath("/contracts/invoices");
+  return { error: null, count: generated };
+}
+
 export async function getOverduePayments() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

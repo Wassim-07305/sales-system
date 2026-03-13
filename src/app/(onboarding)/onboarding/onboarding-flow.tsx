@@ -7,7 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   completeSimpleOnboarding,
   uploadAvatar,
+  getWelcomeVideo,
 } from "@/lib/actions/onboarding";
+import { WelcomeVideo } from "@/components/welcome-video";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -36,6 +38,7 @@ interface OnboardingFlowProps {
 interface StepDef {
   id: string;
   type:
+    | "video"
     | "welcome"
     | "avatar"
     | "text"
@@ -52,6 +55,7 @@ interface StepDef {
 // ---------------------------------------------------------------------------
 
 const B2C_STEPS: StepDef[] = [
+  { id: "video", type: "video", title: "Vidéo de bienvenue" },
   { id: "welcome", type: "welcome", title: "Bienvenue sur Sales System" },
   {
     id: "avatar",
@@ -87,6 +91,7 @@ const B2C_STEPS: StepDef[] = [
 ];
 
 const B2B_STEPS: StepDef[] = [
+  { id: "video", type: "video", title: "Vidéo de bienvenue" },
   { id: "welcome", type: "welcome", title: "Bienvenue sur Sales System" },
   {
     id: "avatar",
@@ -167,14 +172,26 @@ export function OnboardingFlow({
   const [channels, setChannels] = useState<string[]>([]);
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [instagramUsername, setInstagramUsername] = useState("");
+  const [welcomeVideoData, setWelcomeVideoData] = useState<{
+    videoUrl: string;
+    title: string;
+    description: string | null;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentStep = steps[step];
   const isLast = step === steps.length - 1;
-  const totalReal = steps.length - 2; // exclude welcome + summary
-  const currentReal = Math.max(0, Math.min(step - 1, totalReal));
+  const totalReal = steps.length - 3; // exclude video + welcome + summary
+  const currentReal = Math.max(0, Math.min(step - 2, totalReal));
   const progress = totalReal > 0 ? (currentReal / totalReal) * 100 : 0;
+
+  // Fetch welcome video data on mount
+  useEffect(() => {
+    getWelcomeVideo(role).then((data) => {
+      if (data) setWelcomeVideoData(data);
+    });
+  }, [role]);
 
   // Auto-focus inputs on step change
   useEffect(() => {
@@ -201,7 +218,7 @@ export function OnboardingFlow({
         e.preventDefault();
         if (isLast) {
           handleComplete();
-        } else if (currentStep.type !== "welcome") {
+        } else if (currentStep.type !== "welcome" && currentStep.type !== "video") {
           goNext();
         }
       }
@@ -319,7 +336,7 @@ export function OnboardingFlow({
           <p className="text-white/40 text-lg max-w-md">
             {role === "client_b2b"
               ? "Quelques questions pour configurer ton espace business et activer le setting IA."
-              : "Quelques etapes pour configurer ton profil et demarrer ta formation."}
+              : "Quelques étapes pour configurer ton profil et démarrer ta formation."}
           </p>
         </motion.div>
 
@@ -331,7 +348,7 @@ export function OnboardingFlow({
         >
           <Sparkles className="h-4 w-4 text-[#7af17a]" />
           <span className="text-sm text-white/50">
-            {role === "client_b2b" ? "5 etapes" : "3 etapes"} — moins de 2
+            {role === "client_b2b" ? "5 étapes" : "3 étapes"} — moins de 2
             minutes
           </span>
         </motion.div>
@@ -462,7 +479,7 @@ export function OnboardingFlow({
       id === "bio"
         ? "Parle-nous de toi en quelques mots..."
         : id === "business"
-          ? "Decris ton activite, ton offre, ton marche cible..."
+          ? "Décris ton activité, ton offre, ton marché cible..."
           : id === "qualification"
             ? "Ex :\n- Quel est ton budget ?\n- Depuis combien de temps cherches-tu une solution ?"
             : "";
@@ -663,6 +680,16 @@ export function OnboardingFlow({
 
   function renderStepContent() {
     switch (currentStep.type) {
+      case "video":
+        return (
+          <WelcomeVideo
+            videoUrl={welcomeVideoData?.videoUrl}
+            title={welcomeVideoData?.title}
+            description={welcomeVideoData?.description || undefined}
+            userName={userName}
+            onContinue={goNext}
+          />
+        );
       case "welcome":
         return renderWelcome();
       case "avatar":
@@ -710,7 +737,7 @@ export function OnboardingFlow({
       />
 
       {/* Progress bar — fixed top */}
-      {currentStep.type !== "welcome" && (
+      {currentStep.type !== "welcome" && currentStep.type !== "video" && (
         <div className="fixed left-0 right-0 top-0 z-50 h-1 bg-white/10">
           <motion.div
             className="h-full bg-gradient-to-r from-[#7af17a] to-[#4ade80]"
@@ -721,7 +748,7 @@ export function OnboardingFlow({
       )}
 
       {/* Top bar */}
-      {currentStep.type !== "welcome" && (
+      {currentStep.type !== "welcome" && currentStep.type !== "video" && (
         <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 py-4 pt-6">
           {/* Back button */}
           <button
@@ -762,7 +789,8 @@ export function OnboardingFlow({
             className="w-full max-w-2xl"
           >
             {/* Step title (not on welcome/summary) */}
-            {currentStep.type !== "welcome" &&
+            {currentStep.type !== "video" &&
+              currentStep.type !== "welcome" &&
               currentStep.type !== "summary" && (
                 <div className="text-center mb-10">
                   <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
@@ -802,7 +830,8 @@ export function OnboardingFlow({
             </div>
 
             {/* OK / Continue button (not on welcome/summary) */}
-            {currentStep.type !== "welcome" &&
+            {currentStep.type !== "video" &&
+              currentStep.type !== "welcome" &&
               currentStep.type !== "summary" && (
                 <div className="flex justify-center mt-10">
                   <button

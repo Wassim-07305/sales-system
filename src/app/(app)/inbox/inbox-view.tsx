@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Send, Mic, MicOff, Instagram, MessageSquare, Upload, Bot, Plus } from "lucide-react";
-import { sendMessage, createConversation, importConversation } from "@/lib/actions/inbox";
+import { Search, Send, Mic, MicOff, Instagram, MessageSquare, Upload, Bot, Plus, X, Sparkles, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { sendMessage, createConversation, importConversation, generateQuickReplies } from "@/lib/actions/inbox";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -54,6 +55,8 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
   const [voiceAiSchedule, setVoiceAiSchedule] = useState("");
   const [newConvDialogOpen, setNewConvDialogOpen] = useState(false);
   const [newConvProspectId, setNewConvProspectId] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
@@ -123,6 +126,23 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
     router.refresh();
   }
 
+  async function handleQuickReplies() {
+    if (!selectedConv) return;
+    setLoadingSuggestions(true);
+    setSuggestions([]);
+    try {
+      const msgs = selectedConv.messages || [];
+      const lastMessages = msgs.slice(-3).map((m) => `${m.sender}: ${m.content}`).join("\n");
+      const prospectName = selectedConv.prospect?.name || "le prospect";
+      const result = await generateQuickReplies(lastMessages, prospectName);
+      setSuggestions(result.suggestions);
+    } catch {
+      toast.error("Impossible de générer les suggestions");
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }
+
   async function handleVoiceAi() {
     toast.success("Vocal IA programmé (en attente d'intégration ElevenLabs)");
     setVoiceAiDialogOpen(false);
@@ -144,9 +164,9 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
         </div>
       </PageHeader>
 
-      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100vh-200px)]">
+      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-220px)] md:h-[calc(100dvh-200px)]">
         {/* Conversation list */}
-        <Card className="flex flex-col overflow-hidden">
+        <Card className={cn("flex flex-col overflow-hidden", selectedConv ? "hidden md:flex" : "flex")}>
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -197,12 +217,18 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
         </Card>
 
         {/* Messages area */}
-        <Card className="flex flex-col overflow-hidden">
+        <Card className={cn("flex flex-col overflow-hidden", !selectedConv && "hidden md:flex")}>
           {selectedConv ? (
             <>
               {/* Header */}
-              <div className="p-4 border-b flex items-center justify-between">
+              <div className="p-3 md:p-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedConv(null)}
+                    className="md:hidden p-1 -ml-1 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                   <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
                     {selectedConv.prospect?.name?.charAt(0) || "?"}
                   </div>
@@ -239,6 +265,21 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Suggestions IA */}
+              {suggestions.length > 0 && (
+                <div className="px-3 pt-2 flex flex-wrap gap-2">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setMessageText(s); setSuggestions([]); }}
+                      className="text-xs bg-brand/10 text-brand-dark hover:bg-brand/20 rounded-full px-3 py-1.5 text-left max-w-[300px] truncate transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Input */}
               <div className="p-3 border-t flex items-center gap-2">
                 <Input
@@ -248,6 +289,15 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
                   onChange={(e) => setMessageText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                 />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleQuickReplies}
+                  disabled={loadingSuggestions}
+                  title="Suggestions IA"
+                >
+                  {loadingSuggestions ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"

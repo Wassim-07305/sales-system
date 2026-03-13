@@ -240,7 +240,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+        <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-2 md:px-2 scrollbar-hide snap-x snap-mandatory md:snap-none">
           {stages.map((stage) => (
             <KanbanColumn
               key={stage.id}

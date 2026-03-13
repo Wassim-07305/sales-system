@@ -466,8 +466,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
                       Classement du groupe
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-0">
-                    <Table>
+                  <CardContent className="p-0 overflow-x-auto">
+                    <Table className="min-w-[600px]">
                       <TableHeader>
                         <TableRow>
                           <TableHead className="w-12">#</TableHead>
@@ -532,8 +532,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
                       Membres ({groupDetail.members.length})
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-0">
-                    <Table>
+                  <CardContent className="p-0 overflow-x-auto">
+                    <Table className="min-w-[600px]">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Membre</TableHead>
@@ -603,8 +603,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-0">
-                    <Table>
+                  <CardContent className="p-0 overflow-x-auto">
+                    <Table className="min-w-[600px]">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Titre</TableHead>

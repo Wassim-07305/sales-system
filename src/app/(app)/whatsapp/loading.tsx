@@ -24,7 +24,7 @@ export default function WhatsappLoading() {
           </div>
         ))}
       </div>
-      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100vh-280px)]">
+      <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-280px)]">
         <div className="rounded-lg border overflow-hidden">
           <div className="p-3 border-b">
             <Skeleton className="h-9 w-full" />

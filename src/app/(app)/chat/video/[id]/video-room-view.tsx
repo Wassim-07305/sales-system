@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -103,6 +104,10 @@ export function VideoRoomView({
   const [screenSharing, setScreenSharing] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<"participants" | "chat" | "polls">("participants");
 
+  // Auto recording state
+  const [autoRecordEnabled, setAutoRecordEnabled] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+
   // Chat state (local only, stub)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -117,6 +122,38 @@ export function VideoRoomView({
   const isLive = room.status === "live";
   const isScheduled = room.status === "scheduled";
   const activeParticipants = room.participants.filter((p) => !p.left_at);
+
+  function startRecording() {
+    setIsRecording(true);
+    // Stub: actual MediaRecorder implementation
+    console.log("[Auto Recording] Recording started — MediaRecorder stub");
+    toast.success("Enregistrement démarré");
+  }
+
+  function stopRecording() {
+    setIsRecording(false);
+    console.log("[Auto Recording] Recording stopped — MediaRecorder stub");
+    toast.info("Enregistrement arrêté");
+  }
+
+  function toggleRecording() {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }
+
+  function handleAutoRecordToggle(checked: boolean) {
+    setAutoRecordEnabled(checked);
+    if (checked && isLive && !isRecording) {
+      // Auto-start recording when toggled on during a live call
+      startRecording();
+    }
+    if (!checked && isRecording) {
+      stopRecording();
+    }
+  }
 
   function handleSendChat() {
     if (!chatInput.trim()) return;
@@ -149,6 +186,9 @@ export function VideoRoomView({
       try {
         await startRoom(room.id);
         toast.success("Visioconférence démarrée");
+        if (autoRecordEnabled && !isRecording) {
+          startRecording();
+        }
         router.refresh();
       } catch {
         toast.error("Erreur lors du démarrage");
@@ -226,7 +266,7 @@ export function VideoRoomView({
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col">
+    <div className="h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b">
         <div className="flex items-center gap-3">
@@ -245,11 +285,38 @@ export function VideoRoomView({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {isLive && (
-            <div className="flex items-center gap-1.5 text-red-500 text-xs font-medium">
-              <Circle className="h-2.5 w-2.5 fill-red-500 animate-pulse" />
-              Enregistrement
+          {/* Auto Recording toggle */}
+          {isHost && (isScheduled || isLive) && (
+            <div className="flex items-center gap-1.5 mr-2">
+              <Label htmlFor="auto-record" className="text-xs text-muted-foreground cursor-pointer">
+                Enreg. auto
+              </Label>
+              <Switch
+                id="auto-record"
+                checked={autoRecordEnabled}
+                onCheckedChange={handleAutoRecordToggle}
+                aria-label="Enregistrement automatique"
+              />
             </div>
+          )}
+          {/* Recording indicator */}
+          {isRecording && (
+            <button
+              onClick={toggleRecording}
+              className="flex items-center gap-1.5 text-red-500 text-xs font-medium bg-red-50 rounded-full px-2.5 py-1 hover:bg-red-100 transition-colors"
+            >
+              <Circle className="h-2.5 w-2.5 fill-red-500 animate-pulse" />
+              REC
+            </button>
+          )}
+          {isLive && !isRecording && (
+            <button
+              onClick={toggleRecording}
+              className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium hover:text-red-500 transition-colors"
+            >
+              <Circle className="h-2.5 w-2.5" />
+              REC
+            </button>
           )}
           {isHost && isScheduled && (
             <Button

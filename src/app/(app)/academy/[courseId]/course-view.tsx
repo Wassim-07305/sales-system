@@ -341,7 +341,7 @@ export function CourseView({
     });
 
     const score = Math.round((correct / quiz.questions.length) * 100);
-    const passed = score >= (quiz.passing_score || 70);
+    const passed = score >= (quiz.passing_score || 90);
 
     setSubmitting(true);
     try {
@@ -374,7 +374,7 @@ export function CourseView({
         toast.success(`Quiz reussi ! Score : ${score}%`);
       } else {
         toast.error(
-          `Score : ${score}%. Il faut minimum ${quiz.passing_score || 70}% pour valider. ${
+          `Score : ${score}%. Il faut minimum ${quiz.passing_score || 90}% pour valider. ${
             result.attemptsLeft > 0
               ? `Il vous reste ${result.attemptsLeft} tentative(s) aujourd'hui.`
               : "Plus de tentatives aujourd'hui."
@@ -550,7 +550,7 @@ export function CourseView({
   // Main render
   // ---------------------------------------------------------------------------
   return (
-    <div className="flex h-[calc(100vh-4rem)] -m-5 md:-m-8">
+    <div className="flex h-[calc(100dvh-4rem)] -m-4 -mb-24 md:-m-8 md:-mb-8">
       {/* ---- Mobile sidebar toggle ---- */}
       <div className="md:hidden fixed top-[4.5rem] left-4 z-40">
         <Button
@@ -900,13 +900,13 @@ export function CourseView({
                     <div
                       className={cn(
                         "mt-6 rounded-lg border-2 p-4",
-                        quizScore >= (activeQuiz.passing_score || 70)
+                        quizScore >= (activeQuiz.passing_score || 90)
                           ? "border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20"
                           : "border-red-200 bg-red-50/50 dark:border-red-900 dark:bg-red-950/20"
                       )}
                     >
                       <div className="flex items-center gap-4">
-                        {quizScore >= (activeQuiz.passing_score || 70) ? (
+                        {quizScore >= (activeQuiz.passing_score || 90) ? (
                           <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-3">
                             <Trophy className="h-6 w-6 text-green-600" />
                           </div>
@@ -920,9 +920,9 @@ export function CourseView({
                             Score : {quizScore}%
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {quizScore >= (activeQuiz.passing_score || 70)
+                            {quizScore >= (activeQuiz.passing_score || 90)
                               ? "Felicitations ! Vous avez reussi le quiz."
-                              : `Score minimum requis : ${activeQuiz.passing_score || 70}%. Revisez la lecon et reessayez.`}
+                              : `Score minimum requis : ${activeQuiz.passing_score || 90}%. Revisez la lecon et reessayez.`}
                           </p>
                         </div>
                       </div>
@@ -1008,7 +1008,7 @@ export function CourseView({
                         </Button>
                         {quizScore !== null &&
                           quizScore <
-                            (activeQuiz.passing_score || 70) &&
+                            (activeQuiz.passing_score || 90) &&
                           !isQuizLocked(selectedLesson.id) && (
                             <Button
                               variant="outline"

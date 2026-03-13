@@ -166,7 +166,7 @@ export function SessionView({ session }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
+    <div className="flex flex-col h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)]">
       {/* Header */}
       <Card className="mb-4 shrink-0">
         <div className="flex items-center justify-between p-4">

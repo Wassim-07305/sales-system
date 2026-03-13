@@ -26,8 +26,8 @@ export function MobileNav({ role }: MobileNavProps) {
       {showMore && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowMore(false)} />
-          <div className="absolute bottom-16 left-0 right-0 bg-background border-t rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-4 gap-3">
+          <div className="absolute bottom-16 left-0 right-0 bg-background border-t rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe">
+            <div className="grid grid-cols-4 gap-2">
               {overflowItems.map((item) => {
                 const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
                 const Icon = item.icon;
@@ -52,40 +52,42 @@ export function MobileNav({ role }: MobileNavProps) {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t bg-background/95 backdrop-blur-sm md:hidden">
-        {mainItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
-          const Icon = item.icon;
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm md:hidden pb-safe">
+        <div className="flex h-16 items-center justify-around">
+          {mainItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[44px] px-2 py-1.5 text-[10px] font-medium transition-colors rounded-lg active:bg-muted",
+                  isActive ? "text-brand" : "text-muted-foreground"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="truncate max-w-[56px]">{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {overflowItems.length > 0 && (
+            <button
+              onClick={() => setShowMore(!showMore)}
               className={cn(
-                "flex flex-col items-center gap-1 px-2 py-1 text-[10px] font-medium transition-colors",
-                isActive ? "text-brand" : "text-muted-foreground"
+                "flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[44px] px-2 py-1.5 text-[10px] font-medium transition-colors rounded-lg active:bg-muted",
+                showMore ? "text-brand" : "text-muted-foreground"
               )}
             >
-              <Icon className="h-5 w-5" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-
-        {overflowItems.length > 0 && (
-          <button
-            onClick={() => setShowMore(!showMore)}
-            className={cn(
-              "flex flex-col items-center gap-1 px-2 py-1 text-[10px] font-medium transition-colors",
-              showMore ? "text-brand" : "text-muted-foreground"
-            )}
-          >
-            {showMore ? <X className="h-5 w-5" /> : <MoreHorizontal className="h-5 w-5" />}
-            <span>Plus</span>
-          </button>
-        )}
+              {showMore ? <X className="h-5 w-5" /> : <MoreHorizontal className="h-5 w-5" />}
+              <span>Plus</span>
+            </button>
+          )}
+        </div>
       </nav>
     </>
   );
