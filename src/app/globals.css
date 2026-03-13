@@ -88,12 +88,12 @@
   --chart-5: #ef4444;
   --sidebar: #ffffff;
   --sidebar-foreground: #14080e;
-  --sidebar-primary: #7af17a;
-  --sidebar-primary-foreground: #14080e;
-  --sidebar-accent: #f0f0f0;
+  --sidebar-primary: #16a34a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0fdf4;
   --sidebar-accent-foreground: #14080e;
   --sidebar-border: #e5e5e5;
-  --sidebar-ring: #7af17a;
+  --sidebar-ring: #16a34a;
 }
 
 .dark {
