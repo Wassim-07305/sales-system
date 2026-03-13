@@ -174,50 +174,50 @@ function B2BClientDashboard({
       />
 
       {/* Welcome Card with quick stats */}
-      <Card className="mb-6 bg-brand-dark text-white border-0">
+      <Card className="mb-6 bg-primary text-primary-foreground border-0">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
             Bonjour {userName.split(" ")[0]}, voici votre activite du mois
           </h2>
-          <p className="text-white/70 text-sm mb-4">
+          <p className="text-primary-foreground/70 text-sm mb-4">
             Suivez les performances de votre setter et l&apos;avancement de
             votre pipeline commercial.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-3">
               <Send className="h-4 w-4 text-brand shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.messagesSent}
                 </p>
-                <p className="text-[11px] text-white/60">Messages envoyes</p>
+                <p className="text-[11px] text-primary-foreground/60">Messages envoyes</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-3">
               <MessageSquare className="h-4 w-4 text-brand shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.responseRate}%
                 </p>
-                <p className="text-[11px] text-white/60">Taux de reponse</p>
+                <p className="text-[11px] text-primary-foreground/60">Taux de reponse</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-3">
               <Calendar className="h-4 w-4 text-brand shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.bookingsBooked}
                 </p>
-                <p className="text-[11px] text-white/60">RDV decroches</p>
+                <p className="text-[11px] text-primary-foreground/60">RDV decroches</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-3">
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-3">
               <Target className="h-4 w-4 text-brand shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.closingRate}%
                 </p>
-                <p className="text-[11px] text-white/60">Taux de closing</p>
+                <p className="text-[11px] text-primary-foreground/60">Taux de closing</p>
               </div>
             </div>
           </div>
@@ -512,25 +512,25 @@ function B2CClientDashboard({
       <PageHeader title="Mon Espace" description={`Bienvenue, ${userName}`} />
 
       {/* Welcome card */}
-      <Card className="mb-6 bg-brand-dark text-white border-0">
+      <Card className="mb-6 bg-primary text-primary-foreground border-0">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
             Continue sur ta lancee, {userName.split(" ")[0]} !
           </h2>
-          <p className="text-white/70 text-sm mb-4">
+          <p className="text-primary-foreground/70 text-sm mb-4">
             Tu as complete {overallProgress}% de ta formation.
             {overallProgress < 100
               ? " Continue pour debloquer la suite."
               : " Felicitations, tu as tout termine !"}
           </p>
           <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-2">
               <BookOpen className="h-4 w-4 text-brand" />
               <span className="text-sm">
                 {completedLessons}/{totalLessons} lecons
               </span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-2">
               <Calendar className="h-4 w-4 text-brand" />
               <span className="text-sm">
                 {data.upcomingEvents.length} evenement
@@ -538,7 +538,7 @@ function B2CClientDashboard({
               </span>
             </div>
             {data.quizAttemptsToday > 0 && (
-              <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-2">
                 <Star className="h-4 w-4 text-brand" />
                 <span className="text-sm">
                   {data.quizAttemptsToday} quiz aujourd&apos;hui
@@ -546,7 +546,7 @@ function B2CClientDashboard({
               </div>
             )}
             {readiness && (
-              <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-2">
                 <Star className="h-4 w-4 text-brand" />
                 <span className="text-sm">
                   Placement : {readiness.overall}%

@@ -90,7 +90,7 @@ export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown })
             />
             {/* Threshold marker at 80% */}
             <div
-              className="absolute top-0 h-full w-0.5 bg-white/60"
+              className="absolute top-0 h-full w-0.5 bg-foreground/40"
               style={{ left: "80%" }}
             />
           </div>

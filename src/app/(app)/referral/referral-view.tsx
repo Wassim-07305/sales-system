@@ -129,7 +129,7 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
       />
 
       {/* Referral link card */}
-      <Card className="mb-6 bg-brand-dark text-white border-0">
+      <Card className="mb-6 bg-primary text-primary-foreground border-0">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="h-12 w-12 rounded-full bg-brand/20 flex items-center justify-center">

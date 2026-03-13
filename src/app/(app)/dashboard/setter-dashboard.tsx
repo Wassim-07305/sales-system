@@ -157,7 +157,7 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
       {/* Gamification + Daily Quota Row */}
       <div className="grid lg:grid-cols-2 gap-4 mb-6">
         {/* Gamification banner */}
-        <Card className="bg-brand-dark text-white border-0">
+        <Card className="bg-primary text-primary-foreground border-0">
           <CardContent className="p-5">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
@@ -165,7 +165,7 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
                   <Trophy className="h-6 w-6 text-brand" />
                 </div>
                 <div>
-                  <p className="text-sm text-white/70">Niveau actuel</p>
+                  <p className="text-sm text-primary-foreground/70">Niveau actuel</p>
                   <p className="text-xl font-bold">
                     {data.gamification.levelName}
                   </p>
@@ -173,7 +173,7 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
               </div>
               <div className="flex items-center gap-6">
                 <div className="text-right">
-                  <p className="text-sm text-white/70">Streak</p>
+                  <p className="text-sm text-primary-foreground/70">Streak</p>
                   <div className="flex items-center gap-1">
                     <Flame className="h-4 w-4 text-orange-400" />
                     <span className="text-lg font-bold">
@@ -183,7 +183,7 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-white/70">Points</p>
+                  <p className="text-sm text-primary-foreground/70">Points</p>
                   <p className="text-lg font-bold text-brand">
                     {data.gamification.points}
                   </p>
