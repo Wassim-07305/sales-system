@@ -224,14 +224,26 @@ export function ChatLayout({
           filter: `channel_id=eq.${activeChannel.id}`,
         },
         async (payload) => {
+          // Skip if we already have this message (from optimistic insert)
+          const newId = payload.new.id;
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newId)) return prev;
+            // Temporarily add a placeholder — we'll replace with full data
+            return prev;
+          });
+
           const { data: fullMessage } = await supabase
             .from("messages")
             .select("*, sender:profiles(*)")
-            .eq("id", payload.new.id)
+            .eq("id", newId)
             .single();
 
           if (fullMessage) {
-            setMessages((prev) => [...prev, fullMessage]);
+            setMessages((prev) => {
+              // If already present (optimistic or duplicate), skip
+              if (prev.some((m) => m.id === fullMessage.id)) return prev;
+              return [...prev, fullMessage];
+            });
             setTimeout(scrollToBottom, 100);
             // Keep read status current while viewing the channel
             markChannelAsRead(activeChannel!.id);
@@ -274,38 +286,63 @@ export function ChatLayout({
     e.preventDefault();
     if ((!newMessage.trim() && !imageUrl) || !activeChannel) return;
 
-    if (imageUrl) {
-      // Send image message
-      const { error } = await supabase.from("messages").insert({
-        channel_id: activeChannel.id,
-        sender_id: currentUserId,
-        content: newMessage.trim() || "",
-        message_type: "image",
-        file_url: imageUrl,
-      });
-      if (error) {
-        console.error("[Chat] Erreur envoi image:", error);
-        toast.error("Erreur lors de l'envoi de l'image");
-        return;
-      }
-      setImageUrl(null);
-      setImagePreview(null);
-    } else {
-      const { error } = await supabase.from("messages").insert({
-        channel_id: activeChannel.id,
-        sender_id: currentUserId,
-        content: newMessage.trim(),
-        message_type: "text",
-      });
-      if (error) {
-        console.error("[Chat] Erreur envoi message:", error);
-        toast.error("Erreur lors de l'envoi : " + (error.message || "vérifiez vos permissions"));
-        return;
-      }
-    }
+    const content = newMessage.trim();
+    const isImage = !!imageUrl;
 
+    // Optimistic: show message immediately in the UI
+    const optimisticId = `optimistic-${Date.now()}`;
+    const optimisticMessage = {
+      id: optimisticId,
+      channel_id: activeChannel.id,
+      sender_id: currentUserId,
+      content: isImage ? content || "" : content,
+      message_type: isImage ? "image" : "text",
+      file_url: isImage ? imageUrl : null,
+      created_at: new Date().toISOString(),
+      sender: { id: currentUserId, full_name: "Moi", avatar_url: null },
+      is_edited: false,
+      reply_to: null,
+      file_name: null,
+    } as unknown as Message;
+
+    setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
     setTyping(false);
+    if (isImage) {
+      setImageUrl(null);
+      setImagePreview(null);
+    }
+    setTimeout(scrollToBottom, 50);
+
+    // Actually send to Supabase
+    const insertData: Record<string, unknown> = {
+      channel_id: activeChannel.id,
+      sender_id: currentUserId,
+      content: isImage ? content || "" : content,
+      message_type: isImage ? "image" : "text",
+    };
+    if (isImage) insertData.file_url = imageUrl;
+
+    const { data: inserted, error } = await supabase
+      .from("messages")
+      .insert(insertData)
+      .select("*, sender:profiles(*)")
+      .single();
+
+    if (error) {
+      console.error("[Chat] Erreur envoi:", error);
+      toast.error("Erreur : " + (error.message || "vérifiez vos permissions"));
+      // Remove optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+      return;
+    }
+
+    // Replace optimistic message with the real one from DB
+    if (inserted) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === optimisticId ? inserted : m))
+      );
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -648,6 +685,9 @@ export function ChatLayout({
                   )}
                   {messages.map((message) => {
                     const isOwn = message.sender_id === currentUserId;
+                    const senderName = isOwn
+                      ? "Moi"
+                      : message.sender?.full_name || message.sender?.email || "Utilisateur";
                     return (
                       <div
                         key={message.id}
@@ -657,14 +697,14 @@ export function ChatLayout({
                         )}
                       >
                         <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
-                          {message.sender?.full_name?.charAt(0) || "?"}
+                          {senderName.charAt(0).toUpperCase()}
                         </div>
                         <div
                           className={cn("max-w-[70%]", isOwn && "text-right")}
                         >
                           <div className="flex items-center gap-2 mb-0.5">
                             <span className="text-xs font-medium">
-                              {message.sender?.full_name || "Inconnu"}
+                              {senderName}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
                               {format(new Date(message.created_at), "HH:mm", {
