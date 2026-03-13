@@ -23,8 +23,9 @@ export async function getVideoRooms() {
 
 export async function createVideoRoom(data: {
   title: string;
-  scheduledAt: string;
+  scheduledAt?: string;
   maxParticipants?: number;
+  instant?: boolean;
 }) {
   const supabase = await createClient();
   const {
@@ -32,16 +33,25 @@ export async function createVideoRoom(data: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  const { error } = await supabase.from("video_rooms").insert({
-    title: data.title,
-    host_id: user.id,
-    status: "scheduled",
-    scheduled_at: data.scheduledAt,
-    max_participants: data.maxParticipants || 10,
-  });
+  const now = new Date().toISOString();
+  const isInstant = data.instant === true;
+
+  const { data: room, error } = await supabase
+    .from("video_rooms")
+    .insert({
+      title: data.title,
+      host_id: user.id,
+      status: isInstant ? "live" : "scheduled",
+      scheduled_at: isInstant ? now : data.scheduledAt,
+      started_at: isInstant ? now : null,
+      max_participants: data.maxParticipants || 10,
+    })
+    .select("id")
+    .single();
 
   if (error) throw new Error(error.message);
   revalidatePath("/chat/video");
+  return room;
 }
 
 export async function joinRoom(roomId: string) {

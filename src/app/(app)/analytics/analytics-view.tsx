@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import type {
+  StripeRevenueSummary,
+  StripeRecentPayment,
+  StripeSubscriptionStats,
+} from "@/lib/actions/stripe";
 import {
   DollarSign,
   Users,
@@ -21,6 +26,11 @@ import {
   CalendarDays,
   Download,
   SmilePlus,
+  CreditCard,
+  Info,
+  RefreshCw,
+  UserMinus,
+  UserPlus,
 } from "lucide-react";
 import {
   AreaChart,
@@ -69,9 +79,17 @@ const PERIOD_OPTIONS: { key: PeriodKey; label: string }[] = [
 export function AnalyticsView({
   analytics,
   teamPerformance,
+  stripeRevenue,
+  stripePayments,
+  stripeSubscriptions,
+  stripeConfigured,
 }: {
   analytics: AnalyticsData;
   teamPerformance: TeamMember[];
+  stripeRevenue: StripeRevenueSummary;
+  stripePayments: StripeRecentPayment[];
+  stripeSubscriptions: StripeSubscriptionStats;
+  stripeConfigured: boolean;
 }) {
   const [activePeriod, setActivePeriod] = useState<PeriodKey>("6m");
   const [showCustom, setShowCustom] = useState(false);
@@ -378,6 +396,145 @@ export function AnalyticsView({
               </ResponsiveContainer>
               )}
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Stripe Revenue Section */}
+      <div className="grid lg:grid-cols-3 gap-6 mb-8">
+        {/* MRR & Growth Card */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-brand" />
+                Revenus Stripe
+              </CardTitle>
+              {stripeRevenue.source === "local" && (
+                <Badge variant="outline" className="text-xs">Données locales</Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!stripeConfigured && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                <div className="text-xs text-muted-foreground">
+                  <Link href="/settings/api" className="text-blue-500 hover:underline font-medium">
+                    Connectez Stripe
+                  </Link>{" "}
+                  pour voir les revenus en temps réel
+                </div>
+              </div>
+            )}
+            <div>
+              <p className="text-sm text-muted-foreground">MRR</p>
+              <p className="text-2xl font-bold">
+                {stripeRevenue.mrr.toLocaleString("fr-FR")} €
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground">Ce mois</p>
+                <p className="text-lg font-semibold">
+                  {stripeRevenue.revenueThisMonth.toLocaleString("fr-FR")} €
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Mois dernier</p>
+                <p className="text-lg font-semibold">
+                  {stripeRevenue.revenueLastMonth.toLocaleString("fr-FR")} €
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <div
+                className={`flex items-center gap-1 text-sm font-medium ${
+                  stripeRevenue.growthRate >= 0 ? "text-green-600" : "text-red-500"
+                }`}
+              >
+                {stripeRevenue.growthRate >= 0 ? (
+                  <ArrowUpRight className="h-4 w-4" />
+                ) : (
+                  <ArrowDownRight className="h-4 w-4" />
+                )}
+                {Math.abs(stripeRevenue.growthRate).toFixed(1)}%
+              </div>
+              <span className="text-xs text-muted-foreground">vs mois precedent</span>
+            </div>
+
+            {/* Subscription stats */}
+            <div className="border-t pt-3 mt-3 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Abonnements actifs
+                </span>
+                <span className="font-semibold">{stripeSubscriptions.activeCount}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <UserPlus className="h-3.5 w-3.5" />
+                  Nouveaux ce mois
+                </span>
+                <span className="font-semibold text-green-600">+{stripeSubscriptions.newThisMonth}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <UserMinus className="h-3.5 w-3.5" />
+                  Churn ce mois
+                </span>
+                <span className="font-semibold text-red-500">{stripeSubscriptions.churnedThisMonth}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Payments */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Derniers paiements</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {stripePayments.length === 0 ? (
+              <div className="p-6 text-center text-sm text-muted-foreground">
+                Aucun paiement enregistre
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-3 font-medium">Date</th>
+                      <th className="text-left p-3 font-medium">Description</th>
+                      <th className="text-left p-3 font-medium">Client</th>
+                      <th className="text-right p-3 font-medium">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stripePayments.map((payment) => (
+                      <tr key={payment.id} className="border-b last:border-0">
+                        <td className="p-3 text-muted-foreground">
+                          {payment.date
+                            ? new Date(payment.date).toLocaleDateString("fr-FR", {
+                                day: "2-digit",
+                                month: "short",
+                              })
+                            : "-"}
+                        </td>
+                        <td className="p-3">{payment.description}</td>
+                        <td className="p-3 text-muted-foreground">
+                          {payment.customerEmail || "-"}
+                        </td>
+                        <td className="p-3 text-right font-medium">
+                          {payment.amount.toLocaleString("fr-FR")} {payment.currency.toUpperCase() === "EUR" ? "€" : payment.currency.toUpperCase()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

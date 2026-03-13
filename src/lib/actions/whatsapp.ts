@@ -398,6 +398,344 @@ export async function deleteWhatsAppSequence(id: string) {
   revalidatePath("/whatsapp/sequences");
 }
 
+// ---------------------------------------------------------------------------
+// WhatsApp Business API — Cloud API stubs
+// Falls back gracefully when WHATSAPP_TOKEN / WHATSAPP_PHONE_NUMBER_ID are not set.
+// ---------------------------------------------------------------------------
+
+const WA_GRAPH_API = "https://graph.facebook.com/v21.0";
+
+export async function connectWhatsAppBusiness(
+  phoneNumberId: string,
+  token: string
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  if (!phoneNumberId?.trim() || !token?.trim()) {
+    return { error: "Le Phone Number ID et le token sont requis" };
+  }
+
+  // Validate credentials by fetching the phone number info
+  try {
+    const res = await fetch(
+      `${WA_GRAPH_API}/${phoneNumberId}?fields=verified_name,display_phone_number,quality_rating&access_token=${token}`
+    );
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return {
+        error: `Identifiants invalides : ${(body as Record<string, unknown>).error || res.statusText}`,
+      };
+    }
+
+    const phoneInfo = (await res.json()) as {
+      verified_name?: string;
+      display_phone_number?: string;
+      quality_rating?: string;
+    };
+
+    // Store credentials in whatsapp_connections
+    const { data: existing } = await supabase
+      .from("whatsapp_connections")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    const apiConfig = {
+      phone_number_id: phoneNumberId,
+      access_token: token,
+      verified_name: phoneInfo.verified_name || null,
+      display_phone_number: phoneInfo.display_phone_number || null,
+      quality_rating: phoneInfo.quality_rating || null,
+    };
+
+    if (existing) {
+      const { error } = await supabase
+        .from("whatsapp_connections")
+        .update({
+          phone_number: phoneInfo.display_phone_number || phoneNumberId,
+          status: "connected",
+          api_config: apiConfig,
+          connected_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+      if (error) return { error: error.message };
+    } else {
+      const { error } = await supabase.from("whatsapp_connections").insert({
+        user_id: user.id,
+        phone_number: phoneInfo.display_phone_number || phoneNumberId,
+        status: "connected",
+        api_config: apiConfig,
+        connected_at: new Date().toISOString(),
+      });
+      if (error) return { error: error.message };
+    }
+
+    revalidatePath("/whatsapp");
+    revalidatePath("/whatsapp/settings");
+    return {
+      data: {
+        verified_name: phoneInfo.verified_name,
+        display_phone_number: phoneInfo.display_phone_number,
+        quality_rating: phoneInfo.quality_rating,
+      },
+    };
+  } catch (err) {
+    console.error("WhatsApp Business connect error:", err);
+    return { error: "Impossible de valider les identifiants WhatsApp Business" };
+  }
+}
+
+export async function sendWhatsAppTemplate(
+  to: string,
+  templateName: string,
+  params: Record<string, string>
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  if (!to?.trim() || !templateName?.trim()) {
+    return { error: "Le destinataire et le nom du template sont requis" };
+  }
+
+  // Resolve credentials: env vars first, then stored api_config
+  let accessToken = process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
+  let phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!accessToken || !phoneNumberId) {
+    const { data: connection } = await supabase
+      .from("whatsapp_connections")
+      .select("api_config")
+      .eq("user_id", user.id)
+      .single();
+
+    const config = connection?.api_config as Record<string, string> | null;
+    if (config) {
+      accessToken = accessToken || config.access_token;
+      phoneNumberId = phoneNumberId || config.phone_number_id;
+    }
+  }
+
+  if (!accessToken || !phoneNumberId) {
+    // Queue locally when no API credentials
+    const { data: connection } = await supabase
+      .from("whatsapp_connections")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (connection) {
+      await supabase.from("whatsapp_messages").insert({
+        connection_id: connection.id,
+        prospect_id: null,
+        direction: "outbound",
+        content: `[Template: ${templateName}] ${JSON.stringify(params)}`,
+        status: "queued",
+      });
+    }
+
+    return {
+      data: { status: "queued", message_id: null },
+      error:
+        "API WhatsApp non configurée — message template enregistré localement. Ajoutez WHATSAPP_TOKEN et WHATSAPP_PHONE_NUMBER_ID ou connectez votre compte Business.",
+    };
+  }
+
+  // Build template parameters
+  const components: Array<Record<string, unknown>> = [];
+  const paramKeys = Object.keys(params);
+  if (paramKeys.length > 0) {
+    components.push({
+      type: "body",
+      parameters: paramKeys.map((key) => ({
+        type: "text",
+        text: params[key],
+      })),
+    });
+  }
+
+  try {
+    const res = await fetch(
+      `${WA_GRAPH_API}/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: to.replace(/[^0-9]/g, ""),
+          type: "template",
+          template: {
+            name: templateName,
+            language: { code: "fr" },
+            components,
+          },
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      console.error("WhatsApp template API error:", errorBody);
+      return { error: "Échec de l'envoi du template WhatsApp" };
+    }
+
+    const result = (await res.json()) as {
+      messages?: Array<{ id: string }>;
+    };
+
+    const waMessageId = result.messages?.[0]?.id || null;
+
+    // Store in DB
+    const { data: connection } = await supabase
+      .from("whatsapp_connections")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (connection) {
+      await supabase.from("whatsapp_messages").insert({
+        connection_id: connection.id,
+        prospect_id: null,
+        direction: "outbound",
+        content: `[Template: ${templateName}] ${JSON.stringify(params)}`,
+        status: "sent",
+        wa_message_id: waMessageId,
+      });
+    }
+
+    revalidatePath("/whatsapp");
+    return { data: { status: "sent", message_id: waMessageId } };
+  } catch (err) {
+    console.error("WhatsApp template send error:", err);
+    return { error: "Erreur lors de l'envoi du template WhatsApp" };
+  }
+}
+
+export async function getWhatsAppBusinessProfile() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Resolve credentials
+  let accessToken = process.env.WHATSAPP_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
+  let phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  // Check stored config
+  const { data: connection } = await supabase
+    .from("whatsapp_connections")
+    .select("id, phone_number, status, api_config, connected_at")
+    .eq("user_id", user.id)
+    .single();
+
+  const config = connection?.api_config as Record<string, string> | null;
+  if (config) {
+    accessToken = accessToken || config.access_token;
+    phoneNumberId = phoneNumberId || config.phone_number_id;
+  }
+
+  if (!accessToken || !phoneNumberId) {
+    // Return local connection info only
+    if (connection) {
+      return {
+        data: {
+          phone_number: connection.phone_number,
+          status: connection.status,
+          connected_at: connection.connected_at,
+          verified_name: config?.verified_name || null,
+          quality_rating: null,
+          source: "local_database" as const,
+        },
+        error:
+          "API WhatsApp non configurée — profil local uniquement. Ajoutez WHATSAPP_TOKEN et WHATSAPP_PHONE_NUMBER_ID.",
+      };
+    }
+    return {
+      data: null,
+      error:
+        "Aucune connexion WhatsApp trouvée. Connectez votre compte WhatsApp Business.",
+    };
+  }
+
+  // --- Live API path ---
+  try {
+    const res = await fetch(
+      `${WA_GRAPH_API}/${phoneNumberId}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical&access_token=${accessToken}`
+    );
+
+    if (res.ok) {
+      const json = (await res.json()) as {
+        data?: Array<{
+          about?: string;
+          address?: string;
+          description?: string;
+          email?: string;
+          profile_picture_url?: string;
+          websites?: string[];
+          vertical?: string;
+        }>;
+      };
+
+      const profile = json.data?.[0] || {};
+
+      // Also fetch phone number details
+      const phoneRes = await fetch(
+        `${WA_GRAPH_API}/${phoneNumberId}?fields=verified_name,display_phone_number,quality_rating&access_token=${accessToken}`
+      );
+      const phoneInfo = phoneRes.ok
+        ? ((await phoneRes.json()) as Record<string, string>)
+        : {};
+
+      return {
+        data: {
+          phone_number: phoneInfo.display_phone_number || connection?.phone_number || null,
+          verified_name: phoneInfo.verified_name || null,
+          quality_rating: phoneInfo.quality_rating || null,
+          about: profile.about || null,
+          description: profile.description || null,
+          email: profile.email || null,
+          address: profile.address || null,
+          profile_picture_url: profile.profile_picture_url || null,
+          websites: profile.websites || [],
+          vertical: profile.vertical || null,
+          status: connection?.status || "connected",
+          connected_at: connection?.connected_at || null,
+          source: "whatsapp_api" as const,
+        },
+      };
+    }
+
+    console.warn("WhatsApp business profile fetch failed");
+  } catch (err) {
+    console.error("WhatsApp business profile error:", err);
+  }
+
+  // Fallback to local data
+  return {
+    data: connection
+      ? {
+          phone_number: connection.phone_number,
+          status: connection.status,
+          connected_at: connection.connected_at,
+          verified_name: config?.verified_name || null,
+          quality_rating: config?.quality_rating || null,
+          source: "local_database" as const,
+        }
+      : null,
+  };
+}
+
 export async function triggerOptInSequence(
   prospectId: string,
   sequenceId: string

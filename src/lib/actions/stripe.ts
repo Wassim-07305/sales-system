@@ -157,6 +157,341 @@ export async function createPaymentCheckout(installmentId: string) {
   return { url: session.url };
 }
 
+// ---------------------------------------------------------------------------
+// Stripe REST API helpers (use fetch, no stripe npm dependency needed)
+// ---------------------------------------------------------------------------
+
+const STRIPE_API = "https://api.stripe.com/v1";
+
+function getStripeKey(): string | null {
+  return process.env.STRIPE_SECRET_KEY || null;
+}
+
+async function stripeFetch(path: string, params?: Record<string, string>) {
+  const key = getStripeKey();
+  if (!key) return null;
+
+  const url = new URL(`${STRIPE_API}${path}`);
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      url.searchParams.set(k, v);
+    }
+  }
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) return null;
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Revenue Summary
+// ---------------------------------------------------------------------------
+
+export interface StripeRevenueSummary {
+  mrr: number;
+  revenueThisMonth: number;
+  revenueLastMonth: number;
+  growthRate: number;
+  source: "stripe" | "local";
+}
+
+/**
+ * Fetch revenue data from Stripe (MRR, monthly totals, growth).
+ * Falls back to Supabase deals data if no Stripe key is configured.
+ */
+export async function getStripeRevenueSummary(): Promise<StripeRevenueSummary> {
+  const now = new Date();
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const thisMonthTs = Math.floor(startOfThisMonth.getTime() / 1000);
+  const lastMonthTs = Math.floor(startOfLastMonth.getTime() / 1000);
+  const nowTs = Math.floor(now.getTime() / 1000);
+
+  // Try Stripe first
+  const key = getStripeKey();
+  if (key) {
+    try {
+      // Charges this month
+      const chargesThisMonth = await stripeFetch("/charges", {
+        "created[gte]": String(thisMonthTs),
+        "created[lte]": String(nowTs),
+        status: "succeeded",
+        limit: "100",
+      });
+
+      // Charges last month
+      const chargesLastMonth = await stripeFetch("/charges", {
+        "created[gte]": String(lastMonthTs),
+        "created[lt]": String(thisMonthTs),
+        status: "succeeded",
+        limit: "100",
+      });
+
+      // Active subscriptions for MRR
+      const subscriptions = await stripeFetch("/subscriptions", {
+        status: "active",
+        limit: "100",
+      });
+
+      const revenueThisMonth = (chargesThisMonth?.data || []).reduce(
+        (sum: number, c: { amount: number }) => sum + c.amount,
+        0
+      ) / 100;
+
+      const revenueLastMonth = (chargesLastMonth?.data || []).reduce(
+        (sum: number, c: { amount: number }) => sum + c.amount,
+        0
+      ) / 100;
+
+      // MRR = sum of all active subscription monthly amounts
+      const mrr = (subscriptions?.data || []).reduce(
+        (sum: number, sub: { items: { data: { price: { unit_amount: number; recurring: { interval: string; interval_count: number } } }[] } }) => {
+          const items = sub.items?.data || [];
+          return sum + items.reduce((s: number, item: { price: { unit_amount: number; recurring: { interval: string; interval_count: number } } }) => {
+            const amount = (item.price?.unit_amount || 0) / 100;
+            const interval = item.price?.recurring?.interval;
+            const intervalCount = item.price?.recurring?.interval_count || 1;
+            if (interval === "year") return s + amount / (12 * intervalCount);
+            if (interval === "month") return s + amount / intervalCount;
+            return s + amount;
+          }, 0);
+        },
+        0
+      );
+
+      const growthRate =
+        revenueLastMonth > 0
+          ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100
+          : 0;
+
+      return {
+        mrr: Math.round(mrr * 100) / 100,
+        revenueThisMonth: Math.round(revenueThisMonth * 100) / 100,
+        revenueLastMonth: Math.round(revenueLastMonth * 100) / 100,
+        growthRate: Math.round(growthRate * 10) / 10,
+        source: "stripe",
+      };
+    } catch {
+      // Fall through to local fallback
+    }
+  }
+
+  // Fallback: use Supabase deals data
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { mrr: 0, revenueThisMonth: 0, revenueLastMonth: 0, growthRate: 0, source: "local" };
+  }
+
+  const { data: stages } = await supabase
+    .from("pipeline_stages")
+    .select("id, name")
+    .ilike("name", "%sign%");
+
+  const signedStageIds = (stages || []).map((s) => s.id);
+
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("value, created_at, stage_id");
+
+  const allDeals = deals || [];
+  const signedDeals = allDeals.filter((d) => signedStageIds.includes(d.stage_id));
+
+  const thisMonthISO = startOfThisMonth.toISOString();
+  const lastMonthISO = startOfLastMonth.toISOString();
+
+  const revenueThisMonth = signedDeals
+    .filter((d) => d.created_at >= thisMonthISO)
+    .reduce((s, d) => s + (d.value || 0), 0);
+
+  const revenueLastMonth = signedDeals
+    .filter((d) => d.created_at >= lastMonthISO && d.created_at < thisMonthISO)
+    .reduce((s, d) => s + (d.value || 0), 0);
+
+  const growthRate =
+    revenueLastMonth > 0
+      ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100
+      : 0;
+
+  return {
+    mrr: Math.round(revenueThisMonth),
+    revenueThisMonth: Math.round(revenueThisMonth),
+    revenueLastMonth: Math.round(revenueLastMonth),
+    growthRate: Math.round(growthRate * 10) / 10,
+    source: "local",
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Recent Payments
+// ---------------------------------------------------------------------------
+
+export interface StripeRecentPayment {
+  id: string;
+  amount: number;
+  currency: string;
+  description: string;
+  date: string;
+  customerEmail: string;
+  source: "stripe" | "local";
+}
+
+/**
+ * Fetch recent successful charges from Stripe.
+ * Falls back to local invoices/installments data.
+ */
+export async function getStripeRecentPayments(
+  limit = 10
+): Promise<StripeRecentPayment[]> {
+  const key = getStripeKey();
+  if (key) {
+    try {
+      const data = await stripeFetch("/charges", {
+        limit: String(limit),
+        status: "succeeded",
+      });
+
+      if (data?.data) {
+        return (data.data as {
+          id: string;
+          amount: number;
+          currency: string;
+          description: string | null;
+          created: number;
+          billing_details?: { email?: string };
+        }[]).map((charge) => ({
+          id: charge.id,
+          amount: charge.amount / 100,
+          currency: charge.currency || "eur",
+          description: charge.description || "Paiement",
+          date: new Date(charge.created * 1000).toISOString(),
+          customerEmail: charge.billing_details?.email || "",
+          source: "stripe" as const,
+        }));
+      }
+    } catch {
+      // Fall through to local fallback
+    }
+  }
+
+  // Fallback: recent paid installments
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: installments } = await supabase
+    .from("payment_installments")
+    .select("id, amount, due_date, contract:contracts(id, client:profiles(email))")
+    .eq("status", "paid")
+    .order("due_date", { ascending: false })
+    .limit(limit);
+
+  return (installments || []).map((inst) => ({
+    id: inst.id,
+    amount: inst.amount || 0,
+    currency: "eur",
+    description: "Paiement echeance",
+    date: inst.due_date || "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    customerEmail: (inst.contract as any)?.client?.email || "",
+    source: "local" as const,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Subscription Stats
+// ---------------------------------------------------------------------------
+
+export interface StripeSubscriptionStats {
+  activeCount: number;
+  newThisMonth: number;
+  churnedThisMonth: number;
+  source: "stripe" | "local";
+}
+
+/**
+ * Fetch active/new/churned subscription stats from Stripe.
+ * Falls back to contract data.
+ */
+export async function getStripeSubscriptionStats(): Promise<StripeSubscriptionStats> {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthTs = Math.floor(startOfMonth.getTime() / 1000);
+
+  const key = getStripeKey();
+  if (key) {
+    try {
+      // Active subscriptions
+      const active = await stripeFetch("/subscriptions", {
+        status: "active",
+        limit: "1",
+      });
+
+      // New subscriptions this month
+      const newSubs = await stripeFetch("/subscriptions", {
+        status: "active",
+        "created[gte]": String(monthTs),
+        limit: "100",
+      });
+
+      // Canceled this month
+      const canceled = await stripeFetch("/subscriptions", {
+        status: "canceled",
+        "created[gte]": String(monthTs),
+        limit: "100",
+      });
+
+      return {
+        activeCount: active?.data ? (active.total_count ?? active.data.length) : 0,
+        newThisMonth: newSubs?.data?.length || 0,
+        churnedThisMonth: canceled?.data?.length || 0,
+        source: "stripe",
+      };
+    } catch {
+      // Fall through to local fallback
+    }
+  }
+
+  // Fallback: use contracts table
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { activeCount: 0, newThisMonth: 0, churnedThisMonth: 0, source: "local" };
+  }
+
+  const { data: contracts } = await supabase
+    .from("contracts")
+    .select("id, status, created_at");
+
+  const all = contracts || [];
+  const monthISO = startOfMonth.toISOString();
+
+  const activeCount = all.filter((c) => c.status === "signed" || c.status === "active").length;
+  const newThisMonth = all.filter(
+    (c) => (c.status === "signed" || c.status === "active") && c.created_at >= monthISO
+  ).length;
+  const churnedThisMonth = all.filter(
+    (c) => c.status === "cancelled" && c.created_at >= monthISO
+  ).length;
+
+  return { activeCount, newThisMonth, churnedThisMonth, source: "local" };
+}
+
+/**
+ * Check if Stripe is configured (has a secret key).
+ */
+export async function isStripeConfigured(): Promise<boolean> {
+  return !!getStripeKey();
+}
+
 /**
  * Get current subscription status for the logged-in user.
  */

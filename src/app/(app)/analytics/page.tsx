@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getAnalyticsData, getTeamPerformance } from "@/lib/actions/analytics";
+import {
+  getStripeRevenueSummary,
+  getStripeRecentPayments,
+  getStripeSubscriptionStats,
+  isStripeConfigured,
+} from "@/lib/actions/stripe";
 import { AnalyticsView } from "./analytics-view";
 
 export default async function AnalyticsPage() {
@@ -18,8 +24,24 @@ export default async function AnalyticsPage() {
     redirect("/dashboard");
   }
 
-  const analytics = await getAnalyticsData();
-  const teamPerformance = await getTeamPerformance();
+  const [analytics, teamPerformance, revenueSummary, recentPayments, subscriptionStats, stripeConfigured] =
+    await Promise.all([
+      getAnalyticsData(),
+      getTeamPerformance(),
+      getStripeRevenueSummary(),
+      getStripeRecentPayments(5),
+      getStripeSubscriptionStats(),
+      isStripeConfigured(),
+    ]);
 
-  return <AnalyticsView analytics={analytics} teamPerformance={teamPerformance} />;
+  return (
+    <AnalyticsView
+      analytics={analytics}
+      teamPerformance={teamPerformance}
+      stripeRevenue={revenueSummary}
+      stripePayments={recentPayments}
+      stripeSubscriptions={subscriptionStats}
+      stripeConfigured={stripeConfigured}
+    />
+  );
 }
