@@ -19,6 +19,7 @@ export default async function NotificationSettingsPage() {
   const defaults = {
     push_enabled: true,
     email_enabled: true,
+    notify_messages: true,
     notify_deals: true,
     notify_bookings: true,
     notify_challenges: true,

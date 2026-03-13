@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Send, Mic, MicOff, Instagram, MessageSquare, Upload, Bot, Plus, X, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendMessage, createConversation, importConversation, generateQuickReplies } from "@/lib/actions/inbox";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -41,10 +42,12 @@ interface Prospect {
   status: string;
 }
 
-export function InboxView({ conversations, prospects }: { conversations: Conversation[]; prospects: Prospect[] }) {
+export function InboxView({ conversations: initialConversations, prospects }: { conversations: Conversation[]; prospects: Prospect[] }) {
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [search, setSearch] = useState("");
-  const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversations[0] || null);
+  const [selectedConv, setSelectedConv] = useState<Conversation | null>(initialConversations[0] || null);
   const [messageText, setMessageText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -60,9 +63,113 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [selectedConv]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [selectedConv, scrollToBottom]);
+
+  // Supabase Realtime: subscribe to dm_conversations changes for the selected conversation
+  useEffect(() => {
+    if (!selectedConv) return;
+
+    const subscription = supabase
+      .channel(`dm_conversations:${selectedConv.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "dm_conversations",
+          filter: `id=eq.${selectedConv.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as {
+            id: string;
+            messages: DmMessage[];
+            last_message_at: string | null;
+          };
+          // Update the selected conversation with new messages
+          setSelectedConv((prev) => {
+            if (!prev || prev.id !== updated.id) return prev;
+            return {
+              ...prev,
+              messages: updated.messages || prev.messages,
+              last_message_at: updated.last_message_at ?? prev.last_message_at,
+            };
+          });
+          // Also update the conversation in the sidebar list
+          setConversations((prev) =>
+            prev.map((c) =>
+              c.id === updated.id
+                ? {
+                    ...c,
+                    messages: updated.messages || c.messages,
+                    last_message_at: updated.last_message_at ?? c.last_message_at,
+                  }
+                : c
+            )
+          );
+          setTimeout(scrollToBottom, 100);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [selectedConv?.id, supabase, scrollToBottom]);
+
+  // Supabase Realtime: subscribe to new conversations (INSERT) and updates across all conversations for sidebar
+  useEffect(() => {
+    const subscription = supabase
+      .channel("dm_conversations:all")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "dm_conversations",
+        },
+        () => {
+          // A new conversation was created — refresh to get full data with prospect join
+          router.refresh();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "dm_conversations",
+        },
+        (payload) => {
+          const updated = payload.new as {
+            id: string;
+            messages: DmMessage[];
+            last_message_at: string | null;
+          };
+          setConversations((prev) =>
+            prev.map((c) =>
+              c.id === updated.id
+                ? {
+                    ...c,
+                    messages: updated.messages || c.messages,
+                    last_message_at: updated.last_message_at ?? c.last_message_at,
+                  }
+                : c
+            )
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [supabase, router]);
 
   const filteredConvs = conversations.filter((c) =>
     !search || c.prospect?.name.toLowerCase().includes(search.toLowerCase())
@@ -70,9 +177,10 @@ export function InboxView({ conversations, prospects }: { conversations: Convers
 
   async function handleSend() {
     if (!messageText.trim() || !selectedConv) return;
-    await sendMessage(selectedConv.id, messageText);
+    const text = messageText;
     setMessageText("");
-    router.refresh();
+    await sendMessage(selectedConv.id, text);
+    // Realtime subscription will update the messages automatically
   }
 
   async function handleStartRecording() {

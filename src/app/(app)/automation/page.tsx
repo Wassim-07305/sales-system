@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getAutomationRules, getAutomationExecutions } from "@/lib/actions/automation";
+import { getAutomationRules, getAutomationExecutions, getAutomationLogs } from "@/lib/actions/automation";
 import { AutomationView } from "./automation-view";
 
 export default async function AutomationPage() {
@@ -8,13 +8,17 @@ export default async function AutomationPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const rules = await getAutomationRules();
-  const executions = await getAutomationExecutions();
+  const [rules, executions, todayLogs] = await Promise.all([
+    getAutomationRules(),
+    getAutomationExecutions(),
+    getAutomationLogs({ todayOnly: true }),
+  ]);
 
   return (
     <AutomationView
       rules={rules as React.ComponentProps<typeof AutomationView>["rules"]}
       executions={executions as React.ComponentProps<typeof AutomationView>["executions"]}
+      todayExecutions={todayLogs as React.ComponentProps<typeof AutomationView>["todayExecutions"]}
     />
   );
 }

@@ -36,6 +36,7 @@ import {
 interface Preferences {
   push_enabled: boolean;
   email_enabled: boolean;
+  notify_messages: boolean;
   notify_deals: boolean;
   notify_bookings: boolean;
   notify_challenges: boolean;
@@ -258,6 +259,26 @@ export function NotificationPreferencesView({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Send className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">Messages</p>
+                <p className="text-xs text-muted-foreground">
+                  Nouveaux messages dans l&apos;inbox et le chat
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={prefs.notify_messages}
+              onCheckedChange={(checked) =>
+                handleToggle("notify_messages", checked)
+              }
+            />
+          </div>
+
+          <Separator />
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Handshake className="h-4 w-4 text-muted-foreground" />

@@ -1,8 +1,28 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import {
   Zap,
@@ -12,9 +32,21 @@ import {
   Activity,
   CheckCircle2,
   Clock,
+  Plus,
+  Trash2,
+  Play,
+  RefreshCw,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import {
+  createAutomationRule,
+  toggleAutomationRule,
+  deleteAutomationRule,
+  runAutomationCheck,
+} from "@/lib/actions/automation";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface AutomationRule {
   id: string;
@@ -42,36 +74,254 @@ interface AutomationExecution {
 interface Props {
   rules: AutomationRule[];
   executions: AutomationExecution[];
+  todayExecutions?: AutomationExecution[];
 }
 
 const typeLabels: Record<string, string> = {
   nurturing: "Nurturing",
   upsell: "Upsell",
   placement: "Placement",
+  general: "Général",
 };
 
 const typeColors: Record<string, string> = {
   nurturing: "bg-pink-100 text-pink-700",
   upsell: "bg-purple-100 text-purple-700",
   placement: "bg-blue-100 text-blue-700",
+  general: "bg-gray-100 text-gray-700",
 };
 
-export function AutomationView({ rules, executions }: Props) {
+const typeIcons: Record<string, typeof Zap> = {
+  nurturing: Heart,
+  upsell: TrendingUp,
+  placement: Users,
+  general: Zap,
+};
+
+const triggerOptions = [
+  { value: "no_response_2_days", label: "Pas de réponse (2 jours)" },
+  { value: "deal_stage_change", label: "Changement d'étape deal" },
+  { value: "new_lead", label: "Nouveau lead" },
+  { value: "no_activity_7d", label: "Aucune activité (7 jours)" },
+  { value: "no_activity_14d", label: "Aucune activité (14 jours)" },
+  { value: "call_completed", label: "Appel terminé" },
+  { value: "booking_created", label: "RDV créé" },
+  { value: "contract_signed", label: "Contrat signé" },
+  { value: "subscription_renewal", label: "Renouvellement abonnement" },
+];
+
+const actionOptions = [
+  { value: "send_message", label: "Envoyer un message" },
+  { value: "create_task", label: "Créer une tâche" },
+  { value: "notify_manager", label: "Notifier le manager" },
+  { value: "send_email", label: "Envoyer un email" },
+  { value: "send_sms", label: "Envoyer un SMS" },
+];
+
+export function AutomationView({ rules, executions, todayExecutions }: Props) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [triggerEvent, setTriggerEvent] = useState("");
+  const [actionType, setActionType] = useState("");
+  const [ruleType, setRuleType] = useState<string>("general");
+
   const totalRules = rules.length;
   const activeRules = rules.filter((r) => r.is_active).length;
   const totalExecutions = executions.length;
+  const todayCount = todayExecutions?.length ?? executions.filter((e) => {
+    if (!e.created_at) return false;
+    const d = new Date(e.created_at);
+    const today = new Date();
+    return d.toDateString() === today.toDateString();
+  }).length;
 
   const recentExecutions = executions.slice(0, 10);
+
+  function resetForm() {
+    setName("");
+    setTriggerEvent("");
+    setActionType("");
+    setRuleType("general");
+  }
+
+  function handleCreate() {
+    if (!name.trim() || !triggerEvent) {
+      toast.error("Veuillez remplir le nom et le déclencheur");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await createAutomationRule({
+          name: name.trim(),
+          type: ruleType as "nurturing" | "upsell" | "placement" | "general",
+          trigger_conditions: {
+            event: triggerEvent,
+            action: actionType || "notify_manager",
+          },
+          actions: [{ type: actionType || "notify_manager" }],
+          is_active: true,
+        });
+        toast.success("Règle créée avec succès");
+        setDialogOpen(false);
+        resetForm();
+        router.refresh();
+      } catch {
+        toast.error("Erreur lors de la création de la règle");
+      }
+    });
+  }
+
+  function handleToggle(id: string, currentActive: boolean) {
+    startTransition(async () => {
+      try {
+        await toggleAutomationRule(id, !currentActive);
+        toast.success(currentActive ? "Règle désactivée" : "Règle activée");
+        router.refresh();
+      } catch {
+        toast.error("Erreur");
+      }
+    });
+  }
+
+  function handleDelete(id: string) {
+    startTransition(async () => {
+      try {
+        await deleteAutomationRule(id);
+        toast.success("Règle supprimée");
+        router.refresh();
+      } catch {
+        toast.error("Erreur lors de la suppression");
+      }
+    });
+  }
+
+  function handleRunCheck() {
+    startTransition(async () => {
+      try {
+        const result = await runAutomationCheck();
+        toast.success(
+          `Vérification terminée : ${result.checked} règle(s) analysée(s), ${result.triggered} action(s) déclenchée(s)`
+        );
+        router.refresh();
+      } catch {
+        toast.error("Erreur lors de la vérification automatique");
+      }
+    });
+  }
 
   return (
     <div>
       <PageHeader
         title="Automation"
         description="Workflows automatisés"
-      />
+      >
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRunCheck}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4 mr-2" />
+            )}
+            {isPending ? "Vérification..." : "Lancer la vérification"}
+          </Button>
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle règle
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Créer une règle d&apos;automation</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label>Nom de la règle</Label>
+                  <Input
+                    placeholder="Ex: Relance automatique après 2 jours"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={ruleType} onValueChange={setRuleType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Type de règle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">Général</SelectItem>
+                      <SelectItem value="nurturing">Nurturing</SelectItem>
+                      <SelectItem value="upsell">Upsell</SelectItem>
+                      <SelectItem value="placement">Placement</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Déclencheur</Label>
+                  <Select value={triggerEvent} onValueChange={setTriggerEvent}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisir un déclencheur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {triggerOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Action</Label>
+                  <Select value={actionType} onValueChange={setActionType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisir une action" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {actionOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  onClick={handleCreate}
+                  disabled={isPending}
+                >
+                  {isPending ? "Création..." : "Créer la règle"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </PageHeader>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
@@ -96,18 +346,29 @@ export function AutomationView({ rules, executions }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <RefreshCw className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{todayCount}</p>
+              <p className="text-xs text-muted-foreground">Exécutions aujourd&apos;hui</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
               <CheckCircle2 className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalExecutions}</p>
-              <p className="text-xs text-muted-foreground">Exécutions totales</p>
+              <p className="text-xs text-muted-foreground">Actions déclenchées</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs linking to sub-pages */}
+      {/* Category cards linking to sub-pages */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Link href="/automation/nurturing">
           <Card className="hover:border-brand transition-colors cursor-pointer">
@@ -156,7 +417,88 @@ export function AutomationView({ rules, executions }: Props) {
         </Link>
       </div>
 
-      {/* Recent Executions */}
+      {/* All Rules with toggles */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Toutes les règles</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {rules.length > 0 ? (
+            <div className="space-y-3">
+              {rules.map((rule) => {
+                const Icon = typeIcons[rule.type] || Zap;
+                const colorClass = typeColors[rule.type] || "bg-gray-100 text-gray-700";
+                return (
+                  <div
+                    key={rule.id}
+                    className="flex items-center justify-between p-4 rounded-lg border"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                        rule.type === "nurturing" ? "bg-pink-100" :
+                        rule.type === "upsell" ? "bg-purple-100" :
+                        rule.type === "placement" ? "bg-blue-100" :
+                        "bg-gray-100"
+                      }`}>
+                        <Icon className={`h-5 w-5 ${
+                          rule.type === "nurturing" ? "text-pink-600" :
+                          rule.type === "upsell" ? "text-purple-600" :
+                          rule.type === "placement" ? "text-blue-600" :
+                          "text-gray-600"
+                        }`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{rule.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className={`text-xs ${colorClass}`}>
+                            {typeLabels[rule.type] || rule.type}
+                          </Badge>
+                          {rule.trigger_conditions?.event ? (
+                            <span className="text-xs text-muted-foreground">
+                              {triggerOptions.find((o) => o.value === String(rule.trigger_conditions.event))?.label || String(rule.trigger_conditions.event)}
+                            </span>
+                          ) : null}
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(rule.created_at), { addSuffix: true, locale: fr })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {rule.is_active ? "Active" : "Inactive"}
+                        </span>
+                        <Switch
+                          checked={rule.is_active}
+                          onCheckedChange={() => handleToggle(rule.id, rule.is_active)}
+                          disabled={isPending}
+                        />
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDelete(rule.id)}
+                        disabled={isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              Aucune règle d&apos;automation. Cliquez sur &quot;Nouvelle règle&quot; pour commencer.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recent Executions / Logs */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Exécutions récentes</CardTitle>
@@ -187,7 +529,7 @@ export function AutomationView({ rules, executions }: Props) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className={typeColors[exec.rule?.type || ""] || ""}>
-                      {typeLabels[exec.rule?.type || ""] || exec.rule?.type}
+                      {typeLabels[exec.rule?.type || ""] || exec.rule?.type || "—"}
                     </Badge>
                     <Badge
                       variant="outline"

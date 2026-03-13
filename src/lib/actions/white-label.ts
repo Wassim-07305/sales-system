@@ -18,6 +18,23 @@ const ALL_MODULES = [
   "contrats",
 ];
 
+// Default config returned when the table doesn't exist yet
+function getDefaultConfig(userId: string) {
+  return {
+    id: "default",
+    entrepreneur_id: userId,
+    brand_name: null,
+    app_name: null,
+    logo_url: null,
+    primary_color: "#7af17a",
+    secondary_color: "#14080e",
+    custom_domain: null,
+    enabled_modules: ALL_MODULES,
+    is_active: false,
+    created_at: new Date().toISOString(),
+  };
+}
+
 export async function getWhiteLabelConfig() {
   const supabase = await createClient();
   const {
@@ -25,28 +42,46 @@ export async function getWhiteLabelConfig() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: existing } = await supabase
-    .from("white_label_configs")
-    .select("*")
-    .eq("entrepreneur_id", user.id)
-    .single();
+  try {
+    const { data: existing, error: selectError } = await supabase
+      .from("white_label_configs")
+      .select("*")
+      .eq("entrepreneur_id", user.id)
+      .single();
 
-  if (existing) return existing;
+    // If table doesn't exist or other DB error, return default
+    if (selectError && selectError.code === "PGRST116") {
+      // No rows found — create one
+    } else if (selectError) {
+      // Table might not exist (42P01) or other error
+      console.warn("White label config fetch error:", selectError.message);
+      return getDefaultConfig(user.id);
+    }
 
-  // Create default config
-  const { data: newConfig } = await supabase
-    .from("white_label_configs")
-    .insert({
-      entrepreneur_id: user.id,
-      primary_color: "#7af17a",
-      secondary_color: "#14080e",
-      enabled_modules: ALL_MODULES,
-      is_active: false,
-    })
-    .select()
-    .single();
+    if (existing) return existing;
 
-  return newConfig;
+    // Create default config
+    const { data: newConfig, error: insertError } = await supabase
+      .from("white_label_configs")
+      .insert({
+        entrepreneur_id: user.id,
+        primary_color: "#7af17a",
+        secondary_color: "#14080e",
+        enabled_modules: ALL_MODULES,
+        is_active: false,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.warn("White label config insert error:", insertError.message);
+      return getDefaultConfig(user.id);
+    }
+
+    return newConfig;
+  } catch {
+    return getDefaultConfig(user.id);
+  }
 }
 
 export async function saveWhiteLabelConfig(data: {
@@ -77,49 +112,116 @@ export async function saveWhiteLabelConfig(data: {
     updateData.enabled_modules = data.enabledModules;
   if (data.isActive !== undefined) updateData.is_active = data.isActive;
 
-  const { error } = await supabase
-    .from("white_label_configs")
-    .update(updateData)
-    .eq("entrepreneur_id", user.id);
+  try {
+    const { error } = await supabase
+      .from("white_label_configs")
+      .update(updateData)
+      .eq("entrepreneur_id", user.id);
 
-  if (error) return { error: error.message };
+    if (error) return { error: error.message };
+  } catch {
+    return { error: "La table white_label_configs n'est pas encore configurée" };
+  }
 
   revalidatePath("/settings/white-label");
   return { success: true };
 }
 
-export async function getPermissions() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data: config } = await supabase
-    .from("white_label_configs")
-    .select("enabled_modules")
-    .eq("entrepreneur_id", user.id)
-    .single();
-
-  return config?.enabled_modules || ALL_MODULES;
-}
-
-export async function updatePermissions(modules: string[]) {
+/** Update branding config (logo_url, primary_color, app_name, custom_domain) */
+export async function updateWhiteLabelConfig(data: {
+  appName?: string;
+  brandName?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  customDomain?: string;
+  isActive?: boolean;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { error } = await supabase
-    .from("white_label_configs")
-    .update({ enabled_modules: modules })
-    .eq("entrepreneur_id", user.id);
+  const updateData: Record<string, unknown> = {};
+  if (data.appName !== undefined) updateData.app_name = data.appName;
+  if (data.brandName !== undefined) updateData.brand_name = data.brandName;
+  if (data.logoUrl !== undefined) updateData.logo_url = data.logoUrl;
+  if (data.primaryColor !== undefined)
+    updateData.primary_color = data.primaryColor;
+  if (data.secondaryColor !== undefined)
+    updateData.secondary_color = data.secondaryColor;
+  if (data.customDomain !== undefined)
+    updateData.custom_domain = data.customDomain;
+  if (data.isActive !== undefined) updateData.is_active = data.isActive;
 
-  if (error) return { error: error.message };
+  try {
+    const { error } = await supabase
+      .from("white_label_configs")
+      .update(updateData)
+      .eq("entrepreneur_id", user.id);
 
+    if (error) return { error: error.message };
+  } catch {
+    return { error: "La table white_label_configs n'est pas encore configurée" };
+  }
+
+  revalidatePath("/settings/white-label");
+  return { success: true };
+}
+
+/** Returns which features are enabled for this workspace */
+export async function getFeatureToggles(): Promise<string[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return ALL_MODULES;
+
+  try {
+    const { data: config, error } = await supabase
+      .from("white_label_configs")
+      .select("enabled_modules")
+      .eq("entrepreneur_id", user.id)
+      .single();
+
+    if (error || !config) return ALL_MODULES;
+    return (config.enabled_modules as string[]) || ALL_MODULES;
+  } catch {
+    return ALL_MODULES;
+  }
+}
+
+/** Saves feature toggle config */
+export async function updateFeatureToggles(toggles: string[]) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  try {
+    const { error } = await supabase
+      .from("white_label_configs")
+      .update({ enabled_modules: toggles })
+      .eq("entrepreneur_id", user.id);
+
+    if (error) return { error: error.message };
+  } catch {
+    return { error: "La table white_label_configs n'est pas encore configurée" };
+  }
+
+  revalidatePath("/settings/white-label");
   revalidatePath("/settings/white-label/permissions");
   return { success: true };
+}
+
+export async function getPermissions() {
+  return getFeatureToggles();
+}
+
+export async function updatePermissions(modules: string[]) {
+  return updateFeatureToggles(modules);
 }
 
 export async function getPortalData() {

@@ -3,30 +3,57 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function isTableMissing(error: { message?: string; code?: string } | null): boolean {
+  if (!error) return false;
+  const msg = (error.message || "").toLowerCase();
+  return (
+    msg.includes("relation") && msg.includes("does not exist") ||
+    error.code === "42P01"
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CRUD — Automation Rules
+// ---------------------------------------------------------------------------
+
 export async function getAutomationRules(type?: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  let query = supabase
-    .from("automation_rules")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    let query = supabase
+      .from("automation_rules")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (type) {
-    query = query.eq("type", type);
+    if (type) {
+      query = query.eq("type", type);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      if (isTableMissing(error)) return [];
+      throw new Error(error.message);
+    }
+    return data || [];
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("does not exist")) return [];
+    throw err;
   }
-
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
-  return data || [];
 }
 
 export async function createAutomationRule(ruleData: {
   name: string;
-  type: "nurturing" | "upsell" | "placement";
+  type: "nurturing" | "upsell" | "placement" | "general";
   trigger_conditions: Record<string, unknown>;
   actions: unknown[];
+  is_active?: boolean;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -39,7 +66,7 @@ export async function createAutomationRule(ruleData: {
       type: ruleData.type,
       trigger_conditions: ruleData.trigger_conditions,
       actions: ruleData.actions,
-      is_active: true,
+      is_active: ruleData.is_active ?? true,
       created_by: user.id,
     })
     .select()
@@ -76,6 +103,16 @@ export async function deleteAutomationRule(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // Clean up related executions first
+  try {
+    await supabase
+      .from("automation_executions")
+      .delete()
+      .eq("rule_id", id);
+  } catch {
+    // executions table may not exist — ignore
+  }
+
   const { error } = await supabase
     .from("automation_rules")
     .delete()
@@ -99,25 +136,303 @@ export async function toggleAutomationRule(id: string, isActive: boolean) {
   revalidatePath("/automation");
 }
 
+// ---------------------------------------------------------------------------
+// Executions / Logs
+// ---------------------------------------------------------------------------
+
 export async function getAutomationExecutions(ruleId?: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  let query = supabase
-    .from("automation_executions")
-    .select("*, rule:automation_rules(id, name, type), target_user:profiles(id, full_name)")
-    .order("created_at", { ascending: false })
-    .limit(50);
+  try {
+    let query = supabase
+      .from("automation_executions")
+      .select("*, rule:automation_rules(id, name, type), target_user:profiles(id, full_name)")
+      .order("created_at", { ascending: false })
+      .limit(50);
 
-  if (ruleId) {
-    query = query.eq("rule_id", ruleId);
+    if (ruleId) {
+      query = query.eq("rule_id", ruleId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      if (isTableMissing(error)) return [];
+      throw new Error(error.message);
+    }
+    return data || [];
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("does not exist")) return [];
+    throw err;
+  }
+}
+
+/**
+ * Returns recent automation logs (alias for executions with extra metadata).
+ * Includes today-only filter option.
+ */
+export async function getAutomationLogs(options?: { todayOnly?: boolean }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  try {
+    let query = supabase
+      .from("automation_executions")
+      .select("*, rule:automation_rules(id, name, type), target_user:profiles(id, full_name)")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (options?.todayOnly) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      query = query.gte("created_at", todayStart.toISOString());
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      if (isTableMissing(error)) return [];
+      throw new Error(error.message);
+    }
+    return data || [];
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("does not exist")) return [];
+    throw err;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Manual automation check — runs all active rules
+// ---------------------------------------------------------------------------
+
+export async function runAutomationCheck() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Fetch all active rules
+  const { data: rules, error: rulesErr } = await supabase
+    .from("automation_rules")
+    .select("*")
+    .eq("is_active", true);
+
+  if (rulesErr) {
+    if (isTableMissing(rulesErr)) return { checked: 0, triggered: 0 };
+    throw new Error(rulesErr.message);
   }
 
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
-  return data || [];
+  if (!rules || rules.length === 0) {
+    return { checked: 0, triggered: 0 };
+  }
+
+  let triggered = 0;
+
+  for (const rule of rules) {
+    const conditions = (rule.trigger_conditions || {}) as Record<string, unknown>;
+    const event = conditions.event as string | undefined;
+
+    try {
+      // --- Nurturing: no-activity checks ---
+      if (rule.type === "nurturing" && (event === "no_activity_7d" || event === "no_activity_14d")) {
+        const days = event === "no_activity_7d" ? 7 : 14;
+        const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+        const { data: staleDeals } = await supabase
+          .from("deals")
+          .select("id, contact_id")
+          .lt("updated_at", cutoff)
+          .neq("stage", "Client Signé")
+          .limit(20);
+
+        for (const deal of staleDeals || []) {
+          // Avoid duplicate executions today
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          const { data: existing } = await supabase
+            .from("automation_executions")
+            .select("id")
+            .eq("rule_id", rule.id)
+            .eq("target_user_id", deal.contact_id)
+            .gte("created_at", todayStart.toISOString())
+            .limit(1);
+
+          if (existing && existing.length > 0) continue;
+
+          await supabase.from("automation_executions").insert({
+            rule_id: rule.id,
+            target_user_id: deal.contact_id,
+            status: "completed",
+            executed_at: new Date().toISOString(),
+            result: { action: "nurturing_reminder", deal_id: deal.id, days_inactive: days },
+          });
+          triggered++;
+        }
+      }
+
+      // --- Upsell: contract renewal checks ---
+      if (rule.type === "upsell" && event === "subscription_renewal") {
+        const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        const now = new Date().toISOString();
+
+        const { data: expiring } = await supabase
+          .from("contracts")
+          .select("id, client_id")
+          .eq("status", "active")
+          .lte("end_date", thirtyDays)
+          .gte("end_date", now)
+          .limit(20);
+
+        for (const contract of expiring || []) {
+          if (!contract.client_id) continue;
+
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          const { data: existing } = await supabase
+            .from("automation_executions")
+            .select("id")
+            .eq("rule_id", rule.id)
+            .eq("target_user_id", contract.client_id)
+            .gte("created_at", todayStart.toISOString())
+            .limit(1);
+
+          if (existing && existing.length > 0) continue;
+
+          await supabase.from("automation_executions").insert({
+            rule_id: rule.id,
+            target_user_id: contract.client_id,
+            status: "completed",
+            executed_at: new Date().toISOString(),
+            result: { action: "upsell_renewal_check", contract_id: contract.id },
+          });
+          triggered++;
+        }
+      }
+
+      // --- Placement: setter matching ---
+      if (rule.type === "placement") {
+        const { data: setters } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .eq("role", "setter")
+          .eq("onboarding_completed", true)
+          .limit(5);
+
+        const { data: entrepreneurs } = await supabase
+          .from("marketplace_listings")
+          .select("entrepreneur_id")
+          .eq("is_active", true)
+          .limit(5);
+
+        if (setters && setters.length > 0 && entrepreneurs && entrepreneurs.length > 0) {
+          for (let i = 0; i < setters.length; i++) {
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const { data: existing } = await supabase
+              .from("automation_executions")
+              .select("id")
+              .eq("rule_id", rule.id)
+              .eq("target_user_id", setters[i].id)
+              .gte("created_at", todayStart.toISOString())
+              .limit(1);
+
+            if (existing && existing.length > 0) continue;
+
+            await supabase.from("automation_executions").insert({
+              rule_id: rule.id,
+              target_user_id: setters[i].id,
+              status: "completed",
+              executed_at: new Date().toISOString(),
+              result: {
+                action: "placement_match",
+                matched_entrepreneur_id: entrepreneurs[i % entrepreneurs.length]?.entrepreneur_id || null,
+                setter_name: setters[i].full_name,
+              },
+            });
+            triggered++;
+          }
+        }
+      }
+
+      // --- General rules ---
+      if (rule.type === "general") {
+        // Log that the rule was checked
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const { data: existing } = await supabase
+          .from("automation_executions")
+          .select("id")
+          .eq("rule_id", rule.id)
+          .gte("created_at", todayStart.toISOString())
+          .limit(1);
+
+        if (existing && existing.length > 0) continue;
+
+        // For general rules, evaluate the trigger
+        if (event === "no_response_2_days") {
+          const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+          const { data: staleContacts } = await supabase
+            .from("contacts")
+            .select("id")
+            .lt("updated_at", twoDaysAgo)
+            .limit(10);
+
+          for (const contact of staleContacts || []) {
+            await supabase.from("automation_executions").insert({
+              rule_id: rule.id,
+              target_user_id: contact.id,
+              status: "completed",
+              executed_at: new Date().toISOString(),
+              result: { action: conditions.action || "notify_manager", trigger: event },
+            });
+            triggered++;
+          }
+        } else if (event === "new_lead") {
+          // Check for leads created in the last hour without follow-up
+          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+          const { data: newLeads } = await supabase
+            .from("contacts")
+            .select("id")
+            .gte("created_at", oneHourAgo)
+            .limit(10);
+
+          for (const lead of newLeads || []) {
+            await supabase.from("automation_executions").insert({
+              rule_id: rule.id,
+              target_user_id: lead.id,
+              status: "completed",
+              executed_at: new Date().toISOString(),
+              result: { action: conditions.action || "create_task", trigger: event },
+            });
+            triggered++;
+          }
+        } else {
+          // Generic check — just log execution
+          await supabase.from("automation_executions").insert({
+            rule_id: rule.id,
+            target_user_id: user.id,
+            status: "completed",
+            executed_at: new Date().toISOString(),
+            result: { action: "rule_checked", trigger: event || "manual" },
+          });
+          triggered++;
+        }
+      }
+    } catch {
+      // Individual rule failure should not break the whole check
+      continue;
+    }
+  }
+
+  revalidatePath("/automation");
+  return { checked: rules.length, triggered };
 }
+
+// ---------------------------------------------------------------------------
+// Placement Workflow
+// ---------------------------------------------------------------------------
 
 export async function runPlacementWorkflow() {
   const supabase = await createClient();
@@ -178,6 +493,10 @@ export async function runPlacementWorkflow() {
   revalidatePath("/automation/placement");
   return { matched: executions.length };
 }
+
+// ---------------------------------------------------------------------------
+// Upsell Sequence
+// ---------------------------------------------------------------------------
 
 /**
  * Check for clients whose contract/subscription ends within 30 days
