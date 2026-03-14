@@ -271,6 +271,66 @@ export async function sendChallengeAchievedEmail(params: {
   });
 }
 
+/**
+ * Send a prospecting/follow-up email to a prospect or contact.
+ * Stores the message in inbox_messages for tracking.
+ */
+export async function sendEmailToProspect(params: {
+  contactId: string;
+  subject: string;
+  message: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Fetch contact email
+  const { data: contact } = await supabase
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", params.contactId)
+    .single();
+
+  if (!contact?.email) return { error: "Aucune adresse email pour ce contact" };
+
+  // Send the email via Resend
+  try {
+    await sendEmail({
+      to: contact.email,
+      subject: params.subject,
+      html: emailLayout(`
+        <p>${params.message.replace(/\n/g, "<br>")}</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+        <p style="color:#999;font-size:12px">
+          Ce message vous a été envoyé via Sales System.
+        </p>
+      `),
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erreur inconnue";
+    return { error: `Erreur envoi email : ${msg}` };
+  }
+
+  // Track in inbox_messages (non-blocking — table may not exist yet)
+  try {
+    await supabase.from("inbox_messages").insert({
+      user_id: user.id,
+      contact_id: params.contactId,
+      channel: "email",
+      direction: "outbound",
+      subject: params.subject,
+      content: params.message,
+      status: "sent",
+    });
+  } catch {
+    // inbox_messages table may not exist yet — email was still sent successfully
+  }
+
+  return { success: true };
+}
+
 /** Wraps HTML content in a branded email layout. */
 function emailLayout(content: string): string {
   return `

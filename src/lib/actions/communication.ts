@@ -577,3 +577,144 @@ Réponds en JSON :
     };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Message Reactions (Slack-style)
+// ---------------------------------------------------------------------------
+
+export async function toggleReaction(messageId: string, emoji: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { data: existing } = await supabase
+    .from("message_reactions")
+    .select("id")
+    .eq("message_id", messageId)
+    .eq("user_id", user.id)
+    .eq("emoji", emoji)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from("message_reactions").delete().eq("id", existing.id);
+    return { action: "removed" as const };
+  } else {
+    await supabase.from("message_reactions").insert({
+      message_id: messageId,
+      user_id: user.id,
+      emoji,
+    });
+    return { action: "added" as const };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Direct Messages (1-to-1)
+// ---------------------------------------------------------------------------
+
+export async function getOrCreateDM(otherUserId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Look for existing DM between these two users
+  const { data: channels } = await supabase
+    .from("channels")
+    .select("*")
+    .eq("type", "direct")
+    .contains("members", [user.id, otherUserId]);
+
+  const existing = channels?.find(
+    (c) =>
+      c.members?.length === 2 &&
+      c.members.includes(user.id) &&
+      c.members.includes(otherUserId),
+  );
+
+  if (existing) return existing;
+
+  // Get other user's name
+  const { data: otherProfile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", otherUserId)
+    .single();
+
+  const { data: myProfile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  const { data: newChannel, error } = await supabase
+    .from("channels")
+    .insert({
+      name: `${myProfile?.full_name || "Utilisateur"} & ${otherProfile?.full_name || "Utilisateur"}`,
+      type: "direct",
+      created_by: user.id,
+      members: [user.id, otherUserId],
+    })
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/chat");
+  return newChannel;
+}
+
+// ---------------------------------------------------------------------------
+// Edit / Delete Messages
+// ---------------------------------------------------------------------------
+
+export async function editMessage(messageId: string, content: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { error } = await supabase
+    .from("messages")
+    .update({ content, is_edited: true })
+    .eq("id", messageId)
+    .eq("sender_id", user.id);
+
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteMessage(messageId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin = ["admin", "manager"].includes(profile?.role || "");
+
+  if (isAdmin) {
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId)
+      .eq("sender_id", user.id);
+    if (error) throw new Error(error.message);
+  }
+
+  revalidatePath("/chat");
+}

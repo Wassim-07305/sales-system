@@ -543,30 +543,99 @@ export async function createAutoFollowUp(
 
   const { data: deal } = await supabase
     .from("deals")
-    .select("title, assigned_to")
+    .select("title, assigned_to, contact_id")
     .eq("id", dealId)
     .single();
 
   if (!deal) return { error: "Deal introuvable" };
 
+  // --- AI-powered message generation + real sending ---
+  let messageSent = false;
+  let channelUsed = "";
+  let aiMessage = "";
+
+  if (deal.contact_id) {
+    try {
+      const { data: contact } = await supabase
+        .from("profiles")
+        .select("full_name, email, phone")
+        .eq("id", deal.contact_id)
+        .single();
+
+      if (contact) {
+        // Determine best channel: WhatsApp if phone, else email
+        const { generateFollowUpMessage, sendMessageToContact } = await import(
+          "@/lib/actions/messaging"
+        );
+
+        const channel = contact.phone ? "whatsapp" : "email";
+
+        // Generate AI message
+        const aiResult = await generateFollowUpMessage({
+          contactName: contact.full_name || "prospect",
+          dealTitle: deal.title,
+          daysOverdue,
+          channel,
+        });
+
+        if (aiResult.message) {
+          aiMessage = aiResult.message;
+
+          // Parse subject for email channel
+          let subject: string | undefined;
+          let body = aiMessage;
+          if (channel === "email" && aiMessage.startsWith("Objet:")) {
+            const lines = aiMessage.split("\n");
+            subject = lines[0].replace("Objet:", "").trim();
+            body = lines.slice(1).join("\n").trim();
+          }
+
+          // Send the message
+          const sendResult = await sendMessageToContact({
+            contactId: deal.contact_id,
+            channel,
+            subject,
+            message: body,
+          });
+
+          if (sendResult.success) {
+            messageSent = true;
+            channelUsed = channel;
+          }
+        }
+      }
+    } catch (err) {
+      // Non-critical: AI/sending failed, continue with notification-only follow-up
+      console.error("[AutoFollowUp] AI/send error:", err instanceof Error ? err.message : err);
+    }
+  }
+
   // Create a follow-up activity on the deal
+  const activityContent = messageSent
+    ? `Relance automatique IA envoyée via ${channelUsed} — ${daysOverdue} jour(s) sans contact.`
+    : `Relance automatique — ${daysOverdue} jour(s) sans contact. Action requise.`;
+
   const { error: activityError } = await supabase
     .from("deal_activities")
     .insert({
       deal_id: dealId,
       user_id: user.id,
       type: "auto_follow_up",
-      content: `Relance automatique — ${daysOverdue} jour(s) sans contact. Action requise.`,
+      content: activityContent,
     });
 
   if (activityError) return { error: activityError.message };
 
   // Create an in-app notification for the assigned user
   const notifyUserId = deal.assigned_to || user.id;
+  const notifBody = messageSent
+    ? `Relance IA envoyée via ${channelUsed} pour le deal "${deal.title}" (${daysOverdue}j sans contact).`
+    : `Le deal "${deal.title}" n'a pas eu de contact depuis ${daysOverdue} jour(s).`;
+
   await supabase.from("notifications").insert({
     user_id: notifyUserId,
-    title: "Relance automatique",
-    body: `Le deal "${deal.title}" n'a pas eu de contact depuis ${daysOverdue} jour(s).`,
+    title: messageSent ? "Relance IA envoyée" : "Relance automatique",
+    body: notifBody,
     type: "follow_up",
     link: `/crm/${dealId}`,
   });
@@ -575,14 +644,14 @@ export async function createAutoFollowUp(
   await supabase
     .from("deals")
     .update({
-      next_action: "Relance automatique",
+      next_action: messageSent ? "Relance IA envoyée" : "Relance automatique",
       next_action_date: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("id", dealId);
 
   revalidatePath("/crm");
-  return { success: true };
+  return { success: true, messageSent, channel: channelUsed };
 }
 
 /**

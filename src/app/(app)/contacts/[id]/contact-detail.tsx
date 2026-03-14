@@ -15,10 +15,18 @@ import {
   Calendar,
   DollarSign,
   ArrowLeft,
+  Send,
+  Sparkles,
+  Loader2,
+  X,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ClientTimeline } from "@/components/client-timeline";
+import { sendMessageToContact, generateFollowUpMessage, type MessageChannel } from "@/lib/actions/messaging";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 interface ContactDetailProps {
   contact: Profile;
@@ -36,8 +44,79 @@ const activityIcons: Record<string, React.ReactNode> = {
   status_change: <Target className="h-3.5 w-3.5" />,
 };
 
+const channelOptions: { value: MessageChannel; label: string; icon: React.ReactNode }[] = [
+  { value: "email", label: "Email", icon: <Mail className="h-4 w-4" /> },
+  { value: "whatsapp", label: "WhatsApp", icon: <Phone className="h-4 w-4" /> },
+  { value: "linkedin", label: "LinkedIn", icon: <MessageSquare className="h-4 w-4" /> },
+  { value: "instagram", label: "Instagram", icon: <MessageSquare className="h-4 w-4" /> },
+];
+
 export function ContactDetail({ contact, deals, activities, timelineEvents }: ContactDetailProps) {
   const totalDealValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
+  const [showMessaging, setShowMessaging] = useState(false);
+  const [channel, setChannel] = useState<MessageChannel>("email");
+  const [subject, setSubject] = useState("");
+  const [messageText, setMessageText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  async function handleSend() {
+    if (!messageText.trim()) {
+      toast.error("Le message ne peut pas être vide");
+      return;
+    }
+    setSending(true);
+    try {
+      const result = await sendMessageToContact({
+        contactId: contact.id,
+        channel,
+        subject: channel === "email" ? subject : undefined,
+        message: messageText,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Message envoyé via ${channel}`);
+        setMessageText("");
+        setSubject("");
+        setShowMessaging(false);
+      }
+    } catch {
+      toast.error("Erreur lors de l'envoi");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handleGenerateAI() {
+    const dealForContext = deals[0];
+    setGenerating(true);
+    try {
+      const result = await generateFollowUpMessage({
+        contactName: contact.full_name || "prospect",
+        dealTitle: dealForContext?.title || "Accompagnement",
+        daysOverdue: 3,
+        channel,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.message) {
+        // Parse subject from AI-generated email
+        if (channel === "email" && result.message.startsWith("Objet:")) {
+          const lines = result.message.split("\n");
+          setSubject(lines[0].replace("Objet:", "").trim());
+          setMessageText(lines.slice(1).join("\n").trim());
+        } else {
+          setMessageText(result.message);
+        }
+        toast.success("Message généré par l'IA");
+      }
+    } catch {
+      toast.error("Erreur génération IA");
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   return (
     <div>
@@ -145,10 +224,91 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
                   Contrat
                 </Link>
               </Button>
+              <Button
+                size="sm"
+                variant={showMessaging ? "secondary" : "default"}
+                onClick={() => setShowMessaging(!showMessaging)}
+              >
+                {showMessaging ? (
+                  <X className="h-4 w-4 mr-1" />
+                ) : (
+                  <Send className="h-4 w-4 mr-1" />
+                )}
+                {showMessaging ? "Fermer" : "Envoyer"}
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Messaging panel */}
+      {showMessaging && (
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Envoyer un message</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleGenerateAI}
+                disabled={generating}
+              >
+                {generating ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-1" />
+                )}
+                Générer avec l&apos;IA
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Channel selector */}
+            <div className="flex gap-2">
+              {channelOptions.map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={channel === opt.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setChannel(opt.value)}
+                >
+                  {opt.icon}
+                  <span className="ml-1">{opt.label}</span>
+                </Button>
+              ))}
+            </div>
+
+            {/* Subject (email only) */}
+            {channel === "email" && (
+              <Input
+                placeholder="Objet de l'email"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            )}
+
+            {/* Message */}
+            <Textarea
+              placeholder={`Votre message via ${channel}...`}
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              rows={4}
+            />
+
+            {/* Send button */}
+            <div className="flex justify-end">
+              <Button onClick={handleSend} disabled={sending || !messageText.trim()}>
+                {sending ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4 mr-1" />
+                )}
+                {sending ? "Envoi..." : "Envoyer"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Deals */}
