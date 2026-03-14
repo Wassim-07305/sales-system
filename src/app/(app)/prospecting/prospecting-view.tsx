@@ -57,14 +57,14 @@ interface SegmentStats {
 }
 
 const statusColors: Record<string, string> = {
-  new: "bg-gray-100 text-gray-700",
-  contacted: "bg-blue-100 text-blue-700",
-  replied: "bg-orange-100 text-orange-700",
-  booked: "bg-green-100 text-green-700",
-  qualified: "bg-emerald-100 text-emerald-700",
-  converted: "bg-brand/20 text-brand-dark",
-  lost: "bg-red-100 text-red-700",
-  not_interested: "bg-red-100 text-red-700",
+  new: "bg-muted/50 text-muted-foreground border-border/50",
+  contacted: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  replied: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  booked: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  qualified: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  converted: "bg-brand/10 text-brand-dark border-brand/20",
+  lost: "bg-red-500/10 text-red-500 border-red-500/20",
+  not_interested: "bg-red-500/10 text-red-500 border-red-500/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -79,9 +79,9 @@ const statusLabels: Record<string, string> = {
 };
 
 const temperatureConfig: Record<string, { label: string; color: string; icon: typeof Flame }> = {
-  hot: { label: "Chaud", color: "bg-red-100 text-red-700 border-red-200", icon: Flame },
-  warm: { label: "Tiède", color: "bg-orange-100 text-orange-700 border-orange-200", icon: Thermometer },
-  cold: { label: "Froid", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Snowflake },
+  hot: { label: "Chaud", color: "bg-red-500/10 text-red-600 border-red-500/20", icon: Flame },
+  warm: { label: "Tiède", color: "bg-orange-500/10 text-orange-600 border-orange-500/20", icon: Thermometer },
+  cold: { label: "Froid", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: Snowflake },
 };
 
 export function ProspectingView({
@@ -412,10 +412,10 @@ export function ProspectingView({
       <div className="flex flex-wrap gap-3 mb-2">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Rechercher..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input placeholder="Rechercher un prospect..." className="pl-9 h-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={filterPlatform} onValueChange={setFilterPlatform}>
-          <SelectTrigger className="w-[150px]"><SelectValue placeholder="Plateforme" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-9 text-xs"><SelectValue placeholder="Plateforme" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes</SelectItem>
             <SelectItem value="linkedin">LinkedIn</SelectItem>
@@ -423,7 +423,7 @@ export function ProspectingView({
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px]"><SelectValue placeholder="Statut" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-9 text-xs"><SelectValue placeholder="Statut" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>
             {Object.entries(statusLabels).map(([v, l]) => (
@@ -465,10 +465,10 @@ export function ProspectingView({
         </div>
 
         {filtersOpen && (
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-lg border bg-card">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-xl border border-border/50 bg-muted/20">
             {/* Temperature */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Température
               </Label>
               <Select value={filterTemperature} onValueChange={setFilterTemperature}>
@@ -490,7 +490,7 @@ export function ProspectingView({
 
             {/* Score range */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Score (0-100)
               </Label>
               <div className="flex gap-2">
@@ -517,7 +517,7 @@ export function ProspectingView({
 
             {/* Recency */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Activité récente
               </Label>
               <Select value={filterRecency} onValueChange={setFilterRecency}>
@@ -584,14 +584,14 @@ export function ProspectingView({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="text-left p-4 font-medium">Nom</th>
-                  <th className="text-left p-4 font-medium">Temperature</th>
-                  <th className="text-left p-4 font-medium">Score</th>
-                  <th className="text-left p-4 font-medium">Plateforme</th>
-                  <th className="text-left p-4 font-medium">Statut</th>
-                  <th className="text-left p-4 font-medium">Dernier message</th>
-                  <th className="text-left p-4 font-medium">Actions</th>
+                <tr className="border-b">
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Température</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Score</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Plateforme</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Dernier msg</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -689,10 +689,12 @@ export function ProspectingView({
             </table>
           </div>
           {filtered.length === 0 && (
-            <div className="p-12 text-center text-muted-foreground">
-              <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="font-medium">Aucun prospect</p>
-              <p className="text-sm">
+            <div className="py-16 text-center">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Target className="h-6 w-6 text-muted-foreground/40" />
+              </div>
+              <p className="font-medium text-sm">Aucun prospect</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                 {hasActiveSegmentFilters || filterPlatform !== "all" || filterStatus !== "all" || search
                   ? "Aucun prospect ne correspond aux filtres sélectionnés."
                   : "Ajoutez votre premier prospect pour commencer."}
