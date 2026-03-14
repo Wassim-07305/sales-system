@@ -138,9 +138,19 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     if (!over) return;
 
     const dealId = active.id as string;
-    const newStageId = over.id as string;
+    const overId = over.id as string;
+
+    // over.id could be a stage ID (dropped on column) or a deal ID (dropped on a card).
+    // Resolve the target stage ID.
+    const stageIds = new Set(stages.map((s) => s.id));
+    const resolvedStageId = stageIds.has(overId)
+      ? overId
+      : deals.find((d) => d.id === overId)?.stage_id;
+
+    if (!resolvedStageId) return;
 
     const deal = deals.find((d) => d.id === dealId);
+    const newStageId = resolvedStageId;
     if (!deal || deal.stage_id === newStageId) return;
 
     // Optimistic update
