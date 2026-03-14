@@ -64,13 +64,7 @@ import {
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-import {
-  markChannelAsRead,
-  toggleReaction,
-  getOrCreateDM,
-  editMessage,
-  deleteMessage,
-} from "@/lib/actions/communication";
+// All chat operations are done client-side via Supabase to avoid server action re-render issues
 import {
   createChannel,
   deleteChannel,
@@ -452,13 +446,33 @@ export function ChatLayout({
     }
 
     loadMessages();
-    markChannelAsRead(activeChannel.id).then(() => {
+    // Mark channel as read (inline, no server action)
+    (async () => {
+      const { data: existing } = await supabase
+        .from("channel_reads")
+        .select("id")
+        .eq("channel_id", activeChannel!.id)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("channel_reads")
+          .update({ last_read_at: new Date().toISOString() })
+          .eq("id", existing.id);
+      } else {
+        await supabase.from("channel_reads").insert({
+          channel_id: activeChannel!.id,
+          user_id: currentUserId,
+          last_read_at: new Date().toISOString(),
+        });
+      }
       setUnreadCounts((prev) => {
         const next = { ...prev };
         delete next[activeChannel!.id];
         return next;
       });
-    });
+    })();
 
     // Realtime: new messages
     const msgSub = supabase
@@ -486,7 +500,21 @@ export function ChatLayout({
                 return [...prev, fullMessage];
               });
               setTimeout(scrollToBottom, 100);
-              markChannelAsRead(activeChannel!.id);
+              // Mark as read inline
+              const chId = activeChannel!.id;
+              supabase
+                .from("channel_reads")
+                .select("id")
+                .eq("channel_id", chId)
+                .eq("user_id", currentUserId)
+                .maybeSingle()
+                .then(({ data: ex }) => {
+                  if (ex) {
+                    supabase.from("channel_reads").update({ last_read_at: new Date().toISOString() }).eq("id", ex.id).then(() => {});
+                  } else {
+                    supabase.from("channel_reads").insert({ channel_id: chId, user_id: currentUserId, last_read_at: new Date().toISOString() }).then(() => {});
+                  }
+                });
             }
           } else if (payload.eventType === "DELETE") {
             const deletedId = payload.old.id;
@@ -632,12 +660,15 @@ export function ChatLayout({
   };
 
   async function handleToggleReaction(messageId: string, emoji: string) {
-    // Optimistic update
     const userId = currentUserId;
+
+    // Check if reaction already exists
+    const existing = rawReactions.find(
+      (r) => r.message_id === messageId && r.user_id === userId && r.emoji === emoji,
+    );
+
+    // Optimistic update
     setRawReactions((prev) => {
-      const existing = prev.find(
-        (r) => r.message_id === messageId && r.user_id === userId && r.emoji === emoji,
-      );
       if (existing) {
         return prev.filter((r) => r.id !== existing.id);
       } else {
@@ -656,9 +687,29 @@ export function ChatLayout({
     setEmojiPickerFor(null);
 
     try {
-      await toggleReaction(messageId, emoji);
+      if (existing && !existing.id.startsWith("optimistic")) {
+        await supabase.from("message_reactions").delete().eq("id", existing.id);
+      } else {
+        // Check server-side if exists
+        const { data: serverExisting } = await supabase
+          .from("message_reactions")
+          .select("id")
+          .eq("message_id", messageId)
+          .eq("user_id", userId)
+          .eq("emoji", emoji)
+          .maybeSingle();
+
+        if (serverExisting) {
+          await supabase.from("message_reactions").delete().eq("id", serverExisting.id);
+        } else {
+          await supabase.from("message_reactions").insert({
+            message_id: messageId,
+            user_id: userId,
+            emoji,
+          });
+        }
+      }
     } catch {
-      // Reload reactions on error
       const ids = messages.map((m) => m.id);
       loadReactions(ids);
     }
@@ -667,7 +718,12 @@ export function ChatLayout({
   async function handleEditMessage(messageId: string) {
     if (!editContent.trim()) return;
     try {
-      await editMessage(messageId, editContent.trim());
+      const { error } = await supabase
+        .from("messages")
+        .update({ content: editContent.trim(), is_edited: true })
+        .eq("id", messageId)
+        .eq("sender_id", currentUserId);
+      if (error) throw error;
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
@@ -684,7 +740,11 @@ export function ChatLayout({
 
   async function handleDeleteMessage(messageId: string) {
     try {
-      await deleteMessage(messageId);
+      const { error } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+      if (error) throw error;
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     } catch {
       toast.error("Erreur lors de la suppression");
@@ -694,16 +754,55 @@ export function ChatLayout({
   async function handleStartDM(otherUserId: string) {
     setShowNewDMDialog(false);
     try {
-      const channel = await getOrCreateDM(otherUserId);
-      // Refresh channels
-      const { data } = await supabase
+      // Check for existing DM between these two users
+      const { data: existingChannels } = await supabase
+        .from("channels")
+        .select("*")
+        .eq("type", "direct")
+        .contains("members", [currentUserId, otherUserId]);
+
+      const existingDM = existingChannels?.find(
+        (c) =>
+          c.members?.length === 2 &&
+          c.members.includes(currentUserId) &&
+          c.members.includes(otherUserId),
+      );
+
+      if (existingDM) {
+        setActiveChannel(existingDM);
+        return;
+      }
+
+      // Get names for the channel
+      const partner = teamMembers.find((m) => m.id === otherUserId);
+      const { data: myProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", currentUserId)
+        .single();
+
+      const { data: newChannel, error } = await supabase
+        .from("channels")
+        .insert({
+          name: `${myProfile?.full_name || "Utilisateur"} & ${partner?.full_name || "Utilisateur"}`,
+          type: "direct",
+          created_by: currentUserId,
+          members: [currentUserId, otherUserId],
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      // Refresh channels list
+      const { data: allChannels } = await supabase
         .from("channels")
         .select("*")
         .order("created_at", { ascending: false });
-      setChannels(data || []);
-      setActiveChannel(channel);
+      setChannels(allChannels || []);
+      setActiveChannel(newChannel);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la création du DM");
     }
   }
 
