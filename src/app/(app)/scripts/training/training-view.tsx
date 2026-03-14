@@ -48,9 +48,9 @@ function getDifficulty(nodeCount: number): {
   label: string;
   color: string;
 } {
-  if (nodeCount <= 3) return { label: "Facile", color: "bg-green-500/20 text-green-400" };
-  if (nodeCount <= 6) return { label: "Moyen", color: "bg-amber-500/20 text-amber-400" };
-  return { label: "Difficile", color: "bg-red-500/20 text-red-400" };
+  if (nodeCount <= 3) return { label: "Facile", color: "bg-brand/20 text-brand" };
+  if (nodeCount <= 6) return { label: "Moyen", color: "bg-muted-foreground/20 text-muted-foreground" };
+  return { label: "Difficile", color: "bg-foreground/20 text-foreground" };
 }
 
 export function TrainingView({
@@ -113,8 +113,8 @@ export function TrainingView({
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Brain className="h-5 w-5 text-blue-400" />
+              <div className="p-2 rounded-lg bg-muted/60">
+                <Brain className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Score moyen</p>
@@ -126,8 +126,8 @@ export function TrainingView({
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10">
-                <Trophy className="h-5 w-5 text-amber-400" />
+              <div className="p-2 rounded-lg bg-muted/60">
+                <Trophy className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Meilleur score</p>
@@ -220,19 +220,19 @@ export function TrainingView({
                     <div
                       className={`p-1.5 rounded-lg ${
                         result.score >= 80
-                          ? "bg-[#7af17a]/10"
+                          ? "bg-brand/10"
                           : result.score >= 50
-                          ? "bg-amber-500/10"
-                          : "bg-red-500/10"
+                          ? "bg-muted/60"
+                          : "bg-muted/40"
                       }`}
                     >
                       <Target
                         className={`h-4 w-4 ${
                           result.score >= 80
-                            ? "text-[#7af17a]"
+                            ? "text-brand"
                             : result.score >= 50
-                            ? "text-amber-400"
-                            : "text-red-400"
+                            ? "text-muted-foreground"
+                            : "text-muted-foreground/60"
                         }`}
                       />
                     </div>
@@ -260,10 +260,10 @@ export function TrainingView({
                     <Badge
                       className={`${
                         result.score >= 80
-                          ? "bg-[#7af17a]/20 text-[#7af17a]"
+                          ? "bg-brand/20 text-brand"
                           : result.score >= 50
-                          ? "bg-amber-500/20 text-amber-400"
-                          : "bg-red-500/20 text-red-400"
+                          ? "bg-muted-foreground/20 text-muted-foreground"
+                          : "bg-foreground/20 text-foreground"
                       } border-0`}
                     >
                       {result.score}%

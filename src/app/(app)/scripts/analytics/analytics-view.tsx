@@ -57,7 +57,7 @@ interface AnalyticsData {
 }
 
 const CHART_GREEN = "#7af17a";
-const CHART_BLUE = "#60a5fa";
+const CHART_SECONDARY = "#a1a1aa";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("fr-FR", {
@@ -72,7 +72,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
     { name: "Partages", value: data.totalShared },
     { name: "Personnels", value: data.totalPersonal },
   ];
-  const PIE_COLORS = [CHART_BLUE, CHART_GREEN];
+  const PIE_COLORS = [CHART_SECONDARY, CHART_GREEN];
 
   return (
     <div>
@@ -188,7 +188,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
                   <Bar
                     dataKey="mindmaps"
                     name="Mind Maps"
-                    fill={CHART_BLUE}
+                    fill={CHART_SECONDARY}
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
@@ -280,8 +280,8 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
                         variant="outline"
                         className={
                           script.type === "flowchart"
-                            ? "border-green-300 text-green-700"
-                            : "border-blue-300 text-blue-700"
+                            ? "border-brand/30 text-brand"
+                            : "border-muted-foreground/30 text-muted-foreground"
                         }
                       >
                         {script.type === "flowchart" ? (

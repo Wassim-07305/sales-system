@@ -56,11 +56,11 @@ interface MindMapItem {
 }
 
 const categoryColors: Record<string, string> = {
-  prospection: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  closing: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  objection: "bg-red-500/10 text-red-600 border-red-500/20",
-  relance: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  discovery: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  prospection: "bg-foreground/10 text-foreground border-foreground/20",
+  closing: "bg-brand/10 text-brand border-brand/20",
+  objection: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
+  relance: "bg-foreground/8 text-foreground/80 border-foreground/15",
+  discovery: "bg-muted/60 text-muted-foreground border-border/50",
 };
 
 export function ScriptsView({

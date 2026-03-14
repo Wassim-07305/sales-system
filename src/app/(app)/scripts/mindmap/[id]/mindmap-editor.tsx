@@ -41,13 +41,13 @@ interface MindMapData {
 
 const branchColors = [
   { bg: "bg-brand/10", border: "border-brand", text: "text-brand" },
-  { bg: "bg-blue-50", border: "border-blue-400", text: "text-blue-700" },
-  { bg: "bg-purple-50", border: "border-purple-400", text: "text-purple-700" },
-  { bg: "bg-orange-50", border: "border-orange-400", text: "text-orange-700" },
-  { bg: "bg-pink-50", border: "border-pink-400", text: "text-pink-700" },
-  { bg: "bg-teal-50", border: "border-teal-400", text: "text-teal-700" },
-  { bg: "bg-red-50", border: "border-red-400", text: "text-red-700" },
-  { bg: "bg-indigo-50", border: "border-indigo-400", text: "text-indigo-700" },
+  { bg: "bg-foreground/10", border: "border-foreground/40", text: "text-foreground" },
+  { bg: "bg-muted-foreground/10", border: "border-muted-foreground/40", text: "text-muted-foreground" },
+  { bg: "bg-muted/60", border: "border-muted-foreground/30", text: "text-muted-foreground/80" },
+  { bg: "bg-brand/8", border: "border-brand/60", text: "text-brand/80" },
+  { bg: "bg-foreground/8", border: "border-foreground/30", text: "text-foreground/80" },
+  { bg: "bg-muted-foreground/8", border: "border-muted-foreground/30", text: "text-muted-foreground/70" },
+  { bg: "bg-muted/40", border: "border-border", text: "text-muted-foreground/60" },
 ];
 
 function RootNodeComponent({ data }: NodeProps) {

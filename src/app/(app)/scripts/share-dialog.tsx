@@ -113,8 +113,8 @@ export function ShareDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
-              <Share2 className="h-4 w-4 text-blue-600" />
+            <div className="h-9 w-9 rounded-lg ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
+              <Share2 className="h-4 w-4 text-brand" />
             </div>
             Partager le script
           </DialogTitle>
@@ -192,7 +192,7 @@ export function ShareDialog({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={share.permission === "edit" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : "bg-blue-500/10 text-blue-600 border-blue-500/20"}>
+                    <Badge variant="outline" className={share.permission === "edit" ? "bg-brand/10 text-brand border-brand/20" : "bg-muted/60 text-muted-foreground border-border/50"}>
                       {share.permission === "edit" ? "Edition" : "Lecture"}
                     </Badge>
                     <Button

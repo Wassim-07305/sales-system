@@ -303,8 +303,8 @@ export function TrainingSession({
         <div className="max-w-xl mx-auto">
           <Card className="bg-card border-border/50 hover:shadow-md transition-all">
             <CardHeader className="text-center">
-              <div className="mx-auto h-14 w-14 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center mb-2">
-                <Brain className="h-7 w-7 text-emerald-500" />
+              <div className="mx-auto h-14 w-14 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mb-2">
+                <Brain className="h-7 w-7 text-brand" />
               </div>
               <CardTitle className="text-xl">Prêt pour l&apos;entraînement ?</CardTitle>
             </CardHeader>
@@ -325,7 +325,7 @@ export function TrainingSession({
                 </span>
                 {bestScore !== null && (
                   <span className="flex items-center gap-1.5">
-                    <Trophy className="h-4 w-4 text-amber-400" />
+                    <Trophy className="h-4 w-4 text-brand" />
                     Record : {bestScore}%
                   </span>
                 )}
@@ -381,7 +381,7 @@ export function TrainingSession({
           <Card className="bg-card border-border/50 hover:shadow-md transition-all">
             <CardHeader>
               <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[11px] font-medium uppercase tracking-wider">
+                <Badge className="bg-brand/10 text-brand border-brand/20 text-[11px] font-medium uppercase tracking-wider">
                   {getNodeTypeLabel(question.nodeType)}
                 </Badge>
               </div>
@@ -390,15 +390,15 @@ export function TrainingSession({
             <CardContent className="space-y-3">
               {question.options.map((option, optIdx) => {
                 let optionStyle =
-                  "border-border/50 hover:border-emerald-500/40 hover:bg-emerald-500/5 cursor-pointer";
+                  "border-border/50 hover:border-brand/40 hover:bg-brand/5 cursor-pointer";
 
                 if (showFeedback) {
                   if (option === question.correctAnswer) {
                     optionStyle =
-                      "border-emerald-500/60 bg-emerald-500/10 cursor-default";
+                      "border-brand/60 bg-brand/10 cursor-default";
                   } else if (option === selectedAnswer && !isCorrect) {
                     optionStyle =
-                      "border-red-500/60 bg-red-500/10 cursor-default";
+                      "border-foreground/40 bg-foreground/5 cursor-default";
                   } else {
                     optionStyle = "border-border opacity-50 cursor-default";
                   }
@@ -414,12 +414,12 @@ export function TrainingSession({
                     <div className="flex items-center justify-between">
                       <span className="text-sm">{option}</span>
                       {showFeedback && option === question.correctAnswer && (
-                        <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-brand shrink-0" />
                       )}
                       {showFeedback &&
                         option === selectedAnswer &&
                         !isCorrect && (
-                          <XCircle className="h-5 w-5 text-red-400 shrink-0" />
+                          <XCircle className="h-5 w-5 text-muted-foreground shrink-0" />
                         )}
                     </div>
                   </button>
@@ -471,18 +471,18 @@ export function TrainingSession({
             <div
               className={`mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-4 ring-1 ${
                 scorePercent >= 80
-                  ? "bg-emerald-500/10 ring-emerald-500/20"
+                  ? "bg-brand/10 ring-brand/20"
                   : scorePercent >= 50
-                  ? "bg-amber-500/10 ring-amber-500/20"
-                  : "bg-red-500/10 ring-red-500/20"
+                  ? "bg-muted/60 ring-muted-foreground/20"
+                  : "bg-muted/40 ring-muted-foreground/20"
               }`}
             >
               {scorePercent >= 80 ? (
-                <Trophy className="h-8 w-8 text-emerald-500" />
+                <Trophy className="h-8 w-8 text-brand" />
               ) : scorePercent >= 50 ? (
-                <Target className="h-8 w-8 text-amber-500" />
+                <Target className="h-8 w-8 text-muted-foreground" />
               ) : (
-                <Brain className="h-8 w-8 text-red-500" />
+                <Brain className="h-8 w-8 text-muted-foreground/60" />
               )}
             </div>
             <p className="text-5xl font-bold mb-2">{scorePercent}%</p>
@@ -495,7 +495,7 @@ export function TrainingSession({
                 {formatTime(elapsedSeconds)}
               </span>
               {bestScore !== null && scorePercent > bestScore && (
-                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                <Badge className="bg-brand/10 text-brand border-brand/20">
                   Nouveau record !
                 </Badge>
               )}
@@ -517,27 +517,27 @@ export function TrainingSession({
                   key={idx}
                   className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
                     correct
-                      ? "border-emerald-500/20 bg-emerald-500/5"
-                      : "border-red-500/20 bg-red-500/5"
+                      ? "border-brand/20 bg-brand/5"
+                      : "border-muted-foreground/20 bg-muted/30"
                   }`}
                 >
                   {correct ? (
-                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                   ) : (
-                    <XCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                    <XCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{q.prompt}</p>
                     {correct ? (
-                      <p className="text-xs text-emerald-500 mt-1">
+                      <p className="text-xs text-brand mt-1">
                         {q.correctAnswer}
                       </p>
                     ) : (
                       <div className="mt-1">
-                        <p className="text-xs text-red-400">
+                        <p className="text-xs text-muted-foreground">
                           Votre réponse : {userAnswer}
                         </p>
-                        <p className="text-xs text-emerald-500">
+                        <p className="text-xs text-brand">
                           Bonne réponse : {q.correctAnswer}
                         </p>
                       </div>
