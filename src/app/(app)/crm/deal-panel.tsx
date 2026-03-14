@@ -33,14 +33,14 @@ interface DealPanelProps {
 }
 
 const TEMP_CONFIG = {
-  hot: { icon: Flame, color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30", label: "Hot" },
-  warm: { icon: Thermometer, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/30", label: "Warm" },
-  cold: { icon: Snowflake, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/30", label: "Cold" },
+  hot: { icon: Flame, color: "text-foreground", bg: "bg-foreground/10", border: "border-foreground/20", label: "Hot" },
+  warm: { icon: Thermometer, color: "text-muted-foreground", bg: "bg-muted/60", border: "border-border/50", label: "Warm" },
+  cold: { icon: Snowflake, color: "text-muted-foreground/60", bg: "bg-muted/40", border: "border-border/30", label: "Cold" },
 };
 
 const AVATAR_COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
-  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
 ];
 
 function getAvatarColor(str: string) {
@@ -134,22 +134,22 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
 
           {/* KPI Grid */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+            <div className="p-3.5 rounded-xl bg-brand/5 border border-brand/10">
               <div className="flex items-center gap-1.5 mb-1">
-                <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
+                <DollarSign className="h-3.5 w-3.5 text-brand" />
                 <span className="text-[11px] text-muted-foreground">Valeur</span>
               </div>
               <p className="text-xl font-bold tabular-nums">{deal.value?.toLocaleString("fr-FR")} €</p>
             </div>
-            <div className="p-3.5 rounded-xl bg-purple-500/5 border border-purple-500/10">
+            <div className="p-3.5 rounded-xl bg-brand/5 border border-brand/10">
               <div className="flex items-center gap-1.5 mb-1">
-                <Percent className="h-3.5 w-3.5 text-purple-500" />
+                <Percent className="h-3.5 w-3.5 text-brand" />
                 <span className="text-[11px] text-muted-foreground">Probabilité</span>
               </div>
               <p className="text-xl font-bold tabular-nums">{deal.probability}%</p>
-              <div className="w-full bg-purple-500/10 rounded-full h-1 mt-2">
+              <div className="w-full bg-brand/10 rounded-full h-1 mt-2">
                 <div
-                  className="bg-purple-500 h-1 rounded-full transition-all duration-300"
+                  className="bg-brand/50 h-1 rounded-full transition-all duration-300"
                   style={{ width: `${deal.probability || 0}%` }}
                 />
               </div>

@@ -16,30 +16,30 @@ interface DealCardProps {
 const TEMP_CONFIG = {
   hot: {
     icon: Flame,
-    color: "text-red-500",
-    bg: "bg-red-500/10",
-    border: "border-red-500/20",
+    color: "text-foreground",
+    bg: "bg-foreground/10",
+    border: "border-foreground/20",
     label: "Hot",
   },
   warm: {
     icon: Thermometer,
-    color: "text-orange-500",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
+    color: "text-muted-foreground",
+    bg: "bg-muted/60",
+    border: "border-border/50",
     label: "Warm",
   },
   cold: {
     icon: Snowflake,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
+    color: "text-muted-foreground/60",
+    bg: "bg-muted/40",
+    border: "border-border/30",
     label: "Cold",
   },
 };
 
 const AVATAR_COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
-  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
 ];
 
 function getAvatarColor(str: string) {
@@ -113,7 +113,7 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
         {/* Value + Probability + Assigned */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
+            <DollarSign className="h-3.5 w-3.5 text-brand" />
             <span className="text-sm font-bold tabular-nums">
               {deal.value?.toLocaleString("fr-FR")} €
             </span>

@@ -21,33 +21,33 @@ const STAT_CONFIG = [
     key: "deals",
     label: "Deals actifs",
     icon: Target,
-    color: "text-blue-600",
-    bg: "bg-blue-500/10",
-    ring: "ring-blue-500/20",
+    color: "text-brand",
+    bg: "bg-brand/10",
+    ring: "ring-brand/20",
   },
   {
     key: "value",
     label: "Valeur pipeline",
     icon: DollarSign,
-    color: "text-emerald-600",
-    bg: "bg-emerald-500/10",
-    ring: "ring-emerald-500/20",
+    color: "text-brand",
+    bg: "bg-brand/10",
+    ring: "ring-brand/20",
   },
   {
     key: "weighted",
     label: "Valeur pondérée",
     icon: TrendingUp,
-    color: "text-purple-600",
-    bg: "bg-purple-500/10",
-    ring: "ring-purple-500/20",
+    color: "text-brand",
+    bg: "bg-brand/10",
+    ring: "ring-brand/20",
   },
   {
     key: "probability",
     label: "Probabilité moy.",
     icon: Gauge,
-    color: "text-amber-600",
-    bg: "bg-amber-500/10",
-    ring: "ring-amber-500/20",
+    color: "text-brand",
+    bg: "bg-brand/10",
+    ring: "ring-brand/20",
   },
 ] as const;
 
@@ -92,17 +92,17 @@ export function PipelineStats({ deals }: PipelineStatsProps) {
                 {cfg.key === "deals" && (
                   <div className="flex gap-1">
                     {stats.hot > 0 && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded-md">
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-foreground bg-foreground/10 px-1.5 py-0.5 rounded-md">
                         <Flame className="h-2.5 w-2.5" />{stats.hot}
                       </span>
                     )}
                     {stats.warm > 0 && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-orange-600 bg-orange-500/10 px-1.5 py-0.5 rounded-md">
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
                         <Thermometer className="h-2.5 w-2.5" />{stats.warm}
                       </span>
                     )}
                     {stats.cold > 0 && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 bg-blue-500/10 px-1.5 py-0.5 rounded-md">
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-muted-foreground/60 bg-muted/40 px-1.5 py-0.5 rounded-md">
                         <Snowflake className="h-2.5 w-2.5" />{stats.cold}
                       </span>
                     )}
@@ -114,7 +114,7 @@ export function PipelineStats({ deals }: PipelineStatsProps) {
               {cfg.key === "probability" && (
                 <div className="w-full bg-muted rounded-full h-1.5 mt-2.5">
                   <div
-                    className="bg-amber-500 h-1.5 rounded-full transition-all duration-500"
+                    className="bg-brand/50 h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${stats.avgProbability}%` }}
                   />
                 </div>
