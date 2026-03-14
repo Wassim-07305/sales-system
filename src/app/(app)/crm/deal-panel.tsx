@@ -3,13 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import type { Deal, PipelineStage, DealTemperature } from "@/lib/types/database";
+import { cn } from "@/lib/utils";
 import {
   DollarSign,
   Phone,
@@ -17,6 +16,12 @@ import {
   Mail,
   Clock,
   ExternalLink,
+  Flame,
+  Thermometer,
+  Snowflake,
+  Percent,
+  Save,
+  ArrowRight,
 } from "lucide-react";
 import { updateDealStage, updateDealTemperature, updateDealNotes } from "@/lib/actions/crm";
 
@@ -27,11 +32,22 @@ interface DealPanelProps {
   onUpdate: (deal: Deal) => void;
 }
 
-const tempColors = {
-  hot: "bg-red-100 text-red-700",
-  warm: "bg-orange-100 text-orange-700",
-  cold: "bg-blue-100 text-blue-700",
+const TEMP_CONFIG = {
+  hot: { icon: Flame, color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30", label: "Hot" },
+  warm: { icon: Thermometer, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/30", label: "Warm" },
+  cold: { icon: Snowflake, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/30", label: "Cold" },
 };
+
+const AVATAR_COLORS = [
+  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
+  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+];
+
+function getAvatarColor(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
   const [notes, setNotes] = useState(deal.notes || "");
@@ -43,7 +59,6 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
       toast.error("Erreur");
       return;
     }
-
     onUpdate({ ...deal, stage_id: stageId });
     toast.success("Stage mis à jour");
   }
@@ -54,7 +69,6 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
       toast.error("Erreur");
       return;
     }
-
     onUpdate({ ...deal, temperature: temp });
   }
 
@@ -70,180 +84,231 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
     setSaving(false);
   }
 
+  const currentStage = stages.find((s) => s.id === deal.stage_id);
+
   return (
     <Sheet open onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl">{deal.title}</SheetTitle>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/crm/${deal.id}`}>
-                <ExternalLink className="h-4 w-4 mr-1" />
-                Voir detail
-              </Link>
-            </Button>
-          </div>
-        </SheetHeader>
-
-        {/* Contact info */}
-        {deal.contact && (
-          <div className="flex items-center gap-3 mb-4 p-3 bg-muted/50 rounded-lg">
-            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">
-              {deal.contact.full_name?.charAt(0) || "?"}
-            </div>
-            <div>
-              <p className="font-medium">{deal.contact.full_name}</p>
-              <p className="text-sm text-muted-foreground">{deal.contact.email}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Deal info */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="text-xs text-muted-foreground">Valeur</label>
-            <div className="flex items-center gap-1 text-lg font-bold mt-1">
-              <DollarSign className="h-4 w-4 text-brand" />
-              {deal.value?.toLocaleString("fr-FR")} €
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Probabilité</label>
-            <p className="text-lg font-bold mt-1">{deal.probability}%</p>
-          </div>
-        </div>
-
-        {/* Stage */}
-        <div className="mb-4">
-          <label className="text-xs text-muted-foreground mb-1.5 block">Stage</label>
-          <Select value={deal.stage_id || ""} onValueChange={handleStageChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un stage" />
-            </SelectTrigger>
-            <SelectContent>
-              {stages.map((stage) => (
-                <SelectItem key={stage.id} value={stage.id}>
-                  <div className="flex items-center gap-2">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b px-6 py-4">
+          <SheetHeader className="p-0">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <SheetTitle className="text-lg font-bold truncate">{deal.title}</SheetTitle>
+                {currentStage && (
+                  <div className="flex items-center gap-2 mt-1">
                     <div
                       className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: stage.color }}
+                      style={{ backgroundColor: currentStage.color }}
                     />
-                    {stage.name}
+                    <span className="text-xs text-muted-foreground">{currentStage.name}</span>
                   </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Temperature */}
-        <div className="mb-4">
-          <label className="text-xs text-muted-foreground mb-1.5 block">
-            Température
-          </label>
-          <div className="flex gap-2">
-            {(["hot", "warm", "cold"] as const).map((temp) => (
-              <Badge
-                key={temp}
-                variant="outline"
-                className={`cursor-pointer ${
-                  deal.temperature === temp
-                    ? tempColors[temp]
-                    : "opacity-40 hover:opacity-70"
-                }`}
-                onClick={() => handleTempChange(temp)}
-              >
-                {temp === "hot" ? "Hot" : temp === "warm" ? "Warm" : "Cold"}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <Separator className="my-4" />
-
-        {/* Quick actions */}
-        <div className="flex gap-2 mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => {
-              if (deal.contact?.phone) {
-                window.open(`tel:${deal.contact.phone}`, "_self");
-              } else {
-                toast.error("Aucun numéro de téléphone");
-              }
-            }}
-          >
-            <Phone className="h-4 w-4 mr-1" />
-            Appeler
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            asChild
-          >
-            <Link href={`/inbox?contact=${deal.contact?.id || ""}`}>
-              <MessageSquare className="h-4 w-4 mr-1" />
-              Message
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => {
-              if (deal.contact?.email) {
-                window.open(`mailto:${deal.contact.email}?subject=Re: ${deal.title}`, "_blank");
-              } else {
-                toast.error("Aucune adresse email");
-              }
-            }}
-          >
-            <Mail className="h-4 w-4 mr-1" />
-            Email
-          </Button>
-        </div>
-
-        {/* Next action */}
-        {deal.next_action && (
-          <div className="mb-4 p-3 bg-brand/5 rounded-lg border border-brand/10">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-              <Clock className="h-3 w-3" />
-              Prochaine action
+                )}
+              </div>
+              <Button variant="outline" size="sm" asChild className="shrink-0">
+                <Link href={`/crm/${deal.id}`}>
+                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                  Détail
+                </Link>
+              </Button>
             </div>
-            <p className="text-sm font-medium">{deal.next_action}</p>
-            {deal.next_action_date && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(deal.next_action_date).toLocaleDateString("fr-FR")}
-              </p>
-            )}
+          </SheetHeader>
+        </div>
+
+        <div className="px-6 py-5 space-y-6">
+          {/* Contact card */}
+          {deal.contact && (
+            <div className="flex items-center gap-3 p-3.5 bg-muted/30 rounded-xl border border-border/50">
+              <div className={cn(
+                "h-11 w-11 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0",
+                getAvatarColor(deal.contact.id || deal.contact.full_name || ""),
+              )}>
+                {deal.contact.full_name?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?"}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">{deal.contact.full_name}</p>
+                <p className="text-xs text-muted-foreground truncate">{deal.contact.email}</p>
+              </div>
+            </div>
+          )}
+
+          {/* KPI Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+              <div className="flex items-center gap-1.5 mb-1">
+                <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
+                <span className="text-[11px] text-muted-foreground">Valeur</span>
+              </div>
+              <p className="text-xl font-bold tabular-nums">{deal.value?.toLocaleString("fr-FR")} €</p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-purple-500/5 border border-purple-500/10">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Percent className="h-3.5 w-3.5 text-purple-500" />
+                <span className="text-[11px] text-muted-foreground">Probabilité</span>
+              </div>
+              <p className="text-xl font-bold tabular-nums">{deal.probability}%</p>
+              <div className="w-full bg-purple-500/10 rounded-full h-1 mt-2">
+                <div
+                  className="bg-purple-500 h-1 rounded-full transition-all duration-300"
+                  style={{ width: `${deal.probability || 0}%` }}
+                />
+              </div>
+            </div>
           </div>
-        )}
 
-        <Separator className="my-4" />
+          {/* Stage selector */}
+          <div>
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+              Stage du pipeline
+            </label>
+            <Select value={deal.stage_id || ""} onValueChange={handleStageChange}>
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Sélectionner un stage" />
+              </SelectTrigger>
+              <SelectContent>
+                {stages.map((stage) => (
+                  <SelectItem key={stage.id} value={stage.id}>
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: stage.color }}
+                      />
+                      {stage.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Notes */}
-        <div>
-          <label className="text-xs text-muted-foreground mb-1.5 block">
-            Notes
-          </label>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ajouter des notes..."
-            rows={4}
-            className="mb-2"
-          />
-          <Button
-            size="sm"
-            onClick={saveNotes}
-            disabled={saving}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
-          >
-            {saving ? "Enregistrement..." : "Enregistrer"}
-          </Button>
+          {/* Temperature selector */}
+          <div>
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+              Température
+            </label>
+            <div className="flex gap-2">
+              {(["hot", "warm", "cold"] as const).map((temp) => {
+                const cfg = TEMP_CONFIG[temp];
+                const TempIcon = cfg.icon;
+                const isActive = deal.temperature === temp;
+                return (
+                  <button
+                    key={temp}
+                    onClick={() => handleTempChange(temp)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border text-sm font-medium transition-all",
+                      isActive
+                        ? cn(cfg.bg, cfg.border, cfg.color)
+                        : "border-border/50 text-muted-foreground hover:bg-muted/50",
+                    )}
+                  >
+                    <TempIcon className="h-3.5 w-3.5" />
+                    {cfg.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick actions */}
+          <div>
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+              Actions rapides
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 gap-1.5"
+                onClick={() => {
+                  if (deal.contact?.phone) {
+                    window.open(`tel:${deal.contact.phone}`, "_self");
+                  } else {
+                    toast.error("Aucun numéro de téléphone");
+                  }
+                }}
+              >
+                <Phone className="h-3.5 w-3.5" />
+                Appeler
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 gap-1.5"
+                asChild
+              >
+                <Link href={`/chat?contact=${deal.contact?.id || ""}`}>
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  Message
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 gap-1.5"
+                onClick={() => {
+                  if (deal.contact?.email) {
+                    window.open(`mailto:${deal.contact.email}?subject=Re: ${deal.title}`, "_blank");
+                  } else {
+                    toast.error("Aucune adresse email");
+                  }
+                }}
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Email
+              </Button>
+            </div>
+          </div>
+
+          {/* Next action */}
+          {deal.next_action && (
+            <div className="p-4 bg-brand/5 rounded-xl border border-brand/10">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-6 w-6 rounded-md bg-brand/10 flex items-center justify-center">
+                  <ArrowRight className="h-3.5 w-3.5 text-brand" />
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Prochaine action
+                </span>
+              </div>
+              <p className="text-sm font-medium">{deal.next_action}</p>
+              {deal.next_action_date && (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(deal.next_action_date).toLocaleDateString("fr-FR", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "long",
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Notes */}
+          <div>
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+              Notes
+            </label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Ajouter des notes sur ce deal..."
+              rows={4}
+              className="mb-3 resize-none"
+            />
+            <Button
+              size="sm"
+              onClick={saveNotes}
+              disabled={saving || notes === (deal.notes || "")}
+              className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {saving ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

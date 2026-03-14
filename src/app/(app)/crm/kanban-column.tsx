@@ -27,45 +27,56 @@ export function KanbanColumn({
   });
 
   const formatValue = (value: number) => {
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(1).replace(".0", "")}k €`;
-    }
-    return `${value} €`;
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(".0", "")}M €`;
+    if (value >= 1000) return `${(value / 1000).toFixed(1).replace(".0", "")}k €`;
+    return `${value.toLocaleString("fr-FR")} €`;
   };
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-xl bg-muted/30 transition-colors snap-center",
-        isOver && "bg-brand/5 ring-2 ring-brand/20"
+        "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-xl transition-all snap-center",
+        "bg-muted/20 border border-border/50",
+        isOver && "bg-brand/5 border-brand/30 ring-2 ring-brand/20 scale-[1.01]"
       )}
     >
       {/* Column header */}
-      <div className="p-3 border-b">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2.5">
             <div
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: stage.color }}
+              className="h-3 w-3 rounded-full ring-2 ring-offset-1 ring-offset-background"
+              style={{ backgroundColor: stage.color, boxShadow: `0 0 8px ${stage.color}40` }}
             />
-            <h3 className="text-sm font-semibold">{stage.name}</h3>
+            <h3 className="text-[13px] font-semibold tracking-tight">{stage.name}</h3>
           </div>
-          <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+          <span className="text-[11px] font-semibold text-muted-foreground bg-muted/80 rounded-full min-w-[24px] text-center px-2 py-0.5">
             {deals.length}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {formatValue(totalValue)}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-medium text-muted-foreground">{formatValue(totalValue)}</p>
+          {deals.length > 0 && (
+            <div className="flex-1 h-1 bg-muted/50 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ backgroundColor: stage.color, width: "100%", opacity: 0.6 }}
+              />
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Separator */}
+      <div className="mx-3 h-px bg-border/50" />
 
       {/* Cards */}
       <SortableContext
         items={deals.map((d) => d.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="p-2 space-y-2 min-h-[100px] max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-280px)] overflow-y-auto">
+        <div className="p-2 space-y-2 min-h-[80px] max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-280px)] overflow-y-auto scrollbar-hide">
           {deals.map((deal) => (
             <DealCard
               key={deal.id}
@@ -74,8 +85,11 @@ export function KanbanColumn({
             />
           ))}
           {deals.length === 0 && (
-            <div className="flex items-center justify-center h-20 text-xs text-muted-foreground">
-              Aucun deal
+            <div className="flex flex-col items-center justify-center h-20 text-center">
+              <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center mb-1.5">
+                <div className="h-2 w-2 rounded-full bg-muted-foreground/20" />
+              </div>
+              <p className="text-[11px] text-muted-foreground/60">Aucun deal</p>
             </div>
           )}
         </div>

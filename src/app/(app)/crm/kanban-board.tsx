@@ -184,50 +184,59 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher un deal..."
+            placeholder="Rechercher un deal ou contact..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-9"
           />
         </div>
         <Select value={tempFilter} onValueChange={setTempFilter}>
-          <SelectTrigger className="w-[160px]">
-            <Filter className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-[160px] h-9">
+            <Filter className="h-3.5 w-3.5 mr-2" />
             <SelectValue placeholder="Température" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="hot">Hot</SelectItem>
-            <SelectItem value="warm">Warm</SelectItem>
-            <SelectItem value="cold">Cold</SelectItem>
+            <SelectItem value="all">Toutes</SelectItem>
+            <SelectItem value="hot">🔥 Hot</SelectItem>
+            <SelectItem value="warm">🌡️ Warm</SelectItem>
+            <SelectItem value="cold">❄️ Cold</SelectItem>
           </SelectContent>
         </Select>
-        <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+        <div className="ml-auto">
+          <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+        </div>
       </div>
 
       {/* Empty state: zero deals */}
       {deals.length === 0 && (
-        <Card className="mb-6 border-brand/20 bg-brand/5">
-          <CardContent className="p-8 text-center">
-            <BarChart3 className="h-10 w-10 mx-auto text-brand/50 mb-3" />
-            <p className="font-medium text-lg">Votre pipeline est vide</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Créez votre premier deal pour commencer à suivre vos opportunités.
+        <Card className="mb-6 border-border/50 bg-muted/10">
+          <CardContent className="py-16 text-center">
+            <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="h-7 w-7 text-brand" />
+            </div>
+            <p className="font-semibold text-lg">Votre pipeline est vide</p>
+            <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
+              Créez votre premier deal pour commencer à suivre vos opportunités commerciales.
             </p>
-            <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+            <div className="mt-5">
+              <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+            </div>
           </CardContent>
         </Card>
       )}
 
       {/* No results message */}
       {filteredDeals.length === 0 && deals.length > 0 && (
-        <div className="text-center py-8 mb-4">
-          <p className="text-muted-foreground">Aucun deal ne correspond aux filtres actuels.</p>
+        <div className="text-center py-12 mb-4">
+          <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+            <Search className="h-5 w-5 text-muted-foreground/40" />
+          </div>
+          <p className="text-sm font-medium">Aucun deal ne correspond aux filtres</p>
           <Button
             variant="link"
             size="sm"
             onClick={() => { setSearchQuery(""); setTempFilter("all"); }}
-            className="text-brand"
+            className="text-brand mt-1"
           >
             Réinitialiser les filtres
           </Button>

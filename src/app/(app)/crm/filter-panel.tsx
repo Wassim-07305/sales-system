@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, SlidersHorizontal, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { DealFilters } from "@/lib/actions/crm";
 
 interface TeamMember {
@@ -49,9 +50,7 @@ export function FilterPanel({
   }
 
   function resetFilters() {
-    onFiltersChange({
-      sortBy: "created_at_desc",
-    });
+    onFiltersChange({ sortBy: "created_at_desc" });
   }
 
   const activeCount = [
@@ -63,34 +62,33 @@ export function FilterPanel({
 
   return (
     <div className="mb-4">
-      {/* Toggle button */}
-      <div className="flex items-center gap-2">
+      {/* Toggle bar */}
+      <div className="flex items-center gap-2 flex-wrap">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsOpen(!isOpen)}
-          className="gap-2"
+          className={cn(
+            "gap-2 h-9 transition-colors",
+            isOpen && "bg-muted",
+          )}
         >
-          <SlidersHorizontal className="h-4 w-4" />
+          <SlidersHorizontal className="h-3.5 w-3.5" />
           Filtres avancés
           {activeCount > 0 && (
-            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-brand-dark text-xs font-bold">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-brand-dark text-[10px] font-bold">
               {activeCount}
             </span>
           )}
-          {isOpen ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
+          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </Button>
 
-        {/* Sort dropdown - always visible */}
+        {/* Sort - always visible */}
         <Select
           value={filters.sortBy || "created_at_desc"}
           onValueChange={(v) => updateFilter("sortBy", v as DealFilters["sortBy"])}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[200px] h-9 text-xs">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
@@ -104,19 +102,19 @@ export function FilterPanel({
         </Select>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1 text-muted-foreground">
-            <X className="h-4 w-4" />
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1.5 text-muted-foreground h-9 text-xs">
+            <X className="h-3.5 w-3.5" />
             Réinitialiser
           </Button>
         )}
       </div>
 
-      {/* Collapsible filter panel */}
+      {/* Collapsible panel */}
       {isOpen && (
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-lg border bg-card">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-xl border border-border/50 bg-muted/20">
           {/* Date range */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Période de création
             </Label>
             <div className="flex gap-2">
@@ -124,22 +122,20 @@ export function FilterPanel({
                 type="date"
                 value={filters.dateFrom || ""}
                 onChange={(e) => updateFilter("dateFrom", e.target.value || undefined)}
-                className="text-sm"
-                placeholder="Du"
+                className="text-xs h-9"
               />
               <Input
                 type="date"
                 value={filters.dateTo || ""}
                 onChange={(e) => updateFilter("dateTo", e.target.value || undefined)}
-                className="text-sm"
-                placeholder="Au"
+                className="text-xs h-9"
               />
             </div>
           </div>
 
           {/* Amount range */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Montant (€)
             </Label>
             <div className="flex gap-2">
@@ -147,20 +143,16 @@ export function FilterPanel({
                 type="number"
                 placeholder="Min"
                 value={filters.amountMin || ""}
-                onChange={(e) =>
-                  updateFilter("amountMin", e.target.value ? Number(e.target.value) : undefined)
-                }
-                className="text-sm"
+                onChange={(e) => updateFilter("amountMin", e.target.value ? Number(e.target.value) : undefined)}
+                className="text-xs h-9"
                 min={0}
               />
               <Input
                 type="number"
                 placeholder="Max"
                 value={filters.amountMax || ""}
-                onChange={(e) =>
-                  updateFilter("amountMax", e.target.value ? Number(e.target.value) : undefined)
-                }
-                className="text-sm"
+                onChange={(e) => updateFilter("amountMax", e.target.value ? Number(e.target.value) : undefined)}
+                className="text-xs h-9"
                 min={0}
               />
             </div>
@@ -168,14 +160,14 @@ export function FilterPanel({
 
           {/* Assigned user */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Assigné à
             </Label>
             <Select
               value={filters.assignedTo || "all"}
               onValueChange={(v) => updateFilter("assignedTo", v)}
             >
-              <SelectTrigger className="text-sm">
+              <SelectTrigger className="text-xs h-9">
                 <SelectValue placeholder="Tous les membres" />
               </SelectTrigger>
               <SelectContent>
@@ -191,14 +183,14 @@ export function FilterPanel({
 
           {/* Source */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Source
             </Label>
             <Select
               value={filters.source || "all"}
               onValueChange={(v) => updateFilter("source", v)}
             >
-              <SelectTrigger className="text-sm">
+              <SelectTrigger className="text-xs h-9">
                 <SelectValue placeholder="Toutes les sources" />
               </SelectTrigger>
               <SelectContent>

@@ -2,21 +2,54 @@
 
 import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import type { Deal } from "@/lib/types/database";
-import { DollarSign, Target, TrendingUp, Flame, Thermometer, Snowflake } from "lucide-react";
+import { Target, DollarSign, TrendingUp, Gauge, Flame, Thermometer, Snowflake } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PipelineStatsProps {
   deals: Deal[];
 }
 
 function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(".0", "")} M€`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1).replace(".0", "")} k€`;
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
 }
+
+const STAT_CONFIG = [
+  {
+    key: "deals",
+    label: "Deals actifs",
+    icon: Target,
+    color: "text-blue-600",
+    bg: "bg-blue-500/10",
+    ring: "ring-blue-500/20",
+  },
+  {
+    key: "value",
+    label: "Valeur pipeline",
+    icon: DollarSign,
+    color: "text-emerald-600",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
+  },
+  {
+    key: "weighted",
+    label: "Valeur pondérée",
+    icon: TrendingUp,
+    color: "text-purple-600",
+    bg: "bg-purple-500/10",
+    ring: "ring-purple-500/20",
+  },
+  {
+    key: "probability",
+    label: "Probabilité moy.",
+    icon: Gauge,
+    color: "text-amber-600",
+    bg: "bg-amber-500/10",
+    ring: "ring-amber-500/20",
+  },
+] as const;
 
 export function PipelineStats({ deals }: PipelineStatsProps) {
   const stats = useMemo(() => {
@@ -28,93 +61,68 @@ export function PipelineStats({ deals }: PipelineStatsProps) {
     );
     const avgProbability =
       totalDeals > 0
-        ? Math.round(
-            deals.reduce((sum, d) => sum + (d.probability || 0), 0) / totalDeals
-          )
+        ? Math.round(deals.reduce((sum, d) => sum + (d.probability || 0), 0) / totalDeals)
         : 0;
 
     const hot = deals.filter((d) => d.temperature === "hot").length;
     const warm = deals.filter((d) => d.temperature === "warm").length;
     const cold = deals.filter((d) => d.temperature === "cold").length;
 
-    return {
-      totalDeals,
-      totalValue,
-      weightedValue,
-      avgProbability,
-      hot,
-      warm,
-      cold,
-    };
+    return { totalDeals, totalValue, weightedValue, avgProbability, hot, warm, cold };
   }, [deals]);
 
+  const values = [
+    stats.totalDeals.toString(),
+    formatCurrency(stats.totalValue),
+    formatCurrency(stats.weightedValue),
+    `${stats.avgProbability}%`,
+  ];
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-            <Target className="h-3.5 w-3.5" />
-            Deals actifs
-          </div>
-          <p className="text-2xl font-bold">{stats.totalDeals}</p>
-          <div className="flex gap-1.5 mt-2">
-            <Badge variant="outline" className="text-[10px] bg-red-100 text-red-700 border-red-200">
-              <Flame className="h-2.5 w-2.5 mr-0.5" />
-              {stats.hot}
-            </Badge>
-            <Badge variant="outline" className="text-[10px] bg-orange-100 text-orange-700 border-orange-200">
-              <Thermometer className="h-2.5 w-2.5 mr-0.5" />
-              {stats.warm}
-            </Badge>
-            <Badge variant="outline" className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
-              <Snowflake className="h-2.5 w-2.5 mr-0.5" />
-              {stats.cold}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-            <DollarSign className="h-3.5 w-3.5" />
-            Valeur pipeline
-          </div>
-          <p className="text-2xl font-bold">{formatCurrency(stats.totalValue)}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Total des deals en cours
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-            <TrendingUp className="h-3.5 w-3.5" />
-            Valeur ponderee
-          </div>
-          <p className="text-2xl font-bold">{formatCurrency(stats.weightedValue)}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Ajustee selon probabilite
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-            <Target className="h-3.5 w-3.5" />
-            Probabilite moyenne
-          </div>
-          <p className="text-2xl font-bold">{stats.avgProbability}%</p>
-          <div className="w-full bg-muted rounded-full h-1.5 mt-3">
-            <div
-              className="bg-brand h-1.5 rounded-full transition-all"
-              style={{ width: `${stats.avgProbability}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      {STAT_CONFIG.map((cfg, i) => {
+        const Icon = cfg.icon;
+        return (
+          <Card key={cfg.key} className="group relative overflow-hidden border-transparent bg-card shadow-sm hover:shadow-md transition-all">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1", cfg.bg, cfg.ring)}>
+                  <Icon className={cn("h-4.5 w-4.5", cfg.color)} />
+                </div>
+                {cfg.key === "deals" && (
+                  <div className="flex gap-1">
+                    {stats.hot > 0 && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded-md">
+                        <Flame className="h-2.5 w-2.5" />{stats.hot}
+                      </span>
+                    )}
+                    {stats.warm > 0 && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-orange-600 bg-orange-500/10 px-1.5 py-0.5 rounded-md">
+                        <Thermometer className="h-2.5 w-2.5" />{stats.warm}
+                      </span>
+                    )}
+                    {stats.cold > 0 && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 bg-blue-500/10 px-1.5 py-0.5 rounded-md">
+                        <Snowflake className="h-2.5 w-2.5" />{stats.cold}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <p className="text-2xl font-bold tracking-tight">{values[i]}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{cfg.label}</p>
+              {cfg.key === "probability" && (
+                <div className="w-full bg-muted rounded-full h-1.5 mt-2.5">
+                  <div
+                    className="bg-amber-500 h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${stats.avgProbability}%` }}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
