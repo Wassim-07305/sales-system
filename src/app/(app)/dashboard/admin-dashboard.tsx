@@ -130,8 +130,8 @@ function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center">
-              <Icon className="h-4.5 w-4.5 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <Icon className="h-4.5 w-4.5 text-brand" />
             </div>
             <p className="text-sm font-semibold">{data.label}</p>
           </div>
@@ -156,8 +156,8 @@ function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center">
-              <Icon className="h-4.5 w-4.5 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <Icon className="h-4.5 w-4.5 text-brand" />
             </div>
             <p className="text-sm font-semibold">{data.label}</p>
           </div>
@@ -280,8 +280,8 @@ export function AdminDashboard({
               <Card className="h-full transition-all duration-200 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 group-hover:border-foreground/10 border-border/50">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-muted/50 flex items-center justify-center ring-1 ring-border/50">
-                      <Icon className="h-5 w-5 text-muted-foreground" />
+                    <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                      <Icon className="h-5 w-5 text-brand" />
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                   </div>
@@ -303,8 +303,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center ring-1 ring-border/50">
-                  <Zap className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Zap className="h-3.5 w-3.5 text-brand" />
                 </div>
                 Deals récents
               </CardTitle>
@@ -367,8 +367,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center ring-1 ring-border/50">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Calendar className="h-3.5 w-3.5 text-brand" />
                 </div>
                 Prochains RDV
               </CardTitle>
@@ -442,8 +442,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center ring-1 ring-border/50">
-                  <Trophy className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Trophy className="h-3.5 w-3.5 text-brand" />
                 </div>
                 Performance équipe
               </CardTitle>
@@ -490,7 +490,7 @@ export function AdminDashboard({
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-foreground/25 rounded-full transition-all duration-500"
+                              className="h-full bg-brand/50 rounded-full transition-all duration-500"
                               style={{ width: `${percent}%` }}
                             />
                           </div>
@@ -512,8 +512,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-muted/50 flex items-center justify-center ring-1 ring-border/50">
-                  <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <AlertTriangle className="h-3.5 w-3.5 text-brand" />
                 </div>
                 Alertes
                 {data.alerts.length > 0 && (
@@ -527,8 +527,8 @@ export function AdminDashboard({
           <CardContent className="pt-0">
             {data.alerts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-                  <Sparkles className="h-6 w-6 text-muted-foreground/40" />
+                <div className="h-12 w-12 rounded-2xl bg-brand/10 flex items-center justify-center mb-3">
+                  <Sparkles className="h-6 w-6 text-brand/60" />
                 </div>
                 <p className="text-sm font-medium text-muted-foreground">Tout est à jour</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">Aucune alerte, continuez comme ça !</p>
