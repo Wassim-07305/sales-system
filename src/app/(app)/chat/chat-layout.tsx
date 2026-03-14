@@ -1052,7 +1052,7 @@ export function ChatLayout({
       {/* ================================================================= */}
       <div
         className={cn(
-          "w-full md:w-72 flex-shrink-0 flex flex-col border-r bg-muted/30",
+          "w-full md:w-72 flex-shrink-0 flex flex-col border-r bg-muted/30 overflow-hidden",
           (activeChannel || activeWA || activeInbox) ? "hidden md:flex" : "flex",
         )}
       >
@@ -1095,7 +1095,7 @@ export function ChatLayout({
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           {/* ====== TEAM TAB ====== */}
           {sidebarTab === "team" && <>
           {/* Channels section */}
