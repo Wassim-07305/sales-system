@@ -1,42 +1,74 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChatLayout } from "./chat-layout";
-import { getUnreadCounts } from "@/lib/actions/communication";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function ChatPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: channels }, unreadCounts, { data: profile }, { data: teamMembers }] =
-    await Promise.all([
-      supabase
-        .from("channels")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      getUnreadCounts(),
-      supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single(),
-      supabase
-        .from("profiles")
-        .select("id, full_name, role, avatar_url")
-        .neq("id", user.id)
-        .order("full_name"),
-    ]);
+  // Fetch channels and profile
+  const [channelsRes, profileRes, teamRes] = await Promise.all([
+    supabase
+      .from("channels")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase.from("profiles").select("role").eq("id", user.id).single(),
+    supabase
+      .from("profiles")
+      .select("id, full_name, role, avatar_url")
+      .neq("id", user.id),
+  ]);
 
-  const userRole = (profile?.role as UserRole) || "client_b2c";
+  // Compute unread counts inline (avoid "use server" import issues)
+  let unreadCounts: Record<string, number> = {};
+  try {
+    const { data: reads } = await supabase
+      .from("channel_reads")
+      .select("channel_id, last_read_at")
+      .eq("user_id", user.id);
+
+    const readMap: Record<string, string> = {};
+    for (const r of reads || []) {
+      readMap[r.channel_id] = r.last_read_at;
+    }
+
+    const channels = channelsRes.data || [];
+    for (const channel of channels) {
+      let query = supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("channel_id", channel.id)
+        .neq("sender_id", user.id);
+
+      const lastRead = readMap[channel.id];
+      if (lastRead) {
+        query = query.gt("created_at", lastRead);
+      }
+
+      const { count } = await query;
+      if (count && count > 0) {
+        unreadCounts[channel.id] = count;
+      }
+    }
+  } catch {
+    // Non-blocking: unread counts are not critical
+  }
+
+  const userRole = (profileRes.data?.role as UserRole) || "client_b2c";
 
   return (
     <ChatLayout
-      initialChannels={channels || []}
+      initialChannels={(channelsRes.data || []) as Parameters<typeof ChatLayout>[0]["initialChannels"]}
       currentUserId={user.id}
       initialUnreadCounts={unreadCounts}
       userRole={userRole}
-      teamMembers={teamMembers || []}
+      teamMembers={
+        ((teamRes.data || []) as Parameters<typeof ChatLayout>[0]["teamMembers"])
+      }
     />
   );
 }
