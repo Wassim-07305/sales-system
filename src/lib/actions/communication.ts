@@ -662,7 +662,7 @@ export async function getOrCreateDM(otherUserId: string) {
     .single();
 
   if (error) throw new Error(error.message);
-  revalidatePath("/chat");
+  // No revalidatePath here — client refreshes channels list after DM creation
   return newChannel;
 }
 
@@ -715,6 +715,4 @@ export async function deleteMessage(messageId: string) {
       .eq("sender_id", user.id);
     if (error) throw new Error(error.message);
   }
-
-  revalidatePath("/chat");
 }
