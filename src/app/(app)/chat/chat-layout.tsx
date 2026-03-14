@@ -192,8 +192,8 @@ function getInitials(name: string | null | undefined): string {
 
 function getAvatarColor(id: string): string {
   const colors = [
-    "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
-    "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+    "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+    "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
   ];
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -411,7 +411,7 @@ export function ChatLayout({
   // ---- Callbacks ----
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, []);
 
   async function loadAllUsers() {
@@ -1293,8 +1293,8 @@ export function ChatLayout({
                         )}>
                           {getInitials(conv.prospect?.name)}
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 flex items-center justify-center">
-                          <Phone className="h-1.5 w-1.5 text-white" />
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-brand flex items-center justify-center">
+                          <Phone className="h-1.5 w-1.5 text-brand-dark" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 text-left">
@@ -1365,8 +1365,7 @@ export function ChatLayout({
                           {getInitials(conv.prospect?.name)}
                         </div>
                         <div className={cn(
-                          "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center",
-                          conv.platform === "linkedin" ? "bg-blue-600" : "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400",
+                          "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center bg-muted-foreground/80",
                         )}>
                           <PlatformIcon className="h-1.5 w-1.5 text-white" />
                         </div>
@@ -1425,8 +1424,8 @@ export function ChatLayout({
                   )}>
                     {getInitials(activeWA.prospect?.name)}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-card">
-                    <Phone className="h-2 w-2 text-white" />
+                  <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-brand flex items-center justify-center ring-2 ring-card">
+                    <Phone className="h-2 w-2 text-brand-dark" />
                   </div>
                 </div>
                 <div>
@@ -1485,7 +1484,7 @@ export function ChatLayout({
                     size="icon"
                     className={cn(
                       "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
-                      waMessage.trim() ? "bg-green-500 text-white hover:bg-green-600" : "bg-muted text-muted-foreground",
+                      waMessage.trim() ? "bg-brand text-brand-dark hover:bg-brand/90" : "bg-muted text-muted-foreground",
                     )}
                     disabled={!waMessage.trim() || sendingWA}
                   >
@@ -1514,8 +1513,7 @@ export function ChatLayout({
                     {getInitials(activeInbox.prospect?.name)}
                   </div>
                   <div className={cn(
-                    "absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center ring-2 ring-card",
-                    activeInbox.platform === "linkedin" ? "bg-blue-600" : "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400",
+                    "absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center ring-2 ring-card bg-muted-foreground/80",
                   )}>
                     {activeInbox.platform === "linkedin" ? (
                       <Linkedin className="h-2 w-2 text-white" />
@@ -1581,7 +1579,7 @@ export function ChatLayout({
                     className={cn(
                       "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
                       inboxMessage.trim()
-                        ? activeInbox.platform === "linkedin" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gradient-to-br from-purple-500 to-pink-500 text-white"
+                        ? "bg-brand text-brand-dark hover:bg-brand/90"
                         : "bg-muted text-muted-foreground",
                     )}
                     disabled={!inboxMessage.trim() || sendingInbox}

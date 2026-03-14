@@ -51,17 +51,17 @@ const AUDIENCE_OPTIONS = [
 function getRoleBadgeColor(role: string) {
   switch (role) {
     case "admin":
-      return "bg-red-500/10 text-red-600 border-red-500/20";
+      return "bg-foreground/10 text-foreground border-foreground/20";
     case "manager":
-      return "bg-purple-500/10 text-purple-600 border-purple-500/20";
+      return "bg-brand/10 text-brand border-brand/20";
     case "setter":
-      return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+      return "bg-muted/60 text-muted-foreground border-border/50";
     case "closer":
-      return "bg-orange-500/10 text-orange-600 border-orange-500/20";
+      return "bg-muted/60 text-muted-foreground border-border/50";
     case "client_b2b":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+      return "bg-muted/40 text-muted-foreground/80 border-border/30";
     case "client_b2c":
-      return "bg-teal-500/10 text-teal-600 border-teal-500/20";
+      return "bg-muted/40 text-muted-foreground/80 border-border/30";
     default:
       return "bg-muted text-muted-foreground border-border";
   }

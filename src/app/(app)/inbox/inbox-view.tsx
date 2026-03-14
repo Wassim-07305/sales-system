@@ -64,7 +64,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, []);
 
   useEffect(() => {
@@ -410,7 +410,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                   size="sm"
                   variant="outline"
                   onClick={isRecording ? handleStopRecording : handleStartRecording}
-                  className={isRecording ? "text-red-500 border-red-500" : ""}
+                  className={isRecording ? "text-brand border-brand" : ""}
                 >
                   {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>

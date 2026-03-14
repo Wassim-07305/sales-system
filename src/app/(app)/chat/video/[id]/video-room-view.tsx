@@ -179,7 +179,7 @@ export function VideoRoomView({
         screenStreamRef.current = null;
       }
       setScreenSharing(false);
-      toast.info("Partage d\u2019\u00e9cran arr\u00eat\u00e9");
+      toast.info("Partage d'écran arrêté");
       return;
     }
 
@@ -190,33 +190,33 @@ export function VideoRoomView({
       });
       screenStreamRef.current = displayStream;
       setScreenSharing(true);
-      toast.success("Partage d\u2019\u00e9cran activ\u00e9");
+      toast.success("Partage d'écran activé");
 
       // Listen for the user stopping the share via browser UI
       displayStream.getVideoTracks()[0].addEventListener("ended", () => {
         screenStreamRef.current = null;
         setScreenSharing(false);
-        toast.info("Partage d\u2019\u00e9cran arr\u00eat\u00e9");
+        toast.info("Partage d'écran arrêté");
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === "NotAllowedError") {
         // User cancelled — not an error
         return;
       }
-      toast.error("Impossible de partager l\u2019\u00e9cran. V\u00e9rifiez les autorisations de votre navigateur.");
+      toast.error("Impossible de partager l'écran. Vérifiez les autorisations de votre navigateur.");
     }
   }, [screenSharing]);
 
   function startRecording() {
     setIsRecording(true);
     console.log("[Auto Recording] Recording started — MediaRecorder stub");
-    toast.success("Enregistrement d\u00e9marr\u00e9");
+    toast.success("Enregistrement démarré");
   }
 
   function stopRecording() {
     setIsRecording(false);
     console.log("[Auto Recording] Recording stopped — MediaRecorder stub");
-    toast.info("Enregistrement arr\u00eat\u00e9");
+    toast.info("Enregistrement arrêté");
   }
 
   function toggleRecording() {
@@ -270,14 +270,14 @@ export function VideoRoomView({
     startTransition(async () => {
       try {
         await startRoom(room.id);
-        toast.success("Visioconf\u00e9rence d\u00e9marr\u00e9e");
+        toast.success("Visioconférence démarrée");
         await startStream();
         if (autoRecordEnabled && !isRecording) {
           startRecording();
         }
         router.refresh();
       } catch {
-        toast.error("Erreur lors du d\u00e9marrage");
+        toast.error("Erreur lors du démarrage");
       }
     });
   }
@@ -292,10 +292,10 @@ export function VideoRoomView({
           setScreenSharing(false);
         }
         await endRoom(room.id);
-        toast.success("Visioconf\u00e9rence termin\u00e9e");
+        toast.success("Visioconférence terminée");
         router.refresh();
       } catch {
-        toast.error("Erreur lors de l\u2019arr\u00eat");
+        toast.error("Erreur lors de l'arrêt");
       }
     });
   }
@@ -306,7 +306,7 @@ export function VideoRoomView({
       screenStreamRef.current.getTracks().forEach((track) => track.stop());
       screenStreamRef.current = null;
     }
-    toast.info("Vous avez quitt\u00e9 l\u2019appel");
+    toast.info("Vous avez quitté l'appel");
     router.push("/chat/video");
   }
 
@@ -324,14 +324,14 @@ export function VideoRoomView({
           question: pollQuestion,
           options: validOptions,
         });
-        toast.success("Sondage cr\u00e9\u00e9");
+        toast.success("Sondage créé");
         setPollQuestion("");
         setPollOptions(["", ""]);
         setPollDialogOpen(false);
         const updated = await getRoomPolls(room.id);
         setPolls(updated as Poll[]);
       } catch {
-        toast.error("Erreur lors de la cr\u00e9ation du sondage");
+        toast.error("Erreur lors de la création du sondage");
       }
     });
   }
@@ -340,7 +340,7 @@ export function VideoRoomView({
     startTransition(async () => {
       try {
         await votePoll(pollId, optionIndex);
-        toast.success("Vote enregistr\u00e9");
+        toast.success("Vote enregistré");
         const updated = await getRoomPolls(room.id);
         setPolls(updated as Poll[]);
       } catch {
@@ -378,9 +378,9 @@ export function VideoRoomView({
           <div>
             <h1 className="font-semibold text-sm">{room.title}</h1>
             <p className="text-xs text-muted-foreground">
-              {room.host?.full_name || room.host?.email || "H\u00f4te"}
+              {room.host?.full_name || room.host?.email || "Hôte"}
               {room.scheduled_at &&
-                ` — ${format(new Date(room.scheduled_at), "d MMM yyyy '\u00e0' HH:mm", { locale: fr })}`}
+                ` — ${format(new Date(room.scheduled_at), "d MMM yyyy 'à' HH:mm", { locale: fr })}`}
             </p>
           </div>
         </div>
@@ -423,10 +423,10 @@ export function VideoRoomView({
               size="sm"
               onClick={handleStart}
               disabled={isPending}
-              className="bg-green-500 text-white hover:bg-green-600"
+              className="bg-brand text-brand-dark hover:bg-brand/90"
             >
               <Play className="h-3.5 w-3.5 mr-1" />
-              D\u00e9marrer
+              Démarrer
             </Button>
           )}
           {isHost && isLive && (
@@ -474,7 +474,7 @@ export function VideoRoomView({
                       <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                         <div className="text-center text-gray-400">
                           <CameraOff className="h-10 w-10 mx-auto mb-2 opacity-60" />
-                          <p className="text-xs">Cam\u00e9ra d\u00e9sactiv\u00e9e</p>
+                          <p className="text-xs">Caméra désactivée</p>
                         </div>
                       </div>
                     )}
@@ -508,12 +508,12 @@ export function VideoRoomView({
                   <Camera className="h-16 w-16 mx-auto mb-4 opacity-40" />
                   {isLive ? (
                     <p className="text-lg font-medium text-white">
-                      Visioconf\u00e9rence en cours...
+                      Visioconférence en cours...
                     </p>
                   ) : isScheduled ? (
-                    <p className="text-lg font-medium">En attente de d\u00e9marrage</p>
+                    <p className="text-lg font-medium">En attente de démarrage</p>
                   ) : (
-                    <p className="text-lg font-medium">Visioconf\u00e9rence termin\u00e9e</p>
+                    <p className="text-lg font-medium">Visioconférence terminée</p>
                   )}
                   {isScheduled && !isHost && (
                     <Button
@@ -528,7 +528,7 @@ export function VideoRoomView({
                     <Button
                       onClick={handleJoin}
                       disabled={isPending}
-                      className="mt-4 bg-green-500 text-white hover:bg-green-600"
+                      className="mt-4 bg-brand text-brand-dark hover:bg-brand/90"
                     >
                       <Play className="h-4 w-4 mr-2" />
                       Rejoindre
@@ -546,9 +546,9 @@ export function VideoRoomView({
 
             {/* Screen sharing indicator */}
             {screenSharing && (
-              <div className="absolute top-4 right-4 bg-blue-600/80 text-white rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5">
+              <div className="absolute top-4 right-4 bg-brand/80 text-brand-dark rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5">
                 <MonitorUp className="h-3.5 w-3.5" />
-                Partage d&apos;\u00e9cran actif
+                Partage d&apos;écran actif
               </div>
             )}
           </div>
@@ -561,7 +561,7 @@ export function VideoRoomView({
                 variant={videoEnabled ? "secondary" : "destructive"}
                 onClick={toggleVideo}
                 className="rounded-full h-10 w-10 p-0"
-                title={videoEnabled ? "D\u00e9sactiver la cam\u00e9ra" : "Activer la cam\u00e9ra"}
+                title={videoEnabled ? "Désactiver la caméra" : "Activer la caméra"}
               >
                 {videoEnabled ? (
                   <Camera className="h-4 w-4" />
@@ -587,7 +587,7 @@ export function VideoRoomView({
                 variant={screenSharing ? "default" : "secondary"}
                 onClick={handleScreenShare}
                 className="rounded-full h-10 w-10 p-0"
-                title={screenSharing ? "Arr\u00eater le partage" : "Partager l\u2019\u00e9cran"}
+                title={screenSharing ? "Arrêter le partage" : "Partager l'écran"}
               >
                 {screenSharing ? (
                   <MonitorOff className="h-4 w-4" />
@@ -661,9 +661,9 @@ export function VideoRoomView({
                       <p className="text-sm font-medium truncate">
                         {room.host.full_name || room.host.email}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">H\u00f4te</p>
+                      <p className="text-[10px] text-muted-foreground">Hôte</p>
                     </div>
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
+                    <div className="h-2 w-2 rounded-full bg-brand" />
                   </div>
                 )}
 
@@ -687,7 +687,7 @@ export function VideoRoomView({
                             "Participant"}
                         </p>
                       </div>
-                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <div className="h-2 w-2 rounded-full bg-brand" />
                     </div>
                   ))}
 
@@ -728,7 +728,7 @@ export function VideoRoomView({
               </ScrollArea>
               <div className="p-3 border-t flex gap-2">
                 <Input
-                  placeholder="\u00c9crire un message..."
+                  placeholder="Écrire un message..."
                   className="text-xs h-8"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
@@ -753,7 +753,7 @@ export function VideoRoomView({
                   onClick={() => setPollDialogOpen(true)}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1" />
-                  Cr\u00e9er un sondage
+                  Créer un sondage
                 </Button>
               </div>
               <ScrollArea className="flex-1 p-3">
@@ -776,7 +776,7 @@ export function VideoRoomView({
                                 {poll.question}
                               </p>
                               {poll.is_active && (
-                                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+                                <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px]">
                                   Actif
                                 </Badge>
                               )}
@@ -829,7 +829,7 @@ export function VideoRoomView({
       <Dialog open={pollDialogOpen} onOpenChange={setPollDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cr\u00e9er un sondage</DialogTitle>
+            <DialogTitle>Créer un sondage</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -867,7 +867,7 @@ export function VideoRoomView({
               disabled={isPending}
               className="w-full bg-brand text-brand-dark hover:bg-brand/90"
             >
-              {isPending ? "Cr\u00e9ation..." : "Cr\u00e9er le sondage"}
+              {isPending ? "Création..." : "Créer le sondage"}
             </Button>
           </div>
         </DialogContent>

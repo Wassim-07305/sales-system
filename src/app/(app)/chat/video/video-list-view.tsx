@@ -52,22 +52,22 @@ function getStatusBadge(status: string) {
   switch (status) {
     case "live":
       return (
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+        <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
           <Radio className="h-3 w-3 mr-1 animate-pulse" />
           En direct
         </Badge>
       );
     case "scheduled":
       return (
-        <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+        <Badge variant="outline" className="bg-muted/60 text-muted-foreground border-border/50">
           <Clock className="h-3 w-3 mr-1" />
-          Planifi\u00e9e
+          Planifiée
         </Badge>
       );
     case "ended":
       return (
         <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-border/50">
-          Termin\u00e9e
+          Terminée
         </Badge>
       );
     default:
@@ -102,7 +102,7 @@ function ElapsedTimer({ startedAt }: { startedAt: string }) {
   }, [startedAt]);
 
   return (
-    <div className="flex items-center gap-1 text-green-600">
+    <div className="flex items-center gap-1 text-brand">
       <Clock className="h-3.5 w-3.5" />
       <span className="font-mono text-xs">{formatElapsed(elapsed)}</span>
     </div>
@@ -138,14 +138,14 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
           scheduledAt: new Date(scheduledAt).toISOString(),
           maxParticipants: parseInt(maxParticipants) || 10,
         });
-        toast.success("Visioconf\u00e9rence cr\u00e9\u00e9e");
+        toast.success("Visioconférence créée");
         setTitle("");
         setScheduledAt("");
         setMaxParticipants("10");
         setDialogOpen(false);
         router.refresh();
       } catch {
-        toast.error("Erreur lors de la cr\u00e9ation");
+        toast.error("Erreur lors de la création");
       }
     });
   }
@@ -154,18 +154,18 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
     startTransition(async () => {
       try {
         const room = await createVideoRoom({
-          title: `Appel instantan\u00e9 — ${format(new Date(), "d MMM yyyy HH:mm", { locale: fr })}`,
+          title: `Appel instantané — ${format(new Date(), "d MMM yyyy HH:mm", { locale: fr })}`,
           instant: true,
           maxParticipants: 10,
         });
-        toast.success("Appel cr\u00e9\u00e9, redirection...");
+        toast.success("Appel créé, redirection...");
         if (room?.id) {
           router.push(`/chat/video/${room.id}`);
         } else {
           router.refresh();
         }
       } catch {
-        toast.error("Erreur lors de la cr\u00e9ation de l\u2019appel");
+        toast.error("Erreur lors de la création de l'appel");
       }
     });
   }
@@ -178,7 +178,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm truncate">{room.title}</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {room.host?.full_name || room.host?.email || "H\u00f4te inconnu"}
+                {room.host?.full_name || room.host?.email || "Hôte inconnu"}
               </p>
             </div>
             {getStatusBadge(room.status)}
@@ -189,7 +189,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               <div className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
                 <span>
-                  {format(new Date(room.scheduled_at), "d MMM yyyy '\u00e0' HH:mm", {
+                  {format(new Date(room.scheduled_at), "d MMM yyyy 'à' HH:mm", {
                     locale: fr,
                   })}
                 </span>
@@ -210,7 +210,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               <Button
                 size="sm"
                 asChild
-                className="bg-emerald-500 text-white hover:bg-emerald-600"
+                className="bg-brand text-brand-dark hover:bg-brand/90"
               >
                 <Link href={`/chat/video/${room.id}`}>
                   <Play className="h-3.5 w-3.5 mr-1" />
@@ -222,7 +222,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               <Button size="sm" variant="outline" asChild>
                 <Link href={`/chat/video/${room.id}`}>
                   <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                  D\u00e9tails
+                  Détails
                 </Link>
               </Button>
             )}
@@ -230,7 +230,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               <>
                 <Button size="sm" variant="outline" asChild>
                   <Link href={`/chat/video/${room.id}`}>
-                    D\u00e9tails
+                    Détails
                   </Link>
                 </Button>
                 <Button size="sm" variant="outline" asChild>
@@ -250,8 +250,8 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
   return (
     <div>
       <PageHeader
-        title="Visioconf\u00e9rences"
-        description="Planifiez et g\u00e9rez vos appels vid\u00e9o"
+        title="Visioconférences"
+        description="Planifiez et gérez vos appels vidéo"
       >
         <div className="flex items-center gap-2">
           <Button
@@ -260,7 +260,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             disabled={isPending}
           >
             <Zap className="h-4 w-4 mr-2" />
-            {isPending ? "Cr\u00e9ation..." : "Cr\u00e9er un appel instantan\u00e9"}
+            {isPending ? "Création..." : "Créer un appel instantané"}
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -271,13 +271,13 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Nouvelle visioconf\u00e9rence</DialogTitle>
+                <DialogTitle>Nouvelle visioconférence</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
                   <Label className="mb-2 block">Titre</Label>
                   <Input
-                    placeholder="Ex : R\u00e9union d'\u00e9quipe hebdomadaire"
+                    placeholder="Ex : Réunion d'équipe hebdomadaire"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
@@ -306,7 +306,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                   className="w-full bg-brand text-brand-dark hover:bg-brand/90"
                 >
                   <Video className="h-4 w-4 mr-2" />
-                  {isPending ? "Cr\u00e9ation..." : "Cr\u00e9er la visioconf\u00e9rence"}
+                  {isPending ? "Création..." : "Créer la visioconférence"}
                 </Button>
               </div>
             </DialogContent>
@@ -320,14 +320,14 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             <Radio className="h-3.5 w-3.5" />
             En cours
             {live.length > 0 && (
-              <Badge variant="outline" className="ml-1 h-5 w-5 p-0 justify-center bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+              <Badge variant="outline" className="ml-1 h-5 w-5 p-0 justify-center bg-brand/10 text-brand border-brand/20 text-[10px]">
                 {live.length}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="scheduled" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             <Clock className="h-3.5 w-3.5" />
-            Planifi\u00e9es
+            Planifiées
             {scheduled.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center text-[10px]">
                 {scheduled.length}
@@ -335,7 +335,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             )}
           </TabsTrigger>
           <TabsTrigger value="ended" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
-            Termin\u00e9es
+            Terminées
             {ended.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center text-[10px]">
                 {ended.length}
@@ -352,7 +352,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                   <Video className="h-7 w-7 opacity-40" />
                 </div>
                 <p className="font-medium">Aucune visio en cours</p>
-                <p className="text-sm mt-1">Les sessions en direct appara\u00eetront ici</p>
+                <p className="text-sm mt-1">Les sessions en direct apparaîtront ici</p>
               </CardContent>
             </Card>
           ) : (
@@ -371,9 +371,9 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <Calendar className="h-7 w-7 opacity-40" />
                 </div>
-                <p className="font-medium">Aucune visio planifi\u00e9e</p>
+                <p className="font-medium">Aucune visio planifiée</p>
                 <p className="text-sm mt-1">
-                  Cr\u00e9ez une nouvelle visioconf\u00e9rence pour commencer
+                  Créez une nouvelle visioconférence pour commencer
                 </p>
               </CardContent>
             </Card>
@@ -393,9 +393,9 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <Video className="h-7 w-7 opacity-40" />
                 </div>
-                <p className="font-medium">Aucune visio termin\u00e9e</p>
+                <p className="font-medium">Aucune visio terminée</p>
                 <p className="text-sm mt-1">
-                  Les visios pass\u00e9es et leurs replays appara\u00eetront ici
+                  Les visios passées et leurs replays apparaîtront ici
                 </p>
               </CardContent>
             </Card>

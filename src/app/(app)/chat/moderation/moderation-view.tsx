@@ -306,7 +306,7 @@ function ReportedMessageCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
                 onClick={() => onAction(message.id, "resolve", "deleted")}
                 disabled={isPending}
               >
@@ -316,7 +316,7 @@ function ReportedMessageCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30"
+                className="text-brand hover:text-brand hover:bg-brand/10"
                 onClick={() => onAction(message.id, "resolve", "approved")}
                 disabled={isPending}
               >
@@ -427,7 +427,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
         );
       case "restreint":
         return (
-          <Badge variant="outline" className="text-orange-500 border-orange-500/30">
+          <Badge variant="outline" className="text-muted-foreground border-border/50">
             Restreint
           </Badge>
         );
@@ -436,14 +436,15 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
 
   const roleBadge = (role: string) => {
     const colors: Record<string, string> = {
-      manager: "bg-purple-900/30 text-purple-400",
-      setter: "bg-blue-900/30 text-blue-400",
-      closer: "bg-orange-900/30 text-orange-400",
-      client_b2b: "bg-emerald-900/30 text-emerald-400",
-      client_b2c: "bg-teal-900/30 text-teal-400",
+      admin: "bg-foreground/10 text-foreground",
+      manager: "bg-brand/10 text-brand",
+      setter: "bg-muted/60 text-muted-foreground",
+      closer: "bg-muted/60 text-muted-foreground",
+      client_b2b: "bg-muted/40 text-muted-foreground/80",
+      client_b2c: "bg-muted/40 text-muted-foreground/80",
     };
     return (
-      <Badge className={colors[role] || "bg-gray-900/30 text-gray-400"}>
+      <Badge className={colors[role] || "bg-muted text-muted-foreground"}>
         {role}
       </Badge>
     );
@@ -523,7 +524,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-amber-600 hover:bg-amber-950/30"
+                          className="text-muted-foreground hover:bg-muted/50"
                           onClick={() => handleMute(u.id)}
                           disabled={isPending}
                         >
@@ -533,7 +534,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-red-600 hover:bg-red-950/30"
+                          className="text-destructive hover:bg-destructive/10"
                           onClick={() =>
                             setBanTargetId(banTargetId === u.id ? null : u.id)
                           }
@@ -548,7 +549,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-green-600 hover:bg-green-950/30"
+                        className="text-brand hover:bg-brand/10"
                         onClick={() => handleUnmute(u.id)}
                         disabled={isPending}
                       >
@@ -560,7 +561,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-green-600 hover:bg-green-950/30"
+                        className="text-brand hover:bg-brand/10"
                         onClick={() => handleUnban(u.id)}
                         disabled={isPending}
                       >
