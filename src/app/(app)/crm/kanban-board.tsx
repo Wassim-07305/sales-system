@@ -5,11 +5,14 @@ import {
   DndContext,
   DragOverlay,
   closestCorners,
+  pointerWithin,
+  rectIntersection,
   PointerSensor,
   useSensor,
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
+  type CollisionDetection,
 } from "@dnd-kit/core";
 import { KanbanColumn } from "./kanban-column";
 import { DealCard } from "./deal-card";
@@ -105,6 +108,23 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
       activationConstraint: { distance: 8 },
     })
   );
+
+  // Custom collision detection: prefer columns (stages) over deal cards
+  const stageIdSet = new Set(stages.map((s) => s.id));
+  const customCollisionDetection: CollisionDetection = useCallback((args) => {
+    // First try pointerWithin — most natural for columns
+    const pointerCollisions = pointerWithin(args);
+    const columnHit = pointerCollisions.find((c) => stageIdSet.has(c.id as string));
+    if (columnHit) return [columnHit];
+
+    // Fallback to closestCorners
+    const cornerCollisions = closestCorners(args);
+    const columnCornerHit = cornerCollisions.find((c) => stageIdSet.has(c.id as string));
+    if (columnCornerHit) return [columnCornerHit];
+
+    // Last resort: return whatever we found
+    return cornerCollisions;
+  }, [stageIdSet]);
 
   const filteredDeals = deals.filter((deal) => {
     const matchesSearch =
@@ -256,7 +276,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
       {/* Kanban */}
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={customCollisionDetection}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

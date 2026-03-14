@@ -264,6 +264,15 @@ export async function updateDealStage(dealId: string, stageId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Validate that stageId exists in pipeline_stages (prevent FK violation)
+  const { data: stage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .eq("id", stageId)
+    .single();
+
+  if (!stage) return { error: "Stage invalide" };
+
   // Get old stage name for notifications (non-blocking)
   const { data: deal } = await supabase
     .from("deals")
