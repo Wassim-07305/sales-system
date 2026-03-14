@@ -7,14 +7,15 @@ interface OnlineStatusProps {
 }
 
 export function OnlineStatus({ isOnline, className }: OnlineStatusProps) {
+  if (!isOnline) return null;
+
   return (
     <span
       className={cn(
-        "inline-block h-2 w-2 rounded-full",
-        isOnline ? "bg-green-500" : "bg-gray-500",
+        "absolute -bottom-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-[#7af17a] ring-2 ring-card",
         className
       )}
-      title={isOnline ? "En ligne" : "Hors ligne"}
+      title="En ligne"
     />
   );
 }
