@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChatLayout } from "./chat-layout";
 import type { UserRole } from "@/lib/types/database";
+import { getConversations as getWAConversations } from "@/lib/actions/whatsapp";
+import { getConversations as getInboxConversations } from "@/lib/actions/inbox";
 
 export default async function ChatPage() {
   const supabase = await createClient();
@@ -10,8 +12,8 @@ export default async function ChatPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Fetch channels and profile
-  const [channelsRes, profileRes, teamRes] = await Promise.all([
+  // Fetch all data in parallel
+  const [channelsRes, profileRes, teamRes, waConversations, inboxConversations] = await Promise.all([
     supabase
       .from("channels")
       .select("*")
@@ -21,9 +23,11 @@ export default async function ChatPage() {
       .from("profiles")
       .select("id, full_name, role, avatar_url")
       .neq("id", user.id),
+    getWAConversations().catch(() => []),
+    getInboxConversations().catch(() => []),
   ]);
 
-  // Compute unread counts inline (avoid "use server" import issues)
+  // Compute unread counts inline
   let unreadCounts: Record<string, number> = {};
   try {
     const { data: reads } = await supabase
@@ -55,7 +59,7 @@ export default async function ChatPage() {
       }
     }
   } catch {
-    // Non-blocking: unread counts are not critical
+    // Non-blocking
   }
 
   const userRole = (profileRes.data?.role as UserRole) || "client_b2c";
@@ -69,6 +73,8 @@ export default async function ChatPage() {
       teamMembers={
         ((teamRes.data || []) as Parameters<typeof ChatLayout>[0]["teamMembers"])
       }
+      initialWAConversations={waConversations as Parameters<typeof ChatLayout>[0]["initialWAConversations"]}
+      initialInboxConversations={inboxConversations as Parameters<typeof ChatLayout>[0]["initialInboxConversations"]}
     />
   );
 }

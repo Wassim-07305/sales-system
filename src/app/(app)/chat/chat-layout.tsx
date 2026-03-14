@@ -60,6 +60,10 @@ import {
   UserPlus,
   AtSign,
   ArrowLeft,
+  Phone,
+  Inbox,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -77,6 +81,12 @@ import {
   editMessage as editMessageAction,
   deleteMessage as deleteMessageAction,
 } from "@/lib/actions/communication";
+import {
+  sendWhatsAppMessage,
+} from "@/lib/actions/whatsapp";
+import {
+  sendMessage as sendInboxMessage,
+} from "@/lib/actions/inbox";
 import { usePresence } from "@/lib/hooks/use-presence";
 import { TypingIndicator } from "@/components/typing-indicator";
 import { OnlineStatus } from "@/components/online-status";
@@ -85,12 +95,49 @@ import { OnlineStatus } from "@/components/online-status";
 // Types
 // ---------------------------------------------------------------------------
 
+type SidebarTab = "team" | "whatsapp" | "inbox";
+
+interface WAConversation {
+  prospect_id: string;
+  prospect: { id: string; name: string; platform?: string; profile_url?: string; status?: string } | null;
+  messages: WAMessage[];
+  last_message_at: string;
+  unread_count: number;
+}
+
+interface WAMessage {
+  id: string;
+  direction: string;
+  content: string;
+  media_url?: string | null;
+  status: string;
+  created_at: string;
+}
+
+interface InboxConversation {
+  id: string;
+  prospect_id: string;
+  prospect: { id: string; name: string; platform?: string; profile_url?: string } | null;
+  platform: string;
+  messages: InboxMessage[];
+  last_message_at: string;
+}
+
+interface InboxMessage {
+  sender: string;
+  content: string;
+  type: string;
+  timestamp: string;
+}
+
 interface ChatLayoutProps {
   initialChannels: Channel[];
   currentUserId: string;
   initialUnreadCounts: Record<string, number>;
   userRole: UserRole;
   teamMembers: TeamMember[];
+  initialWAConversations: WAConversation[];
+  initialInboxConversations: InboxConversation[];
 }
 
 interface TeamMember {
@@ -256,11 +303,14 @@ export function ChatLayout({
   initialUnreadCounts,
   userRole,
   teamMembers,
+  initialWAConversations,
+  initialInboxConversations,
 }: ChatLayoutProps) {
   const supabase = useMemo(() => createClient(), []);
   const isAdmin = ADMIN_ROLES.includes(userRole);
 
   // ---- Core state ----
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("team");
   const [channels, setChannels] = useState<Channel[]>(initialChannels);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -270,6 +320,18 @@ export function ChatLayout({
   const [hasMore, setHasMore] = useState(false);
   const [channelSearch, setChannelSearch] = useState("");
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>(initialUnreadCounts);
+
+  // ---- WhatsApp state ----
+  const [waConversations, setWAConversations] = useState<WAConversation[]>(initialWAConversations);
+  const [activeWA, setActiveWA] = useState<WAConversation | null>(null);
+  const [waMessage, setWAMessage] = useState("");
+  const [sendingWA, setSendingWA] = useState(false);
+
+  // ---- Inbox state ----
+  const [inboxConversations, setInboxConversations] = useState<InboxConversation[]>(initialInboxConversations);
+  const [activeInbox, setActiveInbox] = useState<InboxConversation | null>(null);
+  const [inboxMessage, setInboxMessage] = useState("");
+  const [sendingInbox, setSendingInbox] = useState(false);
 
   // ---- Image upload ----
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -765,6 +827,73 @@ export function ChatLayout({
     }
   }
 
+  // ---- Tab switching ----
+  function switchTab(tab: SidebarTab) {
+    setSidebarTab(tab);
+    if (tab !== "team") setActiveChannel(null);
+    if (tab !== "whatsapp") setActiveWA(null);
+    if (tab !== "inbox") setActiveInbox(null);
+  }
+
+  // ---- WhatsApp handlers ----
+  async function handleSendWAMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!waMessage.trim() || !activeWA) return;
+    const content = waMessage.trim();
+    setSendingWA(true);
+    setWAMessage("");
+
+    // Optimistic: add message to conversation
+    const optimisticMsg: WAMessage = {
+      id: `opt-${Date.now()}`,
+      direction: "outbound",
+      content,
+      status: "sent",
+      created_at: new Date().toISOString(),
+    };
+    setActiveWA((prev) =>
+      prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev,
+    );
+    setTimeout(scrollToBottom, 50);
+
+    try {
+      await sendWhatsAppMessage({ prospectId: activeWA.prospect_id, content });
+    } catch {
+      toast.error("Erreur envoi WhatsApp");
+    } finally {
+      setSendingWA(false);
+    }
+  }
+
+  // ---- Inbox handlers ----
+  async function handleSendInboxMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inboxMessage.trim() || !activeInbox) return;
+    const content = inboxMessage.trim();
+    setSendingInbox(true);
+    setInboxMessage("");
+
+    // Optimistic
+    const optimisticMsg: InboxMessage = {
+      sender: "damien",
+      content,
+      type: "text",
+      timestamp: new Date().toISOString(),
+    };
+    setActiveInbox((prev) =>
+      prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev,
+    );
+    setTimeout(scrollToBottom, 50);
+
+    try {
+      await sendInboxMessage(activeInbox.id, content);
+    } catch {
+      toast.error("Erreur envoi message");
+    } finally {
+      setSendingInbox(false);
+    }
+  }
+
   // ---- Admin handlers ----
 
   async function handleCreateChannel() {
@@ -895,6 +1024,16 @@ export function ChatLayout({
       (!dmSearch || (u.full_name || "").toLowerCase().includes(dmSearch.toLowerCase())),
   );
 
+  const filteredWAConversations = waConversations.filter((c) => {
+    if (!channelSearch) return true;
+    return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
+  });
+
+  const filteredInboxConversations = inboxConversations.filter((c) => {
+    if (!channelSearch) return true;
+    return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
+  });
+
   // Active channel display info
   const activePartner = activeChannel ? getDMPartner(activeChannel) : undefined;
   const activeName =
@@ -914,10 +1053,36 @@ export function ChatLayout({
       <div
         className={cn(
           "w-full md:w-72 flex-shrink-0 flex flex-col border-r bg-muted/30",
-          activeChannel ? "hidden md:flex" : "flex",
+          (activeChannel || activeWA || activeInbox) ? "hidden md:flex" : "flex",
         )}
       >
-        {/* Sidebar header */}
+        {/* Tab bar */}
+        <div className="flex border-b">
+          {([
+            { key: "team" as SidebarTab, icon: Users, label: "Équipe" },
+            { key: "whatsapp" as SidebarTab, icon: Phone, label: "WhatsApp" },
+            { key: "inbox" as SidebarTab, icon: Inbox, label: "Inbox" },
+          ]).map(({ key, icon: Icon, label }) => (
+            <button
+              key={key}
+              onClick={() => switchTab(key)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors border-b-2",
+                sidebarTab === key
+                  ? "border-[#7af17a] text-[#7af17a]"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span>{label}</span>
+              {key === "whatsapp" && waConversations.some((c) => c.unread_count > 0) && (
+                <span className="h-1.5 w-1.5 rounded-full bg-[#7af17a]" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Sidebar search */}
         <div className="p-3 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -931,6 +1096,8 @@ export function ChatLayout({
         </div>
 
         <ScrollArea className="flex-1">
+          {/* ====== TEAM TAB ====== */}
+          {sidebarTab === "team" && <>
           {/* Channels section */}
           <div className="px-2 pt-3">
             <div className="flex items-center justify-between px-2 mb-1">
@@ -1084,6 +1251,150 @@ export function ChatLayout({
               )}
             </div>
           </div>
+          </>}
+
+          {/* ====== WHATSAPP TAB ====== */}
+          {sidebarTab === "whatsapp" && (
+            <div className="px-2 pt-3 pb-3">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Conversations
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {waConversations.length}
+                </span>
+              </div>
+              <div className="space-y-px">
+                {filteredWAConversations.map((conv) => {
+                  const isActive = activeWA?.prospect_id === conv.prospect_id;
+                  const lastMsg = conv.messages[conv.messages.length - 1];
+                  return (
+                    <button
+                      key={conv.prospect_id}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
+                        isActive
+                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
+                          : conv.unread_count > 0
+                            ? "text-foreground font-semibold hover:bg-muted/50"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                      )}
+                      onClick={() => {
+                        setActiveWA(conv);
+                        setActiveChannel(null);
+                        setActiveInbox(null);
+                        setTimeout(scrollToBottom, 100);
+                      }}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={cn(
+                          "h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
+                          getAvatarColor(conv.prospect_id),
+                        )}>
+                          {getInitials(conv.prospect?.name)}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 flex items-center justify-center">
+                          <Phone className="h-1.5 w-1.5 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm truncate font-medium">
+                          {conv.prospect?.name || "Inconnu"}
+                        </p>
+                        {lastMsg && (
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {lastMsg.direction === "outbound" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
+                          </p>
+                        )}
+                      </div>
+                      {conv.unread_count > 0 && (
+                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                {filteredWAConversations.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
+                    {channelSearch ? "Aucun résultat" : "Aucune conversation WhatsApp"}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ====== INBOX TAB ====== */}
+          {sidebarTab === "inbox" && (
+            <div className="px-2 pt-3 pb-3">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Messages externes
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {inboxConversations.length}
+                </span>
+              </div>
+              <div className="space-y-px">
+                {filteredInboxConversations.map((conv) => {
+                  const isActive = activeInbox?.id === conv.id;
+                  const msgs = conv.messages || [];
+                  const lastMsg = msgs[msgs.length - 1];
+                  const PlatformIcon = conv.platform === "linkedin" ? Linkedin : Instagram;
+                  return (
+                    <button
+                      key={conv.id}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
+                        isActive
+                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                      )}
+                      onClick={() => {
+                        setActiveInbox(conv);
+                        setActiveChannel(null);
+                        setActiveWA(null);
+                        setTimeout(scrollToBottom, 100);
+                      }}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={cn(
+                          "h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
+                          getAvatarColor(conv.prospect_id || conv.id),
+                        )}>
+                          {getInitials(conv.prospect?.name)}
+                        </div>
+                        <div className={cn(
+                          "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center",
+                          conv.platform === "linkedin" ? "bg-blue-600" : "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400",
+                        )}>
+                          <PlatformIcon className="h-1.5 w-1.5 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm truncate font-medium">
+                          {conv.prospect?.name || "Inconnu"}
+                        </p>
+                        {lastMsg && (
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {lastMsg.sender === "damien" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-[9px] h-4 px-1 shrink-0 capitalize">
+                        {conv.platform}
+                      </Badge>
+                    </button>
+                  );
+                })}
+                {filteredInboxConversations.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
+                    {channelSearch ? "Aucun résultat" : "Aucune conversation externe"}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </ScrollArea>
       </div>
 
@@ -1093,10 +1404,195 @@ export function ChatLayout({
       <div
         className={cn(
           "flex-1 flex flex-col min-w-0",
-          !activeChannel && "hidden md:flex",
+          !activeChannel && !activeWA && !activeInbox && "hidden md:flex",
         )}
       >
-        {activeChannel ? (
+        {/* ====== WHATSAPP MESSAGE AREA ====== */}
+        {activeWA ? (
+          <>
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
+              <button
+                onClick={() => setActiveWA(null)}
+                className="md:hidden text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white",
+                    getAvatarColor(activeWA.prospect_id),
+                  )}>
+                    {getInitials(activeWA.prospect?.name)}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-card">
+                    <Phone className="h-2 w-2 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h2 className="font-semibold text-sm leading-tight">
+                    {activeWA.prospect?.name || "Inconnu"}
+                  </h2>
+                  <p className="text-[11px] text-muted-foreground">WhatsApp</p>
+                </div>
+              </div>
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="px-4 py-2 space-y-2">
+                {activeWA.messages.map((msg, i) => {
+                  const isOutbound = msg.direction === "outbound";
+                  return (
+                    <div key={msg.id || i} className={cn("flex", isOutbound ? "justify-end" : "justify-start")}>
+                      <div className={cn(
+                        "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
+                        isOutbound
+                          ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
+                          : "bg-muted rounded-bl-sm",
+                      )}>
+                        <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                        <p className={cn(
+                          "text-[10px] mt-1",
+                          isOutbound ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60",
+                        )}>
+                          {format(new Date(msg.created_at), "HH:mm")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {activeWA.messages.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                    <Phone className="h-8 w-8 opacity-30 mb-3" />
+                    <p className="text-sm font-medium">Aucun message</p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            <div className="px-4 py-3 border-t">
+              <form onSubmit={handleSendWAMessage} className="flex items-end gap-2">
+                <div className="flex-1 relative">
+                  <Textarea
+                    value={waMessage}
+                    onChange={(e) => setWAMessage(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendWAMessage(e); } }}
+                    placeholder={`Message à ${activeWA.prospect?.name || "prospect"}...`}
+                    className="min-h-[40px] max-h-[120px] resize-none text-sm py-2.5 pr-10"
+                    rows={1}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className={cn(
+                      "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
+                      waMessage.trim() ? "bg-green-500 text-white hover:bg-green-600" : "bg-muted text-muted-foreground",
+                    )}
+                    disabled={!waMessage.trim() || sendingWA}
+                  >
+                    {sendingWA ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </>
+        ) : activeInbox ? (
+          <>
+            {/* ====== INBOX MESSAGE AREA ====== */}
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
+              <button
+                onClick={() => setActiveInbox(null)}
+                className="md:hidden text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white",
+                    getAvatarColor(activeInbox.prospect_id || activeInbox.id),
+                  )}>
+                    {getInitials(activeInbox.prospect?.name)}
+                  </div>
+                  <div className={cn(
+                    "absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center ring-2 ring-card",
+                    activeInbox.platform === "linkedin" ? "bg-blue-600" : "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400",
+                  )}>
+                    {activeInbox.platform === "linkedin" ? (
+                      <Linkedin className="h-2 w-2 text-white" />
+                    ) : (
+                      <Instagram className="h-2 w-2 text-white" />
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h2 className="font-semibold text-sm leading-tight">
+                    {activeInbox.prospect?.name || "Inconnu"}
+                  </h2>
+                  <p className="text-[11px] text-muted-foreground capitalize">{activeInbox.platform}</p>
+                </div>
+              </div>
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="px-4 py-2 space-y-2">
+                {(activeInbox.messages || []).map((msg, i) => {
+                  const isDamien = msg.sender === "damien";
+                  return (
+                    <div key={i} className={cn("flex", isDamien ? "justify-end" : "justify-start")}>
+                      <div className={cn(
+                        "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
+                        isDamien
+                          ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
+                          : "bg-muted rounded-bl-sm",
+                      )}>
+                        <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                        <p className={cn(
+                          "text-[10px] mt-1",
+                          isDamien ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60",
+                        )}>
+                          {msg.timestamp ? format(new Date(msg.timestamp), "HH:mm") : ""}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {(!activeInbox.messages || activeInbox.messages.length === 0) && (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                    <Inbox className="h-8 w-8 opacity-30 mb-3" />
+                    <p className="text-sm font-medium">Aucun message</p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            <div className="px-4 py-3 border-t">
+              <form onSubmit={handleSendInboxMessage} className="flex items-end gap-2">
+                <div className="flex-1 relative">
+                  <Textarea
+                    value={inboxMessage}
+                    onChange={(e) => setInboxMessage(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendInboxMessage(e); } }}
+                    placeholder={`Message à ${activeInbox.prospect?.name || "prospect"}...`}
+                    className="min-h-[40px] max-h-[120px] resize-none text-sm py-2.5 pr-10"
+                    rows={1}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className={cn(
+                      "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
+                      inboxMessage.trim()
+                        ? activeInbox.platform === "linkedin" ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gradient-to-br from-purple-500 to-pink-500 text-white"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                    disabled={!inboxMessage.trim() || sendingInbox}
+                  >
+                    {sendingInbox ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </>
+        ) : activeChannel ? (
           <>
             {/* Channel header */}
             <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
@@ -1514,23 +2010,14 @@ export function ChatLayout({
             <div className="h-16 w-16 rounded-2xl bg-muted/30 flex items-center justify-center">
               <MessageSquare className="h-8 w-8 opacity-30" />
             </div>
-            {channels.length === 0 ? (
-              <>
-                <p className="font-medium text-sm">Aucun channel disponible</p>
-                <p className="text-xs text-muted-foreground/60 max-w-xs text-center">
-                  {isAdmin
-                    ? "Créez votre premier channel pour commencer."
-                    : "Votre administrateur n'a pas encore configuré les channels."}
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="font-medium text-sm">Sélectionnez une conversation</p>
-                <p className="text-xs text-muted-foreground/60">
-                  Choisissez un channel ou envoyez un message direct
-                </p>
-              </>
-            )}
+            <p className="font-medium text-sm">Sélectionnez une conversation</p>
+            <p className="text-xs text-muted-foreground/60 max-w-xs text-center">
+              {sidebarTab === "team"
+                ? "Choisissez un channel ou envoyez un message direct"
+                : sidebarTab === "whatsapp"
+                  ? "Sélectionnez une conversation WhatsApp"
+                  : "Sélectionnez une conversation externe"}
+            </p>
           </div>
         )}
       </div>
