@@ -45,29 +45,29 @@ import type { CallReview, CallReviewStats, CallReviewAIAnalysis } from "@/lib/ca
 // ---------------------------------------------------------------------------
 
 function scoreColor(score: number): string {
-  if (score >= 8) return "text-green-400";
-  if (score >= 6) return "text-amber-400";
-  if (score >= 4) return "text-orange-400";
-  return "text-red-400";
+  if (score >= 8) return "text-brand";
+  if (score >= 6) return "text-muted-foreground";
+  if (score >= 4) return "text-muted-foreground/60";
+  return "text-foreground";
 }
 
 function scoreBg(score: number): string {
-  if (score >= 8) return "bg-green-500/20 text-green-400 border-green-500/30";
-  if (score >= 6) return "bg-amber-500/20 text-amber-400 border-amber-500/30";
-  if (score >= 4) return "bg-orange-500/20 text-orange-400 border-orange-500/30";
-  return "bg-red-500/20 text-red-400 border-red-500/30";
+  if (score >= 8) return "bg-brand/10 text-brand border-brand/20";
+  if (score >= 6) return "bg-muted/60 text-muted-foreground border-border";
+  if (score >= 4) return "bg-muted/40 text-muted-foreground/60 border-border";
+  return "bg-foreground/10 text-foreground border-border";
 }
 
 function sentimentBadge(sentiment: string) {
   switch (sentiment) {
     case "positif":
-      return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Positif</Badge>;
+      return <Badge className="bg-brand/10 text-brand border-brand/20">Positif</Badge>;
     case "négatif":
-      return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Négatif</Badge>;
+      return <Badge className="bg-foreground/10 text-foreground border-border">Négatif</Badge>;
     case "mixte":
-      return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">Mixte</Badge>;
+      return <Badge className="bg-muted/60 text-muted-foreground border-border">Mixte</Badge>;
     default:
-      return <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">Neutre</Badge>;
+      return <Badge className="bg-muted/40 text-muted-foreground/60 border-border">Neutre</Badge>;
   }
 }
 
@@ -76,9 +76,9 @@ function sentimentColor(sentiment: string): string {
     case "positif":
       return "#7af17a";
     case "négatif":
-      return "#ef4444";
+      return "hsl(var(--foreground))";
     default:
-      return "#f59e0b";
+      return "hsl(var(--muted-foreground))";
   }
 }
 
@@ -122,13 +122,13 @@ function TalkRatioBar({ ratio }: { ratio: { vendeur: number; prospect: number } 
       </h4>
       <div className="flex rounded-full overflow-hidden h-6">
         <div
-          className="bg-blue-500 flex items-center justify-center text-xs text-white font-medium"
+          className="bg-foreground flex items-center justify-center text-xs text-background font-medium"
           style={{ width: `${ratio.vendeur}%` }}
         >
           {ratio.vendeur}%
         </div>
         <div
-          className="bg-amber-500 flex items-center justify-center text-xs text-white font-medium"
+          className="bg-muted-foreground flex items-center justify-center text-xs text-background font-medium"
           style={{ width: `${ratio.prospect}%` }}
         >
           {ratio.prospect}%
@@ -194,7 +194,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
             const isVendeur = line.startsWith("Vendeur:");
             const isProspect = line.startsWith("Prospect:");
             return (
-              <div key={i} className={`mb-2 ${isVendeur ? "text-blue-400" : isProspect ? "text-amber-400" : ""}`}>
+              <div key={i} className={`mb-2 ${isVendeur ? "text-foreground" : isProspect ? "text-muted-foreground" : ""}`}>
                 {review.keywords.reduce(
                   (acc, keyword) => {
                     if (typeof acc === "string" && acc.toLowerCase().includes(keyword.toLowerCase())) {
@@ -253,13 +253,13 @@ function ReviewDetail({ review }: { review: CallReview }) {
       {analysis.objections.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             Objections détectées
           </h4>
           <ul className="space-y-1">
             {analysis.objections.map((obj, i) => (
               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="text-amber-400 mt-1">•</span>
+                <span className="text-muted-foreground mt-1">•</span>
                 {obj}
               </li>
             ))}
@@ -286,28 +286,28 @@ function ReviewDetail({ review }: { review: CallReview }) {
       {/* Strengths & improvements */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-green-400 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-brand flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             Points forts
           </h4>
           <ul className="space-y-1">
             {review.strengths.map((s, i) => (
               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="text-green-400 mt-1">+</span>
+                <span className="text-brand mt-1">+</span>
                 {s}
               </li>
             ))}
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-amber-400 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
             <Lightbulb className="h-4 w-4" />
             Axes d&apos;amélioration
           </h4>
           <ul className="space-y-1">
             {review.improvements.map((imp, i) => (
               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="text-amber-400 mt-1">-</span>
+                <span className="text-muted-foreground mt-1">-</span>
                 {imp}
               </li>
             ))}
@@ -407,8 +407,8 @@ export function ReviewsView({
                   {stats.averageScore}/10
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-blue-400" />
+              <div className="h-10 w-10 rounded-lg bg-muted/40 ring-1 ring-border flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
@@ -423,8 +423,8 @@ export function ReviewsView({
                   {stats.commonKeywords[0]?.keyword || "-"}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center">
-                <Brain className="h-5 w-5 text-purple-400" />
+              <div className="h-10 w-10 rounded-lg bg-foreground/10 ring-1 ring-border flex items-center justify-center">
+                <Brain className="h-5 w-5 text-foreground" />
               </div>
             </div>
           </CardContent>
@@ -435,13 +435,13 @@ export function ReviewsView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Tendance</p>
-                <p className={`text-2xl font-bold ${trendValue >= 0 ? "text-green-400" : "text-red-400"}`}>
+                <p className={`text-2xl font-bold ${trendValue >= 0 ? "text-brand" : "text-foreground"}`}>
                   {trendValue >= 0 ? "+" : ""}
                   {trendValue.toFixed(1)}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-amber-400" />
+              <div className="h-10 w-10 rounded-lg bg-muted/60 ring-1 ring-border flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
@@ -640,7 +640,7 @@ export function ReviewsView({
                 {analysisResult.aiAnalysis?.objections?.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-amber-400" />
+                      <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                       Objections
                     </h4>
                     <ul className="space-y-1">
@@ -649,7 +649,7 @@ export function ReviewsView({
                           key={i}
                           className="text-sm text-muted-foreground flex items-start gap-2"
                         >
-                          <span className="text-amber-400 mt-1">•</span>
+                          <span className="text-muted-foreground mt-1">•</span>
                           {obj}
                         </li>
                       ))}
@@ -660,21 +660,21 @@ export function ReviewsView({
                 {/* Strengths & improvements */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-green-400">Points forts</h4>
+                    <h4 className="text-sm font-semibold text-brand">Points forts</h4>
                     <ul className="space-y-1">
                       {analysisResult.strengths?.map((s: string, i: number) => (
                         <li
                           key={i}
                           className="text-sm text-muted-foreground flex items-start gap-2"
                         >
-                          <span className="text-green-400 mt-1">+</span>
+                          <span className="text-brand mt-1">+</span>
                           {s}
                         </li>
                       ))}
                     </ul>
                   </div>
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-amber-400">
+                    <h4 className="text-sm font-semibold text-muted-foreground">
                       Axes d&apos;amélioration
                     </h4>
                     <ul className="space-y-1">
@@ -683,7 +683,7 @@ export function ReviewsView({
                           key={i}
                           className="text-sm text-muted-foreground flex items-start gap-2"
                         >
-                          <span className="text-amber-400 mt-1">-</span>
+                          <span className="text-muted-foreground mt-1">-</span>
                           {imp}
                         </li>
                       ))}
@@ -763,7 +763,7 @@ export function ReviewsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Hash className="h-5 w-5 text-purple-400" />
+                  <Hash className="h-5 w-5 text-foreground" />
                   Mots-clés fréquents
                 </CardTitle>
               </CardHeader>
@@ -792,7 +792,7 @@ export function ReviewsView({
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={((value: number) => [value, "Occurrences"]) as any}
                       />
-                      <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="count" fill="hsl(var(--foreground))" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -803,7 +803,7 @@ export function ReviewsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-400" />
+                  <BarChart3 className="h-5 w-5 text-muted-foreground" />
                   Distribution des scores
                 </CardTitle>
               </CardHeader>
@@ -823,7 +823,7 @@ export function ReviewsView({
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={((value: number) => [value, "Appels"]) as any}
                       />
-                      <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -835,7 +835,7 @@ export function ReviewsView({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-amber-400" />
+                <Lightbulb className="h-5 w-5 text-muted-foreground" />
                 Axes d&apos;amélioration prioritaires
               </CardTitle>
             </CardHeader>

@@ -69,10 +69,10 @@ interface Props {
 function ScoreCircle({ score }: { score: number }) {
   const color =
     score >= 80
-      ? "text-green-600 border-green-200 bg-green-50"
+      ? "text-brand border-brand/20 bg-brand/10"
       : score >= 60
-        ? "text-orange-600 border-orange-200 bg-orange-50"
-        : "text-red-600 border-red-200 bg-red-50";
+        ? "text-muted-foreground border-border bg-muted/60"
+        : "text-foreground border-border bg-foreground/10";
 
   return (
     <div
@@ -98,10 +98,10 @@ function MetricBar({
 }) {
   const color =
     value >= 80
-      ? "[&>div]:bg-green-500"
+      ? "[&>div]:bg-brand"
       : value >= 60
-        ? "[&>div]:bg-orange-500"
-        : "[&>div]:bg-red-500";
+        ? "[&>div]:bg-muted-foreground"
+        : "[&>div]:bg-foreground";
 
   return (
     <div>
@@ -134,11 +134,11 @@ export function DebriefView({ session }: Props) {
   return (
     <div>
       <PageHeader
-        title="D\u00e9briefing"
+        title="Débriefing"
         description={
           session.profile
             ? `Session avec ${session.profile.name} - ${session.profile.niche}`
-            : "R\u00e9sum\u00e9 de votre session"
+            : "Résumé de votre session"
         }
       >
         <div className="flex gap-2">
@@ -170,7 +170,7 @@ export function DebriefView({ session }: Props) {
               <ScoreCircle score={score} />
               {session.duration_seconds && (
                 <p className="text-sm text-muted-foreground mt-4">
-                  Dur\u00e9e : {formatDuration(session.duration_seconds)}
+                  Durée : {formatDuration(session.duration_seconds)}
                 </p>
               )}
             </CardContent>
@@ -180,7 +180,7 @@ export function DebriefView({ session }: Props) {
           {feedback && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">M\u00e9triques</CardTitle>
+                <CardTitle className="text-base">Métriques</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 <MetricBar
@@ -189,7 +189,7 @@ export function DebriefView({ session }: Props) {
                   icon={ShieldCheck}
                 />
                 <MetricBar
-                  label="Cr\u00e9ation de rapport"
+                  label="Création de rapport"
                   value={feedback.rapport_building}
                   icon={Handshake}
                 />
@@ -211,7 +211,7 @@ export function DebriefView({ session }: Props) {
               <CardContent className="space-y-4">
                 {feedback.strengths.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1.5">
+                    <h4 className="text-sm font-medium text-brand mb-2 flex items-center gap-1.5">
                       <CheckCircle2 className="h-4 w-4" />
                       Points forts
                     </h4>
@@ -221,7 +221,7 @@ export function DebriefView({ session }: Props) {
                           key={i}
                           className="flex items-start gap-2 text-sm text-muted-foreground"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mt-0.5 shrink-0" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-brand mt-0.5 shrink-0" />
                           {s}
                         </li>
                       ))}
@@ -230,9 +230,9 @@ export function DebriefView({ session }: Props) {
                 )}
                 {feedback.improvements.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-orange-700 mb-2 flex items-center gap-1.5">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
                       <AlertTriangle className="h-4 w-4" />
-                      Axes d&apos;am\u00e9lioration
+                      Axes d&apos;amélioration
                     </h4>
                     <ul className="space-y-1.5">
                       {feedback.improvements.map((s, i) => (
@@ -240,7 +240,7 @@ export function DebriefView({ session }: Props) {
                           key={i}
                           className="flex items-start gap-2 text-sm text-muted-foreground"
                         >
-                          <AlertTriangle className="h-3.5 w-3.5 text-orange-500 mt-0.5 shrink-0" />
+                          <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
                           {s}
                         </li>
                       ))}
@@ -271,7 +271,7 @@ export function DebriefView({ session }: Props) {
                       : 0;
                     const diff = score - avgPast;
                     const TrendIcon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
-                    const trendColor = diff > 0 ? "text-green-500" : diff < 0 ? "text-red-400" : "text-muted-foreground";
+                    const trendColor = diff > 0 ? "text-brand" : diff < 0 ? "text-foreground" : "text-muted-foreground";
 
                     return (
                       <>
@@ -305,7 +305,7 @@ export function DebriefView({ session }: Props) {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-yellow-500" />
+                  <Lightbulb className="h-4 w-4 text-brand" />
                   Exercices recommandes
                 </CardTitle>
               </CardHeader>
@@ -340,7 +340,7 @@ export function DebriefView({ session }: Props) {
           <Card className="h-fit">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                Conversation compl\u00e8te
+                Conversation complète
                 <Badge variant="outline" className="text-[10px]">
                   {messages.length} messages
                 </Badge>

@@ -62,9 +62,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
+  Facile: "bg-brand/10 text-brand border-brand/20",
+  Moyen: "bg-muted/60 text-muted-foreground border-border",
+  Difficile: "bg-foreground/10 text-foreground border-border",
 };
 
 export function SessionView({ session }: Props) {
@@ -231,7 +231,7 @@ export function SessionView({ session }: Props) {
                   size="sm"
                   onClick={handleEnd}
                   disabled={isEnding || isFeedbackLoading}
-                  className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                  className="text-destructive border-border hover:bg-muted hover:text-destructive"
                 >
                   {isEnding ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -271,9 +271,9 @@ export function SessionView({ session }: Props) {
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <Bot className="h-7 w-7 opacity-50" />
                 </div>
-                <p className="font-medium">La session a commenc\u00e9 !</p>
+                <p className="font-medium">La session a commencé !</p>
                 <p className="text-sm mt-1">
-                  Envoyez votre premier message pour d\u00e9marrer la conversation avec{" "}
+                  Envoyez votre premier message pour démarrer la conversation avec{" "}
                   {session.profile?.name || "le prospect"}.
                 </p>
               </div>
@@ -382,10 +382,10 @@ export function SessionView({ session }: Props) {
                 className={cn(
                   "h-16 w-16 rounded-full border-3 flex flex-col items-center justify-center shrink-0",
                   feedback.score >= 80
-                    ? "text-emerald-600 border-emerald-500/20 bg-emerald-500/10"
+                    ? "text-brand border-brand/20 bg-brand/10"
                     : feedback.score >= 60
-                      ? "text-orange-600 border-orange-500/20 bg-orange-500/10"
-                      : "text-red-600 border-red-500/20 bg-red-500/10"
+                      ? "text-muted-foreground border-border bg-muted/60"
+                      : "text-foreground border-border bg-foreground/10"
                 )}
               >
                 <span className="text-xl font-bold">{feedback.score}</span>
@@ -409,7 +409,7 @@ export function SessionView({ session }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Strengths */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-emerald-600 flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-brand flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4" />
                   Points forts
                 </h4>
@@ -419,7 +419,7 @@ export function SessionView({ session }: Props) {
                       key={i}
                       className="flex items-start gap-2 text-sm text-muted-foreground"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-brand mt-0.5 shrink-0" />
                       {s}
                     </li>
                   ))}
@@ -428,7 +428,7 @@ export function SessionView({ session }: Props) {
 
               {/* Improvements */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-orange-600 flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
                   <AlertTriangle className="h-4 w-4" />
                   Axes d&apos;amelioration
                 </h4>
@@ -438,7 +438,7 @@ export function SessionView({ session }: Props) {
                       key={i}
                       className="flex items-start gap-2 text-sm text-muted-foreground"
                     >
-                      <AlertTriangle className="h-3.5 w-3.5 text-orange-500 mt-0.5 shrink-0" />
+                      <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
                       {s}
                     </li>
                   ))}
@@ -447,7 +447,7 @@ export function SessionView({ session }: Props) {
 
               {/* Tips */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-blue-600 flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-foreground flex items-center gap-1.5">
                   <Lightbulb className="h-4 w-4" />
                   Conseils pratiques
                 </h4>
@@ -457,7 +457,7 @@ export function SessionView({ session }: Props) {
                       key={i}
                       className="flex items-start gap-2 text-sm text-muted-foreground"
                     >
-                      <Lightbulb className="h-3.5 w-3.5 text-blue-500 mt-0.5 shrink-0" />
+                      <Lightbulb className="h-3.5 w-3.5 text-foreground mt-0.5 shrink-0" />
                       {s}
                     </li>
                   ))}

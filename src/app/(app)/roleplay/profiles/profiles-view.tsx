@@ -64,9 +64,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
+  Facile: "bg-brand/10 text-brand border-brand/20",
+  Moyen: "bg-muted/60 text-muted-foreground border-border",
+  Difficile: "bg-foreground/10 text-foreground border-border",
 };
 
 const emptyForm = {
@@ -138,10 +138,10 @@ export function ProfilesView({ profiles }: Props) {
         // For edit, we delete and re-create (simple approach without update action)
         await deleteRoleplayProfile(editingProfile.id);
         await createRoleplayProfile(payload);
-        toast.success("Profil mis \u00e0 jour");
+        toast.success("Profil mis à jour");
       } else {
         await createRoleplayProfile(payload);
-        toast.success("Profil cr\u00e9\u00e9");
+        toast.success("Profil créé");
       }
       setDialogOpen(false);
       router.refresh();
@@ -156,7 +156,7 @@ export function ProfilesView({ profiles }: Props) {
     if (!deletingId) return;
     try {
       await deleteRoleplayProfile(deletingId);
-      toast.success("Profil supprim\u00e9");
+      toast.success("Profil supprimé");
       setDeleteDialogOpen(false);
       setDeletingId(null);
       router.refresh();
@@ -169,7 +169,7 @@ export function ProfilesView({ profiles }: Props) {
     <div>
       <PageHeader
         title="Profils Prospects"
-        description="G\u00e9rez les profils de prospects pour le jeu de r\u00f4les"
+        description="Gérez les profils de prospects pour le jeu de rôles"
       >
         <div className="flex gap-2">
           <Link href="/roleplay">
@@ -196,7 +196,7 @@ export function ProfilesView({ profiles }: Props) {
             </div>
             <p className="font-medium">Aucun profil prospect</p>
             <p className="text-sm mt-1">
-              Cr\u00e9ez votre premier profil pour d\u00e9marrer les sessions de jeu de r\u00f4les.
+              Créez votre premier profil pour démarrer les sessions de jeu de rôles.
             </p>
           </CardContent>
         </Card>
@@ -207,8 +207,8 @@ export function ProfilesView({ profiles }: Props) {
               <TableRow>
                 <TableHead>Nom</TableHead>
                 <TableHead>Niche</TableHead>
-                <TableHead>Difficult\u00e9</TableHead>
-                <TableHead>R\u00e9seau</TableHead>
+                <TableHead>Difficulté</TableHead>
+                <TableHead>Réseau</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -247,7 +247,7 @@ export function ProfilesView({ profiles }: Props) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-red-500 hover:text-red-700"
+                        className="text-destructive hover:text-destructive/80"
                         onClick={() => openDelete(profile.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -271,7 +271,7 @@ export function ProfilesView({ profiles }: Props) {
             <DialogDescription>
               {editingProfile
                 ? "Modifiez les informations du profil prospect."
-                : "Configurez un nouveau profil de prospect pour les sessions de jeu de r\u00f4les."}
+                : "Configurez un nouveau profil de prospect pour les sessions de jeu de rôles."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -293,7 +293,7 @@ export function ProfilesView({ profiles }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Difficult\u00e9</Label>
+                <Label>Difficulté</Label>
                 <Select
                   value={form.difficulty}
                   onValueChange={(v) => setForm({ ...form, difficulty: v })}
@@ -309,7 +309,7 @@ export function ProfilesView({ profiles }: Props) {
                 </Select>
               </div>
               <div>
-                <Label>R\u00e9seau</Label>
+                <Label>Réseau</Label>
                 <Select
                   value={form.network}
                   onValueChange={(v) => setForm({ ...form, network: v })}
@@ -330,11 +330,11 @@ export function ProfilesView({ profiles }: Props) {
                 value={form.persona}
                 onChange={(e) => setForm({ ...form, persona: e.target.value })}
                 rows={3}
-                placeholder="D\u00e9crivez la personnalit\u00e9 et le comportement du prospect..."
+                placeholder="Décrivez la personnalité et le comportement du prospect..."
               />
             </div>
             <div>
-              <Label>Sc\u00e9nario</Label>
+              <Label>Scénario</Label>
               <Textarea
                 value={form.scenario}
                 onChange={(e) => setForm({ ...form, scenario: e.target.value })}
@@ -343,13 +343,13 @@ export function ProfilesView({ profiles }: Props) {
               />
             </div>
             <div>
-              <Label>Objections (s\u00e9par\u00e9es par des virgules)</Label>
+              <Label>Objections (séparées par des virgules)</Label>
               <Input
                 value={form.objections}
                 onChange={(e) =>
                   setForm({ ...form, objections: e.target.value })
                 }
-                placeholder="Prix trop \u00e9lev\u00e9, Pas le temps, D\u00e9j\u00e0 essay\u00e9..."
+                placeholder="Prix trop élevé, Pas le temps, Déjà essayé..."
               />
             </div>
             <Button
@@ -360,8 +360,8 @@ export function ProfilesView({ profiles }: Props) {
               {saving
                 ? "Enregistrement..."
                 : editingProfile
-                  ? "Mettre \u00e0 jour"
-                  : "Cr\u00e9er le profil"}
+                  ? "Mettre à jour"
+                  : "Créer le profil"}
             </Button>
           </div>
         </DialogContent>
@@ -373,8 +373,8 @@ export function ProfilesView({ profiles }: Props) {
           <DialogHeader>
             <DialogTitle>Supprimer le profil</DialogTitle>
             <DialogDescription>
-              \u00cates-vous s\u00fbr de vouloir supprimer ce profil ? Cette action est
-              irr\u00e9versible.
+              Êtes-vous sûr de vouloir supprimer ce profil ? Cette action est
+              irréversible.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

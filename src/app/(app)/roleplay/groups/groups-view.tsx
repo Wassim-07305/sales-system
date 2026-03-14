@@ -112,17 +112,17 @@ interface Props {
 }
 
 const nicheColors: Record<string, string> = {
-  Closing: "bg-red-500/10 text-red-400 border-red-500/20",
-  Setting: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  Prospection: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  "Négociation": "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  "Objection handling": "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  Closing: "bg-foreground/10 text-foreground border-border",
+  Setting: "bg-muted/40 text-muted-foreground/60 border-border",
+  Prospection: "bg-muted/60 text-muted-foreground border-border",
+  "Négociation": "bg-foreground/10 text-foreground border-border",
+  "Objection handling": "bg-muted/60 text-muted-foreground border-border",
 };
 
 const sessionTypeLabels: Record<string, { label: string; color: string }> = {
-  roleplay: { label: "Role-Play", color: "bg-green-500/10 text-green-400 border-green-500/20" },
-  workshop: { label: "Workshop", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  debrief: { label: "Debrief", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  roleplay: { label: "Role-Play", color: "bg-brand/10 text-brand border-brand/20" },
+  workshop: { label: "Workshop", color: "bg-muted/40 text-muted-foreground/60 border-border" },
+  debrief: { label: "Debrief", color: "bg-muted/60 text-muted-foreground border-border" },
 };
 
 const emptyGroupForm = {
@@ -156,9 +156,9 @@ function formatDate(dateStr: string) {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 80) return "text-green-400";
-  if (score >= 60) return "text-amber-400";
-  return "text-red-400";
+  if (score >= 80) return "text-brand";
+  if (score >= 60) return "text-muted-foreground";
+  return "text-foreground";
 }
 
 export function GroupsView({ groups, teamMembers }: Props) {
@@ -306,8 +306,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <UserPlus className="h-5 w-5 text-blue-400" />
+            <div className="p-2 rounded-lg bg-muted/40">
+              <UserPlus className="h-5 w-5 text-muted-foreground/60" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalMembers}</p>
@@ -317,8 +317,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/10">
-              <Calendar className="h-5 w-5 text-amber-400" />
+            <div className="p-2 rounded-lg bg-muted/60">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalSessionsMonth}</p>
@@ -328,8 +328,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/10">
-              <Target className="h-5 w-5 text-purple-400" />
+            <div className="p-2 rounded-lg bg-foreground/10">
+              <Target className="h-5 w-5 text-foreground" />
             </div>
             <div>
               <p className="text-2xl font-bold">{avgScore}%</p>
@@ -379,7 +379,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                     <div className="flex items-center gap-2 mb-3">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] ${nicheColors[group.niche] || "bg-gray-500/10 text-gray-400"}`}
+                        className={`text-[10px] ${nicheColors[group.niche] || "bg-muted/40 text-muted-foreground"}`}
                       >
                         {group.niche}
                       </Badge>
@@ -450,7 +450,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                         </span>
                         <span className="text-muted-foreground">score moyen</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm text-green-400">
+                      <div className="flex items-center gap-1.5 text-sm text-brand">
                         <TrendingUp className="h-4 w-4" />
                         <span>+5% ce mois</span>
                       </div>
@@ -462,7 +462,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-amber-400" />
+                      <Trophy className="h-4 w-4 text-brand" />
                       Classement du groupe
                     </CardTitle>
                   </CardHeader>
@@ -485,10 +485,10 @@ export function GroupsView({ groups, teamMembers }: Props) {
                                 <span
                                   className={
                                     entry.rank === 1
-                                      ? "text-amber-400"
+                                      ? "text-brand"
                                       : entry.rank === 2
-                                        ? "text-gray-400"
-                                        : "text-orange-400"
+                                        ? "text-muted-foreground"
+                                        : "text-muted-foreground/60"
                                   }
                                 >
                                   {entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : "🥉"}
@@ -512,7 +512,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
-                              <span className={`text-sm ${entry.progress >= 0 ? "text-green-400" : "text-red-400"}`}>
+                              <span className={`text-sm ${entry.progress >= 0 ? "text-brand" : "text-foreground"}`}>
                                 {entry.progress >= 0 ? "+" : ""}
                                 {entry.progress}%
                               </span>
@@ -528,7 +528,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Users className="h-4 w-4 text-blue-400" />
+                      <Users className="h-4 w-4 text-muted-foreground/60" />
                       Membres ({groupDetail.members.length})
                     </CardTitle>
                   </CardHeader>
@@ -570,7 +570,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
-                              <span className={`text-sm ${member.progress >= 0 ? "text-green-400" : "text-red-400"}`}>
+                              <span className={`text-sm ${member.progress >= 0 ? "text-brand" : "text-foreground"}`}>
                                 {member.progress >= 0 ? "+" : ""}
                                 {member.progress}%
                               </span>
@@ -587,7 +587,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-amber-400" />
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
                         Sessions ({groupDetail.sessions.length})
                       </CardTitle>
                       <Button

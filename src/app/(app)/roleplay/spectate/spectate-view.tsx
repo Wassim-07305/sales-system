@@ -24,9 +24,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
+  Facile: "bg-brand/10 text-brand border-brand/20",
+  Moyen: "bg-muted/60 text-muted-foreground border-border",
+  Difficile: "bg-foreground/10 text-foreground border-border",
 };
 
 function formatDuration(seconds: number | null): string {
@@ -43,7 +43,7 @@ export function SpectateView({ sessions }: Props) {
     <div>
       <PageHeader
         title="Mode Spectateur"
-        description="Observez les sessions de jeu de r\u00f4les de l'\u00e9quipe pour apprendre et s'inspirer"
+        description="Observez les sessions de jeu de rôles de l'équipe pour apprendre et s'inspirer"
       >
         <Link href="/roleplay">
           <Button variant="outline" size="sm">
@@ -58,9 +58,9 @@ export function SpectateView({ sessions }: Props) {
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
               <Eye className="h-7 w-7 opacity-50" />
             </div>
-            <p className="font-medium">Aucune session termin\u00e9e</p>
+            <p className="font-medium">Aucune session terminée</p>
             <p className="text-sm mt-1">
-              Les sessions compl\u00e9t\u00e9es par l&apos;\u00e9quipe appara\u00eetront ici.
+              Les sessions complétées par l&apos;équipe apparaîtront ici.
             </p>
           </CardContent>
         </Card>
@@ -86,7 +86,7 @@ export function SpectateView({ sessions }: Props) {
                         {session.user?.full_name || "Anonyme"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(session.started_at), "d MMM yyyy '\u00e0' HH:mm", {
+                        {format(new Date(session.started_at), "d MMM yyyy 'à' HH:mm", {
                           locale: fr,
                         })}
                       </p>
@@ -96,7 +96,7 @@ export function SpectateView({ sessions }: Props) {
                   {/* Profile info */}
                   <div className="mb-3">
                     <p className="text-sm font-medium">
-                      {session.profile?.name || "Profil supprim\u00e9"}
+                      {session.profile?.name || "Profil supprimé"}
                     </p>
                     <div className="flex gap-2 mt-1.5">
                       {session.profile?.niche && (
@@ -124,10 +124,10 @@ export function SpectateView({ sessions }: Props) {
                           variant="outline"
                           className={`text-xs ${
                             session.score >= 80
-                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                              ? "bg-brand/10 text-brand border-brand/20"
                               : session.score >= 60
-                                ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                                : "bg-red-500/10 text-red-600 border-red-500/20"
+                                ? "bg-muted/60 text-muted-foreground border-border"
+                                : "bg-foreground/10 text-foreground border-border"
                           }`}
                         >
                           {session.score}/100

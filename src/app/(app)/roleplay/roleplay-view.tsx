@@ -52,9 +52,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
+  Facile: "bg-brand/10 text-brand border-brand/20",
+  Moyen: "bg-muted/60 text-muted-foreground border-border",
+  Difficile: "bg-foreground/10 text-foreground border-border",
 };
 
 function formatDuration(seconds: number | null): string {
@@ -100,8 +100,8 @@ export function RoleplayView({ profiles, sessions }: Props) {
   return (
     <div>
       <PageHeader
-        title="Jeu de R\u00f4les IA"
-        description="Entra\u00eenez-vous au closing avec des prospects virtuels"
+        title="Jeu de Rôles IA"
+        description="Entraînez-vous au closing avec des prospects virtuels"
       >
         <div className="flex gap-2">
           <Link href="/roleplay/spectate">
@@ -162,8 +162,8 @@ export function RoleplayView({ profiles, sessions }: Props) {
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
               <User className="h-7 w-7 opacity-50" />
             </div>
-            <p>Aucun profil prospect configur\u00e9.</p>
-            <p className="text-sm">Demandez \u00e0 un admin de cr\u00e9er des profils.</p>
+            <p>Aucun profil prospect configuré.</p>
+            <p className="text-sm">Demandez à un admin de créer des profils.</p>
           </CardContent>
         </Card>
       ) : (
@@ -208,7 +208,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
                   ) : (
                     <Play className="h-4 w-4 mr-2" />
                   )}
-                  D\u00e9marrer
+                  Démarrer
                 </Button>
               </CardContent>
             </Card>
@@ -221,7 +221,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
         <>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5 text-brand" />
-            Sessions r\u00e9centes
+            Sessions récentes
           </h2>
           <div className="space-y-2">
             {sessions.slice(0, 10).map((session) => (
@@ -234,7 +234,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
                       </div>
                       <div>
                         <p className="font-medium text-sm">
-                          {session.profile?.name || "Profil supprim\u00e9"}
+                          {session.profile?.name || "Profil supprimé"}
                         </p>
                         <div className="flex gap-2 mt-0.5">
                           {session.profile?.difficulty && (
@@ -260,10 +260,10 @@ export function RoleplayView({ profiles, sessions }: Props) {
                           variant="outline"
                           className={`text-xs ${
                             session.score >= 80
-                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                              ? "bg-brand/10 text-brand border-brand/20"
                               : session.score >= 60
-                                ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                                : "bg-red-500/10 text-red-600 border-red-500/20"
+                                ? "bg-muted/60 text-muted-foreground border-border"
+                                : "bg-foreground/10 text-foreground border-border"
                           }`}
                         >
                           {session.score}/100
