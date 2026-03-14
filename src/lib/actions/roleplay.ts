@@ -7,7 +7,11 @@ import { aiChat, aiJSON, type AIMessage } from "@/lib/ai/client";
 export async function getRoleplayProfiles() {
   const supabase = await createClient();
   const { data } = await supabase.from("roleplay_prospect_profiles").select("*").order("name");
-  return data || [];
+  return (data || []).map((p: Record<string, unknown>) => ({
+    ...p,
+    objections: p.objection_types || [],
+    scenario: (p.context as Record<string, unknown>)?.scenario || "",
+  }));
 }
 
 export async function createRoleplayProfile(profile: {
@@ -20,7 +24,15 @@ export async function createRoleplayProfile(profile: {
   network: string;
 }) {
   const supabase = createAdminClient();
-  const { error } = await supabase.from("roleplay_prospect_profiles").insert(profile);
+  const { error } = await supabase.from("roleplay_prospect_profiles").insert({
+    name: profile.name,
+    niche: profile.niche,
+    persona: profile.persona,
+    difficulty: profile.difficulty,
+    objection_types: profile.objections,
+    network: profile.network,
+    context: profile.scenario ? { scenario: profile.scenario } : {},
+  });
   if (error) throw new Error(error.message);
   revalidatePath("/roleplay");
   revalidatePath("/roleplay/profiles");
@@ -45,7 +57,6 @@ export async function startSession(profileId: string) {
     prospect_profile_id: profileId,
     status: "active",
     conversation: [],
-    started_at: new Date().toISOString(),
   }).select().single();
 
   if (error) throw new Error(error.message);
@@ -84,8 +95,8 @@ PERSONA DU PROSPECT :
 - Niche : ${profile?.niche || "Business en ligne"}
 - Personnalité : ${profile?.persona || "Sceptique mais ouvert"}
 - Difficulté : ${profile?.difficulty || "moyen"}
-- Objections favorites : ${profile?.objections?.join(", ") || "prix, timing, confiance"}
-- Scénario : ${profile?.scenario || "B2B actif"}
+- Objections favorites : ${profile?.objection_types?.join(", ") || profile?.objections?.join(", ") || "prix, timing, confiance"}
+- Scénario : ${(profile?.context as Record<string, unknown>)?.scenario || profile?.scenario || "B2B actif"}
 - Réseau simulé : ${profile?.network || "Instagram"}
 
 RÈGLES :
@@ -195,10 +206,9 @@ Critères d'évaluation :
 
   await supabase.from("roleplay_sessions").update({
     status: "completed",
-    ended_at: new Date().toISOString(),
     score,
     ai_feedback: feedback,
-    duration_seconds: Math.floor((Date.now() - new Date(session.started_at).getTime()) / 1000),
+    duration_seconds: Math.floor((Date.now() - new Date(session.created_at).getTime()) / 1000),
   }).eq("id", sessionId);
 
   revalidatePath("/roleplay");
@@ -247,7 +257,6 @@ Criteres d'evaluation :
     const supabase = await createClient();
     await supabase.from("roleplay_sessions").update({
       status: "completed",
-      ended_at: new Date().toISOString(),
       score: feedback.score,
       ai_feedback: feedback,
     }).eq("id", sessionId);
@@ -276,6 +285,7 @@ export async function getUserSessions(userId?: string) {
   const { data } = await query;
   return (data || []).map((d: Record<string, unknown>) => ({
     ...d,
+    started_at: d.created_at,
     profile: Array.isArray(d.profile) ? d.profile[0] : d.profile,
     user: Array.isArray(d.user) ? d.user[0] : d.user,
   }));
@@ -292,6 +302,7 @@ export async function getSession(sessionId: string) {
   if (!data) return null;
   return {
     ...data,
+    started_at: data.created_at,
     profile: Array.isArray(data.profile) ? data.profile[0] : data.profile,
     user: Array.isArray(data.user) ? data.user[0] : data.user,
   };

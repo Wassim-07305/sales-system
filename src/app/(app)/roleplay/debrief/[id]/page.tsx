@@ -14,11 +14,11 @@ export default async function DebriefPage({ params }: Props) {
   const supabase = await createClient();
   const { data: pastSessions } = await supabase
     .from("roleplay_sessions")
-    .select("score, ai_feedback, started_at")
+    .select("score, ai_feedback, created_at")
     .eq("user_id", (session as Record<string, unknown>).user_id as string)
     .eq("status", "completed")
     .neq("id", id)
-    .order("started_at", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(10);
 
   const sessionWithHistory = {
