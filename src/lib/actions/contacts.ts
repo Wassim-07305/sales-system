@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export type DuplicateConfidence = "high" | "medium" | "low";
@@ -63,7 +63,9 @@ export async function createContact(params: {
     return { error: "Un contact avec cet email existe déjà" };
   }
 
-  const { data, error } = await supabase
+  // Use admin client to bypass RLS (admin creates contacts on behalf of others)
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
     .from("profiles")
     .insert({
       full_name: params.full_name,

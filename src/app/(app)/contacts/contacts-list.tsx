@@ -43,17 +43,17 @@ interface ContactsListProps {
 }
 
 const ROLE_CONFIG: Record<UserRole, { label: string; color: string }> = {
-  admin: { label: "Admin", color: "bg-purple-500/10 text-purple-600 border-purple-200" },
-  manager: { label: "Manager", color: "bg-blue-500/10 text-blue-600 border-blue-200" },
-  setter: { label: "Setter", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
-  closer: { label: "Closer", color: "bg-orange-500/10 text-orange-600 border-orange-200" },
-  client_b2b: { label: "Client B2B", color: "bg-cyan-500/10 text-cyan-600 border-cyan-200" },
-  client_b2c: { label: "Client B2C", color: "bg-slate-500/10 text-slate-600 border-slate-200" },
+  admin: { label: "Admin", color: "bg-foreground/10 text-foreground border-foreground/20" },
+  manager: { label: "Manager", color: "bg-brand/10 text-brand border-brand/20" },
+  setter: { label: "Setter", color: "bg-muted/60 text-muted-foreground border-border/50" },
+  closer: { label: "Closer", color: "bg-muted/60 text-muted-foreground border-border/50" },
+  client_b2b: { label: "Client B2B", color: "bg-muted/40 text-muted-foreground/80 border-border/30" },
+  client_b2c: { label: "Client B2C", color: "bg-muted/40 text-muted-foreground/80 border-border/30" },
 };
 
 const AVATAR_COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
-  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
 ];
 
 function getAvatarColor(str: string) {
@@ -220,8 +220,8 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                 {paged.map((contact) => {
                   const roleConfig = ROLE_CONFIG[contact.role];
                   const healthScore = contact.health_score || 0;
-                  const healthColor = healthScore >= 70 ? "text-emerald-500" : healthScore >= 40 ? "text-amber-500" : "text-red-500";
-                  const healthBg = healthScore >= 70 ? "bg-emerald-500" : healthScore >= 40 ? "bg-amber-500" : "bg-red-500";
+                  const healthColor = healthScore >= 70 ? "text-brand" : healthScore >= 40 ? "text-muted-foreground" : "text-muted-foreground/60";
+                  const healthBg = healthScore >= 70 ? "bg-brand" : healthScore >= 40 ? "bg-muted-foreground" : "bg-muted-foreground/40";
 
                   return (
                     <TableRow key={contact.id} className="group">
