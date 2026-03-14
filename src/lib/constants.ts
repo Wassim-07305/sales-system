@@ -21,9 +21,7 @@ import {
   FolderOpen,
   LineChart,
   Gift,
-  Inbox,
   Swords,
-  MessageCircle,
   ScrollText,
   Bot,
   Bell,
@@ -154,15 +152,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "client_b2c"],
   },
 
-  // Inbox (DM conversations)
-  {
-    label: "Inbox",
-    href: "/inbox",
-    icon: Inbox,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-
-  // Chat
+  // Chat (unified: team channels, DMs, WhatsApp, Inbox)
   {
     label: "Chat",
     href: "/chat",
@@ -182,12 +172,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/scripts",
     icon: ScrollText,
     roles: ["admin", "manager", "setter", "closer"],
-  },
-  {
-    label: "WhatsApp",
-    href: "/whatsapp",
-    icon: MessageCircle,
-    roles: ["admin", "manager", "setter"],
   },
   {
     label: "Automation",
@@ -382,7 +366,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Communication",
     items: NAV_ITEMS.filter((i) =>
-      ["/inbox", "/chat", "/whatsapp"].includes(i.href),
+      ["/chat"].includes(i.href),
     ),
   },
   {
