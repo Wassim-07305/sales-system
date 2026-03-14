@@ -152,7 +152,8 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     const result = await updateDealStage(dealId, newStageId);
 
     if (result.error) {
-      toast.error("Erreur lors du déplacement du deal");
+      console.error("[CRM] Erreur déplacement deal:", result.error);
+      toast.error("Erreur : " + result.error);
       setDeals((prev) =>
         prev.map((d) =>
           d.id === dealId ? { ...d, stage_id: deal.stage_id } : d

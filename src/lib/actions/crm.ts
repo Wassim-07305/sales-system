@@ -263,13 +263,14 @@ export async function updateDealStage(dealId: string, stageId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  // Get old stage name for email notification
+  // Get old stage name for notifications (non-blocking)
   const { data: deal } = await supabase
     .from("deals")
-    .select("title, stage_id, assigned_to, pipeline_stages(name)")
+    .select("title, stage_id, assigned_to")
     .eq("id", dealId)
     .single();
 
+  // Core operation: update the deal stage
   const { error } = await supabase
     .from("deals")
     .update({ stage_id: stageId, updated_at: new Date().toISOString() })
@@ -277,45 +278,45 @@ export async function updateDealStage(dealId: string, stageId: string) {
 
   if (error) return { error: error.message };
 
+  // Everything below is non-critical — fire-and-forget
   logAuditEvent({ action: "update", entity_type: "deal", entity_id: dealId, details: { stage_id: stageId } }).catch(() => {});
 
-  // Send email notification (fire-and-forget)
-  if (deal?.assigned_to) {
-    const { data: newStage } = await supabase
-      .from("pipeline_stages")
-      .select("name")
-      .eq("id", stageId)
-      .single();
-    const { data: assignee } = await supabase
-      .from("profiles")
-      .select("email, full_name")
-      .eq("id", deal.assigned_to)
-      .single();
+  // Notifications (wrapped in try-catch to never block the response)
+  try {
+    if (deal?.assigned_to) {
+      const [{ data: oldStage }, { data: newStage }, { data: assignee }] = await Promise.all([
+        supabase.from("pipeline_stages").select("name").eq("id", deal.stage_id).single(),
+        supabase.from("pipeline_stages").select("name").eq("id", stageId).single(),
+        supabase.from("profiles").select("email, full_name").eq("id", deal.assigned_to).single(),
+      ]);
 
-    if (assignee?.email && newStage?.name) {
-      const stageData = deal.pipeline_stages;
-      const oldStageName = (Array.isArray(stageData) ? stageData[0]?.name : (stageData as { name: string } | null)?.name) || "—";
+      const oldStageName = oldStage?.name || "—";
+      const newStageName = newStage?.name || "—";
 
       // In-app notification
-      await supabase.from("notifications").insert({
+      supabase.from("notifications").insert({
         user_id: deal.assigned_to,
         title: "Deal déplacé",
-        body: `"${deal.title}" est passé de ${oldStageName} à ${newStage.name}`,
+        body: `"${deal.title}" est passé de ${oldStageName} à ${newStageName}`,
         type: "deal",
         link: `/crm/${dealId}`,
       });
 
       // Email notification (fire-and-forget)
-      import("@/lib/actions/email").then(({ sendDealStageEmail }) =>
-        sendDealStageEmail({
-          email: assignee.email,
-          name: assignee.full_name || "",
-          dealTitle: deal.title,
-          oldStage: oldStageName,
-          newStage: newStage.name,
-        }).catch(() => {})
-      );
+      if (assignee?.email && newStageName) {
+        import("@/lib/actions/email").then(({ sendDealStageEmail }) =>
+          sendDealStageEmail({
+            email: assignee.email,
+            name: assignee.full_name || "",
+            dealTitle: deal.title,
+            oldStage: oldStageName,
+            newStage: newStageName,
+          }).catch(() => {})
+        ).catch(() => {});
+      }
     }
+  } catch {
+    // Non-critical: notifications failed but deal was moved successfully
   }
 
   revalidatePath("/crm");
