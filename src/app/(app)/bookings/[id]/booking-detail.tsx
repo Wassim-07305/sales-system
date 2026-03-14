@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 import type { Booking, BookingStatus } from "@/lib/types/database";
 import {
   ArrowLeft,
@@ -55,6 +56,7 @@ import {
   FileText,
   Loader2,
   TrendingUp,
+  Timer,
 } from "lucide-react";
 import {
   updateBookingStatus,
@@ -69,21 +71,32 @@ interface BookingDetailProps {
   teamMembers: Array<{ id: string; full_name: string | null; role: string }>;
 }
 
-const statusConfig: Record<BookingStatus, { label: string; color: string; icon: typeof CheckCircle }> = {
-  confirmed: { label: "Confirme", color: "bg-blue-100 text-blue-700", icon: Calendar },
-  completed: { label: "Termine", color: "bg-green-100 text-green-700", icon: CheckCircle },
-  no_show: { label: "No-show", color: "bg-red-100 text-red-700", icon: XCircle },
-  cancelled: { label: "Annule", color: "bg-gray-100 text-gray-600", icon: XCircle },
-  rescheduled: { label: "Reprogramme", color: "bg-orange-100 text-orange-700", icon: RefreshCw },
+const statusConfig: Record<BookingStatus, { label: string; color: string; bg: string; icon: typeof CheckCircle }> = {
+  confirmed: { label: "Confirmé", color: "text-blue-600", bg: "bg-blue-500/10 border-blue-500/20", icon: Calendar },
+  completed: { label: "Terminé", color: "text-emerald-600", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle },
+  no_show: { label: "No-show", color: "text-red-500", bg: "bg-red-500/10 border-red-500/20", icon: XCircle },
+  cancelled: { label: "Annulé", color: "text-muted-foreground", bg: "bg-muted/50 border-border/50", icon: XCircle },
+  rescheduled: { label: "Reprogrammé", color: "text-orange-600", bg: "bg-orange-500/10 border-orange-500/20", icon: RefreshCw },
 };
 
 const slotTypeLabels: Record<string, string> = {
-  discovery: "Appel decouverte",
-  demo: "Demo produit",
+  discovery: "Appel découverte",
+  demo: "Démo produit",
   closing: "Appel closing",
   follow_up: "Suivi",
   coaching: "Coaching",
 };
+
+const AVATAR_COLORS = [
+  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
+  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+];
+
+function getAvatarColor(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
   const router = useRouter();
@@ -97,7 +110,6 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
 
-  // Edit form state
   const [editForm, setEditForm] = useState({
     prospect_name: booking.prospect_name,
     prospect_email: booking.prospect_email || "",
@@ -119,57 +131,32 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
     setStatusLoading(status);
     const result = await updateBookingStatus(currentBooking.id, status);
     setStatusLoading(null);
-    if (result.error) {
-      toast.error("Erreur lors de la mise a jour");
-      return;
-    }
+    if (result.error) { toast.error("Erreur lors de la mise à jour"); return; }
     setCurrentBooking({ ...currentBooking, status });
-    toast.success("Statut mis a jour");
+    toast.success("Statut mis à jour");
   }
 
   async function handleEditSubmit() {
     setSaving(true);
     const result = await updateBooking(currentBooking.id, editForm);
     setSaving(false);
-
-    if (result.error) {
-      toast.error("Erreur lors de la mise a jour");
-      return;
-    }
-
-    setCurrentBooking({
-      ...currentBooking,
-      ...editForm,
-    });
+    if (result.error) { toast.error("Erreur lors de la mise à jour"); return; }
+    setCurrentBooking({ ...currentBooking, ...editForm });
     setEditOpen(false);
-    toast.success("Booking mis a jour");
+    toast.success("Booking mis à jour");
   }
 
   async function handleReschedule() {
-    if (!newDate || !newTime) {
-      toast.error("Veuillez choisir une date et heure");
-      return;
-    }
-
+    if (!newDate || !newTime) { toast.error("Veuillez choisir une date et heure"); return; }
     setSaving(true);
     const newDateTime = `${newDate}T${newTime}:00`;
     const result = await rescheduleBooking(currentBooking.id, newDateTime);
     setSaving(false);
-
-    if (result.error) {
-      toast.error("Erreur lors du report");
-      return;
-    }
-
-    setCurrentBooking({
-      ...currentBooking,
-      scheduled_at: newDateTime,
-      status: "rescheduled",
-    });
+    if (result.error) { toast.error("Erreur lors du report"); return; }
+    setCurrentBooking({ ...currentBooking, scheduled_at: newDateTime, status: "rescheduled" });
     setRescheduleOpen(false);
-    setNewDate("");
-    setNewTime("");
-    toast.success("Booking reprogramme");
+    setNewDate(""); setNewTime("");
+    toast.success("Booking reprogrammé");
   }
 
   async function handleConvertToDeal() {
@@ -180,25 +167,16 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
       slotType: currentBooking.slot_type,
     });
     setConvertingToDeal(false);
-    if (result.error) {
-      toast.error(result.error);
-      return;
-    }
-    toast.success("Deal cree avec succes !");
-    if (result.deal?.id) {
-      router.push(`/crm/${result.deal.id}`);
-    }
+    if (result.error) { toast.error(result.error); return; }
+    toast.success("Deal créé avec succès !");
+    if (result.deal?.id) router.push(`/crm/${result.deal.id}`);
   }
 
   async function handleDelete() {
     setDeleting(true);
     const result = await deleteBooking(currentBooking.id);
-    if (result.error) {
-      toast.error("Erreur lors de la suppression");
-      setDeleting(false);
-      return;
-    }
-    toast.success("Booking supprime");
+    if (result.error) { toast.error("Erreur lors de la suppression"); setDeleting(false); return; }
+    toast.success("Booking supprimé");
     router.push("/bookings");
   }
 
@@ -206,20 +184,20 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
     <div>
       <PageHeader
         title={`Booking avec ${currentBooking.prospect_name}`}
-        description={format(scheduledDate, "EEEE d MMMM yyyy 'a' HH:mm", { locale: fr })}
+        description={format(scheduledDate, "EEEE d MMMM yyyy 'à' HH:mm", { locale: fr })}
       >
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild className="h-8">
             <Link href="/bookings">
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
               Retour
             </Link>
           </Button>
 
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Edit2 className="h-4 w-4 mr-1" />
+              <Button variant="outline" size="sm" className="h-8">
+                <Edit2 className="h-3.5 w-3.5 mr-1.5" />
                 Modifier
               </Button>
             </DialogTrigger>
@@ -229,42 +207,27 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
               </DialogHeader>
               <div className="space-y-4 pt-4 max-h-[70vh] overflow-y-auto">
                 <div>
-                  <label className="text-sm font-medium">Nom du prospect</label>
-                  <Input
-                    value={editForm.prospect_name}
-                    onChange={(e) => setEditForm({ ...editForm, prospect_name: e.target.value })}
-                  />
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nom du prospect</label>
+                  <Input value={editForm.prospect_name} onChange={(e) => setEditForm({ ...editForm, prospect_name: e.target.value })} className="mt-1.5 h-9" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Email</label>
-                    <Input
-                      type="email"
-                      value={editForm.prospect_email}
-                      onChange={(e) => setEditForm({ ...editForm, prospect_email: e.target.value })}
-                    />
+                    <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email</label>
+                    <Input type="email" value={editForm.prospect_email} onChange={(e) => setEditForm({ ...editForm, prospect_email: e.target.value })} className="mt-1.5 h-9" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Telephone</label>
-                    <Input
-                      value={editForm.prospect_phone}
-                      onChange={(e) => setEditForm({ ...editForm, prospect_phone: e.target.value })}
-                    />
+                    <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Téléphone</label>
+                    <Input value={editForm.prospect_phone} onChange={(e) => setEditForm({ ...editForm, prospect_phone: e.target.value })} className="mt-1.5 h-9" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Type de RDV</label>
-                    <Select
-                      value={editForm.slot_type}
-                      onValueChange={(v) => setEditForm({ ...editForm, slot_type: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                    <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Type de RDV</label>
+                    <Select value={editForm.slot_type} onValueChange={(v) => setEditForm({ ...editForm, slot_type: v })}>
+                      <SelectTrigger className="mt-1.5 h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="discovery">Appel decouverte</SelectItem>
-                        <SelectItem value="demo">Demo produit</SelectItem>
+                        <SelectItem value="discovery">Appel découverte</SelectItem>
+                        <SelectItem value="demo">Démo produit</SelectItem>
                         <SelectItem value="closing">Appel closing</SelectItem>
                         <SelectItem value="follow_up">Suivi</SelectItem>
                         <SelectItem value="coaching">Coaching</SelectItem>
@@ -272,53 +235,30 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Duree (min)</label>
-                    <Input
-                      type="number"
-                      value={editForm.duration_minutes}
-                      onChange={(e) => setEditForm({ ...editForm, duration_minutes: Number(e.target.value) })}
-                    />
+                    <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Durée (min)</label>
+                    <Input type="number" value={editForm.duration_minutes} onChange={(e) => setEditForm({ ...editForm, duration_minutes: Number(e.target.value) })} className="mt-1.5 h-9" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Assigne a</label>
-                  <Select
-                    value={editForm.assigned_to}
-                    onValueChange={(v) => setEditForm({ ...editForm, assigned_to: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selectionner un membre" />
-                    </SelectTrigger>
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Assigné à</label>
+                  <Select value={editForm.assigned_to} onValueChange={(v) => setEditForm({ ...editForm, assigned_to: v })}>
+                    <SelectTrigger className="mt-1.5 h-9"><SelectValue placeholder="Sélectionner un membre" /></SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.full_name || "Sans nom"}
-                        </SelectItem>
+                        <SelectItem key={m.id} value={m.id}>{m.full_name || "Sans nom"}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Lien de reunion</label>
-                  <Input
-                    value={editForm.meeting_link}
-                    onChange={(e) => setEditForm({ ...editForm, meeting_link: e.target.value })}
-                    placeholder="https://meet.google.com/..."
-                  />
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Lien de réunion</label>
+                  <Input value={editForm.meeting_link} onChange={(e) => setEditForm({ ...editForm, meeting_link: e.target.value })} placeholder="https://meet.google.com/..." className="mt-1.5 h-9" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Notes</label>
-                  <Textarea
-                    value={editForm.notes}
-                    onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                    rows={3}
-                  />
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Notes</label>
+                  <Textarea value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="mt-1.5 resize-none" />
                 </div>
-                <Button
-                  onClick={handleEditSubmit}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
-                  disabled={saving}
-                >
+                <Button onClick={handleEditSubmit} className="w-full bg-brand text-brand-dark hover:bg-brand/90" disabled={saving}>
                   {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   {saving ? "Enregistrement..." : "Enregistrer"}
                 </Button>
@@ -328,37 +268,23 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
           <Dialog open={rescheduleOpen} onOpenChange={setRescheduleOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-1" />
+              <Button variant="outline" size="sm" className="h-8">
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
                 Reporter
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Reporter le booking</DialogTitle>
-              </DialogHeader>
+              <DialogHeader><DialogTitle>Reporter le booking</DialogTitle></DialogHeader>
               <div className="space-y-4 pt-4">
                 <div>
-                  <label className="text-sm font-medium">Nouvelle date</label>
-                  <Input
-                    type="date"
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                  />
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nouvelle date</label>
+                  <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-1.5 h-9" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Nouvelle heure</label>
-                  <Input
-                    type="time"
-                    value={newTime}
-                    onChange={(e) => setNewTime(e.target.value)}
-                  />
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nouvelle heure</label>
+                  <Input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="mt-1.5 h-9" />
                 </div>
-                <Button
-                  onClick={handleReschedule}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
-                  disabled={saving}
-                >
+                <Button onClick={handleReschedule} className="w-full bg-brand text-brand-dark hover:bg-brand/90" disabled={saving}>
                   {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   {saving ? "Report en cours..." : "Confirmer le report"}
                 </Button>
@@ -368,24 +294,20 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                <Trash2 className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-8 text-red-600 hover:text-red-700">
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer ce booking ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Cette action est irreversible. Le rendez-vous sera definitivement supprime.
+                  Cette action est irréversible. Le rendez-vous sera définitivement supprimé.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="bg-red-600 hover:bg-red-700"
-                >
+                <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700">
                   {deleting ? "Suppression..." : "Supprimer"}
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -394,100 +316,87 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
         </div>
       </PageHeader>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4">
         {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Status and date card */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              {/* Status banner */}
+              <div className={cn("px-6 py-4 border-b flex items-center justify-between", statusInfo.bg)}>
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`h-12 w-12 rounded-full flex items-center justify-center ${statusInfo.color}`}
-                  >
-                    <StatusIcon className="h-6 w-6" />
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-background/50", statusInfo.color)}>
+                    <StatusIcon className="h-5 w-5" />
                   </div>
                   <div>
-                    <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className={cn("font-semibold text-sm", statusInfo.color)}>{statusInfo.label}</p>
+                    <p className="text-xs text-muted-foreground">
                       {isUpcoming
                         ? `Dans ${formatDistanceToNow(scheduledDate, { locale: fr })}`
                         : `Il y a ${formatDistanceToNow(scheduledDate, { locale: fr })}`}
                     </p>
                   </div>
                 </div>
-                <Badge variant="outline" className="text-sm">
+                <Badge variant="outline" className="text-xs font-medium">
                   {slotTypeLabels[currentBooking.slot_type] || currentBooking.slot_type}
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {/* Date/time grid */}
+              <div className="px-6 py-5 grid grid-cols-3 gap-4">
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <Calendar className="h-4 w-4 text-blue-600" />
+                  </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Date</p>
-                    <p className="font-medium">
-                      {format(scheduledDate, "EEEE d MMMM", { locale: fr })}
-                    </p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Date</p>
+                    <p className="text-sm font-medium">{format(scheduledDate, "EEEE d MMMM", { locale: fr })}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-purple-600" />
+                  </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Heure</p>
-                    <p className="font-medium">{format(scheduledDate, "HH:mm")}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Heure</p>
+                    <p className="text-sm font-medium">{format(scheduledDate, "HH:mm")}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-9 w-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <Timer className="h-4 w-4 text-amber-600" />
+                  </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Duree</p>
-                    <p className="font-medium">{currentBooking.duration_minutes} min</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Durée</p>
+                    <p className="text-sm font-medium">{currentBooking.duration_minutes} min</p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Quick actions for status change */}
+          {/* Quick status actions */}
           {currentBooking.status === "confirmed" && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Actions rapides</CardTitle>
+                <CardTitle className="text-sm font-semibold">Actions rapides</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {isPastBooking && (
                     <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleStatusChange("completed")}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                        disabled={!!statusLoading}
-                      >
-                        {statusLoading === "completed" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1" />}
-                        Marquer termine
+                      <Button variant="outline" size="sm" onClick={() => handleStatusChange("completed")} className="h-9 gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" disabled={!!statusLoading}>
+                        {statusLoading === "completed" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
+                        Marquer terminé
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleStatusChange("no_show")}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        disabled={!!statusLoading}
-                      >
-                        {statusLoading === "no_show" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
+                      <Button variant="outline" size="sm" onClick={() => handleStatusChange("no_show")} className="h-9 gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50" disabled={!!statusLoading}>
+                        {statusLoading === "no_show" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
                         No-show
                       </Button>
                     </>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStatusChange("cancelled")}
-                    disabled={!!statusLoading}
-                  >
-                    {statusLoading === "cancelled" ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
+                  <Button variant="outline" size="sm" onClick={() => handleStatusChange("cancelled")} className="h-9 gap-1.5" disabled={!!statusLoading}>
+                    {statusLoading === "cancelled" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
                     Annuler
                   </Button>
                 </div>
@@ -495,21 +404,16 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
             </Card>
           )}
 
-          {/* Convert to deal — shown when booking is completed */}
+          {/* Convert to deal */}
           {currentBooking.status === "completed" && (
             <Card className="border-brand/20 bg-brand/5">
               <CardContent className="p-4 flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Booking termine</p>
-                  <p className="text-sm text-muted-foreground">Convertir ce prospect en deal dans le CRM</p>
+                  <p className="font-semibold text-sm">Booking terminé</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Convertir ce prospect en deal dans le CRM</p>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={handleConvertToDeal}
-                  disabled={convertingToDeal}
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
-                >
-                  {convertingToDeal ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <TrendingUp className="h-4 w-4 mr-1" />}
+                <Button size="sm" onClick={handleConvertToDeal} disabled={convertingToDeal} className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5">
+                  {convertingToDeal ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <TrendingUp className="h-3.5 w-3.5" />}
                   {convertingToDeal ? "Conversion..." : "Convertir en deal"}
                 </Button>
               </CardContent>
@@ -518,15 +422,17 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
           {/* Meeting link */}
           {currentBooking.meeting_link && (
-            <Card className="border-brand/20 bg-brand/5">
+            <Card className="border-blue-500/20 bg-blue-500/5">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Video className="h-5 w-5 text-brand" />
-                  <span className="font-medium">Lien de reunion</span>
+                  <div className="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <Video className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="font-medium text-sm">Lien de réunion</span>
                 </div>
-                <Button size="sm" asChild className="bg-brand text-brand-dark hover:bg-brand/90">
+                <Button size="sm" asChild className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
                   <a href={currentBooking.meeting_link} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-1" />
+                    <ExternalLink className="h-3.5 w-3.5" />
                     Rejoindre
                   </a>
                 </Button>
@@ -538,13 +444,13 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
           {currentBooking.notes && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
                   Notes
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm whitespace-pre-wrap">{currentBooking.notes}</p>
+                <p className="text-sm whitespace-pre-wrap text-muted-foreground leading-relaxed">{currentBooking.notes}</p>
               </CardContent>
             </Card>
           )}
@@ -553,48 +459,34 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
           {currentBooking.reliability_score > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Score de fiabilite</CardTitle>
+                <CardTitle className="text-sm font-semibold">Score de fiabilité</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-20">
+                <div className="flex items-center gap-5">
+                  <div className="relative h-20 w-20 shrink-0">
                     <svg className="h-20 w-20 -rotate-90">
+                      <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" strokeWidth="6" className="text-muted/30" />
                       <circle
-                        cx="40"
-                        cy="40"
-                        r="36"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        className="text-muted"
-                      />
-                      <circle
-                        cx="40"
-                        cy="40"
-                        r="36"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="8"
+                        cx="40" cy="40" r="36" fill="none" strokeWidth="6" strokeLinecap="round"
                         strokeDasharray={`${currentBooking.reliability_score * 2.26} 226`}
-                        className={
-                          currentBooking.reliability_score >= 70
-                            ? "text-green-500"
-                            : currentBooking.reliability_score >= 40
-                              ? "text-yellow-500"
-                              : "text-red-500"
-                        }
+                        className={cn(
+                          currentBooking.reliability_score >= 70 ? "stroke-emerald-500" : currentBooking.reliability_score >= 40 ? "stroke-amber-500" : "stroke-red-500",
+                        )}
                       />
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center font-bold">
+                    <span className={cn(
+                      "absolute inset-0 flex items-center justify-center text-lg font-bold",
+                      currentBooking.reliability_score >= 70 ? "text-emerald-500" : currentBooking.reliability_score >= 40 ? "text-amber-500" : "text-red-500",
+                    )}>
                       {currentBooking.reliability_score}%
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {currentBooking.reliability_score >= 70
-                      ? "Prospect tres fiable - haute probabilite de presence"
+                      ? "Prospect très fiable — haute probabilité de présence"
                       : currentBooking.reliability_score >= 40
-                        ? "Fiabilite moyenne - envisagez une confirmation"
-                        : "Faible fiabilite - confirmez avant le RDV"}
+                        ? "Fiabilité moyenne — envisagez une confirmation"
+                        : "Faible fiabilité — confirmez avant le RDV"}
                   </p>
                 </div>
               </CardContent>
@@ -603,19 +495,22 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Prospect info */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Prospect</CardTitle>
+              <CardTitle className="text-sm font-semibold">Prospect</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-lg">
-                  {(currentBooking.prospect_name || "?").charAt(0)}
+                <div className={cn(
+                  "h-12 w-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0",
+                  getAvatarColor(currentBooking.prospect_name || "?"),
+                )}>
+                  {(currentBooking.prospect_name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium">{currentBooking.prospect_name || "Prospect"}</p>
+                  <p className="font-semibold text-sm">{currentBooking.prospect_name || "Prospect"}</p>
                 </div>
               </div>
 
@@ -623,11 +518,8 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
               {currentBooking.prospect_email && (
                 <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`mailto:${currentBooking.prospect_email}`}
-                    className="text-sm hover:underline"
-                  >
+                  <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <a href={`mailto:${currentBooking.prospect_email}`} className="text-sm hover:underline truncate">
                     {currentBooking.prospect_email}
                   </a>
                 </div>
@@ -635,11 +527,8 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
               {currentBooking.prospect_phone && (
                 <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`tel:${currentBooking.prospect_phone}`}
-                    className="text-sm hover:underline"
-                  >
+                  <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <a href={`tel:${currentBooking.prospect_phone}`} className="text-sm hover:underline">
                     {currentBooking.prospect_phone}
                   </a>
                 </div>
@@ -649,17 +538,17 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
               <div className="flex gap-2">
                 {currentBooking.prospect_phone && (
-                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Button variant="outline" size="sm" className="flex-1 h-9 gap-1.5" asChild>
                     <a href={`tel:${currentBooking.prospect_phone}`}>
-                      <Phone className="h-4 w-4 mr-1" />
+                      <Phone className="h-3.5 w-3.5" />
                       Appeler
                     </a>
                   </Button>
                 )}
                 {currentBooking.prospect_email && (
-                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Button variant="outline" size="sm" className="flex-1 h-9 gap-1.5" asChild>
                     <a href={`mailto:${currentBooking.prospect_email}`}>
-                      <Mail className="h-4 w-4 mr-1" />
+                      <Mail className="h-3.5 w-3.5" />
                       Email
                     </a>
                   </Button>
@@ -672,18 +561,19 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
           {currentBooking.assigned_user && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Assigne a</CardTitle>
+                <CardTitle className="text-sm font-semibold">Assigné à</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
-                    {currentBooking.assigned_user.full_name?.charAt(0) || "?"}
+                  <div className={cn(
+                    "h-10 w-10 rounded-lg flex items-center justify-center text-white text-sm font-bold",
+                    getAvatarColor(currentBooking.assigned_user.full_name || "?"),
+                  )}>
+                    {currentBooking.assigned_user.full_name?.charAt(0)?.toUpperCase() || "?"}
                   </div>
                   <div>
-                    <p className="font-medium">
-                      {currentBooking.assigned_user.full_name}
-                    </p>
-                    <Badge variant="outline" className="text-xs capitalize">
+                    <p className="font-medium text-sm">{currentBooking.assigned_user.full_name}</p>
+                    <Badge variant="outline" className="text-[10px] capitalize mt-0.5">
                       {currentBooking.assigned_user.role}
                     </Badge>
                   </div>
@@ -695,20 +585,18 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
           {/* Metadata */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Informations</CardTitle>
+              <CardTitle className="text-sm font-semibold">Informations</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-2.5 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Cree le</span>
-                <span>
-                  {format(new Date(currentBooking.created_at), "d MMM yyyy", {
-                    locale: fr,
-                  })}
-                </span>
+                <span className="text-muted-foreground text-xs">Créé le</span>
+                <span className="text-xs font-medium">{format(new Date(currentBooking.created_at), "d MMM yyyy", { locale: fr })}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Rappel envoye</span>
-                <span>{currentBooking.reminder_sent ? "Oui" : "Non"}</span>
+                <span className="text-muted-foreground text-xs">Rappel envoyé</span>
+                <span className={cn("text-xs font-medium", currentBooking.reminder_sent ? "text-emerald-600" : "text-muted-foreground")}>
+                  {currentBooking.reminder_sent ? "Oui" : "Non"}
+                </span>
               </div>
             </CardContent>
           </Card>
