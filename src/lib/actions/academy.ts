@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiJSON } from "@/lib/ai/client";
+import { notifyMany } from "@/lib/actions/notifications";
 
 export async function getCourseWithPrerequisites(courseId: string, userId: string) {
   const supabase = await createClient();
@@ -1521,16 +1522,7 @@ export async function notifyContentUpdate(courseId: string, changeDescription: s
   }
 
   if (userIds.length > 0) {
-    await supabase.from("notifications").insert(
-      userIds.map((uid) => ({
-        user_id: uid,
-        title: `Mise a jour : ${course.title}`,
-        body: changeDescription,
-        type: "content_update",
-        link: `/academy/${courseId}`,
-        read: false,
-      }))
-    );
+    await notifyMany(userIds, `Mise a jour : ${course.title}`, changeDescription, { type: "content_update", link: `/academy/${courseId}` });
   }
 
   revalidatePath("/academy");

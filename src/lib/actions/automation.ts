@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify } from "@/lib/actions/notifications";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -567,10 +568,8 @@ export async function runUpsellSequence() {
     }
   }
 
-  if (alerts.length > 0) {
-    await supabase.from("notifications").insert(
-      alerts.map((a) => ({ ...a, read: false }))
-    );
+  for (const a of alerts) {
+    await notify(a.user_id, a.title, a.body, { type: a.type, link: a.link });
   }
 
   revalidatePath("/notifications");

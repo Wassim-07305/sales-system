@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { notify } from "@/lib/actions/notifications";
 
 export async function getAnalyticsData() {
   const supabase = await createClient();
@@ -256,13 +257,7 @@ export async function generateWeeklySummary() {
 
   const summary = `Résumé hebdo : CA ${analytics.caThisMonth.toLocaleString("fr-FR")}€ | ${analytics.activeClients} clients actifs | Pipeline ${analytics.pipelineValue.toLocaleString("fr-FR")}€`;
 
-  await supabase.from("notifications").insert({
-    user_id: user.id,
-    title: "📊 Résumé hebdomadaire",
-    body: summary,
-    type: "deal",
-    link: "/analytics",
-  });
+  await notify(user.id, "📊 Résumé hebdomadaire", summary, { type: "deal", link: "/analytics" });
 }
 
 /**

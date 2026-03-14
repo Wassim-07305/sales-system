@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
 import { REWARDS_CATALOG } from "@/lib/reward-definitions";
+import { notify } from "@/lib/actions/notifications";
 
 
 const LEVELS = [
@@ -56,22 +57,16 @@ export async function addPoints(userId: string, points: number, reason: string) 
     })
     .eq("user_id", userId);
 
-  // Level up notification
+  // Level up notification (in-app + push)
   if (newLevel.level > oldLevel.level) {
-    await supabase.from("notifications").insert({
-      user_id: userId,
-      title: `Niveau ${newLevel.level} atteint !`,
-      body: `Félicitations ! Vous êtes maintenant ${newLevel.name} avec ${newTotal} points.`,
+    notify(userId, `Niveau ${newLevel.level} atteint !`, `Félicitations ! Vous êtes maintenant ${newLevel.name} avec ${newTotal} points.`, {
       type: "level_up",
       link: "/challenges",
     });
   }
 
-  // Regular points notification
-  await supabase.from("notifications").insert({
-    user_id: userId,
-    title: `+${points} points`,
-    body: reason,
+  // Regular points notification (in-app + push)
+  notify(userId, `+${points} points`, reason, {
     type: "points",
     link: "/challenges",
   });
@@ -182,11 +177,8 @@ export async function awardBadge(userId: string, badgeId: string) {
   // Award bonus points for earning the badge
   await addPoints(userId, badge.points, `Badge obtenu : ${badge.name}`);
 
-  // Send notification
-  await supabase.from("notifications").insert({
-    user_id: userId,
-    title: `Badge debloque : ${badge.name} !`,
-    body: badge.description,
+  // Send notification (in-app + push)
+  notify(userId, `Badge débloqué : ${badge.name} !`, badge.description, {
     type: "badge",
     link: "/challenges",
   });
@@ -603,11 +595,8 @@ export async function redeemReward(rewardId: string) {
     },
   });
 
-  // Send notification
-  await supabase.from("notifications").insert({
-    user_id: user.id,
-    title: `R\u00e9compense \u00e9chang\u00e9e : ${reward.name}`,
-    body: `Vous avez \u00e9chang\u00e9 ${reward.pointsCost} points contre "${reward.name}". Il vous reste ${newTotal} points.`,
+  // Send notification (in-app + push)
+  notify(user.id, `Récompense échangée : ${reward.name}`, `Vous avez échangé ${reward.pointsCost} points contre "${reward.name}". Il vous reste ${newTotal} points.`, {
     type: "reward",
     link: "/challenges/rewards",
   });
@@ -811,11 +800,8 @@ export async function checkAchievementProgress(userId: string) {
       // Award points
       await addPoints(userId, ach.points, `Achievement debloque : ${ach.name}`);
 
-      // Send notification
-      await supabase.from("notifications").insert({
-        user_id: userId,
-        title: `Achievement debloque : ${ach.name} !`,
-        body: ach.description,
+      // Send notification (in-app + push)
+      notify(userId, `Achievement débloqué : ${ach.name} !`, ach.description, {
         type: "achievement",
         link: "/challenges/achievements",
       });
@@ -879,12 +865,9 @@ export async function submitDailyJournal(data: {
 
   if (error) return { error: error.message };
 
-  // Notify admin/manager about the EOD
-  await supabase.from("notifications").insert({
-    user_id: user.id,
+  // Notify about the EOD (in-app + push)
+  notify(user.id, "EOD soumis", `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`, {
     type: "eod_submitted",
-    title: "EOD soumis",
-    body: `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`,
     link: "/team/journal",
   });
 

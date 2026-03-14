@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify, notifyMany } from "@/lib/actions/notifications";
 
 export async function submitNpsScore(surveyId: string, score: number, comment?: string) {
   const supabase = await createClient();
@@ -20,13 +21,7 @@ export async function submitNpsScore(surveyId: string, score: number, comment?: 
 
   // If score >= 8, trigger testimonial request
   if (score >= 8) {
-    await supabase.from("notifications").insert({
-      user_id: user.id,
-      title: "Partagez votre expérience !",
-      body: "Vous kiffez le Sales System ? Partagez un témoignage pour inspirer la communauté !",
-      type: "testimonial_request",
-      link: "/profile?tab=testimonial",
-    });
+    await notify(user.id, "Partagez votre expérience !", "Vous kiffez le Sales System ? Partagez un témoignage pour inspirer la communauté !", { type: "testimonial_request", link: "/profile?tab=testimonial" });
   }
 
   revalidatePath("/");
@@ -50,16 +45,8 @@ export async function submitTestimonial(content: string, videoUrl?: string) {
     .select("id")
     .in("role", ["admin", "manager"]);
 
-  if (admins) {
-    for (const admin of admins) {
-      await supabase.from("notifications").insert({
-        user_id: admin.id,
-        title: "Nouveau témoignage",
-        body: "Un client a soumis un nouveau témoignage à valider.",
-        type: "testimonial",
-        link: "/customers?tab=testimonials",
-      });
-    }
+  if (admins && admins.length > 0) {
+    await notifyMany(admins.map((a) => a.id), "Nouveau témoignage", "Un client a soumis un nouveau témoignage à valider.", { type: "testimonial", link: "/customers?tab=testimonials" });
   }
 
   revalidatePath("/customers");
@@ -95,13 +82,7 @@ export async function triggerPostClosingNps(dealId: string, clientId: string) {
     sent_at: new Date().toISOString(),
   });
 
-  await supabase.from("notifications").insert({
-    user_id: clientId,
-    title: "Comment s'est passé votre closing ?",
-    body: "Votre deal vient d'être signé ! Donnez-nous votre avis en 30 secondes.",
-    type: "nps",
-    link: "/kpis",
-  });
+  await notify(clientId, "Comment s'est passé votre closing ?", "Votre deal vient d'être signé ! Donnez-nous votre avis en 30 secondes.", { type: "nps", link: "/kpis" });
 }
 
 // ---------- NPS Analytics Dashboard ----------
@@ -257,13 +238,7 @@ export async function checkAndCreateNpsSurveys() {
             sent_at: new Date().toISOString(),
           });
 
-          await supabase.from("notifications").insert({
-            user_id: client.id,
-            title: "Donnez votre avis !",
-            body: `Ça fait ${day} jours que vous êtes avec nous. Comment évaluez-vous votre expérience ?`,
-            type: "nps",
-            link: "/kpis",
-          });
+          await notify(client.id, "Donnez votre avis !", `Ça fait ${day} jours que vous êtes avec nous. Comment évaluez-vous votre expérience ?`, { type: "nps", link: "/kpis" });
         }
       }
     }

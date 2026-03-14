@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify } from "@/lib/actions/notifications";
 
 export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" | "b2c") {
   const supabase = await createClient();
@@ -102,10 +103,7 @@ export async function addComment(postId: string, content: string) {
         .eq("id", user.id)
         .single();
 
-      await supabase.from("notifications").insert({
-        user_id: post.author_id,
-        title: "Nouvelle réponse",
-        body: `${commenter?.full_name || "Quelqu'un"} a répondu à votre post${post.title ? ` "${post.title}"` : ""}`,
+      notify(post.author_id, "Nouvelle réponse", `${commenter?.full_name || "Quelqu'un"} a répondu à votre post${post.title ? ` "${post.title}"` : ""}`, {
         type: "community",
         link: `/community/${postId}`,
       });

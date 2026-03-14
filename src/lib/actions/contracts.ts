@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify, notifyMany } from "@/lib/actions/notifications";
 
 export async function createContract(formData: {
   templateId: string;
@@ -69,10 +70,7 @@ export async function sendContract(contractId: string) {
     .single();
 
   if (contract?.client_id) {
-    await supabase.from("notifications").insert({
-      user_id: contract.client_id,
-      title: "Nouveau contrat à signer",
-      body: "Un contrat vous a été envoyé. Cliquez pour le consulter et le signer.",
+    notify(contract.client_id, "Nouveau contrat à signer", "Un contrat vous a été envoyé. Cliquez pour le consulter et le signer.", {
       type: "contract",
       link: `/contracts/${contractId}`,
     });
@@ -107,14 +105,10 @@ export async function signContract(contractId: string, signatureData: string) {
     .in("role", ["admin", "manager"]);
 
   if (admins) {
-    const notifications = admins.map((admin) => ({
-      user_id: admin.id,
-      title: "Contrat signé",
-      body: "Un client vient de signer son contrat.",
+    notifyMany(admins.map((a) => a.id), "Contrat signé", "Un client vient de signer son contrat.", {
       type: "contract",
       link: `/contracts/${contractId}`,
-    }));
-    await supabase.from("notifications").insert(notifications);
+    });
   }
 
   // Auto-update deal to "Client Signé" stage
@@ -210,14 +204,10 @@ export async function saveSignature(
     .in("role", ["admin", "manager"]);
 
   if (admins) {
-    const notifications = admins.map((admin) => ({
-      user_id: admin.id,
-      title: "Contrat signé",
-      body: `Le contrat a été signé par ${signerName}.`,
+    notifyMany(admins.map((a) => a.id), "Contrat signé", `Le contrat a été signé par ${signerName}.`, {
       type: "contract",
       link: `/contracts/${contractId}`,
-    }));
-    await supabase.from("notifications").insert(notifications);
+    });
   }
 
   // Auto-update deal to "Client Signé" stage

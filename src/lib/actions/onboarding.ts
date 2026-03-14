@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
+import { notify, notifyMany } from "@/lib/actions/notifications";
 
 export async function completeOnboardingStep(
   stepId: string,
@@ -365,14 +366,7 @@ export async function triggerAutoBooking(userId: string) {
   if (error) return { success: false, message: error.message };
 
   // Notify user
-  await supabase.from("notifications").insert({
-    user_id: userId,
-    title: "Appel d'onboarding programme !",
-    body: `Ton premier appel est prevu le ${targetDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} a ${targetDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.`,
-    type: "onboarding_call",
-    link: "/bookings",
-    read: false,
-  });
+  await notify(userId, "Appel d'onboarding programme !", `Ton premier appel est prevu le ${targetDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} a ${targetDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.`, { type: "onboarding_call", link: "/bookings" });
 
   // Notify admins
   const { data: admins } = await supabase
@@ -381,16 +375,7 @@ export async function triggerAutoBooking(userId: string) {
     .in("role", ["admin", "manager"]);
 
   if (admins && admins.length > 0) {
-    await supabase.from("notifications").insert(
-      admins.map((a) => ({
-        user_id: a.id,
-        title: "Nouvel appel d'onboarding",
-        body: `${profile.full_name || "Nouveau client"} — appel programme le ${targetDate.toLocaleDateString("fr-FR")}.`,
-        type: "onboarding_call",
-        link: "/bookings",
-        read: false,
-      })),
-    );
+    await notifyMany(admins.map((a) => a.id), "Nouvel appel d'onboarding", `${profile.full_name || "Nouveau client"} — appel programme le ${targetDate.toLocaleDateString("fr-FR")}.`, { type: "onboarding_call", link: "/bookings" });
   }
 
   revalidatePath("/bookings");

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { logAuditEvent } from "@/lib/actions/audit-log";
+import { notify } from "@/lib/actions/notifications";
 
 // ─── Queries ────────────────────────────────────────────────────────
 
@@ -293,11 +294,8 @@ export async function updateDealStage(dealId: string, stageId: string) {
       const oldStageName = oldStage?.name || "—";
       const newStageName = newStage?.name || "—";
 
-      // In-app notification
-      supabase.from("notifications").insert({
-        user_id: deal.assigned_to,
-        title: "Deal déplacé",
-        body: `"${deal.title}" est passé de ${oldStageName} à ${newStageName}`,
+      // In-app + push notification
+      notify(deal.assigned_to, "Deal déplacé", `"${deal.title}" est passé de ${oldStageName} à ${newStageName}`, {
         type: "deal",
         link: `/crm/${dealId}`,
       });
@@ -632,10 +630,7 @@ export async function createAutoFollowUp(
     ? `Relance IA envoyée via ${channelUsed} pour le deal "${deal.title}" (${daysOverdue}j sans contact).`
     : `Le deal "${deal.title}" n'a pas eu de contact depuis ${daysOverdue} jour(s).`;
 
-  await supabase.from("notifications").insert({
-    user_id: notifyUserId,
-    title: messageSent ? "Relance IA envoyée" : "Relance automatique",
-    body: notifBody,
+  notify(notifyUserId, messageSent ? "Relance IA envoyée" : "Relance automatique", notifBody, {
     type: "follow_up",
     link: `/crm/${dealId}`,
   });

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify, notifyMany } from "@/lib/actions/notifications";
 
 export interface ReadinessBreakdown {
   courseCompletion: number;    // 0-100 — weight 40%
@@ -200,28 +201,13 @@ export async function updateReadinessStatus(userId: string): Promise<ReadinessBr
       .select("id")
       .in("role", ["admin", "manager"]);
 
-    const notifications = (admins || []).map((a) => ({
-      user_id: a.id,
-      type: "placement_ready",
-      title: "Setter pret a etre place !",
-      body: `${profile?.full_name || "Un setter"} a atteint ${readiness.overall}% de preparation et est pret a etre place aupres d'un entrepreneur.`,
-      link: "/team",
-      read: false,
-    }));
-
-    if (notifications.length > 0) {
-      await supabase.from("notifications").insert(notifications);
+    const adminIds = (admins || []).map((a) => a.id);
+    if (adminIds.length > 0) {
+      await notifyMany(adminIds, "Setter pret a etre place !", `${profile?.full_name || "Un setter"} a atteint ${readiness.overall}% de preparation et est pret a etre place aupres d'un entrepreneur.`, { type: "placement_ready", link: "/team" });
     }
 
     // Also notify the setter themselves
-    await supabase.from("notifications").insert({
-      user_id: userId,
-      type: "placement_ready",
-      title: "Felicitations ! Tu es pret a etre place !",
-      body: `Tu as atteint ${readiness.overall}% de preparation. L'equipe va te contacter pour ton placement aupres d'un entrepreneur.`,
-      link: "/dashboard",
-      read: false,
-    });
+    await notify(userId, "Felicitations ! Tu es pret a etre place !", `Tu as atteint ${readiness.overall}% de preparation. L'equipe va te contacter pour ton placement aupres d'un entrepreneur.`, { type: "placement_ready", link: "/dashboard" });
   }
 
   revalidatePath("/dashboard");

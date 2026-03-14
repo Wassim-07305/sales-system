@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
+import { notifyMany } from "@/lib/actions/notifications";
 
 // ---------------------------------------------------------------------------
 // Video Rooms
@@ -219,15 +220,8 @@ export async function sendBroadcast(data: {
 
   // Create notifications for each target user
   if (targetUsers.length > 0) {
-    const notifications = targetUsers.map((t: { id: string }) => ({
-      user_id: t.id,
-      type: "broadcast",
-      title: data.subject || "Nouvelle diffusion",
-      body: data.content.substring(0, 200),
-      read: false,
-    }));
-
-    await supabase.from("notifications").insert(notifications);
+    const userIds = targetUsers.map((t: { id: string }) => t.id);
+    await notifyMany(userIds, data.subject || "Nouvelle diffusion", data.content.substring(0, 200), { type: "broadcast" });
   }
 
   revalidatePath("/chat/broadcast");

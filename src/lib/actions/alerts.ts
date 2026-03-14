@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify, notifyMany } from "@/lib/actions/notifications";
 
 /**
  * Check for various alert conditions and create notifications.
@@ -165,17 +166,8 @@ export async function runSmartAlerts() {
     }
   }
 
-  if (uniqueAlerts.length > 0) {
-    await supabase.from("notifications").insert(
-      uniqueAlerts.map((a) => ({
-        user_id: a.userId,
-        title: a.title,
-        body: a.body,
-        type: a.type,
-        link: a.link,
-        read: false,
-      }))
-    );
+  for (const a of uniqueAlerts) {
+    await notify(a.userId, a.title, a.body, { type: a.type, link: a.link });
   }
 
   revalidatePath("/notifications");
@@ -325,14 +317,7 @@ export async function sendMonthlyValueReports() {
       "Continue sur cette lancee ce mois-ci !",
     ].filter(Boolean);
 
-    await supabase.from("notifications").insert({
-      user_id: client.id,
-      title: `Ton bilan de ${monthName}`,
-      body: bodyLines.join("\n"),
-      type: "monthly_value_report",
-      link: "/dashboard",
-      read: false,
-    });
+    await notify(client.id, `Ton bilan de ${monthName}`, bodyLines.join("\n"), { type: "monthly_value_report", link: "/dashboard" });
 
     sentCount++;
   }

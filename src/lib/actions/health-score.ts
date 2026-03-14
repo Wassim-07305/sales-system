@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { notify } from "@/lib/actions/notifications";
 
 export async function calculateHealthScore(clientId: string): Promise<number> {
   const supabase = await createClient();
@@ -111,13 +112,7 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
           .limit(1);
 
         if (!existing || existing.length === 0) {
-          await supabase.from("notifications").insert({
-            user_id: admin.id,
-            title: "Client en zone rouge",
-            body: `${profile?.full_name || "Un client"} a un health score de ${healthScore}. ${clientId}`,
-            type: "health_alert",
-            link: "/customers",
-          });
+          await notify(admin.id, "Client en zone rouge", `${profile?.full_name || "Un client"} a un health score de ${healthScore}. ${clientId}`, { type: "health_alert", link: "/customers" });
         }
       }
     }

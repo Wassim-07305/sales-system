@@ -3,6 +3,63 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Lightweight helper: inserts a notification in DB + sends web push.
+ * Designed to be called from any server action without creating a new Supabase client.
+ * Fire-and-forget — never throws.
+ */
+export async function notify(
+  userId: string,
+  title: string,
+  body: string,
+  opts?: { link?: string; type?: string }
+) {
+  try {
+    const supabase = await createClient();
+    // 1. Insert notification in DB
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      title,
+      body,
+      type: opts?.type || "push",
+      link: opts?.link || null,
+    });
+    // 2. Send web push (fire-and-forget)
+    const { sendPush } = await import("@/lib/actions/push");
+    sendPush(userId, title, body, opts?.link).catch(() => {});
+  } catch {
+    // Never block the calling action
+  }
+}
+
+/**
+ * Send push notifications to multiple users.
+ * Fire-and-forget — never throws.
+ */
+export async function notifyMany(
+  userIds: string[],
+  title: string,
+  body: string,
+  opts?: { link?: string; type?: string }
+) {
+  try {
+    const supabase = await createClient();
+    const notifications = userIds.map((id) => ({
+      user_id: id,
+      title,
+      body,
+      type: opts?.type || "push",
+      link: opts?.link || null,
+    }));
+    await supabase.from("notifications").insert(notifications);
+    // Send push to each user (fire-and-forget)
+    const { sendBulkPush } = await import("@/lib/actions/push");
+    sendBulkPush(userIds, title, body, opts?.link).catch(() => {});
+  } catch {
+    // Never block
+  }
+}
+
 export async function createNotification(data: {
   userId: string;
   title: string;
@@ -10,13 +67,9 @@ export async function createNotification(data: {
   type?: string;
   link?: string;
 }) {
-  const supabase = await createClient();
-  await supabase.from("notifications").insert({
-    user_id: data.userId,
-    title: data.title,
-    body: data.body || null,
-    type: data.type || null,
-    link: data.link || null,
+  await notify(data.userId, data.title, data.body || "", {
+    link: data.link,
+    type: data.type,
   });
 }
 
