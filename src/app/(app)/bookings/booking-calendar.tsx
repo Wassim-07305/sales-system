@@ -58,33 +58,33 @@ const statusConfig: Record<
 > = {
   confirmed: {
     label: "Confirmé",
-    bg: "bg-blue-500/10 border-blue-500/20",
-    text: "text-blue-600",
-    dot: "bg-blue-500",
+    bg: "bg-brand/10 border-brand/20",
+    text: "text-brand",
+    dot: "bg-brand",
   },
   completed: {
     label: "Terminé",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-    text: "text-emerald-600",
-    dot: "bg-emerald-500",
+    bg: "bg-foreground/10 border-foreground/20",
+    text: "text-foreground",
+    dot: "bg-foreground",
   },
   no_show: {
     label: "No-show",
-    bg: "bg-red-500/10 border-red-500/20",
-    text: "text-red-600",
-    dot: "bg-red-500",
-  },
-  cancelled: {
-    label: "Annulé",
-    bg: "bg-muted/50 border-border/40",
+    bg: "bg-muted/60 border-border/50",
     text: "text-muted-foreground",
     dot: "bg-muted-foreground",
   },
+  cancelled: {
+    label: "Annulé",
+    bg: "bg-muted/40 border-border/30",
+    text: "text-muted-foreground/60",
+    dot: "bg-muted-foreground/40",
+  },
   rescheduled: {
     label: "Reprogrammé",
-    bg: "bg-amber-500/10 border-amber-500/20",
-    text: "text-amber-600",
-    dot: "bg-amber-500",
+    bg: "bg-muted/50 border-border/40",
+    text: "text-muted-foreground",
+    dot: "bg-muted-foreground",
   },
 };
 
@@ -106,10 +106,10 @@ const CALL_RESULT_LABELS: Record<CallResult, string> = {
 };
 
 const CALL_RESULT_COLORS: Record<CallResult, string> = {
-  vente_realisee: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  non_realisee: "bg-red-500/10 text-red-600 border-red-500/20",
-  suivi_prevu: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  no_show: "bg-muted text-muted-foreground border-border/40",
+  vente_realisee: "bg-brand/10 text-brand border-brand/20",
+  non_realisee: "bg-foreground/10 text-foreground border-foreground/20",
+  suivi_prevu: "bg-muted/60 text-muted-foreground border-border/50",
+  no_show: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
 
 // ─── Time period filter ──────────────────────────────────────────────
@@ -261,31 +261,31 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
             label: "Total RDV",
             value: kpis.total,
             icon: CalendarDays,
-            color: "bg-blue-500/10 text-blue-600",
+            color: "bg-brand/10 text-brand",
           },
           {
             label: "Confirmés",
             value: kpis.confirmed,
             icon: CalendarCheck,
-            color: "bg-violet-500/10 text-violet-600",
+            color: "bg-brand/10 text-brand",
           },
           {
             label: "Terminés",
             value: kpis.completed,
             icon: CheckCircle2,
-            color: "bg-emerald-500/10 text-emerald-600",
+            color: "bg-brand/10 text-brand",
           },
           {
             label: "No-shows",
             value: kpis.noShow,
             icon: UserX,
-            color: "bg-red-500/10 text-red-600",
+            color: "bg-brand/10 text-brand",
           },
           {
             label: "Taux annulation",
             value: `${kpis.cancelRate}%`,
             icon: Percent,
-            color: "bg-amber-500/10 text-amber-600",
+            color: "bg-brand/10 text-brand",
           },
         ].map((kpi) => (
           <div
