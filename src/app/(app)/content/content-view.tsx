@@ -41,9 +41,9 @@ const platformColors: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  scheduled: "bg-orange-100 text-orange-700",
-  published: "bg-green-100 text-green-700",
+  draft: "bg-muted/50 text-muted-foreground border-border/50",
+  scheduled: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  published: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
 };
 
 const statusLabels: Record<string, string> = { draft: "Brouillon", scheduled: "Planifié", published: "Publié" };
