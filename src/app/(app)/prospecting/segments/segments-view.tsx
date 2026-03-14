@@ -422,7 +422,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeFilterRow(index)}
-                          className="text-muted-foreground hover:text-red-400 px-2"
+                          className="text-muted-foreground hover:text-destructive px-2"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -475,8 +475,8 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Users className="h-5 w-5 text-blue-400" />
+              <div className="p-2 rounded-lg bg-muted/40">
+                <Users className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -491,8 +491,8 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <BarChart3 className="h-5 w-5 text-purple-400" />
+              <div className="p-2 rounded-lg bg-foreground/10">
+                <BarChart3 className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -539,7 +539,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
                       onClick={() => handleDelete(segment)}
                       disabled={isPending}
                     >

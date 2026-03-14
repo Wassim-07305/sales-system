@@ -206,20 +206,20 @@ export function EnrichmentView({ prospects }: Props) {
   function getConfidenceBadge(confiance: number) {
     if (confiance >= 70)
       return (
-        <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 gap-1">
+        <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
           <Check className="h-3 w-3" />
           {confiance}%
         </Badge>
       );
     if (confiance >= 40)
       return (
-        <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 gap-1">
+        <Badge className="bg-muted/60 text-muted-foreground border border-border/50 gap-1">
           <AlertTriangle className="h-3 w-3" />
           {confiance}%
         </Badge>
       );
     return (
-      <Badge className="bg-red-500/10 text-red-600 border border-red-500/20 gap-1">
+      <Badge className="bg-foreground/10 text-foreground border border-foreground/20 gap-1">
         <AlertTriangle className="h-3 w-3" />
         {confiance}%
       </Badge>
@@ -268,8 +268,8 @@ export function EnrichmentView({ prospects }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-amber-500" />
+            <div className="h-10 w-10 rounded-lg bg-muted/60 ring-1 ring-border/50 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <p className="text-2xl font-bold">{stats.pending}</p>
@@ -281,8 +281,8 @@ export function EnrichmentView({ prospects }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-blue-500" />
+            <div className="h-10 w-10 rounded-lg bg-muted/40 ring-1 ring-border/30 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <p className="text-2xl font-bold">{stats.completionRate}%</p>
@@ -383,7 +383,7 @@ export function EnrichmentView({ prospects }: Props) {
                         className={
                           prospect.missing_count === 0
                             ? "border-brand/30 text-brand"
-                            : "border-amber-500/30 text-amber-500"
+                            : "border-muted-foreground/30 text-muted-foreground"
                         }
                       >
                         {getMissingLabel(prospect.missing_count)}
@@ -467,7 +467,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Taille entreprise */}
                           <div className="flex items-start gap-2">
-                            <Users className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                            <Users className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground">
                                 Taille entreprise
@@ -480,7 +480,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Poste probable */}
                           <div className="flex items-start gap-2">
-                            <Briefcase className="h-4 w-4 text-purple-500 mt-0.5 shrink-0" />
+                            <Briefcase className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground">
                                 Poste probable
@@ -493,7 +493,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Budget estimé */}
                           <div className="flex items-start gap-2">
-                            <Target className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                            <Target className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground">
                                 Budget estimé
@@ -506,7 +506,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Meilleur moment */}
                           <div className="flex items-start gap-2">
-                            <Clock className="h-4 w-4 text-cyan-500 mt-0.5 shrink-0" />
+                            <Clock className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground">
                                 Meilleur moment de contact
@@ -519,7 +519,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Site web */}
                           <div className="flex items-start gap-2">
-                            <Globe className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                            <Globe className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground">
                                 Site web probable
@@ -533,7 +533,7 @@ export function EnrichmentView({ prospects }: Props) {
                           {/* LinkedIn */}
                           {prospect.enrichment.profil_linkedin_probable && (
                             <div className="flex items-start gap-2">
-                              <Linkedin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                              <Linkedin className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
                               <div>
                                 <p className="text-xs text-muted-foreground">
                                   LinkedIn probable
@@ -548,7 +548,7 @@ export function EnrichmentView({ prospects }: Props) {
                           {/* Twitter */}
                           {prospect.enrichment.profil_twitter_probable && (
                             <div className="flex items-start gap-2">
-                              <Twitter className="h-4 w-4 text-sky-500 mt-0.5 shrink-0" />
+                              <Twitter className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                               <div>
                                 <p className="text-xs text-muted-foreground">
                                   Twitter/X probable
@@ -679,14 +679,14 @@ export function EnrichmentView({ prospects }: Props) {
                   <span className="font-medium">{companyInsights.secteur}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Users className="h-4 w-4 text-blue-500 shrink-0" />
+                  <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="text-muted-foreground">Taille:</span>
                   <span className="font-medium">
                     {companyInsights.taille_estimee} employés
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Target className="h-4 w-4 text-amber-500 shrink-0" />
+                  <Target className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="text-muted-foreground">Budget:</span>
                   <span className="font-medium">
                     {companyInsights.budget_potentiel}
@@ -718,7 +718,7 @@ export function EnrichmentView({ prospects }: Props) {
                   <ul className="space-y-1">
                     {companyInsights.defis_cles.map((d, i) => (
                       <li key={i} className="text-xs flex items-start gap-1.5">
-                        <AlertTriangle className="h-3 w-3 text-amber-500 mt-0.5 shrink-0" />
+                        <AlertTriangle className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
                         {d}
                       </li>
                     ))}

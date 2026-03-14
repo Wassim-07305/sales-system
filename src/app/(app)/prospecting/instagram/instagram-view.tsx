@@ -81,12 +81,12 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   new: "bg-muted text-muted-foreground",
-  contacted: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
-  replied: "bg-green-500/10 text-green-600 border border-green-500/20",
-  interested: "bg-purple-500/10 text-purple-600 border border-purple-500/20",
+  contacted: "bg-muted/40 text-muted-foreground/60 border border-border/30",
+  replied: "bg-brand/10 text-brand border border-brand/20",
+  interested: "bg-foreground/10 text-foreground border border-foreground/20",
   booked: "bg-brand/20 text-brand-dark",
-  converted: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
-  lost: "bg-red-500/10 text-red-600 border border-red-500/20",
+  converted: "bg-brand/10 text-brand border border-brand/20",
+  lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
 export function InstagramView({ prospects }: Props) {
@@ -188,7 +188,7 @@ export function InstagramView({ prospects }: Props) {
         title="Instagram"
         description="Prospection et outils Instagram"
       >
-        <Badge variant="outline" className="bg-pink-500/10 text-pink-600 border-pink-500/20 gap-1">
+        <Badge variant="outline" className="bg-muted/60 text-muted-foreground border-border/50 gap-1">
           <Instagram className="h-3 w-3" />
           {prospects.length} prospects
         </Badge>
@@ -247,9 +247,9 @@ export function InstagramView({ prospects }: Props) {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               {story.type === "video" ? (
-                                <Video className="h-4 w-4 text-purple-500" />
+                                <Video className="h-4 w-4 text-foreground" />
                               ) : (
-                                <ImageIcon className="h-4 w-4 text-blue-500" />
+                                <ImageIcon className="h-4 w-4 text-muted-foreground" />
                               )}
                               <span className="text-sm font-medium capitalize">
                                 {story.type}
@@ -267,7 +267,7 @@ export function InstagramView({ prospects }: Props) {
                             {story.hasPoll && (
                               <Badge
                                 variant="outline"
-                                className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                className="text-xs bg-muted/60 text-muted-foreground border-border/50"
                               >
                                 <BarChart3 className="h-3 w-3 mr-1" />
                                 Sondage : {story.pollQuestion}
@@ -276,7 +276,7 @@ export function InstagramView({ prospects }: Props) {
                             {story.hasQuestion && (
                               <Badge
                                 variant="outline"
-                                className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/20"
+                                className="text-xs bg-foreground/10 text-foreground border-foreground/20"
                               >
                                 <HelpCircle className="h-3 w-3 mr-1" />
                                 Question : {story.questionText}
@@ -391,7 +391,7 @@ export function InstagramView({ prospects }: Props) {
                     className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-400 via-red-400 to-yellow-400 flex items-center justify-center text-white font-bold">
+                      <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center text-foreground font-bold">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -402,7 +402,7 @@ export function InstagramView({ prospects }: Props) {
                               href={prospect.profile_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-pink-600"
+                              className="text-muted-foreground hover:text-foreground"
                             >
                               <ExternalLink className="h-3 w-3" />
                             </a>
@@ -421,7 +421,7 @@ export function InstagramView({ prospects }: Props) {
                       {/* Mode Duo IA+Humain toggle */}
                       <div className="flex items-center gap-1.5">
                         {autoModeIds.has(prospect.id) && (
-                          <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20 text-[10px] gap-1">
+                          <Badge className="bg-foreground/10 text-foreground border border-foreground/20 text-[10px] gap-1">
                             <Bot className="h-3 w-3" />
                             IA Auto
                           </Badge>

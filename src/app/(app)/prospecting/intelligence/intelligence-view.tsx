@@ -121,21 +121,21 @@ interface Props {
 // ─── Constants ──────────────────────────────────────────────────────
 
 const RELEVANCE_COLORS: Record<string, string> = {
-  forte: "bg-green-500/20 text-green-400 border-green-500/30",
-  moyenne: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  faible: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
+  forte: "bg-brand/10 text-brand border-brand/20",
+  moyenne: "bg-muted/60 text-muted-foreground border-border/50",
+  faible: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  haute: "bg-red-500/20 text-red-400 border-red-500/30",
-  moyenne: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  basse: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  haute: "bg-foreground/10 text-foreground border-foreground/20",
+  moyenne: "bg-muted/60 text-muted-foreground border-border/50",
+  basse: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
 
 const IMPACT_COLORS: Record<string, string> = {
-  positif: "bg-green-500/20 text-green-400 border-green-500/30",
-  neutre: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
-  negatif: "bg-red-500/20 text-red-400 border-red-500/30",
+  positif: "bg-brand/10 text-brand border-brand/20",
+  neutre: "bg-muted/40 text-muted-foreground/60 border-border/30",
+  negatif: "bg-foreground/10 text-foreground border-foreground/20",
 };
 
 // ─── Component ──────────────────────────────────────────────────────
@@ -575,7 +575,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                 </CardHeader>
                 <CardContent className="flex-1 space-y-3">
                   <div>
-                    <p className="text-xs font-medium text-green-400 mb-1">
+                    <p className="text-xs font-medium text-brand mb-1">
                       Forces
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -583,7 +583,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-red-400 mb-1">
+                    <p className="text-xs font-medium text-foreground mb-1">
                       Faiblesses
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -639,7 +639,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                   <div className="border-t px-6 py-4 space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-green-400 flex items-center gap-1">
+                        <p className="text-xs font-semibold text-brand flex items-center gap-1">
                           <ShieldAlert className="size-3" /> Forces
                         </p>
                         {analyses[comp.id].swot.strengths.map((s, i) => (
@@ -649,7 +649,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                         ))}
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-red-400 flex items-center gap-1">
+                        <p className="text-xs font-semibold text-foreground flex items-center gap-1">
                           <AlertTriangle className="size-3" /> Faiblesses
                         </p>
                         {analyses[comp.id].swot.weaknesses.map((w, i) => (
@@ -659,7 +659,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                         ))}
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-blue-400 flex items-center gap-1">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                           <Lightbulb className="size-3" /> Opportunités
                         </p>
                         {analyses[comp.id].swot.opportunities.map((o, i) => (
@@ -669,7 +669,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                         ))}
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-amber-400 flex items-center gap-1">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                           <AlertTriangle className="size-3" /> Menaces
                         </p>
                         {analyses[comp.id].swot.threats.map((t, i) => (
@@ -880,7 +880,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <AlertTriangle className="size-4 text-amber-400" />
+                    <AlertTriangle className="size-4 text-muted-foreground" />
                     Risques
                   </CardTitle>
                 </CardHeader>
@@ -889,7 +889,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                     {insights.risks.map((risk, i) => (
                       <div
                         key={i}
-                        className="p-3 rounded-lg bg-red-500/5 border border-red-500/10"
+                        className="p-3 rounded-lg bg-foreground/5 border border-foreground/10"
                       >
                         <p className="text-sm font-medium">{risk.title}</p>
                         <p className="text-xs text-muted-foreground mt-1">

@@ -58,13 +58,13 @@ interface SegmentStats {
 
 const statusColors: Record<string, string> = {
   new: "bg-muted/50 text-muted-foreground border-border/50",
-  contacted: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  replied: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  booked: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  qualified: "bg-purple-500/10 text-purple-600 border-purple-500/20",
-  converted: "bg-brand/10 text-brand-dark border-brand/20",
-  lost: "bg-red-500/10 text-red-500 border-red-500/20",
-  not_interested: "bg-red-500/10 text-red-500 border-red-500/20",
+  contacted: "bg-foreground/10 text-foreground border-foreground/20",
+  replied: "bg-brand/10 text-brand border-brand/20",
+  booked: "bg-brand/15 text-brand border-brand/25",
+  qualified: "bg-foreground/10 text-foreground border-foreground/20",
+  converted: "bg-brand/10 text-brand border-brand/20",
+  lost: "bg-muted/40 text-muted-foreground/60 border-border/30",
+  not_interested: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
 
 const statusLabels: Record<string, string> = {
@@ -79,9 +79,9 @@ const statusLabels: Record<string, string> = {
 };
 
 const temperatureConfig: Record<string, { label: string; color: string; icon: typeof Flame }> = {
-  hot: { label: "Chaud", color: "bg-red-500/10 text-red-600 border-red-500/20", icon: Flame },
-  warm: { label: "Tiède", color: "bg-orange-500/10 text-orange-600 border-orange-500/20", icon: Thermometer },
-  cold: { label: "Froid", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: Snowflake },
+  hot: { label: "Chaud", color: "bg-foreground/10 text-foreground border-foreground/20", icon: Flame },
+  warm: { label: "Tiède", color: "bg-muted/60 text-muted-foreground border-border/50", icon: Thermometer },
+  cold: { label: "Froid", color: "bg-muted/40 text-muted-foreground/60 border-border/30", icon: Snowflake },
 };
 
 export function ProspectingView({
@@ -112,9 +112,9 @@ export function ProspectingView({
   const [isRecalculating, startRecalcTransition] = useTransition();
 
   function getScoreBadgeStyle(score: number) {
-    if (score >= 75) return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
-    if (score >= 45) return "bg-orange-500/10 text-orange-600 border-orange-500/20";
-    return "bg-red-500/10 text-red-600 border-red-500/20";
+    if (score >= 75) return "bg-brand/10 text-brand border-brand/20";
+    if (score >= 45) return "bg-foreground/10 text-foreground border-foreground/20";
+    return "bg-muted/40 text-muted-foreground/60 border-border/30";
   }
 
   async function handleRecalculateAll() {
@@ -299,51 +299,51 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-red-300",
-            filterTemperature === "hot" && "ring-2 ring-red-400"
+            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            filterTemperature === "hot" && "ring-2 ring-brand/50"
           )}
           onClick={() => setFilterTemperature(filterTemperature === "hot" ? "all" : "hot")}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-              <Flame className="h-5 w-5 text-red-600" />
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+              <Flame className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none text-red-600">{segmentStats.hot}</p>
+              <p className="text-2xl font-bold leading-none">{segmentStats.hot}</p>
               <p className="text-xs text-muted-foreground mt-1">Chauds</p>
             </div>
           </CardContent>
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-orange-300",
-            filterTemperature === "warm" && "ring-2 ring-orange-400"
+            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            filterTemperature === "warm" && "ring-2 ring-brand/50"
           )}
           onClick={() => setFilterTemperature(filterTemperature === "warm" ? "all" : "warm")}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
-              <Thermometer className="h-5 w-5 text-orange-600" />
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+              <Thermometer className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none text-orange-600">{segmentStats.warm}</p>
+              <p className="text-2xl font-bold leading-none">{segmentStats.warm}</p>
               <p className="text-xs text-muted-foreground mt-1">Tièdes</p>
             </div>
           </CardContent>
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-blue-300",
-            filterTemperature === "cold" && "ring-2 ring-blue-400"
+            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            filterTemperature === "cold" && "ring-2 ring-brand/50"
           )}
           onClick={() => setFilterTemperature(filterTemperature === "cold" ? "all" : "cold")}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-              <Snowflake className="h-5 w-5 text-blue-600" />
+            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+              <Snowflake className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none text-blue-600">{segmentStats.cold}</p>
+              <p className="text-2xl font-bold leading-none">{segmentStats.cold}</p>
               <p className="text-xs text-muted-foreground mt-1">Froids</p>
             </div>
           </CardContent>
@@ -625,10 +625,10 @@ export function ProspectingView({
                                 className={cn(
                                   "h-full rounded-full transition-all",
                                   prospect.computed_score.total_score >= 75
-                                    ? "bg-green-500"
+                                    ? "bg-brand"
                                     : prospect.computed_score.total_score >= 45
-                                    ? "bg-orange-400"
-                                    : "bg-red-500"
+                                    ? "bg-muted-foreground"
+                                    : "bg-muted-foreground/40"
                                 )}
                                 style={{ width: `${prospect.computed_score.total_score}%` }}
                               />

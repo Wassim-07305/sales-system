@@ -164,7 +164,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
                 </div>
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-3.5 w-3.5" /></Button>
-                  <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{t.content}</p>

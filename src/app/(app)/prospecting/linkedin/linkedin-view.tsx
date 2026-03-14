@@ -78,12 +78,12 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   new: "bg-muted text-muted-foreground",
-  contacted: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
-  replied: "bg-green-500/10 text-green-600 border border-green-500/20",
-  interested: "bg-purple-500/10 text-purple-600 border border-purple-500/20",
+  contacted: "bg-muted/40 text-muted-foreground/60 border border-border/30",
+  replied: "bg-brand/10 text-brand border border-brand/20",
+  interested: "bg-foreground/10 text-foreground border border-foreground/20",
   booked: "bg-brand/20 text-brand-dark",
-  converted: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
-  lost: "bg-red-500/10 text-red-600 border border-red-500/20",
+  converted: "bg-brand/10 text-brand border border-brand/20",
+  lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
 export function LinkedinView({ prospects, syncStatus }: Props) {
@@ -207,7 +207,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
         title="LinkedIn"
         description="Prospection et outils LinkedIn"
       >
-        <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
+        <Badge variant="outline" className="bg-foreground/10 text-foreground border-foreground/20 gap-1">
           <Linkedin className="h-3 w-3" />
           {prospects.length} prospects
         </Badge>
@@ -221,8 +221,8 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
             <div className="flex items-center gap-2">
               {syncStatus?.connected ? (
                 <>
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span className="text-sm font-medium text-emerald-600">
+                  <CheckCircle2 className="h-4 w-4 text-brand" />
+                  <span className="text-sm font-medium text-brand">
                     Extension connectée
                   </span>
                 </>
@@ -326,8 +326,8 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                       <Badge
                         className={
                           (profileResult.score as number) >= 70
-                            ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                            ? "bg-brand/10 text-brand border border-brand/20"
+                            : "bg-muted/60 text-muted-foreground border border-border/50"
                         }
                       >
                         {profileResult.score as number}/100
@@ -502,7 +502,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                     className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center text-blue-600 font-bold">
+                      <div className="h-10 w-10 rounded-lg bg-foreground/10 ring-1 ring-foreground/20 flex items-center justify-center text-foreground font-bold">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -513,7 +513,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                               href={prospect.profile_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-blue-600"
+                              className="text-muted-foreground hover:text-foreground"
                             >
                               <ExternalLink className="h-3 w-3" />
                             </a>
@@ -532,7 +532,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                       {/* Mode Duo IA+Humain toggle */}
                       <div className="flex items-center gap-1.5">
                         {autoModeIds.has(prospect.id) && (
-                          <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20 text-[10px] gap-1">
+                          <Badge className="bg-foreground/10 text-foreground border border-foreground/20 text-[10px] gap-1">
                             <Bot className="h-3 w-3" />
                             IA Auto
                           </Badge>

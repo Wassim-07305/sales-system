@@ -218,7 +218,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
 
   function getScheduleColor(dateStr: string) {
     const date = new Date(dateStr);
-    if (isPast(date) && !isToday(date)) return "bg-red-500/10 text-red-600 border-red-500/20";
+    if (isPast(date) && !isToday(date)) return "bg-foreground/10 text-foreground border-foreground/20";
     if (isToday(date)) return "bg-brand/20 text-brand-dark border-brand/30";
     return "bg-muted/50 text-muted-foreground border-border/50";
   }
@@ -475,8 +475,8 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
-                  <CalendarCheck className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-lg bg-muted/40 ring-1 ring-border/30 flex items-center justify-center">
+                  <CalendarCheck className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{upcomingTasks.length}</p>
@@ -486,8 +486,8 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-brand" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completedTasks.length}</p>

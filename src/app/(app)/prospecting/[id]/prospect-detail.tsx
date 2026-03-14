@@ -74,17 +74,17 @@ interface ProspectDetailProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  new: { label: "Nouveau", color: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
-  contacted: { label: "Contacte", color: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  replied: { label: "A repondu", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  booked: { label: "RDV pris", color: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
-  not_interested: { label: "Pas interesse", color: "bg-muted/50 text-muted-foreground border-border/50" },
+  new: { label: "Nouveau", color: "bg-muted/40 text-muted-foreground/60 border-border/30" },
+  contacted: { label: "Contacté", color: "bg-muted/60 text-muted-foreground border-border/50" },
+  replied: { label: "A répondu", color: "bg-brand/10 text-brand border-brand/20" },
+  booked: { label: "RDV pris", color: "bg-foreground/10 text-foreground border-foreground/20" },
+  not_interested: { label: "Pas intéressé", color: "bg-muted/50 text-muted-foreground border-border/50" },
 };
 
 const tempColors: Record<string, string> = {
-  hot: "bg-red-500/10 text-red-600 border-red-500/20",
-  warm: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  cold: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  hot: "bg-foreground/10 text-foreground border-foreground/20",
+  warm: "bg-muted/60 text-muted-foreground border-border/50",
+  cold: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
 
 const platformIcons: Record<string, typeof Linkedin> = {
@@ -392,7 +392,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+              <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -408,7 +408,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 <AlertDialogAction
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-destructive hover:bg-destructive/90"
                 >
                   {deleting ? "Suppression..." : "Supprimer"}
                 </AlertDialogAction>

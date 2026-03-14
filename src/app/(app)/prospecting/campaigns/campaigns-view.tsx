@@ -190,10 +190,10 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
 
   function getStatusBadge(campaign: DripCampaign) {
     if (campaign.is_active) {
-      return <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Active</Badge>;
+      return <Badge className="bg-brand/10 text-brand border border-brand/20">Active</Badge>;
     }
     if (campaign.executions_count && campaign.executions_count > 0 && campaign.completed_count === campaign.executions_count) {
-      return <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20">Terminée</Badge>;
+      return <Badge className="bg-muted/40 text-muted-foreground/60 border border-border/30">Terminée</Badge>;
     }
     return <Badge variant="outline" className="text-muted-foreground">En pause</Badge>;
   }
@@ -405,7 +405,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-brand">
               {campaigns.filter((c) => c.is_active).length}
             </p>
             <p className="text-xs text-muted-foreground">Actives</p>

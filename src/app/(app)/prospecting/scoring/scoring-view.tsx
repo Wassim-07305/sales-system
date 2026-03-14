@@ -90,25 +90,25 @@ const tierConfig: Record<ScoreTier, { label: string; color: string; badgeClass: 
   froid: {
     label: "Froid",
     color: "#3b82f6",
-    badgeClass: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    badgeClass: "bg-muted/40 text-muted-foreground/60 border-border/30",
     icon: Snowflake,
   },
   tiede: {
-    label: "Tiede",
+    label: "Tiède",
     color: "#f59e0b",
-    badgeClass: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    badgeClass: "bg-muted/60 text-muted-foreground border-border/50",
     icon: Thermometer,
   },
   chaud: {
     label: "Chaud",
     color: "#f97316",
-    badgeClass: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+    badgeClass: "bg-foreground/10 text-foreground border-foreground/20",
     icon: Flame,
   },
   brulant: {
-    label: "Brulant",
+    label: "Brûlant",
     color: "#ef4444",
-    badgeClass: "bg-red-500/10 text-red-600 border-red-500/20",
+    badgeClass: "bg-foreground/10 text-foreground border-foreground/20",
     icon: Zap,
   },
 };

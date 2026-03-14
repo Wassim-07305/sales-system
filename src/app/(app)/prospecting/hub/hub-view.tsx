@@ -93,9 +93,9 @@ export function HubView({ overview, whatsappStats }: Props) {
   const [recalculating, setRecalculating] = useState(false);
 
   const platformIcons: Record<string, React.ReactNode> = {
-    linkedin: <Linkedin className="h-5 w-5 text-blue-600" />,
-    instagram: <Instagram className="h-5 w-5 text-pink-500" />,
-    whatsapp: <Phone className="h-5 w-5 text-green-600" />,
+    linkedin: <Linkedin className="h-5 w-5 text-foreground" />,
+    instagram: <Instagram className="h-5 w-5 text-muted-foreground" />,
+    whatsapp: <Phone className="h-5 w-5 text-brand" />,
   };
 
   const platformLabels: Record<string, string> = {
@@ -105,9 +105,9 @@ export function HubView({ overview, whatsappStats }: Props) {
   };
 
   const platformColors: Record<string, string> = {
-    linkedin: "bg-blue-500/10 border-blue-500/20",
-    instagram: "bg-pink-500/10 border-pink-500/20",
-    whatsapp: "bg-green-500/10 border-green-500/20",
+    linkedin: "bg-foreground/5 border-foreground/10",
+    instagram: "bg-muted/60 border-border/50",
+    whatsapp: "bg-brand/10 border-brand/20",
   };
 
   async function handleAnalyzeProfile() {
@@ -207,28 +207,28 @@ export function HubView({ overview, whatsappStats }: Props) {
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <MessageCircle className="h-4 w-4 text-blue-500" />
+                    <MessageCircle className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <p className="text-2xl font-bold">{p.contacted}</p>
                   <p className="text-xs text-muted-foreground">Contactés</p>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <Reply className="h-4 w-4 text-green-500" />
+                    <Reply className="h-4 w-4 text-brand" />
                   </div>
                   <p className="text-2xl font-bold">{p.replied}</p>
                   <p className="text-xs text-muted-foreground">Répondu</p>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <CalendarCheck className="h-4 w-4 text-purple-500" />
+                    <CalendarCheck className="h-4 w-4 text-foreground" />
                   </div>
                   <p className="text-2xl font-bold">{p.booked}</p>
                   <p className="text-xs text-muted-foreground">RDV</p>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
-                    <TrendingUp className="h-4 w-4 text-orange-500" />
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <p className="text-2xl font-bold">{p.avgScore}</p>
                   <p className="text-xs text-muted-foreground">Score moy.</p>
@@ -245,7 +245,7 @@ export function HubView({ overview, whatsappStats }: Props) {
               {platformIcons.whatsapp}
               WhatsApp
               {whatsappStats?.connected ? (
-                <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] ml-auto">
+                <Badge className="bg-brand/10 text-brand border border-brand/20 text-[10px] ml-auto">
                   Connecté
                 </Badge>
               ) : (
@@ -259,21 +259,21 @@ export function HubView({ overview, whatsappStats }: Props) {
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-1">
-                  <MessageCircle className="h-4 w-4 text-green-600" />
+                  <MessageCircle className="h-4 w-4 text-brand" />
                 </div>
                 <p className="text-2xl font-bold">{whatsappStats?.conversations ?? 0}</p>
                 <p className="text-xs text-muted-foreground">Conversations</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-1">
-                  <Send className="h-4 w-4 text-blue-500" />
+                  <Send className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <p className="text-2xl font-bold">{whatsappStats?.messagesSent ?? 0}</p>
                 <p className="text-xs text-muted-foreground">Envoyés</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center mb-1">
-                  <ArrowDownRight className="h-4 w-4 text-emerald-500" />
+                  <ArrowDownRight className="h-4 w-4 text-brand" />
                 </div>
                 <p className="text-2xl font-bold">{whatsappStats?.messagesReceived ?? 0}</p>
                 <p className="text-xs text-muted-foreground">Reçus</p>
@@ -405,10 +405,10 @@ export function HubView({ overview, whatsappStats }: Props) {
                         <Badge
                           className={
                             (profileResult.score as number) >= 70
-                              ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                              ? "bg-brand/10 text-brand border border-brand/20"
                               : (profileResult.score as number) >= 50
-                              ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                              : "bg-red-500/10 text-red-600 border border-red-500/20"
+                              ? "bg-muted/60 text-muted-foreground border border-border/50"
+                              : "bg-foreground/10 text-foreground border border-foreground/20"
                           }
                         >
                           {profileResult.score as number}/100
