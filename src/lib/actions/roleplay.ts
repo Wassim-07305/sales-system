@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiChat, aiJSON, type AIMessage } from "@/lib/ai/client";
 
@@ -19,15 +19,19 @@ export async function createRoleplayProfile(profile: {
   scenario: string;
   network: string;
 }) {
-  const supabase = await createClient();
-  await supabase.from("roleplay_prospect_profiles").insert(profile);
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("roleplay_prospect_profiles").insert(profile);
+  if (error) throw new Error(error.message);
   revalidatePath("/roleplay");
+  revalidatePath("/roleplay/profiles");
 }
 
 export async function deleteRoleplayProfile(id: string) {
-  const supabase = await createClient();
-  await supabase.from("roleplay_prospect_profiles").delete().eq("id", id);
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("roleplay_prospect_profiles").delete().eq("id", id);
+  if (error) throw new Error(error.message);
   revalidatePath("/roleplay");
+  revalidatePath("/roleplay/profiles");
 }
 
 export async function startSession(profileId: string) {
@@ -35,7 +39,8 @@ export async function startSession(profileId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  const { data } = await supabase.from("roleplay_sessions").insert({
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("roleplay_sessions").insert({
     user_id: user.id,
     prospect_profile_id: profileId,
     status: "active",
@@ -43,6 +48,7 @@ export async function startSession(profileId: string) {
     started_at: new Date().toISOString(),
   }).select().single();
 
+  if (error) throw new Error(error.message);
   return data;
 }
 
