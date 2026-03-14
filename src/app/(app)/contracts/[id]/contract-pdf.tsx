@@ -283,19 +283,19 @@ function formatCurrency(value: number | null): string {
 
 const statusLabelFr: Record<string, string> = {
   draft: "Brouillon",
-  sent: "Envoy\u00e9",
-  signed: "Sign\u00e9",
-  expired: "Expir\u00e9",
+  sent: "Envoyé",
+  signed: "Signé",
+  expired: "Expiré",
 };
 
 /* Default terms when none are in the contract content */
 const defaultTerms: string[] = [
-  "1. Le pr\u00e9sent contrat prend effet \u00e0 la date de signature par les deux parties.",
-  "2. Tout retard de paiement entra\u00eenera des p\u00e9nalit\u00e9s de retard au taux l\u00e9gal en vigueur, conform\u00e9ment \u00e0 l\u2019article L.441-10 du Code de commerce.",
-  "3. En cas de litige, les parties s\u2019engagent \u00e0 rechercher une solution amiable avant toute proc\u00e9dure judiciaire. \u00c0 d\u00e9faut, le tribunal comp\u00e9tent sera celui du si\u00e8ge social du prestataire.",
-  "4. Chaque partie peut r\u00e9silier le contrat avec un pr\u00e9avis \u00e9crit de trente (30) jours. La r\u00e9siliation ne lib\u00e8re pas des obligations financi\u00e8res en cours.",
-  "5. Les informations \u00e9chang\u00e9es dans le cadre de ce contrat sont consid\u00e9r\u00e9es comme confidentielles et ne peuvent \u00eatre divulgu\u00e9es \u00e0 des tiers sans accord pr\u00e9alable.",
-  "6. Ce contrat est soumis au droit fran\u00e7ais.",
+  "1. Le présent contrat prend effet à la date de signature par les deux parties.",
+  "2. Tout retard de paiement entraînera des pénalités de retard au taux légal en vigueur, conformément à l\u2019article L.441-10 du Code de commerce.",
+  "3. En cas de litige, les parties s\u2019engagent à rechercher une solution amiable avant toute procédure judiciaire. À défaut, le tribunal compétent sera celui du siège social du prestataire.",
+  "4. Chaque partie peut résilier le contrat avec un préavis écrit de trente (30) jours. La résiliation ne libère pas des obligations financières en cours.",
+  "5. Les informations échangées dans le cadre de ce contrat sont considérées comme confidentielles et ne peuvent être divulguées à des tiers sans accord préalable.",
+  "6. Ce contrat est soumis au droit français.",
 ];
 
 /* ------------------------------------------------------------------ */
@@ -365,7 +365,7 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Date de cr\u00e9ation</Text>
+            <Text style={styles.summaryLabel}>Date de création</Text>
             <Text style={[styles.summaryValue, { fontSize: 10 }]}>
               {formatDateFr(contract.created_at)}
             </Text>
@@ -373,7 +373,7 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
         </View>
 
         {/* ── Contract body (parsed from markdown-like content) ── */}
-        <Text style={styles.sectionTitle}>D\u00e9tail du contrat</Text>
+        <Text style={styles.sectionTitle}>Détail du contrat</Text>
         {lines.map((line, i) => {
           if (line.startsWith("# "))
             return (
@@ -409,10 +409,10 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
           );
         })}
 
-        {/* ── Conditions g\u00e9n\u00e9rales ── */}
+        {/* ── Conditions générales ── */}
         <View style={styles.termsBox}>
           <Text style={styles.termsTitle}>
-            Conditions g\u00e9n\u00e9rales
+            Conditions générales
           </Text>
           {defaultTerms.map((term, i) => (
             <Text key={i} style={styles.termsText}>
@@ -446,7 +446,7 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
                     style={styles.signatureImage}
                   />
                   <Text style={styles.signatureDate}>
-                    Sign\u00e9 le{" "}
+                    {"Signé le "}
                     {contract.signed_at
                       ? formatDateFr(contract.signed_at)
                       : "\u2014"}
@@ -508,15 +508,15 @@ export function ContractPdf({ contract, onClose }: Props) {
       <div className="bg-background rounded-xl p-6 max-w-md w-full space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-base">
-            T\u00e9l\u00e9charger le contrat
+            Télécharger le contrat
           </h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Le PDF sera g\u00e9n\u00e9r\u00e9 avec l&apos;en-t\u00eate Sales
-          System, le d\u00e9tail du contrat, les conditions g\u00e9n\u00e9rales
+          Le PDF sera généré avec l&apos;en-tête Sales
+          System, le détail du contrat, les conditions générales
           {contract.signature_data
             ? " et la signature du client"
             : " et un espace de signature"}
@@ -524,7 +524,7 @@ export function ContractPdf({ contract, onClose }: Props) {
         </p>
         <div className="bg-muted rounded-lg p-4 text-sm space-y-1">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">R\u00e9f\u00e9rence</span>
+            <span className="text-muted-foreground">Référence</span>
             <span className="font-medium">
               #{contract.id.slice(0, 8).toUpperCase()}
             </span>
@@ -553,8 +553,8 @@ export function ContractPdf({ contract, onClose }: Props) {
             <Download className="h-4 w-4 mr-2" />
           )}
           {generating
-            ? "G\u00e9n\u00e9ration en cours\u2026"
-            : "T\u00e9l\u00e9charger PDF"}
+            ? "Génération en cours\u2026"
+            : "Télécharger PDF"}
         </Button>
       </div>
     </div>
