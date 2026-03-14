@@ -64,7 +64,7 @@ import {
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-// All chat operations are done client-side via Supabase to avoid server action re-render issues
+// Server actions for operations requiring elevated privileges
 import {
   createChannel,
   deleteChannel,
@@ -72,6 +72,11 @@ import {
   getChannelMembers,
   getAllUsers,
 } from "@/lib/actions/chat-admin";
+import {
+  getOrCreateDM,
+  editMessage as editMessageAction,
+  deleteMessage as deleteMessageAction,
+} from "@/lib/actions/communication";
 import { usePresence } from "@/lib/hooks/use-presence";
 import { TypingIndicator } from "@/components/typing-indicator";
 import { OnlineStatus } from "@/components/online-status";
@@ -718,12 +723,7 @@ export function ChatLayout({
   async function handleEditMessage(messageId: string) {
     if (!editContent.trim()) return;
     try {
-      const { error } = await supabase
-        .from("messages")
-        .update({ content: editContent.trim(), is_edited: true })
-        .eq("id", messageId)
-        .eq("sender_id", currentUserId);
-      if (error) throw error;
+      await editMessageAction(messageId, editContent.trim());
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
@@ -740,11 +740,7 @@ export function ChatLayout({
 
   async function handleDeleteMessage(messageId: string) {
     try {
-      const { error } = await supabase
-        .from("messages")
-        .delete()
-        .eq("id", messageId);
-      if (error) throw error;
+      await deleteMessageAction(messageId);
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     } catch {
       toast.error("Erreur lors de la suppression");
@@ -754,45 +750,8 @@ export function ChatLayout({
   async function handleStartDM(otherUserId: string) {
     setShowNewDMDialog(false);
     try {
-      // Check for existing DM between these two users
-      const { data: existingChannels } = await supabase
-        .from("channels")
-        .select("*")
-        .eq("type", "direct")
-        .contains("members", [currentUserId, otherUserId]);
-
-      const existingDM = existingChannels?.find(
-        (c) =>
-          c.members?.length === 2 &&
-          c.members.includes(currentUserId) &&
-          c.members.includes(otherUserId),
-      );
-
-      if (existingDM) {
-        setActiveChannel(existingDM);
-        return;
-      }
-
-      // Get names for the channel
-      const partner = teamMembers.find((m) => m.id === otherUserId);
-      const { data: myProfile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", currentUserId)
-        .single();
-
-      const { data: newChannel, error } = await supabase
-        .from("channels")
-        .insert({
-          name: `${myProfile?.full_name || "Utilisateur"} & ${partner?.full_name || "Utilisateur"}`,
-          type: "direct",
-          created_by: currentUserId,
-          members: [currentUserId, otherUserId],
-        })
-        .select("*")
-        .single();
-
-      if (error) throw error;
+      // Use server action with admin client to bypass RLS
+      const dmChannel = await getOrCreateDM(otherUserId);
 
       // Refresh channels list
       const { data: allChannels } = await supabase
@@ -800,7 +759,7 @@ export function ChatLayout({
         .select("*")
         .order("created_at", { ascending: false });
       setChannels(allChannels || []);
-      setActiveChannel(newChannel);
+      setActiveChannel(dmChannel);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur lors de la création du DM");
     }

@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
 
@@ -650,7 +650,9 @@ export async function getOrCreateDM(otherUserId: string) {
     .eq("id", user.id)
     .single();
 
-  const { data: newChannel, error } = await supabase
+  // Use admin client to bypass RLS for channel creation
+  const adminClient = createAdminClient();
+  const { data: newChannel, error } = await adminClient
     .from("channels")
     .insert({
       name: `${myProfile?.full_name || "Utilisateur"} & ${otherProfile?.full_name || "Utilisateur"}`,
@@ -662,7 +664,6 @@ export async function getOrCreateDM(otherUserId: string) {
     .single();
 
   if (error) throw new Error(error.message);
-  // No revalidatePath here — client refreshes channels list after DM creation
   return newChannel;
 }
 
@@ -677,7 +678,9 @@ export async function editMessage(messageId: string, content: string) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  const { error } = await supabase
+  // Use admin client to bypass RLS (no UPDATE policy on messages)
+  const adminClient = createAdminClient();
+  const { error } = await adminClient
     .from("messages")
     .update({ content, is_edited: true })
     .eq("id", messageId)
@@ -701,14 +704,16 @@ export async function deleteMessage(messageId: string) {
 
   const isAdmin = ["admin", "manager"].includes(profile?.role || "");
 
+  // Use admin client to bypass RLS (no DELETE policy on messages)
+  const adminClient = createAdminClient();
   if (isAdmin) {
-    const { error } = await supabase
+    const { error } = await adminClient
       .from("messages")
       .delete()
       .eq("id", messageId);
     if (error) throw new Error(error.message);
   } else {
-    const { error } = await supabase
+    const { error } = await adminClient
       .from("messages")
       .delete()
       .eq("id", messageId)

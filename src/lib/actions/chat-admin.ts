@@ -1,7 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/types/database";
 
 const ADMIN_ROLES: UserRole[] = ["admin", "manager"];
@@ -32,9 +31,10 @@ export async function createChannel(data: {
   type: "group" | "direct" | "announcement";
   memberIds: string[];
 }) {
-  const { supabase, user } = await requireAdmin();
+  const { user } = await requireAdmin();
+  const adminClient = createAdminClient();
 
-  const { error } = await supabase.from("channels").insert({
+  const { error } = await adminClient.from("channels").insert({
     name: data.name,
     description: data.description || null,
     type: data.type,
@@ -43,45 +43,44 @@ export async function createChannel(data: {
   });
 
   if (error) throw new Error(`Erreur création channel : ${error.message}`);
-
-  revalidatePath("/chat");
+  // No revalidatePath — client refreshes channel list
 }
 
 export async function deleteChannel(channelId: string) {
-  const { supabase } = await requireAdmin();
+  await requireAdmin();
+  const adminClient = createAdminClient();
 
   // Supprimer les messages du channel d'abord
-  await supabase.from("messages").delete().eq("channel_id", channelId);
+  await adminClient.from("messages").delete().eq("channel_id", channelId);
 
   // Supprimer les lectures
-  await supabase.from("channel_reads").delete().eq("channel_id", channelId);
+  await adminClient.from("channel_reads").delete().eq("channel_id", channelId);
 
   // Supprimer le channel
-  const { error } = await supabase
+  const { error } = await adminClient
     .from("channels")
     .delete()
     .eq("id", channelId);
 
   if (error) throw new Error(`Erreur suppression channel : ${error.message}`);
-
-  revalidatePath("/chat");
+  // No revalidatePath — client refreshes channel list
 }
 
 export async function updateChannelMembers(
   channelId: string,
   memberIds: string[]
 ) {
-  const { supabase } = await requireAdmin();
+  await requireAdmin();
+  const adminClient = createAdminClient();
 
-  const { error } = await supabase
+  const { error } = await adminClient
     .from("channels")
     .update({ members: memberIds })
     .eq("id", channelId);
 
   if (error)
     throw new Error(`Erreur mise à jour des membres : ${error.message}`);
-
-  revalidatePath("/chat");
+  // No revalidatePath — client refreshes channel list
 }
 
 export async function getChannelMembers(channelId: string) {
