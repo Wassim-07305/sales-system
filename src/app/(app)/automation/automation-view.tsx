@@ -85,10 +85,10 @@ const typeLabels: Record<string, string> = {
 };
 
 const typeColors: Record<string, string> = {
-  nurturing: "bg-pink-100 text-pink-700",
-  upsell: "bg-purple-100 text-purple-700",
-  placement: "bg-blue-100 text-blue-700",
-  general: "bg-gray-100 text-gray-700",
+  nurturing: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+  upsell: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  placement: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  general: "bg-gray-500/10 text-gray-600 border-gray-500/20",
 };
 
 const typeIcons: Record<string, typeof Zap> = {
@@ -322,47 +322,47 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
               <Zap className="h-5 w-5 text-brand" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalRules}</p>
-              <p className="text-xs text-muted-foreground">Règles totales</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Règles totales</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
               <Activity className="h-5 w-5 text-green-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{activeRules}</p>
-              <p className="text-xs text-muted-foreground">Règles actives</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Règles actives</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center">
               <RefreshCw className="h-5 w-5 text-amber-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{todayCount}</p>
-              <p className="text-xs text-muted-foreground">Exécutions aujourd&apos;hui</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Exécutions aujourd&apos;hui</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
               <CheckCircle2 className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalExecutions}</p>
-              <p className="text-xs text-muted-foreground">Actions déclenchées</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Actions déclenchées</p>
             </div>
           </CardContent>
         </Card>
@@ -373,7 +373,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
         <Link href="/automation/nurturing">
           <Card className="hover:border-brand transition-colors cursor-pointer">
             <CardContent className="p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-lg bg-pink-100 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-pink-500/10 flex items-center justify-center">
                 <Heart className="h-6 w-6 text-pink-600" />
               </div>
               <div>
@@ -388,7 +388,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
         <Link href="/automation/upsell">
           <Card className="hover:border-brand transition-colors cursor-pointer">
             <CardContent className="p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div>
@@ -403,7 +403,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
         <Link href="/automation/placement">
           <Card className="hover:border-brand transition-colors cursor-pointer">
             <CardContent className="p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
               <div>
@@ -418,7 +418,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
       </div>
 
       {/* All Rules with toggles */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-base">Toutes les règles</CardTitle>
         </CardHeader>
@@ -427,7 +427,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             <div className="space-y-3">
               {rules.map((rule) => {
                 const Icon = typeIcons[rule.type] || Zap;
-                const colorClass = typeColors[rule.type] || "bg-gray-100 text-gray-700";
+                const colorClass = typeColors[rule.type] || "bg-gray-500/10 text-gray-600 border-gray-500/20";
                 return (
                   <div
                     key={rule.id}
@@ -435,10 +435,10 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                   >
                     <div className="flex items-center gap-4">
                       <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                        rule.type === "nurturing" ? "bg-pink-100" :
-                        rule.type === "upsell" ? "bg-purple-100" :
-                        rule.type === "placement" ? "bg-blue-100" :
-                        "bg-gray-100"
+                        rule.type === "nurturing" ? "bg-pink-500/10" :
+                        rule.type === "upsell" ? "bg-purple-500/10" :
+                        rule.type === "placement" ? "bg-blue-500/10" :
+                        "bg-gray-500/10"
                       }`}>
                         <Icon className={`h-5 w-5 ${
                           rule.type === "nurturing" ? "text-pink-600" :
@@ -490,16 +490,18 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              Aucune règle d&apos;automation. Cliquez sur &quot;Nouvelle règle&quot; pour commencer.
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Zap className="h-6 w-6 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm">Aucune règle d&apos;automation. Cliquez sur &quot;Nouvelle règle&quot; pour commencer.</p>
             </div>
           )}
         </CardContent>
       </Card>
 
       {/* Recent Executions / Logs */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-base">Exécutions récentes</CardTitle>
         </CardHeader>
@@ -535,10 +537,10 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                       variant="outline"
                       className={
                         exec.status === "completed"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-500/10 text-green-600 border-green-500/20"
                           : exec.status === "failed"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
+                          ? "bg-red-500/10 text-red-600 border-red-500/20"
+                          : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                       }
                     >
                       {exec.status === "completed"
@@ -552,9 +554,11 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              Aucune exécution récente
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Clock className="h-6 w-6 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm">Aucune exécution récente</p>
             </div>
           )}
         </CardContent>

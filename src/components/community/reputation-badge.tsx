@@ -12,11 +12,11 @@ export interface ReputationLevel {
 }
 
 export const REPUTATION_LEVELS: ReputationLevel[] = [
-  { label: "Nouveau", minScore: 0, color: "bg-gray-100 text-gray-600 border-gray-200", icon: Star },
-  { label: "Contributeur", minScore: 50, color: "bg-blue-100 text-blue-700 border-blue-200", icon: Award },
-  { label: "Expert", minScore: 150, color: "bg-purple-100 text-purple-700 border-purple-200", icon: GraduationCap },
-  { label: "Mentor", minScore: 300, color: "bg-amber-100 text-amber-700 border-amber-200", icon: Shield },
-  { label: "Leader", minScore: 500, color: "bg-green-100 text-green-700 border-green-200", icon: Crown },
+  { label: "Nouveau", minScore: 0, color: "bg-muted text-muted-foreground border-border/40", icon: Star },
+  { label: "Contributeur", minScore: 50, color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: Award },
+  { label: "Expert", minScore: 150, color: "bg-purple-500/10 text-purple-600 border-purple-500/20", icon: GraduationCap },
+  { label: "Mentor", minScore: 300, color: "bg-amber-500/10 text-amber-600 border-amber-500/20", icon: Shield },
+  { label: "Leader", minScore: 500, color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: Crown },
 ];
 
 export function getReputationLevel(score: number): ReputationLevel {

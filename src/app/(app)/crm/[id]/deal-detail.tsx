@@ -73,9 +73,9 @@ interface DealDetailProps {
 }
 
 const tempColors = {
-  hot: "bg-red-100 text-red-700 border-red-200",
-  warm: "bg-orange-100 text-orange-700 border-orange-200",
-  cold: "bg-blue-100 text-blue-700 border-blue-200",
+  hot: "bg-red-500/10 text-red-600 border-red-500/20",
+  warm: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  cold: "bg-blue-500/10 text-blue-600 border-blue-500/20",
 };
 
 const activityIcons: Record<DealActivityType, typeof Phone> = {
@@ -506,7 +506,7 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                     const Icon = activityIcons[activity.type] || FileText;
                     return (
                       <div key={activity.id} className="flex gap-3">
-                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                        <div className="h-8 w-8 rounded-lg bg-muted ring-1 ring-border/40 flex items-center justify-center shrink-0">
                           <Icon className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">

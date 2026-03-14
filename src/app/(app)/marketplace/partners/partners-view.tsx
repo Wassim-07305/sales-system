@@ -78,21 +78,21 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  technology: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  consulting: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  referral: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  technology: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  consulting: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  referral: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  active: { label: "Actif", className: "bg-green-500/20 text-green-400 border-green-500/30" },
-  pending: { label: "En attente", className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-  inactive: { label: "Inactif", className: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
+  active: { label: "Actif", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+  pending: { label: "En attente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
+  inactive: { label: "Inactif", className: "bg-gray-500/10 text-gray-600 border-gray-500/20" },
 };
 
 const PAYOUT_STATUS: Record<string, { label: string; className: string }> = {
-  paid: { label: "Payé", className: "bg-green-500/20 text-green-400 border-green-500/30" },
-  pending: { label: "En attente", className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-  processing: { label: "En cours", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  paid: { label: "Payé", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+  pending: { label: "En attente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
+  processing: { label: "En cours", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
 };
 
 export function PartnersView({ partners, revenueData }: PartnersViewProps) {
@@ -262,16 +262,16 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
+          <Card key={stat.label} className="border-border/50 hover:shadow-md transition-all">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 flex items-center justify-center">
-                  <stat.icon className="h-5 w-5 text-[#7af17a]" />
+                <div className="h-9 w-9 rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
+                  <stat.icon className="h-5 w-5 text-emerald-500" />
                 </div>
               </div>
             </CardContent>
@@ -281,20 +281,20 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="active">
+        <TabsList className="bg-muted/30 rounded-lg p-0.5">
+          <TabsTrigger value="active" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             Partenaires actifs
             <Badge variant="secondary" className="ml-2 text-xs">{activePartners.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="applications">
+          <TabsTrigger value="applications" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             Candidatures
             {pendingPartners.length > 0 && (
-              <Badge className="ml-2 text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+              <Badge variant="outline" className="ml-2 text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
                 {pendingPartners.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="revenue">Revenus</TabsTrigger>
+          <TabsTrigger value="revenue" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Revenus</TabsTrigger>
         </TabsList>
 
         {/* Active partners tab */}
@@ -381,18 +381,18 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                           <TableCell colSpan={9} className="bg-muted/30 px-8 py-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div>
-                                <p className="text-sm text-muted-foreground mb-1">Email</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Email</p>
                                 <p className="text-sm font-medium">{partner.email}</p>
                               </div>
                               <div>
-                                <p className="text-sm text-muted-foreground mb-1">Note</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Note</p>
                                 <div className="flex items-center gap-1">
                                   <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                                   <span className="text-sm font-medium">{partner.rating.toFixed(1)}/5</span>
                                 </div>
                               </div>
                               <div>
-                                <p className="text-sm text-muted-foreground mb-1">Membre depuis</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Membre depuis</p>
                                 <p className="text-sm font-medium">
                                   {new Date(partner.created_at).toLocaleDateString("fr-FR", {
                                     day: "numeric",
@@ -403,7 +403,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                               </div>
                               {partner.approved_at && (
                                 <div>
-                                  <p className="text-sm text-muted-foreground mb-1">Approuvé le</p>
+                                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Approuvé le</p>
                                   <p className="text-sm font-medium">
                                     {new Date(partner.approved_at).toLocaleDateString("fr-FR", {
                                       day: "numeric",
@@ -414,7 +414,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                                 </div>
                               )}
                               <div>
-                                <p className="text-sm text-muted-foreground mb-1">Commission effective</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Commission effective</p>
                                 <p className="text-sm font-medium">
                                   {(partner.revenue_generated * partner.commission_rate / 100).toLocaleString("fr-FR")} &euro;
                                 </p>

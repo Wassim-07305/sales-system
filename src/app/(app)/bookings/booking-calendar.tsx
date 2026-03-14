@@ -58,32 +58,32 @@ const statusConfig: Record<
 > = {
   confirmed: {
     label: "Confirmé",
-    bg: "bg-blue-50 border-blue-200",
-    text: "text-blue-700",
+    bg: "bg-blue-500/10 border-blue-500/20",
+    text: "text-blue-600",
     dot: "bg-blue-500",
   },
   completed: {
     label: "Terminé",
-    bg: "bg-emerald-50 border-emerald-200",
-    text: "text-emerald-700",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    text: "text-emerald-600",
     dot: "bg-emerald-500",
   },
   no_show: {
     label: "No-show",
-    bg: "bg-red-50 border-red-200",
-    text: "text-red-700",
+    bg: "bg-red-500/10 border-red-500/20",
+    text: "text-red-600",
     dot: "bg-red-500",
   },
   cancelled: {
     label: "Annulé",
-    bg: "bg-gray-50 border-gray-200",
-    text: "text-gray-500",
-    dot: "bg-gray-400",
+    bg: "bg-muted/50 border-border/40",
+    text: "text-muted-foreground",
+    dot: "bg-muted-foreground",
   },
   rescheduled: {
     label: "Reprogrammé",
-    bg: "bg-amber-50 border-amber-200",
-    text: "text-amber-700",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    text: "text-amber-600",
     dot: "bg-amber-500",
   },
 };
@@ -106,10 +106,10 @@ const CALL_RESULT_LABELS: Record<CallResult, string> = {
 };
 
 const CALL_RESULT_COLORS: Record<CallResult, string> = {
-  vente_realisee: "bg-emerald-100 text-emerald-700",
-  non_realisee: "bg-red-100 text-red-700",
-  suivi_prevu: "bg-amber-100 text-amber-700",
-  no_show: "bg-gray-100 text-gray-600",
+  vente_realisee: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  non_realisee: "bg-red-500/10 text-red-600 border-red-500/20",
+  suivi_prevu: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  no_show: "bg-muted text-muted-foreground border-border/40",
 };
 
 // ─── Time period filter ──────────────────────────────────────────────
@@ -460,7 +460,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
             <Card className="rounded-xl border-border/40 shadow-sm">
               <CardContent className="py-12">
                 <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50">
                     <Clock className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <p className="font-medium">Aucun rendez-vous</p>

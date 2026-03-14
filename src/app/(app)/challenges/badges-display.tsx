@@ -27,6 +27,7 @@ import {
 import { checkBadgeEligibility } from "@/lib/actions/gamification";
 import type { BadgeDefinition } from "@/lib/badge-definitions";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Map icon name strings to actual Lucide components
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -86,7 +87,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="border-border/50 hover:shadow-md transition-all">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg flex items-center gap-2">
           <Trophy className="h-5 w-5 text-brand" />
@@ -108,7 +109,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
           if (badges.length === 0) return null;
           return (
             <div key={key}>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">
                 {label}
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -122,16 +123,18 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                       <Tooltip key={badge.id}>
                         <TooltipTrigger asChild>
                           <div
-                            className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all w-[90px] ${
+                            className={cn(
+                              "relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all w-[90px]",
                               isEarned
-                                ? "border-brand/40 bg-brand/5 shadow-sm"
-                                : "border-muted bg-muted/30 opacity-50 grayscale"
-                            }`}
+                                ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-md"
+                                : "border-border/50 bg-muted/30 opacity-50 grayscale"
+                            )}
                           >
                             <div
-                              className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                                isEarned ? "bg-brand/20" : "bg-muted"
-                              }`}
+                              className={cn(
+                                "h-10 w-10 rounded-xl flex items-center justify-center",
+                                isEarned ? "bg-emerald-500/10" : "bg-muted/50"
+                              )}
                             >
                               {isEarned ? (
                                 <IconComponent

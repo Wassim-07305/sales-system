@@ -16,6 +16,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface Challenge {
   id: string;
@@ -63,9 +64,11 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
       </PageHeader>
 
       {challenges.length === 0 ? (
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="p-12 text-center text-muted-foreground">
-            <Users className="h-10 w-10 mx-auto mb-3 opacity-50" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <Users className="h-7 w-7 text-muted-foreground/60" />
+            </div>
             <p className="font-medium text-lg mb-1">
               Aucun défi d&apos;équipe en cours
             </p>
@@ -90,13 +93,16 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
               return (
                 <Card
                   key={challenge.id}
-                  className={isCompleted ? "border-brand/50 bg-brand/5" : ""}
+                  className={cn(
+                    "border-border/50 hover:shadow-md transition-all",
+                    isCompleted && "border-emerald-500/20 bg-emerald-500/10"
+                  )}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
-                          <Users className="h-5 w-5 text-brand" />
+                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                          <Users className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg mb-1">
@@ -109,12 +115,12 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-4">
                         {isCompleted && (
-                          <Badge className="bg-brand text-brand-dark">
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                             <Trophy className="h-3 w-3 mr-1" />
                             Complété
                           </Badge>
                         )}
-                        <Badge className="bg-brand/10 text-brand">
+                        <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-500/20">
                           <Zap className="h-3 w-3 mr-1" />
                           {challenge.points_reward} pts
                         </Badge>
@@ -153,7 +159,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                     {/* Individual contributions */}
                     {prog?.contributions && prog.contributions.length > 0 && (
                       <div className="border-t pt-4">
-                        <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                        <p className="text-[11px] font-medium text-muted-foreground mb-3 uppercase tracking-wider">
                           Contributions individuelles
                         </p>
                         <div className="space-y-2">
@@ -182,7 +188,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                                   >
                                     {i + 1}
                                   </span>
-                                  <div className="h-6 w-6 rounded-full bg-brand/10 flex items-center justify-center text-brand text-[10px] font-bold">
+                                  <div className="h-6 w-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 text-[10px] font-bold">
                                     {c.full_name?.charAt(0) || "?"}
                                   </div>
                                   <span className="text-sm flex-1 truncate">
@@ -207,7 +213,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
           </div>
 
           {/* Team Leaderboard sidebar */}
-          <Card className="h-fit">
+          <Card className="h-fit border-border/50 hover:shadow-md transition-all">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Medal className="h-5 w-5 text-brand" />
@@ -239,9 +245,12 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
 
                   if (sorted.length === 0) {
                     return (
-                      <p className="text-center text-sm text-muted-foreground py-4">
+                      <div className="flex flex-col items-center text-center text-sm text-muted-foreground py-6">
+                        <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                          <Medal className="h-6 w-6 text-muted-foreground/60" />
+                        </div>
                         Pas encore de contributions
-                      </p>
+                      </div>
                     );
                   }
 
@@ -250,24 +259,26 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                     return (
                       <div
                         key={userId}
-                        className={`flex items-center gap-3 p-3 rounded-lg ${
-                          rank <= 3 ? "bg-muted/50" : ""
-                        }`}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-lg transition-all",
+                          rank <= 3 ? "bg-muted/50 border border-border/50" : ""
+                        )}
                       >
                         <span
-                          className={`text-lg font-bold w-6 text-center ${
+                          className={cn(
+                            "text-lg font-bold w-6 text-center",
                             rank === 1
-                              ? "text-yellow-500"
+                              ? "text-amber-500"
                               : rank === 2
                                 ? "text-gray-400"
                                 : rank === 3
                                   ? "text-orange-400"
                                   : "text-muted-foreground"
-                          }`}
+                          )}
                         >
                           {rank}
                         </span>
-                        <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                        <div className="h-8 w-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 text-xs font-bold">
                           {data.full_name?.charAt(0) || "?"}
                         </div>
                         <div className="flex-1 min-w-0">

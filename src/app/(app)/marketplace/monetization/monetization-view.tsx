@@ -98,29 +98,33 @@ export function MonetizationView({
       title: "Revenu total",
       value: `${overview.totalRevenue.toLocaleString("fr-FR")} €`,
       icon: DollarSign,
-      color: "text-green-400",
-      bgColor: "bg-green-400/10",
+      color: "text-emerald-500",
+      bgColor: "bg-emerald-500/10",
+      ringColor: "ring-emerald-500/20",
     },
     {
       title: "Commissions ce mois",
       value: `${overview.commissionsThisMonth.toLocaleString("fr-FR")} €`,
       icon: TrendingUp,
-      color: "text-blue-400",
-      bgColor: "bg-blue-400/10",
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      ringColor: "ring-blue-500/20",
     },
     {
       title: "Abonnements actifs",
       value: overview.activeSubscriptions.toString(),
       icon: Package,
-      color: "text-purple-400",
-      bgColor: "bg-purple-400/10",
+      color: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+      ringColor: "ring-purple-500/20",
     },
     {
       title: "Prochain paiement",
       value: `${overview.nextPayout.toLocaleString("fr-FR")} €`,
       icon: CreditCard,
-      color: "text-amber-400",
-      bgColor: "bg-amber-400/10",
+      color: "text-amber-500",
+      bgColor: "bg-amber-500/10",
+      ringColor: "ring-amber-500/20",
       subtitle: overview.nextPayoutDate
         ? new Date(overview.nextPayoutDate).toLocaleDateString("fr-FR")
         : "Aucun en attente",
@@ -167,17 +171,17 @@ export function MonetizationView({
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat) => (
-          <Card key={stat.title}>
+          <Card key={stat.title} className="border-border/50 hover:shadow-md transition-all">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
                   {stat.subtitle && (
                     <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
                   )}
                 </div>
-                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                <div className={`h-9 w-9 rounded-lg ring-1 ${stat.ringColor} ${stat.bgColor} flex items-center justify-center`}>
                   <stat.icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </div>
@@ -188,11 +192,11 @@ export function MonetizationView({
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Vue d&apos;ensemble</TabsTrigger>
-          <TabsTrigger value="pricing">Tarification</TabsTrigger>
-          <TabsTrigger value="history">Historique</TabsTrigger>
-          <TabsTrigger value="commissions">Commissions</TabsTrigger>
+        <TabsList className="bg-muted/30 rounded-lg p-0.5">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Vue d&apos;ensemble</TabsTrigger>
+          <TabsTrigger value="pricing" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Tarification</TabsTrigger>
+          <TabsTrigger value="history" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Historique</TabsTrigger>
+          <TabsTrigger value="commissions" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Commissions</TabsTrigger>
         </TabsList>
 
         {/* Vue d'ensemble */}
@@ -390,11 +394,11 @@ export function MonetizationView({
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={payout.status === "paye" ? "default" : "secondary"}
+                            variant="outline"
                             className={
                               payout.status === "paye"
-                                ? "bg-green-500/20 text-green-400 border-green-500/30"
-                                : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                : "bg-amber-500/10 text-amber-600 border-amber-500/20"
                             }
                           >
                             {payout.status === "paye" ? "Payé" : "En attente"}
@@ -466,8 +470,8 @@ export function MonetizationView({
                   />
                 </div>
                 {estimatedInstalls > 0 && (
-                  <div className="rounded-lg border p-4 space-y-3">
-                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                  <div className="rounded-lg border border-border/50 p-4 space-y-3">
+                    <h4 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                       Estimation des gains mensuels
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

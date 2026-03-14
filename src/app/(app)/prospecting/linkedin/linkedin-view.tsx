@@ -77,13 +77,13 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  new: "bg-gray-100 text-gray-700",
-  contacted: "bg-blue-100 text-blue-700",
-  replied: "bg-green-100 text-green-700",
-  interested: "bg-purple-100 text-purple-700",
+  new: "bg-muted text-muted-foreground",
+  contacted: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
+  replied: "bg-green-500/10 text-green-600 border border-green-500/20",
+  interested: "bg-purple-500/10 text-purple-600 border border-purple-500/20",
   booked: "bg-brand/20 text-brand-dark",
-  converted: "bg-emerald-100 text-emerald-700",
-  lost: "bg-red-100 text-red-700",
+  converted: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+  lost: "bg-red-500/10 text-red-600 border border-red-500/20",
 };
 
 export function LinkedinView({ prospects, syncStatus }: Props) {
@@ -207,7 +207,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
         title="LinkedIn"
         description="Prospection et outils LinkedIn"
       >
-        <Badge variant="outline" className="bg-blue-50 text-blue-700 gap-1">
+        <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
           <Linkedin className="h-3 w-3" />
           {prospects.length} prospects
         </Badge>
@@ -326,8 +326,8 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                       <Badge
                         className={
                           (profileResult.score as number) >= 70
-                            ? "bg-green-100 text-green-700"
-                            : "bg-orange-100 text-orange-700"
+                            ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                            : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
                         }
                       >
                         {profileResult.score as number}/100
@@ -502,7 +502,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                     className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                      <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center text-blue-600 font-bold">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -532,7 +532,7 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                       {/* Mode Duo IA+Humain toggle */}
                       <div className="flex items-center gap-1.5">
                         {autoModeIds.has(prospect.id) && (
-                          <Badge className="bg-purple-100 text-purple-700 text-[10px] gap-1">
+                          <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20 text-[10px] gap-1">
                             <Bot className="h-3 w-3" />
                             IA Auto
                           </Badge>
@@ -571,7 +571,9 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
                 ))}
                 {filteredProspects.length === 0 && (
                   <div className="p-8 text-center text-muted-foreground">
-                    <Linkedin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <Linkedin className="h-7 w-7 opacity-50" />
+                    </div>
                     Aucun prospect LinkedIn trouvé
                   </div>
                 )}

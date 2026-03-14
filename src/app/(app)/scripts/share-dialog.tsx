@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Users, Trash2, Loader2 } from "lucide-react";
+import { Share2, Users, Trash2, Loader2, UserPlus } from "lucide-react";
 import {
   shareScript,
   getScriptShares,
@@ -112,8 +112,10 @@ export function ShareDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Share2 className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
+              <Share2 className="h-4 w-4 text-blue-600" />
+            </div>
             Partager le script
           </DialogTitle>
           <DialogDescription>
@@ -129,13 +131,13 @@ export function ShareDialog({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1"
+            className="flex-1 h-9 text-xs"
           />
           <Select
             value={permission}
             onValueChange={(v) => setPermission(v as "view" | "edit")}
           >
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[120px] h-9 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -156,7 +158,7 @@ export function ShareDialog({
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-3">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Partage avec ({shares.length})
             </span>
           </div>
@@ -166,15 +168,20 @@ export function ShareDialog({
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : shares.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Ce script n&apos;est partage avec personne.
-            </p>
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                <UserPlus className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Ce script n&apos;est partage avec personne.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2">
               {shares.map((share) => (
                 <div
                   key={share.id}
-                  className="flex items-center justify-between rounded-lg border px-3 py-2"
+                  className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-2 hover:shadow-md transition-all"
                 >
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">
@@ -185,7 +192,7 @@ export function ShareDialog({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline">
+                    <Badge variant="outline" className={share.permission === "edit" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : "bg-blue-500/10 text-blue-600 border-blue-500/20"}>
                       {share.permission === "edit" ? "Edition" : "Lecture"}
                     </Badge>
                     <Button

@@ -44,8 +44,8 @@ interface Comment {
 
 const typeColors: Record<string, string> = {
   win: "bg-brand/10 text-brand-dark border-brand/30",
-  question: "bg-blue-100 text-blue-700",
-  discussion: "bg-gray-100 text-gray-700",
+  question: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  discussion: "bg-muted/50 text-muted-foreground border-border",
 };
 
 const typeLabels: Record<string, string> = { win: "Win", question: "Question", discussion: "Discussion" };
@@ -149,10 +149,10 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
 
   function PostCard({ post, isWinGrid }: { post: Post; isWinGrid?: boolean }) {
     return (
-      <Card className={`${post.type === "win" && isWinGrid ? "border-green-300 bg-green-50/50" : ""}`}>
+      <Card className={`${post.type === "win" && isWinGrid ? "border-emerald-500/20 bg-emerald-500/5" : ""}`}>
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+            <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center text-brand text-xs font-bold ring-1 ring-brand/20">
               {post.author?.full_name?.charAt(0) || "?"}
             </div>
             <div>
@@ -281,7 +281,9 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
           {filtered.length === 0 && (
             <Card className="mt-4">
               <CardContent className="p-12 text-center text-muted-foreground">
-                <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <MessageCircle className="h-7 w-7 opacity-50" />
+                </div>
                 <p className="font-medium">Aucun post</p>
                 <p className="text-sm">Soyez le premier à publier !</p>
               </CardContent>

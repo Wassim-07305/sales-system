@@ -66,37 +66,37 @@ const nodeTypeConfig: Record<
 > = {
   opening: {
     label: "Accroche",
-    bg: "bg-green-50",
-    border: "border-green-400",
-    text: "text-green-800",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20",
+    text: "text-emerald-600",
     icon: MessageSquare,
   },
   question: {
     label: "Question",
-    bg: "bg-blue-50",
-    border: "border-blue-400",
-    text: "text-blue-800",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+    text: "text-blue-600",
     icon: HelpCircle,
   },
   objection: {
     label: "Objection",
-    bg: "bg-red-50",
-    border: "border-red-400",
-    text: "text-red-800",
+    bg: "bg-red-500/10",
+    border: "border-red-500/20",
+    text: "text-red-600",
     icon: ShieldAlert,
   },
   response: {
     label: "Réponse",
-    bg: "bg-yellow-50",
-    border: "border-yellow-400",
-    text: "text-yellow-800",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+    text: "text-amber-600",
     icon: Reply,
   },
   closing: {
     label: "Closing",
-    bg: "bg-purple-50",
-    border: "border-purple-400",
-    text: "text-purple-800",
+    bg: "bg-purple-500/10",
+    border: "border-purple-500/20",
+    text: "text-purple-600",
     icon: CheckCircle,
   },
 };
@@ -108,7 +108,7 @@ function ScriptNodeComponent({ data }: NodeProps) {
 
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 shadow-sm min-w-[180px] ${config.bg} ${config.border}`}
+      className={`px-4 py-3 rounded-lg border shadow-sm min-w-[180px] ${config.bg} ${config.border} hover:shadow-md transition-all`}
     >
       <Handle
         type="target"
@@ -117,11 +117,11 @@ function ScriptNodeComponent({ data }: NodeProps) {
       />
       <div className="flex items-center gap-2 mb-1">
         <Icon className={`h-3.5 w-3.5 ${config.text}`} />
-        <span className={`text-[10px] font-semibold uppercase ${config.text}`}>
+        <span className={`text-[10px] font-medium uppercase tracking-wider ${config.text}`}>
           {config.label}
         </span>
       </div>
-      <p className="text-sm font-medium text-gray-900">{nodeData.label}</p>
+      <p className="text-sm font-medium text-foreground">{nodeData.label}</p>
       <Handle
         type="source"
         position={Position.Bottom}
@@ -231,7 +231,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
   return (
     <div className="h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] flex flex-col">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b bg-background">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50 bg-background">
         <Link href="/scripts">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -244,12 +244,12 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="max-w-[250px] h-8 text-sm font-medium"
+          className="max-w-[250px] h-9 text-xs font-medium"
           placeholder="Titre du flowchart"
         />
 
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-[160px] h-8">
+          <SelectTrigger className="w-[160px] h-9 text-xs">
             <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
           <SelectContent>
@@ -343,8 +343,8 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
 
           {/* Add Node Panel */}
           <Panel position="top-left">
-            <div className="bg-background border rounded-lg shadow-sm p-3 space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            <div className="bg-background border border-border/50 rounded-lg shadow-sm p-3 space-y-2">
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                 Ajouter un noeud
               </p>
               {Object.entries(nodeTypeConfig).map(([type, config]) => {
@@ -353,7 +353,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
                   <button
                     key={type}
                     onClick={() => addNode(type)}
-                    className={`flex items-center gap-2 w-full px-3 py-1.5 rounded text-xs font-medium border transition-colors hover:opacity-80 ${config.bg} ${config.border} ${config.text}`}
+                    className={`flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs font-medium border transition-all hover:shadow-md ${config.bg} ${config.border} ${config.text}`}
                   >
                     <Icon className="h-3.5 w-3.5" />
                     {config.label}

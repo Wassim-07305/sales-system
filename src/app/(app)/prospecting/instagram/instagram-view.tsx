@@ -80,13 +80,13 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  new: "bg-gray-100 text-gray-700",
-  contacted: "bg-blue-100 text-blue-700",
-  replied: "bg-green-100 text-green-700",
-  interested: "bg-purple-100 text-purple-700",
+  new: "bg-muted text-muted-foreground",
+  contacted: "bg-blue-500/10 text-blue-600 border border-blue-500/20",
+  replied: "bg-green-500/10 text-green-600 border border-green-500/20",
+  interested: "bg-purple-500/10 text-purple-600 border border-purple-500/20",
   booked: "bg-brand/20 text-brand-dark",
-  converted: "bg-emerald-100 text-emerald-700",
-  lost: "bg-red-100 text-red-700",
+  converted: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+  lost: "bg-red-500/10 text-red-600 border border-red-500/20",
 };
 
 export function InstagramView({ prospects }: Props) {
@@ -188,7 +188,7 @@ export function InstagramView({ prospects }: Props) {
         title="Instagram"
         description="Prospection et outils Instagram"
       >
-        <Badge variant="outline" className="bg-pink-50 text-pink-700 gap-1">
+        <Badge variant="outline" className="bg-pink-500/10 text-pink-600 border-pink-500/20 gap-1">
           <Instagram className="h-3 w-3" />
           {prospects.length} prospects
         </Badge>
@@ -267,7 +267,7 @@ export function InstagramView({ prospects }: Props) {
                             {story.hasPoll && (
                               <Badge
                                 variant="outline"
-                                className="text-xs bg-orange-50 text-orange-700"
+                                className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20"
                               >
                                 <BarChart3 className="h-3 w-3 mr-1" />
                                 Sondage : {story.pollQuestion}
@@ -276,7 +276,7 @@ export function InstagramView({ prospects }: Props) {
                             {story.hasQuestion && (
                               <Badge
                                 variant="outline"
-                                className="text-xs bg-purple-50 text-purple-700"
+                                className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/20"
                               >
                                 <HelpCircle className="h-3 w-3 mr-1" />
                                 Question : {story.questionText}
@@ -421,7 +421,7 @@ export function InstagramView({ prospects }: Props) {
                       {/* Mode Duo IA+Humain toggle */}
                       <div className="flex items-center gap-1.5">
                         {autoModeIds.has(prospect.id) && (
-                          <Badge className="bg-purple-100 text-purple-700 text-[10px] gap-1">
+                          <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20 text-[10px] gap-1">
                             <Bot className="h-3 w-3" />
                             IA Auto
                           </Badge>
@@ -460,7 +460,9 @@ export function InstagramView({ prospects }: Props) {
                 ))}
                 {filteredProspects.length === 0 && (
                   <div className="p-8 text-center text-muted-foreground">
-                    <Instagram className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <Instagram className="h-7 w-7 opacity-50" />
+                    </div>
                     Aucun prospect Instagram trouvé
                   </div>
                 )}

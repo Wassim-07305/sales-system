@@ -47,11 +47,11 @@ interface VoiceMessage {
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-700", icon: <Clock className="h-3 w-3" /> },
-  processing: { label: "Clonage en cours", color: "bg-blue-100 text-blue-700", icon: <Loader2 className="h-3 w-3 animate-spin" /> },
-  ready: { label: "Prêt", color: "bg-green-100 text-green-700", icon: <CheckCircle2 className="h-3 w-3" /> },
-  failed: { label: "Erreur", color: "bg-red-100 text-red-700", icon: <AlertCircle className="h-3 w-3" /> },
-  error: { label: "Erreur", color: "bg-red-100 text-red-700", icon: <AlertCircle className="h-3 w-3" /> },
+  pending: { label: "En attente", color: "bg-amber-500/10 text-amber-600 border-amber-500/20", icon: <Clock className="h-3 w-3" /> },
+  processing: { label: "Clonage en cours", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: <Loader2 className="h-3 w-3 animate-spin" /> },
+  ready: { label: "Prêt", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: <CheckCircle2 className="h-3 w-3" /> },
+  failed: { label: "Erreur", color: "bg-red-500/10 text-red-600 border-red-500/20", icon: <AlertCircle className="h-3 w-3" /> },
+  error: { label: "Erreur", color: "bg-red-500/10 text-red-600 border-red-500/20", icon: <AlertCircle className="h-3 w-3" /> },
 };
 
 export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: VoiceProfile | null; voiceMessages: VoiceMessage[] }) {
@@ -196,7 +196,7 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
           <div className="space-y-4">
             {/* Status indicator */}
             <div className="flex items-center gap-4 p-4 rounded-lg border">
-              <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                 <Mic className="h-6 w-6 text-brand" />
               </div>
               <div className="flex-1">
@@ -369,7 +369,9 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <Mic className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Mic className="h-7 w-7 text-muted-foreground" />
+              </div>
               <p className="font-medium">Aucun vocal programme</p>
               <p className="text-sm">Utilisez le bouton de test ci-dessus ou l&apos;IA dans l&apos;inbox pour generer des vocaux.</p>
             </div>

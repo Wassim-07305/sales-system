@@ -403,7 +403,7 @@ export function VideoRoomView({
           {isRecording && (
             <button
               onClick={toggleRecording}
-              className="flex items-center gap-1.5 text-red-500 text-xs font-medium bg-red-50 rounded-full px-2.5 py-1 hover:bg-red-100 transition-colors"
+              className="flex items-center gap-1.5 text-red-600 text-xs font-medium bg-red-500/10 rounded-full px-2.5 py-1 hover:bg-red-500/20 transition-colors"
             >
               <Circle className="h-2.5 w-2.5 fill-red-500 animate-pulse" />
               REC
@@ -776,7 +776,7 @@ export function VideoRoomView({
                                 {poll.question}
                               </p>
                               {poll.is_active && (
-                                <Badge className="bg-green-100 text-green-700 text-[10px]">
+                                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
                                   Actif
                                 </Badge>
                               )}

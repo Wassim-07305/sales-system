@@ -301,10 +301,10 @@ export function TrainingSession({
         </PageHeader>
 
         <div className="max-w-xl mx-auto">
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border/50 hover:shadow-md transition-all">
             <CardHeader className="text-center">
-              <div className="mx-auto p-3 rounded-full bg-[#7af17a]/10 w-fit mb-2">
-                <Brain className="h-8 w-8 text-[#7af17a]" />
+              <div className="mx-auto h-14 w-14 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center mb-2">
+                <Brain className="h-7 w-7 text-emerald-500" />
               </div>
               <CardTitle className="text-xl">Prêt pour l&apos;entraînement ?</CardTitle>
             </CardHeader>
@@ -337,7 +337,7 @@ export function TrainingSession({
               <div className="flex justify-center pt-2">
                 <Button
                   onClick={startTraining}
-                  className="bg-[#7af17a] text-black hover:bg-[#7af17a]/90 px-8"
+                  className="bg-brand text-brand-dark hover:bg-brand/90 px-8"
                 >
                   Commencer
                 </Button>
@@ -366,7 +366,7 @@ export function TrainingSession({
               <Timer className="h-4 w-4" />
               {formatTime(elapsedSeconds)}
             </div>
-            <Badge variant="outline" className="border-border">
+            <Badge variant="outline" className="border-border/50 text-[11px] font-medium uppercase tracking-wider">
               {currentIndex + 1} / {totalQuestions}
             </Badge>
           </div>
@@ -378,10 +378,10 @@ export function TrainingSession({
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border/50 hover:shadow-md transition-all">
             <CardHeader>
               <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-[#7af17a]/20 text-[#7af17a] border-0 text-xs">
+                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[11px] font-medium uppercase tracking-wider">
                   {getNodeTypeLabel(question.nodeType)}
                 </Badge>
               </div>
@@ -390,12 +390,12 @@ export function TrainingSession({
             <CardContent className="space-y-3">
               {question.options.map((option, optIdx) => {
                 let optionStyle =
-                  "border-border hover:border-[#7af17a]/40 hover:bg-[#7af17a]/5 cursor-pointer";
+                  "border-border/50 hover:border-emerald-500/40 hover:bg-emerald-500/5 cursor-pointer";
 
                 if (showFeedback) {
                   if (option === question.correctAnswer) {
                     optionStyle =
-                      "border-[#7af17a]/60 bg-[#7af17a]/10 cursor-default";
+                      "border-emerald-500/60 bg-emerald-500/10 cursor-default";
                   } else if (option === selectedAnswer && !isCorrect) {
                     optionStyle =
                       "border-red-500/60 bg-red-500/10 cursor-default";
@@ -409,12 +409,12 @@ export function TrainingSession({
                     key={optIdx}
                     onClick={() => handleAnswer(option)}
                     disabled={showFeedback}
-                    className={`w-full text-left p-4 rounded-lg border transition-colors ${optionStyle}`}
+                    className={`w-full text-left p-4 rounded-lg border transition-all ${optionStyle}`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm">{option}</span>
                       {showFeedback && option === question.correctAnswer && (
-                        <CheckCircle className="h-5 w-5 text-[#7af17a] shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
                       )}
                       {showFeedback &&
                         option === selectedAnswer &&
@@ -430,7 +430,7 @@ export function TrainingSession({
                 <div className="pt-4 flex justify-end">
                   <Button
                     onClick={handleNext}
-                    className="bg-[#7af17a] text-black hover:bg-[#7af17a]/90"
+                    className="bg-brand text-brand-dark hover:bg-brand/90"
                   >
                     {currentIndex < totalQuestions - 1 ? (
                       <>
@@ -466,23 +466,23 @@ export function TrainingSession({
 
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Score Card */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border/50 hover:shadow-md transition-all">
           <CardContent className="pt-8 pb-8 text-center">
             <div
-              className={`mx-auto p-4 rounded-full w-fit mb-4 ${
+              className={`mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-4 ring-1 ${
                 scorePercent >= 80
-                  ? "bg-[#7af17a]/10"
+                  ? "bg-emerald-500/10 ring-emerald-500/20"
                   : scorePercent >= 50
-                  ? "bg-amber-500/10"
-                  : "bg-red-500/10"
+                  ? "bg-amber-500/10 ring-amber-500/20"
+                  : "bg-red-500/10 ring-red-500/20"
               }`}
             >
               {scorePercent >= 80 ? (
-                <Trophy className="h-10 w-10 text-[#7af17a]" />
+                <Trophy className="h-8 w-8 text-emerald-500" />
               ) : scorePercent >= 50 ? (
-                <Target className="h-10 w-10 text-amber-400" />
+                <Target className="h-8 w-8 text-amber-500" />
               ) : (
-                <Brain className="h-10 w-10 text-red-400" />
+                <Brain className="h-8 w-8 text-red-500" />
               )}
             </div>
             <p className="text-5xl font-bold mb-2">{scorePercent}%</p>
@@ -495,7 +495,7 @@ export function TrainingSession({
                 {formatTime(elapsedSeconds)}
               </span>
               {bestScore !== null && scorePercent > bestScore && (
-                <Badge className="bg-[#7af17a]/20 text-[#7af17a] border-0">
+                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                   Nouveau record !
                 </Badge>
               )}
@@ -504,9 +504,9 @@ export function TrainingSession({
         </Card>
 
         {/* Detailed Answers */}
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-base">Détail des réponses</CardTitle>
+            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Détail des réponses</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {questions.map((q, idx) => {
@@ -515,21 +515,21 @@ export function TrainingSession({
               return (
                 <div
                   key={idx}
-                  className={`flex items-start gap-3 p-3 rounded-lg border ${
+                  className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
                     correct
-                      ? "border-[#7af17a]/20 bg-[#7af17a]/5"
+                      ? "border-emerald-500/20 bg-emerald-500/5"
                       : "border-red-500/20 bg-red-500/5"
                   }`}
                 >
                   {correct ? (
-                    <CheckCircle className="h-5 w-5 text-[#7af17a] shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                   ) : (
                     <XCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{q.prompt}</p>
                     {correct ? (
-                      <p className="text-xs text-[#7af17a] mt-1">
+                      <p className="text-xs text-emerald-500 mt-1">
                         {q.correctAnswer}
                       </p>
                     ) : (
@@ -537,7 +537,7 @@ export function TrainingSession({
                         <p className="text-xs text-red-400">
                           Votre réponse : {userAnswer}
                         </p>
-                        <p className="text-xs text-[#7af17a]">
+                        <p className="text-xs text-emerald-500">
                           Bonne réponse : {q.correctAnswer}
                         </p>
                       </div>
@@ -554,7 +554,7 @@ export function TrainingSession({
           <Button
             variant="outline"
             onClick={startTraining}
-            className="border-border"
+            className="border-border/50"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Recommencer
@@ -562,7 +562,7 @@ export function TrainingSession({
           <Button
             onClick={handleSaveAndFinish}
             disabled={saving}
-            className="bg-[#7af17a] text-black hover:bg-[#7af17a]/90"
+            className="bg-brand text-brand-dark hover:bg-brand/90"
           >
             {saving ? "Sauvegarde..." : "Sauvegarder le résultat"}
           </Button>

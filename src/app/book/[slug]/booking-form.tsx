@@ -111,7 +111,7 @@ export function BookingForm({ slug }: BookingFormProps) {
   if (step === "confirmed") {
     return (
       <div className="text-center py-8">
-        <div className="mx-auto w-16 h-16 rounded-full bg-brand/10 flex items-center justify-center mb-4">
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mb-4">
           <CheckCircle2 className="h-8 w-8 text-brand" />
         </div>
         <h2 className="text-2xl font-bold mb-2">Rendez-vous confirmé !</h2>
@@ -156,7 +156,7 @@ export function BookingForm({ slug }: BookingFormProps) {
         </p>
 
         <div className="space-y-2">
-          <Label>Date</Label>
+          <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Date</Label>
           <Input
             type="date"
             value={selectedDate}
@@ -167,7 +167,7 @@ export function BookingForm({ slug }: BookingFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label>Horaire</Label>
+          <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Horaire</Label>
           <div className="grid grid-cols-3 gap-2">
             {availableTimes.map((time) => (
               <Button

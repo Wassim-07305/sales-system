@@ -66,9 +66,9 @@ interface Props {
 }
 
 const appStatusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  accepted: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
+  pending: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  accepted: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  rejected: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const appStatusLabels: Record<string, string> = {
@@ -200,7 +200,7 @@ export function MarketplaceView({ listings, myApplications }: Props) {
           const StatusIcon = existingApp ? appStatusIcons[existingApp.status] || Clock : null;
 
           return (
-            <Card key={listing.id} className="flex flex-col">
+            <Card key={listing.id} className="flex flex-col border-border/50 hover:shadow-md transition-all">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-base leading-tight">
@@ -288,10 +288,13 @@ export function MarketplaceView({ listings, myApplications }: Props) {
       </div>
 
       {filtered.length === 0 && (
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="p-12 text-center text-muted-foreground">
-            <Store className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            Aucune offre trouvée
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <Store className="h-7 w-7 opacity-50" />
+            </div>
+            <p className="font-medium">Aucune offre trouvée</p>
+            <p className="text-sm mt-1">Essayez de modifier vos filtres de recherche</p>
           </CardContent>
         </Card>
       )}

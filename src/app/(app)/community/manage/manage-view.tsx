@@ -63,7 +63,7 @@ export function ManageView({ posts }: { posts: Post[] }) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm font-medium">{post.author?.full_name || "Anonyme"}</span>
                   <Badge variant="outline" className="text-[10px]">{post.type}</Badge>
-                  {post.hidden && <Badge variant="outline" className="text-[10px] bg-red-100 text-red-700">Masqué</Badge>}
+                  {post.hidden && <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-600 border-red-500/20">Masqué</Badge>}
                   <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
                   </span>
@@ -88,6 +88,9 @@ export function ManageView({ posts }: { posts: Post[] }) {
       {posts.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground">
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <Eye className="h-7 w-7 opacity-50" />
+            </div>
             <p className="font-medium">Aucun post à modérer</p>
           </CardContent>
         </Card>

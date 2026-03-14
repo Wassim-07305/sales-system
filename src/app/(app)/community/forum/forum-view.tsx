@@ -31,6 +31,7 @@ import {
   BookOpen,
   Search,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { createCommunityPost } from "@/lib/actions/community";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -68,6 +69,24 @@ interface Props {
   modules: Module[];
   userId: string;
   reputations?: Record<string, number>;
+}
+
+const AVATAR_COLORS = ["bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600", "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600"];
+
+function getAvatarColor(name: string | null | undefined) {
+  if (!name) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function getInitials(name: string | null | undefined) {
+  if (!name) return "??";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -135,7 +154,8 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           </Link>
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            size="sm"
+            className="h-9 bg-brand text-brand-dark hover:bg-brand/90"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau sujet
@@ -146,7 +166,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
       {/* Pinned posts */}
       {pinnedPosts.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+          <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
             <Pin className="h-4 w-4" />
             Épinglés
           </h2>
@@ -156,9 +176,11 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                 key={post.id}
                 href={`/community/forum/${post.id}`}
               >
-                <Card className="hover:border-brand/30 transition-colors cursor-pointer">
+                <Card className="border-border/50 hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
-                    <Pin className="h-4 w-4 text-brand shrink-0" />
+                    <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Pin className="h-4 w-4 text-amber-600" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">
                         {post.title || "Sans titre"}
@@ -176,7 +198,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                       </p>
                     </div>
                     {post.module_id && (
-                      <Badge variant="outline" className="shrink-0">
+                      <Badge variant="outline" className="shrink-0 bg-blue-500/10 text-blue-600 border-blue-500/20">
                         <BookOpen className="h-3 w-3 mr-1" />
                         {getModuleName(post.module_id)}
                       </Badge>
@@ -213,11 +235,11 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                 key={post.id}
                 href={`/community/forum/${post.id}`}
               >
-                <Card className="hover:border-brand/30 transition-colors cursor-pointer mb-3">
+                <Card className="border-border/50 hover:shadow-md transition-all cursor-pointer mb-3">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
-                      <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand text-sm font-bold shrink-0">
-                        {post.author?.full_name?.charAt(0) || "?"}
+                      <div className={cn("h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0", getAvatarColor(post.author?.full_name))}>
+                        {getInitials(post.author?.full_name)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -227,7 +249,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                           {post.module_id && (
                             <Badge
                               variant="outline"
-                              className="text-xs shrink-0"
+                              className="text-xs shrink-0 bg-blue-500/10 text-blue-600 border-blue-500/20"
                             >
                               <BookOpen className="h-3 w-3 mr-1" />
                               {getModuleName(post.module_id)}
@@ -263,11 +285,13 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
             ))}
 
             {filtered.length === 0 && (
-              <Card>
+              <Card className="border-border/50">
                 <CardContent className="p-12 text-center text-muted-foreground">
-                  <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <MessageSquare className="h-7 w-7 opacity-50" />
+                  </div>
                   <p className="font-medium">Aucun sujet dans cette catégorie</p>
-                  <p className="text-sm">
+                  <p className="text-sm mt-1">
                     Créez le premier sujet de discussion !
                   </p>
                 </CardContent>
@@ -285,15 +309,16 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Titre</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Titre</Label>
               <Input
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Sujet de discussion..."
+                className="h-9"
               />
             </div>
             <div className="space-y-2">
-              <Label>Module (optionnel)</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Module (optionnel)</Label>
               <Select value={newModuleId} onValueChange={setNewModuleId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choisir un module" />
@@ -308,7 +333,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Contenu</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Contenu</Label>
               <Textarea
                 value={newContent}
                 onChange={(e) => setNewContent(e.target.value)}
@@ -319,7 +344,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
             <Button
               onClick={handleCreate}
               disabled={isPending}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full h-9 bg-brand text-brand-dark hover:bg-brand/90"
             >
               {isPending ? "Publication..." : "Publier"}
             </Button>

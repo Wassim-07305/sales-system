@@ -27,11 +27,11 @@ interface AuditLogViewProps {
 }
 
 const entityTypeBadgeColors: Record<string, string> = {
-  deal: "bg-blue-100 text-blue-700",
-  contact: "bg-green-100 text-green-700",
-  contract: "bg-purple-100 text-purple-700",
-  booking: "bg-orange-100 text-orange-700",
-  profile: "bg-brand/10 text-brand-dark",
+  deal: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  contact: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  contract: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  booking: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  profile: "bg-brand/10 text-brand-dark border-brand/20",
 };
 
 export function AuditLogView({ logs }: AuditLogViewProps) {
@@ -104,7 +104,7 @@ export function AuditLogView({ logs }: AuditLogViewProps) {
                       variant="outline"
                       className={
                         entityTypeBadgeColors[log.entity_type] ??
-                        "bg-gray-100 text-gray-700"
+                        "bg-muted text-muted-foreground border-border/40"
                       }
                     >
                       {log.entity_type}

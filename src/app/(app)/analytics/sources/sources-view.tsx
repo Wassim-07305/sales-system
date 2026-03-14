@@ -70,7 +70,7 @@ export function SourcesView({
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-[#7af17a]/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-[#7af17a]/20 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
                   <DollarSign className="h-5 w-5 text-[#7af17a]" />
                 </div>
                 <div>
@@ -84,7 +84,7 @@ export function SourcesView({
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-blue-500/20 ring-1 ring-blue-500/20 flex items-center justify-center">
                   <Hash className="h-5 w-5 text-blue-400" />
                 </div>
                 <div>
@@ -98,7 +98,7 @@ export function SourcesView({
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-amber-500/20 ring-1 ring-amber-500/20 flex items-center justify-center">
                   <Trophy className="h-5 w-5 text-amber-400" />
                 </div>
                 <div>
@@ -138,8 +138,8 @@ export function SourcesView({
                     <Tooltip
                       formatter={(value) => [formatCurrency(Number(value)), "CA"]}
                       contentStyle={{
-                        backgroundColor: "#1a1a1a",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
                         borderRadius: 8,
                       }}
                     />
@@ -186,7 +186,7 @@ export function SourcesView({
                           />
                           <span className="font-medium capitalize">{source.name}</span>
                           {i === 0 && (
-                            <Badge className="bg-green-100 text-green-700 text-[10px]">Top</Badge>
+                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">Top</Badge>
                           )}
                         </div>
                       </td>

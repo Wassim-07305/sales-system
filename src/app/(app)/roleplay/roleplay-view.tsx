@@ -52,9 +52,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-green-100 text-green-700",
-  Moyen: "bg-orange-100 text-orange-700",
-  Difficile: "bg-red-100 text-red-700",
+  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 function formatDuration(seconds: number | null): string {
@@ -159,7 +159,9 @@ export function RoleplayView({ profiles, sessions }: Props) {
       {profiles.length === 0 ? (
         <Card className="mb-8">
           <CardContent className="p-8 text-center text-muted-foreground">
-            <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <User className="h-7 w-7 opacity-50" />
+            </div>
             <p>Aucun profil prospect configur\u00e9.</p>
             <p className="text-sm">Demandez \u00e0 un admin de cr\u00e9er des profils.</p>
           </CardContent>
@@ -187,7 +189,8 @@ export function RoleplayView({ profiles, sessions }: Props) {
                     </div>
                   </div>
                   <Badge
-                    className={`${difficultyColors[profile.difficulty] || "bg-gray-100 text-gray-700"} border-0 text-[10px]`}
+                    variant="outline"
+                    className={`${difficultyColors[profile.difficulty] || "bg-muted/50 text-muted-foreground border-border"} text-[10px]`}
                   >
                     {profile.difficulty}
                   </Badge>
@@ -236,7 +239,8 @@ export function RoleplayView({ profiles, sessions }: Props) {
                         <div className="flex gap-2 mt-0.5">
                           {session.profile?.difficulty && (
                             <Badge
-                              className={`${difficultyColors[session.profile.difficulty] || ""} border-0 text-[10px]`}
+                              variant="outline"
+                              className={`${difficultyColors[session.profile.difficulty] || ""} text-[10px]`}
                             >
                               {session.profile.difficulty}
                             </Badge>
@@ -253,12 +257,13 @@ export function RoleplayView({ profiles, sessions }: Props) {
                     <div className="flex items-center gap-3">
                       {session.status === "completed" && session.score !== null ? (
                         <Badge
-                          className={`border-0 text-xs ${
+                          variant="outline"
+                          className={`text-xs ${
                             session.score >= 80
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : session.score >= 60
-                                ? "bg-orange-100 text-orange-700"
-                                : "bg-red-100 text-red-700"
+                                ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                                : "bg-red-500/10 text-red-600 border-red-500/20"
                           }`}
                         >
                           {session.score}/100

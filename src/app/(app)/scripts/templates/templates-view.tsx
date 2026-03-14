@@ -40,11 +40,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  prospection: "bg-blue-100 text-blue-700",
-  closing: "bg-green-100 text-green-700",
-  objection: "bg-red-100 text-red-700",
-  relance: "bg-orange-100 text-orange-700",
-  discovery: "bg-purple-100 text-purple-700",
+  prospection: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  closing: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  objection: "bg-red-500/10 text-red-600 border-red-500/20",
+  relance: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  discovery: "bg-purple-500/10 text-purple-600 border-purple-500/20",
 };
 
 const networkLabels: Record<string, string> = {
@@ -56,11 +56,11 @@ const networkLabels: Record<string, string> = {
 };
 
 const networkColors: Record<string, string> = {
-  linkedin: "bg-[#0077b5]/10 text-[#0077b5]",
-  instagram: "bg-[#e4405f]/10 text-[#e4405f]",
-  telephone: "bg-gray-100 text-gray-700",
-  email: "bg-amber-100 text-amber-700",
-  whatsapp: "bg-[#25d366]/10 text-[#25d366]",
+  linkedin: "bg-[#0077b5]/10 text-[#0077b5] border-[#0077b5]/20",
+  instagram: "bg-[#e4405f]/10 text-[#e4405f] border-[#e4405f]/20",
+  telephone: "bg-muted text-muted-foreground border-border",
+  email: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  whatsapp: "bg-[#25d366]/10 text-[#25d366] border-[#25d366]/20",
 };
 
 export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
@@ -198,7 +198,7 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
                     variant="outline"
                     className={
                       categoryColors[template.category] ||
-                      "bg-gray-100 text-gray-700"
+                      "bg-muted text-muted-foreground border-border"
                     }
                   >
                     {categoryLabels[template.category] || template.category}
@@ -214,7 +214,7 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
                     variant="outline"
                     className={
                       networkColors[template.network] ||
-                      "bg-gray-100 text-gray-700"
+                      "bg-muted text-muted-foreground border-border"
                     }
                   >
                     {networkLabels[template.network] || template.network}
@@ -249,7 +249,9 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
           <div className="col-span-full">
             <Card>
               <CardContent className="p-12 text-center text-muted-foreground">
-                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <FileText className="h-7 w-7 opacity-50" />
+                </div>
                 <p className="font-medium">Aucun template trouvé</p>
                 <p className="text-sm mt-1">
                   {search || filterCategory !== "all" || filterNiche !== "all" || filterNetwork !== "all"

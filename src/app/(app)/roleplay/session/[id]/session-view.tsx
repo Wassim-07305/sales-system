@@ -62,9 +62,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-green-100 text-green-700",
-  Moyen: "bg-orange-100 text-orange-700",
-  Difficile: "bg-red-100 text-red-700",
+  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 export function SessionView({ session }: Props) {
@@ -171,7 +171,7 @@ export function SessionView({ session }: Props) {
       <Card className="mb-4 shrink-0">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
               <Bot className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -186,7 +186,8 @@ export function SessionView({ session }: Props) {
                 )}
                 {session.profile?.difficulty && (
                   <Badge
-                    className={`${difficultyColors[session.profile.difficulty] || ""} border-0 text-[10px]`}
+                    variant="outline"
+                    className={`${difficultyColors[session.profile.difficulty] || ""} text-[10px]`}
                   >
                     {session.profile.difficulty}
                   </Badge>
@@ -267,7 +268,9 @@ export function SessionView({ session }: Props) {
             {/* Intro message */}
             {messages.length === 0 && !isCompleted && (
               <div className="text-center py-8 text-muted-foreground">
-                <Bot className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Bot className="h-7 w-7 opacity-50" />
+                </div>
                 <p className="font-medium">La session a commenc\u00e9 !</p>
                 <p className="text-sm mt-1">
                   Envoyez votre premier message pour d\u00e9marrer la conversation avec{" "}
@@ -285,7 +288,7 @@ export function SessionView({ session }: Props) {
                 >
                   <div
                     className={cn(
-                      "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
+                      "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
                       isUser
                         ? "bg-brand/10 text-brand"
                         : "bg-muted text-muted-foreground"
@@ -321,7 +324,7 @@ export function SessionView({ session }: Props) {
 
             {isSending && (
               <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                   <Bot className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
@@ -379,10 +382,10 @@ export function SessionView({ session }: Props) {
                 className={cn(
                   "h-16 w-16 rounded-full border-3 flex flex-col items-center justify-center shrink-0",
                   feedback.score >= 80
-                    ? "text-green-600 border-green-200 bg-green-50"
+                    ? "text-emerald-600 border-emerald-500/20 bg-emerald-500/10"
                     : feedback.score >= 60
-                      ? "text-orange-600 border-orange-200 bg-orange-50"
-                      : "text-red-600 border-red-200 bg-red-50"
+                      ? "text-orange-600 border-orange-500/20 bg-orange-500/10"
+                      : "text-red-600 border-red-500/20 bg-red-500/10"
                 )}
               >
                 <span className="text-xl font-bold">{feedback.score}</span>
@@ -406,7 +409,7 @@ export function SessionView({ session }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Strengths */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-emerald-600 flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4" />
                   Points forts
                 </h4>
@@ -416,7 +419,7 @@ export function SessionView({ session }: Props) {
                       key={i}
                       className="flex items-start gap-2 text-sm text-muted-foreground"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                       {s}
                     </li>
                   ))}
@@ -425,7 +428,7 @@ export function SessionView({ session }: Props) {
 
               {/* Improvements */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-orange-700 flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-orange-600 flex items-center gap-1.5">
                   <AlertTriangle className="h-4 w-4" />
                   Axes d&apos;amelioration
                 </h4>
@@ -444,7 +447,7 @@ export function SessionView({ session }: Props) {
 
               {/* Tips */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-blue-700 flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-blue-600 flex items-center gap-1.5">
                   <Lightbulb className="h-4 w-4" />
                   Conseils pratiques
                 </h4>

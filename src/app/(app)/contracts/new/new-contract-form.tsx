@@ -123,13 +123,13 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Form */}
         <div className="space-y-6">
-          <Card>
+          <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="text-base">Informations du contrat</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Template</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Template</Label>
                 <Select value={templateId} onValueChange={setTemplateId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choisir un template" />
@@ -143,7 +143,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               </div>
 
               <div>
-                <Label>Deal associé (optionnel)</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deal associé (optionnel)</Label>
                 <Select value={dealId} onValueChange={handleDealChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Associer à un deal" />
@@ -159,7 +159,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               </div>
 
               <div>
-                <Label>Client</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</Label>
                 <Select value={clientId} onValueChange={setClientId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner le client" />
@@ -175,7 +175,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               </div>
 
               <div>
-                <Label>Nom de l&apos;offre</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nom de l&apos;offre</Label>
                 <Input
                   value={offerName}
                   onChange={(e) => setOfferName(e.target.value)}
@@ -184,7 +184,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               </div>
 
               <div>
-                <Label>Montant (€ TTC)</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Montant (€ TTC)</Label>
                 <Input
                   type="number"
                   value={amount}
@@ -194,7 +194,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               </div>
 
               <div>
-                <Label>Échéancier de paiement</Label>
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Échéancier de paiement</Label>
                 <Input
                   value={paymentSchedule}
                   onChange={(e) => setPaymentSchedule(e.target.value)}
@@ -226,7 +226,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
         </div>
 
         {/* Preview */}
-        <Card className="h-fit">
+        <Card className="h-fit border-border/50">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Eye className="h-4 w-4" />

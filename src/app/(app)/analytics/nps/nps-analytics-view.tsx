@@ -82,33 +82,39 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <NpsGauge score={npsScore} />
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 flex flex-col justify-center h-full">
             <div className="flex items-center gap-2 mb-1">
-              <BarChart3 className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">CSAT</span>
+              <div className="h-9 w-9 rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-emerald-500" />
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CSAT</span>
             </div>
             <p className="text-2xl font-bold">{csatScore}%</p>
             <p className="text-xs text-muted-foreground">Score &ge; 7/10</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 flex flex-col justify-center h-full">
             <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-blue-500" />
-              <span className="text-xs text-muted-foreground">Moyenne</span>
+              <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-blue-500" />
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Moyenne</span>
             </div>
             <p className="text-2xl font-bold">{avgScore}/10</p>
             <p className="text-xs text-muted-foreground">{totalResponses} réponses</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 flex flex-col justify-center h-full">
             <div className="flex items-center gap-2 mb-1">
-              <MessageSquare className="h-4 w-4 text-purple-500" />
-              <span className="text-xs text-muted-foreground">Réponses</span>
+              <div className="h-9 w-9 rounded-lg ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center">
+                <MessageSquare className="h-4 w-4 text-purple-500" />
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Réponses</span>
             </div>
             <p className="text-2xl font-bold">{totalResponses}</p>
             <p className="text-xs text-muted-foreground">
@@ -117,7 +123,7 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 flex flex-col justify-center h-full">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -149,7 +155,7 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         {/* Score Distribution */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base">Distribution des scores</CardTitle>
           </CardHeader>
@@ -157,10 +163,15 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={distribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                  <XAxis dataKey="score" />
-                  <YAxis allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="score" stroke="#888" />
+                  <YAxis allowDecimals={false} stroke="#888" />
                   <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: "8px",
+                    }}
                     formatter={(value) => [
                       `${value} réponse${Number(value) > 1 ? "s" : ""}`,
                       "Nombre",
@@ -189,7 +200,7 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
         </Card>
 
         {/* NPS Trend */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base">Évolution du NPS (6 mois)</CardTitle>
           </CardHeader>
@@ -197,10 +208,15 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                  <XAxis dataKey="month" />
-                  <YAxis domain={[-100, 100]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="month" stroke="#888" />
+                  <YAxis domain={[-100, 100]} stroke="#888" />
                   <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: "8px",
+                    }}
                     formatter={(value, name) => {
                       const labels: Record<string, string> = {
                         nps: "NPS",
@@ -235,7 +251,7 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
       </div>
 
       {/* Recent Feedback */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Clock className="h-4 w-4" />
@@ -245,35 +261,37 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
         <CardContent className="p-0">
           {recentFeedback.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <MessageSquare className="h-7 w-7 opacity-50" />
+              </div>
               <p className="font-medium">Aucun retour pour le moment</p>
-              <p className="text-sm">Les réponses NPS apparaîtront ici.</p>
+              <p className="text-sm mt-1">Les réponses NPS apparaîtront ici.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-medium">Client</th>
-                    <th className="text-center p-4 font-medium">Score</th>
-                    <th className="text-left p-4 font-medium">Commentaire</th>
-                    <th className="text-center p-4 font-medium">Déclencheur</th>
-                    <th className="text-right p-4 font-medium">Date</th>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</th>
+                    <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Score</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Commentaire</th>
+                    <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Déclencheur</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentFeedback.map((fb) => (
-                    <tr key={fb.id} className="border-b last:border-0">
+                    <tr key={fb.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="p-4 font-medium">{fb.clientName}</td>
                       <td className="p-4 text-center">
                         <span
                           className={cn(
                             "inline-flex items-center justify-center h-8 w-8 rounded-full text-sm font-bold",
                             fb.score >= 9
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
                               : fb.score >= 7
-                                ? "bg-amber-100 text-amber-700"
-                                : "bg-red-100 text-red-700"
+                                ? "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20"
+                                : "bg-red-500/10 text-red-600 ring-1 ring-red-500/20"
                           )}
                         >
                           {fb.score}
@@ -283,7 +301,7 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                         {fb.comment || "—"}
                       </td>
                       <td className="p-4 text-center">
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded-full">
                           {fb.triggerDay === -1 ? "Post-closing" : `Jour ${fb.triggerDay}`}
                         </span>
                       </td>

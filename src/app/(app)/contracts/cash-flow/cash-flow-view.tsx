@@ -45,10 +45,10 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  paid: "bg-green-100 text-green-700",
-  overdue: "bg-red-100 text-red-700",
-  failed: "bg-red-100 text-red-700",
+  pending: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  paid: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  overdue: "bg-red-500/10 text-red-600 border-red-500/20",
+  failed: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const PIE_COLORS = ["#7af17a", "#60a5fa", "#ef4444"];
@@ -188,6 +188,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                   }
                 />
                 <Tooltip
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
                   formatter={((value: number, name: string) => {
                     const labels: Record<string, string> = {
                       received: "Encaisse",
@@ -245,6 +246,9 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
             <CardContent className="p-0">
               {upcomingPayments.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <DollarSign className="h-7 w-7 opacity-50" />
+                  </div>
                   <p className="font-medium">Aucun paiement a venir</p>
                   <p className="text-sm">
                     Les echeances de paiement apparaitront ici.
@@ -334,6 +338,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                         ))}
                       </Pie>
                       <Tooltip
+                        contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
                         formatter={((value: number) => [
                           `${Number(value).toLocaleString("fr-FR")} \u20ac`,
                         ]) as never}

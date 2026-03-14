@@ -43,17 +43,17 @@ interface IntegrationKeys {
 const statusConfig = {
   connected: {
     label: "Connecté",
-    color: "bg-green-100 text-green-700 border-green-200",
+    color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     icon: Wifi,
   },
   disconnected: {
     label: "Déconnecté",
-    color: "bg-red-100 text-red-700 border-red-200",
+    color: "bg-red-500/10 text-red-600 border-red-500/20",
     icon: WifiOff,
   },
   pending: {
     label: "En attente",
-    color: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     icon: Clock,
   },
 };
@@ -190,10 +190,12 @@ export function WaSettingsView({
 
       <div className="grid gap-6 max-w-2xl">
         {/* Connection Card */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
+                <Phone className="h-4 w-4 text-blue-600" />
+              </div>
               Connexion WhatsApp
             </CardTitle>
           </CardHeader>
@@ -212,7 +214,7 @@ export function WaSettingsView({
 
             {/* Status */}
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Statut</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</span>
               <Badge variant="outline" className={statusInfo.color}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {statusInfo.label}
@@ -221,7 +223,7 @@ export function WaSettingsView({
 
             {connection?.connected_at && (
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Connecté depuis</span>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Connecté depuis</span>
                 <span className="text-sm text-muted-foreground">
                   {new Date(connection.connected_at).toLocaleDateString(
                     "fr-FR",
@@ -278,10 +280,12 @@ export function WaSettingsView({
         </Card>
 
         {/* Integrations Card */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Link2 className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center">
+                <Link2 className="h-4 w-4 text-purple-600" />
+              </div>
               Intégrations
             </CardTitle>
           </CardHeader>
@@ -292,7 +296,7 @@ export function WaSettingsView({
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-sm">GoHighLevel (GHL)</p>
                   {ghlSaved && (
-                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 text-[10px]">
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
                       <Check className="h-3 w-3 mr-0.5" />
                       Connecté
                     </Badge>
@@ -345,7 +349,7 @@ export function WaSettingsView({
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-sm">iClosed</p>
                   {iClosedSaved && (
-                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 text-[10px]">
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
                       <Check className="h-3 w-3 mr-0.5" />
                       Connecté
                     </Badge>
@@ -393,10 +397,12 @@ export function WaSettingsView({
         </Card>
 
         {/* Webhooks Card */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Webhook className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg ring-1 ring-amber-500/20 bg-amber-500/10 flex items-center justify-center">
+                <Webhook className="h-4 w-4 text-amber-600" />
+              </div>
               Webhooks
             </CardTitle>
           </CardHeader>

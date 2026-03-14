@@ -196,13 +196,13 @@ export function PlacementView({ rules, executions }: Props) {
 
       {/* Rules */}
       <div className="space-y-4 mb-8">
-        <h3 className="font-semibold text-sm text-muted-foreground">Règles de placement</h3>
+        <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Règles de placement</h3>
         {rules.map((rule) => (
-          <Card key={rule.id}>
+          <Card key={rule.id} className="border-border/50">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                     <ArrowRightLeft className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
@@ -238,17 +238,19 @@ export function PlacementView({ rules, executions }: Props) {
           </Card>
         ))}
         {rules.length === 0 && (
-          <Card>
+          <Card className="border-border/50">
             <CardContent className="p-12 text-center text-muted-foreground">
-              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              Aucune règle de placement. Créez-en une pour lancer le matching.
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Users className="h-6 w-6 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm">Aucune règle de placement. Créez-en une pour lancer le matching.</p>
             </CardContent>
           </Card>
         )}
       </div>
 
       {/* Recent placement executions */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-base">Placements récents</CardTitle>
         </CardHeader>
@@ -261,7 +263,7 @@ export function PlacementView({ rules, executions }: Props) {
                   className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
                       <ArrowRightLeft className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
@@ -284,10 +286,10 @@ export function PlacementView({ rules, executions }: Props) {
                     variant="outline"
                     className={
                       exec.status === "completed"
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-green-500/10 text-green-600 border-green-500/20"
                         : exec.status === "failed"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
+                        ? "bg-red-500/10 text-red-600 border-red-500/20"
+                        : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                     }
                   >
                     {exec.status === "completed"
@@ -300,9 +302,11 @@ export function PlacementView({ rules, executions }: Props) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              Aucun placement récent. Lancez le workflow pour matcher les setters.
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Users className="h-6 w-6 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm">Aucun placement récent. Lancez le workflow pour matcher les setters.</p>
             </div>
           )}
         </CardContent>

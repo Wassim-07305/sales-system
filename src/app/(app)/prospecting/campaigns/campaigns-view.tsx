@@ -190,10 +190,10 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
 
   function getStatusBadge(campaign: DripCampaign) {
     if (campaign.is_active) {
-      return <Badge className="bg-green-100 text-green-700 border-green-200">Active</Badge>;
+      return <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Active</Badge>;
     }
     if (campaign.executions_count && campaign.executions_count > 0 && campaign.completed_count === campaign.executions_count) {
-      return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Terminée</Badge>;
+      return <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20">Terminée</Badge>;
     }
     return <Badge variant="outline" className="text-muted-foreground">En pause</Badge>;
   }
@@ -433,7 +433,9 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
       {campaigns.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Mail className="h-7 w-7 text-muted-foreground" />
+            </div>
             <h3 className="text-lg font-semibold mb-2">Aucune campagne</h3>
             <p className="text-muted-foreground text-sm mb-4">
               Créez votre première campagne drip pour automatiser votre prospection
@@ -550,10 +552,10 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                             {/* Vertical connector line */}
                             <div className="flex flex-col items-center">
                               <div
-                                className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium shrink-0 ${
+                                className={`h-9 w-9 rounded-lg flex items-center justify-center text-sm font-medium shrink-0 ${
                                   campaign.is_active
-                                    ? "bg-brand/20 text-brand border border-brand/30"
-                                    : "bg-muted text-muted-foreground border"
+                                    ? "bg-brand/20 text-brand ring-1 ring-brand/30"
+                                    : "bg-muted text-muted-foreground ring-1 ring-border"
                                 }`}
                               >
                                 {idx + 1}

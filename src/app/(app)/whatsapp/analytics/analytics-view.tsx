@@ -77,7 +77,9 @@ export function WhatsAppAnalyticsView({
         </PageHeader>
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <MessageCircle className="h-7 w-7 text-muted-foreground" />
+            </div>
             <p className="font-medium">Aucune donnée disponible</p>
             <p className="text-sm mt-1">
               Connectez votre WhatsApp et envoyez des messages pour voir vos
@@ -117,7 +119,7 @@ export function WhatsAppAnalyticsView({
         <Card>
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
                 <Send className="h-5 w-5 text-[#7af17a]" />
               </div>
               <div>
@@ -133,7 +135,7 @@ export function WhatsAppAnalyticsView({
         <Card>
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#60a5fa]/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-[#60a5fa]/10 ring-1 ring-[#60a5fa]/20 flex items-center justify-center">
                 <MessageCircle className="h-5 w-5 text-[#60a5fa]" />
               </div>
               <div>
@@ -149,7 +151,7 @@ export function WhatsAppAnalyticsView({
         <Card>
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
               </div>
               <div>
@@ -165,7 +167,7 @@ export function WhatsAppAnalyticsView({
         <Card>
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center">
                 <Zap className="h-5 w-5 text-purple-500" />
               </div>
               <div>
@@ -207,10 +209,10 @@ export function WhatsAppAnalyticsView({
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#14080e",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
                     borderRadius: "8px",
-                    color: "#fff",
+                    color: "hsl(var(--foreground))",
                     fontSize: "12px",
                   }}
                   labelFormatter={(label) => `Date : ${label}`}
@@ -246,7 +248,9 @@ export function WhatsAppAnalyticsView({
         <CardContent>
           {sequenceStats.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground text-sm">
-              <Zap className="h-6 w-6 mx-auto mb-2 opacity-50" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Zap className="h-7 w-7 text-muted-foreground" />
+              </div>
               Aucune s&eacute;quence cr&eacute;&eacute;e
             </div>
           ) : (
@@ -294,8 +298,8 @@ export function WhatsAppAnalyticsView({
                         variant="outline"
                         className={
                           seq.is_active
-                            ? "bg-green-100 text-green-700 border-green-200"
-                            : "bg-gray-100 text-gray-500 border-gray-200"
+                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                            : "bg-muted text-muted-foreground border-border/40"
                         }
                       >
                         {seq.is_active ? "Active" : "Inactive"}

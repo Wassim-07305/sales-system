@@ -85,26 +85,30 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
       value: `${data.revenuePerClient.toLocaleString("fr-FR")} \u20ac`,
       icon: DollarSign,
       description: "Moyenne",
+      color: "emerald",
     },
     {
       title: "Coût d'acquisition estimé",
       value: `${data.estimatedCPA.toLocaleString("fr-FR")} \u20ac`,
       icon: Target,
       description: "CPA moyen",
+      color: "blue",
     },
     {
       title: "LTV estimée",
       value: `${data.estimatedLTV.toLocaleString("fr-FR")} \u20ac`,
       icon: TrendingUp,
       description: "Valeur vie client",
+      color: "purple",
     },
     {
       title: "Score satisfaction moyen",
       value: `${data.avgSatisfaction}/100`,
       icon: Heart,
       description: "Basé sur le health score",
+      color: "amber",
     },
-  ];
+  ] as const;
 
   return (
     <div>
@@ -125,15 +129,27 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.title}>
+            <Card key={kpi.title} className="border-border/50 hover:shadow-md transition-all">
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-brand" />
+                  <div className={cn(
+                    "h-9 w-9 rounded-lg ring-1 flex items-center justify-center",
+                    kpi.color === "emerald" && "ring-emerald-500/20 bg-emerald-500/10",
+                    kpi.color === "blue" && "ring-blue-500/20 bg-blue-500/10",
+                    kpi.color === "purple" && "ring-purple-500/20 bg-purple-500/10",
+                    kpi.color === "amber" && "ring-amber-500/20 bg-amber-500/10",
+                  )}>
+                    <Icon className={cn(
+                      "h-5 w-5",
+                      kpi.color === "emerald" && "text-emerald-500",
+                      kpi.color === "blue" && "text-blue-500",
+                      kpi.color === "purple" && "text-purple-500",
+                      kpi.color === "amber" && "text-amber-500",
+                    )} />
                   </div>
                 </div>
                 <p className="text-2xl font-bold">{kpi.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{kpi.title}</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-1">{kpi.title}</p>
                 <p className="text-xs text-muted-foreground/70">{kpi.description}</p>
               </CardContent>
             </Card>
@@ -143,26 +159,26 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
 
       {/* ROI Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 text-center">
-            <p className="text-sm text-muted-foreground mb-1">ROI global</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">ROI global</p>
             <p className={cn(
               "text-3xl font-bold",
-              roi >= 0 ? "text-green-600" : "text-red-500"
+              roi >= 0 ? "text-emerald-600" : "text-red-500"
             )}>
               {roi}%
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Ratio LTV / CAC</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Ratio LTV / CAC</p>
             <p className="text-3xl font-bold text-brand">{ltvCacRatio}x</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Clients totaux</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Clients totaux</p>
             <div className="flex items-center justify-center gap-2">
               <Users className="h-5 w-5 text-brand" />
               <p className="text-3xl font-bold">{data.totalClients}</p>
@@ -174,7 +190,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         {/* Revenue per Client Chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle>Revenue par client (Top 10)</CardTitle>
           </CardHeader>
@@ -183,18 +199,25 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
               {topClients.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topClients} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis
                       type="number"
                       tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                      stroke="#888"
                     />
                     <YAxis
                       type="category"
                       dataKey="name"
                       width={120}
                       tick={{ fontSize: 12 }}
+                      stroke="#888"
                     />
                     <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "8px",
+                      }}
                       formatter={(value) => [
                         `${Number(value).toLocaleString("fr-FR")} \u20ac`,
                         "Revenue",
@@ -211,8 +234,11 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  Aucun client trouvé
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                    <Users className="h-7 w-7 opacity-50" />
+                  </div>
+                  <p className="text-sm">Aucun client trouvé</p>
                 </div>
               )}
             </div>
@@ -220,7 +246,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
         </Card>
 
         {/* Health Score Distribution */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle>Distribution satisfaction client</CardTitle>
           </CardHeader>
@@ -229,10 +255,15 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
               {data.healthDistribution.some((d) => d.count > 0) ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.healthDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                    <XAxis dataKey="range" />
-                    <YAxis allowDecimals={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="range" stroke="#888" />
+                    <YAxis allowDecimals={false} stroke="#888" />
                     <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "8px",
+                      }}
                       formatter={(value) => [value, "Clients"]}
                       labelFormatter={(label) => `Score: ${label}`}
                     />
@@ -247,8 +278,11 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  Aucune donnée de satisfaction
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                    <Heart className="h-7 w-7 opacity-50" />
+                  </div>
+                  <p className="text-sm">Aucune donnée de satisfaction</p>
                 </div>
               )}
             </div>
@@ -258,7 +292,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
 
       {/* Client Details Table (show all with revenue > 0) */}
       {data.clients.filter((c) => c.revenue > 0).length > 0 && (
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle>Détails par client</CardTitle>
           </CardHeader>
@@ -266,18 +300,18 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-medium">Client</th>
-                    <th className="text-right p-4 font-medium">Revenue</th>
-                    <th className="text-right p-4 font-medium">Health Score</th>
-                    <th className="text-right p-4 font-medium">Statut</th>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Revenue</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Health Score</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.clients
                     .filter((c) => c.revenue > 0)
                     .map((client) => (
-                      <tr key={client.clientId} className="border-b last:border-0">
+                      <tr key={client.clientId} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                         <td className="p-4 font-medium">{client.clientName}</td>
                         <td className="p-4 text-right">
                           {client.revenue.toLocaleString("fr-FR")} &euro;
@@ -301,12 +335,12 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                         <td className="p-4 text-right">
                           <span
                             className={cn(
-                              "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                              "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
                               client.healthScore >= 70
-                                ? "bg-green-100 text-green-700"
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                 : client.healthScore >= 40
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-red-100 text-red-700"
+                                  ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                  : "bg-red-500/10 text-red-600 border-red-500/20"
                             )}
                           >
                             {client.healthScore >= 70

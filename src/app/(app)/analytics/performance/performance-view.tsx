@@ -121,7 +121,7 @@ export function PerformanceView({
       </PageHeader>
 
       {/* Ranking Banner */}
-      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-border">
+      <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-border/50 hover:shadow-md transition-all">
         <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
@@ -129,7 +129,7 @@ export function PerformanceView({
                 <Medal className="h-7 w-7 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Classement equipe</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Classement equipe</p>
                 <p className="text-3xl font-bold text-foreground">
                   #{report.ranking.position}
                   <span className="text-lg text-muted-foreground font-normal">
@@ -140,7 +140,7 @@ export function PerformanceView({
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Base sur</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Base sur</p>
               <p className="text-lg font-medium text-foreground">
                 {report.ranking.metric}
               </p>
@@ -151,10 +151,12 @@ export function PerformanceView({
 
       {/* Metrics Cards */}
       {report.metrics.length === 0 && (
-        <Card className="mb-6">
+        <Card className="mb-6 border-border/50">
           <CardContent className="p-8 text-center">
-            <BarChart3 className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
-            <p className="text-muted-foreground">Aucune metrique disponible pour cette periode.</p>
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <BarChart3 className="h-7 w-7 text-muted-foreground/50" />
+            </div>
+            <p className="text-muted-foreground font-medium">Aucune metrique disponible pour cette periode.</p>
           </CardContent>
         </Card>
       )}
@@ -164,10 +166,10 @@ export function PerformanceView({
           const isPositiveTrend = (metric.trend ?? 0) >= 0;
 
           return (
-            <Card key={metric.label}>
+            <Card key={metric.label} className="border-border/50 hover:shadow-md transition-all">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                     {metric.label}
                   </span>
                   {metric.trend != null && metric.trend !== 0 && (
@@ -227,10 +229,10 @@ export function PerformanceView({
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Weekly Revenue Chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-brand" />
+              <BarChart3 className="h-5 w-5 text-emerald-500" />
               Evolution hebdomadaire
             </CardTitle>
           </CardHeader>
@@ -261,8 +263,11 @@ export function PerformanceView({
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  Aucune donnee disponible
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                    <BarChart3 className="h-7 w-7 opacity-50" />
+                  </div>
+                  <p className="text-sm">Aucune donnee disponible</p>
                 </div>
               )}
             </div>
@@ -270,10 +275,10 @@ export function PerformanceView({
         </Card>
 
         {/* Goal Progress Radial */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-brand" />
+              <Target className="h-5 w-5 text-blue-500" />
               Progression objectifs
             </CardTitle>
           </CardHeader>
@@ -313,8 +318,11 @@ export function PerformanceView({
                   </RadialBarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                  Aucune donnee disponible
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                    <BarChart3 className="h-7 w-7 opacity-50" />
+                  </div>
+                  <p className="text-sm">Aucune donnee disponible</p>
                 </div>
               )}
             </div>
@@ -323,11 +331,11 @@ export function PerformanceView({
       </div>
 
       {/* Objectives Progress */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-brand" />
+              <Trophy className="h-5 w-5 text-amber-500" />
               Suivi des objectifs SMART
             </CardTitle>
             <Link href="/team/coaching">
@@ -340,7 +348,9 @@ export function PerformanceView({
         <CardContent>
           {report.objectivesProgress.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <Target className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Target className="h-7 w-7 opacity-50" />
+              </div>
               <p className="font-medium">Aucun objectif actif</p>
               <p className="text-sm mt-1">
                 Definissez vos objectifs pour suivre votre progression
@@ -358,7 +368,7 @@ export function PerformanceView({
                 return (
                   <div
                     key={obj.id}
-                    className="p-4 rounded-lg bg-muted/30 border border-border"
+                    className="p-4 rounded-lg bg-muted/30 border border-border/50 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>

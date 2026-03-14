@@ -51,19 +51,19 @@ const AUDIENCE_OPTIONS = [
 function getRoleBadgeColor(role: string) {
   switch (role) {
     case "admin":
-      return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      return "bg-red-500/10 text-red-600 border-red-500/20";
     case "manager":
-      return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+      return "bg-purple-500/10 text-purple-600 border-purple-500/20";
     case "setter":
-      return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      return "bg-blue-500/10 text-blue-600 border-blue-500/20";
     case "closer":
-      return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
+      return "bg-orange-500/10 text-orange-600 border-orange-500/20";
     case "client_b2b":
-      return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
     case "client_b2c":
-      return "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400";
+      return "bg-teal-500/10 text-teal-600 border-teal-500/20";
     default:
-      return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
+      return "bg-muted text-muted-foreground border-border";
   }
 }
 
@@ -214,7 +214,9 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
           {broadcasts.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                <Mail className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Mail className="h-7 w-7 opacity-50" />
+                </div>
                 <p className="font-medium">Aucune diffusion envoyée</p>
                 <p className="text-sm mt-1">
                   Composez votre premier message ci-contre
@@ -262,7 +264,7 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
                         {role}
                       </span>
                     ))}
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-muted text-muted-foreground">
                       {broadcast.target_audience === "all"
                         ? "Tous"
                         : broadcast.target_audience.toUpperCase()}

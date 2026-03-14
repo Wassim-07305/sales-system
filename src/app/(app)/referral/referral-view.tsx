@@ -116,9 +116,9 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
     : referrals.filter((r) => r.status === filter);
 
   const statusConfig: Record<string, { label: string; className: string; icon: typeof Clock }> = {
-    pending: { label: "En attente", className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
-    converted: { label: "Converti", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle2 },
-    expired: { label: "Expire", className: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400", icon: XCircle },
+    pending: { label: "En attente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20", icon: Clock },
+    converted: { label: "Converti", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: CheckCircle2 },
+    expired: { label: "Expire", className: "bg-muted text-muted-foreground border-border", icon: XCircle },
   };
 
   return (
@@ -132,7 +132,7 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
       <Card className="mb-6 bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-full bg-brand/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-lg bg-brand/20 flex items-center justify-center ring-1 ring-brand/20">
               <Gift className="h-6 w-6 text-brand" />
             </div>
             <div>
@@ -165,8 +165,8 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Send className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Send className="h-4 w-4 text-blue-600" />
               </div>
               <p className="text-xs text-muted-foreground">Invitations envoyees</p>
             </div>
@@ -176,8 +176,8 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <Clock className="h-4 w-4 text-amber-600" />
               </div>
               <p className="text-xs text-muted-foreground">En attente</p>
             </div>
@@ -187,8 +187,8 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               </div>
               <p className="text-xs text-muted-foreground">Conversions</p>
             </div>
@@ -321,8 +321,8 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                <Gift className="h-8 w-8 opacity-50" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Gift className="h-7 w-7 opacity-50" />
               </div>
               <p className="font-medium text-base mb-1">
                 {filter === "all" ? "Aucun parrainage pour le moment" : `Aucun parrainage ${filter === "pending" ? "en attente" : filter === "converted" ? "converti" : "expire"}`}

@@ -112,9 +112,9 @@ export function ProspectingView({
   const [isRecalculating, startRecalcTransition] = useTransition();
 
   function getScoreBadgeStyle(score: number) {
-    if (score >= 75) return "bg-green-100 text-green-700 border-green-200";
-    if (score >= 45) return "bg-orange-100 text-orange-700 border-orange-200";
-    return "bg-red-100 text-red-700 border-red-200";
+    if (score >= 75) return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    if (score >= 45) return "bg-orange-500/10 text-orange-600 border-orange-500/20";
+    return "bg-red-500/10 text-red-600 border-red-500/20";
   }
 
   async function handleRecalculateAll() {

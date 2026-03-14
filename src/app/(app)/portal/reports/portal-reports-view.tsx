@@ -46,10 +46,10 @@ function MetricItem({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="text-muted-foreground">{icon}</div>
+    <div className="flex items-center gap-3">
+      <div className="h-9 w-9 rounded-lg ring-1 ring-border/50 bg-muted/50 flex items-center justify-center text-muted-foreground">{icon}</div>
       <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
         <p className="text-sm font-medium">{value}</p>
       </div>
     </div>
@@ -83,9 +83,11 @@ export function PortalReportsView({ reports }: { reports: Report[] }) {
       </PageHeader>
 
       {reports.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
-            <FileBarChart className="h-12 w-12 mx-auto mb-3 opacity-50" />
+        <Card className="border-border/50">
+          <CardContent className="p-12 text-center text-muted-foreground">
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <FileBarChart className="h-7 w-7 opacity-50" />
+            </div>
             <p className="font-medium text-lg">Aucun rapport</p>
             <p className="text-sm mt-1">
               Cliquez sur &quot;Générer le rapport du mois&quot; pour créer
@@ -98,7 +100,7 @@ export function PortalReportsView({ reports }: { reports: Report[] }) {
           {reports.map((report) => {
             const metrics = report.metrics || {};
             return (
-              <Card key={report.id}>
+              <Card key={report.id} className="border-border/50 hover:shadow-md transition-all">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg capitalize">

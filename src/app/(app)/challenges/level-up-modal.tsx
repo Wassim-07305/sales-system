@@ -50,13 +50,13 @@ export function LevelUpModal({ level, levelName }: Props) {
           />
         ))}
 
-        <div className="bg-gradient-to-b from-brand-dark to-background rounded-2xl p-8 max-w-sm w-full text-center relative overflow-hidden">
+        <div className="bg-gradient-to-b from-brand-dark to-background rounded-2xl p-8 max-w-sm w-full text-center relative overflow-hidden border border-border/50 shadow-2xl">
           <div className="absolute inset-0 opacity-10">
             <Sparkles className="h-full w-full text-brand" />
           </div>
 
           <div className="relative z-10">
-            <div className="h-20 w-20 rounded-full bg-brand/20 border-4 border-brand flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <div className="h-20 w-20 rounded-2xl bg-emerald-500/10 border-4 border-emerald-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
               <Star className="h-10 w-10 text-brand" />
             </div>
 

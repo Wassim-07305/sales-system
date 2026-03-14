@@ -105,9 +105,9 @@ export function HubView({ overview, whatsappStats }: Props) {
   };
 
   const platformColors: Record<string, string> = {
-    linkedin: "bg-blue-50 border-blue-200",
-    instagram: "bg-pink-50 border-pink-200",
-    whatsapp: "bg-green-50 border-green-200",
+    linkedin: "bg-blue-500/10 border-blue-500/20",
+    instagram: "bg-pink-500/10 border-pink-500/20",
+    whatsapp: "bg-green-500/10 border-green-500/20",
   };
 
   async function handleAnalyzeProfile() {
@@ -245,7 +245,7 @@ export function HubView({ overview, whatsappStats }: Props) {
               {platformIcons.whatsapp}
               WhatsApp
               {whatsappStats?.connected ? (
-                <Badge className="bg-green-100 text-green-700 text-[10px] ml-auto">
+                <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] ml-auto">
                   Connecté
                 </Badge>
               ) : (
@@ -308,7 +308,7 @@ export function HubView({ overview, whatsappStats }: Props) {
           onClick={() => router.push("/prospecting/campaigns")}
         >
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
               <Mail className="h-6 w-6 text-brand" />
             </div>
             <div>
@@ -328,7 +328,7 @@ export function HubView({ overview, whatsappStats }: Props) {
           <DialogTrigger asChild>
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <Search className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -405,10 +405,10 @@ export function HubView({ overview, whatsappStats }: Props) {
                         <Badge
                           className={
                             (profileResult.score as number) >= 70
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
                               : (profileResult.score as number) >= 50
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-red-100 text-red-700"
+                              ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                              : "bg-red-500/10 text-red-600 border border-red-500/20"
                           }
                         >
                           {profileResult.score as number}/100
@@ -445,7 +445,7 @@ export function HubView({ overview, whatsappStats }: Props) {
           <DialogTrigger asChild>
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -536,7 +536,7 @@ export function HubView({ overview, whatsappStats }: Props) {
           <DialogTrigger asChild>
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <MessageSquare className="h-5 w-5 text-brand" />
                 </div>
                 <div>

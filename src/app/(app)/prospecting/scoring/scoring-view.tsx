@@ -90,25 +90,25 @@ const tierConfig: Record<ScoreTier, { label: string; color: string; badgeClass: 
   froid: {
     label: "Froid",
     color: "#3b82f6",
-    badgeClass: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    badgeClass: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     icon: Snowflake,
   },
   tiede: {
     label: "Tiede",
     color: "#f59e0b",
-    badgeClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    badgeClass: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     icon: Thermometer,
   },
   chaud: {
     label: "Chaud",
     color: "#f97316",
-    badgeClass: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    badgeClass: "bg-orange-500/10 text-orange-600 border-orange-500/20",
     icon: Flame,
   },
   brulant: {
     label: "Brulant",
     color: "#ef4444",
-    badgeClass: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    badgeClass: "bg-red-500/10 text-red-600 border-red-500/20",
     icon: Zap,
   },
 };
@@ -351,7 +351,7 @@ export function ScoringView({ prospects }: Props) {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -367,8 +367,8 @@ export function ScoringView({ prospects }: Props) {
             <Card key={tier}>
               <CardContent className="p-4 flex items-center gap-3">
                 <div
-                  className="h-10 w-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${cfg.color}15` }}
+                  className="h-10 w-10 rounded-lg flex items-center justify-center ring-1"
+                  style={{ backgroundColor: `${cfg.color}15`, boxShadow: `inset 0 0 0 1px ${cfg.color}30` }}
                 >
                   <TierIcon className="h-5 w-5" style={{ color: cfg.color }} />
                 </div>
@@ -396,7 +396,7 @@ export function ScoringView({ prospects }: Props) {
                 <Tooltip
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={((value: number) => [`${Number(value || 0)} prospect(s)`, "Nombre"]) as any}
-                  contentStyle={{ backgroundColor: "#14080e", border: "none", borderRadius: 8, color: "#fff" }}
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }}
                   labelStyle={{ color: "#ccc" }}
                 />
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
@@ -420,7 +420,7 @@ export function ScoringView({ prospects }: Props) {
           placeholder="Rechercher un prospect..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
+          className="pl-10 h-9 text-xs"
         />
       </div>
 
@@ -678,9 +678,12 @@ export function ScoringView({ prospects }: Props) {
             })}
 
             {filtered.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground">
-                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                Aucun prospect trouve
+              <div className="p-12 text-center text-muted-foreground">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Users className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="font-medium text-sm">Aucun prospect trouvé</p>
+                <p className="text-xs mt-1">Ajoutez des prospects pour commencer le scoring</p>
               </div>
             )}
           </div>

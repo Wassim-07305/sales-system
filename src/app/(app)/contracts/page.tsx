@@ -20,10 +20,10 @@ import { DownloadPdfButton } from "./download-pdf-button";
 import { ContractsExportButton } from "./contracts-export-button";
 
 const statusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  sent: "bg-blue-100 text-blue-700",
-  signed: "bg-green-100 text-green-700",
-  expired: "bg-red-100 text-red-700",
+  draft: "bg-muted text-muted-foreground border-border",
+  sent: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  signed: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  expired: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -130,8 +130,14 @@ export default async function ContractsPage() {
               ))}
               {(!contracts || contracts.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Aucun contrat
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <div className="flex flex-col items-center">
+                      <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                        <FileText className="h-7 w-7 opacity-50" />
+                      </div>
+                      <p className="font-medium">Aucun contrat</p>
+                      <p className="text-sm mt-1">Créez votre premier contrat pour commencer.</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

@@ -51,42 +51,42 @@ const nodeTypeConfig: Record<
 > = {
   opening: {
     label: "Accroche",
-    bg: "bg-green-500",
-    border: "border-green-400",
-    text: "text-green-800",
-    lightBg: "bg-green-50",
+    bg: "bg-emerald-500",
+    border: "border-emerald-500/20",
+    text: "text-emerald-600",
+    lightBg: "bg-emerald-500/10",
     icon: MessageSquare,
   },
   question: {
     label: "Question",
     bg: "bg-blue-500",
-    border: "border-blue-400",
-    text: "text-blue-800",
-    lightBg: "bg-blue-50",
+    border: "border-blue-500/20",
+    text: "text-blue-600",
+    lightBg: "bg-blue-500/10",
     icon: HelpCircle,
   },
   objection: {
     label: "Objection",
     bg: "bg-red-500",
-    border: "border-red-400",
-    text: "text-red-800",
-    lightBg: "bg-red-50",
+    border: "border-red-500/20",
+    text: "text-red-600",
+    lightBg: "bg-red-500/10",
     icon: ShieldAlert,
   },
   response: {
     label: "Réponse",
-    bg: "bg-yellow-500",
-    border: "border-yellow-400",
-    text: "text-yellow-800",
-    lightBg: "bg-yellow-50",
+    bg: "bg-amber-500",
+    border: "border-amber-500/20",
+    text: "text-amber-600",
+    lightBg: "bg-amber-500/10",
     icon: Reply,
   },
   closing: {
     label: "Closing",
     bg: "bg-purple-500",
-    border: "border-purple-400",
-    text: "text-purple-800",
-    lightBg: "bg-purple-50",
+    border: "border-purple-500/20",
+    text: "text-purple-600",
+    lightBg: "bg-purple-500/10",
     icon: CheckCircle,
   },
 };
@@ -159,6 +159,9 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-brand-dark">
         <div className="text-center text-white">
+          <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="h-6 w-6 text-muted-foreground" />
+          </div>
           <p className="text-xl mb-4">Aucun noeud dans ce flowchart</p>
           <Link href={`/scripts/flowchart/${flowchart.id}`}>
             <Button variant="outline">Retour à l&apos;éditeur</Button>
@@ -176,14 +179,14 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
         <h2 className="text-white/70 text-sm font-medium">
           {flowchart.title}
         </h2>
         <div className="flex items-center gap-3">
-          <span className="text-white/50 text-sm">
+          <Badge variant="outline" className="bg-muted/30 border-border/50 text-[11px] font-medium uppercase tracking-wider">
             {currentStep + 1} / {totalSteps}
-          </span>
+          </Badge>
           <Link href={`/scripts/flowchart/${flowchart.id}`}>
             <Button
               variant="ghost"
@@ -215,16 +218,16 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
           {/* Step type badge */}
           <div className="flex justify-center mb-6">
             <Badge
-              className={`${config.lightBg} ${config.text} ${config.border} border px-3 py-1 text-sm`}
+              className={`${config.lightBg} ${config.text} ${config.border} border px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider`}
             >
-              <Icon className="h-4 w-4 mr-2" />
+              <Icon className="h-3.5 w-3.5 mr-2" />
               {config.label}
             </Badge>
           </div>
 
           {/* Main card */}
           <Card
-            className={`border-2 ${config.border} shadow-2xl shadow-black/50`}
+            className={`border ${config.border} shadow-2xl shadow-black/50 hover:shadow-md transition-all`}
           >
             <CardContent className="p-8 md:p-12">
               <p className="text-xl md:text-2xl font-semibold text-center leading-relaxed">

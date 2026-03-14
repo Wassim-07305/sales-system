@@ -132,8 +132,8 @@ export function CustomersView({ clients, testimonials }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{healthy.length}</p>
@@ -143,7 +143,7 @@ export function CustomersView({ clients, testimonials }: Props) {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center ring-1 ring-orange-500/20">
                   <TrendingDown className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
@@ -154,7 +154,7 @@ export function CustomersView({ clients, testimonials }: Props) {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center ring-1 ring-red-500/20">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
                 </div>
                 <div>
@@ -228,8 +228,10 @@ export function CustomersView({ clients, testimonials }: Props) {
                 ))}
                 {filtered.length === 0 && (
                   <div className="p-8 text-center text-muted-foreground">
-                    <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    Aucun client trouvé
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <Users className="h-7 w-7 opacity-50" />
+                    </div>
+                    <p className="font-medium">Aucun client trouvé</p>
                   </div>
                 )}
               </div>
@@ -248,9 +250,9 @@ export function CustomersView({ clients, testimonials }: Props) {
                       <p className="text-xs text-muted-foreground">{t.client?.email}</p>
                     </div>
                     <Badge variant="outline" className={
-                      t.status === "published" ? "bg-green-100 text-green-700" :
-                      t.status === "approved" ? "bg-blue-100 text-blue-700" :
-                      "bg-gray-100 text-gray-700"
+                      t.status === "published" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+                      t.status === "approved" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
+                      "bg-muted text-muted-foreground border-border"
                     }>
                       {t.status === "published" ? "Publié" : t.status === "approved" ? "Approuvé" : "En attente"}
                     </Badge>
@@ -277,8 +279,10 @@ export function CustomersView({ clients, testimonials }: Props) {
             {testimonials.length === 0 && (
               <Card>
                 <CardContent className="p-12 text-center text-muted-foreground">
-                  <Star className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  Aucun témoignage
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <Star className="h-7 w-7 opacity-50" />
+                  </div>
+                  <p className="font-medium">Aucun témoignage</p>
                 </CardContent>
               </Card>
             )}
@@ -338,7 +342,7 @@ export function CustomersView({ clients, testimonials }: Props) {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Onboarding</span>
                       <Badge variant="outline" className={
-                        selectedClient.onboarding_completed ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
+                        selectedClient.onboarding_completed ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-orange-500/10 text-orange-600 border-orange-500/20"
                       }>
                         {selectedClient.onboarding_completed ? "Complété" : "En cours"}
                       </Badge>

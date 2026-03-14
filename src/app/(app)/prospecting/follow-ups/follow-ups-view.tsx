@@ -218,9 +218,9 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
 
   function getScheduleColor(dateStr: string) {
     const date = new Date(dateStr);
-    if (isPast(date) && !isToday(date)) return "bg-red-100 text-red-700";
-    if (isToday(date)) return "bg-brand/20 text-brand-dark";
-    return "bg-gray-100 text-gray-700";
+    if (isPast(date) && !isToday(date)) return "bg-red-500/10 text-red-600 border-red-500/20";
+    if (isToday(date)) return "bg-brand/20 text-brand-dark border-brand/30";
+    return "bg-muted/50 text-muted-foreground border-border/50";
   }
 
   return (
@@ -462,7 +462,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <Clock className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -475,7 +475,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
                   <CalendarCheck className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
@@ -486,8 +486,8 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completedTasks.length}</p>
@@ -553,9 +553,12 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                   </div>
                 ))}
                 {todayTasks.length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    Aucune tâche pour aujourd&apos;hui. Bravo !
+                  <div className="p-12 text-center text-muted-foreground">
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle2 className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                    <p className="font-medium text-sm">Aucune tâche pour aujourd&apos;hui</p>
+                    <p className="text-xs mt-1">Bravo, tout est à jour !</p>
                   </div>
                 )}
               </div>
@@ -610,10 +613,13 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
         {/* Sequences Tab */}
         <TabsContent value="sequences">
           {sequences.length === 0 ? (
-            <Card>
+            <Card className="border-border/50">
               <CardContent className="p-12 text-center text-muted-foreground">
-                <ListChecks className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                Aucune séquence créée. Commencez par en créer une !
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <ListChecks className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="font-medium text-sm">Aucune séquence créée</p>
+                <p className="text-xs mt-1">Commencez par en créer une !</p>
               </CardContent>
             </Card>
           ) : (

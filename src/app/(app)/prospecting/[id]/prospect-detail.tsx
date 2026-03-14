@@ -74,17 +74,17 @@ interface ProspectDetailProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  new: { label: "Nouveau", color: "bg-blue-100 text-blue-700" },
-  contacted: { label: "Contacte", color: "bg-yellow-100 text-yellow-700" },
-  replied: { label: "A repondu", color: "bg-green-100 text-green-700" },
-  booked: { label: "RDV pris", color: "bg-purple-100 text-purple-700" },
-  not_interested: { label: "Pas interesse", color: "bg-gray-100 text-gray-600" },
+  new: { label: "Nouveau", color: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
+  contacted: { label: "Contacte", color: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
+  replied: { label: "A repondu", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+  booked: { label: "RDV pris", color: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+  not_interested: { label: "Pas interesse", color: "bg-muted/50 text-muted-foreground border-border/50" },
 };
 
 const tempColors: Record<string, string> = {
-  hot: "bg-red-100 text-red-700",
-  warm: "bg-orange-100 text-orange-700",
-  cold: "bg-blue-100 text-blue-700",
+  hot: "bg-red-500/10 text-red-600 border-red-500/20",
+  warm: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  cold: "bg-blue-500/10 text-blue-600 border-blue-500/20",
 };
 
 const platformIcons: Record<string, typeof Linkedin> = {

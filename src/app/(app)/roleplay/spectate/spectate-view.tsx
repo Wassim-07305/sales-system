@@ -24,9 +24,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-green-100 text-green-700",
-  Moyen: "bg-orange-100 text-orange-700",
-  Difficile: "bg-red-100 text-red-700",
+  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 function formatDuration(seconds: number | null): string {
@@ -55,7 +55,9 @@ export function SpectateView({ sessions }: Props) {
       {completedSessions.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground">
-            <Eye className="h-10 w-10 mx-auto mb-3 opacity-50" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <Eye className="h-7 w-7 opacity-50" />
+            </div>
             <p className="font-medium">Aucune session termin\u00e9e</p>
             <p className="text-sm mt-1">
               Les sessions compl\u00e9t\u00e9es par l&apos;\u00e9quipe appara\u00eetront ici.
@@ -74,7 +76,7 @@ export function SpectateView({ sessions }: Props) {
                 <CardContent className="p-5">
                   {/* User */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center text-brand text-sm font-bold">
+                    <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand text-sm font-bold ring-1 ring-brand/20">
                       {session.user?.full_name?.charAt(0) || (
                         <User className="h-4 w-4" />
                       )}
@@ -104,7 +106,8 @@ export function SpectateView({ sessions }: Props) {
                       )}
                       {session.profile?.difficulty && (
                         <Badge
-                          className={`${difficultyColors[session.profile.difficulty] || ""} border-0 text-[10px]`}
+                          variant="outline"
+                          className={`${difficultyColors[session.profile.difficulty] || ""} text-[10px]`}
                         >
                           {session.profile.difficulty}
                         </Badge>
@@ -118,12 +121,13 @@ export function SpectateView({ sessions }: Props) {
                       <Trophy className="h-4 w-4 text-brand" />
                       {session.score !== null ? (
                         <Badge
-                          className={`border-0 text-xs ${
+                          variant="outline"
+                          className={`text-xs ${
                             session.score >= 80
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : session.score >= 60
-                                ? "bg-orange-100 text-orange-700"
-                                : "bg-red-100 text-red-700"
+                                ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                                : "bg-red-500/10 text-red-600 border-red-500/20"
                           }`}
                         >
                           {session.score}/100

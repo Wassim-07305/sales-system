@@ -206,20 +206,20 @@ export function EnrichmentView({ prospects }: Props) {
   function getConfidenceBadge(confiance: number) {
     if (confiance >= 70)
       return (
-        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 gap-1">
+        <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 gap-1">
           <Check className="h-3 w-3" />
           {confiance}%
         </Badge>
       );
     if (confiance >= 40)
       return (
-        <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 gap-1">
+        <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 gap-1">
           <AlertTriangle className="h-3 w-3" />
           {confiance}%
         </Badge>
       );
     return (
-      <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 gap-1">
+      <Badge className="bg-red-500/10 text-red-600 border border-red-500/20 gap-1">
         <AlertTriangle className="h-3 w-3" />
         {confiance}%
       </Badge>
@@ -255,7 +255,7 @@ export function EnrichmentView({ prospects }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
               <Database className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -268,7 +268,7 @@ export function EnrichmentView({ prospects }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
               <Clock className="h-5 w-5 text-amber-500" />
             </div>
             <div>
@@ -281,7 +281,7 @@ export function EnrichmentView({ prospects }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
               <TrendingUp className="h-5 w-5 text-blue-500" />
             </div>
             <div>
@@ -350,7 +350,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                     {/* Name */}
                     <div className="sm:col-span-2 flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm shrink-0">
+                      <div className="h-8 w-8 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand font-bold text-sm shrink-0">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-medium text-sm truncate">
@@ -610,7 +610,9 @@ export function EnrichmentView({ prospects }: Props) {
 
             {filtered.length === 0 && (
               <div className="p-8 text-center text-muted-foreground">
-                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Users className="h-7 w-7 opacity-50" />
+                </div>
                 Aucun prospect trouvé
               </div>
             )}

@@ -65,10 +65,10 @@ const eventTypeLabels: Record<string, string> = {
 };
 
 const eventTypeColors: Record<string, string> = {
-  webinar: "bg-blue-100 text-blue-700 border-blue-200",
-  ama: "bg-purple-100 text-purple-700 border-purple-200",
-  workshop: "bg-amber-100 text-amber-700 border-amber-200",
-  masterclass: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  webinar: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  ama: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  workshop: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  masterclass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
 };
 
 function formatEventDate(dateStr: string): string {
@@ -210,7 +210,7 @@ export function EventsView({
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Date block */}
             <div className="flex sm:flex-col items-center gap-2 sm:gap-0 sm:w-16 shrink-0 sm:text-center">
-              <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <Calendar className="h-5 w-5 text-brand" />
               </div>
               <div className="sm:mt-1">
@@ -233,7 +233,7 @@ export function EventsView({
                   {eventTypeLabels[meta.type] || meta.type}
                 </Badge>
                 {isFull && !isPast && (
-                  <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">
+                  <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
                     Complet
                   </Badge>
                 )}
@@ -349,7 +349,9 @@ export function EventsView({
         {upcoming.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center text-muted-foreground">
-              <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Calendar className="h-7 w-7 opacity-50" />
+              </div>
               <p className="font-medium">Aucun événement prévu</p>
               <p className="text-sm">
                 {isAdmin

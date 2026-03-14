@@ -66,9 +66,9 @@ const funnelTypeLabels: Record<string, string> = {
 };
 
 const funnelTypeColors: Record<string, string> = {
-  "post-optin": "bg-blue-100 text-blue-700 border-blue-200",
-  "post-booking": "bg-green-100 text-green-700 border-green-200",
-  nurturing: "bg-purple-100 text-purple-700 border-purple-200",
+  "post-optin": "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  "post-booking": "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  nurturing: "bg-purple-500/10 text-purple-600 border-purple-500/20",
 };
 
 const emptyStep: SequenceStep = { delay_minutes: 0, message: "" };
@@ -222,9 +222,11 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
 
       {/* Sequence List */}
       {sequences.length === 0 ? (
-        <Card>
+        <Card className="border-border/50">
           <CardContent className="py-12 text-center text-muted-foreground">
-            <Zap className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <Zap className="h-7 w-7 opacity-40" />
+            </div>
             <p className="font-medium">Aucune séquence</p>
             <p className="text-sm mt-1">
               Créez votre première séquence de messages automatisés
@@ -234,7 +236,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
       ) : (
         <div className="grid gap-4">
           {sequences.map((seq) => (
-            <Card key={seq.id}>
+            <Card key={seq.id} className="border-border/50 hover:shadow-md transition-all">
               <CardContent className="py-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -255,8 +257,8 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                         variant="outline"
                         className={
                           seq.is_active
-                            ? "bg-green-50 text-green-700 border-green-200"
-                            : "bg-gray-50 text-gray-500 border-gray-200"
+                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                            : "bg-muted/50 text-muted-foreground border-border/50"
                         }
                       >
                         {seq.is_active ? "Actif" : "Inactif"}
@@ -267,7 +269,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                         {seq.description}
                       </p>
                     )}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                       <span className="flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
                         {seq.steps?.length || 0} étapes
@@ -387,7 +389,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
               </div>
               <div className="space-y-4">
                 {steps.map((step, index) => (
-                  <Card key={index}>
+                  <Card key={index} className="border-border/50">
                     <CardContent className="py-3">
                       <div className="flex items-start gap-3">
                         <div className="flex items-center gap-1 pt-2 text-muted-foreground">

@@ -39,6 +39,7 @@ import {
   ArrowLeft,
   Linkedin,
   Instagram,
+  User,
 } from "lucide-react";
 import {
   createRoleplayProfile,
@@ -63,9 +64,9 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-green-100 text-green-700",
-  Moyen: "bg-orange-100 text-orange-700",
-  Difficile: "bg-red-100 text-red-700",
+  Facile: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  Moyen: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  Difficile: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const emptyForm = {
@@ -190,6 +191,9 @@ export function ProfilesView({ profiles }: Props) {
       {profiles.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground">
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+              <User className="h-7 w-7 opacity-50" />
+            </div>
             <p className="font-medium">Aucun profil prospect</p>
             <p className="text-sm mt-1">
               Cr\u00e9ez votre premier profil pour d\u00e9marrer les sessions de jeu de r\u00f4les.
@@ -215,7 +219,8 @@ export function ProfilesView({ profiles }: Props) {
                   <TableCell>{profile.niche}</TableCell>
                   <TableCell>
                     <Badge
-                      className={`${difficultyColors[profile.difficulty] || ""} border-0 text-[10px]`}
+                      variant="outline"
+                      className={`${difficultyColors[profile.difficulty] || ""} text-[10px]`}
                     >
                       {profile.difficulty}
                     </Badge>

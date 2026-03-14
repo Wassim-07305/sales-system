@@ -70,9 +70,9 @@ interface Props {
 }
 
 const statusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  sent: "bg-blue-100 text-blue-700",
-  paid: "bg-green-100 text-green-700",
+  draft: "bg-muted/50 text-muted-foreground border-border/50",
+  sent: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  paid: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -205,18 +205,18 @@ export function InvoicesView({ invoices, contracts }: Props) {
         </Dialog>
       </PageHeader>
 
-      <Card>
+      <Card className="border-border/50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead>N° Facture</TableHead>
-                <TableHead>Contrat</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Échéance</TableHead>
-                <TableHead className="text-right">PDF</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">N° Facture</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Contrat</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Montant</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Échéance</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-right">PDF</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -270,9 +270,12 @@ export function InvoicesView({ invoices, contracts }: Props) {
               ))}
               {invoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    Aucune facture
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <FileText className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                    <p className="font-medium text-sm">Aucune facture</p>
+                    <p className="text-xs mt-1">Les factures apparaîtront ici une fois générées</p>
                   </TableCell>
                 </TableRow>
               )}

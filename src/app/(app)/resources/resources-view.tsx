@@ -71,14 +71,11 @@ function formatFileSize(bytes: number | null): string {
 }
 
 const categoryColors: Record<string, string> = {
-  formation: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  scripts:
-    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  templates:
-    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  replays:
-    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  outils: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+  formation: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  scripts: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  templates: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  replays: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  outils: "bg-rose-500/10 text-rose-600 border-rose-500/20",
 };
 
 // Fallback resources if database is empty
@@ -241,7 +238,9 @@ export function ResourcesView({ resources, categories }: Props) {
       {filteredResources.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <FolderOpen className="h-7 w-7 text-muted-foreground/50" />
+            </div>
             <h3 className="font-semibold text-lg mb-2">
               Aucune ressource trouvée
             </h3>
@@ -258,7 +257,7 @@ export function ResourcesView({ resources, categories }: Props) {
             const Icon = getFileIcon(resource.file_type);
             const categoryColor =
               categoryColors[resource.category?.toLowerCase() || ""] ||
-              "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+              "bg-muted text-muted-foreground border-border";
 
             return (
               <Card

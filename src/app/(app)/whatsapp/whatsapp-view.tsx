@@ -61,17 +61,17 @@ interface Conversation {
 const statusConfig = {
   connected: {
     label: "Connecté",
-    color: "bg-green-100 text-green-700 border-green-200",
+    color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     icon: Wifi,
   },
   disconnected: {
     label: "Déconnecté",
-    color: "bg-red-100 text-red-700 border-red-200",
+    color: "bg-red-500/10 text-red-600 border-red-500/20",
     icon: WifiOff,
   },
   pending: {
     label: "En attente",
-    color: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     icon: Clock,
   },
 };
@@ -187,10 +187,12 @@ export function WhatsAppView({
       </PageHeader>
 
       {/* Connection Status Card */}
-      <Card className="mb-4">
+      <Card className="mb-4 border-border/50">
         <CardContent className="py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <StatusIcon className="h-5 w-5" />
+            <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1", status === "connected" ? "ring-emerald-500/20 bg-emerald-500/10" : status === "pending" ? "ring-amber-500/20 bg-amber-500/10" : "ring-red-500/20 bg-red-500/10")}>
+              <StatusIcon className={cn("h-4 w-4", status === "connected" ? "text-emerald-600" : status === "pending" ? "text-amber-600" : "text-red-600")} />
+            </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-medium text-sm">WhatsApp</span>
@@ -230,24 +232,24 @@ export function WhatsAppView({
 
       {/* Stats Bar */}
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{totalConversations}</p>
-            <p className="text-xs text-muted-foreground">Conversations</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Conversations</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{messagesSentToday}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Messages envoyés aujourd&apos;hui
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{responseRate}%</p>
-            <p className="text-xs text-muted-foreground">Taux de réponse</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Taux de réponse</p>
           </CardContent>
         </Card>
       </div>
@@ -255,13 +257,13 @@ export function WhatsAppView({
       {/* Conversations */}
       <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-420px)] md:h-[calc(100dvh-380px)]">
         {/* Left sidebar: conversation list */}
-        <Card className={cn("flex flex-col overflow-hidden", selectedConv ? "hidden md:flex" : "flex")}>
+        <Card className={cn("flex flex-col overflow-hidden border-border/50", selectedConv ? "hidden md:flex" : "flex")}>
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher..."
-                className="pl-9 h-9"
+                className="pl-9 h-9 text-xs"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -313,7 +315,9 @@ export function WhatsAppView({
             })}
             {filteredConvs.length === 0 && (
               <div className="p-8 text-center text-muted-foreground text-sm">
-                <MessageCircle className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <MessageCircle className="h-6 w-6 opacity-50" />
+                </div>
                 Aucune conversation
               </div>
             )}
@@ -321,7 +325,7 @@ export function WhatsAppView({
         </Card>
 
         {/* Right panel: message thread */}
-        <Card className={cn("flex flex-col overflow-hidden", !selectedConv && "hidden md:flex")}>
+        <Card className={cn("flex flex-col overflow-hidden border-border/50", !selectedConv && "hidden md:flex")}>
           {selectedConv ? (
             <>
               {/* Header */}
@@ -418,7 +422,9 @@ export function WhatsAppView({
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
-                <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <MessageCircle className="h-7 w-7 opacity-40" />
+                </div>
                 <p className="font-medium">Sélectionnez une conversation</p>
                 <p className="text-sm">
                   ou envoyez un nouveau message depuis vos prospects

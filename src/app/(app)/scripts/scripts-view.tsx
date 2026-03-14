@@ -56,11 +56,11 @@ interface MindMapItem {
 }
 
 const categoryColors: Record<string, string> = {
-  prospection: "bg-blue-100 text-blue-700",
-  closing: "bg-green-100 text-green-700",
-  objection: "bg-red-100 text-red-700",
-  relance: "bg-orange-100 text-orange-700",
-  discovery: "bg-purple-100 text-purple-700",
+  prospection: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  closing: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  objection: "bg-red-500/10 text-red-600 border-red-500/20",
+  relance: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  discovery: "bg-purple-500/10 text-purple-600 border-purple-500/20",
 };
 
 export function ScriptsView({
@@ -189,7 +189,7 @@ export function ScriptsView({
                         variant="outline"
                         className={
                           categoryColors[script.category] ||
-                          "bg-gray-100 text-gray-700"
+                          "bg-muted text-muted-foreground border-border"
                         }
                       >
                         {script.category}
@@ -231,7 +231,9 @@ export function ScriptsView({
               <div className="col-span-full">
                 <Card>
                   <CardContent className="p-12 text-center text-muted-foreground">
-                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <FileText className="h-7 w-7 opacity-50" />
+                    </div>
                     <p className="font-medium">Aucun script trouvé</p>
                     <p className="text-sm mt-1">
                       {scriptSearch
@@ -284,7 +286,7 @@ export function ScriptsView({
                       variant="outline"
                       className={
                         categoryColors[fc.category] ||
-                        "bg-gray-100 text-gray-700"
+                        "bg-muted text-muted-foreground border-border"
                       }
                     >
                       {fc.category}
@@ -316,7 +318,9 @@ export function ScriptsView({
               <div className="col-span-full">
                 <Card>
                   <CardContent className="p-12 text-center text-muted-foreground">
-                    <GitBranch className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <GitBranch className="h-7 w-7 opacity-50" />
+                    </div>
                     <p className="font-medium">Aucun flowchart</p>
                     <p className="text-sm mt-1">
                       Créez votre premier flowchart pour visualiser vos scripts
@@ -361,7 +365,7 @@ export function ScriptsView({
                       variant="outline"
                       className={
                         categoryColors[mm.category] ||
-                        "bg-gray-100 text-gray-700"
+                        "bg-muted text-muted-foreground border-border"
                       }
                     >
                       {mm.category}
@@ -393,7 +397,9 @@ export function ScriptsView({
               <div className="col-span-full">
                 <Card>
                   <CardContent className="p-12 text-center text-muted-foreground">
-                    <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <Brain className="h-7 w-7 opacity-50" />
+                    </div>
                     <p className="font-medium">Aucune mind map</p>
                     <p className="text-sm mt-1">
                       Créez votre première mind map pour organiser vos idées.

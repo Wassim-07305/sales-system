@@ -131,10 +131,10 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
       </div>
 
       {/* Header card */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="h-16 w-16 rounded-full bg-brand/10 flex items-center justify-center text-brand text-2xl font-bold shrink-0">
+            <div className="h-16 w-16 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand text-2xl font-bold shrink-0">
               {contact.full_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div className="flex-1">
@@ -157,14 +157,14 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
               {/* Quick stats */}
               <div className="flex gap-6 mt-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Health Score</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Health Score</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div
                       className={`h-2 w-2 rounded-full ${
                         contact.health_score >= 70
-                          ? "bg-green-500"
+                          ? "bg-emerald-500"
                           : contact.health_score >= 40
-                          ? "bg-orange-400"
+                          ? "bg-amber-500"
                           : "bg-red-500"
                       }`}
                     />
@@ -172,11 +172,11 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total deals</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total deals</p>
                   <p className="text-lg font-bold mt-0.5">{deals.length}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Valeur totale</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Valeur totale</p>
                   <p className="text-lg font-bold mt-0.5">
                     {totalDealValue.toLocaleString("fr-FR")} €
                   </p>

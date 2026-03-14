@@ -23,8 +23,8 @@ export default function AppError({
       <PageHeader title="Erreur" description="Un problème est survenu" />
       <Card>
         <CardContent className="p-8 text-center">
-          <div className="h-16 w-16 rounded-full bg-red-100 dark:bg-red-950 flex items-center justify-center mx-auto mb-6">
-            <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+          <div className="h-16 w-16 rounded-2xl bg-red-500/10 ring-1 ring-red-500/20 flex items-center justify-center mx-auto mb-6">
+            <AlertTriangle className="h-8 w-8 text-red-500" />
           </div>
           <h2 className="text-xl font-bold mb-2">
             Oups, quelque chose s&apos;est mal passé

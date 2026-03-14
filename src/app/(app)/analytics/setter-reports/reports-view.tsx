@@ -204,7 +204,7 @@ export function ReportsView({
             <Card key={stat.title}>
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                     <Icon className="h-5 w-5 text-brand" />
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export function ReportsView({
               {radarData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
-                    <PolarGrid stroke="#e5e5e5" />
+                    <PolarGrid stroke="hsl(var(--border))" />
                     <PolarAngleAxis dataKey="axis" tick={{ fontSize: 12 }} />
                     <Radar
                       dataKey="value"
@@ -258,7 +258,7 @@ export function ReportsView({
               {weeklyComparison.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyComparison}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="name" />
                     <YAxis allowDecimals={false} />
                     <Tooltip />
@@ -321,10 +321,10 @@ export function ReportsView({
                           className={cn(
                             "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
                             setter.responseRate >= 20
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : setter.responseRate >= 10
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-red-100 text-red-700"
+                                ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                : "bg-red-500/10 text-red-600 border-red-500/20"
                           )}
                         >
                           {setter.responseRate.toFixed(1)}%

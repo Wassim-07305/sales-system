@@ -391,7 +391,7 @@ export function ReviewsView({
                 <p className="text-sm text-muted-foreground">Appels analysés</p>
                 <p className="text-2xl font-bold">{stats.totalReviews}</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-[#7af17a]/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
                 <Mic className="h-5 w-5 text-[#7af17a]" />
               </div>
             </div>
@@ -407,7 +407,7 @@ export function ReviewsView({
                   {stats.averageScore}/10
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
                 <BarChart3 className="h-5 w-5 text-blue-400" />
               </div>
             </div>
@@ -423,7 +423,7 @@ export function ReviewsView({
                   {stats.commonKeywords[0]?.keyword || "-"}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center">
                 <Brain className="h-5 w-5 text-purple-400" />
               </div>
             </div>
@@ -440,7 +440,7 @@ export function ReviewsView({
                   {trendValue.toFixed(1)}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
                 <TrendingUp className="h-5 w-5 text-amber-400" />
               </div>
             </div>
@@ -459,11 +459,13 @@ export function ReviewsView({
         {/* Analyses tab */}
         <TabsContent value="analyses" className="space-y-4">
           {reviews.length === 0 ? (
-            <Card>
+            <Card className="border-border/50">
               <CardContent className="py-12 text-center text-muted-foreground">
-                <Mic className="h-12 w-12 mx-auto mb-4 opacity-40" />
-                <p>Aucun appel analysé pour le moment.</p>
-                <p className="text-sm mt-1">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Mic className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="font-medium text-sm">Aucun appel analysé pour le moment</p>
+                <p className="text-xs mt-1">
                   Collez un transcript dans l&apos;onglet &quot;Nouveau transcript&quot; pour commencer.
                 </p>
               </CardContent>
@@ -735,8 +737,8 @@ export function ReviewsView({
                     <YAxis domain={[0, 10]} stroke="#888" fontSize={12} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#14080e",
-                        border: "1px solid #333",
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "8px",
                       }}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any

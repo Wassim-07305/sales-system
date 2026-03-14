@@ -65,14 +65,16 @@ export function ReplaysListView({ replays }: { replays: Replay[] }) {
             placeholder="Rechercher un replay..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-9 text-xs"
           />
         </div>
 
         {filtered.length === 0 ? (
-          <Card>
+          <Card className="border-border/50">
             <CardContent className="p-8 text-center text-muted-foreground">
-              <Video className="h-12 w-12 mx-auto mb-3 opacity-40" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Video className="h-7 w-7 opacity-40" />
+              </div>
               <p className="font-medium">Aucun replay disponible</p>
               <p className="text-sm mt-1">
                 Les enregistrements des sessions vidéo apparaîtront ici
@@ -82,17 +84,17 @@ export function ReplaysListView({ replays }: { replays: Replay[] }) {
         ) : (
           <div className="space-y-3">
             {filtered.map((replay) => (
-              <Card key={replay.id}>
+              <Card key={replay.id} className="border-border/50 hover:shadow-md transition-all">
                 <CardContent className="p-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
-                      <Play className="h-5 w-5 text-brand" />
+                    <div className="h-9 w-9 rounded-lg ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center shrink-0">
+                      <Play className="h-4 w-4 text-purple-600" />
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium text-sm truncate">
                         {replay.title}
                       </p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                      <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground mt-1">
                         {replay.started_at && (
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />

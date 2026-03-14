@@ -111,10 +111,10 @@ interface SupportViewProps {
 // ─── Constants ───────────────────────────────────────────────────────
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: "#94a3b8",
-  medium: "#3b82f6",
-  high: "#f59e0b",
-  urgent: "#ef4444",
+  low: "bg-slate-500/10 text-slate-600 border-slate-500/20",
+  medium: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  high: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  urgent: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -125,11 +125,11 @@ const PRIORITY_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  open: "#3b82f6",
-  in_progress: "#f59e0b",
-  waiting: "#8b5cf6",
-  resolved: "#7af17a",
-  closed: "#94a3b8",
+  open: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  in_progress: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  waiting: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  resolved: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  closed: "bg-slate-500/10 text-slate-600 border-slate-500/20",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -398,21 +398,15 @@ export function SupportView({
           <TableCell>
             <Badge
               variant="outline"
-              className="text-xs"
-              style={{
-                borderColor: PRIORITY_COLORS[ticket.priority],
-                color: PRIORITY_COLORS[ticket.priority],
-              }}
+              className={`text-xs ${PRIORITY_COLORS[ticket.priority]}`}
             >
               {PRIORITY_LABELS[ticket.priority]}
             </Badge>
           </TableCell>
           <TableCell>
             <Badge
-              className="text-xs text-white"
-              style={{
-                backgroundColor: STATUS_COLORS[ticket.status],
-              }}
+              variant="outline"
+              className={`text-xs ${STATUS_COLORS[ticket.status]}`}
             >
               {STATUS_LABELS[ticket.status]}
             </Badge>
@@ -592,48 +586,56 @@ export function SupportView({
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Tickets ouverts
             </CardTitle>
-            <MessageSquare className="size-4 text-[#3b82f6]" />
+            <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
+              <MessageSquare className="size-4 text-blue-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.open}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               En cours
             </CardTitle>
-            <Clock className="size-4 text-[#f59e0b]" />
+            <div className="h-9 w-9 rounded-lg ring-1 ring-amber-500/20 bg-amber-500/10 flex items-center justify-center">
+              <Clock className="size-4 text-amber-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.in_progress}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Résolus
             </CardTitle>
-            <CheckCircle className="size-4 text-[#7af17a]" />
+            <div className="h-9 w-9 rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
+              <CheckCircle className="size-4 text-emerald-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.resolved}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Temps moyen résolution
             </CardTitle>
-            <AlertTriangle className="size-4 text-[#8b5cf6]" />
+            <div className="h-9 w-9 rounded-lg ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center">
+              <AlertTriangle className="size-4 text-purple-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -645,15 +647,16 @@ export function SupportView({
 
       {/* Tabs */}
       <Tabs defaultValue="my-tickets">
-        <TabsList>
-          <TabsTrigger value="my-tickets">Mes tickets</TabsTrigger>
-          <TabsTrigger value="new-ticket">
+        <TabsList className="bg-muted/30 rounded-lg p-0.5">
+          <TabsTrigger value="my-tickets" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Mes tickets</TabsTrigger>
+          <TabsTrigger value="new-ticket" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             <Plus className="size-4 mr-1" />
             Nouveau ticket
           </TabsTrigger>
           {isAdmin && (
             <TabsTrigger
               value="all-tickets"
+              className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
               onClick={() => {
                 if (!allTicketsLoaded) handleLoadAllTickets();
               }}
@@ -668,11 +671,16 @@ export function SupportView({
           {statusFilterDropdown}
 
           {filteredTickets.length === 0 ? (
-            <Card>
+            <Card className="border-border/50">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <LifeBuoy className="size-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-sm">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                  <LifeBuoy className="size-7 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-sm font-medium">
                   Aucun ticket trouvé
+                </p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  Créez un nouveau ticket pour contacter le support
                 </p>
               </CardContent>
             </Card>
@@ -711,7 +719,7 @@ export function SupportView({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Sujet</label>
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Sujet</label>
                 <Input
                   placeholder="Décrivez brièvement votre problème"
                   value={newSubject}
@@ -721,7 +729,7 @@ export function SupportView({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Catégorie</label>
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Catégorie</label>
                   <Select value={newCategory} onValueChange={setNewCategory}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une catégorie" />
@@ -737,7 +745,7 @@ export function SupportView({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Priorité</label>
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Priorité</label>
                   <Select value={newPriority} onValueChange={setNewPriority}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner la priorité" />
@@ -769,7 +777,7 @@ export function SupportView({
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Description</label>
                 <Textarea
                   placeholder="Décrivez votre problème en détail..."
                   value={newDescription}
@@ -809,10 +817,12 @@ export function SupportView({
                 </CardContent>
               </Card>
             ) : filteredAllTickets.length === 0 ? (
-              <Card>
+              <Card className="border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <LifeBuoy className="size-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground text-sm">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                    <LifeBuoy className="size-7 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground text-sm font-medium">
                     Aucun ticket trouvé
                   </p>
                 </CardContent>

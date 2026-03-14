@@ -36,6 +36,7 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface AnalyticsData {
   totalUsers: number;
@@ -109,56 +110,56 @@ export function GamificationAnalyticsView({ data }: Props) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 flex items-center justify-center">
-                <Star className="h-5 w-5 text-[#7af17a]" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Star className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.avgPoints}</p>
-                <p className="text-xs text-muted-foreground">Pts moyens</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Pts moyens</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#f59e0b]/10 flex items-center justify-center">
-                <Flame className="h-5 w-5 text-[#f59e0b]" />
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <Flame className="h-5 w-5 text-amber-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.avgStreak}</p>
-                <p className="text-xs text-muted-foreground">Streak moyen</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Streak moyen</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#60a5fa]/10 flex items-center justify-center">
-                <Trophy className="h-5 w-5 text-[#60a5fa]" />
+              <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Trophy className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.totalChallengesCompleted}</p>
-                <p className="text-xs text-muted-foreground">Defis completes</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Defis completes</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 flex items-center justify-center">
-                <Zap className="h-5 w-5 text-[#7af17a]" />
+              <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                <Zap className="h-5 w-5 text-violet-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold truncate">
                   {data.mostPopularBadge?.name || "—"}
                 </p>
-                <p className="text-xs text-muted-foreground">Badge populaire</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Badge populaire</p>
               </div>
             </div>
           </CardContent>
@@ -168,10 +169,10 @@ export function GamificationAnalyticsView({ data }: Props) {
       {/* Level distribution + Mood trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Level distribution bar chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-4 w-4 text-[#60a5fa]" />
+              <Users className="h-4 w-4 text-blue-600" />
               Repartition par niveau
             </CardTitle>
           </CardHeader>
@@ -206,10 +207,10 @@ export function GamificationAnalyticsView({ data }: Props) {
         </Card>
 
         {/* Mood trend line chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[#f59e0b]" />
+              <TrendingUp className="h-4 w-4 text-amber-600" />
               Tendance humeur (30 jours)
             </CardTitle>
           </CardHeader>
@@ -249,7 +250,10 @@ export function GamificationAnalyticsView({ data }: Props) {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-sm gap-3">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-muted-foreground/60" />
+                  </div>
                   Aucune donnee d&apos;humeur disponible
                 </div>
               )}
@@ -259,10 +263,10 @@ export function GamificationAnalyticsView({ data }: Props) {
       </div>
 
       {/* Badge completion grid */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Star className="h-4 w-4 text-[#7af17a]" />
+            <Star className="h-4 w-4 text-emerald-600" />
             Taux d&apos;obtention des badges
           </CardTitle>
         </CardHeader>
@@ -271,7 +275,7 @@ export function GamificationAnalyticsView({ data }: Props) {
             {data.badgeCompletionRates.map((badge) => (
               <div
                 key={badge.id}
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30"
+                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50 hover:shadow-md transition-all"
               >
                 <div
                   className="h-9 w-9 rounded-full flex items-center justify-center shrink-0"
@@ -322,10 +326,10 @@ export function GamificationAnalyticsView({ data }: Props) {
 
       {/* Challenge completion rates */}
       {data.challengeStats.length > 0 && (
-        <Card className="mb-6">
+        <Card className="mb-6 border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-[#60a5fa]" />
+              <Trophy className="h-4 w-4 text-blue-600" />
               Taux de completion des defis
             </CardTitle>
           </CardHeader>
@@ -334,8 +338,13 @@ export function GamificationAnalyticsView({ data }: Props) {
               {data.challengeStats.map((ch) => (
                 <div key={ch.id} className="flex items-center gap-3">
                   <Badge
-                    variant={ch.isActive ? "default" : "outline"}
-                    className={ch.isActive ? "bg-[#7af17a]/10 text-[#7af17a] shrink-0" : "shrink-0"}
+                    variant="outline"
+                    className={cn(
+                      "shrink-0",
+                      ch.isActive
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        : "bg-zinc-500/10 text-zinc-600 border-zinc-500/20"
+                    )}
                   >
                     {ch.isActive ? "Actif" : "Termine"}
                   </Badge>
@@ -359,10 +368,10 @@ export function GamificationAnalyticsView({ data }: Props) {
       )}
 
       {/* Impact section */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#7af17a]" />
+            <TrendingUp className="h-4 w-4 text-emerald-600" />
             Impact de la gamification sur les ventes
           </CardTitle>
         </CardHeader>
@@ -414,7 +423,7 @@ export function GamificationAnalyticsView({ data }: Props) {
             </TableBody>
           </Table>
           {data.impact.active.count > 0 && data.impact.others.count > 0 && (
-            <div className="mt-4 p-3 rounded-lg bg-[#7af17a]/5 border border-[#7af17a]/20">
+            <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
               <p className="text-sm">
                 {data.impact.active.avgRevenue > data.impact.others.avgRevenue ? (
                   <>

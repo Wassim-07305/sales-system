@@ -66,10 +66,12 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
       <PageHeader title="Paramètres" description="Gérez vos préférences et votre compte" />
 
       {/* Notifications */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Bell className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-3 text-base">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10">
+              <Bell className="h-4 w-4 text-blue-500" />
+            </div>
             Notifications
           </CardTitle>
           <CardDescription>Gérez comment vous souhaitez être notifié</CardDescription>
@@ -107,10 +109,12 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
       </Card>
 
       {/* Compte */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Lock className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-3 text-base">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-amber-500/20 bg-amber-500/10">
+              <Lock className="h-4 w-4 text-amber-500" />
+            </div>
             Sécurité du compte
           </CardTitle>
           <CardDescription>Modifiez votre mot de passe</CardDescription>
@@ -154,21 +158,23 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
       </Card>
 
       {/* Abonnement */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <CreditCard className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-3 text-base">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10">
+              <CreditCard className="h-4 w-4 text-emerald-500" />
+            </div>
             Mon abonnement
           </CardTitle>
           <CardDescription>Informations sur votre plan actuel</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-border p-4">
+          <div className="flex items-center justify-between rounded-lg border border-border/50 p-4">
             <div>
               <p className="font-medium">Plan actuel</p>
               <p className="text-sm text-muted-foreground">Accès complet à la plateforme</p>
             </div>
-            <Badge className="bg-brand text-brand-dark">Actif</Badge>
+            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Actif</Badge>
           </div>
           <p className="text-xs text-muted-foreground">
             Pour toute question sur votre abonnement, contactez le support.

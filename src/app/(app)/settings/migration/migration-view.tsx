@@ -188,7 +188,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
                   i === step
                     ? "bg-brand text-brand-dark"
                     : i < step
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
                       : "bg-muted text-muted-foreground"
                 )}
               >
@@ -251,7 +251,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
                     type="checkbox"
                     checked={skipDuplicates}
                     onChange={(e) => setSkipDuplicates(e.target.checked)}
-                    className="rounded border-gray-300"
+                    className="rounded border-border"
                   />
                   Ignorer les doublons (par email)
                 </label>
@@ -260,7 +260,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
                     type="checkbox"
                     checked={mergeExisting}
                     onChange={(e) => setMergeExisting(e.target.checked)}
-                    className="rounded border-gray-300"
+                    className="rounded border-border"
                   />
                   Fusionner avec les contacts existants
                 </label>
@@ -411,32 +411,32 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {(dataType === "contacts" || dataType === "both") && (
                 <>
-                  <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20">
-                    <p className="text-2xl font-bold text-green-700">{result.contactsImported}</p>
+                  <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <p className="text-2xl font-bold text-emerald-600">{result.contactsImported}</p>
                     <p className="text-xs text-muted-foreground">Contacts importés</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20">
-                    <p className="text-2xl font-bold text-amber-700">{result.contactsSkipped}</p>
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-2xl font-bold text-amber-600">{result.contactsSkipped}</p>
                     <p className="text-xs text-muted-foreground">Contacts ignorés (doublons)</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
-                    <p className="text-2xl font-bold text-red-700">{result.contactsErrors}</p>
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <p className="text-2xl font-bold text-red-600">{result.contactsErrors}</p>
                     <p className="text-xs text-muted-foreground">Erreurs contacts</p>
                   </div>
                 </>
               )}
               {(dataType === "deals" || dataType === "both") && (
                 <>
-                  <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20">
-                    <p className="text-2xl font-bold text-green-700">{result.dealsImported}</p>
+                  <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <p className="text-2xl font-bold text-emerald-600">{result.dealsImported}</p>
                     <p className="text-xs text-muted-foreground">Deals importés</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20">
-                    <p className="text-2xl font-bold text-amber-700">{result.dealsSkipped}</p>
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-2xl font-bold text-amber-600">{result.dealsSkipped}</p>
                     <p className="text-xs text-muted-foreground">Deals ignorés</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
-                    <p className="text-2xl font-bold text-red-700">{result.dealsErrors}</p>
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <p className="text-2xl font-bold text-red-600">{result.dealsErrors}</p>
                     <p className="text-xs text-muted-foreground">Erreurs deals</p>
                   </div>
                 </>

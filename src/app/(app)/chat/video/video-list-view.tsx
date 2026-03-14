@@ -52,21 +52,21 @@ function getStatusBadge(status: string) {
   switch (status) {
     case "live":
       return (
-        <Badge className="bg-green-500 text-white hover:bg-green-600">
+        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
           <Radio className="h-3 w-3 mr-1 animate-pulse" />
           En direct
         </Badge>
       );
     case "scheduled":
       return (
-        <Badge variant="outline" className="border-blue-300 text-blue-600 dark:text-blue-400">
+        <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
           <Clock className="h-3 w-3 mr-1" />
           Planifi\u00e9e
         </Badge>
       );
     case "ended":
       return (
-        <Badge variant="secondary">
+        <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-border/50">
           Termin\u00e9e
         </Badge>
       );
@@ -172,7 +172,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
 
   function RoomCard({ room }: { room: VideoRoom }) {
     return (
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardContent className="pt-5">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
@@ -184,7 +184,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             {getStatusBadge(room.status)}
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+          <div className="flex items-center gap-4 text-[11px] font-medium text-muted-foreground mb-4">
             {room.scheduled_at && (
               <div className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
@@ -210,7 +210,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               <Button
                 size="sm"
                 asChild
-                className="bg-green-500 text-white hover:bg-green-600"
+                className="bg-emerald-500 text-white hover:bg-emerald-600"
               >
                 <Link href={`/chat/video/${room.id}`}>
                   <Play className="h-3.5 w-3.5 mr-1" />
@@ -315,17 +315,17 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
       </PageHeader>
 
       <Tabs defaultValue="scheduled" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="live" className="gap-1.5">
+        <TabsList className="bg-muted/30 rounded-lg p-0.5">
+          <TabsTrigger value="live" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             <Radio className="h-3.5 w-3.5" />
             En cours
             {live.length > 0 && (
-              <Badge className="ml-1 h-5 w-5 p-0 justify-center bg-green-500 text-white text-[10px]">
+              <Badge variant="outline" className="ml-1 h-5 w-5 p-0 justify-center bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
                 {live.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="scheduled" className="gap-1.5">
+          <TabsTrigger value="scheduled" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             <Clock className="h-3.5 w-3.5" />
             Planifi\u00e9es
             {scheduled.length > 0 && (
@@ -334,7 +334,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="ended" className="gap-1.5">
+          <TabsTrigger value="ended" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
             Termin\u00e9es
             {ended.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center text-[10px]">
@@ -346,9 +346,11 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
 
         <TabsContent value="live">
           {live.length === 0 ? (
-            <Card>
+            <Card className="border-border/50">
               <CardContent className="py-12 text-center text-muted-foreground">
-                <Video className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Video className="h-7 w-7 opacity-40" />
+                </div>
                 <p className="font-medium">Aucune visio en cours</p>
                 <p className="text-sm mt-1">Les sessions en direct appara\u00eetront ici</p>
               </CardContent>
@@ -364,9 +366,11 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
 
         <TabsContent value="scheduled">
           {scheduled.length === 0 ? (
-            <Card>
+            <Card className="border-border/50">
               <CardContent className="py-12 text-center text-muted-foreground">
-                <Calendar className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Calendar className="h-7 w-7 opacity-40" />
+                </div>
                 <p className="font-medium">Aucune visio planifi\u00e9e</p>
                 <p className="text-sm mt-1">
                   Cr\u00e9ez une nouvelle visioconf\u00e9rence pour commencer
@@ -384,9 +388,11 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
 
         <TabsContent value="ended">
           {ended.length === 0 ? (
-            <Card>
+            <Card className="border-border/50">
               <CardContent className="py-12 text-center text-muted-foreground">
-                <Video className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <Video className="h-7 w-7 opacity-40" />
+                </div>
                 <p className="font-medium">Aucune visio termin\u00e9e</p>
                 <p className="text-sm mt-1">
                   Les visios pass\u00e9es et leurs replays appara\u00eetront ici

@@ -87,21 +87,21 @@ interface RoadmapViewProps {
 // ─── Category colors ─────────────────────────────────────────────────
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Intégration: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  Mobile: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  Analytics: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  Développeur: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-  CRM: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  IA: "bg-pink-500/20 text-pink-400 border-pink-500/30",
-  Communication: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-  Dashboard: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  Gamification: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  Support: "bg-teal-500/20 text-teal-400 border-teal-500/30",
-  Formation: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-  Outils: "bg-lime-500/20 text-lime-400 border-lime-500/30",
-  Finance: "bg-green-500/20 text-green-400 border-green-500/30",
-  Social: "bg-violet-500/20 text-violet-400 border-violet-500/30",
-  Interface: "bg-sky-500/20 text-sky-400 border-sky-500/30",
+  Intégration: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  Mobile: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  Analytics: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  Développeur: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+  CRM: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  IA: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+  Communication: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+  Dashboard: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  Gamification: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  Support: "bg-teal-500/10 text-teal-600 border-teal-500/20",
+  Formation: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  Outils: "bg-lime-500/10 text-lime-600 border-lime-500/20",
+  Finance: "bg-green-500/10 text-green-600 border-green-500/20",
+  Social: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  Interface: "bg-sky-500/10 text-sky-600 border-sky-500/20",
 };
 
 const SUGGESTION_CATEGORIES = [
@@ -120,23 +120,23 @@ const STATUS_CONFIG = {
   planned: {
     label: "Planifié",
     icon: Clock,
-    color: "text-blue-400",
+    color: "text-blue-500",
     bg: "bg-blue-500/10 border-blue-500/20",
-    dot: "bg-blue-400",
+    dot: "bg-blue-500",
   },
   in_progress: {
     label: "En cours",
     icon: Rocket,
-    color: "text-amber-400",
+    color: "text-amber-500",
     bg: "bg-amber-500/10 border-amber-500/20",
-    dot: "bg-amber-400",
+    dot: "bg-amber-500",
   },
   done: {
     label: "Terminé",
     icon: CheckCircle,
-    color: "text-[#7af17a]",
-    bg: "bg-[#7af17a]/10 border-[#7af17a]/20",
-    dot: "bg-[#7af17a]",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    dot: "bg-emerald-500",
   },
 };
 
@@ -158,7 +158,7 @@ function FeatureCard({
     "bg-gray-500/20 text-gray-400 border-gray-500/30";
 
   return (
-    <Card className="bg-card/60 border-border hover:border-border transition-colors">
+    <Card className="bg-card/60 border-border/50 hover:shadow-md hover:border-border transition-all">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -449,7 +449,7 @@ export function RoadmapView({
         {/* ── Suggestions Tab ──────────────────────────────────────────── */}
         <TabsContent value="suggestions" className="space-y-6 mt-4">
           {/* Suggestion form */}
-          <Card className="bg-card/60 border-border">
+          <Card className="bg-card/60 border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Plus className="h-4 w-4 text-[#7af17a]" />
@@ -522,7 +522,7 @@ export function RoadmapView({
 
           {/* Community suggestions list */}
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+            <h2 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
               <Lightbulb className="h-4 w-4" />
               Suggestions de la communauté
               <Badge
@@ -541,7 +541,7 @@ export function RoadmapView({
                 return (
                   <Card
                     key={sug.id}
-                    className="bg-card/60 border-border hover:border-border transition-colors"
+                    className="bg-card/60 border-border/50 hover:shadow-md hover:border-border transition-all"
                   >
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-start justify-between gap-3">
@@ -622,7 +622,7 @@ export function RoadmapView({
                   </div>
 
                   {/* Release card */}
-                  <Card className="flex-1 bg-card/60 border-border">
+                  <Card className="flex-1 bg-card/60 border-border/50 hover:shadow-md transition-all">
                     <CardHeader className="pb-3">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <Badge

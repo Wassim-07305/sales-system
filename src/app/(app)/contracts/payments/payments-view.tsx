@@ -53,10 +53,10 @@ interface Props {
 }
 
 const statusColors: Record<string, string> = {
-  paid: "bg-green-100 text-green-700",
-  pending: "bg-yellow-100 text-yellow-700",
-  overdue: "bg-red-100 text-red-700",
-  failed: "bg-red-100 text-red-700",
+  paid: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  pending: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  overdue: "bg-red-500/10 text-red-600 border-red-500/20",
+  failed: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -121,7 +121,7 @@ export function PaymentsView({ installments, overdue }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
               <DollarSign className="h-5 w-5 text-blue-600" />
             </div>
             <div>
@@ -134,8 +134,8 @@ export function PaymentsView({ installments, overdue }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -147,7 +147,7 @@ export function PaymentsView({ installments, overdue }: Props) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 flex items-center justify-center">
               <AlertTriangle className="h-5 w-5 text-red-500" />
             </div>
             <div>
@@ -169,17 +169,17 @@ export function PaymentsView({ installments, overdue }: Props) {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {overdue.map((item) => (
-              <Card key={item.id} className="border-red-200 bg-red-50">
+              <Card key={item.id} className="border-red-500/20 bg-red-500/5">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">
                       Contrat #{item.contract_id.slice(0, 8)}
                     </span>
-                    <Badge variant="outline" className="bg-red-100 text-red-700">
+                    <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
                       En retard
                     </Badge>
                   </div>
-                  <p className="text-lg font-bold text-red-700">
+                  <p className="text-lg font-bold text-red-500">
                     {item.amount.toLocaleString("fr-FR")} &euro;
                   </p>
                   <p className="text-xs text-red-600">
@@ -215,7 +215,7 @@ export function PaymentsView({ installments, overdue }: Props) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">Tous les paiements</h3>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-44">
+          <SelectTrigger className="w-44 h-9 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -233,12 +233,12 @@ export function PaymentsView({ installments, overdue }: Props) {
           <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Contrat</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Échéance</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Payé le</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Contrat</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Montant</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Échéance</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Payé le</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -297,9 +297,12 @@ export function PaymentsView({ installments, overdue }: Props) {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    Aucun paiement trouvé
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <Clock className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                    <p className="font-medium text-sm">Aucun paiement trouvé</p>
+                    <p className="text-xs mt-1">Les paiements apparaîtront ici</p>
                   </TableCell>
                 </TableRow>
               )}
