@@ -88,14 +88,15 @@ const STAT_CONFIG = [
 const NAV_LINKS = [
   { href: "/analytics/funnel", icon: Funnel, label: "Funnel" },
   { href: "/analytics/sources", icon: PieChartIcon, label: "Sources" },
+  { href: "/analytics/objections", icon: AlertTriangle, label: "Objections" },
   { href: "/analytics/projections", icon: TrendingUp, label: "Projections" },
   { href: "/analytics/benchmarking", icon: BarChart3, label: "Benchmarking" },
   { href: "/analytics/nps", icon: SmilePlus, label: "NPS & CSAT" },
 ];
 
 const AVATAR_COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
-  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
 ];
 
 function getAvatarColor(str: string) {

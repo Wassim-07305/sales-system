@@ -110,18 +110,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["setter", "closer"],
   },
   {
-    label: "Sources",
-    href: "/analytics/sources",
-    icon: Target,
-    roles: ["admin", "manager"],
-  },
-  {
-    label: "Objections",
-    href: "/analytics/objections",
-    icon: Shield,
-    roles: ["admin", "manager"],
-  },
-  {
     label: "Journal EOD",
     href: "/journal",
     icon: BookOpen,
@@ -357,8 +345,6 @@ export const NAV_SECTIONS: NavSection[] = [
         "/contracts",
         "/analytics",
         "/analytics/performance",
-        "/analytics/sources",
-        "/analytics/objections",
         "/journal",
       ].includes(i.href),
     ),
