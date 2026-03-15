@@ -6,6 +6,15 @@ import { notify } from "@/lib/actions/notifications";
 
 export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" | "b2c", channel?: string) {
   const supabase = await createClient();
+
+  // Check user role for team_interne access
+  const { data: { user } } = await supabase.auth.getUser();
+  let canSeeTeamInterne = false;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    canSeeTeamInterne = !!profile && ["admin", "manager", "setter"].includes(profile.role);
+  }
+
   let query = supabase
     .from("community_posts")
     .select("*, author:profiles(id, full_name, avatar_url, niche, role)")
@@ -14,9 +23,15 @@ export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" 
 
   if (type && type !== "all") query = query.eq("type", type);
 
-  // Filter by channel
+  // Filter by channel — enforce server-side access control for team_interne
   if (channel && channel !== "all") {
+    if (channel === "team_interne" && !canSeeTeamInterne) {
+      return [];
+    }
     query = query.eq("channel", channel);
+  } else if (!canSeeTeamInterne) {
+    // Exclude team_interne posts from "all" view for unauthorized users
+    query = query.neq("channel", "team_interne");
   }
 
   // Filter by audience segment (B2B vs B2C separation)
@@ -220,7 +235,15 @@ export async function deleteComment(commentId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  await supabase.from("community_comments").delete().eq("id", commentId);
+  // Only allow deleting own comments or admin/manager
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const isAdmin = profile && ["admin", "manager"].includes(profile.role);
+
+  if (isAdmin) {
+    await supabase.from("community_comments").delete().eq("id", commentId);
+  } else {
+    await supabase.from("community_comments").delete().eq("id", commentId).eq("author_id", user.id);
+  }
   revalidatePath("/community");
   return { success: true };
 }
@@ -905,6 +928,11 @@ export async function getUserRsvps(userId: string, eventIds: string[]): Promise<
 
 export async function getAllPostsForModeration() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+
   const { data } = await supabase
     .from("community_posts")
     .select("*, author:profiles(id, full_name, avatar_url)")

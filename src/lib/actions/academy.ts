@@ -77,6 +77,28 @@ export async function submitQuizAttempt(
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
+  // Server-side score verification: fetch quiz questions and recompute
+  const { data: quizData } = await supabase
+    .from("quizzes")
+    .select("questions, max_attempts_per_day")
+    .eq("id", quizId)
+    .single();
+
+  const maxAttempts = quizData?.max_attempts_per_day || 3;
+
+  // Recompute score server-side to prevent client manipulation
+  let verifiedScore = score;
+  let verifiedPassed = passed;
+  if (quizData?.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
+    const questions = quizData.questions as Array<{ correctAnswer?: number }>;
+    let correct = 0;
+    for (let i = 0; i < questions.length; i++) {
+      if (answers[i] === questions[i].correctAnswer) correct++;
+    }
+    verifiedScore = Math.round((correct / questions.length) * 100);
+    verifiedPassed = verifiedScore >= 90;
+  }
+
   // Check attempts today
   const today = new Date().toISOString().split("T")[0];
   const { data: todayAttempts } = await supabase
@@ -85,14 +107,6 @@ export async function submitQuizAttempt(
     .eq("user_id", user.id)
     .eq("lesson_id", lessonId)
     .gte("attempted_at", `${today}T00:00:00.000Z`);
-
-  const { data: quiz } = await supabase
-    .from("quizzes")
-    .select("max_attempts_per_day")
-    .eq("id", quizId)
-    .single();
-
-  const maxAttempts = quiz?.max_attempts_per_day || 3;
 
   if ((todayAttempts || []).length >= maxAttempts) {
     throw new Error(`Maximum ${maxAttempts} tentatives par jour atteint`);
@@ -103,12 +117,12 @@ export async function submitQuizAttempt(
     quiz_id: quizId,
     lesson_id: lessonId,
     answers,
-    score,
-    passed,
+    score: verifiedScore,
+    passed: verifiedPassed,
   });
 
   revalidatePath("/academy");
-  return { attemptsLeft: maxAttempts - (todayAttempts || []).length - 1 };
+  return { attemptsLeft: maxAttempts - (todayAttempts || []).length - 1, score: verifiedScore, passed: verifiedPassed };
 }
 
 export async function getQuizAttempts(lessonId: string, userId: string) {
@@ -835,7 +849,7 @@ export async function getModuleUnlockStatus(courseId: string): Promise<{
 
   return { moduleStatus };
   } catch (error) {
-    // Graceful fallback: if tables don't exist or queries fail, unlock everything
+    // Graceful fallback: if tables don't exist, lock everything by default (safer)
     console.error("[getModuleUnlockStatus] Error fetching module status:", error);
     return { moduleStatus: {} };
   }

@@ -18,19 +18,24 @@ export function ForgotPasswordForm() {
     e.preventDefault();
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
-    });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
+      });
 
-    if (error) {
-      toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+      if (error) {
+        toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+        setLoading(false);
+        return;
+      }
+
+      setSent(true);
       setLoading(false);
-      return;
+    } catch {
+      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      setLoading(false);
     }
-
-    setSent(true);
-    setLoading(false);
   }
 
   if (sent) {

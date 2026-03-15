@@ -887,6 +887,10 @@ export function ChatLayout({
       await sendWhatsAppMessage({ prospectId: activeWA.prospect_id, content });
     } catch {
       toast.error("Erreur envoi WhatsApp");
+      // Rollback optimistic message
+      setActiveWA((prev) =>
+        prev ? { ...prev, messages: prev.messages.filter((m) => m.id !== optimisticMsg.id) } : prev,
+      );
     } finally {
       setSendingWA(false);
     }
@@ -923,6 +927,10 @@ export function ChatLayout({
       if (!res.ok) throw new Error("Send failed");
     } catch {
       toast.error("Erreur envoi message");
+      // Rollback optimistic message
+      setActiveSocial((prev) =>
+        prev ? { ...prev, messages: prev.messages.filter((m) => m !== optimisticMsg) } : prev,
+      );
     } finally {
       setSendingSocial(false);
     }

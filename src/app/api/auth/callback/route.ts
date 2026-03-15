@@ -4,7 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  let next = searchParams.get("next") ?? "/dashboard";
+
+  // Prevent open redirect — only allow relative paths
+  if (!next.startsWith("/") || next.startsWith("//") || next.includes("://")) {
+    next = "/dashboard";
+  }
 
   if (code) {
     const supabase = await createClient();
@@ -16,5 +21,5 @@ export async function GET(request: NextRequest) {
   }
 
   // En cas d'erreur, rediriger vers la page de login
-  return NextResponse.redirect(new URL("/login", request.url));
+  return NextResponse.redirect(new URL("/login?error=auth_callback_failed", request.url));
 }

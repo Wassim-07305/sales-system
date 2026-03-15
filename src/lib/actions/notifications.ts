@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 /**
  * Lightweight helper: inserts a notification in DB + sends web push.
- * Designed to be called from any server action without creating a new Supabase client.
+ * Designed to be called from other server actions (not directly from client).
  * Fire-and-forget — never throws.
  */
 export async function notify(
@@ -16,6 +16,9 @@ export async function notify(
 ) {
   try {
     const supabase = await createClient();
+    // Verify caller is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     // 1. Insert notification in DB
     await supabase.from("notifications").insert({
       user_id: userId,
@@ -44,6 +47,8 @@ export async function notifyMany(
 ) {
   try {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     const notifications = userIds.map((id) => ({
       user_id: id,
       title,

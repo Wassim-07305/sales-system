@@ -2,8 +2,16 @@
 
 import { createClient } from "@/lib/supabase/server";
 
+/** Auth guard — returns authenticated user or throws. */
+async function requireAuth(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+  return user;
+}
+
 export async function getAdminDashboardData() {
   const supabase = await createClient();
+  await requireAuth(supabase);
   const now = new Date();
   const startOfMonth = new Date(
     now.getFullYear(),
@@ -152,6 +160,9 @@ export async function getAdminDashboardData() {
 
 export async function getClientDashboardData(userId: string) {
   const supabase = await createClient();
+  const authUser = await requireAuth(supabase);
+  // Ensure users can only access their own data
+  if (authUser.id !== userId) throw new Error("Accès refusé");
 
   // Course progress via lesson_progress
   const { data: enrollments } = await supabase
@@ -240,6 +251,11 @@ export async function getClientDashboardData(userId: string) {
 
 export async function getSetterDashboardData(userId: string) {
   const supabase = await createClient();
+  const authUser = await requireAuth(supabase);
+  // Setters can only view their own data; admin/manager can view anyone
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", authUser.id).single();
+  const isAdmin = profile && ["admin", "manager"].includes(profile.role);
+  if (authUser.id !== userId && !isAdmin) throw new Error("Accès refusé");
   const now = new Date();
   const today = now.toISOString().split("T")[0];
   const startOfMonth = new Date(
@@ -470,6 +486,10 @@ export async function saveDailyJournal(data: {
 
 export async function getSetterHubData(userId: string) {
   const supabase = await createClient();
+  const authUser = await requireAuth(supabase);
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", authUser.id).single();
+  const isAdmin = profile && ["admin", "manager"].includes(profile.role);
+  if (authUser.id !== userId && !isAdmin) throw new Error("Accès refusé");
   const now = new Date();
   const today = now.toISOString().split("T")[0];
   const startOfMonth = new Date(
@@ -643,6 +663,10 @@ export async function getPersonalPerformanceReport(
   userId: string,
 ): Promise<PersonalPerformanceReport> {
   const supabase = await createClient();
+  const authUser = await requireAuth(supabase);
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", authUser.id).single();
+  const isAdmin = profile && ["admin", "manager"].includes(profile.role);
+  if (authUser.id !== userId && !isAdmin) throw new Error("Accès refusé");
   const now = new Date();
   const startOfMonth = new Date(
     now.getFullYear(),
@@ -901,6 +925,7 @@ export async function getPersonalPerformanceReport(
 
 export async function getTeamKPIs() {
   const supabase = await createClient();
+  await requireAuth(supabase);
   const now = new Date();
   const startOfMonth = new Date(
     now.getFullYear(),
@@ -1122,6 +1147,8 @@ export async function getB2BDashboardData(
   userId: string,
 ): Promise<B2BDashboardData> {
   const supabase = await createClient();
+  const authUser = await requireAuth(supabase);
+  if (authUser.id !== userId) throw new Error("Accès refusé");
   const now = new Date();
   const startOfMonth = new Date(
     now.getFullYear(),

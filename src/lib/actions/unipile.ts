@@ -342,6 +342,12 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
   }>
 > {
   try {
+    // Auth check
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
     const dsn = process.env.UNIPILE_DSN;
     const apiKey = process.env.UNIPILE_API_KEY;
     if (!dsn || !apiKey) return [];

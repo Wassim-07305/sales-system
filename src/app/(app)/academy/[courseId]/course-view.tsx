@@ -194,11 +194,11 @@ export function CourseView({
   const [justUnlockedModules, setJustUnlockedModules] = useState<Set<string>>(new Set());
 
   const isModuleUnlocked = useCallback(
-    (moduleId: string): boolean => {
+    (moduleId: string, moduleIndex?: number): boolean => {
       if (!allPrereqsMet) return false;
       const status = localModuleUnlock[moduleId];
-      // If no status info, assume unlocked (first module or no quizzes)
-      if (!status) return true;
+      // First module is always unlocked; others require status
+      if (!status) return moduleIndex === 0 || moduleIndex === undefined;
       return status.unlocked;
     },
     [allPrereqsMet, localModuleUnlock]
@@ -543,7 +543,7 @@ export function CourseView({
                 completedLessonIds.has(l.id)
               ).length;
               const moduleAllComplete = moduleLessonCount > 0 && moduleCompletedCount === moduleLessonCount;
-              const modUnlocked = isModuleUnlocked(mod.id);
+              const modUnlocked = isModuleUnlocked(mod.id, modIdx);
               const modUnlockInfo = getModuleUnlockInfo(mod.id);
               const isJustUnlocked = justUnlockedModules.has(mod.id);
               const moduleProgress = moduleLessonCount > 0 ? Math.round((moduleCompletedCount / moduleLessonCount) * 100) : 0;

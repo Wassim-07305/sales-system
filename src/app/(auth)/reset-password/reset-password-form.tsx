@@ -39,17 +39,22 @@ export function ResetPasswordForm() {
 
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password });
 
-    if (error) {
-      toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+      if (error) {
+        toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+        setLoading(false);
+        return;
+      }
+
       setLoading(false);
-      return;
+      setSuccess(true);
+    } catch {
+      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      setLoading(false);
     }
-
-    setLoading(false);
-    setSuccess(true);
   }
 
   if (success) {

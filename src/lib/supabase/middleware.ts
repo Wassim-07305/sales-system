@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && (pathname === "/login" || pathname === "/register")) {
+  if (user && (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
@@ -75,8 +75,8 @@ export async function updateSession(request: NextRequest) {
       onboardingCompleted = profile?.onboarding_completed ?? true;
 
       // Cache role in cookie for 5 minutes to reduce DB queries
-      supabaseResponse.cookies.set("x-user-role", role || "", { maxAge: 300, path: "/" });
-      supabaseResponse.cookies.set("x-onboarding-done", onboardingCompleted ? "1" : "0", { maxAge: 300, path: "/" });
+      supabaseResponse.cookies.set("x-user-role", role || "", { maxAge: 300, path: "/", httpOnly: true, secure: true, sameSite: "lax" });
+      supabaseResponse.cookies.set("x-onboarding-done", onboardingCompleted ? "1" : "0", { maxAge: 300, path: "/", httpOnly: true, secure: true, sameSite: "lax" });
     }
 
     if (

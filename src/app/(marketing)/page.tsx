@@ -445,7 +445,7 @@ export default function LandingPage() {
               </div>
 
               {/* Trust line */}
-              <div className="mt-8 flex items-center justify-center gap-5 text-[13px] text-white/30">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-[13px] text-white/50">
                 <span className="flex items-center gap-1.5">
                   <Shield className="size-3.5" aria-hidden="true" />
                   Sans engagement
@@ -472,14 +472,14 @@ export default function LandingPage() {
                       <button
                         type="button"
                         className="flex size-16 items-center justify-center rounded-full bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-300 hover:scale-105 hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F0F11] sm:size-20"
-                        aria-label="Lire la vid&eacute;o de pr&eacute;sentation"
+                        aria-label="Lire la vidéo de présentation"
                       >
                         <Play
                           className="ml-0.5 size-6 text-[#09090B] sm:size-7"
                           aria-hidden="true"
                         />
                       </button>
-                      <p className="mt-4 text-[13px] font-medium text-white/30">
+                      <p className="mt-4 text-[13px] font-medium text-white/50">
                         D&eacute;couvrez Setting Academy en 2 minutes
                       </p>
                     </div>
@@ -515,7 +515,7 @@ export default function LandingPage() {
                     />
                   </div>
                   <div
-                    className={`mt-2 text-[13px] font-medium tracking-wide text-white/35 uppercase transition-all duration-700 ${
+                    className={`mt-2 text-[13px] font-medium tracking-wide text-white/50 uppercase transition-all duration-700 ${
                       statsSection.isInView
                         ? "opacity-100 translate-y-0"
                         : "opacity-0 translate-y-4"
@@ -557,7 +557,7 @@ export default function LandingPage() {
                 pour{" "}
                 <span className="text-white/40">performer</span>
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-white/40 sm:text-lg">
+              <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
                 Une suite d&apos;outils con&ccedil;us pour les setters et
                 closers ambitieux.
               </p>
@@ -586,7 +586,7 @@ export default function LandingPage() {
                     <h3 className="text-[15px] font-semibold tracking-tight">
                       {feature.title}
                     </h3>
-                    <p className="mt-2.5 text-[14px] leading-relaxed text-white/40">
+                    <p className="mt-2.5 text-[14px] leading-relaxed text-white/50">
                       {feature.desc}
                     </p>
                   </div>
@@ -620,7 +620,7 @@ export default function LandingPage() {
               >
                 Ils ont transform&eacute; leur carri&egrave;re
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-white/40 sm:text-lg">
+              <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
                 D&eacute;couvrez les retours de nos membres les plus actifs.
               </p>
             </div>
@@ -671,7 +671,7 @@ export default function LandingPage() {
                       <div className="text-[13px] font-semibold text-white/80">
                         {t.name}
                       </div>
-                      <div className="text-[12px] text-white/35">{t.role}</div>
+                      <div className="text-[12px] text-white/50">{t.role}</div>
                     </div>
                   </div>
                 </article>
@@ -704,7 +704,7 @@ export default function LandingPage() {
               >
                 Un investissement, pas une d&eacute;pense
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-white/40 sm:text-lg">
+              <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
                 Choisissez le plan adapt&eacute; &agrave; votre profil et
                 commencez &agrave; performer.
               </p>
@@ -743,7 +743,7 @@ export default function LandingPage() {
                   <h3 className="mt-1 font-serif text-2xl font-bold">
                     {plan.name}
                   </h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-white/40">
+                  <p className="mt-2 text-[14px] leading-relaxed text-white/50">
                     {plan.description}
                   </p>
                   <div className="mt-6 flex items-baseline gap-1">
@@ -792,7 +792,7 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <p className="mx-auto mt-10 max-w-md text-center text-[13px] text-white/25">
+            <p className="mx-auto mt-10 max-w-md text-center text-[13px] text-white/45">
               Annulation possible &agrave; tout moment. Aucun engagement longue
               dur&eacute;e.
             </p>
@@ -826,7 +826,7 @@ export default function LandingPage() {
               <br />
               <span className="text-white/40">votre carri&egrave;re</span> ?
             </h2>
-            <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/40 sm:text-lg">
+            <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/50 sm:text-lg">
               Rejoignez des centaines de setters qui ont d&eacute;j&agrave; fait
               le choix de l&apos;excellence.
             </p>
@@ -843,7 +843,7 @@ export default function LandingPage() {
                   />
                 </Button>
               </Link>
-              <span className="text-[13px] text-white/25">
+              <span className="text-[13px] text-white/45">
                 Essai gratuit &middot; Sans carte bancaire
               </span>
             </div>
@@ -875,7 +875,7 @@ export default function LandingPage() {
                   Setting Academy
                 </span>
               </Link>
-              <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-white/30">
+              <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-white/50">
                 La plateforme de r&eacute;f&eacute;rence pour les setters et
                 closers en France.
               </p>
@@ -892,7 +892,7 @@ export default function LandingPage() {
                     <li key={link.label}>
                       <a
                         href={link.href}
-                        className="text-[13px] text-white/30 transition-colors duration-200 hover:text-white/60"
+                        className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/70"
                       >
                         {link.label}
                       </a>
@@ -903,7 +903,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="mt-14 border-t border-white/[0.04] pt-8 text-center text-[12px] text-white/20">
+          <div className="mt-14 border-t border-white/[0.04] pt-8 text-center text-[12px] text-white/45">
             &copy; 2026 Setting Academy. Tous droits r&eacute;serv&eacute;s.
           </div>
         </div>

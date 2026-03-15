@@ -82,6 +82,9 @@ export async function sendPush(
   url?: string
 ) {
   const supabase = await createClient();
+  // Verify caller is authenticated
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { sent: false, reason: "unauthenticated" };
 
   // Get the user's push subscription
   const { data: subscription } = await supabase
@@ -137,6 +140,9 @@ export async function sendBulkPush(
   body: string,
   url?: string
 ) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
   const results = [];
 
   for (const userId of userIds) {

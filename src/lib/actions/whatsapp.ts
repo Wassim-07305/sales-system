@@ -454,6 +454,8 @@ export async function sendWhatsAppMessage(data: {
 
 export async function getWhatsAppSequences() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
   const { data } = await supabase
     .from("whatsapp_sequences")
     .select("*")
@@ -621,6 +623,8 @@ export async function getWhatsAppAnalytics() {
 
 export async function deleteWhatsAppSequence(id: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
   const { error } = await supabase
     .from("whatsapp_sequences")
     .delete()

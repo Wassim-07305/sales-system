@@ -26,26 +26,31 @@ export function RegisterForm() {
     e.preventDefault();
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
+      });
 
-    if (error) {
-      toast.error(error.message);
+      if (error) {
+        toast.error("Une erreur est survenue lors de l\u2019inscription. Veuillez r\u00e9essayer.");
+        setLoading(false);
+        return;
+      }
+
       setLoading(false);
-      return;
+      setSuccess(true);
+    } catch {
+      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      setLoading(false);
     }
-
-    setLoading(false);
-    setSuccess(true);
   }
 
   if (success) {
