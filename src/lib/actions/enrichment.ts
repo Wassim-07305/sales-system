@@ -3,6 +3,108 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiJSON } from "@/lib/ai/client";
+import { callApifyActor } from "@/lib/apify";
+
+// ─── Type pour les résultats d'enrichissement Apify ─────────────────
+interface ApifyCompanyEnrichment {
+  domain?: string;
+  name?: string;
+  description?: string;
+  industry?: string;
+  sector?: string;
+  employees?: number;
+  employeeRange?: string;
+  founded?: number;
+  tech?: string[];
+  socials?: {
+    linkedin?: string;
+    twitter?: string;
+    facebook?: string;
+  };
+  seo?: {
+    domainAuthority?: number;
+    organicTraffic?: number;
+  };
+  contact?: {
+    email?: string;
+    phone?: string;
+  };
+  whois?: {
+    registrar?: string;
+    createdDate?: string;
+  };
+  [key: string]: unknown;
+}
+
+// ─── Extraire un domaine depuis un email ou un champ website/company ─
+function extractDomain(email: string, company: string): string | null {
+  // Depuis l'email (le plus fiable)
+  if (email.includes("@")) {
+    const domain = email.split("@")[1];
+    // Ignorer les domaines génériques
+    const genericDomains = [
+      "gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
+      "live.com", "orange.fr", "free.fr", "sfr.fr", "laposte.net",
+      "icloud.com", "protonmail.com", "mail.com",
+    ];
+    if (!genericDomains.includes(domain.toLowerCase())) {
+      return domain;
+    }
+  }
+
+  // Depuis le champ company s'il ressemble à un domaine/URL
+  if (company) {
+    const urlMatch = company.match(
+      /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/
+    );
+    if (urlMatch) return urlMatch[1];
+  }
+
+  return null;
+}
+
+// ─── Mapper les données Apify vers le format d'enrichissement ───────
+function mapApifyToEnrichment(data: ApifyCompanyEnrichment) {
+  // Estimation de la taille à partir du nombre d'employés
+  let tailleEntreprise = "";
+  if (data.employeeRange) {
+    tailleEntreprise = data.employeeRange;
+  } else if (data.employees) {
+    const e = data.employees;
+    if (e <= 10) tailleEntreprise = "1-10";
+    else if (e <= 50) tailleEntreprise = "11-50";
+    else if (e <= 200) tailleEntreprise = "51-200";
+    else if (e <= 500) tailleEntreprise = "201-500";
+    else tailleEntreprise = "500+";
+  }
+
+  // Points clés à partir des données disponibles
+  const pointsCles: string[] = [];
+  if (data.industry) pointsCles.push(`Secteur : ${data.industry}`);
+  if (data.tech && data.tech.length > 0) {
+    pointsCles.push(`Technologies : ${data.tech.slice(0, 5).join(", ")}`);
+  }
+  if (data.founded) pointsCles.push(`Fondée en ${data.founded}`);
+  if (data.seo?.domainAuthority) {
+    pointsCles.push(`Autorité de domaine : ${data.seo.domainAuthority}`);
+  }
+  if (data.description) {
+    pointsCles.push(data.description.slice(0, 150));
+  }
+
+  return {
+    secteur: data.industry || data.sector || "",
+    taille_entreprise: tailleEntreprise,
+    poste_probable: "", // Apify company enrichment ne donne pas le poste
+    budget_estime: "", // Pas disponible via cet acteur
+    meilleur_moment_contact: "", // Pas disponible
+    profil_linkedin_probable: data.socials?.linkedin || "",
+    profil_twitter_probable: data.socials?.twitter || "",
+    site_web_probable: data.domain ? `https://${data.domain}` : "",
+    points_cles: pointsCles.length > 0 ? pointsCles : ["Données vérifiées via Apify"],
+    confiance: 85, // Données réelles, confiance élevée
+  };
+}
 
 // ─── enrichProspect ─────────────────────────────────────────────────
 export async function enrichProspect(prospectId: string) {
@@ -29,7 +131,47 @@ export async function enrichProspect(prospectId: string) {
   // Extract email domain for hints
   const emailDomain = email.includes("@") ? email.split("@")[1] : "";
 
-  const prompt = `Tu es un expert en intelligence commerciale B2B.
+  // ─── Tier 1 : Enrichissement via Apify (données réelles) ─────────
+  const domain = extractDomain(email, company);
+  let enrichmentSource: "apify_verified" | "ai_estimation" = "ai_estimation";
+  let enrichmentData: {
+    secteur: string;
+    taille_entreprise: string;
+    poste_probable: string;
+    budget_estime: string;
+    meilleur_moment_contact: string;
+    profil_linkedin_probable: string;
+    profil_twitter_probable: string;
+    site_web_probable: string;
+    points_cles: string[];
+    confiance: number;
+  } | null = null;
+
+  if (domain) {
+    try {
+      console.log(`[enrichProspect] Tentative Apify pour domaine: ${domain}`);
+      const apifyResults = await callApifyActor<ApifyCompanyEnrichment>(
+        "george.the.developer/company-enrichment-api",
+        { domain }
+      );
+
+      if (apifyResults && apifyResults.length > 0) {
+        const companyData = apifyResults[0];
+        // Vérifier qu'on a au moins quelques données utiles
+        if (companyData.industry || companyData.employees || companyData.tech) {
+          enrichmentData = mapApifyToEnrichment(companyData);
+          enrichmentSource = "apify_verified";
+          console.log(`[enrichProspect] Apify OK pour ${domain}`);
+        }
+      }
+    } catch (apifyError) {
+      console.error("[enrichProspect] Erreur Apify, fallback IA:", apifyError);
+    }
+  }
+
+  // ─── Tier 2 : Fallback IA (estimations) ──────────────────────────
+  if (!enrichmentData) {
+    const prompt = `Tu es un expert en intelligence commerciale B2B.
 À partir des informations suivantes sur un prospect, génère des données d'enrichissement.
 
 Nom: ${name}
@@ -51,28 +193,25 @@ Génère un JSON avec ces champs:
 - points_cles (string[]): 3-5 points clés à utiliser en approche commerciale
 - confiance (number): score de confiance de 0 à 100 sur la fiabilité des données générées`;
 
-  let enrichmentData: {
-    secteur: string;
-    taille_entreprise: string;
-    poste_probable: string;
-    budget_estime: string;
-    meilleur_moment_contact: string;
-    profil_linkedin_probable: string;
-    profil_twitter_probable: string;
-    site_web_probable: string;
-    points_cles: string[];
-    confiance: number;
-  };
-
-  try {
-    enrichmentData = await aiJSON<typeof enrichmentData>(prompt, {
-      system:
-        "Tu es un assistant d'enrichissement de données commerciales. Réponds uniquement en JSON valide. Base tes estimations sur les indices disponibles (nom, email, entreprise). Sois réaliste et indique un score de confiance honnête.",
-    });
-  } catch (aiError) {
-    console.error("[enrichProspect] Erreur IA:", aiError);
-    throw new Error("L'enrichissement IA a échoué. Veuillez réessayer plus tard.");
+    try {
+      enrichmentData = await aiJSON<typeof enrichmentData>(prompt, {
+        system:
+          "Tu es un assistant d'enrichissement de données commerciales. Réponds uniquement en JSON valide. Base tes estimations sur les indices disponibles (nom, email, entreprise). Sois réaliste et indique un score de confiance honnête.",
+      });
+    } catch (aiError) {
+      console.error("[enrichProspect] Erreur IA:", aiError);
+      throw new Error("L'enrichissement a échoué. Veuillez réessayer plus tard.");
+    }
   }
+
+  if (!enrichmentData) {
+    throw new Error("L'enrichissement a échoué. Aucune source n'a retourné de données.");
+  }
+
+  const disclaimer =
+    enrichmentSource === "apify_verified"
+      ? "Données vérifiées via Apify (company-enrichment-api). Certains champs peuvent nécessiter une validation manuelle."
+      : "Données estimées par IA, non vérifiées. Aucune source externe (Clearbit, Apollo, etc.) n'a été consultée.";
 
   // Save enrichment data to prospect metadata
   const existingMetadata =
@@ -84,8 +223,8 @@ Génère un JSON avec ces champs:
     ...existingMetadata,
     enrichment: {
       ...enrichmentData,
-      source: "ai_estimation" as const,
-      disclaimer: "Données estimées par IA, non vérifiées. Aucune source externe (Clearbit, Apollo, etc.) n'a été consultée.",
+      source: enrichmentSource,
+      disclaimer,
       enriched_at: new Date().toISOString(),
       enriched_by: user.id,
     },
@@ -107,14 +246,15 @@ Génère un JSON avec ces champs:
     metadata: {
       prospect_name: name,
       confiance: enrichmentData.confiance,
+      source: enrichmentSource,
     },
   });
 
   revalidatePath("/prospecting/enrichment");
   return {
     ...enrichmentData,
-    source: "ai_estimation" as const,
-    disclaimer: "Données estimées par IA, non vérifiées. Aucune source externe (Clearbit, Apollo, etc.) n'a été consultée.",
+    source: enrichmentSource,
+    disclaimer,
   };
 }
 

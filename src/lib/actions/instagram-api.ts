@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getApiKey } from "@/lib/api-keys";
 import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
+import { callApifyActor } from "@/lib/apify";
 
 // ---------------------------------------------------------------------------
 // Instagram API — Unipile preferred, Graph API fallback, then local DB.
@@ -200,6 +201,46 @@ export async function getInstagramProfile(username: string) {
     } catch (err) {
       console.error("Instagram profile fetch error:", err);
     }
+  }
+
+  // --- Apify path (enrichissement supplémentaire) ---
+  try {
+    interface ApifyInstagramProfile {
+      fullName?: string;
+      biography?: string;
+      followersCount?: number;
+      followsCount?: number;
+      postsCount?: number;
+      profilePicUrl?: string;
+      externalUrl?: string;
+      username?: string;
+    }
+
+    const apifyResults = await callApifyActor<ApifyInstagramProfile>(
+      "apify/instagram-profile-scraper",
+      { usernames: [username] }
+    );
+
+    if (apifyResults && apifyResults.length > 0) {
+      const p = apifyResults[0];
+      if (p.username || p.fullName) {
+        return {
+          data: {
+            username: p.username || username,
+            name: p.fullName || username,
+            biography: p.biography || null,
+            followers_count: p.followersCount ?? null,
+            follows_count: p.followsCount ?? null,
+            media_count: p.postsCount ?? null,
+            profile_picture_url: p.profilePicUrl || null,
+            website: p.externalUrl || null,
+            source: "apify" as const,
+          },
+        };
+      }
+    }
+  } catch (err) {
+    console.error("Apify Instagram profile error, falling back:", err);
   }
 
   // --- Fallback: check local prospects table ---

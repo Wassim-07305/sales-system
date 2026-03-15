@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getApiKey } from "@/lib/api-keys";
 import { revalidatePath } from "next/cache";
 import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
+import { callApifyActor } from "@/lib/apify";
 
 /** Find the Unipile WhatsApp account ID if available */
 async function getUnipileWhatsAppAccountId(): Promise<string | null> {
@@ -20,6 +21,87 @@ async function getUnipileWhatsAppAccountId(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// WhatsApp Number Validation via Apify
+// ---------------------------------------------------------------------------
+
+interface WhatsAppValidationResult {
+  phone: string;
+  hasWhatsApp: boolean;
+}
+
+/**
+ * Valide si un numéro de téléphone est actif sur WhatsApp via Apify.
+ * Si APIFY_TOKEN n'est pas configuré, retourne null (skip la validation).
+ */
+export async function validateWhatsAppNumber(
+  phone: string
+): Promise<WhatsAppValidationResult | null> {
+  interface ApifyValidationItem {
+    phone_number?: string;
+    phoneNumber?: string;
+    exists?: boolean;
+    isWhatsappUser?: boolean;
+    is_whatsapp_user?: boolean;
+    hasWhatsApp?: boolean;
+  }
+
+  const results = await callApifyActor<ApifyValidationItem>(
+    "clearpath/whatsapp-phone-number-validator-api",
+    { phoneNumbers: [phone], onlyWhatsappUsers: false }
+  );
+
+  if (!results || results.length === 0) return null;
+
+  const item = results[0];
+  const hasWhatsApp =
+    item.exists ?? item.isWhatsappUser ?? item.is_whatsapp_user ?? item.hasWhatsApp ?? false;
+
+  return {
+    phone,
+    hasWhatsApp: Boolean(hasWhatsApp),
+  };
+}
+
+/**
+ * Valide plusieurs numéros en bulk (max 10 000).
+ * Si APIFY_TOKEN n'est pas configuré, retourne null (skip la validation).
+ */
+export async function validateWhatsAppNumbers(
+  phones: string[]
+): Promise<WhatsAppValidationResult[] | null> {
+  if (phones.length === 0) return [];
+
+  interface ApifyValidationItem {
+    phone_number?: string;
+    phoneNumber?: string;
+    exists?: boolean;
+    isWhatsappUser?: boolean;
+    is_whatsapp_user?: boolean;
+    hasWhatsApp?: boolean;
+  }
+
+  // Limiter à 10K numéros max
+  const batch = phones.slice(0, 10_000);
+
+  const results = await callApifyActor<ApifyValidationItem>(
+    "clearpath/whatsapp-phone-number-validator-api",
+    { phoneNumbers: batch, onlyWhatsappUsers: false },
+    120 // timeout plus long pour le bulk
+  );
+
+  if (!results) return null;
+
+  return results.map((item, idx) => {
+    const hasWhatsApp =
+      item.exists ?? item.isWhatsappUser ?? item.is_whatsapp_user ?? item.hasWhatsApp ?? false;
+    return {
+      phone: item.phone_number || item.phoneNumber || batch[idx] || "",
+      hasWhatsApp: Boolean(hasWhatsApp),
+    };
+  });
 }
 
 export async function getWhatsAppConnection() {
@@ -386,6 +468,25 @@ export async function sendWhatsAppMessage(data: {
     .select("phone")
     .eq("id", data.prospectId)
     .single();
+
+  // --- Validation Apify (optionnelle — skip si APIFY_TOKEN absent) ---
+  if (prospect?.phone) {
+    try {
+      const validation = await validateWhatsAppNumber(prospect.phone);
+      if (validation && !validation.hasWhatsApp) {
+        throw new Error(
+          `Le numéro ${prospect.phone} n'est pas actif sur WhatsApp. Vérifiez le numéro avant de réessayer.`
+        );
+      }
+    } catch (err) {
+      // Si c'est notre erreur de validation, on la remonte
+      if (err instanceof Error && err.message.includes("n'est pas actif sur WhatsApp")) {
+        throw err;
+      }
+      // Sinon (erreur réseau Apify, etc.), on continue sans validation
+      console.warn("Validation WhatsApp Apify échouée, envoi sans validation:", err);
+    }
+  }
 
   let waMessageId: string | null = null;
   let status = "sent";

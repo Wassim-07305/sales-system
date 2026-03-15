@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getApiKey } from "@/lib/api-keys";
 import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
+import { callApifyActor } from "@/lib/apify";
 
 // ---------------------------------------------------------------------------
 // LinkedIn API — Unipile preferred, direct API fallback, then local DB.
@@ -217,6 +218,50 @@ export async function getLinkedInProfile(profileUrl: string) {
     } catch (err) {
       console.error("LinkedIn profile fetch error:", err);
     }
+  }
+
+  // --- Apify LinkedIn Profile Scraper (tier intermédiaire) ---
+  try {
+    const apifyResults = await callApifyActor<{
+      firstName?: string;
+      lastName?: string;
+      fullName?: string;
+      headline?: string;
+      summary?: string;
+      profileUrl?: string;
+      email?: string;
+      phone?: string;
+      company?: string;
+      position?: string;
+      experiences?: Array<{ title?: string; company?: string }>;
+      educations?: Array<{ school?: string; degree?: string }>;
+      [key: string]: unknown;
+    }>("dev_fusion/Linkedin-Profile-Scraper", {
+      profileUrls: [profileUrl],
+    });
+
+    if (apifyResults && apifyResults.length > 0) {
+      const p = apifyResults[0];
+      const fullName = p.fullName || [p.firstName, p.lastName].filter(Boolean).join(" ");
+      if (fullName) {
+        return {
+          data: {
+            id: null,
+            name: fullName,
+            headline: p.headline || null,
+            profile_url: p.profileUrl || profileUrl,
+            source: "apify_scraper" as const,
+            // Données supplémentaires fournies par Apify
+            ...(p.email ? { email: p.email } : {}),
+            ...(p.phone ? { phone: p.phone } : {}),
+            ...(p.company ? { company: p.company } : {}),
+            ...(p.position ? { position: p.position } : {}),
+          },
+        };
+      }
+    }
+  } catch (apifyErr) {
+    console.error("Apify LinkedIn scraper error, falling back:", apifyErr);
   }
 
   // --- Fallback: check local prospects table ---

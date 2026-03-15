@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
 import { computeScoreBreakdown } from "@/lib/scoring";
 import { getApiKey } from "@/lib/api-keys";
+import { callApifyActor } from "@/lib/apify";
 
 // ─── Multi-Network Overview ────────────────────────────────────────
 
@@ -100,6 +101,123 @@ export async function analyzeProfile(profileUrl: string) {
   const isLinkedin = profileUrl.includes("linkedin");
   const isInstagram = profileUrl.includes("instagram");
   const platform = isLinkedin ? "linkedin" : isInstagram ? "instagram" : "autre";
+
+  // --- Enrichissement Apify pour les profils Instagram ---
+  let apifyEnrichment: {
+    name?: string;
+    biography?: string;
+    followers?: number;
+    following?: number;
+    posts?: number;
+    website?: string;
+  } | null = null;
+
+  if (isInstagram) {
+    try {
+      // Extraire le username depuis l'URL (ex: instagram.com/username)
+      const urlParts = profileUrl.replace(/\/$/, "").split("/");
+      const username = urlParts[urlParts.length - 1];
+
+      if (username && username !== "instagram.com") {
+        interface ApifyInstagramProfile {
+          fullName?: string;
+          biography?: string;
+          followersCount?: number;
+          followsCount?: number;
+          postsCount?: number;
+          externalUrl?: string;
+        }
+
+        const results = await callApifyActor<ApifyInstagramProfile>(
+          "apify/instagram-profile-scraper",
+          { usernames: [username] }
+        );
+
+        if (results && results.length > 0) {
+          const p = results[0];
+          apifyEnrichment = {
+            name: p.fullName || undefined,
+            biography: p.biography || undefined,
+            followers: p.followersCount,
+            following: p.followsCount,
+            posts: p.postsCount,
+            website: p.externalUrl || undefined,
+          };
+        }
+      }
+    } catch (err) {
+      console.error("Apify enrichissement profil Instagram échoué:", err);
+    }
+  }
+
+  // Si Apify a retourné des données enrichies, les utiliser pour améliorer l'analyse
+  if (apifyEnrichment?.name || apifyEnrichment?.biography) {
+    const enrichedName = apifyEnrichment.name || profileUrl.split("/").filter(Boolean).pop() || "Profil";
+    const enrichedBio = apifyEnrichment.biography || "";
+    const enrichedFollowers = apifyEnrichment.followers || 0;
+
+    try {
+      const result = await aiJSON<{
+        headline: string;
+        engagementRate: number;
+        lastActive: string;
+        topics: string[];
+        score: number;
+        recommendation: string;
+      }>(
+        `Analyse ce profil ${platform} enrichi pour la prospection commerciale.
+
+URL : ${profileUrl}
+Nom : ${enrichedName}
+Bio : ${enrichedBio}
+Followers : ${apifyEnrichment.followers || "inconnu"}
+Following : ${apifyEnrichment.following || "inconnu"}
+Posts : ${apifyEnrichment.posts || "inconnu"}
+Site : ${apifyEnrichment.website || "aucun"}
+
+Génère une analyse basée sur ces VRAIES données :
+- headline : résumé du profil en une phrase
+- engagementRate : taux d'engagement estimé (1.0-10.0)
+- lastActive : activité récente estimée
+- topics : 3-5 sujets principaux déduits de la bio
+- score : score de prospection 0-100
+- recommendation : stratégie d'approche recommandée (2 phrases max)
+
+Réponds en JSON.`,
+        {
+          system: "Tu es un expert en social selling et prospection digitale. Analyse les profils pour identifier les meilleures opportunités commerciales.",
+          maxTokens: 500,
+        }
+      );
+
+      return {
+        platform,
+        name: enrichedName,
+        headline: result.headline || enrichedBio.slice(0, 80),
+        followers: enrichedFollowers,
+        engagementRate: result.engagementRate || 0,
+        lastActive: result.lastActive || "Inconnu",
+        topics: result.topics || [],
+        score: Math.min(100, Math.max(0, result.score || 50)),
+        recommendation: result.recommendation || "Aucune recommandation disponible.",
+        source: "apify" as const,
+      };
+    } catch {
+      // Si l'IA échoue, retourner quand même les données Apify
+      return {
+        platform,
+        name: enrichedName,
+        headline: enrichedBio.slice(0, 80) || "Créateur Instagram",
+        followers: enrichedFollowers,
+        engagementRate: 0,
+        lastActive: "Inconnu",
+        topics: [],
+        score: 50,
+        recommendation: "Données enrichies via Apify. Consultez le profil pour affiner l'analyse.",
+        source: "apify" as const,
+      };
+    }
+  }
 
   try {
     const result = await aiJSON<{
