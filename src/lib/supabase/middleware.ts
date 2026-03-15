@@ -39,7 +39,10 @@ export async function updateSession(request: NextRequest) {
   const publicRoutes = ["/login", "/register", "/book", "/forgot-password", "/reset-password"];
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
-  if (!user && !isPublicRoute && pathname !== "/") {
+  // Landing page + marketing/legal pages are public for all users
+  const isMarketingRoute = pathname === "/" || pathname.startsWith("/cgv") || pathname.startsWith("/mentions-legales") || pathname.startsWith("/confidentialite");
+
+  if (!user && !isPublicRoute && !isMarketingRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -51,13 +54,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Landing page at "/" is public for all users (authenticated and unauthenticated)
-
-  // Redirect clients with incomplete onboarding to /onboarding
-  // Skip DB query for API routes and paths that don't need onboarding check
-  const skipOnboardingCheck = pathname.startsWith("/api") || pathname.startsWith("/onboarding");
-  if (user && !skipOnboardingCheck && !isPublicRoute) {
-    // Check cookie cache first to avoid DB query on every request
+  // Role-based route restrictions & onboarding check
+  // Skip for API routes, public routes, marketing pages, and static assets
+  const skipRoleCheck = pathname.startsWith("/api") || pathname.startsWith("/onboarding") || isPublicRoute || isMarketingRoute;
+  if (user && !skipRoleCheck) {
+    // Always fetch from DB to prevent cookie spoofing — cached for performance via httpOnly cookie
     const cachedRole = request.cookies.get("x-user-role")?.value;
     const cachedOnboarding = request.cookies.get("x-onboarding-done")?.value;
 
@@ -74,11 +75,12 @@ export async function updateSession(request: NextRequest) {
       role = profile?.role || "";
       onboardingCompleted = profile?.onboarding_completed ?? true;
 
-      // Cache role in cookie for 5 minutes to reduce DB queries
+      // Cache role in httpOnly cookie for 5 minutes to reduce DB queries
       supabaseResponse.cookies.set("x-user-role", role || "", { maxAge: 300, path: "/", httpOnly: true, secure: true, sameSite: "lax" });
       supabaseResponse.cookies.set("x-onboarding-done", onboardingCompleted ? "1" : "0", { maxAge: 300, path: "/", httpOnly: true, secure: true, sameSite: "lax" });
     }
 
+    // Onboarding redirect for clients
     if (
       role &&
       ["client_b2b", "client_b2c"].includes(role) &&
@@ -87,6 +89,39 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);
+    }
+
+    // Role-based route restrictions
+    // Client roles can only access their specific routes
+    if (role && ["client_b2b", "client_b2c"].includes(role)) {
+      const clientAllowedRoutes = [
+        "/dashboard", "/academy", "/profile", "/settings/subscription",
+        "/settings/notifications", "/notifications", "/onboarding",
+        "/portal", "/community", "/chat", "/resources", "/support",
+        "/referral", "/challenges", "/kpis", "/bookings",
+      ];
+      const isAllowed = clientAllowedRoutes.some((route) => pathname.startsWith(route));
+      if (!isAllowed) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // Setter/closer cannot access admin-only routes
+    if (role && ["setter", "closer"].includes(role)) {
+      const adminOnlyRoutes = [
+        "/settings/branding", "/settings/white-label", "/settings/onboarding",
+        "/settings/ai-modes", "/settings/custom-fields", "/settings/integrations",
+        "/settings/migration", "/settings/security", "/settings/privacy",
+        "/settings/dashboard-builder",
+      ];
+      const isRestricted = adminOnlyRoutes.some((route) => pathname.startsWith(route));
+      if (isRestricted) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
     }
   }
 

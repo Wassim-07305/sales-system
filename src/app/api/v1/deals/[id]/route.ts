@@ -19,7 +19,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { id } = await params;
   const body = await request.json();
 
-  const { data, error: dbError } = await supabase!.from("deals").update(body).eq("id", id).select().single();
+  // Allowlist updatable fields to prevent arbitrary column manipulation
+  const ALLOWED_FIELDS = ["title", "value", "stage_id", "assigned_to", "source", "notes", "status", "priority", "expected_close_date"];
+  const sanitized: Record<string, unknown> = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (key in body) sanitized[key] = body[key];
+  }
+  if (Object.keys(sanitized).length === 0) {
+    return errorResponse("BAD_REQUEST", "Aucun champ modifiable fourni", 400);
+  }
+
+  const { data, error: dbError } = await supabase!.from("deals").update(sanitized).eq("id", id).select().single();
   if (dbError) return errorResponse("DB_ERROR", dbError.message, 500);
 
   return jsonResponse(data);

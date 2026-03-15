@@ -50,6 +50,9 @@ export async function getDealActivities(dealId: string) {
 
 export async function getPipelineStages() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data } = await supabase
     .from("pipeline_stages")
     .select("*")

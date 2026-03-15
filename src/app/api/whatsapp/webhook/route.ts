@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabaseAdmin() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for webhook processing");
+  }
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    serviceRoleKey
   );
 }
 
@@ -28,32 +32,29 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin();
 
-  // Vérifier la signature Meta (si META_APP_SECRET est configuré)
+  // Vérifier la signature Meta — obligatoire en production
   const appSecret = process.env.META_APP_SECRET;
-  if (appSecret) {
-    const signature = request.headers.get("x-hub-signature-256");
-    if (!signature) {
-      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
-    }
-
-    // En production, vérifier le HMAC SHA-256
-    const body = await request.text();
-    const { createHmac } = await import("crypto");
-    const expectedSignature =
-      "sha256=" + createHmac("sha256", appSecret).update(body).digest("hex");
-
-    if (signature !== expectedSignature) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-
-    // Parser le body manuellement car on l'a déjà lu
-    const payload = JSON.parse(body);
-    await processWebhookPayload(supabaseAdmin, payload);
-  } else {
-    // Mode développement : pas de vérification de signature
-    const payload = await request.json();
-    await processWebhookPayload(supabaseAdmin, payload);
+  if (!appSecret) {
+    console.error("META_APP_SECRET not configured — rejecting webhook");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
   }
+
+  const signature = request.headers.get("x-hub-signature-256");
+  if (!signature) {
+    return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+  }
+
+  const body = await request.text();
+  const { createHmac } = await import("crypto");
+  const expectedSignature =
+    "sha256=" + createHmac("sha256", appSecret).update(body).digest("hex");
+
+  if (signature !== expectedSignature) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  const payload = JSON.parse(body);
+  await processWebhookPayload(supabaseAdmin, payload);
 
   return NextResponse.json({ received: true });
 }

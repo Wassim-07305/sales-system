@@ -29,27 +29,31 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-unipile-signature");
     const webhookSecret = process.env.UNIPILE_WEBHOOK_SECRET;
 
-    if (webhookSecret && signature) {
-      const body = await request.text();
-
-      // Verify HMAC signature
-      const crypto = await import("crypto");
-      const expectedSignature = crypto
-        .createHmac("sha256", webhookSecret)
-        .update(body)
-        .digest("hex");
-
-      if (signature !== expectedSignature) {
-        console.error("Unipile webhook signature mismatch");
-        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-      }
-
-      const payload = JSON.parse(body);
-      await handleUnipileWebhook(payload);
-    } else {
-      const payload = await request.json();
-      await handleUnipileWebhook(payload);
+    if (!webhookSecret) {
+      console.error("UNIPILE_WEBHOOK_SECRET not configured — rejecting webhook");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
+
+    if (!signature) {
+      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+    }
+
+    const body = await request.text();
+
+    // Verify HMAC signature
+    const crypto = await import("crypto");
+    const expectedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(body)
+      .digest("hex");
+
+    if (signature !== expectedSignature) {
+      console.error("Unipile webhook signature mismatch");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    const payload = JSON.parse(body);
+    await handleUnipileWebhook(payload);
 
     return NextResponse.json({ status: "ok" });
   } catch (err) {

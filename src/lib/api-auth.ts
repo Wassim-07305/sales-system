@@ -61,6 +61,23 @@ export async function validateApiRequest(request: NextRequest) {
     rateLimitMap.set(key, { count: 1, resetAt: now + RATE_WINDOW });
   }
 
+  // Verify role — V1 API is restricted to team members (not clients)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || ["client_b2b", "client_b2c"].includes(profile.role)) {
+    return {
+      error: NextResponse.json(
+        { error: { code: "FORBIDDEN", message: "Accès API réservé aux membres de l'équipe" } },
+        { status: 403 }
+      ),
+      user: null,
+    };
+  }
+
   return { error: null, user, supabase };
 }
 
