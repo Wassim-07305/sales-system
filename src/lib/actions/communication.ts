@@ -172,19 +172,10 @@ export async function getRecording(roomId: string) {
 
   if (!room) return null;
 
-  // Return real data if available, otherwise return mock
   return {
     recording_url: room.recording_url || null,
-    ai_summary:
-      room.ai_summary ||
-      "Résumé automatique : Cette visioconférence a couvert les points clés du projet, incluant la revue des objectifs trimestriels, la répartition des tâches et les prochaines étapes. Les participants ont convenu d'un suivi hebdomadaire pour assurer le bon déroulement du plan d'action.",
-    chapters: room.chapters || [
-      { timestamp: "00:00", label: "Introduction et tour de table" },
-      { timestamp: "05:30", label: "Revue des objectifs" },
-      { timestamp: "15:00", label: "Discussion stratégie commerciale" },
-      { timestamp: "28:45", label: "Plan d'action et prochaines étapes" },
-      { timestamp: "40:00", label: "Questions et clôture" },
-    ],
+    ai_summary: room.ai_summary || null,
+    chapters: room.chapters || [],
     title: room.title,
     started_at: room.started_at,
     ended_at: room.ended_at,
@@ -206,6 +197,17 @@ export async function sendBroadcast(data: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+
+  // AI mode check — block if critical validation requires approval
+  try {
+    const { checkCriticalAction } = await import("@/lib/actions/ai-modes");
+    const aiCheck = await checkCriticalAction("Envoi de message initial");
+    if (aiCheck.requiresValidation) {
+      throw new Error("Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)");
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("Action bloquée")) throw err;
+  }
 
   // Only admin/manager can send broadcasts
   const { data: senderProfile } = await supabase

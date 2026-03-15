@@ -26,6 +26,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { calculateProspectScore, recalculateAllScores } from "@/lib/actions/hub-setting";
+import { createRelanceWorkflow } from "@/lib/actions/automation";
+import { qualifyProspect } from "@/lib/actions/prospecting";
 import type { ScoreBreakdown, ScoreTier } from "@/lib/scoring";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -134,6 +136,8 @@ export function ScoringView({ prospects }: Props) {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
+  const [relancingId, setRelancingId] = useState<string | null>(null);
+  const [qualifyingId, setQualifyingId] = useState<string | null>(null);
 
   // ── Computed stats ──
   const scores = prospects.map((p) => p.breakdown.total);
@@ -202,6 +206,55 @@ export function ScoringView({ prospects }: Props) {
         toast.error("Erreur lors du recalcul");
       } finally {
         setRecalculating(null);
+      }
+    });
+  }
+
+  async function handleRelancer(prospect: Prospect) {
+    setRelancingId(prospect.id);
+    startTransition(async () => {
+      try {
+        await createRelanceWorkflow({
+          prospect_id: prospect.id,
+          platform: prospect.platform,
+          message_j2: `Bonjour ${prospect.name}, je me permets de revenir vers vous suite à notre dernier échange.`,
+          message_j3: `${prospect.name}, avez-vous eu le temps de réfléchir à notre proposition ?`,
+          delay_j2_hours: 48,
+          delay_j3_hours: 72,
+        });
+        toast.success(`Relance programmée pour ${prospect.name} (J+2 et J+3)`);
+        router.refresh();
+      } catch {
+        toast.error("Erreur lors de la création de la relance");
+      } finally {
+        setRelancingId(null);
+      }
+    });
+  }
+
+  async function handleQualifier(prospect: Prospect) {
+    setQualifyingId(prospect.id);
+    startTransition(async () => {
+      try {
+        const shouldCreateDeal = prospect.breakdown.total >= 60;
+        const result = await qualifyProspect(prospect.id, {
+          createDeal: shouldCreateDeal,
+          temperature: prospect.breakdown.tier === "brulant" ? "hot" : "warm",
+        });
+
+        if (result && "error" in result) {
+          toast.error(result.error as string);
+        } else if (result.dealCreated) {
+          toast.success(`${prospect.name} qualifié et deal créé automatiquement`);
+        } else {
+          toast.success(`${prospect.name} marqué comme qualifié`);
+        }
+
+        router.refresh();
+      } catch {
+        toast.error("Erreur lors de la qualification");
+      } finally {
+        setQualifyingId(null);
       }
     });
   }
@@ -524,12 +577,17 @@ export function ScoringView({ prospects }: Props) {
                           size="sm"
                           variant="outline"
                           className="text-xs h-7 px-2"
+                          disabled={relancingId === prospect.id}
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast.info(`Relance programmee pour ${prospect.name}`);
+                            handleRelancer(prospect);
                           }}
                         >
-                          <MessageSquare className="h-3 w-3 mr-1" />
+                          {relancingId === prospect.id ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <MessageSquare className="h-3 w-3 mr-1" />
+                          )}
                           Relancer
                         </Button>
                       )}
@@ -538,12 +596,17 @@ export function ScoringView({ prospects }: Props) {
                           size="sm"
                           variant="outline"
                           className="text-xs h-7 px-2 border-brand/30 text-brand hover:bg-brand/10"
+                          disabled={qualifyingId === prospect.id}
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast.info(`Qualification lancee pour ${prospect.name}`);
+                            handleQualifier(prospect);
                           }}
                         >
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          {qualifyingId === prospect.id ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                          )}
                           Qualifier
                         </Button>
                       )}

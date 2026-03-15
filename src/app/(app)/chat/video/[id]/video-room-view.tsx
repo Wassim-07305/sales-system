@@ -43,9 +43,14 @@ import {
   getRoomPolls,
 } from "@/lib/actions/communication";
 import { useMediaStream } from "@/lib/hooks/use-media-stream";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface Participant {
   id: string;
@@ -92,6 +97,23 @@ interface ChatMessage {
   time: string;
 }
 
+// Peer state tracked per remote user
+interface PeerState {
+  pc: RTCPeerConnection;
+  remoteStream: MediaStream;
+}
+
+// ICE servers — free Google STUN
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:stun2.l.google.com:19302" },
+];
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 export function VideoRoomView({
   room,
   currentUserId,
@@ -121,12 +143,15 @@ export function VideoRoomView({
 
   // Video refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Auto recording state
+  // Recording state
   const [autoRecordEnabled, setAutoRecordEnabled] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
 
-  // Chat state (local only, stub)
+  // Chat state (local only — broadcast via Realtime)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
 
@@ -136,10 +161,259 @@ export function VideoRoomView({
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState(["", ""]);
 
+  // ---------------------------------------------------------------------------
+  // WebRTC state
+  // ---------------------------------------------------------------------------
+  const peersRef = useRef<Map<string, PeerState>>(new Map());
+  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
+  const signalingChannelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const supabaseRef = useRef(createClient());
+  // Track whether we have already joined the signaling channel
+  const signalingJoinedRef = useRef(false);
+  // Keep a ref to the current local stream so callbacks always have the latest
+  const localStreamRef = useRef<MediaStream | null>(null);
+
   const isHost = room.host_id === currentUserId;
   const isLive = room.status === "live";
   const isScheduled = room.status === "scheduled";
   const activeParticipants = room.participants.filter((p) => !p.left_at);
+
+  // Keep localStreamRef in sync
+  useEffect(() => {
+    localStreamRef.current = stream;
+  }, [stream]);
+
+  // ---------------------------------------------------------------------------
+  // WebRTC helpers
+  // ---------------------------------------------------------------------------
+
+  const createPeerConnection = useCallback(
+    (remoteUserId: string): RTCPeerConnection => {
+      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+      // Create a remote stream to collect incoming tracks
+      const remoteStream = new MediaStream();
+
+      // Add local tracks if available
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => {
+          pc.addTrack(track, localStreamRef.current!);
+        });
+      }
+
+      // Handle incoming tracks
+      pc.ontrack = (event) => {
+        event.streams[0]?.getTracks().forEach((track) => {
+          remoteStream.addTrack(track);
+        });
+        // Also add any track not part of a stream
+        if (!event.streams[0]) {
+          remoteStream.addTrack(event.track);
+        }
+        setRemoteStreams((prev) => {
+          const next = new Map(prev);
+          next.set(remoteUserId, remoteStream);
+          return next;
+        });
+      };
+
+      // ICE candidate exchange
+      pc.onicecandidate = (event) => {
+        if (event.candidate && signalingChannelRef.current) {
+          signalingChannelRef.current.send({
+            type: "broadcast",
+            event: "webrtc-signal",
+            payload: {
+              type: "ice-candidate",
+              candidate: event.candidate.toJSON(),
+              from: currentUserId,
+              to: remoteUserId,
+            },
+          });
+        }
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === "failed" || pc.iceConnectionState === "disconnected") {
+          // Cleanup on disconnect
+          cleanupPeer(remoteUserId);
+        }
+      };
+
+      peersRef.current.set(remoteUserId, { pc, remoteStream });
+      return pc;
+    },
+    [currentUserId],
+  );
+
+  const cleanupPeer = useCallback((remoteUserId: string) => {
+    const peer = peersRef.current.get(remoteUserId);
+    if (peer) {
+      peer.pc.close();
+      peersRef.current.delete(remoteUserId);
+      setRemoteStreams((prev) => {
+        const next = new Map(prev);
+        next.delete(remoteUserId);
+        return next;
+      });
+    }
+  }, []);
+
+  const cleanupAllPeers = useCallback(() => {
+    peersRef.current.forEach((peer, id) => {
+      peer.pc.close();
+    });
+    peersRef.current.clear();
+    setRemoteStreams(new Map());
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Signaling via Supabase Realtime
+  // ---------------------------------------------------------------------------
+
+  const setupSignaling = useCallback(() => {
+    if (signalingJoinedRef.current) return;
+    signalingJoinedRef.current = true;
+
+    const supabase = supabaseRef.current;
+    const channel = supabase.channel(`video-room-${room.id}`, {
+      config: { broadcast: { self: false } },
+    });
+
+    signalingChannelRef.current = channel;
+
+    channel.on("broadcast", { event: "webrtc-signal" }, async ({ payload }) => {
+      if (!payload) return;
+      const { type, from, to } = payload as {
+        type: string;
+        from: string;
+        to?: string;
+        candidate?: RTCIceCandidateInit;
+        sdp?: RTCSessionDescriptionInit;
+      };
+
+      // Ignore messages not meant for us (except "join" which is broadcast to all)
+      if (to && to !== currentUserId) return;
+      if (from === currentUserId) return;
+
+      switch (type) {
+        case "join": {
+          // A new peer joined — we initiate the offer
+          const pc = createPeerConnection(from);
+          try {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            channel.send({
+              type: "broadcast",
+              event: "webrtc-signal",
+              payload: {
+                type: "offer",
+                sdp: pc.localDescription,
+                from: currentUserId,
+                to: from,
+              },
+            });
+          } catch (err) {
+            console.error("[WebRTC] Error creating offer:", err);
+          }
+          break;
+        }
+
+        case "offer": {
+          const { sdp } = payload as { sdp: RTCSessionDescriptionInit; from: string };
+          // Create peer connection for the offerer if we don't have one
+          let pc: RTCPeerConnection;
+          const existing = peersRef.current.get(from);
+          if (existing) {
+            pc = existing.pc;
+          } else {
+            pc = createPeerConnection(from);
+          }
+
+          try {
+            await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            channel.send({
+              type: "broadcast",
+              event: "webrtc-signal",
+              payload: {
+                type: "answer",
+                sdp: pc.localDescription,
+                from: currentUserId,
+                to: from,
+              },
+            });
+          } catch (err) {
+            console.error("[WebRTC] Error handling offer:", err);
+          }
+          break;
+        }
+
+        case "answer": {
+          const { sdp } = payload as { sdp: RTCSessionDescriptionInit; from: string };
+          const peer = peersRef.current.get(from);
+          if (peer) {
+            try {
+              await peer.pc.setRemoteDescription(new RTCSessionDescription(sdp));
+            } catch (err) {
+              console.error("[WebRTC] Error setting remote description:", err);
+            }
+          }
+          break;
+        }
+
+        case "ice-candidate": {
+          const { candidate } = payload as { candidate: RTCIceCandidateInit; from: string };
+          const peer = peersRef.current.get(from);
+          if (peer && candidate) {
+            try {
+              await peer.pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (err) {
+              console.error("[WebRTC] Error adding ICE candidate:", err);
+            }
+          }
+          break;
+        }
+
+        case "leave": {
+          cleanupPeer(from);
+          break;
+        }
+      }
+    });
+
+    // Also receive chat messages via broadcast
+    channel.on("broadcast", { event: "chat-message" }, ({ payload }) => {
+      if (!payload) return;
+      const msg = payload as ChatMessage;
+      if (msg.id) {
+        setChatMessages((prev) => {
+          // Deduplicate
+          if (prev.some((m) => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+      }
+    });
+
+    channel.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        // Announce our presence so existing peers send us offers
+        channel.send({
+          type: "broadcast",
+          event: "webrtc-signal",
+          payload: {
+            type: "join",
+            from: currentUserId,
+          },
+        });
+      }
+    });
+  }, [room.id, currentUserId, createPeerConnection, cleanupPeer]);
+
+  // ---------------------------------------------------------------------------
+  // Lifecycle
+  // ---------------------------------------------------------------------------
 
   // Attach local stream to video element
   useEffect(() => {
@@ -148,6 +422,16 @@ export function VideoRoomView({
     }
   }, [stream]);
 
+  // Attach the first remote stream to the remote video element
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStreams.size > 0) {
+      const firstRemote = remoteStreams.values().next().value;
+      if (firstRemote) {
+        remoteVideoRef.current.srcObject = firstRemote;
+      }
+    }
+  }, [remoteStreams]);
+
   // Show media errors as toasts
   useEffect(() => {
     if (mediaError) {
@@ -155,25 +439,66 @@ export function VideoRoomView({
     }
   }, [mediaError]);
 
-  // Auto-start media when room is live
+  // Auto-start media and signaling when room is live
   useEffect(() => {
     if (isLive && !stream) {
       startStream();
     }
   }, [isLive]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cleanup screen share on unmount
+  // Set up signaling when we have a local stream and room is live
+  useEffect(() => {
+    if (isLive && stream) {
+      setupSignaling();
+    }
+  }, [isLive, stream, setupSignaling]);
+
+  // When local stream changes, update tracks on existing peer connections
+  useEffect(() => {
+    if (!stream) return;
+    peersRef.current.forEach((peer) => {
+      const senders = peer.pc.getSenders();
+      stream.getTracks().forEach((track) => {
+        const existingSender = senders.find((s) => s.track?.kind === track.kind);
+        if (existingSender) {
+          existingSender.replaceTrack(track).catch(() => {});
+        } else {
+          peer.pc.addTrack(track, stream);
+        }
+      });
+    });
+  }, [stream]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Announce leave
+      if (signalingChannelRef.current) {
+        signalingChannelRef.current.send({
+          type: "broadcast",
+          event: "webrtc-signal",
+          payload: { type: "leave", from: currentUserId },
+        });
+        supabaseRef.current.removeChannel(signalingChannelRef.current);
+        signalingChannelRef.current = null;
+        signalingJoinedRef.current = false;
+      }
+      // Close all peer connections
+      peersRef.current.forEach((peer) => peer.pc.close());
+      peersRef.current.clear();
+      // Stop screen share
       if (screenStreamRef.current) {
         screenStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ---------------------------------------------------------------------------
+  // Screen share
+  // ---------------------------------------------------------------------------
 
   const handleScreenShare = useCallback(async () => {
     if (screenSharing) {
-      // Stop screen share
       if (screenStreamRef.current) {
         screenStreamRef.current.getTracks().forEach((track) => track.stop());
         screenStreamRef.current = null;
@@ -192,30 +517,136 @@ export function VideoRoomView({
       setScreenSharing(true);
       toast.success("Partage d'écran activé");
 
-      // Listen for the user stopping the share via browser UI
-      displayStream.getVideoTracks()[0].addEventListener("ended", () => {
+      // Replace video track on all peer connections with screen share track
+      const screenTrack = displayStream.getVideoTracks()[0];
+      peersRef.current.forEach((peer) => {
+        const videoSender = peer.pc.getSenders().find((s) => s.track?.kind === "video");
+        if (videoSender) {
+          videoSender.replaceTrack(screenTrack).catch(() => {});
+        }
+      });
+
+      screenTrack.addEventListener("ended", () => {
         screenStreamRef.current = null;
         setScreenSharing(false);
         toast.info("Partage d'écran arrêté");
+        // Restore camera track
+        const cameraTrack = localStreamRef.current?.getVideoTracks()[0];
+        if (cameraTrack) {
+          peersRef.current.forEach((peer) => {
+            const videoSender = peer.pc.getSenders().find((s) => s.track?.kind === "video");
+            if (videoSender) {
+              videoSender.replaceTrack(cameraTrack).catch(() => {});
+            }
+          });
+        }
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === "NotAllowedError") {
-        // User cancelled — not an error
         return;
       }
       toast.error("Impossible de partager l'écran. Vérifiez les autorisations de votre navigateur.");
     }
   }, [screenSharing]);
 
+  // ---------------------------------------------------------------------------
+  // Recording — real MediaRecorder
+  // ---------------------------------------------------------------------------
+
   function startRecording() {
-    setIsRecording(true);
-    console.log("[Auto Recording] Recording started — MediaRecorder stub");
-    toast.success("Enregistrement démarré");
+    const tracks: MediaStreamTrack[] = [];
+
+    // Add local tracks
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((t) => tracks.push(t));
+    }
+
+    // Add first remote stream tracks
+    if (remoteStreams.size > 0) {
+      const firstRemote = remoteStreams.values().next().value;
+      if (firstRemote) {
+        (firstRemote as MediaStream).getTracks().forEach((t: MediaStreamTrack) => tracks.push(t));
+      }
+    }
+
+    if (tracks.length === 0) {
+      toast.error("Aucun flux disponible pour l'enregistrement");
+      return;
+    }
+
+    const combined = new MediaStream(tracks);
+
+    // Choose a supported mimeType
+    const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+      ? "video/webm;codecs=vp9,opus"
+      : MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus")
+        ? "video/webm;codecs=vp8,opus"
+        : "video/webm";
+
+    try {
+      const recorder = new MediaRecorder(combined, { mimeType });
+      recordedChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          recordedChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        if (blob.size === 0) return;
+
+        try {
+          const supabase = supabaseRef.current;
+          const filename = `room-${room.id}-${Date.now()}.webm`;
+          const { data, error } = await supabase.storage
+            .from("recordings")
+            .upload(filename, blob, { contentType: "video/webm" });
+
+          if (error) {
+            console.error("[Recording] Upload error:", error);
+            toast.error("Erreur lors de l'upload de l'enregistrement");
+            return;
+          }
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from("recordings")
+            .getPublicUrl(filename);
+
+          const recordingUrl = urlData?.publicUrl || null;
+
+          // Update the room record
+          if (recordingUrl) {
+            await supabase
+              .from("video_rooms")
+              .update({ recording_url: recordingUrl })
+              .eq("id", room.id);
+            toast.success("Enregistrement sauvegardé");
+          }
+        } catch (err) {
+          console.error("[Recording] Save error:", err);
+          toast.error("Erreur lors de la sauvegarde de l'enregistrement");
+        }
+      };
+
+      recorder.start(1000); // Collect data every second
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      toast.success("Enregistrement démarré");
+    } catch (err) {
+      console.error("[Recording] MediaRecorder error:", err);
+      toast.error("Impossible de démarrer l'enregistrement");
+    }
   }
 
   function stopRecording() {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
     setIsRecording(false);
-    console.log("[Auto Recording] Recording stopped — MediaRecorder stub");
     toast.info("Enregistrement arrêté");
   }
 
@@ -237,19 +668,40 @@ export function VideoRoomView({
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Chat (broadcast via Supabase Realtime)
+  // ---------------------------------------------------------------------------
+
   function handleSendChat() {
     if (!chatInput.trim()) return;
-    setChatMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        sender: "Vous",
-        text: chatInput,
-        time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-      },
-    ]);
+    const msg: ChatMessage = {
+      id: `${currentUserId}-${Date.now()}`,
+      sender: "Vous",
+      text: chatInput,
+      time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+    };
+    setChatMessages((prev) => [...prev, msg]);
+    // Broadcast to other participants
+    if (signalingChannelRef.current) {
+      const participantName =
+        room.participants.find((p) => p.user_id === currentUserId)?.user?.full_name ||
+        room.host?.full_name ||
+        "Participant";
+      signalingChannelRef.current.send({
+        type: "broadcast",
+        event: "chat-message",
+        payload: {
+          ...msg,
+          sender: participantName,
+        },
+      });
+    }
     setChatInput("");
   }
+
+  // ---------------------------------------------------------------------------
+  // Room actions
+  // ---------------------------------------------------------------------------
 
   function handleJoin() {
     startTransition(async () => {
@@ -285,11 +737,24 @@ export function VideoRoomView({
   function handleEnd() {
     startTransition(async () => {
       try {
+        // Stop recording if active
+        if (isRecording) {
+          stopRecording();
+        }
         stopStream();
+        cleanupAllPeers();
         if (screenStreamRef.current) {
           screenStreamRef.current.getTracks().forEach((track) => track.stop());
           screenStreamRef.current = null;
           setScreenSharing(false);
+        }
+        // Announce leave
+        if (signalingChannelRef.current) {
+          signalingChannelRef.current.send({
+            type: "broadcast",
+            event: "webrtc-signal",
+            payload: { type: "leave", from: currentUserId },
+          });
         }
         await endRoom(room.id);
         toast.success("Visioconférence terminée");
@@ -301,14 +766,34 @@ export function VideoRoomView({
   }
 
   function handleLeave() {
+    // Stop recording if active
+    if (isRecording) {
+      stopRecording();
+    }
     stopStream();
+    cleanupAllPeers();
     if (screenStreamRef.current) {
       screenStreamRef.current.getTracks().forEach((track) => track.stop());
       screenStreamRef.current = null;
     }
+    // Announce leave
+    if (signalingChannelRef.current) {
+      signalingChannelRef.current.send({
+        type: "broadcast",
+        event: "webrtc-signal",
+        payload: { type: "leave", from: currentUserId },
+      });
+      supabaseRef.current.removeChannel(signalingChannelRef.current);
+      signalingChannelRef.current = null;
+      signalingJoinedRef.current = false;
+    }
     toast.info("Vous avez quitté l'appel");
     router.push("/chat/video");
   }
+
+  // ---------------------------------------------------------------------------
+  // Polls
+  // ---------------------------------------------------------------------------
 
   function handleCreatePoll() {
     const validOptions = pollOptions.filter((o) => o.trim());
@@ -364,6 +849,30 @@ export function VideoRoomView({
       setPolls(data as Poll[]);
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // Derived state
+  // ---------------------------------------------------------------------------
+
+  const hasRemoteStream = remoteStreams.size > 0;
+
+  // Find the name of the first connected remote peer
+  const remotePeerName = (() => {
+    if (remoteStreams.size === 0) return null;
+    const remotePeerId = remoteStreams.keys().next().value;
+    const participant = room.participants.find((p) => p.user_id === remotePeerId);
+    if (participant?.user?.full_name) return participant.user.full_name;
+    if (participant?.user?.email) return participant.user.email;
+    // Check if it's the host
+    if (remotePeerId === room.host_id) {
+      return room.host?.full_name || room.host?.email || "Participant";
+    }
+    return "Participant";
+  })();
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] flex flex-col">
@@ -453,12 +962,31 @@ export function VideoRoomView({
               <>
                 {/* Participant grid */}
                 <div className="h-full grid grid-cols-1 md:grid-cols-2 gap-1 p-1">
-                  {/* Remote participant placeholder */}
-                  <div className="bg-gray-800 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-gray-500">
-                      <Users className="h-12 w-12 mx-auto mb-2 opacity-40" />
-                      <p className="text-sm">En attente d&apos;un participant...</p>
-                    </div>
+                  {/* Remote participant */}
+                  <div className="bg-gray-800 rounded-lg overflow-hidden relative">
+                    {hasRemoteStream ? (
+                      <>
+                        <video
+                          ref={remoteVideoRef}
+                          autoPlay
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-2 left-2 bg-black/60 text-white rounded px-2 py-0.5 text-xs">
+                          {remotePeerName}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="h-full flex items-center justify-center">
+                        <div className="text-center text-gray-500">
+                          <Users className="h-12 w-12 mx-auto mb-2 opacity-40" />
+                          <p className="text-sm">En attente d&apos;un participant...</p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            La connexion s&apos;établira automatiquement
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Local video (main grid) */}
@@ -484,23 +1012,25 @@ export function VideoRoomView({
                   </div>
                 </div>
 
-                {/* PiP local video overlay (small corner) */}
-                <div className="absolute bottom-16 right-4 w-40 h-28 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg z-10">
-                  <video
-                    autoPlay
-                    playsInline
-                    muted
-                    ref={(el) => {
-                      if (el && stream) el.srcObject = stream;
-                    }}
-                    className={`w-full h-full object-cover ${!videoEnabled ? "hidden" : ""}`}
-                  />
-                  {!videoEnabled && (
-                    <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                      <CameraOff className="h-5 w-5 text-gray-500" />
-                    </div>
-                  )}
-                </div>
+                {/* PiP local video overlay (small corner) — only shown when remote is connected */}
+                {hasRemoteStream && (
+                  <div className="absolute bottom-16 right-4 w-40 h-28 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg z-10">
+                    <video
+                      autoPlay
+                      playsInline
+                      muted
+                      ref={(el) => {
+                        if (el && stream) el.srcObject = stream;
+                      }}
+                      className={`w-full h-full object-cover ${!videoEnabled ? "hidden" : ""}`}
+                    />
+                    {!videoEnabled && (
+                      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                        <CameraOff className="h-5 w-5 text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div className="h-full flex items-center justify-center">
@@ -543,6 +1073,20 @@ export function VideoRoomView({
               <Users className="h-3.5 w-3.5" />
               {activeParticipants.length} / {room.max_participants}
             </div>
+
+            {/* Connection status */}
+            {isLive && stream && (
+              <div className={`absolute top-4 left-32 rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 ${
+                hasRemoteStream
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-yellow-500/20 text-yellow-400"
+              }`}>
+                <div className={`h-2 w-2 rounded-full ${
+                  hasRemoteStream ? "bg-green-500" : "bg-yellow-500 animate-pulse"
+                }`} />
+                {hasRemoteStream ? "Connecté" : "En attente..."}
+              </div>
+            )}
 
             {/* Screen sharing indicator */}
             {screenSharing && (
@@ -670,26 +1214,32 @@ export function VideoRoomView({
                 {/* Other participants */}
                 {activeParticipants
                   .filter((p) => p.user_id !== room.host_id)
-                  .map((participant) => (
-                    <div
-                      key={participant.id}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs font-bold">
-                        {participant.user?.full_name?.charAt(0) ||
-                          participant.user?.email?.charAt(0) ||
-                          "?"}
+                  .map((participant) => {
+                    const isConnected = remoteStreams.has(participant.user_id);
+                    return (
+                      <div
+                        key={participant.id}
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50"
+                      >
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs font-bold">
+                          {participant.user?.full_name?.charAt(0) ||
+                            participant.user?.email?.charAt(0) ||
+                            "?"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {participant.user?.full_name ||
+                              participant.user?.email ||
+                              "Participant"}
+                          </p>
+                          {isConnected && (
+                            <p className="text-[10px] text-green-500">Connecté</p>
+                          )}
+                        </div>
+                        <div className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-brand"}`} />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {participant.user?.full_name ||
-                            participant.user?.email ||
-                            "Participant"}
-                        </p>
-                      </div>
-                      <div className="h-2 w-2 rounded-full bg-brand" />
-                    </div>
-                  ))}
+                    );
+                  })}
 
                 {activeParticipants.length === 0 && !room.host && (
                   <p className="text-sm text-muted-foreground text-center py-8">

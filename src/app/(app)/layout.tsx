@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "./app-shell";
+import { getWhiteLabelConfig } from "@/lib/actions/white-label";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function AppLayout({
@@ -17,11 +18,10 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, whiteLabelConfig] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    getWhiteLabelConfig().catch(() => null),
+  ]);
 
   // If no profile yet, create one with defaults and persist to DB
   let userProfile = profile;
@@ -53,6 +53,7 @@ export default async function AppLayout({
       email={userProfile.email || user.email || ""}
       avatarUrl={userProfile.avatar_url}
       userId={user.id}
+      whiteLabelConfig={whiteLabelConfig}
     >
       {children}
     </AppShell>

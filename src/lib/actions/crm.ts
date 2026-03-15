@@ -234,6 +234,17 @@ export async function createDeal(params: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // AI mode check — optional guard for deal creation
+  try {
+    const { checkCriticalAction } = await import("@/lib/actions/ai-modes");
+    const aiCheck = await checkCriticalAction("Envoi de contrat");
+    if (aiCheck.requiresValidation) {
+      return { error: "Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)" };
+    }
+  } catch {
+    // Ignore — AI mode config not set up
+  }
+
   if (!params.value || params.value <= 0) {
     return { error: "La valeur du deal doit être supérieure à 0" };
   }

@@ -84,6 +84,8 @@ Génère un JSON avec ces champs:
     ...existingMetadata,
     enrichment: {
       ...enrichmentData,
+      source: "ai_estimation" as const,
+      disclaimer: "Données estimées par IA, non vérifiées. Aucune source externe (Clearbit, Apollo, etc.) n'a été consultée.",
       enriched_at: new Date().toISOString(),
       enriched_by: user.id,
     },
@@ -109,7 +111,11 @@ Génère un JSON avec ces champs:
   });
 
   revalidatePath("/prospecting/enrichment");
-  return enrichmentData;
+  return {
+    ...enrichmentData,
+    source: "ai_estimation" as const,
+    disclaimer: "Données estimées par IA, non vérifiées. Aucune source externe (Clearbit, Apollo, etc.) n'a été consultée.",
+  };
 }
 
 // ─── enrichBatch ────────────────────────────────────────────────────
@@ -195,7 +201,11 @@ Génère un JSON avec ces champs:
       model: "anthropic/claude-3.5-sonnet",
     });
 
-    return insights;
+    return {
+      ...insights,
+      source: "ai_estimation" as const,
+      disclaimer: "Données estimées par IA, non vérifiées. Aucune source externe n'a été consultée.",
+    };
   } catch (aiError) {
     console.error("[generateCompanyInsights] Erreur IA:", aiError);
     throw new Error("L'analyse IA de l'entreprise a échoué. Veuillez réessayer plus tard.");
@@ -252,6 +262,8 @@ export async function getProspectsForEnrichment() {
             points_cles: (enrichment.points_cles as string[]) || [],
             confiance: (enrichment.confiance as number) || 0,
             enriched_at: (enrichment.enriched_at as string) || "",
+            source: (enrichment.source as string) || "ai_estimation",
+            disclaimer: (enrichment.disclaimer as string) || "Données estimées par IA, non vérifiées",
           }
         : null,
     };

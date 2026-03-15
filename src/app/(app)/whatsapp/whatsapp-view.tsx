@@ -16,6 +16,7 @@ import {
   BarChart3,
   Clock,
   X,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -185,6 +186,21 @@ export function WhatsAppView({
           </Link>
         </div>
       </PageHeader>
+
+      {/* Warning banner when disconnected */}
+      {status === "disconnected" && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-center gap-2 text-amber-600">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <p className="text-sm font-medium">
+              WhatsApp n&apos;est pas connecté. Les messages ne seront ni envoyés ni reçus.{" "}
+              <Link href="/whatsapp/settings" className="underline">
+                Configurer la connexion
+              </Link>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Connection Status Card */}
       <Card className="shadow-sm rounded-2xl border-border/50">

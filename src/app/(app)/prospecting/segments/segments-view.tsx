@@ -206,7 +206,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
 
     startTransition(async () => {
       try {
-        if (editingSegment && !editingSegment.id.startsWith("demo-")) {
+        if (editingSegment) {
           await updateSegment(editingSegment.id, {
             name: formName,
             description: formDescription,
@@ -235,11 +235,6 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
   }
 
   async function handleDelete(segment: Segment) {
-    if (segment.id.startsWith("demo-")) {
-      toast.error("Les segments de demo ne peuvent pas etre supprimes");
-      return;
-    }
-
     startTransition(async () => {
       try {
         await deleteSegment(segment.id);
@@ -662,10 +657,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
               <Filter className="h-7 w-7 text-muted-foreground/50" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              Aucun segment configure
+              Aucun segment créé
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Creez votre premier segment pour organiser vos prospects.
+              Créez votre premier segment pour organiser vos prospects en groupes ciblés.
             </p>
             <Button
               onClick={openCreate}

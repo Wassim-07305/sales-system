@@ -17,12 +17,23 @@ const AiCoachWidget = dynamic(
   { ssr: false }
 );
 
+export interface WhiteLabelConfig {
+  brand_name?: string | null;
+  app_name?: string | null;
+  logo_url?: string | null;
+  primary_color?: string | null;
+  secondary_color?: string | null;
+  custom_domain?: string | null;
+  is_active?: boolean;
+}
+
 interface AppShellProps {
   role: UserRole;
   userName: string;
   email: string;
   avatarUrl?: string | null;
   userId: string;
+  whiteLabelConfig?: WhiteLabelConfig | null;
   children: React.ReactNode;
 }
 
@@ -32,6 +43,7 @@ export function AppShell({
   email,
   avatarUrl,
   userId,
+  whiteLabelConfig,
   children,
 }: AppShellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -40,12 +52,28 @@ export function AppShell({
     setUnreadCount(count);
   }, []);
 
+  // Build white-label config only if active
+  const wl = whiteLabelConfig?.is_active ? whiteLabelConfig : null;
+
   return (
     <ThemeProvider>
       <NavigationProgress />
+      {wl?.primary_color && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root {
+                --brand: ${wl.primary_color};
+                --sidebar-primary: ${wl.primary_color};
+              }
+              ${wl.secondary_color ? `:root { --sidebar: ${wl.secondary_color}; --sidebar-background: ${wl.secondary_color}; }` : ""}
+            `,
+          }}
+        />
+      )}
       <div className="flex h-dvh overflow-hidden bg-background">
         {/* Sidebar */}
-        <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} />
+        <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} whiteLabelConfig={wl} />
 
         {/* Main area */}
         <div className="flex min-w-0 flex-1 flex-col">

@@ -329,6 +329,19 @@ export async function sendWhatsAppMessage(data: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // AI mode check — block if critical validation requires approval
+  try {
+    const { checkCriticalAction } = await import("@/lib/actions/ai-modes");
+    const aiCheck = await checkCriticalAction("Envoi de message initial");
+    if (aiCheck.requiresValidation) {
+      throw new Error("Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)");
+    }
+  } catch (err) {
+    // If it's our own validation error, re-throw it
+    if (err instanceof Error && err.message.startsWith("Action bloquée")) throw err;
+    // Otherwise ignore (config not set up, table missing, etc.)
+  }
+
   // --- Unipile direct chat path (for Unipile-sourced conversations) ---
   if (data.prospectId.startsWith("unipile-")) {
     const chatId = data.prospectId.replace("unipile-", "");

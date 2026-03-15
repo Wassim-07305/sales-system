@@ -47,63 +47,6 @@ Réponds en JSON avec un tableau "lookalikes" contenant pour chaque suggestion :
 
 // ─── Competitors ────────────────────────────────────────────────────
 
-const DEMO_COMPETITORS = [
-  {
-    id: "comp-1",
-    name: "SalesForce FR",
-    website: "https://salesforce.com/fr",
-    strengths: "Leader mondial, écosystème riche, IA Einstein intégrée",
-    weaknesses: "Prix élevés, complexité de mise en place, interface chargée",
-    pricingTier: "Premium (300-500€/utilisateur/mois)",
-    notes: "",
-  },
-  {
-    id: "comp-2",
-    name: "HubSpot Sales",
-    website: "https://hubspot.fr",
-    strengths: "Freemium attractif, UX intuitive, intégration marketing native",
-    weaknesses: "Fonctions avancées payantes, limité en personnalisation, rapports basiques en gratuit",
-    pricingTier: "Mid-range (45-150€/utilisateur/mois)",
-    notes: "",
-  },
-  {
-    id: "comp-3",
-    name: "Pipedrive",
-    website: "https://pipedrive.com/fr",
-    strengths: "Pipeline visuel excellent, simplicité, bon rapport qualité-prix",
-    weaknesses: "Peu de fonctions marketing, analytics limitées, pas de module formation",
-    pricingTier: "Accessible (15-99€/utilisateur/mois)",
-    notes: "",
-  },
-  {
-    id: "comp-4",
-    name: "NoCRM.io",
-    website: "https://nocrm.io",
-    strengths: "Made in France, ultra-simple, focus closing, prise en main rapide",
-    weaknesses: "Pas de prospection avancée, peu d'intégrations, pas de gamification",
-    pricingTier: "Accessible (22-33€/utilisateur/mois)",
-    notes: "",
-  },
-  {
-    id: "comp-5",
-    name: "Sellsy",
-    website: "https://sellsy.com",
-    strengths: "Solution française complète, facturation intégrée, support réactif",
-    weaknesses: "Interface vieillissante, mobile limité, pas d'IA avancée",
-    pricingTier: "Mid-range (29-99€/utilisateur/mois)",
-    notes: "",
-  },
-  {
-    id: "comp-6",
-    name: "Close CRM",
-    website: "https://close.com",
-    strengths: "Calling intégré, séquences email, interface moderne",
-    weaknesses: "Pas de version française, pricing USD, communauté limitée en France",
-    pricingTier: "Mid-range (59-149$/utilisateur/mois)",
-    notes: "",
-  },
-];
-
 export async function getCompetitors() {
   const supabase = await createClient();
   const {
@@ -130,10 +73,10 @@ export async function getCompetitors() {
       }));
     }
   } catch {
-    // Table n'existe pas — fallback aux données de référence
+    // Table n'existe pas — retourner un tableau vide
   }
 
-  return DEMO_COMPETITORS;
+  return [];
 }
 
 export async function addCompetitor(data: {

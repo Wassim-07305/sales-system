@@ -21,65 +21,6 @@ type Segment = {
   updated_at: string;
 };
 
-// ─── Demo fallback segments ─────────────────────────────────────────
-
-const DEMO_SEGMENTS: Segment[] = [
-  {
-    id: "demo-1",
-    name: "Prospects chauds",
-    description: "Prospects avec une temperature elevee, prets a convertir",
-    filters: [{ field: "temperature", operator: "eq", value: "hot" }],
-    color: "#ef4444",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "demo-2",
-    name: "Entreprises tech",
-    description: "Prospects issus du secteur technologique",
-    filters: [{ field: "company", operator: "contains", value: "tech" }],
-    color: "#3b82f6",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "demo-3",
-    name: "Follow-up cette semaine",
-    description: "Prospects contactes recemment necessitant un suivi",
-    filters: [{ field: "status", operator: "eq", value: "contacted" }],
-    color: "#f59e0b",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "demo-4",
-    name: "Inactifs 30 jours",
-    description: "Prospects sans interaction depuis plus de 30 jours",
-    filters: [{ field: "last_contact", operator: "lt", value: "30_days_ago" }],
-    color: "#6b7280",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "demo-5",
-    name: "Top prospects",
-    description: "Prospects avec le meilleur score de qualification",
-    filters: [{ field: "score", operator: "gt", value: "80" }],
-    color: "#7af17a",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "demo-6",
-    name: "Nouveaux contacts",
-    description: "Prospects ajoutes recemment dans le systeme",
-    filters: [{ field: "status", operator: "eq", value: "new" }],
-    color: "#8b5cf6",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
-
 // ─── Helpers ────────────────────────────────────────────────────────
 
 function parseFilters(raw: unknown): SegmentFilter[] {
@@ -92,7 +33,7 @@ function parseFilters(raw: unknown): SegmentFilter[] {
 export async function getSegments() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return DEMO_SEGMENTS;
+  if (!user) return [];
 
   try {
     const { data, error } = await supabase
@@ -101,7 +42,7 @@ export async function getSegments() {
       .order("created_at", { ascending: false });
 
     if (error || !data || data.length === 0) {
-      return DEMO_SEGMENTS;
+      return [];
     }
 
     return data.map((row: Record<string, unknown>) => ({
@@ -114,7 +55,7 @@ export async function getSegments() {
       updated_at: (row.updated_at as string) || (row.created_at as string),
     }));
   } catch {
-    return DEMO_SEGMENTS;
+    return [];
   }
 }
 
@@ -199,20 +140,14 @@ export async function getSegmentProspects(segmentId: string) {
   // Get segment filters
   let filters: SegmentFilter[] = [];
 
-  // Check demo segments first
-  const demoSegment = DEMO_SEGMENTS.find((s) => s.id === segmentId);
-  if (demoSegment) {
-    filters = demoSegment.filters;
-  } else {
-    const { data: segment } = await supabase
-      .from("prospect_segments")
-      .select("filters")
-      .eq("id", segmentId)
-      .single();
+  const { data: segment } = await supabase
+    .from("prospect_segments")
+    .select("filters")
+    .eq("id", segmentId)
+    .single();
 
-    if (!segment) return [];
-    filters = parseFilters(segment.filters);
-  }
+  if (!segment) return [];
+  filters = parseFilters(segment.filters);
 
   // Build query with filters
   let query = supabase

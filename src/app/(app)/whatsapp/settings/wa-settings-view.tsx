@@ -25,6 +25,7 @@ import {
   Loader2,
   RefreshCw,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { connectWhatsApp, disconnectWhatsApp } from "@/lib/actions/whatsapp";
 import { generateUnipileAuthLink, getUnipileStatus } from "@/lib/actions/unipile";
@@ -230,6 +231,19 @@ export function WaSettingsView({
           </Button>
         </Link>
       </PageHeader>
+
+      {/* Warning banner when neither method is connected */}
+      {!unipileConnected && status === "disconnected" && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 max-w-2xl">
+          <div className="flex items-center gap-2 text-amber-600">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <p className="text-sm font-medium">
+              WhatsApp n&apos;est pas connecté. Les messages ne seront ni envoyés ni reçus.
+              Connectez votre compte via Unipile (recommandé) ou manuellement ci-dessous.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 max-w-2xl">
         {/* Unipile Connection — Recommended */}

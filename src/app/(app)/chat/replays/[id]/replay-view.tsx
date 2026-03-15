@@ -9,8 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Play,
-  Pause,
   Clock,
   Calendar,
   Users,
@@ -55,7 +53,7 @@ interface VideoRoom {
 
 interface Recording {
   recording_url: string | null;
-  ai_summary: string;
+  ai_summary: string | null;
   chapters: Array<{ timestamp: string; label: string }>;
   title: string;
   started_at: string | null;
@@ -83,7 +81,6 @@ export function ReplayView({
   room: VideoRoom;
   recording: Recording | null;
 }) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
 
   const duration = calculateDuration(room.started_at, room.ended_at);
@@ -123,28 +120,11 @@ export function ReplayView({
                       <Video className="h-16 w-16 mx-auto opacity-40" />
                     </div>
                     <p className="text-lg font-medium">
-                      Replay bientôt disponible
+                      Aucun enregistrement disponible
                     </p>
                     <p className="text-sm mt-1 opacity-60">
-                      L&apos;enregistrement est en cours de traitement
+                      Cette session n&apos;a pas été enregistrée ou l&apos;enregistrement n&apos;est pas disponible.
                     </p>
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={() => setIsPlaying(!isPlaying)}
-                    >
-                      {isPlaying ? (
-                        <>
-                          <Pause className="h-4 w-4 mr-2" />
-                          Pause
-                        </>
-                      ) : (
-                        <>
-                          <Play className="h-4 w-4 mr-2" />
-                          Lecture (demo)
-                        </>
-                      )}
-                    </Button>
                   </>
                 )}
               </div>

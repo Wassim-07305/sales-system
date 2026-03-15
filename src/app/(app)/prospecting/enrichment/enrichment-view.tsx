@@ -49,6 +49,8 @@ interface EnrichmentData {
   points_cles: string[];
   confiance: number;
   enriched_at: string;
+  source?: string;
+  disclaimer?: string;
 }
 
 interface Prospect {
@@ -77,6 +79,8 @@ interface CompanyInsights {
   budget_potentiel: string;
   approche_recommandee: string;
   confiance: number;
+  source?: string;
+  disclaimer?: string;
 }
 
 interface Props {
@@ -444,11 +448,21 @@ export function EnrichmentView({ prospects }: Props) {
                   {isExpanded && prospect.enrichment && (
                     <div className="px-4 pb-4 pt-0 bg-muted/30">
                       <div className="rounded-xl border p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                            Données enrichies par IA
-                          </p>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                              Données enrichies
+                            </p>
+                            <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 gap-1 text-[10px]">
+                              <AlertTriangle className="h-3 w-3" />
+                              Estimation IA
+                            </Badge>
+                          </div>
                           {getConfidenceBadge(prospect.enrichment.confiance)}
+                        </div>
+                        <div className="mb-4 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/15 text-xs text-amber-600">
+                          <AlertTriangle className="h-3 w-3 inline mr-1.5" />
+                          {prospect.enrichment.disclaimer || "Données estimées par IA, non vérifiées. Aucune source externe (Clearbit, Apollo, etc.) n'a été consultée."}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -456,8 +470,9 @@ export function EnrichmentView({ prospects }: Props) {
                           <div className="flex items-start gap-2">
                             <Building2 className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Secteur
+                                <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                               </p>
                               <p className="text-sm font-medium">
                                 {prospect.enrichment.secteur}
@@ -469,8 +484,9 @@ export function EnrichmentView({ prospects }: Props) {
                           <div className="flex items-start gap-2">
                             <Users className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Taille entreprise
+                                <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                               </p>
                               <p className="text-sm font-medium">
                                 {prospect.enrichment.taille_entreprise} employés
@@ -482,8 +498,9 @@ export function EnrichmentView({ prospects }: Props) {
                           <div className="flex items-start gap-2">
                             <Briefcase className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Poste probable
+                                <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                               </p>
                               <p className="text-sm font-medium">
                                 {prospect.enrichment.poste_probable}
@@ -495,8 +512,9 @@ export function EnrichmentView({ prospects }: Props) {
                           <div className="flex items-start gap-2">
                             <Target className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Budget estimé
+                                <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                               </p>
                               <p className="text-sm font-medium">
                                 {prospect.enrichment.budget_estime}
@@ -508,8 +526,9 @@ export function EnrichmentView({ prospects }: Props) {
                           <div className="flex items-start gap-2">
                             <Clock className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Meilleur moment de contact
+                                <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                               </p>
                               <p className="text-sm font-medium">
                                 {prospect.enrichment.meilleur_moment_contact}
@@ -521,8 +540,9 @@ export function EnrichmentView({ prospects }: Props) {
                           <div className="flex items-start gap-2">
                             <Globe className="h-4 w-4 text-brand mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Site web probable
+                                <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                               </p>
                               <p className="text-sm font-medium">
                                 {prospect.enrichment.site_web_probable}
@@ -535,8 +555,9 @@ export function EnrichmentView({ prospects }: Props) {
                             <div className="flex items-start gap-2">
                               <Linkedin className="h-4 w-4 text-foreground mt-0.5 shrink-0" />
                               <div>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                   LinkedIn probable
+                                  <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                                 </p>
                                 <p className="text-sm font-medium truncate">
                                   {prospect.enrichment.profil_linkedin_probable}
@@ -550,8 +571,9 @@ export function EnrichmentView({ prospects }: Props) {
                             <div className="flex items-start gap-2">
                               <Twitter className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                               <div>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                   Twitter/X probable
+                                  <span className="text-[9px] text-amber-600 bg-amber-500/10 px-1 py-0.5 rounded">IA</span>
                                 </p>
                                 <p className="text-sm font-medium truncate">
                                   {prospect.enrichment.profil_twitter_probable}
@@ -658,11 +680,20 @@ export function EnrichmentView({ prospects }: Props) {
 
           {companyInsights && (
             <div className="rounded-xl border p-4 space-y-4">
+              {/* Disclaimer */}
+              <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/15 text-xs text-amber-600">
+                <AlertTriangle className="h-3 w-3 inline mr-1.5" />
+                {companyInsights.disclaimer || "Données estimées par IA, non vérifiées. Aucune source externe n'a été consultée."}
+              </div>
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-lg">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
                     {companyInsights.nom}
+                    <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 gap-1 text-[10px]">
+                      <AlertTriangle className="h-3 w-3" />
+                      Estimation IA
+                    </Badge>
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {companyInsights.description}

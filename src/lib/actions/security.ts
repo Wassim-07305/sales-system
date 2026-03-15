@@ -3,6 +3,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+// ─── Helpers ─────────────────────────────────────────────────────────
+
+function isTableMissing(error: { message?: string; code?: string } | null): boolean {
+  if (!error) return false;
+  const msg = (error.message || "").toLowerCase();
+  return (
+    msg.includes("relation") && msg.includes("does not exist") ||
+    error.code === "42P01"
+  );
+}
+
 // ---------------------------------------------------------------------------
 // MFA Status
 // ---------------------------------------------------------------------------
@@ -115,7 +126,7 @@ export async function unenrollMfa(factorId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Security Settings (hardcoded defaults, stored in profiles metadata)
+// Security Settings (stored in user metadata)
 // ---------------------------------------------------------------------------
 
 export async function getSecuritySettings() {
@@ -164,7 +175,7 @@ export async function updateSecuritySettings(settings: {
 }
 
 // ---------------------------------------------------------------------------
-// Login History (demo data — Supabase does not expose auth.sessions publicly)
+// Login History — query audit_logs table, return [] if unavailable
 // ---------------------------------------------------------------------------
 
 export async function getLoginHistory() {
@@ -174,55 +185,35 @@ export async function getLoginHistory() {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Supabase Auth doesn't expose login history to clients.
-  // Return demo data for UI purposes.
-  const now = new Date();
-  return [
-    {
-      id: "1",
-      date: new Date(now.getTime() - 1000 * 60 * 5).toISOString(),
-      ip: "192.168.1.42",
-      device: "Chrome / macOS",
-      status: "success" as const,
-      location: "Paris, France",
-    },
-    {
-      id: "2",
-      date: new Date(now.getTime() - 1000 * 60 * 60 * 3).toISOString(),
-      ip: "192.168.1.42",
-      device: "Safari / iPhone",
-      status: "success" as const,
-      location: "Paris, France",
-    },
-    {
-      id: "3",
-      date: new Date(now.getTime() - 1000 * 60 * 60 * 24).toISOString(),
-      ip: "10.0.0.1",
-      device: "Firefox / Windows",
-      status: "failed" as const,
-      location: "Lyon, France",
-    },
-    {
-      id: "4",
-      date: new Date(now.getTime() - 1000 * 60 * 60 * 48).toISOString(),
-      ip: "192.168.1.42",
-      device: "Chrome / macOS",
-      status: "success" as const,
-      location: "Paris, France",
-    },
-    {
-      id: "5",
-      date: new Date(now.getTime() - 1000 * 60 * 60 * 72).toISOString(),
-      ip: "172.16.0.5",
-      device: "Edge / Windows",
-      status: "failed" as const,
-      location: "Marseille, France",
-    },
-  ];
+  const { data, error } = await supabase
+    .from("audit_logs")
+    .select("*")
+    .eq("user_id", user.id)
+    .in("action", ["login", "login_failed", "auth.login", "auth.login_failed"])
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) {
+    if (isTableMissing(error)) return [];
+    // If the table exists but the query fails for another reason, return empty
+    return [];
+  }
+
+  return (data || []).map((log: Record<string, unknown>) => {
+    const meta = (log.metadata || {}) as Record<string, unknown>;
+    return {
+      id: (log.id as string) || "",
+      date: (log.created_at as string) || "",
+      ip: (log.ip_address as string) || (meta.ip as string) || "",
+      device: (log.user_agent as string) || (meta.device as string) || "",
+      status: ((log.action as string) || "").includes("failed") ? "failed" as const : "success" as const,
+      location: (meta.location as string) || "",
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
-// Active Sessions (demo data)
+// Active Sessions — return current session only (honest approach)
 // ---------------------------------------------------------------------------
 
 export async function getActiveSessions() {
@@ -232,21 +223,15 @@ export async function getActiveSessions() {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const now = new Date();
+  // Supabase does not expose session listing to client-side.
+  // Return the current session as the only known active session.
   return [
     {
-      id: "sess_1",
-      device: "Chrome / macOS",
-      ip: "192.168.1.42",
-      lastActive: new Date(now.getTime() - 1000 * 60 * 2).toISOString(),
+      id: user.id,
+      device: "Session actuelle",
+      ip: "",
+      lastActive: new Date().toISOString(),
       current: true,
-    },
-    {
-      id: "sess_2",
-      device: "Safari / iPhone",
-      ip: "192.168.1.42",
-      lastActive: new Date(now.getTime() - 1000 * 60 * 60 * 3).toISOString(),
-      current: false,
     },
   ];
 }

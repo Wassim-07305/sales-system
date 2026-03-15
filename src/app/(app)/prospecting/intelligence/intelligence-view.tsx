@@ -554,6 +554,21 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
           </div>
 
           {/* Competitor cards grid */}
+          {competitors.length === 0 && (
+            <Card className="shadow-sm rounded-2xl">
+              <CardContent className="py-12 text-center">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Building className="h-7 w-7 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Aucun concurrent ajouté
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Cliquez sur &quot;Ajouter un concurrent&quot; pour commencer votre veille concurrentielle.
+                </p>
+              </CardContent>
+            </Card>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {competitors.map((comp) => (
               <Card key={comp.id} className="flex flex-col shadow-sm rounded-2xl">

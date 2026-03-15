@@ -121,7 +121,7 @@ export async function addProspect(formData: { name: string; profile_url?: string
 
 export async function updateProspectStatus(prospectId: string, status: string) {
   const supabase = await createClient();
-  const validStatuses = ["new", "contacted", "replied", "hot", "booked", "lost"];
+  const validStatuses = ["new", "contacted", "replied", "hot", "interested", "qualified", "booked", "converted", "lost", "not_interested"];
   if (!validStatuses.includes(status)) return { error: "Statut invalide" };
 
   const { error } = await supabase.from("prospects").update({ status }).eq("id", prospectId);
@@ -398,6 +398,66 @@ export async function convertProspectToDeal(prospectId: string, dealData: {
   revalidatePath("/prospecting");
   revalidatePath("/crm");
   return { success: true, dealId: deal.id };
+}
+
+export async function qualifyProspect(prospectId: string, params: {
+  createDeal: boolean;
+  temperature: string;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Get prospect data
+  const { data: prospect } = await supabase
+    .from("prospects")
+    .select("name, profile_url, platform")
+    .eq("id", prospectId)
+    .single();
+
+  if (!prospect) return { error: "Prospect introuvable" };
+
+  // Update prospect status to qualified
+  const { error: statusError } = await supabase
+    .from("prospects")
+    .update({ status: "qualified" })
+    .eq("id", prospectId);
+
+  if (statusError) return { error: "Impossible de qualifier le prospect" };
+
+  let dealCreated = false;
+
+  // Optionally create a deal
+  if (params.createDeal) {
+    // Get the first pipeline stage
+    const { data: firstStage } = await supabase
+      .from("pipeline_stages")
+      .select("id")
+      .order("position", { ascending: true })
+      .limit(1)
+      .single();
+
+    if (firstStage) {
+      const { error: dealError } = await supabase
+        .from("deals")
+        .insert({
+          title: `${prospect.name} — Qualification scoring`,
+          value: 0,
+          stage_id: firstStage.id,
+          source: "scoring",
+          temperature: params.temperature,
+          notes: `Qualifié automatiquement depuis le scoring (${prospect.platform})`,
+        })
+        .select()
+        .single();
+
+      dealCreated = !dealError;
+    }
+  }
+
+  revalidatePath("/prospecting");
+  revalidatePath("/crm");
+  return { success: true, dealCreated };
 }
 
 export async function getSettersForAssignment() {

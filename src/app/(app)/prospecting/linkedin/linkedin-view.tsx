@@ -33,6 +33,7 @@ import {
   RefreshCw,
   Bot,
   Unplug,
+  AlertTriangle,
 } from "lucide-react";
 import {
   analyzeProfile,
@@ -247,6 +248,19 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
           {prospects.length} prospects
         </Badge>
       </PageHeader>
+
+      {/* Warning banner when not connected */}
+      {!liConnected && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-center gap-2 text-amber-600">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <p className="text-sm font-medium">
+              Intégration LinkedIn non configurée. Les messages et analyses ne seront pas synchronisés automatiquement.
+              Connectez votre compte ci-dessous pour activer toutes les fonctionnalités.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Unipile LinkedIn connection status */}
       <Card className={`shadow-sm rounded-2xl ${liConnected ? "border-brand/30" : ""}`}>

@@ -15,14 +15,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { WhiteLabelConfig } from "@/app/(app)/app-shell";
 
 interface SidebarProps {
   role: UserRole;
   userName: string;
   avatarUrl?: string | null;
+  whiteLabelConfig?: WhiteLabelConfig | null;
 }
 
-export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
+export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const {
@@ -82,15 +84,19 @@ export function Sidebar({ role, userName, avatarUrl }: SidebarProps) {
             onClick={closeMobile}
           >
             <Image
-              src="/logo.png"
-              alt="Sales System"
+              src={whiteLabelConfig?.logo_url || "/logo.png"}
+              alt={whiteLabelConfig?.brand_name || whiteLabelConfig?.app_name || "Sales System"}
               width={32}
               height={32}
               className="shrink-0"
             />
             {!isCollapsed && (
               <span className="font-serif text-lg font-bold text-sidebar-foreground whitespace-nowrap">
-                Sales<span className="text-brand">System</span>
+                {whiteLabelConfig?.brand_name || whiteLabelConfig?.app_name ? (
+                  <span className="text-brand">{whiteLabelConfig.brand_name || whiteLabelConfig.app_name}</span>
+                ) : (
+                  <>Sales<span className="text-brand">System</span></>
+                )}
               </span>
             )}
           </Link>
