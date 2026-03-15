@@ -254,7 +254,7 @@ export async function getVoiceMessages() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("voice_messages")
-    .select("*, prospect:prospects(id, name)")
+    .select("*")
     .order("created_at", { ascending: false });
 
   return (data || []).map((d: Record<string, unknown>) => ({

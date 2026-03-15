@@ -771,12 +771,12 @@ export async function getPersonalPerformanceReport(
   // Fetch user's coaching objectives for personalized targets, fallback to defaults
   const { data: targetObjectives } = await supabase
     .from("coaching_objectives")
-    .select("target_type, target_value")
-    .eq("user_id", userId)
-    .eq("status", "active");
+    .select("category, target_value")
+    .eq("assignee_id", userId)
+    .eq("status", "in_progress");
 
   const getTarget = (type: string, fallback: number) => {
-    const obj = (targetObjectives || []).find((o) => o.target_type === type);
+    const obj = (targetObjectives || []).find((o) => o.category === type);
     return obj?.target_value ?? fallback;
   };
 
@@ -1307,20 +1307,24 @@ export async function getB2BDashboardData(
       ? Math.round((closedDeals / dealsForPipeline.length) * 100)
       : 0;
 
-  // Upcoming bookings
-  const { data: bookings } = await supabase
+  // Upcoming bookings (scoped to this client's setter if available)
+  let bookingsQuery = supabase
     .from("bookings")
     .select("id, prospect_name, scheduled_at, slot_type")
     .gte("scheduled_at", now.toISOString())
     .order("scheduled_at")
     .limit(5);
+  if (setterId) bookingsQuery = bookingsQuery.eq("assigned_to", setterId);
+  const { data: bookings } = await bookingsQuery;
 
-  // Bookings count this month
-  const { count: bookingsMonthCount } = await supabase
+  // Bookings count this month (scoped to this client's setter)
+  let bookingsCountQuery = supabase
     .from("bookings")
     .select("id", { count: "exact", head: true })
     .gte("scheduled_at", startOfMonth)
     .lte("scheduled_at", endOfMonth);
+  if (setterId) bookingsCountQuery = bookingsCountQuery.eq("assigned_to", setterId);
+  const { count: bookingsMonthCount } = await bookingsCountQuery;
 
   // Recent activity - deal activities
   const dealIds = dealsForPipeline.map((d) => d.id);
@@ -1329,7 +1333,7 @@ export async function getB2BDashboardData(
   if (dealIds.length > 0) {
     const { data: dealActivities } = await supabase
       .from("deal_activities")
-      .select("id, type, description, created_at")
+      .select("id, type, content, created_at")
       .in("deal_id", dealIds)
       .order("created_at", { ascending: false })
       .limit(10);
@@ -1343,7 +1347,7 @@ export async function getB2BDashboardData(
           : a.type === "call"
             ? "call"
             : "deal_move") as "message" | "booking" | "deal_move" | "call",
-      description: a.description || "",
+      description: a.content || "",
       date: a.created_at,
     }));
   }

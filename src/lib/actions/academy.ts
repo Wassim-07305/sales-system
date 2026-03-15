@@ -90,10 +90,11 @@ export async function submitQuizAttempt(
   let verifiedScore = score;
   let verifiedPassed = passed;
   if (quizData?.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
-    const questions = quizData.questions as Array<{ correctAnswer?: number }>;
+    const questions = quizData.questions as Array<{ correct_index?: number; correctIndex?: number }>;
     let correct = 0;
     for (let i = 0; i < questions.length; i++) {
-      if (answers[i] === questions[i].correctAnswer) correct++;
+      const correctIdx = questions[i].correct_index ?? questions[i].correctIndex;
+      if (answers[i] === correctIdx) correct++;
     }
     verifiedScore = Math.round((correct / questions.length) * 100);
     verifiedPassed = verifiedScore >= 90;

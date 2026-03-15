@@ -725,6 +725,7 @@ export async function editMessage(messageId: string, content: string) {
     .eq("sender_id", user.id);
 
   if (error) throw new Error(error.message);
+  revalidatePath("/chat");
 }
 
 export async function deleteMessage(messageId: string) {

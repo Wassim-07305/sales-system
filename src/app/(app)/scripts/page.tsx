@@ -10,18 +10,13 @@ export default async function ScriptsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: scripts } = await supabase
-    .from("scripts")
-    .select("*")
-    .order("created_at", { ascending: false });
-
   const flowcharts = await getFlowcharts();
   const mindMaps = await getMindMaps();
 
   return (
     <ScriptsView
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      scripts={(scripts || []) as any}
+      scripts={[] as any}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       flowcharts={flowcharts as any}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

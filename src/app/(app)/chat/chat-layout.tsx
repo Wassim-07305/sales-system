@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,7 +53,6 @@ import {
   MessageSquare,
   SmilePlus,
   Pencil,
-  Check,
   ChevronDown,
   UserPlus,
   AtSign,
@@ -66,14 +63,13 @@ import {
   Linkedin,
   ExternalLink,
   RefreshCw,
-  Settings,
-  Unplug,
   CheckCircle2,
+  Circle,
+  Sparkles,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-// Server actions for operations requiring elevated privileges
 import {
   createChannel,
   deleteChannel,
@@ -93,7 +89,6 @@ import {
   generateUnipileAuthLink,
   getUnipileStatus,
 } from "@/lib/actions/unipile";
-// Social messaging via Unipile REST API (LinkedIn/Instagram)
 import { usePresence } from "@/lib/hooks/use-presence";
 import { TypingIndicator } from "@/components/typing-indicator";
 import { OnlineStatus } from "@/components/online-status";
@@ -101,8 +96,6 @@ import { OnlineStatus } from "@/components/online-status";
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-// All sections now unified in single sidebar view
 
 interface WAConversation {
   prospect_id: string;
@@ -180,7 +173,7 @@ const PAGE_SIZE = 50;
 // ---------------------------------------------------------------------------
 
 function getDateLabel(date: Date): string {
-  if (isToday(date)) return "Aujourd'hui";
+  if (isToday(date)) return "Aujourd\u2019hui";
   if (isYesterday(date)) return "Hier";
   return format(date, "EEEE d MMMM yyyy", { locale: fr });
 }
@@ -202,14 +195,32 @@ function getInitials(name: string | null | undefined): string {
     .slice(0, 2);
 }
 
+const AVATAR_GRADIENTS = [
+  "from-violet-500 to-purple-600",
+  "from-blue-500 to-cyan-600",
+  "from-emerald-500 to-teal-600",
+  "from-amber-500 to-orange-600",
+  "from-rose-500 to-pink-600",
+  "from-indigo-500 to-blue-600",
+  "from-fuchsia-500 to-purple-600",
+  "from-sky-500 to-blue-600",
+];
+
 function getAvatarColor(id: string): string {
-  const colors = [
-    "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
-    "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
-  ];
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
+  return `bg-gradient-to-br ${AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length]}`;
+}
+
+function formatTimeAgo(dateStr: string): string {
+  const now = Date.now();
+  const d = new Date(dateStr).getTime();
+  const diff = now - d;
+  if (diff < 60000) return "now";
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
+  if (diff < 86400000) return format(new Date(dateStr), "HH:mm");
+  if (diff < 604800000) return format(new Date(dateStr), "EEE", { locale: fr });
+  return format(new Date(dateStr), "dd/MM");
 }
 
 // ---------------------------------------------------------------------------
@@ -218,12 +229,12 @@ function getAvatarColor(id: string): string {
 
 function DateSeparator({ date }: { date: Date }) {
   return (
-    <div className="flex items-center gap-3 py-2">
-      <div className="flex-1 h-px bg-border" />
-      <span className="text-[11px] font-medium text-muted-foreground bg-card px-3 py-0.5 rounded-full border">
+    <div className="flex items-center gap-4 py-4 px-2">
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <span className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-widest">
         {getDateLabel(date)}
       </span>
-      <div className="flex-1 h-px bg-border" />
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>
   );
 }
@@ -243,7 +254,7 @@ function ReactionPills({
   if (emojis.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-1 mt-1">
+    <div className="flex flex-wrap gap-1.5 mt-2">
       {emojis.map((emoji) => {
         const data = reactions[emoji];
         const hasReacted = data.userIds.includes(currentUserId);
@@ -254,17 +265,17 @@ function ReactionPills({
                 <button
                   onClick={() => onToggle(messageId, emoji)}
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors border",
+                    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-200 border",
                     hasReacted
-                      ? "bg-[#7af17a]/15 border-[#7af17a]/30 text-[#7af17a]"
-                      : "bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:border-border",
+                      ? "bg-[#7af17a]/10 border-[#7af17a]/25 text-[#7af17a] shadow-[0_0_8px_rgba(122,241,122,0.1)]"
+                      : "bg-secondary/50 border-transparent text-muted-foreground hover:bg-secondary hover:border-border",
                   )}
                 >
-                  <span>{emoji}</span>
-                  <span className="font-medium">{data.count}</span>
+                  <span className="text-sm">{emoji}</span>
+                  <span>{data.count}</span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
+              <TooltipContent side="top" className="text-xs font-medium">
                 {data.userNames.filter(Boolean).join(", ") || "Utilisateur"}
               </TooltipContent>
             </Tooltip>
@@ -284,10 +295,10 @@ function QuickEmojiPicker({
 }) {
   return (
     <div
-      className="absolute bottom-full right-0 mb-1 z-50 bg-popover border rounded-xl shadow-xl p-2 animate-in fade-in-0 zoom-in-95"
+      className="absolute bottom-full right-0 mb-2 z-50 bg-popover/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl shadow-black/10 p-2.5 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-200"
       onMouseLeave={onClose}
     >
-      <div className="grid grid-cols-6 gap-0.5">
+      <div className="grid grid-cols-6 gap-1">
         {QUICK_EMOJIS.map((emoji) => (
           <button
             key={emoji}
@@ -295,12 +306,122 @@ function QuickEmojiPicker({
               onSelect(emoji);
               onClose();
             }}
-            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted text-base transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-secondary hover:scale-110 text-lg transition-all duration-150"
           >
             {emoji}
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+// Sidebar conversation row for social channels
+function SocialConvRow({
+  name,
+  lastMessage,
+  lastMessageTime,
+  unread,
+  isActive,
+  avatarId,
+  badge,
+  onClick,
+}: {
+  name: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unread: number;
+  isActive: boolean;
+  avatarId: string;
+  badge: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={cn(
+        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
+        isActive
+          ? "bg-[#7af17a]/8 ring-1 ring-[#7af17a]/20"
+          : "hover:bg-secondary/60",
+      )}
+      onClick={onClick}
+    >
+      <div className="relative shrink-0">
+        <div className={cn(
+          "h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-sm",
+          getAvatarColor(avatarId),
+        )}>
+          {getInitials(name)}
+        </div>
+        <div className="absolute -bottom-0.5 -right-0.5">{badge}</div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <p className={cn(
+            "text-[13px] truncate",
+            isActive ? "font-semibold text-foreground" : unread > 0 ? "font-semibold text-foreground" : "font-medium text-foreground/80",
+          )}>
+            {name}
+          </p>
+          {lastMessageTime && (
+            <span className={cn(
+              "text-[10px] shrink-0",
+              unread > 0 ? "text-[#7af17a] font-semibold" : "text-muted-foreground/60",
+            )}>
+              {formatTimeAgo(lastMessageTime)}
+            </span>
+          )}
+        </div>
+        {lastMessage && (
+          <p className={cn(
+            "text-[11px] truncate mt-0.5",
+            unread > 0 ? "text-foreground/70" : "text-muted-foreground/60",
+          )}>
+            {lastMessage}
+          </p>
+        )}
+      </div>
+      {unread > 0 && (
+        <span className="bg-[#7af17a] text-[#14080e] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#7af17a]/30">
+          {unread > 99 ? "99+" : unread}
+        </span>
+      )}
+    </button>
+  );
+}
+
+// Section header
+function SectionHeader({
+  label,
+  count,
+  isOpen,
+  onToggle,
+  action,
+  dotColor,
+}: {
+  label: string;
+  count?: number;
+  isOpen: boolean;
+  onToggle: () => void;
+  action?: React.ReactNode;
+  dotColor?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between px-3 py-2">
+      <button
+        onClick={onToggle}
+        className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground/70 uppercase tracking-[0.08em] hover:text-foreground/80 transition-colors"
+      >
+        <ChevronDown className={cn("h-3 w-3 transition-transform duration-200", !isOpen && "-rotate-90")} />
+        {dotColor && <div className={cn("h-1.5 w-1.5 rounded-full", dotColor)} />}
+        {label}
+        {count !== undefined && count > 0 && (
+          <span className="text-[10px] text-muted-foreground/50 font-medium normal-case tracking-normal">
+            {count}
+          </span>
+        )}
+      </button>
+      {action}
     </div>
   );
 }
@@ -326,7 +447,6 @@ export function ChatLayout({
   const isAdmin = ADMIN_ROLES.includes(userRole);
 
   // ---- Core state ----
-  // Sidebar tab state removed — all sections unified
   const [channels, setChannels] = useState<Channel[]>(initialChannels);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -431,7 +551,6 @@ export function ChatLayout({
     return map;
   }, [rawReactions]);
 
-  // Get DM partner name
   function getDMPartner(channel: Channel): TeamMember | undefined {
     if (channel.type !== "direct" || !channel.members) return undefined;
     const otherId = channel.members.find((id: string) => id !== currentUserId);
@@ -457,18 +576,13 @@ export function ChatLayout({
     }
   }
 
-  // Load reactions for a set of message IDs
   const loadReactions = useCallback(
     async (messageIds: string[]) => {
-      if (messageIds.length === 0) {
-        setRawReactions([]);
-        return;
-      }
+      if (messageIds.length === 0) { setRawReactions([]); return; }
       const { data } = await supabase
         .from("message_reactions")
         .select("id, message_id, user_id, emoji, user:profiles(full_name)")
         .in("message_id", messageIds);
-
       if (data) {
         setRawReactions(
           data.map((r: Record<string, unknown>) => ({
@@ -488,7 +602,6 @@ export function ChatLayout({
     [supabase],
   );
 
-  // Load older messages
   const loadOlderMessages = useCallback(async () => {
     if (!activeChannel || !messages.length || loadingMore) return;
     setLoadingMore(true);
@@ -500,12 +613,10 @@ export function ChatLayout({
       .lt("created_at", oldestDate)
       .order("created_at", { ascending: false })
       .limit(PAGE_SIZE);
-
     if (data && data.length > 0) {
       const reversed = data.reverse();
       setMessages((prev) => [...reversed, ...prev]);
       setHasMore(data.length === PAGE_SIZE);
-      // Load reactions for new messages
       loadReactions([...reversed.map((m: Message) => m.id), ...messages.map((m) => m.id)]);
     } else {
       setHasMore(false);
@@ -515,35 +626,29 @@ export function ChatLayout({
 
   // ---- Effects ----
 
-  // Load messages + reactions when channel changes
   useEffect(() => {
     if (!activeChannel) return;
 
     async function loadMessages() {
       setLoading(true);
       setRawReactions([]);
-
       const { data } = await supabase
         .from("messages")
         .select("*, sender:profiles(*)")
         .eq("channel_id", activeChannel!.id)
         .order("created_at", { ascending: false })
         .limit(PAGE_SIZE);
-
       const sorted = (data || []).reverse();
       setMessages(sorted);
       setHasMore((data || []).length === PAGE_SIZE);
       setLoading(false);
       setTimeout(scrollToBottom, 100);
-
-      // Load reactions
       if (sorted.length > 0) {
         loadReactions(sorted.map((m: Message) => m.id));
       }
     }
 
     loadMessages();
-    // Mark channel as read (inline, no server action)
     (async () => {
       const { data: existing } = await supabase
         .from("channel_reads")
@@ -551,195 +656,101 @@ export function ChatLayout({
         .eq("channel_id", activeChannel!.id)
         .eq("user_id", currentUserId)
         .maybeSingle();
-
       if (existing) {
-        await supabase
-          .from("channel_reads")
-          .update({ last_read_at: new Date().toISOString() })
-          .eq("id", existing.id);
+        await supabase.from("channel_reads").update({ last_read_at: new Date().toISOString() }).eq("id", existing.id);
       } else {
-        await supabase.from("channel_reads").insert({
-          channel_id: activeChannel!.id,
-          user_id: currentUserId,
-          last_read_at: new Date().toISOString(),
-        });
+        await supabase.from("channel_reads").insert({ channel_id: activeChannel!.id, user_id: currentUserId, last_read_at: new Date().toISOString() });
       }
-      setUnreadCounts((prev) => {
-        const next = { ...prev };
-        delete next[activeChannel!.id];
-        return next;
-      });
+      setUnreadCounts((prev) => { const next = { ...prev }; delete next[activeChannel!.id]; return next; });
     })();
 
-    // Realtime: new messages
     const msgSub = supabase
       .channel(`messages:${activeChannel.id}`)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "messages",
-          filter: `channel_id=eq.${activeChannel.id}`,
-        },
+        { event: "*", schema: "public", table: "messages", filter: `channel_id=eq.${activeChannel.id}` },
         async (payload) => {
           if (payload.eventType === "INSERT") {
             const newId = payload.new.id;
-            const { data: fullMessage } = await supabase
-              .from("messages")
-              .select("*, sender:profiles(*)")
-              .eq("id", newId)
-              .single();
-
+            const { data: fullMessage } = await supabase.from("messages").select("*, sender:profiles(*)").eq("id", newId).single();
             if (fullMessage) {
               setMessages((prev) => {
                 if (prev.some((m) => m.id === fullMessage.id)) return prev;
                 return [...prev, fullMessage];
               });
               setTimeout(scrollToBottom, 100);
-              // Mark as read inline
               const chId = activeChannel!.id;
-              supabase
-                .from("channel_reads")
-                .select("id")
-                .eq("channel_id", chId)
-                .eq("user_id", currentUserId)
-                .maybeSingle()
-                .then(({ data: ex }) => {
-                  if (ex) {
-                    supabase.from("channel_reads").update({ last_read_at: new Date().toISOString() }).eq("id", ex.id).then(() => {});
-                  } else {
-                    supabase.from("channel_reads").insert({ channel_id: chId, user_id: currentUserId, last_read_at: new Date().toISOString() }).then(() => {});
-                  }
-                });
+              supabase.from("channel_reads").select("id").eq("channel_id", chId).eq("user_id", currentUserId).maybeSingle().then(({ data: ex }) => {
+                if (ex) { supabase.from("channel_reads").update({ last_read_at: new Date().toISOString() }).eq("id", ex.id).then(() => {}); }
+                else { supabase.from("channel_reads").insert({ channel_id: chId, user_id: currentUserId, last_read_at: new Date().toISOString() }).then(() => {}); }
+              });
             }
           } else if (payload.eventType === "DELETE") {
-            const deletedId = payload.old.id;
-            setMessages((prev) => prev.filter((m) => m.id !== deletedId));
+            setMessages((prev) => prev.filter((m) => m.id !== payload.old.id));
           } else if (payload.eventType === "UPDATE") {
-            const updatedId = payload.new.id;
-            const { data: fullMessage } = await supabase
-              .from("messages")
-              .select("*, sender:profiles(*)")
-              .eq("id", updatedId)
-              .single();
-            if (fullMessage) {
-              setMessages((prev) =>
-                prev.map((m) => (m.id === fullMessage.id ? fullMessage : m)),
-              );
-            }
+            const { data: fullMessage } = await supabase.from("messages").select("*, sender:profiles(*)").eq("id", payload.new.id).single();
+            if (fullMessage) { setMessages((prev) => prev.map((m) => (m.id === fullMessage.id ? fullMessage : m))); }
           }
         },
       )
       .subscribe();
 
-    // Realtime: reactions
     const reactionSub = supabase
       .channel(`reactions:${activeChannel.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "message_reactions" },
-        () => {
-          // Reload all reactions for current messages
-          setMessages((prev) => {
-            if (prev.length > 0) {
-              loadReactions(prev.map((m) => m.id));
-            }
-            return prev;
-          });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, () => {
+        setMessages((prev) => { if (prev.length > 0) { loadReactions(prev.map((m) => m.id)); } return prev; });
+      })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(msgSub);
-      supabase.removeChannel(reactionSub);
-    };
-  }, [activeChannel, supabase, scrollToBottom, loadReactions]);
+    return () => { supabase.removeChannel(msgSub); supabase.removeChannel(reactionSub); };
+  }, [activeChannel, supabase, scrollToBottom, loadReactions, currentUserId]);
 
   // ---- Handlers ----
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("L'image doit faire moins de 10 Mo");
-      return;
-    }
+    if (file.size > 10 * 1024 * 1024) { toast.error("L\u2019image doit faire moins de 10 Mo"); return; }
     setUploadingImage(true);
     try {
       const ext = file.name.split(".").pop();
       const path = `chat/${currentUserId}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("chat-media")
-        .upload(path, file, { upsert: true });
+      const { error } = await supabase.storage.from("chat-media").upload(path, file, { upsert: true });
       if (error) throw new Error(error.message);
       const { data } = supabase.storage.from("chat-media").getPublicUrl(path);
       setImageUrl(data.publicUrl);
       setImagePreview(data.publicUrl);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur upload image");
-    } finally {
-      setUploadingImage(false);
-    }
+    } finally { setUploadingImage(false); }
   }
 
   async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault();
     if ((!newMessage.trim() && !imageUrl) || !activeChannel) return;
-
     const content = newMessage.trim();
     const isImage = !!imageUrl;
-
     const optimisticId = `optimistic-${Date.now()}`;
     const optimisticMessage = {
-      id: optimisticId,
-      channel_id: activeChannel.id,
-      sender_id: currentUserId,
-      content: isImage ? content || "" : content,
-      message_type: isImage ? "image" : "text",
-      file_url: isImage ? imageUrl : null,
-      created_at: new Date().toISOString(),
+      id: optimisticId, channel_id: activeChannel.id, sender_id: currentUserId,
+      content: isImage ? content || "" : content, message_type: isImage ? "image" : "text",
+      file_url: isImage ? imageUrl : null, created_at: new Date().toISOString(),
       sender: { id: currentUserId, full_name: "Moi", avatar_url: null },
-      is_edited: false,
-      reply_to: null,
-      file_name: null,
+      is_edited: false, reply_to: null, file_name: null,
     } as unknown as Message;
-
     setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
     setTyping(false);
-    if (isImage) {
-      setImageUrl(null);
-      setImagePreview(null);
-    }
+    if (isImage) { setImageUrl(null); setImagePreview(null); }
     setTimeout(scrollToBottom, 50);
-
     const insertData: Record<string, unknown> = {
-      channel_id: activeChannel.id,
-      sender_id: currentUserId,
-      content: isImage ? content || "" : content,
-      message_type: isImage ? "image" : "text",
+      channel_id: activeChannel.id, sender_id: currentUserId,
+      content: isImage ? content || "" : content, message_type: isImage ? "image" : "text",
     };
     if (isImage) insertData.file_url = imageUrl;
-
-    const { data: inserted, error } = await supabase
-      .from("messages")
-      .insert(insertData)
-      .select("*, sender:profiles(*)")
-      .single();
-
-    if (error) {
-      toast.error("Erreur : " + (error.message || "vérifiez vos permissions"));
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
-      return;
-    }
-
-    if (inserted) {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === optimisticId ? inserted : m)),
-      );
-    }
+    const { data: inserted, error } = await supabase.from("messages").insert(insertData).select("*, sender:profiles(*)").single();
+    if (error) { toast.error("Erreur : " + (error.message || "v\u00e9rifiez vos permissions")); setMessages((prev) => prev.filter((m) => m.id !== optimisticId)); return; }
+    if (inserted) { setMessages((prev) => prev.map((m) => (m.id === optimisticId ? inserted : m))); }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -750,220 +761,91 @@ export function ChatLayout({
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage(e);
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(e); }
   };
 
   async function handleToggleReaction(messageId: string, emoji: string) {
     const userId = currentUserId;
-
-    // Check if reaction already exists
-    const existing = rawReactions.find(
-      (r) => r.message_id === messageId && r.user_id === userId && r.emoji === emoji,
-    );
-
-    // Optimistic update
+    const existing = rawReactions.find((r) => r.message_id === messageId && r.user_id === userId && r.emoji === emoji);
     setRawReactions((prev) => {
-      if (existing) {
-        return prev.filter((r) => r.id !== existing.id);
-      } else {
-        return [
-          ...prev,
-          {
-            id: `optimistic-${Date.now()}`,
-            message_id: messageId,
-            user_id: userId,
-            emoji,
-            user_name: "Moi",
-          },
-        ];
-      }
+      if (existing) return prev.filter((r) => r.id !== existing.id);
+      return [...prev, { id: `optimistic-${Date.now()}`, message_id: messageId, user_id: userId, emoji, user_name: "Moi" }];
     });
     setEmojiPickerFor(null);
-
     try {
       if (existing && !existing.id.startsWith("optimistic")) {
         await supabase.from("message_reactions").delete().eq("id", existing.id);
       } else {
-        // Check server-side if exists
-        const { data: serverExisting } = await supabase
-          .from("message_reactions")
-          .select("id")
-          .eq("message_id", messageId)
-          .eq("user_id", userId)
-          .eq("emoji", emoji)
-          .maybeSingle();
-
-        if (serverExisting) {
-          await supabase.from("message_reactions").delete().eq("id", serverExisting.id);
-        } else {
-          await supabase.from("message_reactions").insert({
-            message_id: messageId,
-            user_id: userId,
-            emoji,
-          });
-        }
+        const { data: serverExisting } = await supabase.from("message_reactions").select("id").eq("message_id", messageId).eq("user_id", userId).eq("emoji", emoji).maybeSingle();
+        if (serverExisting) { await supabase.from("message_reactions").delete().eq("id", serverExisting.id); }
+        else { await supabase.from("message_reactions").insert({ message_id: messageId, user_id: userId, emoji }); }
       }
-    } catch {
-      const ids = messages.map((m) => m.id);
-      loadReactions(ids);
-    }
+    } catch { loadReactions(messages.map((m) => m.id)); }
   }
 
   async function handleEditMessage(messageId: string) {
     if (!editContent.trim()) return;
     try {
       await editMessageAction(messageId, editContent.trim());
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === messageId
-            ? { ...m, content: editContent.trim(), is_edited: true }
-            : m,
-        ),
-      );
-      setEditingMessageId(null);
-      setEditContent("");
-    } catch {
-      toast.error("Erreur lors de la modification");
-    }
+      setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, content: editContent.trim(), is_edited: true } : m));
+      setEditingMessageId(null); setEditContent("");
+    } catch { toast.error("Erreur lors de la modification"); }
   }
 
   async function handleDeleteMessage(messageId: string) {
-    try {
-      await deleteMessageAction(messageId);
-      setMessages((prev) => prev.filter((m) => m.id !== messageId));
-    } catch {
-      toast.error("Erreur lors de la suppression");
-    }
+    try { await deleteMessageAction(messageId); setMessages((prev) => prev.filter((m) => m.id !== messageId)); }
+    catch { toast.error("Erreur lors de la suppression"); }
   }
 
   async function handleStartDM(otherUserId: string) {
     setShowNewDMDialog(false);
     try {
-      // Use server action with admin client to bypass RLS
       const dmChannel = await getOrCreateDM(otherUserId);
-
-      // Refresh channels list
-      const { data: allChannels } = await supabase
-        .from("channels")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data: allChannels } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(allChannels || []);
-      setActiveChannel(dmChannel);
-      setActiveWA(null);
-      setActiveSocial(null);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur lors de la création du DM");
-    }
+      setActiveChannel(dmChannel); setActiveWA(null); setActiveSocial(null);
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur lors de la cr\u00e9ation du DM"); }
   }
 
-  // ---- Tab switching ----
-  // switchTab removed — all sections unified in single sidebar
-
-  // ---- WhatsApp handlers ----
   async function handleSendWAMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!waMessage.trim() || !activeWA) return;
     const content = waMessage.trim();
-    setSendingWA(true);
-    setWAMessage("");
-
-    // Optimistic: add message to conversation
-    const optimisticMsg: WAMessage = {
-      id: `opt-${Date.now()}`,
-      direction: "outbound",
-      content,
-      status: "sent",
-      created_at: new Date().toISOString(),
-    };
-    setActiveWA((prev) =>
-      prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev,
-    );
+    setSendingWA(true); setWAMessage("");
+    const optimisticMsg: WAMessage = { id: `opt-${Date.now()}`, direction: "outbound", content, status: "sent", created_at: new Date().toISOString() };
+    setActiveWA((prev) => prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev);
     setTimeout(scrollToBottom, 50);
-
-    try {
-      await sendWhatsAppMessage({ prospectId: activeWA.prospect_id, content });
-    } catch {
-      toast.error("Erreur envoi WhatsApp");
-      // Rollback optimistic message
-      setActiveWA((prev) =>
-        prev ? { ...prev, messages: prev.messages.filter((m) => m.id !== optimisticMsg.id) } : prev,
-      );
-    } finally {
-      setSendingWA(false);
-    }
+    try { await sendWhatsAppMessage({ prospectId: activeWA.prospect_id, content }); }
+    catch { toast.error("Erreur envoi WhatsApp"); setActiveWA((prev) => prev ? { ...prev, messages: prev.messages.filter((m) => m.id !== optimisticMsg.id) } : prev); }
+    finally { setSendingWA(false); }
   }
 
-  // ---- Social (LinkedIn/Instagram) handlers ----
   async function handleSendSocialMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!socialMessage.trim() || !activeSocial) return;
     const content = socialMessage.trim();
-    setSendingSocial(true);
-    setSocialMessage("");
-
-    // Optimistic
-    const optimisticMsg: SocialMessage = {
-      sender: "me",
-      content,
-      type: "text",
-      timestamp: new Date().toISOString(),
-    };
-    setActiveSocial((prev) =>
-      prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev,
-    );
+    setSendingSocial(true); setSocialMessage("");
+    const optimisticMsg: SocialMessage = { sender: "me", content, type: "text", timestamp: new Date().toISOString() };
+    setActiveSocial((prev) => prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev);
     setTimeout(scrollToBottom, 50);
-
     try {
-      // Send via Unipile REST API
       const chatId = activeSocial.id.replace("unipile-", "");
-      const res = await fetch("/api/unipile/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId, text: content }),
-      });
+      const res = await fetch("/api/unipile/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chatId, text: content }) });
       if (!res.ok) throw new Error("Send failed");
-    } catch {
-      toast.error("Erreur envoi message");
-      // Rollback optimistic message
-      setActiveSocial((prev) =>
-        prev ? { ...prev, messages: prev.messages.filter((m) => m !== optimisticMsg) } : prev,
-      );
-    } finally {
-      setSendingSocial(false);
-    }
+    } catch { toast.error("Erreur envoi message"); setActiveSocial((prev) => prev ? { ...prev, messages: prev.messages.filter((m) => m !== optimisticMsg) } : prev); }
+    finally { setSendingSocial(false); }
   }
 
-  // ---- Admin handlers ----
-
   async function handleCreateChannel() {
-    if (!newChannelName.trim()) {
-      toast.error("Le nom du channel est requis");
-      return;
-    }
+    if (!newChannelName.trim()) { toast.error("Le nom du channel est requis"); return; }
     setSaving(true);
     try {
-      await createChannel({
-        name: newChannelName.trim(),
-        description: newChannelDescription.trim() || undefined,
-        type: newChannelType,
-        memberIds: selectedMemberIds,
-      });
-      toast.success("Channel créé");
-      setShowCreateDialog(false);
-      resetCreateForm();
-      const { data } = await supabase
-        .from("channels")
-        .select("*")
-        .order("created_at", { ascending: false });
+      await createChannel({ name: newChannelName.trim(), description: newChannelDescription.trim() || undefined, type: newChannelType, memberIds: selectedMemberIds });
+      toast.success("Channel cr\u00e9\u00e9"); setShowCreateDialog(false); resetCreateForm();
+      const { data } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(data || []);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setSaving(false);
-    }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
+    finally { setSaving(false); }
   }
 
   async function handleDeleteChannel() {
@@ -971,20 +853,12 @@ export function ChatLayout({
     setSaving(true);
     try {
       await deleteChannel(channelToManage.id);
-      toast.success("Channel supprimé");
-      setShowDeleteConfirm(false);
-      setChannelToManage(null);
+      toast.success("Channel supprim\u00e9"); setShowDeleteConfirm(false); setChannelToManage(null);
       if (activeChannel?.id === channelToManage.id) setActiveChannel(null);
-      const { data } = await supabase
-        .from("channels")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(data || []);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setSaving(false);
-    }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
+    finally { setSaving(false); }
   }
 
   async function handleUpdateMembers() {
@@ -992,701 +866,433 @@ export function ChatLayout({
     setSaving(true);
     try {
       await updateChannelMembers(channelToManage.id, selectedMemberIds);
-      toast.success("Membres mis à jour");
-      setShowMembersDialog(false);
-      setChannelToManage(null);
-      setSelectedMemberIds([]);
-      const { data } = await supabase
-        .from("channels")
-        .select("*")
-        .order("created_at", { ascending: false });
+      toast.success("Membres mis \u00e0 jour"); setShowMembersDialog(false); setChannelToManage(null); setSelectedMemberIds([]);
+      const { data } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(data || []);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur");
-    } finally {
-      setSaving(false);
-    }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
+    finally { setSaving(false); }
   }
 
   async function openMembersDialog(channel: Channel) {
-    setChannelToManage(channel);
-    await loadAllUsers();
-    try {
-      const members = await getChannelMembers(channel.id);
-      setSelectedMemberIds(members.map((m: TeamMember) => m.id));
-    } catch {
-      setSelectedMemberIds(channel.members || []);
-    }
+    setChannelToManage(channel); await loadAllUsers();
+    try { const members = await getChannelMembers(channel.id); setSelectedMemberIds(members.map((m: TeamMember) => m.id)); }
+    catch { setSelectedMemberIds(channel.members || []); }
     setShowMembersDialog(true);
   }
 
-  function openCreateDialog() {
-    resetCreateForm();
-    loadAllUsers();
-    setShowCreateDialog(true);
-  }
-
-  function resetCreateForm() {
-    setNewChannelName("");
-    setNewChannelDescription("");
-    setNewChannelType("group");
-    setSelectedMemberIds([]);
-    setMemberSearch("");
-  }
-
-  function toggleMember(userId: string) {
-    setSelectedMemberIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
-    );
-  }
+  function openCreateDialog() { resetCreateForm(); loadAllUsers(); setShowCreateDialog(true); }
+  function resetCreateForm() { setNewChannelName(""); setNewChannelDescription(""); setNewChannelType("group"); setSelectedMemberIds([]); setMemberSearch(""); }
+  function toggleMember(userId: string) { setSelectedMemberIds((prev) => prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]); }
 
   // ---- Filtered data ----
+  const filteredGroupChannels = groupChannels.filter((c) => !channelSearch || c.name.toLowerCase().includes(channelSearch.toLowerCase()));
+  const filteredDMChannels = dmChannels.filter((c) => { if (!channelSearch) return true; const partner = getDMPartner(c); return c.name.toLowerCase().includes(channelSearch.toLowerCase()) || (partner?.full_name || "").toLowerCase().includes(channelSearch.toLowerCase()); });
+  const filteredUsers = allUsers.filter((u) => !memberSearch || (u.full_name || "").toLowerCase().includes(memberSearch.toLowerCase()));
+  const filteredDMUsers = teamMembers.filter((u) => u.id !== currentUserId && (!dmSearch || (u.full_name || "").toLowerCase().includes(dmSearch.toLowerCase())));
+  const filteredWAConversations = waConversations.filter((c) => !channelSearch || (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase()));
+  const filteredLinkedinConversations = linkedinConversations.filter((c) => !channelSearch || (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase()));
+  const filteredInstagramConversations = instagramConversations.filter((c) => !channelSearch || (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase()));
 
-  const filteredGroupChannels = groupChannels.filter(
-    (c) => !channelSearch || c.name.toLowerCase().includes(channelSearch.toLowerCase()),
-  );
-  const filteredDMChannels = dmChannels.filter((c) => {
-    if (!channelSearch) return true;
-    const partner = getDMPartner(c);
-    return (
-      c.name.toLowerCase().includes(channelSearch.toLowerCase()) ||
-      (partner?.full_name || "").toLowerCase().includes(channelSearch.toLowerCase())
-    );
-  });
-
-  const filteredUsers = allUsers.filter(
-    (u) =>
-      !memberSearch ||
-      (u.full_name || "").toLowerCase().includes(memberSearch.toLowerCase()),
-  );
-
-  const filteredDMUsers = teamMembers.filter(
-    (u) =>
-      u.id !== currentUserId &&
-      (!dmSearch || (u.full_name || "").toLowerCase().includes(dmSearch.toLowerCase())),
-  );
-
-  const filteredWAConversations = waConversations.filter((c) => {
-    if (!channelSearch) return true;
-    return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
-  });
-
-  const filteredLinkedinConversations = linkedinConversations.filter((c) => {
-    if (!channelSearch) return true;
-    return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
-  });
-
-  const filteredInstagramConversations = instagramConversations.filter((c) => {
-    if (!channelSearch) return true;
-    return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
-  });
-
-  // Active channel display info
   const activePartner = activeChannel ? getDMPartner(activeChannel) : undefined;
-  const activeName =
-    activeChannel?.type === "direct"
-      ? activePartner?.full_name || "Message direct"
-      : activeChannel?.name || "";
+  const activeName = activeChannel?.type === "direct" ? activePartner?.full_name || "Message direct" : activeChannel?.name || "";
+
+  // Total unread
+  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
 
   // =========================================================================
   // RENDER
   // =========================================================================
 
   return (
-    <div className="flex h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] gap-0 rounded-xl overflow-hidden border bg-card">
+    <div className="flex h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm">
       {/* ================================================================= */}
       {/* SIDEBAR                                                           */}
       {/* ================================================================= */}
       <div
         className={cn(
-          "w-full md:w-72 flex-shrink-0 flex flex-col border-r bg-muted/30 overflow-hidden",
+          "w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-border/50 bg-background overflow-hidden",
           (activeChannel || activeWA || activeSocial) ? "hidden md:flex" : "flex",
         )}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b">
-          <span className="text-sm font-semibold">Messages</span>
+        {/* Sidebar header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#7af17a] to-[#4ade80] flex items-center justify-center shadow-sm shadow-[#7af17a]/20">
+              <MessageSquare className="h-4 w-4 text-[#14080e]" />
+            </div>
+            <div>
+              <h1 className="text-[15px] font-bold text-foreground leading-tight">Messages</h1>
+              {totalUnread > 0 && (
+                <p className="text-[10px] text-[#7af17a] font-semibold">{totalUnread} non lu{totalUnread > 1 ? "s" : ""}</p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => { setDmSearch(""); setShowNewDMDialog(true); }}
+            className="h-8 w-8 rounded-xl bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
+            title="Nouveau message"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
         </div>
 
-        {/* Sidebar search */}
-        <div className="p-3 border-b">
+        {/* Search */}
+        <div className="px-4 py-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <Input
-              placeholder="Rechercher..."
+              placeholder="Rechercher une conversation..."
               value={channelSearch}
               onChange={(e) => setChannelSearch(e.target.value)}
-              className="pl-9 h-8 text-sm bg-background/50"
+              className="pl-10 h-9 text-[13px] bg-secondary/50 border-0 rounded-xl placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-[#7af17a]/30 focus-visible:bg-background transition-all"
             />
+            {channelSearch && (
+              <button onClick={() => setChannelSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground">
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 px-2">
           {/* ====== CHANNELS ====== */}
-          <>
-          {/* Channels section */}
-          <div className="px-2 pt-3">
-            <div className="flex items-center justify-between px-2 mb-1">
-              <button
-                onClick={() => setChannelsOpen((v) => !v)}
-                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
-              >
-                <ChevronDown className={cn("h-3 w-3 transition-transform", !channelsOpen && "-rotate-90")} />
-                Channels
-              </button>
-              {isAdmin && (
-                <button
-                  onClick={openCreateDialog}
-                  className="h-5 w-5 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                  title="Créer un channel"
-                >
+          <div className="mb-1">
+            <SectionHeader
+              label="Channels"
+              isOpen={channelsOpen}
+              onToggle={() => setChannelsOpen((v) => !v)}
+              dotColor="bg-[#7af17a]"
+              action={isAdmin ? (
+                <button onClick={openCreateDialog} className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground/50 hover:text-foreground transition-all" title="Cr\u00e9er un channel">
                   <Plus className="h-3.5 w-3.5" />
                 </button>
-              )}
-            </div>
-            {channelsOpen && <div className="space-y-px">
-              {filteredGroupChannels.map((channel) => {
-                const isAnnouncement = channel.type === "announcement";
-                const Icon = isAnnouncement ? Megaphone : Hash;
-                const unread = unreadCounts[channel.id] || 0;
-                const isActive = activeChannel?.id === channel.id;
+              ) : undefined}
+            />
+            {channelsOpen && (
+              <div className="space-y-0.5 px-1">
+                {filteredGroupChannels.map((channel) => {
+                  const isAnnouncement = channel.type === "announcement";
+                  const Icon = isAnnouncement ? Megaphone : Hash;
+                  const unread = unreadCounts[channel.id] || 0;
+                  const isActive = activeChannel?.id === channel.id;
+                  return (
+                    <div key={channel.id} className="group flex items-center">
+                      <button
+                        className={cn(
+                          "flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-200",
+                          isActive
+                            ? "bg-[#7af17a]/8 text-foreground font-semibold ring-1 ring-[#7af17a]/20"
+                            : unread > 0
+                              ? "text-foreground font-semibold hover:bg-secondary/60"
+                              : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
+                        )}
+                        onClick={() => { setActiveChannel(channel); setActiveWA(null); setActiveSocial(null); }}
+                      >
+                        <div className={cn(
+                          "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                          isActive ? "bg-[#7af17a]/15 text-[#7af17a]" : "bg-secondary/80 text-muted-foreground",
+                        )}>
+                          <Icon className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="truncate flex-1 text-left">{channel.name}</span>
+                        {unread > 0 && (
+                          <span className="bg-[#7af17a] text-[#14080e] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#7af17a]/30">
+                            {unread > 99 ? "99+" : unread}
+                          </span>
+                        )}
+                      </button>
+                      {isAdmin && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="h-7 w-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 text-muted-foreground/50 hover:text-foreground hover:bg-secondary transition-all">
+                              <MoreVertical className="h-3.5 w-3.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                            <DropdownMenuItem onClick={() => openMembersDialog(channel)} className="rounded-lg">
+                              <Users className="h-3.5 w-3.5 mr-2" /> G\u00e9rer les membres
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive focus:text-destructive rounded-lg" onClick={() => { setChannelToManage(channel); setShowDeleteConfirm(true); }}>
+                              <Trash2 className="h-3.5 w-3.5 mr-2" /> Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  );
+                })}
+                {filteredGroupChannels.length === 0 && !channelSearch && (
+                  <p className="text-[11px] text-muted-foreground/40 px-3 py-3">
+                    {isAdmin ? "Cr\u00e9ez votre premier channel" : "Aucun channel"}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
 
-                return (
-                  <div key={channel.id} className="group flex items-center">
+          {/* ====== DIRECT MESSAGES ====== */}
+          <div className="mb-1">
+            <SectionHeader
+              label="Messages directs"
+              count={dmChannels.length}
+              isOpen={dmsOpen}
+              onToggle={() => setDmsOpen((v) => !v)}
+              dotColor="bg-blue-500"
+              action={
+                <button onClick={() => { setDmSearch(""); setShowNewDMDialog(true); }} className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground/50 hover:text-foreground transition-all" title="Nouveau message">
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              }
+            />
+            {dmsOpen && (
+              <div className="space-y-0.5 px-1">
+                {filteredDMChannels.map((channel) => {
+                  const partner = getDMPartner(channel);
+                  const unread = unreadCounts[channel.id] || 0;
+                  const isActive = activeChannel?.id === channel.id;
+                  const isOnline = partner ? onlineUsers.some((u) => u.userId === partner.id) : false;
+                  return (
                     <button
+                      key={channel.id}
                       className={cn(
-                        "flex-1 flex items-center gap-2 px-2 py-1 rounded-md text-sm transition-colors",
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
                         isActive
-                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
-                          : unread > 0
-                            ? "text-foreground font-semibold hover:bg-muted/50"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                          ? "bg-[#7af17a]/8 ring-1 ring-[#7af17a]/20"
+                          : "hover:bg-secondary/60",
                       )}
                       onClick={() => { setActiveChannel(channel); setActiveWA(null); setActiveSocial(null); }}
                     >
-                      <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                      <span className="truncate flex-1 text-left">{channel.name}</span>
+                      <div className="relative shrink-0">
+                        <div className={cn(
+                          "h-9 w-9 rounded-xl flex items-center justify-center text-[11px] font-bold text-white shadow-sm",
+                          partner ? getAvatarColor(partner.id) : "bg-muted",
+                        )}>
+                          {getInitials(partner?.full_name)}
+                        </div>
+                        {isOnline && (
+                          <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#7af17a] border-[2.5px] border-background shadow-sm shadow-[#7af17a]/40" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(
+                          "text-[13px] truncate",
+                          isActive || unread > 0 ? "font-semibold text-foreground" : "font-medium text-foreground/80",
+                        )}>
+                          {partner?.full_name || "Utilisateur"}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground/50 capitalize">{partner?.role}</p>
+                      </div>
                       {unread > 0 && (
-                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
+                        <span className="bg-[#7af17a] text-[#14080e] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#7af17a]/30">
                           {unread > 99 ? "99+" : unread}
                         </span>
                       )}
                     </button>
-                    {isAdmin && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="h-6 w-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-all">
-                            <MoreVertical className="h-3 w-3" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuItem onClick={() => openMembersDialog(channel)}>
-                            <Users className="h-3.5 w-3.5 mr-2" />
-                            Gérer les membres
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => {
-                              setChannelToManage(channel);
-                              setShowDeleteConfirm(true);
-                            }}
-                          >
-                            <Trash2 className="h-3.5 w-3.5 mr-2" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-                );
-              })}
-              {filteredGroupChannels.length === 0 && !channelSearch && (
-                <p className="text-[11px] text-muted-foreground/60 px-2 py-2">
-                  {isAdmin ? "Créez votre premier channel" : "Aucun channel"}
-                </p>
-              )}
-            </div>}
+                  );
+                })}
+                {filteredDMChannels.length === 0 && !channelSearch && (
+                  <p className="text-[11px] text-muted-foreground/40 px-3 py-3">
+                    Cliquez + pour envoyer un message
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-
-          {/* DMs section */}
-          <div className="px-2 pt-4 pb-3">
-            <div className="flex items-center justify-between px-2 mb-1">
-              <button
-                onClick={() => setDmsOpen((v) => !v)}
-                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
-              >
-                <ChevronDown className={cn("h-3 w-3 transition-transform", !dmsOpen && "-rotate-90")} />
-                Messages directs
-              </button>
-              <button
-                onClick={() => {
-                  setDmSearch("");
-                  setShowNewDMDialog(true);
-                }}
-                className="h-5 w-5 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                title="Nouveau message"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            {dmsOpen && <div className="space-y-px">
-              {filteredDMChannels.map((channel) => {
-                const partner = getDMPartner(channel);
-                const unread = unreadCounts[channel.id] || 0;
-                const isActive = activeChannel?.id === channel.id;
-                const isOnline = partner
-                  ? onlineUsers.some((u) => u.userId === partner.id)
-                  : false;
-
-                return (
-                  <button
-                    key={channel.id}
-                    className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors",
-                      isActive
-                        ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
-                        : unread > 0
-                          ? "text-foreground font-semibold hover:bg-muted/50"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                    )}
-                    onClick={() => { setActiveChannel(channel); setActiveWA(null); setActiveSocial(null); }}
-                  >
-                    <div className="relative shrink-0">
-                      <div
-                        className={cn(
-                          "h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
-                          partner ? getAvatarColor(partner.id) : "bg-muted",
-                        )}
-                      >
-                        {getInitials(partner?.full_name)}
-                      </div>
-                      {isOnline && (
-                        <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#7af17a] border-2 border-card" />
-                      )}
-                    </div>
-                    <span className="truncate flex-1 text-left">
-                      {partner?.full_name || "Utilisateur"}
-                    </span>
-                    {unread > 0 && (
-                      <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
-                        {unread > 99 ? "99+" : unread}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-              {filteredDMChannels.length === 0 && !channelSearch && (
-                <p className="text-[11px] text-muted-foreground/60 px-2 py-2">
-                  Cliquez + pour envoyer un message
-                </p>
-              )}
-            </div>}
-          </div>
-          </>
 
           {/* ====== WHATSAPP ====== */}
-          <div className="px-2 pt-4 pb-3">
-            <div className="flex items-center justify-between px-2 mb-1">
-              <button
-                onClick={() => setWaOpen((v) => !v)}
-                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
-              >
-                <ChevronDown className={cn("h-3 w-3 transition-transform", !waOpen && "-rotate-90")} />
-                WhatsApp
-              </button>
-              <span className="text-[10px] text-muted-foreground">
-                {waConversations.length}
-              </span>
-            </div>
-              {waOpen && <div className="space-y-px">
+          <div className="mb-1">
+            <SectionHeader
+              label="WhatsApp"
+              count={waConversations.length}
+              isOpen={waOpen}
+              onToggle={() => setWaOpen((v) => !v)}
+              dotColor="bg-green-500"
+            />
+            {waOpen && (
+              <div className="space-y-0.5 px-1">
                 {filteredWAConversations.map((conv) => {
-                  const isActive = activeWA?.prospect_id === conv.prospect_id;
                   const lastMsg = conv.messages[conv.messages.length - 1];
                   return (
-                    <button
+                    <SocialConvRow
                       key={conv.prospect_id}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
-                        isActive
-                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
-                          : conv.unread_count > 0
-                            ? "text-foreground font-semibold hover:bg-muted/50"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                      )}
-                      onClick={() => {
-                        setActiveWA(conv);
-                        setActiveChannel(null);
-                        setActiveSocial(null);
-                        setTimeout(scrollToBottom, 100);
-                      }}
-                    >
-                      <div className="relative shrink-0">
-                        <div className={cn(
-                          "h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
-                          getAvatarColor(conv.prospect_id),
-                        )}>
-                          {getInitials(conv.prospect?.name)}
+                      name={conv.prospect?.name || "Inconnu"}
+                      lastMessage={lastMsg ? `${lastMsg.direction === "outbound" ? "Vous : " : ""}${lastMsg.content?.slice(0, 50)}` : undefined}
+                      lastMessageTime={conv.last_message_at}
+                      unread={conv.unread_count}
+                      isActive={activeWA?.prospect_id === conv.prospect_id}
+                      avatarId={conv.prospect_id}
+                      badge={
+                        <div className="h-4 w-4 rounded-full bg-[#25D366] flex items-center justify-center ring-2 ring-background">
+                          <Phone className="h-2 w-2 text-white" />
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-brand flex items-center justify-center">
-                          <Phone className="h-1.5 w-1.5 text-brand-dark" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm truncate font-medium">
-                          {conv.prospect?.name || "Inconnu"}
-                        </p>
-                        {lastMsg && (
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {lastMsg.direction === "outbound" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
-                          </p>
-                        )}
-                      </div>
-                      {conv.unread_count > 0 && (
-                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
-                          {conv.unread_count}
-                        </span>
-                      )}
-                    </button>
+                      }
+                      onClick={() => { setActiveWA(conv); setActiveChannel(null); setActiveSocial(null); setTimeout(scrollToBottom, 100); }}
+                    />
                   );
                 })}
                 {filteredWAConversations.length === 0 && (
-                  <div className="px-2 py-4 text-center space-y-3">
-                    <p className="text-[11px] text-muted-foreground/60">
-                      {channelSearch ? "Aucun résultat" : "Aucune conversation WhatsApp"}
-                    </p>
+                  <div className="px-3 py-5 text-center space-y-3">
+                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun r\u00e9sultat" : "Aucune conversation"}</p>
                     {!channelSearch && !waConnected && (
                       <div className="space-y-2">
-                        <Button
-                          size="sm"
-                          className="w-full bg-brand text-brand-dark hover:bg-brand/90 text-xs"
-                          disabled={connectingWA}
-                          onClick={async () => {
-                            setConnectingWA(true);
-                            try {
-                              const result = await generateUnipileAuthLink("WHATSAPP");
-                              if (result.error) {
-                                toast.error(result.error);
-                              } else if (result.url) {
-                                window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-                                toast.info("Scannez le QR code WhatsApp dans la fenêtre");
-                              }
-                            } catch {
-                              toast.error("Erreur de connexion");
-                            }
-                            setConnectingWA(false);
-                          }}
-                        >
-                          {connectingWA ? (
-                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                          ) : (
-                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                          )}
+                        <Button size="sm" className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90 text-xs rounded-xl h-9 font-medium" disabled={connectingWA} onClick={async () => {
+                          setConnectingWA(true);
+                          try { const result = await generateUnipileAuthLink("WHATSAPP"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Scannez le QR code WhatsApp"); } }
+                          catch { toast.error("Erreur de connexion"); }
+                          setConnectingWA(false);
+                        }}>
+                          {connectingWA ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <ExternalLink className="h-3.5 w-3.5 mr-1.5" />}
                           Connecter WhatsApp
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full text-[11px] text-muted-foreground"
-                          onClick={async () => {
-                            try {
-                              const status = await getUnipileStatus();
-                              const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP");
-                              if (wa) {
-                                setWaConnected(true);
-                                toast.success("WhatsApp connecté ! Rechargez la page pour voir vos conversations.");
-                              } else {
-                                toast.info("Aucun compte WhatsApp détecté");
-                              }
-                            } catch {
-                              toast.error("Erreur de vérification");
-                            }
-                          }}
-                        >
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Vérifier la connexion
+                        <Button variant="ghost" size="sm" className="w-full text-[11px] text-muted-foreground/60 rounded-xl" onClick={async () => {
+                          try { const status = await getUnipileStatus(); const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP"); if (wa) { setWaConnected(true); toast.success("WhatsApp connect\u00e9 ! Rechargez la page."); } else { toast.info("Aucun compte d\u00e9tect\u00e9"); } }
+                          catch { toast.error("Erreur de v\u00e9rification"); }
+                        }}>
+                          <RefreshCw className="h-3 w-3 mr-1" /> V\u00e9rifier
                         </Button>
                       </div>
                     )}
                     {!channelSearch && waConnected && waConversations.length === 0 && (
-                      <div className="flex items-center gap-2 justify-center text-brand">
+                      <div className="flex items-center gap-2 justify-center text-[#25D366]">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        <span className="text-[11px]">WhatsApp connecté</span>
+                        <span className="text-[11px] font-medium">Connect\u00e9</span>
                       </div>
                     )}
                   </div>
                 )}
-              </div>}
+              </div>
+            )}
           </div>
 
           {/* ====== LINKEDIN ====== */}
-          <div className="px-2 pt-4 pb-3">
-            <div className="flex items-center justify-between px-2 mb-1">
-              <button
-                onClick={() => setLinkedinOpen((v) => !v)}
-                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
-              >
-                <ChevronDown className={cn("h-3 w-3 transition-transform", !linkedinOpen && "-rotate-90")} />
-                LinkedIn
-              </button>
-              <span className="text-[10px] text-muted-foreground">
-                {linkedinConversations.length}
-              </span>
-            </div>
-              {linkedinOpen && <div className="space-y-px">
+          <div className="mb-1">
+            <SectionHeader
+              label="LinkedIn"
+              count={linkedinConversations.length}
+              isOpen={linkedinOpen}
+              onToggle={() => setLinkedinOpen((v) => !v)}
+              dotColor="bg-[#0A66C2]"
+            />
+            {linkedinOpen && (
+              <div className="space-y-0.5 px-1">
                 {filteredLinkedinConversations.map((conv) => {
-                  const isActive = activeSocial?.id === conv.id;
                   const msgs = conv.messages || [];
                   const lastMsg = msgs[msgs.length - 1];
                   return (
-                    <button
+                    <SocialConvRow
                       key={conv.id}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
-                        isActive
-                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
-                          : conv.unread_count > 0
-                            ? "text-foreground font-semibold hover:bg-muted/50"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                      )}
-                      onClick={() => {
-                        setActiveSocial(conv);
-                        setActiveChannel(null);
-                        setActiveWA(null);
-                        setTimeout(scrollToBottom, 100);
-                      }}
-                    >
-                      <div className="relative shrink-0">
-                        <div className={cn(
-                          "h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
-                          getAvatarColor(conv.prospect_id || conv.id),
-                        )}>
-                          {getInitials(conv.prospect?.name)}
+                      name={conv.prospect?.name || "Inconnu"}
+                      lastMessage={lastMsg ? `${lastMsg.sender === "me" ? "Vous : " : ""}${lastMsg.content?.slice(0, 50)}` : undefined}
+                      lastMessageTime={conv.last_message_at}
+                      unread={conv.unread_count}
+                      isActive={activeSocial?.id === conv.id}
+                      avatarId={conv.prospect_id || conv.id}
+                      badge={
+                        <div className="h-4 w-4 rounded-full bg-[#0A66C2] flex items-center justify-center ring-2 ring-background">
+                          <Linkedin className="h-2 w-2 text-white" />
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center bg-[#0A66C2]">
-                          <Linkedin className="h-1.5 w-1.5 text-white" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm truncate font-medium">
-                          {conv.prospect?.name || "Inconnu"}
-                        </p>
-                        {lastMsg && (
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {lastMsg.sender === "me" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
-                          </p>
-                        )}
-                      </div>
-                      {conv.unread_count > 0 && (
-                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
-                          {conv.unread_count}
-                        </span>
-                      )}
-                    </button>
+                      }
+                      onClick={() => { setActiveSocial(conv); setActiveChannel(null); setActiveWA(null); setTimeout(scrollToBottom, 100); }}
+                    />
                   );
                 })}
                 {filteredLinkedinConversations.length === 0 && (
-                  <div className="px-2 py-4 text-center space-y-3">
-                    <p className="text-[11px] text-muted-foreground/60">
-                      {channelSearch ? "Aucun résultat" : "Aucune conversation LinkedIn"}
-                    </p>
+                  <div className="px-3 py-5 text-center space-y-3">
+                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun r\u00e9sultat" : "Aucune conversation"}</p>
                     {!channelSearch && !linkedinConnected && (
                       <div className="space-y-2">
-                        <Button
-                          size="sm"
-                          className="w-full bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90 text-xs"
-                          disabled={connectingLinkedin}
-                          onClick={async () => {
-                            setConnectingLinkedin(true);
-                            try {
-                              const result = await generateUnipileAuthLink("LINKEDIN");
-                              if (result.error) {
-                                toast.error(result.error);
-                              } else if (result.url) {
-                                window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-                                toast.info("Connectez-vous à LinkedIn dans la fenêtre");
-                              }
-                            } catch {
-                              toast.error("Erreur de connexion");
-                            }
-                            setConnectingLinkedin(false);
-                          }}
-                        >
-                          {connectingLinkedin ? (
-                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                          ) : (
-                            <Linkedin className="h-3.5 w-3.5 mr-1.5" />
-                          )}
+                        <Button size="sm" className="w-full bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90 text-xs rounded-xl h-9 font-medium" disabled={connectingLinkedin} onClick={async () => {
+                          setConnectingLinkedin(true);
+                          try { const result = await generateUnipileAuthLink("LINKEDIN"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Connectez-vous \u00e0 LinkedIn"); } }
+                          catch { toast.error("Erreur de connexion"); }
+                          setConnectingLinkedin(false);
+                        }}>
+                          {connectingLinkedin ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Linkedin className="h-3.5 w-3.5 mr-1.5" />}
                           Connecter LinkedIn
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full text-[11px] text-muted-foreground"
-                          onClick={async () => {
-                            try {
-                              const status = await getUnipileStatus();
-                              const li = status.accounts.find((a) => a.provider.toUpperCase() === "LINKEDIN");
-                              if (li) {
-                                setLinkedinConnected(true);
-                                toast.success("LinkedIn connecté ! Rechargez la page pour voir vos conversations.");
-                              } else {
-                                toast.info("Aucun compte LinkedIn détecté");
-                              }
-                            } catch {
-                              toast.error("Erreur de vérification");
-                            }
-                          }}
-                        >
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Vérifier la connexion
+                        <Button variant="ghost" size="sm" className="w-full text-[11px] text-muted-foreground/60 rounded-xl" onClick={async () => {
+                          try { const status = await getUnipileStatus(); const li = status.accounts.find((a) => a.provider.toUpperCase() === "LINKEDIN"); if (li) { setLinkedinConnected(true); toast.success("LinkedIn connect\u00e9 ! Rechargez la page."); } else { toast.info("Aucun compte d\u00e9tect\u00e9"); } }
+                          catch { toast.error("Erreur de v\u00e9rification"); }
+                        }}>
+                          <RefreshCw className="h-3 w-3 mr-1" /> V\u00e9rifier
                         </Button>
                       </div>
                     )}
                     {!channelSearch && linkedinConnected && linkedinConversations.length === 0 && (
                       <div className="flex items-center gap-2 justify-center text-[#0A66C2]">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        <span className="text-[11px]">LinkedIn connecté</span>
+                        <CheckCircle2 className="h-3.5 w-3.5" /><span className="text-[11px] font-medium">Connect\u00e9</span>
                       </div>
                     )}
                   </div>
                 )}
-              </div>}
+              </div>
+            )}
           </div>
 
           {/* ====== INSTAGRAM ====== */}
-          <div className="px-2 pt-4 pb-3">
-            <div className="flex items-center justify-between px-2 mb-1">
-              <button
-                onClick={() => setInstagramOpen((v) => !v)}
-                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
-              >
-                <ChevronDown className={cn("h-3 w-3 transition-transform", !instagramOpen && "-rotate-90")} />
-                Instagram
-              </button>
-              <span className="text-[10px] text-muted-foreground">
-                {instagramConversations.length}
-              </span>
-            </div>
-              {instagramOpen && <div className="space-y-px">
+          <div className="mb-4">
+            <SectionHeader
+              label="Instagram"
+              count={instagramConversations.length}
+              isOpen={instagramOpen}
+              onToggle={() => setInstagramOpen((v) => !v)}
+              dotColor="bg-gradient-to-r from-[#F58529] to-[#DD2A7B]"
+            />
+            {instagramOpen && (
+              <div className="space-y-0.5 px-1">
                 {filteredInstagramConversations.map((conv) => {
-                  const isActive = activeSocial?.id === conv.id;
                   const msgs = conv.messages || [];
                   const lastMsg = msgs[msgs.length - 1];
                   return (
-                    <button
+                    <SocialConvRow
                       key={conv.id}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
-                        isActive
-                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
-                          : conv.unread_count > 0
-                            ? "text-foreground font-semibold hover:bg-muted/50"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                      )}
-                      onClick={() => {
-                        setActiveSocial(conv);
-                        setActiveChannel(null);
-                        setActiveWA(null);
-                        setTimeout(scrollToBottom, 100);
-                      }}
-                    >
-                      <div className="relative shrink-0">
-                        <div className={cn(
-                          "h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
-                          getAvatarColor(conv.prospect_id || conv.id),
-                        )}>
-                          {getInitials(conv.prospect?.name)}
+                      name={conv.prospect?.name || "Inconnu"}
+                      lastMessage={lastMsg ? `${lastMsg.sender === "me" ? "Vous : " : ""}${lastMsg.content?.slice(0, 50)}` : undefined}
+                      lastMessageTime={conv.last_message_at}
+                      unread={conv.unread_count}
+                      isActive={activeSocial?.id === conv.id}
+                      avatarId={conv.prospect_id || conv.id}
+                      badge={
+                        <div className="h-4 w-4 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center ring-2 ring-background">
+                          <Instagram className="h-2 w-2 text-white" />
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]">
-                          <Instagram className="h-1.5 w-1.5 text-white" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm truncate font-medium">
-                          {conv.prospect?.name || "Inconnu"}
-                        </p>
-                        {lastMsg && (
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {lastMsg.sender === "me" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
-                          </p>
-                        )}
-                      </div>
-                      {conv.unread_count > 0 && (
-                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
-                          {conv.unread_count}
-                        </span>
-                      )}
-                    </button>
+                      }
+                      onClick={() => { setActiveSocial(conv); setActiveChannel(null); setActiveWA(null); setTimeout(scrollToBottom, 100); }}
+                    />
                   );
                 })}
                 {filteredInstagramConversations.length === 0 && (
-                  <div className="px-2 py-4 text-center space-y-3">
-                    <p className="text-[11px] text-muted-foreground/60">
-                      {channelSearch ? "Aucun résultat" : "Aucune conversation Instagram"}
-                    </p>
+                  <div className="px-3 py-5 text-center space-y-3">
+                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun r\u00e9sultat" : "Aucune conversation"}</p>
                     {!channelSearch && !instagramConnected && (
                       <div className="space-y-2">
-                        <Button
-                          size="sm"
-                          className="w-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white hover:opacity-90 text-xs"
-                          disabled={connectingInstagram}
-                          onClick={async () => {
-                            setConnectingInstagram(true);
-                            try {
-                              const result = await generateUnipileAuthLink("INSTAGRAM");
-                              if (result.error) {
-                                toast.error(result.error);
-                              } else if (result.url) {
-                                window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-                                toast.info("Connectez-vous à Instagram dans la fenêtre");
-                              }
-                            } catch {
-                              toast.error("Erreur de connexion");
-                            }
-                            setConnectingInstagram(false);
-                          }}
-                        >
-                          {connectingInstagram ? (
-                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                          ) : (
-                            <Instagram className="h-3.5 w-3.5 mr-1.5" />
-                          )}
+                        <Button size="sm" className="w-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white hover:opacity-90 text-xs rounded-xl h-9 font-medium" disabled={connectingInstagram} onClick={async () => {
+                          setConnectingInstagram(true);
+                          try { const result = await generateUnipileAuthLink("INSTAGRAM"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Connectez-vous \u00e0 Instagram"); } }
+                          catch { toast.error("Erreur de connexion"); }
+                          setConnectingInstagram(false);
+                        }}>
+                          {connectingInstagram ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Instagram className="h-3.5 w-3.5 mr-1.5" />}
                           Connecter Instagram
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full text-[11px] text-muted-foreground"
-                          onClick={async () => {
-                            try {
-                              const status = await getUnipileStatus();
-                              const ig = status.accounts.find((a) => a.provider.toUpperCase() === "INSTAGRAM");
-                              if (ig) {
-                                setInstagramConnected(true);
-                                toast.success("Instagram connecté ! Rechargez la page pour voir vos conversations.");
-                              } else {
-                                toast.info("Aucun compte Instagram détecté");
-                              }
-                            } catch {
-                              toast.error("Erreur de vérification");
-                            }
-                          }}
-                        >
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Vérifier la connexion
+                        <Button variant="ghost" size="sm" className="w-full text-[11px] text-muted-foreground/60 rounded-xl" onClick={async () => {
+                          try { const status = await getUnipileStatus(); const ig = status.accounts.find((a) => a.provider.toUpperCase() === "INSTAGRAM"); if (ig) { setInstagramConnected(true); toast.success("Instagram connect\u00e9 ! Rechargez la page."); } else { toast.info("Aucun compte d\u00e9tect\u00e9"); } }
+                          catch { toast.error("Erreur de v\u00e9rification"); }
+                        }}>
+                          <RefreshCw className="h-3 w-3 mr-1" /> V\u00e9rifier
                         </Button>
                       </div>
                     )}
                     {!channelSearch && instagramConnected && instagramConversations.length === 0 && (
                       <div className="flex items-center gap-2 justify-center text-[#DD2A7B]">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        <span className="text-[11px]">Instagram connecté</span>
+                        <CheckCircle2 className="h-3.5 w-3.5" /><span className="text-[11px] font-medium">Connect\u00e9</span>
                       </div>
                     )}
                   </div>
                 )}
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1694,279 +1300,149 @@ export function ChatLayout({
       {/* ================================================================= */}
       {/* MESSAGE AREA                                                      */}
       {/* ================================================================= */}
-      <div
-        className={cn(
-          "flex-1 flex flex-col min-w-0",
-          !activeChannel && !activeWA && !activeSocial && "hidden md:flex",
-        )}
-      >
-        {/* ====== WHATSAPP MESSAGE AREA ====== */}
+      <div className={cn("flex-1 flex flex-col min-w-0 bg-card", !activeChannel && !activeWA && !activeSocial && "hidden md:flex")}>
         {activeWA ? (
           <>
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
-              <button
-                onClick={() => setActiveWA(null)}
-                className="md:hidden text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div className="flex items-center gap-2.5">
+            {/* WhatsApp header */}
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/50 bg-card">
+              <button onClick={() => setActiveWA(null)} className="md:hidden text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft className="h-5 w-5" /></button>
+              <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className={cn(
-                    "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white",
-                    getAvatarColor(activeWA.prospect_id),
-                  )}>
-                    {getInitials(activeWA.prospect?.name)}
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-brand flex items-center justify-center ring-2 ring-card">
-                    <Phone className="h-2 w-2 text-brand-dark" />
-                  </div>
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-sm", getAvatarColor(activeWA.prospect_id))}>{getInitials(activeWA.prospect?.name)}</div>
+                  <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-[#25D366] flex items-center justify-center ring-2 ring-card"><Phone className="h-2 w-2 text-white" /></div>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-sm leading-tight">
-                    {activeWA.prospect?.name || "Inconnu"}
-                  </h2>
-                  <p className="text-[11px] text-muted-foreground">WhatsApp</p>
+                  <h2 className="font-semibold text-[15px] leading-tight">{activeWA.prospect?.name || "Inconnu"}</h2>
+                  <p className="text-[11px] text-[#25D366] font-medium">WhatsApp</p>
                 </div>
               </div>
             </div>
             <ScrollArea className="flex-1">
-              <div className="px-4 py-2 space-y-2">
+              <div className="px-5 py-4 space-y-1.5">
                 {activeWA.messages.map((msg, i) => {
                   const isOutbound = msg.direction === "outbound";
                   return (
                     <div key={msg.id || i} className={cn("flex", isOutbound ? "justify-end" : "justify-start")}>
                       <div className={cn(
-                        "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
-                        isOutbound
-                          ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
-                          : "bg-muted rounded-bl-sm",
+                        "max-w-[70%] rounded-2xl px-4 py-2.5 text-[13px] shadow-sm",
+                        isOutbound ? "bg-gradient-to-br from-[#7af17a]/15 to-[#7af17a]/8 text-foreground rounded-br-md" : "bg-secondary/60 rounded-bl-md",
                       )}>
-                        <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                        <p className={cn(
-                          "text-[10px] mt-1",
-                          isOutbound ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60",
-                        )}>
-                          {format(new Date(msg.created_at), "HH:mm")}
-                        </p>
+                        <p className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
+                        <p className={cn("text-[10px] mt-1.5 font-medium", isOutbound ? "text-[#7af17a]/50 text-right" : "text-muted-foreground/40")}>{format(new Date(msg.created_at), "HH:mm")}</p>
                       </div>
                     </div>
                   );
                 })}
                 {activeWA.messages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                    <Phone className="h-8 w-8 opacity-30 mb-3" />
-                    <p className="text-sm font-medium">Aucun message</p>
+                  <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                    <div className="h-16 w-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4"><Phone className="h-7 w-7 opacity-30" /></div>
+                    <p className="font-semibold text-sm">Aucun message</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">Envoyez le premier message</p>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
-            <div className="px-4 py-3 border-t">
-              <form onSubmit={handleSendWAMessage} className="flex items-end gap-2">
-                <div className="flex-1 relative">
-                  <Textarea
-                    value={waMessage}
-                    onChange={(e) => setWAMessage(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendWAMessage(e); } }}
-                    placeholder={`Message à ${activeWA.prospect?.name || "prospect"}...`}
-                    className="min-h-[40px] max-h-[120px] resize-none text-sm py-2.5 pr-10"
-                    rows={1}
-                  />
-                  <Button
-                    type="submit"
-                    size="icon"
-                    className={cn(
-                      "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
-                      waMessage.trim() ? "bg-brand text-brand-dark hover:bg-brand/90" : "bg-muted text-muted-foreground",
-                    )}
-                    disabled={!waMessage.trim() || sendingWA}
-                  >
-                    {sendingWA ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                  </Button>
-                </div>
+            <div className="px-5 py-4 border-t border-border/50">
+              <form onSubmit={handleSendWAMessage} className="relative">
+                <Textarea value={waMessage} onChange={(e) => setWAMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendWAMessage(e); } }} placeholder={`Message \u00e0 ${activeWA.prospect?.name || "prospect"}...`} className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40" rows={1} />
+                <Button type="submit" size="icon" className={cn("absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200", waMessage.trim() ? "bg-[#25D366] text-white hover:bg-[#25D366]/90 shadow-sm shadow-[#25D366]/30" : "bg-secondary text-muted-foreground/40")} disabled={!waMessage.trim() || sendingWA}>
+                  {sendingWA ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
               </form>
             </div>
           </>
         ) : activeSocial ? (
           <>
-            {/* ====== INBOX MESSAGE AREA ====== */}
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
-              <button
-                onClick={() => setActiveSocial(null)}
-                className="md:hidden text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div className="flex items-center gap-2.5">
+            {/* Social header */}
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/50 bg-card">
+              <button onClick={() => setActiveSocial(null)} className="md:hidden text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft className="h-5 w-5" /></button>
+              <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className={cn(
-                    "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white",
-                    getAvatarColor(activeSocial.prospect_id || activeSocial.id),
-                  )}>
-                    {getInitials(activeSocial.prospect?.name)}
-                  </div>
-                  <div className={cn(
-                    "absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center ring-2 ring-card bg-muted-foreground/80",
-                  )}>
-                    {activeSocial.platform === "linkedin" ? (
-                      <Linkedin className="h-2 w-2 text-white" />
-                    ) : (
-                      <Instagram className="h-2 w-2 text-white" />
-                    )}
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-sm", getAvatarColor(activeSocial.prospect_id || activeSocial.id))}>{getInitials(activeSocial.prospect?.name)}</div>
+                  <div className={cn("absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full flex items-center justify-center ring-2 ring-card", activeSocial.platform === "linkedin" ? "bg-[#0A66C2]" : "bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]")}>
+                    {activeSocial.platform === "linkedin" ? <Linkedin className="h-2 w-2 text-white" /> : <Instagram className="h-2 w-2 text-white" />}
                   </div>
                 </div>
                 <div>
-                  <h2 className="font-semibold text-sm leading-tight">
-                    {activeSocial.prospect?.name || "Inconnu"}
-                  </h2>
-                  <p className="text-[11px] text-muted-foreground capitalize">{activeSocial.platform}</p>
+                  <h2 className="font-semibold text-[15px] leading-tight">{activeSocial.prospect?.name || "Inconnu"}</h2>
+                  <p className={cn("text-[11px] font-medium capitalize", activeSocial.platform === "linkedin" ? "text-[#0A66C2]" : "text-[#DD2A7B]")}>{activeSocial.platform}</p>
                 </div>
               </div>
             </div>
             <ScrollArea className="flex-1">
-              <div className="px-4 py-2 space-y-2">
+              <div className="px-5 py-4 space-y-1.5">
                 {(activeSocial.messages || []).map((msg, i) => {
                   const isMe = msg.sender === "me";
                   return (
                     <div key={i} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
                       <div className={cn(
-                        "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
-                        isMe
-                          ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
-                          : "bg-muted rounded-bl-sm",
+                        "max-w-[70%] rounded-2xl px-4 py-2.5 text-[13px] shadow-sm",
+                        isMe ? "bg-gradient-to-br from-[#7af17a]/15 to-[#7af17a]/8 text-foreground rounded-br-md" : "bg-secondary/60 rounded-bl-md",
                       )}>
-                        <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                        <p className={cn(
-                          "text-[10px] mt-1",
-                          isMe ? "text-muted-foreground/70 text-right" : "text-muted-foreground/70",
-                        )}>
-                          {msg.timestamp ? format(new Date(msg.timestamp), "HH:mm") : ""}
-                        </p>
+                        <p className="whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
+                        <p className={cn("text-[10px] mt-1.5 font-medium", isMe ? "text-muted-foreground/40 text-right" : "text-muted-foreground/40")}>{msg.timestamp ? format(new Date(msg.timestamp), "HH:mm") : ""}</p>
                       </div>
                     </div>
                   );
                 })}
                 {(!activeSocial.messages || activeSocial.messages.length === 0) && (
-                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                    <Inbox className="h-8 w-8 opacity-30 mb-3" />
-                    <p className="text-sm font-medium">Aucun message</p>
+                  <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                    <div className="h-16 w-16 rounded-2xl bg-secondary/50 flex items-center justify-center mb-4"><Inbox className="h-7 w-7 opacity-30" /></div>
+                    <p className="font-semibold text-sm">Aucun message</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">Envoyez le premier message</p>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
-            <div className="px-4 py-3 border-t">
-              <form onSubmit={handleSendSocialMessage} className="flex items-end gap-2">
-                <div className="flex-1 relative">
-                  <Textarea
-                    value={socialMessage}
-                    onChange={(e) => setSocialMessage(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendSocialMessage(e); } }}
-                    placeholder={`Message à ${activeSocial.prospect?.name || "prospect"}...`}
-                    className="min-h-[40px] max-h-[120px] resize-none text-sm py-2.5 pr-10"
-                    rows={1}
-                  />
-                  <Button
-                    type="submit"
-                    size="icon"
-                    className={cn(
-                      "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
-                      socialMessage.trim()
-                        ? "bg-brand text-brand-dark hover:bg-brand/90"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                    disabled={!socialMessage.trim() || sendingSocial}
-                  >
-                    {sendingSocial ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                  </Button>
-                </div>
+            <div className="px-5 py-4 border-t border-border/50">
+              <form onSubmit={handleSendSocialMessage} className="relative">
+                <Textarea value={socialMessage} onChange={(e) => setSocialMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendSocialMessage(e); } }} placeholder={`Message \u00e0 ${activeSocial.prospect?.name || "prospect"}...`} className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40" rows={1} />
+                <Button type="submit" size="icon" className={cn("absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200", socialMessage.trim() ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30" : "bg-secondary text-muted-foreground/40")} disabled={!socialMessage.trim() || sendingSocial}>
+                  {sendingSocial ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
               </form>
             </div>
           </>
         ) : activeChannel ? (
           <>
-            {/* Channel header */}
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
-              <button
-                onClick={() => setActiveChannel(null)}
-                className="md:hidden text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-
+            {/* Channel/DM header */}
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/50 bg-card">
+              <button onClick={() => setActiveChannel(null)} className="md:hidden text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft className="h-5 w-5" /></button>
               {activeChannel.type === "direct" && activePartner ? (
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div
-                      className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white",
-                        getAvatarColor(activePartner.id),
-                      )}
-                    >
-                      {getInitials(activePartner.full_name)}
-                    </div>
-                    <OnlineStatus
-                      isOnline={onlineUsers.some((u) => u.userId === activePartner.id)}
-                    />
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-sm", getAvatarColor(activePartner.id))}>{getInitials(activePartner.full_name)}</div>
+                    <OnlineStatus isOnline={onlineUsers.some((u) => u.userId === activePartner.id)} />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-sm leading-tight">
-                      {activePartner.full_name || "Utilisateur"}
-                    </h2>
-                    <p className="text-[11px] text-muted-foreground capitalize">
-                      {activePartner.role}
-                    </p>
+                    <h2 className="font-semibold text-[15px] leading-tight">{activePartner.full_name || "Utilisateur"}</h2>
+                    <p className="text-[11px] text-muted-foreground/60 capitalize">{activePartner.role}</p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  {activeChannel.type === "announcement" ? (
-                    <Megaphone className="h-4.5 w-4.5 text-muted-foreground" />
-                  ) : (
-                    <Hash className="h-4.5 w-4.5 text-muted-foreground" />
-                  )}
+                <div className="flex items-center gap-3">
+                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", activeChannel.type === "announcement" ? "bg-amber-500/10 text-amber-600" : "bg-[#7af17a]/10 text-[#7af17a]")}>
+                    {activeChannel.type === "announcement" ? <Megaphone className="h-4.5 w-4.5" /> : <Hash className="h-4.5 w-4.5" />}
+                  </div>
                   <div>
-                    <h2 className="font-semibold text-sm leading-tight">
-                      {activeChannel.name}
-                    </h2>
-                    {activeChannel.description && (
-                      <p className="text-[11px] text-muted-foreground truncate max-w-md">
-                        {activeChannel.description}
-                      </p>
-                    )}
+                    <h2 className="font-semibold text-[15px] leading-tight">{activeChannel.name}</h2>
+                    {activeChannel.description && <p className="text-[11px] text-muted-foreground/60 truncate max-w-md">{activeChannel.description}</p>}
                   </div>
                 </div>
               )}
-
-              <div className="ml-auto flex items-center gap-1.5">
+              <div className="ml-auto flex items-center gap-2">
                 {onlineUsers.length > 0 && activeChannel.type !== "direct" && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mr-2">
-                    <div className="h-2 w-2 rounded-full bg-[#7af17a]" />
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 mr-2 bg-secondary/50 px-2.5 py-1 rounded-full">
+                    <div className="h-1.5 w-1.5 rounded-full bg-[#7af17a] animate-pulse" />
                     {onlineUsers.length} en ligne
                   </div>
                 )}
                 {isAdmin && activeChannel.type !== "direct" && (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => openMembersDialog(activeChannel)}
-                    >
-                      <Users className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
-                      onClick={() => {
-                        setChannelToManage(activeChannel);
-                        setShowDeleteConfirm(true);
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => openMembersDialog(activeChannel)}><Users className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-destructive/60 hover:text-destructive" onClick={() => { setChannelToManage(activeChannel); setShowDeleteConfirm(true); }}><Trash2 className="h-4 w-4" /></Button>
                   </>
                 )}
               </div>
@@ -1974,302 +1450,127 @@ export function ChatLayout({
 
             {/* Messages */}
             <ScrollArea className="flex-1">
-              <div className="px-4 py-2">
+              <div className="px-5 py-3">
                 {loading ? (
-                  <div className="flex items-center justify-center h-40 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                    Chargement...
+                  <div className="flex items-center justify-center h-40 text-muted-foreground/60">
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" /> Chargement...
                   </div>
                 ) : (
                   <>
                     {messages.length === 0 && !hasMore && (
-                      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                        <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
-                          <MessageSquare className="h-7 w-7 opacity-40" />
+                      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                        <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-[#7af17a]/10 to-[#7af17a]/5 flex items-center justify-center mb-5 shadow-inner">
+                          <Sparkles className="h-9 w-9 text-[#7af17a]/40" />
                         </div>
-                        <p className="font-medium text-sm">
-                          {activeChannel.type === "direct"
-                            ? `Commencez une conversation avec ${activePartner?.full_name || "cet utilisateur"}`
-                            : `Bienvenue dans #${activeChannel.name}`}
+                        <p className="font-semibold text-base text-foreground/80">
+                          {activeChannel.type === "direct" ? `Dites bonjour \u00e0 ${activePartner?.full_name || "cet utilisateur"}` : `Bienvenue dans #${activeChannel.name}`}
                         </p>
-                        <p className="text-xs mt-1 text-muted-foreground/60">
-                          Envoyez le premier message !
-                        </p>
+                        <p className="text-[13px] mt-1.5 text-muted-foreground/50">Envoyez le premier message pour d\u00e9marrer la conversation</p>
                       </div>
                     )}
-
                     {hasMore && (
-                      <div className="text-center py-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={loadOlderMessages}
-                          disabled={loadingMore}
-                          className="text-xs text-muted-foreground"
-                        >
-                          {loadingMore ? (
-                            <>
-                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                              Chargement...
-                            </>
-                          ) : (
-                            "Charger les messages précédents"
-                          )}
+                      <div className="text-center py-3">
+                        <Button variant="ghost" size="sm" onClick={loadOlderMessages} disabled={loadingMore} className="text-xs text-muted-foreground/60 rounded-xl hover:text-foreground">
+                          {loadingMore ? <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Chargement...</> : "Charger les messages pr\u00e9c\u00e9dents"}
                         </Button>
                       </div>
                     )}
-
-                    {/* Render messages with grouping and date separators */}
                     {messages.map((message, index) => {
                       const prevMessage = index > 0 ? messages[index - 1] : null;
                       const isGrouped = prevMessage ? shouldGroup(prevMessage, message) : false;
                       const isOwn = message.sender_id === currentUserId;
-                      const senderName = isOwn
-                        ? "Moi"
-                        : message.sender?.full_name || message.sender?.email || "Utilisateur";
+                      const senderName = isOwn ? "Moi" : message.sender?.full_name || message.sender?.email || "Utilisateur";
                       const senderId = message.sender_id || "";
                       const isEditing = editingMessageId === message.id;
                       const messageReactions = groupedReactions[message.id] || {};
-
-                      // Date separator
-                      const showDate =
-                        !prevMessage ||
-                        !isSameDay(
-                          new Date(prevMessage.created_at),
-                          new Date(message.created_at),
-                        );
+                      const showDate = !prevMessage || !isSameDay(new Date(prevMessage.created_at), new Date(message.created_at));
 
                       return (
                         <div key={message.id}>
-                          {showDate && (
-                            <DateSeparator date={new Date(message.created_at)} />
-                          )}
-
+                          {showDate && <DateSeparator date={new Date(message.created_at)} />}
                           {activeChannel?.type === "direct" ? (
-                            /* ---- DM bubble layout ---- */
                             <div className={cn("group relative flex flex-col", isOwn ? "items-end" : "items-start", isGrouped ? "pt-0.5" : "pt-3")}>
                               <div className={cn(
-                                "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
-                                isOwn
-                                  ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
-                                  : "bg-muted rounded-bl-sm",
+                                "max-w-[70%] rounded-2xl px-4 py-2.5 text-[13px] shadow-sm",
+                                isOwn ? "bg-gradient-to-br from-[#7af17a]/15 to-[#7af17a]/8 text-foreground rounded-br-md" : "bg-secondary/60 rounded-bl-md",
                               )}>
                                 {isEditing ? (
                                   <div className="space-y-2">
-                                    <Textarea
-                                      value={editContent}
-                                      onChange={(e) => setEditContent(e.target.value)}
-                                      className="min-h-[60px] text-sm"
-                                      autoFocus
-                                      onKeyDown={(e) => {
-                                        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); }
-                                        if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); }
-                                      }}
-                                    />
+                                    <Textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="min-h-[60px] text-[13px] rounded-xl" autoFocus onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); } if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); } }} />
                                     <div className="flex items-center gap-2">
-                                      <Button size="sm" className="h-7 text-xs" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
-                                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
+                                      <Button size="sm" className="h-7 text-xs rounded-lg" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs rounded-lg" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
                                     </div>
                                   </div>
                                 ) : (
                                   <>
                                     {message.message_type === "image" && message.file_url ? (
-                                      <img src={message.file_url} alt="Image" className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
+                                      <img src={message.file_url} alt="Image" className="rounded-xl max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
                                     ) : (
-                                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                      <p className="whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                                     )}
-                                    <p className={cn("text-[10px] mt-1", isOwn ? "text-muted-foreground/70 text-right" : "text-muted-foreground/70")}>
+                                    <p className={cn("text-[10px] mt-1.5 font-medium", isOwn ? "text-muted-foreground/40 text-right" : "text-muted-foreground/40")}>
                                       {format(new Date(message.created_at), "HH:mm")}
-                                      {message.is_edited && " · modifié"}
+                                      {message.is_edited && " \u00b7 modifi\u00e9"}
                                     </p>
-                                    {Object.keys(messageReactions).length > 0 && (
-                                      <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
-                                    )}
+                                    {Object.keys(messageReactions).length > 0 && <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />}
                                   </>
                                 )}
                               </div>
-                              {/* Hover toolbar */}
                               {!isEditing && (
-                                <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5 z-10", isOwn ? "left-2" : "right-2")}>
+                                <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg px-1 py-1 z-10", isOwn ? "left-2" : "right-2")}>
                                   <div className="relative">
-                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Réagir">
-                                      <SmilePlus className="h-3.5 w-3.5" />
-                                    </button>
-                                    {emojiPickerFor === message.id && (
-                                      <QuickEmojiPicker onSelect={(emoji) => handleToggleReaction(message.id, emoji)} onClose={() => setEmojiPickerFor(null)} />
-                                    )}
+                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="R\u00e9agir"><SmilePlus className="h-3.5 w-3.5" /></button>
+                                    {emojiPickerFor === message.id && <QuickEmojiPicker onSelect={(emoji) => handleToggleReaction(message.id, emoji)} onClose={() => setEmojiPickerFor(null)} />}
                                   </div>
-                                  {isOwn && (
-                                    <button onClick={() => { setEditingMessageId(message.id); setEditContent(message.content || ""); }} className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Modifier">
-                                      <Pencil className="h-3.5 w-3.5" />
-                                    </button>
-                                  )}
-                                  {(isOwn || isAdmin) && (
-                                    <button onClick={() => handleDeleteMessage(message.id)} className="h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Supprimer">
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
-                                  )}
+                                  {isOwn && <button onClick={() => { setEditingMessageId(message.id); setEditContent(message.content || ""); }} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Modifier"><Pencil className="h-3.5 w-3.5" /></button>}
+                                  {(isOwn || isAdmin) && <button onClick={() => handleDeleteMessage(message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Supprimer"><Trash2 className="h-3.5 w-3.5" /></button>}
                                 </div>
                               )}
                             </div>
                           ) : (
-                            /* ---- Channel Slack-style layout ---- */
-                            <div
-                              className={cn(
-                                "group relative flex gap-3 px-1 -mx-1 rounded-md transition-colors",
-                                isGrouped ? "pt-0.5" : "pt-3",
-                                "hover:bg-muted/30",
-                              )}
-                            >
-                              {/* Avatar or spacer */}
-                              <div className="w-8 shrink-0 pt-0.5">
+                            <div className={cn("group relative flex gap-3 px-2 -mx-2 rounded-xl transition-colors", isGrouped ? "pt-0.5" : "pt-3", "hover:bg-secondary/30")}>
+                              <div className="w-9 shrink-0 pt-0.5">
                                 {!isGrouped && (
-                                  <div
-                                    className={cn(
-                                      "h-8 w-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white",
-                                      getAvatarColor(senderId),
-                                    )}
-                                  >
-                                    {getInitials(senderName)}
-                                  </div>
+                                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center text-[11px] font-bold text-white shadow-sm", getAvatarColor(senderId))}>{getInitials(senderName)}</div>
                                 )}
-                                {isGrouped && (
-                                  <span className="hidden group-hover:block text-[10px] text-muted-foreground/60 text-center leading-8">
-                                    {format(new Date(message.created_at), "HH:mm")}
-                                  </span>
-                                )}
+                                {isGrouped && <span className="hidden group-hover:block text-[10px] text-muted-foreground/40 text-center leading-9 font-medium">{format(new Date(message.created_at), "HH:mm")}</span>}
                               </div>
-
-                              {/* Content */}
                               <div className="flex-1 min-w-0">
                                 {!isGrouped && (
                                   <div className="flex items-baseline gap-2 mb-0.5">
-                                    <span className="text-sm font-semibold text-foreground">
-                                      {senderName}
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground">
-                                      {format(new Date(message.created_at), "HH:mm", {
-                                        locale: fr,
-                                      })}
-                                    </span>
-                                    {message.is_edited && (
-                                      <span className="text-[10px] text-muted-foreground/50">
-                                        (modifié)
-                                      </span>
-                                    )}
+                                    <span className="text-[13px] font-semibold text-foreground">{senderName}</span>
+                                    <span className="text-[10px] text-muted-foreground/40 font-medium">{format(new Date(message.created_at), "HH:mm", { locale: fr })}</span>
+                                    {message.is_edited && <span className="text-[10px] text-muted-foreground/30">(modifi\u00e9)</span>}
                                   </div>
                                 )}
-
                                 {isEditing ? (
                                   <div className="space-y-2">
-                                    <Textarea
-                                      value={editContent}
-                                      onChange={(e) => setEditContent(e.target.value)}
-                                      className="min-h-[60px] text-sm"
-                                      autoFocus
-                                      onKeyDown={(e) => {
-                                        if (e.key === "Enter" && !e.shiftKey) {
-                                          e.preventDefault();
-                                          handleEditMessage(message.id);
-                                        }
-                                        if (e.key === "Escape") {
-                                          setEditingMessageId(null);
-                                          setEditContent("");
-                                        }
-                                      }}
-                                    />
+                                    <Textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="min-h-[60px] text-[13px] rounded-xl" autoFocus onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); } if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); } }} />
                                     <div className="flex items-center gap-2">
-                                      <Button
-                                        size="sm"
-                                        className="h-7 text-xs"
-                                        onClick={() => handleEditMessage(message.id)}
-                                      >
-                                        Enregistrer
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-7 text-xs"
-                                        onClick={() => {
-                                          setEditingMessageId(null);
-                                          setEditContent("");
-                                        }}
-                                      >
-                                        Annuler
-                                      </Button>
+                                      <Button size="sm" className="h-7 text-xs rounded-lg" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs rounded-lg" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
                                     </div>
                                   </div>
                                 ) : (
                                   <>
                                     {message.message_type === "image" && message.file_url ? (
-                                      <img
-                                        src={message.file_url}
-                                        alt="Image"
-                                        className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity mt-0.5"
-                                        onClick={() => window.open(message.file_url!, "_blank")}
-                                      />
+                                      <img src={message.file_url} alt="Image" className="rounded-xl max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity mt-0.5" onClick={() => window.open(message.file_url!, "_blank")} />
                                     ) : (
-                                      <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words leading-relaxed">
-                                        {message.content}
-                                      </p>
+                                      <p className="text-[13px] text-foreground/85 whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                                     )}
-
-                                    {/* Reactions */}
-                                    <ReactionPills
-                                      messageId={message.id}
-                                      reactions={messageReactions}
-                                      currentUserId={currentUserId}
-                                      onToggle={handleToggleReaction}
-                                    />
+                                    <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
                                   </>
                                 )}
                               </div>
-
-                              {/* Hover toolbar */}
                               {!isEditing && (
-                                <div className="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5">
+                                <div className="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg px-1 py-1">
                                   <div className="relative">
-                                    <button
-                                      onClick={() =>
-                                        setEmojiPickerFor(
-                                          emojiPickerFor === message.id ? null : message.id,
-                                        )
-                                      }
-                                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                      title="Réagir"
-                                    >
-                                      <SmilePlus className="h-3.5 w-3.5" />
-                                    </button>
-                                    {emojiPickerFor === message.id && (
-                                      <QuickEmojiPicker
-                                        onSelect={(emoji) =>
-                                          handleToggleReaction(message.id, emoji)
-                                        }
-                                        onClose={() => setEmojiPickerFor(null)}
-                                      />
-                                    )}
+                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="R\u00e9agir"><SmilePlus className="h-3.5 w-3.5" /></button>
+                                    {emojiPickerFor === message.id && <QuickEmojiPicker onSelect={(emoji) => handleToggleReaction(message.id, emoji)} onClose={() => setEmojiPickerFor(null)} />}
                                   </div>
-                                  {isOwn && (
-                                    <button
-                                      onClick={() => {
-                                        setEditingMessageId(message.id);
-                                        setEditContent(message.content || "");
-                                      }}
-                                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                      title="Modifier"
-                                    >
-                                      <Pencil className="h-3.5 w-3.5" />
-                                    </button>
-                                  )}
-                                  {(isOwn || isAdmin) && (
-                                    <button
-                                      onClick={() => handleDeleteMessage(message.id)}
-                                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                      title="Supprimer"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
-                                  )}
+                                  {isOwn && <button onClick={() => { setEditingMessageId(message.id); setEditContent(message.content || ""); }} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Modifier"><Pencil className="h-3.5 w-3.5" /></button>}
+                                  {(isOwn || isAdmin) && <button onClick={() => handleDeleteMessage(message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Supprimer"><Trash2 className="h-3.5 w-3.5" /></button>}
                                 </div>
                               )}
                             </div>
@@ -2283,98 +1584,58 @@ export function ChatLayout({
               </div>
             </ScrollArea>
 
-            {/* Image preview */}
             {imagePreview && (
-              <div className="px-4 pb-2">
+              <div className="px-5 pb-2">
                 <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Aperçu"
-                    className="h-20 rounded-lg object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImagePreview(null);
-                      setImageUrl(null);
-                    }}
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+                  <img src={imagePreview} alt="Aper\u00e7u" className="h-20 rounded-xl object-cover shadow-sm" />
+                  <button type="button" onClick={() => { setImagePreview(null); setImageUrl(null); }} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-foreground/80 flex items-center justify-center text-background hover:bg-foreground transition-colors shadow-sm"><X className="h-3 w-3" /></button>
                 </div>
               </div>
             )}
 
-            {/* Typing indicator + input */}
-            <div className="px-4 py-3 border-t">
-              {typingUsers.length > 0 && (
-                <div className="mb-2">
-                  <TypingIndicator users={typingUsers} />
-                </div>
-              )}
-              <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 h-9 w-9 mb-px"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingImage}
-                >
-                  {uploadingImage ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Paperclip className="h-4 w-4" />
-                  )}
+            <div className="px-5 py-4 border-t border-border/50">
+              {typingUsers.length > 0 && <div className="mb-2"><TypingIndicator users={typingUsers} /></div>}
+              <form onSubmit={handleSendMessage} className="flex items-end gap-2.5">
+                <Button type="button" variant="ghost" size="icon" className="shrink-0 h-9 w-9 mb-0.5 rounded-xl" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage}>
+                  {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
                 </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 <div className="flex-1 relative">
                   <Textarea
                     value={newMessage}
                     onChange={handleInputChange}
                     onKeyDown={handleInputKeyDown}
-                    placeholder={
-                      activeChannel.type === "direct"
-                        ? `Message à ${activePartner?.full_name || "utilisateur"}...`
-                        : `Message dans #${activeChannel.name}...`
-                    }
-                    className="min-h-[40px] max-h-[120px] resize-none text-sm py-2.5 pr-10"
+                    placeholder={activeChannel.type === "direct" ? `Message \u00e0 ${activePartner?.full_name || "utilisateur"}...` : `Message dans #${activeChannel.name}...`}
+                    className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
                     rows={1}
                   />
                   <Button
-                    type="submit"
-                    size="icon"
+                    type="submit" size="icon"
                     className={cn(
-                      "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
+                      "absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200",
                       newMessage.trim() || imageUrl
-                        ? "bg-[#7af17a] text-black hover:bg-[#7af17a]/90"
-                        : "bg-muted text-muted-foreground",
+                        ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30"
+                        : "bg-secondary text-muted-foreground/40",
                     )}
                     disabled={!newMessage.trim() && !imageUrl}
                   >
-                    <Send className="h-3.5 w-3.5" />
+                    <Send className="h-4 w-4" />
                   </Button>
                 </div>
               </form>
             </div>
           </>
         ) : (
-          /* Empty state */
-          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-3">
-            <div className="h-16 w-16 rounded-2xl bg-muted/30 flex items-center justify-center">
-              <MessageSquare className="h-8 w-8 opacity-30" />
+          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-4">
+            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-[#7af17a]/10 to-[#7af17a]/5 flex items-center justify-center shadow-inner">
+              <MessageSquare className="h-10 w-10 text-[#7af17a]/30" />
             </div>
-            <p className="font-medium text-sm">Sélectionnez une conversation</p>
-            <p className="text-xs text-muted-foreground/60 max-w-xs text-center">
-              Choisissez un channel, un message direct ou une conversation
-            </p>
+            <div className="text-center">
+              <p className="font-semibold text-base text-foreground/70">S\u00e9lectionnez une conversation</p>
+              <p className="text-[13px] text-muted-foreground/40 mt-1 max-w-xs">
+                Choisissez un channel, un message direct ou une conversation pour commencer
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -2383,92 +1644,46 @@ export function ChatLayout({
       {/* DIALOGS                                                           */}
       {/* ================================================================= */}
 
-      {/* Dialog: Créer un channel */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Créer un channel</DialogTitle>
-            <DialogDescription>
-              Ajoutez un nouveau channel de discussion.
-            </DialogDescription>
+            <DialogTitle className="text-lg">Cr\u00e9er un channel</DialogTitle>
+            <DialogDescription>Ajoutez un nouveau channel de discussion.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="channel-name">Nom</Label>
-              <Input
-                id="channel-name"
-                placeholder="ex: général, ventes, support..."
-                value={newChannelName}
-                onChange={(e) => setNewChannelName(e.target.value)}
-              />
+              <Input id="channel-name" placeholder="ex: g\u00e9n\u00e9ral, ventes, support..." value={newChannelName} onChange={(e) => setNewChannelName(e.target.value)} className="rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="channel-desc">Description (optionnel)</Label>
-              <Input
-                id="channel-desc"
-                placeholder="De quoi parle ce channel ?"
-                value={newChannelDescription}
-                onChange={(e) => setNewChannelDescription(e.target.value)}
-              />
+              <Input id="channel-desc" placeholder="De quoi parle ce channel ?" value={newChannelDescription} onChange={(e) => setNewChannelDescription(e.target.value)} className="rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select
-                value={newChannelType}
-                onValueChange={(v) =>
-                  setNewChannelType(v as "group" | "direct" | "announcement")
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+              <Select value={newChannelType} onValueChange={(v) => setNewChannelType(v as "group" | "direct" | "announcement")}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="group">Groupe</SelectItem>
                   <SelectItem value="announcement">Annonce</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>
-                Membres ({selectedMemberIds.length})
-              </Label>
-              <Input
-                placeholder="Rechercher..."
-                value={memberSearch}
-                onChange={(e) => setMemberSearch(e.target.value)}
-                className="h-8 text-sm"
-              />
-              <ScrollArea className="h-40 border rounded-md p-2">
+              <Label>Membres ({selectedMemberIds.length})</Label>
+              <Input placeholder="Rechercher..." value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} className="h-9 text-sm rounded-xl" />
+              <ScrollArea className="h-40 border rounded-xl p-2">
                 {loadingUsers ? (
-                  <div className="flex items-center justify-center py-4 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  </div>
+                  <div className="flex items-center justify-center py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-2" /></div>
                 ) : (
                   <div className="space-y-0.5">
                     {filteredUsers.map((user) => (
-                      <label
-                        key={user.id}
-                        className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={selectedMemberIds.includes(user.id)}
-                          onCheckedChange={() => toggleMember(user.id)}
-                        />
+                      <label key={user.id} className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-secondary cursor-pointer">
+                        <Checkbox checked={selectedMemberIds.includes(user.id)} onCheckedChange={() => toggleMember(user.id)} />
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <div
-                            className={cn(
-                              "h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0",
-                              getAvatarColor(user.id),
-                            )}
-                          >
-                            {getInitials(user.full_name)}
-                          </div>
-                          <span className="text-sm truncate">
-                            {user.full_name || "Sans nom"}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground capitalize">
-                            {user.role}
-                          </span>
+                          <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0", getAvatarColor(user.id))}>{getInitials(user.full_name)}</div>
+                          <span className="text-sm truncate">{user.full_name || "Sans nom"}</span>
+                          <span className="text-[10px] text-muted-foreground capitalize">{user.role}</span>
                         </div>
                       </label>
                     ))}
@@ -2478,162 +1693,89 @@ export function ChatLayout({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleCreateChannel} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Créer
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="rounded-xl">Annuler</Button>
+            <Button onClick={handleCreateChannel} disabled={saving} className="rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90">
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Cr\u00e9er
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: Nouveau DM */}
       <Dialog open={showNewDMDialog} onOpenChange={setShowNewDMDialog}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              Nouveau message
-            </DialogTitle>
-            <DialogDescription>
-              Sélectionnez un membre pour démarrer une conversation.
-            </DialogDescription>
+            <DialogTitle className="flex items-center gap-2 text-lg"><UserPlus className="h-4.5 w-4.5" /> Nouveau message</DialogTitle>
+            <DialogDescription>S\u00e9lectionnez un membre pour d\u00e9marrer une conversation.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="relative">
-              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un membre..."
-                value={dmSearch}
-                onChange={(e) => setDmSearch(e.target.value)}
-                className="pl-9 h-9"
-                autoFocus
-              />
+              <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Input placeholder="Rechercher un membre..." value={dmSearch} onChange={(e) => setDmSearch(e.target.value)} className="pl-10 h-10 rounded-xl" autoFocus />
             </div>
             <ScrollArea className="h-64">
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {filteredDMUsers.map((user) => (
-                  <button
-                    key={user.id}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
-                    onClick={() => handleStartDM(user.id)}
-                  >
-                    <div
-                      className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0",
-                        getAvatarColor(user.id),
-                      )}
-                    >
-                      {getInitials(user.full_name)}
-                    </div>
+                  <button key={user.id} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-all text-left" onClick={() => handleStartDM(user.id)}>
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm", getAvatarColor(user.id))}>{getInitials(user.full_name)}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {user.full_name || "Sans nom"}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground capitalize">
-                        {user.role}
-                      </p>
+                      <p className="text-[13px] font-medium truncate">{user.full_name || "Sans nom"}</p>
+                      <p className="text-[11px] text-muted-foreground/60 capitalize">{user.role}</p>
                     </div>
                   </button>
                 ))}
-                {filteredDMUsers.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-6">
-                    Aucun membre trouvé
-                  </p>
-                )}
+                {filteredDMUsers.length === 0 && <p className="text-xs text-muted-foreground/50 text-center py-6">Aucun membre trouv\u00e9</p>}
               </div>
             </ScrollArea>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: Gérer les membres */}
       <Dialog open={showMembersDialog} onOpenChange={setShowMembersDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>
-              Membres — {channelToManage?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Gérez les membres de ce channel.
-            </DialogDescription>
+            <DialogTitle className="text-lg">Membres \u2014 {channelToManage?.name}</DialogTitle>
+            <DialogDescription>G\u00e9rez les membres de ce channel.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <Input
-              placeholder="Rechercher..."
-              value={memberSearch}
-              onChange={(e) => setMemberSearch(e.target.value)}
-              className="h-8 text-sm"
-            />
-            <ScrollArea className="h-56 border rounded-md p-2">
+            <Input placeholder="Rechercher..." value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} className="h-9 text-sm rounded-xl" />
+            <ScrollArea className="h-56 border rounded-xl p-2">
               {loadingUsers ? (
-                <div className="flex items-center justify-center py-4 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                </div>
+                <div className="flex items-center justify-center py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-2" /></div>
               ) : (
                 <div className="space-y-0.5">
                   {filteredUsers.map((user) => (
-                    <label
-                      key={user.id}
-                      className="flex items-center gap-3 px-2 py-1.5 rounded-md hover:bg-muted cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={selectedMemberIds.includes(user.id)}
-                        onCheckedChange={() => toggleMember(user.id)}
-                      />
+                    <label key={user.id} className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-secondary cursor-pointer">
+                      <Checkbox checked={selectedMemberIds.includes(user.id)} onCheckedChange={() => toggleMember(user.id)} />
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div
-                          className={cn(
-                            "h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0",
-                            getAvatarColor(user.id),
-                          )}
-                        >
-                          {getInitials(user.full_name)}
-                        </div>
-                        <span className="text-sm truncate">
-                          {user.full_name || "Sans nom"}
-                        </span>
+                        <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0", getAvatarColor(user.id))}>{getInitials(user.full_name)}</div>
+                        <span className="text-sm truncate">{user.full_name || "Sans nom"}</span>
                       </div>
                     </label>
                   ))}
                 </div>
               )}
             </ScrollArea>
-            <p className="text-xs text-muted-foreground">
-              {selectedMemberIds.length} membre{selectedMemberIds.length > 1 ? "s" : ""}
-            </p>
+            <p className="text-xs text-muted-foreground/60">{selectedMemberIds.length} membre{selectedMemberIds.length > 1 ? "s" : ""}</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowMembersDialog(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleUpdateMembers} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Enregistrer
+            <Button variant="outline" onClick={() => setShowMembersDialog(false)} className="rounded-xl">Annuler</Button>
+            <Button onClick={handleUpdateMembers} disabled={saving} className="rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90">
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Enregistrer
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: Confirmer suppression */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Supprimer le channel</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer &quot;{channelToManage?.name}&quot; ?
-              Tous les messages seront définitivement supprimés.
-            </DialogDescription>
+            <DialogTitle className="text-lg">Supprimer le channel</DialogTitle>
+            <DialogDescription>\u00cates-vous s\u00fbr de vouloir supprimer &quot;{channelToManage?.name}&quot; ? Tous les messages seront d\u00e9finitivement supprim\u00e9s.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-              Annuler
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteChannel} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Supprimer
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} className="rounded-xl">Annuler</Button>
+            <Button variant="destructive" onClick={handleDeleteChannel} disabled={saving} className="rounded-xl">
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -70,10 +70,15 @@ export async function sendMessage(conversationId: string, content: string, type:
 
   messages.push(newMessage);
 
-  await supabase.from("dm_conversations").update({
+  const { error } = await supabase.from("dm_conversations").update({
     messages,
     last_message_at: new Date().toISOString(),
   }).eq("id", conversationId);
+
+  if (error) {
+    console.error("Inbox sendMessage error:", error.message);
+    throw new Error("Échec de l'envoi du message");
+  }
 
   revalidatePath("/inbox");
 }

@@ -278,7 +278,7 @@ export async function getUserSessions(userId?: string) {
   let query = supabase
     .from("roleplay_sessions")
     .select("*, profile:roleplay_prospect_profiles(name, niche, difficulty), user:profiles(full_name, avatar_url)")
-    .order("started_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (userId) query = query.eq("user_id", userId);
 

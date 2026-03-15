@@ -189,6 +189,7 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
                 <User className="h-4 w-4" />
                 Mon profil
               </button>
+              {!["client_b2b", "client_b2c"].includes(role) && (
               <button
                 onClick={() => { setUserMenuOpen(false); router.push("/settings"); }}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
@@ -196,6 +197,7 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
                 <Settings className="h-4 w-4" />
                 Paramètres
               </button>
+              )}
               <div className="mx-2 border-t border-border" />
               <button
                 onClick={handleLogout}

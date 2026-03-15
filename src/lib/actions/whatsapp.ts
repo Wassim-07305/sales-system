@@ -398,7 +398,7 @@ export async function sendWhatsAppMessage(data: {
   }
 
   // --- Direct Meta API path (fallback) ---
-  if (status !== "sent" || !waMessageId) {
+  if (!waMessageId) {
     const accessToken = await getApiKey("WHATSAPP_ACCESS_TOKEN");
     const phoneNumberId = await getApiKey("WHATSAPP_PHONE_NUMBER_ID");
 
@@ -435,6 +435,11 @@ export async function sendWhatsAppMessage(data: {
         status = "failed";
       }
     }
+  }
+
+  // If neither API produced a message ID, mark as failed
+  if (!waMessageId) {
+    status = "failed";
   }
 
   // Enregistrer le message en base

@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -86,7 +85,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
   }
 
   const filtered = useMemo(() => {
-    let result = initialContacts.filter((c) => {
+    const result = initialContacts.filter((c) => {
       const matchesSearch =
         !search ||
         c.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -122,7 +121,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
     return counts;
   }, [initialContacts]);
 
-  function SortHeader({ label, sortId }: { label: string; sortId: SortKey }) {
+  const renderSortHeader = (label: string, sortId: SortKey) => {
     const active = sortKey === sortId;
     return (
       <button
@@ -136,7 +135,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
         <ArrowUpDown className={cn("h-3 w-3", active && "text-brand")} />
       </button>
     );
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -208,11 +207,11 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[280px]"><SortHeader label="Contact" sortId="name" /></TableHead>
-                  <TableHead><SortHeader label="Email" sortId="email" /></TableHead>
-                  <TableHead className="w-[120px]"><SortHeader label="Rôle" sortId="role" /></TableHead>
-                  <TableHead><SortHeader label="Entreprise" sortId="company" /></TableHead>
-                  <TableHead className="w-[100px]"><SortHeader label="Santé" sortId="health" /></TableHead>
+                  <TableHead className="w-[280px]">{renderSortHeader("Contact", "name")}</TableHead>
+                  <TableHead>{renderSortHeader("Email", "email")}</TableHead>
+                  <TableHead className="w-[120px]">{renderSortHeader("Rôle", "role")}</TableHead>
+                  <TableHead>{renderSortHeader("Entreprise", "company")}</TableHead>
+                  <TableHead className="w-[100px]">{renderSortHeader("Santé", "health")}</TableHead>
                   <TableHead className="text-right w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>

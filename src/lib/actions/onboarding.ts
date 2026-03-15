@@ -48,12 +48,12 @@ export async function completeOnboardingStep(
       .eq("id", user.id);
   }
 
-  // Update onboarding_step counter
+  // Update onboarding_step counter — completedSteps already includes the newly upserted step
   const completedCount = completedSteps?.length || 0;
   await supabase
     .from("profiles")
     .update({
-      onboarding_step: completedCount + (completedIds.has(stepId) ? 0 : 1),
+      onboarding_step: completedCount,
     })
     .eq("id", user.id);
 

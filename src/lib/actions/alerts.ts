@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { notify, notifyMany } from "@/lib/actions/notifications";
+import { notify } from "@/lib/actions/notifications";
 
 /**
  * Check for various alert conditions and create notifications.

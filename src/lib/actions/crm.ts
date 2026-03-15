@@ -86,7 +86,7 @@ export async function getFilteredDeals(filters: DealFilters) {
   let query = supabase
     .from("deals")
     .select(
-      "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",
+      "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*), stage:pipeline_stages(*)",
     );
 
   // Date range filter

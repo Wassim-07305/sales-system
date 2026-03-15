@@ -37,6 +37,7 @@ export function LoginForm() {
 
       router.push("/dashboard");
       router.refresh();
+      setLoading(false);
     } catch {
       toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
       setLoading(false);

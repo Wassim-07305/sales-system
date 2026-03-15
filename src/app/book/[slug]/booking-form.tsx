@@ -73,6 +73,7 @@ export function BookingForm({ slug }: BookingFormProps) {
       scheduled_at: scheduledAt.toISOString(),
       slot_type: "discovery",
       duration_minutes: 30,
+      status: "confirmed",
       qualification_data: { revenue, challenge, urgency },
     });
 

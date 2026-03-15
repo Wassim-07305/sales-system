@@ -412,8 +412,8 @@ export async function getContactHeatmap() {
   // Get all prospect interactions with timestamps
   const { data: prospects } = await supabase
     .from("prospects")
-    .select("contacted_at, status, last_reply_at")
-    .not("contacted_at", "is", null);
+    .select("last_message_at, status, created_at")
+    .not("last_message_at", "is", null);
 
   // Get bookings with scheduling times
   const { data: bookings } = await supabase
@@ -426,12 +426,12 @@ export async function getContactHeatmap() {
 
   // Analyze prospect contacts — count responses
   for (const p of prospects || []) {
-    if (p.contacted_at) {
-      const date = new Date(p.contacted_at);
+    if (p.last_message_at) {
+      const date = new Date(p.last_message_at);
       const day = date.getDay(); // 0=Sun, 6=Sat
       const hour = date.getHours();
       contactCount[day][hour]++;
-      if (p.status === "replied" || p.status === "hot" || p.last_reply_at) {
+      if (p.status === "replied" || p.status === "hot" || p.status === "booked") {
         heatmap[day][hour]++;
       }
     }

@@ -112,6 +112,7 @@ export async function addProspect(formData: { name: string; profile_url?: string
     platform: formData.platform,
     list_id: formData.list_id || null,
     status: "new",
+    created_by: user.id,
   });
   if (error) return { error: "Impossible d'ajouter le prospect." };
   revalidatePath("/prospecting");
@@ -184,6 +185,10 @@ export async function incrementReplies() {
   const { data: quota } = await supabase.from("daily_quotas").select("id, replies_received").eq("user_id", user.id).eq("date", today).single();
   if (quota) {
     await supabase.from("daily_quotas").update({ replies_received: quota.replies_received + 1 }).eq("id", quota.id);
+  } else {
+    await supabase.from("daily_quotas").insert({
+      user_id: user.id, date: today, dms_sent: 0, dms_target: 20, replies_received: 1, bookings_from_dms: 0,
+    });
   }
   revalidatePath("/prospecting");
 }

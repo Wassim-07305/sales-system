@@ -81,10 +81,13 @@ const statusConfig: Record<BookingStatus, { label: string; color: string; bg: st
 
 const slotTypeLabels: Record<string, string> = {
   discovery: "Appel découverte",
+  decouverte: "Appel découverte",
   demo: "Démo produit",
   closing: "Appel closing",
   follow_up: "Suivi",
+  suivi: "Suivi",
   coaching: "Coaching",
+  autre: "Autre",
 };
 
 const AVATAR_COLORS = [

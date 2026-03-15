@@ -30,7 +30,7 @@ export default async function ChatPage() {
   ]);
 
   // Compute unread counts inline
-  let unreadCounts: Record<string, number> = {};
+  const unreadCounts: Record<string, number> = {};
   try {
     const { data: reads } = await supabase
       .from("channel_reads")
