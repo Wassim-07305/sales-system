@@ -304,6 +304,35 @@ export async function sendWhatsAppMessage(data: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // --- Unipile direct chat path (for Unipile-sourced conversations) ---
+  if (data.prospectId.startsWith("unipile-")) {
+    const chatId = data.prospectId.replace("unipile-", "");
+    const dsn = process.env.UNIPILE_DSN;
+    const apiKey = process.env.UNIPILE_API_KEY;
+    if (!dsn || !apiKey) throw new Error("Unipile non configuré");
+
+    const res = await fetch(`${dsn}/api/v1/chats/${chatId}/messages`, {
+      method: "POST",
+      headers: {
+        "X-API-KEY": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text: data.content }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Unipile send error:", err);
+      throw new Error("Erreur envoi WhatsApp");
+    }
+
+    revalidatePath("/chat");
+    revalidatePath("/whatsapp");
+    return { success: true };
+  }
+
+  // --- Legacy path for DB-sourced conversations ---
+
   // Get connection
   const { data: connection } = await supabase
     .from("whatsapp_connections")
