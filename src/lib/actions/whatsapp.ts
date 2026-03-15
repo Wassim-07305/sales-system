@@ -116,10 +116,13 @@ export async function getConversations() {
 
         interface UnipileChat {
           id: string;
-          name?: string;
+          name?: string | null;
           timestamp?: string;
           updated_at?: string;
           unread_count?: number;
+          provider_id?: string;
+          attendee_public_identifier?: string;
+          attendee_provider_id?: string;
           last_message?: {
             text?: string;
             timestamp?: string;
@@ -132,12 +135,55 @@ export async function getConversations() {
           }>;
         }
 
-        const conversations = (chats as UnipileChat[]).map((chat) => {
+        /** Extract a readable phone number from WhatsApp identifiers like "33601383098@s.whatsapp.net" */
+        function extractPhoneName(chat: UnipileChat): string {
+          const identifier = chat.attendee_public_identifier || chat.provider_id || "";
+          const match = identifier.match(/^(\d+)@/);
+          if (match) {
+            const digits = match[1];
+            // Format as +XX X XX XX XX XX for French numbers, otherwise +digits
+            if (digits.startsWith("33") && digits.length >= 11) {
+              return `+${digits.slice(0, 2)} ${digits.slice(2, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+            }
+            return `+${digits}`;
+          }
+          return "Contact";
+        }
+
+        // Fetch last message for each chat in parallel (limit to first 20 to avoid overload)
+        const dsn = process.env.UNIPILE_DSN;
+        const apiKey = process.env.UNIPILE_API_KEY;
+        const chatsToProcess = (chats as UnipileChat[]).slice(0, 30);
+
+        interface UnipileMessage {
+          id: string;
+          text?: string | null;
+          is_sender?: number | boolean;
+          timestamp?: string;
+          attachments?: Array<{ type?: string }>;
+        }
+
+        const lastMessages = await Promise.all(
+          chatsToProcess.map(async (chat) => {
+            try {
+              const res = await fetch(`${dsn}/api/v1/chats/${chat.id}/messages?limit=1`, {
+                headers: { "X-API-KEY": apiKey!, Accept: "application/json" },
+              });
+              if (!res.ok) return null;
+              const data = await res.json();
+              const items = data?.items as UnipileMessage[] | undefined;
+              return items?.[0] || null;
+            } catch {
+              return null;
+            }
+          })
+        );
+
+        const conversations = chatsToProcess.map((chat, idx) => {
           const attendee = chat.attendees?.[0];
           const contactName =
-            chat.name || attendee?.display_name || attendee?.name || "Contact";
+            chat.name || attendee?.display_name || attendee?.name || extractPhoneName(chat);
           const lastMsgTime =
-            chat.last_message?.timestamp ||
             chat.timestamp ||
             chat.updated_at ||
             new Date().toISOString();
@@ -150,14 +196,18 @@ export async function getConversations() {
             created_at: string;
           }> = [];
 
-          if (chat.last_message?.text) {
+          const lastMsg = lastMessages[idx];
+          if (lastMsg) {
+            const hasAttachment = lastMsg.attachments && lastMsg.attachments.length > 0;
+            const content = lastMsg.text
+              || (hasAttachment ? `[${lastMsg.attachments![0].type || "pièce jointe"}]` : null);
             messages.push({
-              id: `unipile-${chat.id}-last`,
-              direction: chat.last_message.is_sender ? "outbound" : "inbound",
-              content: chat.last_message.text,
+              id: `unipile-${lastMsg.id}`,
+              direction: lastMsg.is_sender ? "outbound" : "inbound",
+              content,
               media_url: null,
               status: "delivered",
-              created_at: lastMsgTime,
+              created_at: lastMsg.timestamp || lastMsgTime,
             });
           }
 
@@ -171,7 +221,7 @@ export async function getConversations() {
               status: "active",
             },
             messages,
-            last_message_at: lastMsgTime,
+            last_message_at: lastMsg?.timestamp || lastMsgTime,
             unread_count: chat.unread_count || 0,
           };
         });
