@@ -1,7 +1,7 @@
 # Suivi Cahier des Charges — Sales System
 
-> **Dernière mise à jour** : 2026-03-14
-> **Couverture globale** : 95% (80 faits / 4 manquants API tierce)
+> **Dernière mise à jour** : 2026-03-15
+> **Couverture globale** : 97% (82 faits / 4 manquants API tierce)
 > **Note** : Tous les items internes sont complétés. Les 4 manquants nécessitent des APIs tierces payantes (Sage/SAP, Zapier/Make, Sentry)
 
 ---
@@ -255,10 +255,10 @@
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 80 | 95% |
+| ✅ Fait | 82 | 95% |
 | ⚠️ Partiel | 0 | 0% |
 | ❌ Manquant (API tierce) | 4 | 5% |
-| **Total** | **84** | **100%** |
+| **Total** | **86** | **100%** |
 
 ## Features nécessitant une API tierce (non faisables en interne)
 
@@ -290,3 +290,5 @@
 7. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait (OpenRouter)
 8. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait (Supabase Storage)
 9. ~~**F54.9** — Migration CRM complète~~ ✅ Fait
+10. ~~**C5** — Rapport hebdo auto B2B~~ ✅ Fait (cron `/api/cron/weekly-reports`, Vercel schedule lundi 9h)
+11. ~~**C6** — To-do list setters~~ ✅ Fait (`SetterTasksWidget` + `getSetterTasks/create/toggle/delete`)
