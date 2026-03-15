@@ -327,6 +327,151 @@ export async function getUnipileMessages(chatId: string): Promise<{
 }
 
 // ---------------------------------------------------------------------------
+// Get LinkedIn / Instagram conversations for Chat sidebar
+// ---------------------------------------------------------------------------
+
+export async function getUnipileSocialConversations(platform: "linkedin" | "instagram"): Promise<
+  Array<{
+    id: string;
+    prospect_id: string;
+    prospect: { id: string; name: string; platform: string; profile_url: string | null } | null;
+    platform: string;
+    messages: Array<{ sender: string; content: string; type: string; timestamp: string }>;
+    last_message_at: string;
+    unread_count: number;
+  }>
+> {
+  try {
+    const dsn = process.env.UNIPILE_DSN;
+    const apiKey = process.env.UNIPILE_API_KEY;
+    if (!dsn || !apiKey) return [];
+
+    // Find account for this platform
+    const client = getUnipileClient();
+    if (!client) return [];
+
+    const accountsRes = await client.account.getAll();
+    const accounts = Array.isArray(accountsRes)
+      ? accountsRes
+      : (accountsRes as { items?: Array<{ id: string; type?: string; provider?: string }> }).items || [];
+
+    const providerName = platform === "linkedin" ? "LINKEDIN" : "INSTAGRAM";
+    const account = (accounts as Array<{ id: string; type?: string; provider?: string }>).find(
+      (a) => (a.type || a.provider || "").toUpperCase() === providerName
+    );
+    if (!account) return [];
+
+    // Fetch chats
+    const chatsRes = await fetch(`${dsn}/api/v1/chats?account_id=${account.id}&limit=50`, {
+      headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+    });
+    if (!chatsRes.ok) return [];
+    const chatsData = await chatsRes.json();
+    const chats = (chatsData.items || []) as Array<{
+      id: string;
+      name?: string | null;
+      timestamp?: string;
+      unread_count?: number;
+      attendee_provider_id?: string;
+      attendee_public_identifier?: string;
+      provider_id?: string;
+    }>;
+
+    // Fetch attendees for each chat (parallel, max 30)
+    const chatsToProcess = chats.slice(0, 30);
+
+    const [attendeesResults, messagesResults] = await Promise.all([
+      // Fetch attendees
+      Promise.all(
+        chatsToProcess.map(async (chat) => {
+          try {
+            const res = await fetch(`${dsn}/api/v1/chats/${chat.id}/attendees`, {
+              headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+            });
+            if (!res.ok) return [];
+            const data = await res.json();
+            return (data.items || []) as Array<{
+              name?: string;
+              is_self?: number;
+              picture_url?: string;
+              profile_url?: string;
+              specifics?: { occupation?: string };
+            }>;
+          } catch {
+            return [];
+          }
+        })
+      ),
+      // Fetch last message
+      Promise.all(
+        chatsToProcess.map(async (chat) => {
+          try {
+            const res = await fetch(`${dsn}/api/v1/chats/${chat.id}/messages?limit=1`, {
+              headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+            });
+            if (!res.ok) return null;
+            const data = await res.json();
+            const msg = data.items?.[0];
+            return msg
+              ? {
+                  text: msg.text || null,
+                  is_sender: !!msg.is_sender,
+                  timestamp: msg.timestamp || chat.timestamp,
+                  attachments: msg.attachments || [],
+                }
+              : null;
+          } catch {
+            return null;
+          }
+        })
+      ),
+    ]);
+
+    return chatsToProcess.map((chat, idx) => {
+      const attendees = attendeesResults[idx];
+      const otherAttendee = attendees.find((a) => !a.is_self);
+      const contactName = otherAttendee?.name || chat.name || "Contact";
+      const profileUrl = otherAttendee?.profile_url || null;
+      const lastMsg = messagesResults[idx];
+      const lastMsgTime = lastMsg?.timestamp || chat.timestamp || new Date().toISOString();
+
+      const messages: Array<{ sender: string; content: string; type: string; timestamp: string }> = [];
+      if (lastMsg) {
+        const hasAttachment = lastMsg.attachments && lastMsg.attachments.length > 0;
+        const content = lastMsg.text
+          || (hasAttachment ? `[${lastMsg.attachments[0]?.type || "pièce jointe"}]` : "");
+        messages.push({
+          sender: lastMsg.is_sender ? "me" : "prospect",
+          content,
+          type: "text",
+          timestamp: lastMsgTime,
+        });
+      }
+
+      return {
+        id: `unipile-${chat.id}`,
+        prospect_id: `unipile-${chat.id}`,
+        prospect: {
+          id: `unipile-${chat.id}`,
+          name: contactName,
+          platform,
+          profile_url: profileUrl,
+        },
+        platform,
+        messages,
+        last_message_at: lastMsgTime,
+        unread_count: chat.unread_count || 0,
+      };
+    }).sort((a, b) =>
+      new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+    );
+  } catch (err) {
+    console.error(`Unipile ${platform} conversations error:`, err);
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // LinkedIn: get profile
 // ---------------------------------------------------------------------------
 

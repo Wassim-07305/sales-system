@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { ChatLayout } from "./chat-layout";
 import type { UserRole } from "@/lib/types/database";
 import { getConversations as getWAConversations } from "@/lib/actions/whatsapp";
-import { getConversations as getInboxConversations } from "@/lib/actions/inbox";
-import { getUnipileStatus } from "@/lib/actions/unipile";
+import { getUnipileStatus, getUnipileSocialConversations } from "@/lib/actions/unipile";
 
 export default async function ChatPage() {
   const supabase = await createClient();
@@ -14,7 +13,7 @@ export default async function ChatPage() {
   if (!user) redirect("/login");
 
   // Fetch all data in parallel
-  const [channelsRes, profileRes, teamRes, waConversations, inboxConversations, unipileStatus] = await Promise.all([
+  const [channelsRes, profileRes, teamRes, waConversations, linkedinConversations, instagramConversations, unipileStatus] = await Promise.all([
     supabase
       .from("channels")
       .select("*")
@@ -25,7 +24,8 @@ export default async function ChatPage() {
       .select("id, full_name, role, avatar_url")
       .neq("id", user.id),
     getWAConversations().catch(() => []),
-    getInboxConversations().catch(() => []),
+    getUnipileSocialConversations("linkedin").catch(() => []),
+    getUnipileSocialConversations("instagram").catch(() => []),
     getUnipileStatus().catch(() => ({ configured: false, accounts: [] })),
   ]);
 
@@ -76,7 +76,10 @@ export default async function ChatPage() {
         ((teamRes.data || []) as Parameters<typeof ChatLayout>[0]["teamMembers"])
       }
       initialWAConversations={waConversations as Parameters<typeof ChatLayout>[0]["initialWAConversations"]}
-      initialInboxConversations={inboxConversations as Parameters<typeof ChatLayout>[0]["initialInboxConversations"]}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initialLinkedinConversations={linkedinConversations as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initialInstagramConversations={instagramConversations as any}
       unipileWhatsApp={
         unipileStatus.configured
           ? {

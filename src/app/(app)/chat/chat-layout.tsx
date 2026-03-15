@@ -93,9 +93,7 @@ import {
   generateUnipileAuthLink,
   getUnipileStatus,
 } from "@/lib/actions/unipile";
-import {
-  sendMessage as sendInboxMessage,
-} from "@/lib/actions/inbox";
+// Social messaging via Unipile REST API (LinkedIn/Instagram)
 import { usePresence } from "@/lib/hooks/use-presence";
 import { TypingIndicator } from "@/components/typing-indicator";
 import { OnlineStatus } from "@/components/online-status";
@@ -123,16 +121,17 @@ interface WAMessage {
   created_at: string;
 }
 
-interface InboxConversation {
+interface SocialConversation {
   id: string;
   prospect_id: string;
   prospect: { id: string; name: string; platform?: string; profile_url?: string } | null;
   platform: string;
-  messages: InboxMessage[];
+  messages: SocialMessage[];
   last_message_at: string;
+  unread_count: number;
 }
 
-interface InboxMessage {
+interface SocialMessage {
   sender: string;
   content: string;
   type: string;
@@ -146,7 +145,8 @@ interface ChatLayoutProps {
   userRole: UserRole;
   teamMembers: TeamMember[];
   initialWAConversations: WAConversation[];
-  initialInboxConversations: InboxConversation[];
+  initialLinkedinConversations: SocialConversation[];
+  initialInstagramConversations: SocialConversation[];
   unipileWhatsApp?: { connected: boolean; accountName?: string } | null;
 }
 
@@ -314,7 +314,8 @@ export function ChatLayout({
   userRole,
   teamMembers,
   initialWAConversations,
-  initialInboxConversations,
+  initialLinkedinConversations,
+  initialInstagramConversations,
   unipileWhatsApp,
 }: ChatLayoutProps) {
   const supabase = useMemo(() => createClient(), []);
@@ -344,13 +345,15 @@ export function ChatLayout({
   const [channelsOpen, setChannelsOpen] = useState(true);
   const [dmsOpen, setDmsOpen] = useState(true);
   const [waOpen, setWaOpen] = useState(true);
-  const [inboxOpen, setInboxOpen] = useState(true);
+  const [linkedinOpen, setLinkedinOpen] = useState(true);
+  const [instagramOpen, setInstagramOpen] = useState(true);
 
-  // ---- Inbox state ----
-  const [inboxConversations, setInboxConversations] = useState<InboxConversation[]>(initialInboxConversations);
-  const [activeInbox, setActiveInbox] = useState<InboxConversation | null>(null);
-  const [inboxMessage, setInboxMessage] = useState("");
-  const [sendingInbox, setSendingInbox] = useState(false);
+  // ---- LinkedIn / Instagram state ----
+  const [linkedinConversations] = useState<SocialConversation[]>(initialLinkedinConversations);
+  const [instagramConversations] = useState<SocialConversation[]>(initialInstagramConversations);
+  const [activeSocial, setActiveSocial] = useState<SocialConversation | null>(null);
+  const [socialMessage, setSocialMessage] = useState("");
+  const [sendingSocial, setSendingSocial] = useState(false);
 
   // ---- Image upload ----
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -879,32 +882,39 @@ export function ChatLayout({
     }
   }
 
-  // ---- Inbox handlers ----
-  async function handleSendInboxMessage(e: React.FormEvent) {
+  // ---- Social (LinkedIn/Instagram) handlers ----
+  async function handleSendSocialMessage(e: React.FormEvent) {
     e.preventDefault();
-    if (!inboxMessage.trim() || !activeInbox) return;
-    const content = inboxMessage.trim();
-    setSendingInbox(true);
-    setInboxMessage("");
+    if (!socialMessage.trim() || !activeSocial) return;
+    const content = socialMessage.trim();
+    setSendingSocial(true);
+    setSocialMessage("");
 
     // Optimistic
-    const optimisticMsg: InboxMessage = {
-      sender: "damien",
+    const optimisticMsg: SocialMessage = {
+      sender: "me",
       content,
       type: "text",
       timestamp: new Date().toISOString(),
     };
-    setActiveInbox((prev) =>
+    setActiveSocial((prev) =>
       prev ? { ...prev, messages: [...prev.messages, optimisticMsg] } : prev,
     );
     setTimeout(scrollToBottom, 50);
 
     try {
-      await sendInboxMessage(activeInbox.id, content);
+      // Send via Unipile REST API
+      const chatId = activeSocial.id.replace("unipile-", "");
+      const res = await fetch("/api/unipile/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, text: content }),
+      });
+      if (!res.ok) throw new Error("Send failed");
     } catch {
       toast.error("Erreur envoi message");
     } finally {
-      setSendingInbox(false);
+      setSendingSocial(false);
     }
   }
 
@@ -1043,7 +1053,12 @@ export function ChatLayout({
     return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
   });
 
-  const filteredInboxConversations = inboxConversations.filter((c) => {
+  const filteredLinkedinConversations = linkedinConversations.filter((c) => {
+    if (!channelSearch) return true;
+    return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
+  });
+
+  const filteredInstagramConversations = instagramConversations.filter((c) => {
     if (!channelSearch) return true;
     return (c.prospect?.name || "").toLowerCase().includes(channelSearch.toLowerCase());
   });
@@ -1067,7 +1082,7 @@ export function ChatLayout({
       <div
         className={cn(
           "w-full md:w-72 flex-shrink-0 flex flex-col border-r bg-muted/30 overflow-hidden",
-          (activeChannel || activeWA || activeInbox) ? "hidden md:flex" : "flex",
+          (activeChannel || activeWA || activeSocial) ? "hidden md:flex" : "flex",
         )}
       >
         {/* Header */}
@@ -1284,7 +1299,7 @@ export function ChatLayout({
                       onClick={() => {
                         setActiveWA(conv);
                         setActiveChannel(null);
-                        setActiveInbox(null);
+                        setActiveSocial(null);
                         setTimeout(scrollToBottom, 100);
                       }}
                     >
@@ -1386,26 +1401,25 @@ export function ChatLayout({
               </div>}
           </div>
 
-          {/* ====== INBOX ====== */}
+          {/* ====== LINKEDIN ====== */}
           <div className="px-2 pt-4 pb-3">
             <div className="flex items-center justify-between px-2 mb-1">
               <button
-                onClick={() => setInboxOpen((v) => !v)}
+                onClick={() => setLinkedinOpen((v) => !v)}
                 className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
               >
-                <ChevronDown className={cn("h-3 w-3 transition-transform", !inboxOpen && "-rotate-90")} />
-                Inbox
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !linkedinOpen && "-rotate-90")} />
+                LinkedIn
               </button>
               <span className="text-[10px] text-muted-foreground">
-                {inboxConversations.length}
+                {linkedinConversations.length}
               </span>
             </div>
-              {inboxOpen && <div className="space-y-px">
-                {filteredInboxConversations.map((conv) => {
-                  const isActive = activeInbox?.id === conv.id;
+              {linkedinOpen && <div className="space-y-px">
+                {filteredLinkedinConversations.map((conv) => {
+                  const isActive = activeSocial?.id === conv.id;
                   const msgs = conv.messages || [];
                   const lastMsg = msgs[msgs.length - 1];
-                  const PlatformIcon = conv.platform === "linkedin" ? Linkedin : Instagram;
                   return (
                     <button
                       key={conv.id}
@@ -1413,10 +1427,12 @@ export function ChatLayout({
                         "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
                         isActive
                           ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                          : conv.unread_count > 0
+                            ? "text-foreground font-semibold hover:bg-muted/50"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                       )}
                       onClick={() => {
-                        setActiveInbox(conv);
+                        setActiveSocial(conv);
                         setActiveChannel(null);
                         setActiveWA(null);
                         setTimeout(scrollToBottom, 100);
@@ -1429,10 +1445,8 @@ export function ChatLayout({
                         )}>
                           {getInitials(conv.prospect?.name)}
                         </div>
-                        <div className={cn(
-                          "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center bg-muted-foreground/80",
-                        )}>
-                          <PlatformIcon className="h-1.5 w-1.5 text-white" />
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center bg-[#0A66C2]">
+                          <Linkedin className="h-1.5 w-1.5 text-white" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 text-left">
@@ -1441,19 +1455,95 @@ export function ChatLayout({
                         </p>
                         {lastMsg && (
                           <p className="text-[11px] text-muted-foreground truncate">
-                            {lastMsg.sender === "damien" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
+                            {lastMsg.sender === "me" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
                           </p>
                         )}
                       </div>
-                      <Badge variant="outline" className="text-[9px] h-4 px-1 shrink-0 capitalize">
-                        {conv.platform}
-                      </Badge>
+                      {conv.unread_count > 0 && (
+                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
+                          {conv.unread_count}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
-                {filteredInboxConversations.length === 0 && (
+                {filteredLinkedinConversations.length === 0 && (
                   <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
-                    {channelSearch ? "Aucun résultat" : "Aucune conversation externe"}
+                    {channelSearch ? "Aucun résultat" : "Aucune conversation LinkedIn"}
+                  </p>
+                )}
+              </div>}
+          </div>
+
+          {/* ====== INSTAGRAM ====== */}
+          <div className="px-2 pt-4 pb-3">
+            <div className="flex items-center justify-between px-2 mb-1">
+              <button
+                onClick={() => setInstagramOpen((v) => !v)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !instagramOpen && "-rotate-90")} />
+                Instagram
+              </button>
+              <span className="text-[10px] text-muted-foreground">
+                {instagramConversations.length}
+              </span>
+            </div>
+              {instagramOpen && <div className="space-y-px">
+                {filteredInstagramConversations.map((conv) => {
+                  const isActive = activeSocial?.id === conv.id;
+                  const msgs = conv.messages || [];
+                  const lastMsg = msgs[msgs.length - 1];
+                  return (
+                    <button
+                      key={conv.id}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors",
+                        isActive
+                          ? "bg-[#7af17a]/10 text-[#7af17a] font-medium"
+                          : conv.unread_count > 0
+                            ? "text-foreground font-semibold hover:bg-muted/50"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                      )}
+                      onClick={() => {
+                        setActiveSocial(conv);
+                        setActiveChannel(null);
+                        setActiveWA(null);
+                        setTimeout(scrollToBottom, 100);
+                      }}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={cn(
+                          "h-7 w-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white",
+                          getAvatarColor(conv.prospect_id || conv.id),
+                        )}>
+                          {getInitials(conv.prospect?.name)}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]">
+                          <Instagram className="h-1.5 w-1.5 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm truncate font-medium">
+                          {conv.prospect?.name || "Inconnu"}
+                        </p>
+                        {lastMsg && (
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {lastMsg.sender === "me" ? "Vous : " : ""}{lastMsg.content?.slice(0, 40)}
+                          </p>
+                        )}
+                      </div>
+                      {conv.unread_count > 0 && (
+                        <span className="bg-[#7af17a] text-black text-[10px] font-bold h-4.5 min-w-4.5 flex items-center justify-center px-1 rounded-full">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                {filteredInstagramConversations.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
+                    {channelSearch ? "Aucun résultat" : "Aucune conversation Instagram"}
                   </p>
                 )}
               </div>}
@@ -1467,7 +1557,7 @@ export function ChatLayout({
       <div
         className={cn(
           "flex-1 flex flex-col min-w-0",
-          !activeChannel && !activeWA && !activeInbox && "hidden md:flex",
+          !activeChannel && !activeWA && !activeSocial && "hidden md:flex",
         )}
       >
         {/* ====== WHATSAPP MESSAGE AREA ====== */}
@@ -1558,12 +1648,12 @@ export function ChatLayout({
               </form>
             </div>
           </>
-        ) : activeInbox ? (
+        ) : activeSocial ? (
           <>
             {/* ====== INBOX MESSAGE AREA ====== */}
             <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-card">
               <button
-                onClick={() => setActiveInbox(null)}
+                onClick={() => setActiveSocial(null)}
                 className="md:hidden text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -1572,14 +1662,14 @@ export function ChatLayout({
                 <div className="relative">
                   <div className={cn(
                     "h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white",
-                    getAvatarColor(activeInbox.prospect_id || activeInbox.id),
+                    getAvatarColor(activeSocial.prospect_id || activeSocial.id),
                   )}>
-                    {getInitials(activeInbox.prospect?.name)}
+                    {getInitials(activeSocial.prospect?.name)}
                   </div>
                   <div className={cn(
                     "absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center ring-2 ring-card bg-muted-foreground/80",
                   )}>
-                    {activeInbox.platform === "linkedin" ? (
+                    {activeSocial.platform === "linkedin" ? (
                       <Linkedin className="h-2 w-2 text-white" />
                     ) : (
                       <Instagram className="h-2 w-2 text-white" />
@@ -1588,15 +1678,15 @@ export function ChatLayout({
                 </div>
                 <div>
                   <h2 className="font-semibold text-sm leading-tight">
-                    {activeInbox.prospect?.name || "Inconnu"}
+                    {activeSocial.prospect?.name || "Inconnu"}
                   </h2>
-                  <p className="text-[11px] text-muted-foreground capitalize">{activeInbox.platform}</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">{activeSocial.platform}</p>
                 </div>
               </div>
             </div>
             <ScrollArea className="flex-1">
               <div className="px-4 py-2 space-y-2">
-                {(activeInbox.messages || []).map((msg, i) => {
+                {(activeSocial.messages || []).map((msg, i) => {
                   const isDamien = msg.sender === "damien";
                   return (
                     <div key={i} className={cn("flex", isDamien ? "justify-end" : "justify-start")}>
@@ -1617,7 +1707,7 @@ export function ChatLayout({
                     </div>
                   );
                 })}
-                {(!activeInbox.messages || activeInbox.messages.length === 0) && (
+                {(!activeSocial.messages || activeSocial.messages.length === 0) && (
                   <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                     <Inbox className="h-8 w-8 opacity-30 mb-3" />
                     <p className="text-sm font-medium">Aucun message</p>
@@ -1627,13 +1717,13 @@ export function ChatLayout({
               </div>
             </ScrollArea>
             <div className="px-4 py-3 border-t">
-              <form onSubmit={handleSendInboxMessage} className="flex items-end gap-2">
+              <form onSubmit={handleSendSocialMessage} className="flex items-end gap-2">
                 <div className="flex-1 relative">
                   <Textarea
-                    value={inboxMessage}
-                    onChange={(e) => setInboxMessage(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendInboxMessage(e); } }}
-                    placeholder={`Message à ${activeInbox.prospect?.name || "prospect"}...`}
+                    value={socialMessage}
+                    onChange={(e) => setSocialMessage(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendSocialMessage(e); } }}
+                    placeholder={`Message à ${activeSocial.prospect?.name || "prospect"}...`}
                     className="min-h-[40px] max-h-[120px] resize-none text-sm py-2.5 pr-10"
                     rows={1}
                   />
@@ -1642,13 +1732,13 @@ export function ChatLayout({
                     size="icon"
                     className={cn(
                       "absolute right-1.5 bottom-1.5 h-7 w-7 rounded-md transition-colors",
-                      inboxMessage.trim()
+                      socialMessage.trim()
                         ? "bg-brand text-brand-dark hover:bg-brand/90"
                         : "bg-muted text-muted-foreground",
                     )}
-                    disabled={!inboxMessage.trim() || sendingInbox}
+                    disabled={!socialMessage.trim() || sendingSocial}
                   >
-                    {sendingInbox ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    {sendingSocial ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                   </Button>
                 </div>
               </form>
