@@ -1016,6 +1016,91 @@ export async function getMissingEodSetters(date?: string) {
   return setters.filter(s => !submittedIds.has(s.id));
 }
 
+// ---------------------------------------------------------------------------
+// Setter/Closer Tasks (to-do list)
+// ---------------------------------------------------------------------------
+
+export async function getSetterTasks() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from("setter_tasks")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    // Table doesn't exist – graceful fallback
+    if (error && error.code === "42P01") return [];
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createSetterTask(title: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { error } = await supabase
+    .from("setter_tasks")
+    .insert({ user_id: user.id, title, completed: false });
+
+  if (error) {
+    // Table may not exist
+    if (error.code === "42P01") return { error: null };
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard");
+  return { error: null };
+}
+
+export async function toggleSetterTask(taskId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  // Get current state
+  const { data: task } = await supabase
+    .from("setter_tasks")
+    .select("completed")
+    .eq("id", taskId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!task) return { error: "Tâche introuvable" };
+
+  const { error } = await supabase
+    .from("setter_tasks")
+    .update({ completed: !task.completed, completed_at: !task.completed ? new Date().toISOString() : null })
+    .eq("id", taskId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  return { error: null };
+}
+
+export async function deleteSetterTask(taskId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  await supabase
+    .from("setter_tasks")
+    .delete()
+    .eq("id", taskId)
+    .eq("user_id", user.id);
+
+  revalidatePath("/dashboard");
+  return { error: null };
+}
+
 export async function getRedemptionHistory() {
   const supabase = await createClient();
   const {

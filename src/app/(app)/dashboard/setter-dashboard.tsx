@@ -35,6 +35,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { SetterTasksWidget } from "./setter-tasks-widget";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("fr-FR", {
@@ -129,7 +130,15 @@ function getCurrentLevel(level: number) {
   );
 }
 
-export function SetterDashboard({ data }: { data: SetterDashboardData }) {
+interface SetterTask {
+  id: string;
+  title: string;
+  completed: boolean;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardData; tasks?: SetterTask[] }) {
   const currentLevel = getCurrentLevel(data.gamification.level);
   const nextLevel = getNextLevel(data.gamification.level);
 
@@ -483,56 +492,62 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
         </Card>
       </div>
 
-      {/* Upcoming calls */}
-      <Card className="border-border/50 hover:shadow-md transition-all">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <Phone className="h-3.5 w-3.5 text-brand" />
-            </div>
-            Prochains appels
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {data.upcomingCalls.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-              <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-                <Phone className="h-6 w-6 text-muted-foreground/40" />
+      {/* Tasks + Upcoming calls */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Task list widget */}
+        <SetterTasksWidget initialTasks={tasks} />
+
+        {/* Upcoming calls */}
+        <Card className="border-border/50 hover:shadow-md transition-all">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Phone className="h-3.5 w-3.5 text-brand" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground">Aucun appel prevu</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Les prochains appels apparaitront ici</p>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {data.upcomingCalls.map((call) => (
-                <div
-                  key={call.id}
-                  className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-xs font-bold ring-1 ring-brand/20">
-                      {call.name?.charAt(0) || "?"}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        {call.name || "Inconnu"}
-                      </p>
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5">
-                        {call.type}
-                      </Badge>
-                    </div>
-                  </div>
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {format(new Date(call.time), "EEE dd MMM HH:mm", {
-                      locale: fr,
-                    })}
-                  </span>
+              Prochains appels
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {data.upcomingCalls.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                  <Phone className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <p className="text-sm font-medium text-muted-foreground">Aucun appel prevu</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Les prochains appels apparaitront ici</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {data.upcomingCalls.map((call) => (
+                  <div
+                    key={call.id}
+                    className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-xs font-bold ring-1 ring-brand/20">
+                        {call.name?.charAt(0) || "?"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {call.name || "Inconnu"}
+                        </p>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5">
+                          {call.type}
+                        </Badge>
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {format(new Date(call.time), "EEE dd MMM HH:mm", {
+                        locale: fr,
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

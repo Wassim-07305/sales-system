@@ -16,6 +16,7 @@ import {
   getDashboardWidgets,
   getWidgetData,
 } from "@/lib/actions/dashboard-builder";
+import { getSetterTasks } from "@/lib/actions/gamification";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function DashboardPage() {
@@ -81,11 +82,14 @@ export default async function DashboardPage() {
     }
     case "setter":
     case "closer": {
-      const data = await getSetterDashboardData(user.id);
+      const [data, tasks] = await Promise.all([
+        getSetterDashboardData(user.id),
+        getSetterTasks(),
+      ]);
       return (
         <>
           {mobileWidget}
-          <SetterDashboard data={data} />
+          <SetterDashboard data={data} tasks={tasks} />
         </>
       );
     }
