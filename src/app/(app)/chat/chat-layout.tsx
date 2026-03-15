@@ -340,6 +340,12 @@ export function ChatLayout({
   const [waConnected, setWaConnected] = useState(unipileWhatsApp?.connected || false);
   const [connectingWA, setConnectingWA] = useState(false);
 
+  // ---- Collapsible sections ----
+  const [channelsOpen, setChannelsOpen] = useState(true);
+  const [dmsOpen, setDmsOpen] = useState(true);
+  const [waOpen, setWaOpen] = useState(true);
+  const [inboxOpen, setInboxOpen] = useState(true);
+
   // ---- Inbox state ----
   const [inboxConversations, setInboxConversations] = useState<InboxConversation[]>(initialInboxConversations);
   const [activeInbox, setActiveInbox] = useState<InboxConversation | null>(null);
@@ -1088,8 +1094,11 @@ export function ChatLayout({
           {/* Channels section */}
           <div className="px-2 pt-3">
             <div className="flex items-center justify-between px-2 mb-1">
-              <button className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
-                <ChevronDown className="h-3 w-3" />
+              <button
+                onClick={() => setChannelsOpen((v) => !v)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !channelsOpen && "-rotate-90")} />
                 Channels
               </button>
               {isAdmin && (
@@ -1102,7 +1111,7 @@ export function ChatLayout({
                 </button>
               )}
             </div>
-            <div className="space-y-px">
+            {channelsOpen && <div className="space-y-px">
               {filteredGroupChannels.map((channel) => {
                 const isAnnouncement = channel.type === "announcement";
                 const Icon = isAnnouncement ? Megaphone : Hash;
@@ -1164,14 +1173,17 @@ export function ChatLayout({
                   {isAdmin ? "Créez votre premier channel" : "Aucun channel"}
                 </p>
               )}
-            </div>
+            </div>}
           </div>
 
           {/* DMs section */}
           <div className="px-2 pt-4 pb-3">
             <div className="flex items-center justify-between px-2 mb-1">
-              <button className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
-                <ChevronDown className="h-3 w-3" />
+              <button
+                onClick={() => setDmsOpen((v) => !v)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !dmsOpen && "-rotate-90")} />
                 Messages directs
               </button>
               <button
@@ -1185,7 +1197,7 @@ export function ChatLayout({
                 <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
-            <div className="space-y-px">
+            {dmsOpen && <div className="space-y-px">
               {filteredDMChannels.map((channel) => {
                 const partner = getDMPartner(channel);
                 const unread = unreadCounts[channel.id] || 0;
@@ -1236,22 +1248,25 @@ export function ChatLayout({
                   Cliquez + pour envoyer un message
                 </p>
               )}
-            </div>
+            </div>}
           </div>
           </>
 
           {/* ====== WHATSAPP ====== */}
           <div className="px-2 pt-4 pb-3">
             <div className="flex items-center justify-between px-2 mb-1">
-              <button className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
-                <ChevronDown className="h-3 w-3" />
+              <button
+                onClick={() => setWaOpen((v) => !v)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !waOpen && "-rotate-90")} />
                 WhatsApp
               </button>
               <span className="text-[10px] text-muted-foreground">
                 {waConversations.length}
               </span>
             </div>
-              <div className="space-y-px">
+              {waOpen && <div className="space-y-px">
                 {filteredWAConversations.map((conv) => {
                   const isActive = activeWA?.prospect_id === conv.prospect_id;
                   const lastMsg = conv.messages[conv.messages.length - 1];
@@ -1368,21 +1383,24 @@ export function ChatLayout({
                     )}
                   </div>
                 )}
-              </div>
+              </div>}
           </div>
 
           {/* ====== INBOX ====== */}
           <div className="px-2 pt-4 pb-3">
             <div className="flex items-center justify-between px-2 mb-1">
-              <button className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
-                <ChevronDown className="h-3 w-3" />
+              <button
+                onClick={() => setInboxOpen((v) => !v)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !inboxOpen && "-rotate-90")} />
                 Inbox
               </button>
               <span className="text-[10px] text-muted-foreground">
                 {inboxConversations.length}
               </span>
             </div>
-              <div className="space-y-px">
+              {inboxOpen && <div className="space-y-px">
                 {filteredInboxConversations.map((conv) => {
                   const isActive = activeInbox?.id === conv.id;
                   const msgs = conv.messages || [];
@@ -1438,7 +1456,7 @@ export function ChatLayout({
                     {channelSearch ? "Aucun résultat" : "Aucune conversation externe"}
                   </p>
                 )}
-              </div>
+              </div>}
           </div>
         </div>
       </div>

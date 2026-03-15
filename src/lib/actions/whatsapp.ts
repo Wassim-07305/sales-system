@@ -135,19 +135,44 @@ export async function getConversations() {
           }>;
         }
 
-        /** Extract a readable phone number from WhatsApp identifiers like "33601383098@s.whatsapp.net" */
+        /** Extract a readable name from WhatsApp chat identifiers */
         function extractPhoneName(chat: UnipileChat): string {
-          const identifier = chat.attendee_public_identifier || chat.provider_id || "";
-          const match = identifier.match(/^(\d+)@/);
+          // Group chats: provider_id ends with @g.us
+          const providerId = chat.provider_id || "";
+          if (providerId.endsWith("@g.us")) {
+            return "Groupe WhatsApp";
+          }
+          // Status broadcast
+          if (providerId === "status@broadcast" || providerId.endsWith("@broadcast")) {
+            return "Status";
+          }
+
+          // Individual chats: prefer attendee_public_identifier (has real phone)
+          const identifier = chat.attendee_public_identifier || "";
+          const match = identifier.match(/^(\d+)@s\.whatsapp\.net$/);
           if (match) {
             const digits = match[1];
-            // Format as +XX X XX XX XX XX for French numbers, otherwise +digits
+            // Format as +XX X XX XX XX XX for French numbers
+            if (digits.startsWith("33") && digits.length >= 11) {
+              return `+${digits.slice(0, 2)} ${digits.slice(2, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+            }
+            // Other international numbers
+            if (digits.length >= 8) {
+              return `+${digits}`;
+            }
+          }
+
+          // Fallback: try provider_id for phone pattern
+          const providerMatch = providerId.match(/^(\d{8,})@/);
+          if (providerMatch) {
+            const digits = providerMatch[1];
             if (digits.startsWith("33") && digits.length >= 11) {
               return `+${digits.slice(0, 2)} ${digits.slice(2, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
             }
             return `+${digits}`;
           }
-          return "Contact";
+
+          return "Contact WhatsApp";
         }
 
         // Fetch last message for each chat in parallel (limit to first 20 to avoid overload)
