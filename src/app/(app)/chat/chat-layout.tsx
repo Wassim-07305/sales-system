@@ -1819,19 +1819,19 @@ export function ChatLayout({
             <ScrollArea className="flex-1">
               <div className="px-4 py-2 space-y-2">
                 {(activeSocial.messages || []).map((msg, i) => {
-                  const isDamien = msg.sender === "damien";
+                  const isMe = msg.sender === "me";
                   return (
-                    <div key={i} className={cn("flex", isDamien ? "justify-end" : "justify-start")}>
+                    <div key={i} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
                       <div className={cn(
                         "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
-                        isDamien
+                        isMe
                           ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
                           : "bg-muted rounded-bl-sm",
                       )}>
                         <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                         <p className={cn(
                           "text-[10px] mt-1",
-                          isDamien ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60",
+                          isMe ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60",
                         )}>
                           {msg.timestamp ? format(new Date(msg.timestamp), "HH:mm") : ""}
                         </p>
