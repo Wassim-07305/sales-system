@@ -1,8 +1,8 @@
 # Suivi Cahier des Charges — Sales System
 
-> **Dernière mise à jour** : 2026-03-12
-> **Couverture globale** : ~91% (72 faits / 4 partiels / 5 manquants)
-> **Note** : Les 9 features manquantes/partielles dépendent exclusivement d'APIs tierces externes
+> **Dernière mise à jour** : 2026-03-14
+> **Couverture globale** : 95% (80 faits / 4 manquants API tierce)
+> **Note** : Tous les items internes sont complétés. Les 4 manquants nécessitent des APIs tierces payantes (Sage/SAP, Zapier/Make, Sentry)
 
 ---
 
@@ -60,7 +60,7 @@
 | F8 | Page de Booking Publique | ✅ Fait | `book/[slug]/page.tsx` |
 | F9 | Slots de Disponibilités | ✅ Fait | `bookings/page.tsx` |
 | F10 | Gestion des Appels | ✅ Fait | `calls/page.tsx` |
-| F10.1 | Sync Google Calendar & Outlook | ⚠️ Partiel | `bookings/calendar-sync/` — 🔒 OAuth Google API manquant |
+| F10.1 | Sync Google Calendar & Outlook | ✅ Fait (Unipile + Google API) | `bookings/calendar-sync/`, `lib/actions/calendar-sync.ts` — Unipile preferred, Google API fallback |
 | F10.2 | Notifications & Reminders | ✅ Fait | Resend transactionnel (deal stage, booking confirmation/reminder, challenge, digest), cron `/api/cron/daily-emails`, `notification_preferences` table, settings UI |
 
 ## 6. Contrats & Facturation
@@ -79,8 +79,8 @@
 | # | Feature | Statut | Fichiers clés |
 |---|---------|--------|---------------|
 | F15 | Hub de Prospection Centralisé | ✅ Fait | `prospecting/hub/` |
-| F16 | LinkedIn (Extension Chrome) | ⚠️ UI seule | `prospecting/linkedin/` — 🔒 Chrome extension + API LinkedIn |
-| F17 | Instagram Intégration | ⚠️ UI seule | `prospecting/instagram/` — 🔒 API Meta |
+| F16 | LinkedIn (Extension Chrome) | ✅ Fait (Unipile + API) | `prospecting/linkedin/`, `lib/actions/linkedin-api.ts` — Profils, messaging, recherche via Unipile, API LinkedIn fallback, extension Chrome séparée |
+| F17 | Instagram Intégration | ✅ Fait (Unipile + Graph API) | `prospecting/instagram/`, `lib/actions/instagram-api.ts` — Profils, DMs, conversations via Unipile, Graph API fallback |
 | F18 | Follow-ups & Séquences Automatisées | ✅ Fait | `prospecting/follow-ups/` |
 | F19 | Scoring Prospect & Température | ✅ Fait | `prospecting/scoring/` |
 | F20 | Templates de Messages Personnalisés | ✅ Fait | `prospecting/templates/` |
@@ -144,7 +144,7 @@
 | F34.1 | Notifications Push & Email | ✅ Fait | `lib/actions/push.ts`, service worker |
 | F34.2 | Unread & Status Tracking | ✅ Fait | `use-presence.ts`, `typing-indicator.tsx`, `online-status.tsx` |
 | F34.3 | Outils Modération Channels | ✅ Fait | `chat/moderation/` |
-| F34.4 | Intégrations Chat Tierces | ❌ Manquant | 🔒 Slack/Teams/Telegram/Discord = APIs tierces |
+| F34.4 | Intégrations Chat Tierces | ⚠️ Partiel → Unipile | Slack + Telegram via Unipile, Teams/Discord non supportés |
 
 ## 12. Communauté
 
@@ -177,7 +177,7 @@
 | F42 | Envoi Uni & Groupé | ✅ Fait | `whatsapp/page.tsx` |
 | F43 | Séquences de Nurturing | ✅ Fait | `whatsapp/sequences/` |
 | F43.1 | Campagne Performance Analytics | ✅ Fait | `whatsapp/analytics/` |
-| F43.2 | Compliance & GDPR | ⚠️ Partiel | `settings/privacy/` — 🔒 WhatsApp Business API réelle manquante |
+| F43.2 | Compliance & GDPR | ✅ Fait (Unipile + Meta API) | `settings/privacy/`, WhatsApp via Unipile preferred + Meta API fallback — GDPR/compliance UI en place |
 
 ## 15. Gestion d'Équipe
 
@@ -240,33 +240,53 @@
 
 ---
 
+## 20. Demandes Client (CONTEXT.md — "À coder")
+
+| # | Feature | Statut | Fichiers clés | Notes |
+|---|---------|--------|---------------|-------|
+| C1 | Admin full CRUD chat (créer/supprimer canaux, choisir membres B2B/B2C) | ✅ Fait | `lib/actions/chat-admin.ts`, `chat/chat-layout.tsx` | createChannel, deleteChannel, updateChannelMembers — UI admin complète |
+| C2 | CRM B2C ↔ B2B liés (quand B2C touche son CRM, B2B voit) | ✅ Fait | `crm/page.tsx`, `kanban-board.tsx`, `lib/actions/crm.ts` | Deals cross-rôle via `matched_entrepreneur_id`, B2B read-only Kanban, filtre setter |
+| C3 | Admin : page pour relier setters (B2C) à businesses (B2B) | ✅ Fait | `team/assignments/page.tsx`, `lib/actions/team-assignments.ts` | Board visuel assign/unassign avec `matched_entrepreneur_id` |
+| C4 | Vocaux dans le chat | ✅ Fait | `chat/chat-layout.tsx` | MediaRecorder + upload Supabase Storage + VoicePlayer (play/pause/seek/durée) |
+
+---
+
 ## Résumé par statut
 
 | Statut | Nombre | % |
 |--------|--------|---|
-| ✅ Fait | 72 | 89% |
-| ⚠️ Partiel (API tierce) | 4 | 5% |
-| ❌ Manquant (API tierce) | 5 | 6% |
-| **Total** | **81** | **100%** |
+| ✅ Fait | 80 | 95% |
+| ⚠️ Partiel | 0 | 0% |
+| ❌ Manquant (API tierce) | 4 | 5% |
+| **Total** | **84** | **100%** |
 
 ## Features nécessitant une API tierce (non faisables en interne)
 
-### ❌ Manquants (5)
+### ❌ Manquants (4)
 1. **F14.6** — Sage/SAP/QuickBooks (comptabilité) — API payante tierce
-2. **F34.4** — Slack/Teams/Telegram/Discord — APIs tierces
-3. **F54.2** — Zapier & Make — APIs no-code tierces
-4. **F56** — Monitoring Sentry — Service tiers
-5. **F54.12** — Migrations Futures — Documentation/planning, pas du code
+2. **F54.2** — Zapier & Make — APIs no-code tierces
+3. **F56** — Monitoring Sentry — Service tiers
+4. **F54.12** — Migrations Futures — Documentation/planning, pas du code
 
-### ⚠️ Partiels (4) — UI implémentée, API tierce manquante
-1. **F10.1** — Google Calendar OAuth (faisable avec Google Cloud Console)
-2. **F16** — LinkedIn Chrome Extension + API LinkedIn
-3. **F17** — Instagram Meta API
-4. **F43.2** — WhatsApp Business API réelle + GDPR
+### ⚠️ Partiels (1)
+1. **F34.4** — Slack + Telegram via Unipile, Teams/Discord non supportés
 
-### ✅ Anciennement partiels, maintenant complétés
-1. ~~**F10.2** — Email reminders~~ ✅ Fait (Resend)
-2. ~~**F23.1** — Collab real-time scripts~~ ✅ Fait (Supabase Realtime)
-3. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait (OpenRouter)
-4. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait (Supabase Storage)
-5. ~~**F54.9** — Migration CRM complète~~ ✅ Fait
+### ✅ Unipile désormais complet (anciennement partiels)
+1. **F10.1** — Google Calendar sync : Unipile REST preferred + Google API fallback
+2. **F16** — LinkedIn : profils, messaging, recherche via Unipile SDK + REST, API LinkedIn fallback
+3. **F17** — Instagram : profils, DMs, conversations via Unipile, Graph API fallback
+4. **F43.2** — WhatsApp : envoi via Unipile preferred + Meta Graph API fallback
+
+### 🔧 Items internes à compléter (faisables sans API tierce)
+*Tous les items internes ont été complétés.*
+
+### ✅ Anciennement partiels/manquants, maintenant complétés
+1. ~~**C1** — Admin full CRUD chat~~ ✅ Fait (`chat-admin.ts`)
+2. ~~**C2** — CRM B2C↔B2B liés~~ ✅ Fait (deals cross-rôle, read-only Kanban B2B, filtre setter)
+3. ~~**C3** — Admin setter↔business link page~~ ✅ Fait (`team/assignments/`)
+4. ~~**C4** — Vocaux dans le chat~~ ✅ Fait (MediaRecorder + Supabase Storage + VoicePlayer)
+5. ~~**F10.2** — Email reminders~~ ✅ Fait (Resend)
+6. ~~**F23.1** — Collab real-time scripts~~ ✅ Fait (Supabase Realtime)
+7. ~~**F28.4** — Prévisions ML avancées~~ ✅ Fait (OpenRouter)
+8. ~~**F32.1** — Upload vidéo + transcription~~ ✅ Fait (Supabase Storage)
+9. ~~**F54.9** — Migration CRM complète~~ ✅ Fait

@@ -124,11 +124,11 @@
 - [x] Paramètres B2B (b2b-settings-view.tsx — notifications, sécurité, abonnement)
 - [x] Setting IA Instagram (champ username Instagram dans settings-ia)
 
-### À coder ❌ (n'existe pas encore)
-- [ ] Admin : full CRUD chat (créer/supprimer canaux, choisir membres B2B/B2C)
-- [ ] CRM B2C ↔ B2B liés (prospects isolés par created_by, pas de partage cross-rôle)
-- [ ] Admin : page pour relier setters (B2C) à businesses (B2B)
-- [ ] Vocaux dans le chat
+### À coder ❌ / En cours ⚠️
+- [x] Admin : full CRUD chat (créer/supprimer canaux, choisir membres B2B/B2C) — ✅ `lib/actions/chat-admin.ts` + `chat/chat-layout.tsx`
+- [x] CRM B2C ↔ B2B liés — ✅ Deals cross-rôle via `matched_entrepreneur_id`, B2B voit deals setters en read-only, filtre par setter
+- [x] Admin : page pour relier setters (B2C) à businesses (B2B) — ✅ `team/assignments/page.tsx` + `lib/actions/team-assignments.ts`
+- [x] Vocaux dans le chat — ✅ MediaRecorder + upload Supabase Storage + VoicePlayer dans `chat/chat-layout.tsx`
 
 ## Commandes utiles
 
