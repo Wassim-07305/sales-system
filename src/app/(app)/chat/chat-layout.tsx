@@ -2039,49 +2039,47 @@ export function ChatLayout({
 
                           {activeChannel?.type === "direct" ? (
                             /* ---- DM bubble layout ---- */
-                            <div className={cn("group relative", isGrouped ? "pt-0.5" : "pt-3")}>
-                              <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
-                                <div className={cn(
-                                  "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
-                                  isOwn
-                                    ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
-                                    : "bg-muted rounded-bl-sm",
-                                )}>
-                                  {isEditing ? (
-                                    <div className="space-y-2">
-                                      <Textarea
-                                        value={editContent}
-                                        onChange={(e) => setEditContent(e.target.value)}
-                                        className="min-h-[60px] text-sm"
-                                        autoFocus
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); }
-                                          if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); }
-                                        }}
-                                      />
-                                      <div className="flex items-center gap-2">
-                                        <Button size="sm" className="h-7 text-xs" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
-                                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
-                                      </div>
+                            <div className={cn("group relative flex flex-col", isOwn ? "items-end" : "items-start", isGrouped ? "pt-0.5" : "pt-3")}>
+                              <div className={cn(
+                                "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
+                                isOwn
+                                  ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
+                                  : "bg-muted rounded-bl-sm",
+                              )}>
+                                {isEditing ? (
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      value={editContent}
+                                      onChange={(e) => setEditContent(e.target.value)}
+                                      className="min-h-[60px] text-sm"
+                                      autoFocus
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); }
+                                        if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); }
+                                      }}
+                                    />
+                                    <div className="flex items-center gap-2">
+                                      <Button size="sm" className="h-7 text-xs" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
                                     </div>
-                                  ) : (
-                                    <>
-                                      {message.message_type === "image" && message.file_url ? (
-                                        <img src={message.file_url} alt="Image" className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
-                                      ) : (
-                                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                                      )}
-                                      <p className={cn("text-[10px] mt-1", isOwn ? "text-muted-foreground/70 text-right" : "text-muted-foreground/70")}>
-                                        {format(new Date(message.created_at), "HH:mm")}
-                                        {message.is_edited && " · modifié"}
-                                      </p>
-                                    </>
-                                  )}
-                                </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {message.message_type === "image" && message.file_url ? (
+                                      <img src={message.file_url} alt="Image" className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
+                                    ) : (
+                                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                    )}
+                                    <p className={cn("text-[10px] mt-1", isOwn ? "text-muted-foreground/70 text-right" : "text-muted-foreground/70")}>
+                                      {format(new Date(message.created_at), "HH:mm")}
+                                      {message.is_edited && " · modifié"}
+                                    </p>
+                                  </>
+                                )}
                               </div>
-                              {/* Reactions outside bubble */}
-                              {!isEditing && (
-                                <div className={cn("flex", isOwn ? "justify-end pr-1" : "justify-start pl-1")}>
+                              {/* Reactions directly under bubble */}
+                              {!isEditing && Object.keys(messageReactions).length > 0 && (
+                                <div className="-mt-1.5 px-2">
                                   <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
                                 </div>
                               )}
