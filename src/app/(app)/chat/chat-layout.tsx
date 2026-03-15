@@ -2037,166 +2037,233 @@ export function ChatLayout({
                             <DateSeparator date={new Date(message.created_at)} />
                           )}
 
-                          {/* Message row */}
-                          <div
-                            className={cn(
-                              "group relative flex gap-3 px-1 -mx-1 rounded-md transition-colors",
-                              isGrouped ? "pt-0.5" : "pt-3",
-                              "hover:bg-muted/30",
-                            )}
-                          >
-                            {/* Avatar or spacer */}
-                            <div className="w-8 shrink-0 pt-0.5">
-                              {!isGrouped && (
-                                <div
-                                  className={cn(
-                                    "h-8 w-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white",
-                                    getAvatarColor(senderId),
-                                  )}
-                                >
-                                  {getInitials(senderName === "Moi" ? senderName : senderName)}
-                                </div>
-                              )}
-                              {isGrouped && (
-                                <span className="hidden group-hover:block text-[10px] text-muted-foreground/60 text-center leading-8">
-                                  {format(new Date(message.created_at), "HH:mm")}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                              {!isGrouped && (
-                                <div className="flex items-baseline gap-2 mb-0.5">
-                                  <span className="text-sm font-semibold text-foreground">
-                                    {senderName}
-                                  </span>
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {format(new Date(message.created_at), "HH:mm", {
-                                      locale: fr,
-                                    })}
-                                  </span>
-                                  {message.is_edited && (
-                                    <span className="text-[10px] text-muted-foreground/50">
-                                      (modifié)
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              {isEditing ? (
-                                <div className="space-y-2">
-                                  <Textarea
-                                    value={editContent}
-                                    onChange={(e) => setEditContent(e.target.value)}
-                                    className="min-h-[60px] text-sm"
-                                    autoFocus
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleEditMessage(message.id);
-                                      }
-                                      if (e.key === "Escape") {
-                                        setEditingMessageId(null);
-                                        setEditContent("");
-                                      }
-                                    }}
-                                  />
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      size="sm"
-                                      className="h-7 text-xs"
-                                      onClick={() => handleEditMessage(message.id)}
-                                    >
-                                      Enregistrer
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-7 text-xs"
-                                      onClick={() => {
-                                        setEditingMessageId(null);
-                                        setEditContent("");
+                          {activeChannel?.type === "direct" ? (
+                            /* ---- DM bubble layout ---- */
+                            <div className={cn("group relative flex", isOwn ? "justify-end" : "justify-start", isGrouped ? "pt-0.5" : "pt-3")}>
+                              <div className={cn(
+                                "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm relative",
+                                isOwn
+                                  ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
+                                  : "bg-muted rounded-bl-sm",
+                              )}>
+                                {isEditing ? (
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      value={editContent}
+                                      onChange={(e) => setEditContent(e.target.value)}
+                                      className="min-h-[60px] text-sm"
+                                      autoFocus
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); }
+                                        if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); }
                                       }}
-                                    >
-                                      Annuler
-                                    </Button>
+                                    />
+                                    <div className="flex items-center gap-2">
+                                      <Button size="sm" className="h-7 text-xs" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
+                                    </div>
                                   </div>
-                                </div>
-                              ) : (
-                                <>
-                                  {message.message_type === "image" && message.file_url ? (
-                                    <img
-                                      src={message.file_url}
-                                      alt="Image"
-                                      className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity mt-0.5"
-                                      onClick={() => window.open(message.file_url!, "_blank")}
-                                    />
-                                  ) : (
-                                    <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words leading-relaxed">
-                                      {message.content}
+                                ) : (
+                                  <>
+                                    {message.message_type === "image" && message.file_url ? (
+                                      <img src={message.file_url} alt="Image" className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
+                                    ) : (
+                                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                    )}
+                                    <p className={cn("text-[10px] mt-1", isOwn ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60")}>
+                                      {format(new Date(message.created_at), "HH:mm")}
+                                      {message.is_edited && " · modifié"}
                                     </p>
-                                  )}
-
-                                  {/* Reactions */}
-                                  <ReactionPills
-                                    messageId={message.id}
-                                    reactions={messageReactions}
-                                    currentUserId={currentUserId}
-                                    onToggle={handleToggleReaction}
-                                  />
-                                </>
-                              )}
-                            </div>
-
-                            {/* Hover toolbar */}
-                            {!isEditing && (
-                              <div className="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5">
-                                <div className="relative">
-                                  <button
-                                    onClick={() =>
-                                      setEmojiPickerFor(
-                                        emojiPickerFor === message.id ? null : message.id,
-                                      )
-                                    }
-                                    className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Réagir"
-                                  >
-                                    <SmilePlus className="h-3.5 w-3.5" />
-                                  </button>
-                                  {emojiPickerFor === message.id && (
-                                    <QuickEmojiPicker
-                                      onSelect={(emoji) =>
-                                        handleToggleReaction(message.id, emoji)
-                                      }
-                                      onClose={() => setEmojiPickerFor(null)}
-                                    />
-                                  )}
-                                </div>
-                                {isOwn && (
-                                  <button
-                                    onClick={() => {
-                                      setEditingMessageId(message.id);
-                                      setEditContent(message.content || "");
-                                    }}
-                                    className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Modifier"
-                                  >
-                                    <Pencil className="h-3.5 w-3.5" />
-                                  </button>
-                                )}
-                                {(isOwn || isAdmin) && (
-                                  <button
-                                    onClick={() => handleDeleteMessage(message.id)}
-                                    className="h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                    title="Supprimer"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
+                                    <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
+                                  </>
                                 )}
                               </div>
-                            )}
-                          </div>
+                              {/* Hover toolbar */}
+                              {!isEditing && (
+                                <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5", isOwn ? "left-2" : "right-2")}>
+                                  <div className="relative">
+                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Réagir">
+                                      <SmilePlus className="h-3.5 w-3.5" />
+                                    </button>
+                                    {emojiPickerFor === message.id && (
+                                      <QuickEmojiPicker onSelect={(emoji) => handleToggleReaction(message.id, emoji)} onClose={() => setEmojiPickerFor(null)} />
+                                    )}
+                                  </div>
+                                  {isOwn && (
+                                    <button onClick={() => { setEditingMessageId(message.id); setEditContent(message.content || ""); }} className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Modifier">
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                  {(isOwn || isAdmin) && (
+                                    <button onClick={() => handleDeleteMessage(message.id)} className="h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Supprimer">
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            /* ---- Channel Slack-style layout ---- */
+                            <div
+                              className={cn(
+                                "group relative flex gap-3 px-1 -mx-1 rounded-md transition-colors",
+                                isGrouped ? "pt-0.5" : "pt-3",
+                                "hover:bg-muted/30",
+                              )}
+                            >
+                              {/* Avatar or spacer */}
+                              <div className="w-8 shrink-0 pt-0.5">
+                                {!isGrouped && (
+                                  <div
+                                    className={cn(
+                                      "h-8 w-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white",
+                                      getAvatarColor(senderId),
+                                    )}
+                                  >
+                                    {getInitials(senderName)}
+                                  </div>
+                                )}
+                                {isGrouped && (
+                                  <span className="hidden group-hover:block text-[10px] text-muted-foreground/60 text-center leading-8">
+                                    {format(new Date(message.created_at), "HH:mm")}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                {!isGrouped && (
+                                  <div className="flex items-baseline gap-2 mb-0.5">
+                                    <span className="text-sm font-semibold text-foreground">
+                                      {senderName}
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {format(new Date(message.created_at), "HH:mm", {
+                                        locale: fr,
+                                      })}
+                                    </span>
+                                    {message.is_edited && (
+                                      <span className="text-[10px] text-muted-foreground/50">
+                                        (modifié)
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                {isEditing ? (
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      value={editContent}
+                                      onChange={(e) => setEditContent(e.target.value)}
+                                      className="min-h-[60px] text-sm"
+                                      autoFocus
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                          e.preventDefault();
+                                          handleEditMessage(message.id);
+                                        }
+                                        if (e.key === "Escape") {
+                                          setEditingMessageId(null);
+                                          setEditContent("");
+                                        }
+                                      }}
+                                    />
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        className="h-7 text-xs"
+                                        onClick={() => handleEditMessage(message.id)}
+                                      >
+                                        Enregistrer
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-7 text-xs"
+                                        onClick={() => {
+                                          setEditingMessageId(null);
+                                          setEditContent("");
+                                        }}
+                                      >
+                                        Annuler
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {message.message_type === "image" && message.file_url ? (
+                                      <img
+                                        src={message.file_url}
+                                        alt="Image"
+                                        className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity mt-0.5"
+                                        onClick={() => window.open(message.file_url!, "_blank")}
+                                      />
+                                    ) : (
+                                      <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words leading-relaxed">
+                                        {message.content}
+                                      </p>
+                                    )}
+
+                                    {/* Reactions */}
+                                    <ReactionPills
+                                      messageId={message.id}
+                                      reactions={messageReactions}
+                                      currentUserId={currentUserId}
+                                      onToggle={handleToggleReaction}
+                                    />
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Hover toolbar */}
+                              {!isEditing && (
+                                <div className="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5">
+                                  <div className="relative">
+                                    <button
+                                      onClick={() =>
+                                        setEmojiPickerFor(
+                                          emojiPickerFor === message.id ? null : message.id,
+                                        )
+                                      }
+                                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Réagir"
+                                    >
+                                      <SmilePlus className="h-3.5 w-3.5" />
+                                    </button>
+                                    {emojiPickerFor === message.id && (
+                                      <QuickEmojiPicker
+                                        onSelect={(emoji) =>
+                                          handleToggleReaction(message.id, emoji)
+                                        }
+                                        onClose={() => setEmojiPickerFor(null)}
+                                      />
+                                    )}
+                                  </div>
+                                  {isOwn && (
+                                    <button
+                                      onClick={() => {
+                                        setEditingMessageId(message.id);
+                                        setEditContent(message.content || "");
+                                      }}
+                                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                      title="Modifier"
+                                    >
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                  {(isOwn || isAdmin) && (
+                                    <button
+                                      onClick={() => handleDeleteMessage(message.id)}
+                                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                      title="Supprimer"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
