@@ -1831,7 +1831,7 @@ export function ChatLayout({
                         <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                         <p className={cn(
                           "text-[10px] mt-1",
-                          isMe ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60",
+                          isMe ? "text-muted-foreground/70 text-right" : "text-muted-foreground/70",
                         )}>
                           {msg.timestamp ? format(new Date(msg.timestamp), "HH:mm") : ""}
                         </p>
@@ -2039,48 +2039,55 @@ export function ChatLayout({
 
                           {activeChannel?.type === "direct" ? (
                             /* ---- DM bubble layout ---- */
-                            <div className={cn("group relative flex", isOwn ? "justify-end" : "justify-start", isGrouped ? "pt-0.5" : "pt-3")}>
-                              <div className={cn(
-                                "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm relative",
-                                isOwn
-                                  ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
-                                  : "bg-muted rounded-bl-sm",
-                              )}>
-                                {isEditing ? (
-                                  <div className="space-y-2">
-                                    <Textarea
-                                      value={editContent}
-                                      onChange={(e) => setEditContent(e.target.value)}
-                                      className="min-h-[60px] text-sm"
-                                      autoFocus
-                                      onKeyDown={(e) => {
-                                        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); }
-                                        if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); }
-                                      }}
-                                    />
-                                    <div className="flex items-center gap-2">
-                                      <Button size="sm" className="h-7 text-xs" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
-                                      <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
+                            <div className={cn("group relative", isGrouped ? "pt-0.5" : "pt-3")}>
+                              <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
+                                <div className={cn(
+                                  "max-w-[70%] rounded-2xl px-3.5 py-2 text-sm",
+                                  isOwn
+                                    ? "bg-[#7af17a]/15 text-foreground rounded-br-sm"
+                                    : "bg-muted rounded-bl-sm",
+                                )}>
+                                  {isEditing ? (
+                                    <div className="space-y-2">
+                                      <Textarea
+                                        value={editContent}
+                                        onChange={(e) => setEditContent(e.target.value)}
+                                        className="min-h-[60px] text-sm"
+                                        autoFocus
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditMessage(message.id); }
+                                          if (e.key === "Escape") { setEditingMessageId(null); setEditContent(""); }
+                                        }}
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        <Button size="sm" className="h-7 text-xs" onClick={() => handleEditMessage(message.id)}>Enregistrer</Button>
+                                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingMessageId(null); setEditContent(""); }}>Annuler</Button>
+                                      </div>
                                     </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    {message.message_type === "image" && message.file_url ? (
-                                      <img src={message.file_url} alt="Image" className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
-                                    ) : (
-                                      <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                                    )}
-                                    <p className={cn("text-[10px] mt-1", isOwn ? "text-[#7af17a]/60 text-right" : "text-muted-foreground/60")}>
-                                      {format(new Date(message.created_at), "HH:mm")}
-                                      {message.is_edited && " · modifié"}
-                                    </p>
-                                    <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
-                                  </>
-                                )}
+                                  ) : (
+                                    <>
+                                      {message.message_type === "image" && message.file_url ? (
+                                        <img src={message.file_url} alt="Image" className="rounded-lg max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
+                                      ) : (
+                                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                      )}
+                                      <p className={cn("text-[10px] mt-1", isOwn ? "text-muted-foreground/70 text-right" : "text-muted-foreground/70")}>
+                                        {format(new Date(message.created_at), "HH:mm")}
+                                        {message.is_edited && " · modifié"}
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
                               </div>
+                              {/* Reactions outside bubble */}
+                              {!isEditing && (
+                                <div className={cn("flex", isOwn ? "justify-end pr-1" : "justify-start pl-1")}>
+                                  <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
+                                </div>
+                              )}
                               {/* Hover toolbar */}
                               {!isEditing && (
-                                <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5", isOwn ? "left-2" : "right-2")}>
+                                <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5 z-10", isOwn ? "left-2" : "right-2")}>
                                   <div className="relative">
                                     <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Réagir">
                                       <SmilePlus className="h-3.5 w-3.5" />
