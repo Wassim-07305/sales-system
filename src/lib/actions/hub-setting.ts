@@ -102,7 +102,7 @@ export async function analyzeProfile(profileUrl: string) {
   const isInstagram = profileUrl.includes("instagram");
   const platform = isLinkedin ? "linkedin" : isInstagram ? "instagram" : "autre";
 
-  // --- Enrichissement Apify pour les profils Instagram ---
+  // --- Enrichissement Apify pour les profils Instagram & LinkedIn ---
   let apifyEnrichment: {
     name?: string;
     biography?: string;
@@ -110,7 +110,53 @@ export async function analyzeProfile(profileUrl: string) {
     following?: number;
     posts?: number;
     website?: string;
+    headline?: string;
+    experience?: string;
   } | null = null;
+
+  // ─── LinkedIn : scraping Apify avant analyse IA ──────────────────
+  if (isLinkedin) {
+    try {
+      interface ApifyLinkedInProfile {
+        fullName?: string;
+        headline?: string;
+        summary?: string;
+        description?: string;
+        followersCount?: number;
+        connectionsCount?: number;
+        experienceCount?: number;
+        experience?: Array<{ title?: string; companyName?: string; duration?: string }>;
+        skills?: string[];
+        location?: string;
+        profileUrl?: string;
+        [key: string]: unknown;
+      }
+
+      const results = await callApifyActor<ApifyLinkedInProfile>(
+        "dev_fusion/Linkedin-Profile-Scraper",
+        { profileUrls: [profileUrl] },
+        120 // Timeout 120s pour LinkedIn
+      );
+
+      if (results && results.length > 0) {
+        const p = results[0];
+        const experienceSummary = p.experience
+          ? p.experience.slice(0, 3).map(e => `${e.title || ""} @ ${e.companyName || ""}`).join(", ")
+          : undefined;
+
+        apifyEnrichment = {
+          name: p.fullName || undefined,
+          biography: p.summary || p.description || undefined,
+          followers: p.followersCount || p.connectionsCount,
+          headline: p.headline || undefined,
+          experience: experienceSummary || undefined,
+          website: p.profileUrl || undefined,
+        };
+      }
+    } catch (err) {
+      console.error("[analyzeProfile] Apify enrichissement LinkedIn echoue:", err);
+    }
+  }
 
   if (isInstagram) {
     try {
@@ -170,20 +216,22 @@ export async function analyzeProfile(profileUrl: string) {
 URL : ${profileUrl}
 Nom : ${enrichedName}
 Bio : ${enrichedBio}
-Followers : ${apifyEnrichment.followers || "inconnu"}
+${apifyEnrichment.headline ? `Titre professionnel : ${apifyEnrichment.headline}` : ""}
+${apifyEnrichment.experience ? `Experience : ${apifyEnrichment.experience}` : ""}
+Followers/Connexions : ${apifyEnrichment.followers || "inconnu"}
 Following : ${apifyEnrichment.following || "inconnu"}
 Posts : ${apifyEnrichment.posts || "inconnu"}
 Site : ${apifyEnrichment.website || "aucun"}
 
-Génère une analyse basée sur ces VRAIES données :
-- headline : résumé du profil en une phrase
-- engagementRate : taux d'engagement estimé (1.0-10.0)
-- lastActive : activité récente estimée
-- topics : 3-5 sujets principaux déduits de la bio
+Genere une analyse basee sur ces VRAIES donnees :
+- headline : resume du profil en une phrase
+- engagementRate : taux d'engagement estime (1.0-10.0)
+- lastActive : activite recente estimee
+- topics : 3-5 sujets principaux deduits de la bio${apifyEnrichment.headline ? " et du titre" : ""}${apifyEnrichment.experience ? " et de l'experience" : ""}
 - score : score de prospection 0-100
-- recommendation : stratégie d'approche recommandée (2 phrases max)
+- recommendation : strategie d'approche recommandee (2 phrases max)
 
-Réponds en JSON.`,
+Reponds en JSON.`,
         {
           system: "Tu es un expert en social selling et prospection digitale. Analyse les profils pour identifier les meilleures opportunités commerciales.",
           maxTokens: 500,
@@ -355,7 +403,49 @@ export async function scrapeStories(username: string) {
     }
   }
 
-  // Fallback : générer des stories simulées via IA pour l'analyse
+  // ─── Tier 2 : Scraping via Apify (données réelles) ──────────────
+  try {
+    interface ApifyInstagramStory {
+      id?: string;
+      type?: string;
+      mediaType?: number;
+      caption?: string;
+      timestamp?: string;
+      takenAt?: string;
+      url?: string;
+      videoUrl?: string;
+      hashtags?: string[];
+      mentions?: string[];
+      [key: string]: unknown;
+    }
+
+    const apifyStories = await callApifyActor<ApifyInstagramStory>(
+      "apify/instagram-scraper",
+      {
+        directUrls: [`https://www.instagram.com/${username}/`],
+        resultsType: "stories",
+        resultsLimit: 10,
+      },
+      120 // Timeout 120s pour le scraping Instagram
+    );
+
+    if (apifyStories && apifyStories.length > 0) {
+      return apifyStories.map((story, i) => ({
+        id: story.id || `story_apify_${i + 1}`,
+        username,
+        type: (story.type === "video" || story.mediaType === 2) ? "video" as const : "image" as const,
+        timestamp: story.timestamp || story.takenAt || new Date(Date.now() - (i + 1) * 3 * 60 * 60 * 1000).toISOString(),
+        caption: story.caption || "",
+        hasQuestion: false,
+        hasPoll: false,
+        source: "apify" as const,
+      }));
+    }
+  } catch (apifyErr) {
+    console.error("[scrapeStories] Apify Instagram scraper échoué, fallback IA:", apifyErr);
+  }
+
+  // ─── Tier 3 : Fallback IA (stories simulées — disclaimer) ──────
   try {
     const result = await aiJSON<{
       stories: Array<{
@@ -395,6 +485,8 @@ Réponds en JSON : { "stories": [...] }`,
       questionText: story.questionText,
       hasPoll: story.hasPoll || false,
       pollQuestion: story.pollQuestion,
+      source: "ai_simulated" as const,
+      disclaimer: "Stories simulees par IA — les donnees reelles n'ont pas pu etre recuperees via Instagram API ni Apify.",
     }));
   } catch {
     // Fallback statique

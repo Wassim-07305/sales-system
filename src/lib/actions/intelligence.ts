@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiJSON, SMART_MODEL } from "@/lib/ai/client";
+import { callApifyActor } from "@/lib/apify";
 
 // ─── Lookalikes ─────────────────────────────────────────────────────
 
@@ -43,6 +44,47 @@ Réponds en JSON avec un tableau "lookalikes" contenant pour chaque suggestion :
   );
 
   return result.lookalikes;
+}
+
+// ─── LinkedIn Company Scraper ───────────────────────────────────────
+
+export async function scrapeCompanyLinkedIn(linkedinUrl: string) {
+  const results = await callApifyActor("dev_fusion/Linkedin-Company-Scraper", {
+    profileUrls: [linkedinUrl],
+  });
+  if (!results?.[0]) return null;
+  const company = results[0] as Record<string, unknown>;
+  return {
+    name: company.name as string | undefined,
+    industry: company.industry as string | undefined,
+    employeeCount: (company.employeeCount || company.staffCount) as number | undefined,
+    headquarters: company.headquarters as string | undefined,
+    website: company.website as string | undefined,
+    description: company.description as string | undefined,
+    specialties: company.specialities as string[] | undefined,
+    founded: company.foundedOn as string | undefined,
+    type: company.type as string | undefined,
+    source: "linkedin_apify" as const,
+  };
+}
+
+export async function searchCompanyDeciders(companyLinkedInUrl: string, jobTitles?: string[]) {
+  const results = await callApifyActor("harvestapi/linkedin-company-employees", {
+    companies: [companyLinkedInUrl],
+    maxItems: 10,
+    profileScraperMode: "Full + email search ($12 per 1k)",
+    seniorityLevelIds: ["300", "310", "320"],
+    jobTitles: jobTitles || [],
+  });
+  return (results as Record<string, unknown>[])?.map((p) => ({
+    name: (p.fullName as string) || `${p.firstName || ""} ${p.lastName || ""}`.trim(),
+    title: (p.headline as string) || (p.currentJobTitle as string),
+    email: p.email as string | undefined,
+    phone: p.phone as string | undefined,
+    linkedinUrl: (p.linkedinUrl as string) || (p.profileUrl as string),
+    company: p.currentCompany as string | undefined,
+    source: "linkedin_employees_apify" as const,
+  })) || [];
 }
 
 // ─── Competitors ────────────────────────────────────────────────────
@@ -135,12 +177,70 @@ export async function addCompetitor(data: {
   return newCompetitor;
 }
 
-export async function analyzeCompetitor(competitorName: string) {
+export async function analyzeCompetitor(competitorName: string, linkedinUrl?: string) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+
+  // ─── Tier 1 : Recherche Google via Apify (données web réelles) ────
+  let googleContext = "";
+  try {
+    interface ApifyGoogleSearchResult {
+      title?: string;
+      description?: string;
+      url?: string;
+      [key: string]: unknown;
+    }
+
+    const searchResults = await callApifyActor<ApifyGoogleSearchResult>(
+      "apify/google-search-scraper",
+      {
+        queries: `${competitorName} pricing features avis`,
+        maxPagesPerQuery: 1,
+        resultsPerPage: 5,
+        languageCode: "fr",
+        countryCode: "fr",
+      },
+      120
+    );
+
+    if (searchResults && searchResults.length > 0) {
+      const snippets = searchResults
+        .filter((r) => r.title && r.description)
+        .slice(0, 5)
+        .map((r) => `- ${r.title}: ${r.description}`)
+        .join("\n");
+
+      if (snippets) {
+        googleContext = `\n\nResultats de recherche Google reels pour "${competitorName}" :\n${snippets}`;
+      }
+    }
+  } catch (googleErr) {
+    console.error("[analyzeCompetitor] Google Search Apify echoue:", googleErr);
+  }
+
+  // ─── Tier 2 : Enrichir avec des données LinkedIn réelles si disponible
+  let linkedinContext = "";
+  if (linkedinUrl) {
+    try {
+      const linkedinData = await scrapeCompanyLinkedIn(linkedinUrl);
+      if (linkedinData) {
+        linkedinContext = `\n\nDonnées LinkedIn réelles de l'entreprise :
+- Industrie : ${linkedinData.industry || "N/A"}
+- Effectifs : ${linkedinData.employeeCount || "N/A"}
+- Siège : ${linkedinData.headquarters || "N/A"}
+- Site web : ${linkedinData.website || "N/A"}
+- Description : ${linkedinData.description || "N/A"}
+- Spécialités : ${linkedinData.specialties?.join(", ") || "N/A"}
+- Fondée : ${linkedinData.founded || "N/A"}
+- Type : ${linkedinData.type || "N/A"}`;
+      }
+    } catch {
+      // Si le scraping LinkedIn échoue, on continue avec l'analyse IA seule
+    }
+  }
 
   const result = await aiJSON<{
     swot: {
@@ -154,7 +254,7 @@ export async function analyzeCompetitor(competitorName: string) {
     keyDifferentiators: string[];
     recommendation: string;
   }>(
-    `Réalise une analyse concurrentielle complète de "${competitorName}" par rapport à un CRM de vente français moderne avec gamification, IA intégrée, prospection multi-canal, et academy de formation.
+    `Réalise une analyse concurrentielle complète de "${competitorName}" par rapport à un CRM de vente français moderne avec gamification, IA intégrée, prospection multi-canal, et academy de formation.${googleContext}${linkedinContext}
 
 Réponds en JSON avec :
 - swot: { strengths: string[], weaknesses: string[], opportunities: string[], threats: string[] } (3-4 points chacun)

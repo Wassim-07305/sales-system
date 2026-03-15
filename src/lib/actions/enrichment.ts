@@ -258,18 +258,136 @@ Génère un JSON avec ces champs:
   };
 }
 
-// ─── enrichBatch ────────────────────────────────────────────────────
+// ─── enrichBatch (optimisé — un seul appel Apify bulk) ──────────────
 export async function enrichBatch(prospectIds: string[]) {
   if (prospectIds.length === 0) return { success: 0, failed: 0 };
   // Limit to 10 at a time
   const ids = prospectIds.slice(0, 10);
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // 1. Récupérer tous les prospects
+  const { data: prospects } = await supabase
+    .from("prospects")
+    .select("*")
+    .in("id", ids);
+
+  if (!prospects || prospects.length === 0) return { success: 0, failed: 0 };
+
+  // 2. Extraire les domaines de chaque prospect
+  const prospectDomainMap = new Map<string, { prospectId: string; domain: string }>();
+  const prospectsWithoutDomain: string[] = [];
+
+  for (const p of prospects) {
+    const email = (p.email as string) || "";
+    const company = (p.company as string) || "";
+    const domain = extractDomain(email, company);
+
+    if (domain) {
+      prospectDomainMap.set(domain, { prospectId: p.id as string, domain });
+    } else {
+      prospectsWithoutDomain.push(p.id as string);
+    }
+  }
+
   let success = 0;
   let failed = 0;
 
-  for (const id of ids) {
+  // 3. Appel Apify batch unique pour tous les domaines
+  const domains = Array.from(prospectDomainMap.keys());
+  let apifyBatchResults: Map<string, ApifyCompanyEnrichment> = new Map();
+
+  if (domains.length > 0) {
     try {
-      await enrichProspect(id);
+      console.log(`[enrichBatch] Appel Apify bulk pour ${domains.length} domaines`);
+      const batchResults = await callApifyActor<ApifyCompanyEnrichment>(
+        "george.the.developer/company-enrichment-api",
+        { domains },
+        120 // Timeout 120s pour le batch
+      );
+
+      if (batchResults && batchResults.length > 0) {
+        // Mapper les résultats par domaine
+        for (const result of batchResults) {
+          if (result.domain) {
+            apifyBatchResults.set(result.domain.toLowerCase(), result);
+          }
+        }
+        console.log(`[enrichBatch] Apify batch: ${apifyBatchResults.size}/${domains.length} résultats`);
+      }
+    } catch (apifyErr) {
+      console.error("[enrichBatch] Erreur Apify batch, fallback individuel:", apifyErr);
+    }
+  }
+
+  // 4. Sauvegarder les résultats Apify pour chaque prospect avec domaine
+  for (const [domain, { prospectId }] of prospectDomainMap) {
+    const apifyData = apifyBatchResults.get(domain.toLowerCase());
+
+    if (apifyData && (apifyData.industry || apifyData.employees || apifyData.tech)) {
+      // Données Apify disponibles — sauvegarder directement
+      try {
+        const enrichmentData = mapApifyToEnrichment(apifyData);
+        const prospect = prospects.find((p) => (p.id as string) === prospectId);
+        const existingMetadata =
+          typeof prospect?.metadata === "object" && prospect?.metadata !== null
+            ? (prospect.metadata as Record<string, unknown>)
+            : {};
+
+        const updatedMetadata = {
+          ...existingMetadata,
+          enrichment: {
+            ...enrichmentData,
+            source: "apify_verified" as const,
+            disclaimer: "Données vérifiées via Apify (batch company-enrichment-api).",
+            enriched_at: new Date().toISOString(),
+            enriched_by: user.id,
+          },
+        };
+
+        const { error: updateError } = await supabase
+          .from("prospects")
+          .update({ metadata: updatedMetadata })
+          .eq("id", prospectId);
+
+        if (!updateError) {
+          await supabase.from("activity_logs").insert({
+            user_id: user.id,
+            action: "enrichment",
+            entity_type: "prospect",
+            entity_id: prospectId,
+            metadata: {
+              prospect_name: (prospect?.name as string) || "",
+              confiance: enrichmentData.confiance,
+              source: "apify_verified",
+            },
+          });
+          success++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    } else {
+      // Pas de données Apify pour ce domaine — fallback individuel
+      try {
+        await enrichProspect(prospectId);
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+  }
+
+  // 5. Fallback IA individuel pour les prospects sans domaine
+  for (const prospectId of prospectsWithoutDomain) {
+    try {
+      await enrichProspect(prospectId);
       success++;
     } catch {
       failed++;

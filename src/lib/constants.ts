@@ -28,6 +28,7 @@ import {
   Building2,
   Zap,
   Store,
+  Search,
   SlidersHorizontal,
   Code,
   Plug,
@@ -119,6 +120,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Prospection",
     href: "/prospecting",
     icon: Target,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+  {
+    label: "Découverte Leads",
+    href: "/prospecting/discovery",
+    icon: Search,
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
@@ -352,7 +359,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Prospection",
     items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href),
+      ["/prospecting", "/prospecting/discovery", "/roleplay", "/scripts", "/automation"].includes(i.href),
     ),
   },
   {
@@ -459,6 +466,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   privacy: "Confidentialité & RGPD",
   security: "Sécurité & 2FA",
   duplicates: "Doublons",
+  discovery: "Découverte Leads",
   intelligence: "Hunting Intelligence",
   certificates: "Certificats",
   diagnostic: "Diagnostic",
