@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Circle,
   Lock,
+  ShieldCheck,
   ChevronDown,
   ChevronRight,
   FileText,
@@ -31,6 +32,8 @@ import {
   Menu,
   X,
   Loader2,
+  Sparkles,
+  Star,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -186,6 +189,9 @@ export function CourseView({
 
   // -- Module unlock status (driven by server-side quiz score checks)
   const [localModuleUnlock, setLocalModuleUnlock] = useState(moduleUnlockStatus);
+
+  // -- Track which modules just got unlocked for celebration animation
+  const [justUnlockedModules, setJustUnlockedModules] = useState<Set<string>>(new Set());
 
   const isModuleUnlocked = useCallback(
     (moduleId: string): boolean => {
@@ -412,6 +418,7 @@ export function CourseView({
 
         // Optimistically unlock the next module if this quiz gates it
         if (score >= 90) {
+          const unlockedIds: string[] = [];
           setLocalModuleUnlock((prev) => {
             const next = { ...prev };
             for (const [modId, info] of Object.entries(next)) {
@@ -432,12 +439,26 @@ export function CourseView({
                       previousModuleQuizPassed: true,
                       previousModuleQuizBestScore: score,
                     };
+                    unlockedIds.push(modId);
                   }
                 }
               }
             }
             return next;
           });
+
+          // Trigger unlock celebration animation
+          if (unlockedIds.length > 0) {
+            setJustUnlockedModules(new Set(unlockedIds));
+            // Auto-expand newly unlocked modules
+            setExpandedModules((prev) => {
+              const next = new Set(prev);
+              unlockedIds.forEach((id) => next.add(id));
+              return next;
+            });
+            // Clear celebration after animation completes
+            setTimeout(() => setJustUnlockedModules(new Set()), 3000);
+          }
         }
 
         toast.success(`Quiz reussi ! Score : ${score}%`);
@@ -515,7 +536,7 @@ export function CourseView({
         {/* Module sections */}
         <ScrollArea className="flex-1">
           <div className="py-2">
-            {course.modules.map((mod) => {
+            {course.modules.map((mod, modIdx) => {
               const isExpanded = expandedModules.has(mod.id);
               const moduleLessonCount = mod.lessons.length;
               const moduleCompletedCount = mod.lessons.filter((l) =>
@@ -524,80 +545,188 @@ export function CourseView({
               const moduleAllComplete = moduleLessonCount > 0 && moduleCompletedCount === moduleLessonCount;
               const modUnlocked = isModuleUnlocked(mod.id);
               const modUnlockInfo = getModuleUnlockInfo(mod.id);
+              const isJustUnlocked = justUnlockedModules.has(mod.id);
+              const moduleProgress = moduleLessonCount > 0 ? Math.round((moduleCompletedCount / moduleLessonCount) * 100) : 0;
 
               return (
-                <div key={mod.id}>
+                <div key={mod.id} className={cn(
+                  "transition-all duration-500",
+                  isJustUnlocked && "animate-in fade-in slide-in-from-left-2 duration-500"
+                )}>
                   {/* Module header */}
                   <button
                     onClick={() => toggleModule(mod.id)}
                     className={cn(
-                      "w-full flex items-center justify-between px-5 py-3 transition-colors group",
-                      modUnlocked ? "hover:bg-muted/50" : "opacity-60"
+                      "w-full flex items-center justify-between px-5 py-3.5 transition-all duration-200 group relative",
+                      modUnlocked ? "hover:bg-muted/50" : "opacity-50 hover:opacity-60",
+                      isJustUnlocked && "bg-brand/5"
                     )}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      {/* Module status icon */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Module status icon — premium sizing with background */}
                       {!modUnlocked ? (
-                        <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-muted/80 dark:bg-muted/40 border border-border/50">
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                        </div>
                       ) : moduleAllComplete ? (
-                        <CheckCircle2 className="h-4 w-4 text-brand fill-brand/20 shrink-0" />
-                      ) : isExpanded ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-brand/15 border border-brand/20">
+                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                        </div>
+                      ) : isJustUnlocked ? (
+                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-brand/15 border border-brand/30 animate-in zoom-in duration-300">
+                          <Sparkles className="h-4 w-4 text-brand animate-pulse" />
+                        </div>
                       ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-muted/50 dark:bg-muted/30 border border-border/30 group-hover:border-border/60 transition-colors">
+                          {isExpanded ? (
+                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          ) : (
+                            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          )}
+                        </div>
                       )}
-                      <span className={cn(
-                        "text-xs font-semibold tracking-wider uppercase truncate transition-colors",
-                        modUnlocked
-                          ? "text-muted-foreground group-hover:text-foreground"
-                          : "text-muted-foreground"
-                      )}>
-                        {mod.title}
-                      </span>
+
+                      <div className="min-w-0 flex-1">
+                        <span className={cn(
+                          "text-xs font-semibold tracking-wider uppercase truncate block transition-colors",
+                          modUnlocked
+                            ? "text-foreground/70 group-hover:text-foreground"
+                            : "text-muted-foreground",
+                          isJustUnlocked && "text-brand"
+                        )}>
+                          {mod.title}
+                        </span>
+                        {/* Mini progress bar under module title */}
+                        {modUnlocked && moduleLessonCount > 0 && (
+                          <div className="h-1 w-full rounded-full bg-muted/60 mt-1.5 overflow-hidden">
+                            <div
+                              className={cn(
+                                "h-full rounded-full transition-all duration-700 ease-out",
+                                moduleAllComplete ? "bg-brand" : "bg-brand/60"
+                              )}
+                              style={{ width: `${moduleProgress}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      {moduleAllComplete && (
-                        <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px] px-1.5 py-0">
+                    <div className="flex items-center gap-2 shrink-0 ml-3">
+                      {moduleAllComplete ? (
+                        <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px] px-2 py-0.5 font-semibold gap-1">
+                          <Star className="h-2.5 w-2.5 fill-brand" />
                           Termine
                         </Badge>
-                      )}
-                      <span className="text-[10px] text-muted-foreground">
+                      ) : isJustUnlocked ? (
+                        <Badge className="bg-brand/10 text-brand border-brand/30 text-[10px] px-2 py-0.5 font-semibold animate-in fade-in duration-500 gap-1">
+                          <Sparkles className="h-2.5 w-2.5" />
+                          Debloque !
+                        </Badge>
+                      ) : !modUnlocked ? (
+                        <Badge variant="outline" className="text-[10px] px-2 py-0.5 text-muted-foreground border-border/50">
+                          <Lock className="h-2.5 w-2.5 mr-1" />
+                          Verrouille
+                        </Badge>
+                      ) : null}
+                      <span className={cn(
+                        "text-[10px] tabular-nums",
+                        moduleAllComplete ? "text-brand" : "text-muted-foreground"
+                      )}>
                         {moduleCompletedCount}/{moduleLessonCount}
                       </span>
                     </div>
                   </button>
 
-                  {/* Module locked banner */}
+                  {/* Module locked banner — premium design */}
                   {!modUnlocked && modUnlockInfo && isExpanded && (
-                    <div className="mx-5 mb-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30 px-3 py-2.5">
-                      <div className="flex items-start gap-2">
-                        <Lock className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
-                        <div className="text-xs">
-                          <p className="font-medium text-amber-800 dark:text-amber-200">
+                    <div className="mx-4 mb-3 rounded-xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 to-orange-50/40 dark:border-amber-900/40 dark:from-amber-950/20 dark:to-orange-950/10 px-4 py-3.5 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 border border-amber-200/60 dark:border-amber-800/40 mt-0.5">
+                          <ShieldCheck className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-amber-900 dark:text-amber-100">
                             Module verrouille
                           </p>
-                          <p className="text-amber-700 dark:text-amber-300 mt-0.5">
-                            Reussissez le quiz du module precedent (90% min.) pour debloquer
+                          <p className="text-xs text-amber-700/80 dark:text-amber-300/70 mt-1 leading-relaxed">
+                            Reussissez le quiz du module precedent avec un score minimum de 90% pour debloquer ce contenu.
                           </p>
+
+                          {/* Score progress bar */}
                           {modUnlockInfo.previousModuleQuizBestScore !== null && modUnlockInfo.previousModuleQuizBestScore > 0 && (
-                            <p className={cn(
-                              "mt-1 flex items-center gap-1",
-                              modUnlockInfo.previousModuleQuizBestScore >= 90
-                                ? "text-green-600 dark:text-green-400"
-                                : modUnlockInfo.previousModuleQuizBestScore >= 50
-                                ? "text-amber-600 dark:text-amber-400"
-                                : "text-red-600 dark:text-red-400"
-                            )}>
-                              <Trophy className="h-3 w-3" />
-                              Votre meilleur score : {modUnlockInfo.previousModuleQuizBestScore}%
-                            </p>
+                            <div className="mt-3 space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-200">
+                                  <Trophy className="h-3 w-3" />
+                                  Votre meilleur score
+                                </span>
+                                <span className={cn(
+                                  "font-bold tabular-nums",
+                                  modUnlockInfo.previousModuleQuizBestScore >= 90
+                                    ? "text-green-600 dark:text-green-400"
+                                    : modUnlockInfo.previousModuleQuizBestScore >= 50
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : "text-red-600 dark:text-red-400"
+                                )}>
+                                  {modUnlockInfo.previousModuleQuizBestScore}%
+                                </span>
+                              </div>
+                              {/* Visual score bar with 90% threshold marker */}
+                              <div className="relative h-2 w-full rounded-full bg-amber-200/50 dark:bg-amber-900/30 overflow-hidden">
+                                <div
+                                  className={cn(
+                                    "h-full rounded-full transition-all duration-500 ease-out",
+                                    modUnlockInfo.previousModuleQuizBestScore >= 90
+                                      ? "bg-green-500"
+                                      : modUnlockInfo.previousModuleQuizBestScore >= 50
+                                      ? "bg-amber-500"
+                                      : "bg-red-400"
+                                  )}
+                                  style={{ width: `${modUnlockInfo.previousModuleQuizBestScore}%` }}
+                                />
+                                {/* 90% threshold marker */}
+                                <div className="absolute top-0 bottom-0 w-px bg-amber-800/40 dark:bg-amber-300/40" style={{ left: '90%' }} />
+                              </div>
+                              <p className="text-[10px] text-amber-600/70 dark:text-amber-400/50 text-right">
+                                Seuil requis : 90%
+                              </p>
+                            </div>
                           )}
+
+                          {/* Remaining attempts pill */}
                           {modUnlockInfo.previousModuleQuizTodayAttempts > 0 && (
-                            <p className="text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              Il vous reste {Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts)} tentative(s) aujourd&apos;hui
-                            </p>
+                            <div className="mt-2.5 flex items-center gap-2">
+                              <div className={cn(
+                                "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                                Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts) > 0
+                                  ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800/40"
+                                  : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
+                              )}>
+                                <Clock className="h-3 w-3" />
+                                {Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts) > 0
+                                  ? `${Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts)} tentative(s) restante(s)`
+                                  : "Revenez demain"}
+                              </div>
+                            </div>
                           )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Just unlocked celebration banner */}
+                  {isJustUnlocked && isExpanded && (
+                    <div className="mx-4 mb-3 rounded-xl border border-brand/30 bg-gradient-to-br from-brand/5 to-green-50/50 dark:from-brand/5 dark:to-green-950/10 px-4 py-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
+                      <div className="flex items-center gap-3">
+                        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-brand/15 border border-brand/20">
+                          <Sparkles className="h-4 w-4 text-brand animate-pulse" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-brand">
+                            Module debloque !
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Felicitations ! Vous pouvez maintenant acceder a ce contenu.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -605,41 +734,58 @@ export function CourseView({
 
                   {/* Lesson items */}
                   {isExpanded && (
-                    <div className="pb-1">
-                      {mod.lessons.map((lesson) => {
+                    <div className={cn(
+                      "pb-2 animate-in fade-in slide-in-from-top-1 duration-200",
+                      !modUnlocked && "relative"
+                    )}>
+                      {/* Subtle overlay for locked module lessons */}
+                      {!modUnlocked && (
+                        <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/20 to-background/40 dark:from-background/0 dark:via-background/10 dark:to-background/30 z-[1] pointer-events-none rounded-b-lg" />
+                      )}
+                      {mod.lessons.map((lesson, lessonIdx) => {
                         const completed = completedLessonIds.has(lesson.id);
                         const isActive = selectedLessonId === lesson.id;
                         const unlocked = isLessonUnlocked(lesson.id);
+                        const isModLocked = !modUnlocked;
 
                         return (
                           <button
                             key={lesson.id}
                             disabled={!unlocked}
                             onClick={() => selectLesson(lesson.id)}
-                            title={!modUnlocked
-                              ? "Reussissez le quiz du module precedent (90% min.) pour debloquer"
+                            title={isModLocked
+                              ? "Reussissez le quiz du module precedent pour debloquer"
                               : !unlocked
                               ? "Terminez la lecon precedente pour debloquer"
                               : undefined
                             }
                             className={cn(
-                              "w-full flex items-center gap-3 pl-7 pr-4 py-2.5 text-left transition-colors relative",
+                              "w-full flex items-center gap-3 pl-7 pr-4 py-2.5 text-left transition-all duration-200 relative",
                               isActive &&
-                                "bg-brand/10 border-l-2 border-brand",
-                              !isActive && unlocked && "hover:bg-muted/50",
-                              !unlocked && "opacity-40 cursor-not-allowed"
+                                "bg-brand/8 border-l-2 border-brand shadow-[inset_0_0_12px_rgba(122,241,122,0.04)]",
+                              !isActive && unlocked && "hover:bg-muted/40 hover:pl-8",
+                              isModLocked && "opacity-35 cursor-not-allowed select-none",
+                              !isModLocked && !unlocked && "opacity-45 cursor-not-allowed"
                             )}
                           >
-                            {/* Status icon */}
-                            <span className="shrink-0">
+                            {/* Status icon — larger touch target with refined states */}
+                            <span className="shrink-0 flex items-center justify-center w-5 h-5">
                               {completed ? (
-                                <CheckCircle2 className="h-4 w-4 text-brand fill-brand/20" />
+                                <CheckCircle2 className={cn(
+                                  "h-[18px] w-[18px] text-brand",
+                                  isJustUnlocked && "animate-in zoom-in duration-300"
+                                )} />
                               ) : isActive ? (
-                                <Play className="h-4 w-4 text-brand" />
+                                <div className="relative">
+                                  <Play className="h-4 w-4 text-brand" />
+                                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+                                </div>
                               ) : unlocked ? (
-                                <Circle className="h-4 w-4 text-muted-foreground" />
+                                <Circle className="h-4 w-4 text-muted-foreground/60" />
+                              ) : isModLocked ? (
+                                <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
                               ) : (
-                                <Lock className="h-4 w-4 text-muted-foreground" />
+                                <Lock className="h-3.5 w-3.5 text-muted-foreground/70" />
                               )}
                             </span>
 
@@ -647,25 +793,33 @@ export function CourseView({
                             <div className="min-w-0 flex-1">
                               <p
                                 className={cn(
-                                  "text-sm truncate",
+                                  "text-sm truncate transition-colors",
                                   isActive && "font-medium text-foreground",
                                   completed &&
                                     !isActive &&
-                                    "text-muted-foreground",
+                                    "text-muted-foreground line-through decoration-brand/30",
                                   !completed &&
                                     !isActive &&
                                     unlocked &&
-                                    "text-foreground"
+                                    "text-foreground/80"
                                 )}
                               >
                                 {lesson.title}
                               </p>
                               {lesson.duration_minutes && (
-                                <span className="text-[11px] text-muted-foreground">
+                                <span className="text-[11px] text-muted-foreground/70 flex items-center gap-1 mt-0.5">
+                                  <Clock className="h-2.5 w-2.5" />
                                   {lesson.duration_minutes} min
                                 </span>
                               )}
                             </div>
+
+                            {/* Lesson number for locked lessons (gives a sense of progression) */}
+                            {!unlocked && (
+                              <span className="text-[10px] text-muted-foreground/40 tabular-nums shrink-0">
+                                {modIdx > 0 ? `${modIdx + 1}.` : ""}{lessonIdx + 1}
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -889,10 +1043,10 @@ export function CourseView({
 
                   {/* Quiz button */}
                   {activeQuiz && !completedLessonIds.has(selectedLesson.id) && (
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-2">
                       <Button
                         variant="outline"
-                        className="gap-2"
+                        className="gap-2 font-semibold"
                         onClick={() => setQuizOpen(true)}
                         disabled={isQuizLocked(selectedLesson.id)}
                       >
@@ -900,33 +1054,39 @@ export function CourseView({
                         Passer le quiz
                       </Button>
                       {activeAttempts && (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Attempts pill */}
+                          <div className={cn(
+                            "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                            Math.max(0, activeAttempts.maxAttempts - activeAttempts.todayAttempts) > 0
+                              ? "bg-muted/50 text-muted-foreground border-border/50"
+                              : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
+                          )}>
                             <Clock className="h-3 w-3" />
-                            <span>
-                              Il vous reste {Math.max(0, activeAttempts.maxAttempts - activeAttempts.todayAttempts)} tentative(s) aujourd&apos;hui
-                            </span>
+                            {Math.max(0, activeAttempts.maxAttempts - activeAttempts.todayAttempts)} tentative(s)
                           </div>
+                          {/* Best score pill */}
                           {activeAttempts.bestScore > 0 && (
                             <div className={cn(
-                              "flex items-center gap-1.5 text-xs",
+                              "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
                               activeAttempts.bestScore >= 90
-                                ? "text-green-600"
+                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800/40"
                                 : activeAttempts.bestScore >= 50
-                                ? "text-amber-600"
-                                : "text-red-600"
+                                ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/40"
+                                : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
                             )}>
                               <Trophy className="h-3 w-3" />
-                              <span>
-                                Meilleur score : {activeAttempts.bestScore}%
-                                {activeAttempts.bestScore < 90 && " (90% requis)"}
-                              </span>
+                              {activeAttempts.bestScore}%
+                              {activeAttempts.bestScore < 90 && (
+                                <span className="text-[10px] opacity-70">/90%</span>
+                              )}
                             </div>
                           )}
                         </div>
                       )}
                       {isQuizLocked(selectedLesson.id) && (
-                        <p className="text-xs text-amber-600">
+                        <p className="text-xs text-amber-600 flex items-center gap-1.5 font-medium">
+                          <Clock className="h-3 w-3" />
                           Plus de tentatives aujourd&apos;hui. Revenez demain !
                         </p>
                       )}
@@ -1039,41 +1199,77 @@ export function CourseView({
                     ))}
                   </div>
 
-                  {/* Quiz results */}
+                  {/* Quiz results — premium design with score ring */}
                   {quizSubmitted && quizScore !== null && (
                     <div
                       className={cn(
-                        "mt-6 rounded-lg border-2 p-4",
+                        "mt-6 rounded-xl border-2 p-5 animate-in fade-in slide-in-from-bottom-2 duration-300",
                         quizScore >= (activeQuiz.passing_score || 90)
-                          ? "border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20"
-                          : "border-red-200 bg-red-50/50 dark:border-red-900 dark:bg-red-950/20"
+                          ? "border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/40 dark:border-green-900 dark:from-green-950/20 dark:to-emerald-950/10"
+                          : "border-red-200 bg-gradient-to-br from-red-50/80 to-orange-50/40 dark:border-red-900 dark:from-red-950/20 dark:to-orange-950/10"
                       )}
                     >
-                      <div className="flex items-center gap-4">
-                        {quizScore >= (activeQuiz.passing_score || 90) ? (
-                          <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-3">
-                            <Trophy className="h-6 w-6 text-green-600" />
+                      <div className="flex items-center gap-5">
+                        {/* Score ring */}
+                        <div className="relative shrink-0 w-16 h-16">
+                          <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                            <circle
+                              cx="32" cy="32" r="28"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              className="text-muted/30"
+                            />
+                            <circle
+                              cx="32" cy="32" r="28"
+                              fill="none"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              strokeDasharray={`${(quizScore / 100) * 175.9} 175.9`}
+                              className={cn(
+                                "transition-all duration-1000 ease-out",
+                                quizScore >= (activeQuiz.passing_score || 90) ? "stroke-green-500" : "stroke-red-400"
+                              )}
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className={cn(
+                              "text-lg font-bold tabular-nums leading-none",
+                              quizScore >= (activeQuiz.passing_score || 90) ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"
+                            )}>
+                              {quizScore}%
+                            </span>
                           </div>
-                        ) : (
-                          <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3">
-                            <XCircle className="h-6 w-6 text-red-500" />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {quizScore >= (activeQuiz.passing_score || 90) ? (
+                              <Trophy className="h-5 w-5 text-green-600 shrink-0" />
+                            ) : (
+                              <XCircle className="h-5 w-5 text-red-500 shrink-0" />
+                            )}
+                            <p className="font-bold text-lg">
+                              {quizScore >= (activeQuiz.passing_score || 90) ? "Quiz reussi !" : "Quiz non valide"}
+                            </p>
                           </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="font-semibold text-lg">
-                            Score : {quizScore}%
-                          </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {quizScore >= (activeQuiz.passing_score || 90)
-                              ? "Felicitations ! Vous avez reussi le quiz."
+                              ? "Felicitations ! Vous avez reussi le quiz et debloque la suite."
                               : `Score minimum requis : ${activeQuiz.passing_score || 90}%. Revisez la lecon et reessayez.`}
                           </p>
+                          {quizScore >= (activeQuiz.passing_score || 90) && (
+                            <p className="text-xs text-green-600 dark:text-green-400 mt-1.5 flex items-center gap-1.5 font-medium">
+                              <Sparkles className="h-3 w-3" />
+                              Module suivant debloque
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       {/* Question results detail */}
-                      <div className="mt-4 space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground uppercase">
+                      <div className="mt-5 pt-4 border-t border-border/50 space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                           Detail des reponses
                         </p>
                         {activeQuiz.questions.map((q, qi) => {
@@ -1082,7 +1278,10 @@ export function CourseView({
                           return (
                             <div
                               key={qi}
-                              className="flex items-center gap-2 text-sm"
+                              className={cn(
+                                "flex items-center gap-2.5 text-sm py-1 px-2 rounded-md -mx-1",
+                                isCorrect ? "bg-green-50/50 dark:bg-green-950/10" : "bg-red-50/50 dark:bg-red-950/10"
+                              )}
                             >
                               {isCorrect ? (
                                 <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
@@ -1091,6 +1290,7 @@ export function CourseView({
                               )}
                               <span
                                 className={cn(
+                                  "truncate",
                                   isCorrect
                                     ? "text-green-700 dark:text-green-400"
                                     : "text-red-600 dark:text-red-400"

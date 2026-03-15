@@ -11,10 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar, ImagePlus, X, Loader2,
-  HelpCircle, PartyPopper, MessagesSquare, ShieldCheck, Hash,
+  HelpCircle, PartyPopper, MessagesSquare, ShieldCheck, Hash, Sparkles,
 } from "lucide-react";
 import { createCommunityPost, toggleLike, getComments, addComment } from "@/lib/actions/community";
 import { createClient } from "@/lib/supabase/client";
@@ -56,6 +56,7 @@ interface ChannelDef {
   color: string;          // Tailwind text color
   bgColor: string;        // Tailwind bg color for icon container
   borderColor: string;    // Active border accent
+  activeBg: string;       // Active item background
   private?: boolean;
   allowedRoles?: string[];
 }
@@ -66,9 +67,10 @@ const CHANNELS: ChannelDef[] = [
     label: "Tous les canaux",
     description: "Voir tous les posts",
     icon: <Hash className="h-4 w-4" />,
-    color: "text-muted-foreground",
-    bgColor: "bg-muted/50",
+    color: "text-foreground",
+    bgColor: "bg-muted",
     borderColor: "border-brand",
+    activeBg: "bg-brand/8",
   },
   {
     id: "questions",
@@ -78,6 +80,7 @@ const CHANNELS: ChannelDef[] = [
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500",
+    activeBg: "bg-blue-500/8",
   },
   {
     id: "wins",
@@ -87,6 +90,7 @@ const CHANNELS: ChannelDef[] = [
     color: "text-emerald-500",
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-500",
+    activeBg: "bg-emerald-500/8",
   },
   {
     id: "general",
@@ -96,6 +100,7 @@ const CHANNELS: ChannelDef[] = [
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
     borderColor: "border-amber-500",
+    activeBg: "bg-amber-500/8",
   },
   {
     id: "team_interne",
@@ -105,6 +110,7 @@ const CHANNELS: ChannelDef[] = [
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
     borderColor: "border-purple-500",
+    activeBg: "bg-purple-500/8",
     private: true,
     allowedRoles: ["admin", "manager", "setter"],
   },
@@ -259,15 +265,16 @@ export function CommunityView({
   function PostCard({ post, isWinGrid }: { post: Post; isWinGrid?: boolean }) {
     const postChannel = CHANNELS.find((c) => c.id === (post.channel || "general"));
     return (
-      <Card className={`${post.type === "win" && isWinGrid ? "border-emerald-500/20 bg-emerald-500/5" : ""}`}>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center text-brand text-xs font-bold ring-1 ring-brand/20">
-              {post.author?.full_name?.charAt(0) || "?"}
+      <Card className={`transition-shadow hover:shadow-md ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}>
+        <CardContent className="px-5 py-5 sm:px-6 sm:py-6">
+          {/* Author row */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center text-brand font-semibold text-sm ring-1 ring-brand/20 shrink-0">
+              {post.author?.full_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium">{post.author?.full_name || "Anonyme"}</p>
+                <p className="text-sm font-semibold truncate">{post.author?.full_name || "Anonyme"}</p>
                 {post.author?.id && reputations[post.author.id] !== undefined && (
                   <ReputationBadge score={reputations[post.author.id]} />
                 )}
@@ -276,59 +283,80 @@ export function CommunityView({
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
               </p>
             </div>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {activeChannel === "all" && postChannel && postChannel.id !== "all" && (
-                <Badge variant="outline" className={`text-xs ${postChannel.color} ${postChannel.bgColor} border-transparent`}>
-                  {postChannel.private && <ShieldCheck className="h-3 w-3 mr-1" />}
+                <Badge variant="outline" className={`text-[11px] ${postChannel.color} ${postChannel.bgColor} border-current/15`}>
+                  {postChannel.private && <ShieldCheck className="h-3 w-3 mr-0.5" />}
                   {postChannel.label}
                 </Badge>
               )}
-              <Badge variant="outline" className={`${typeColors[post.type]}`}>
-                {post.type === "win" && <Trophy className="h-3 w-3 mr-1" />}
+              <Badge variant="outline" className={`text-[11px] ${typeColors[post.type]}`}>
+                {post.type === "win" && <Trophy className="h-3 w-3 mr-0.5" />}
                 {typeLabels[post.type]}
               </Badge>
             </div>
           </div>
-          {post.title && <h3 className="font-semibold mb-2">{post.title}</h3>}
-          <p className="text-sm mb-4 whitespace-pre-wrap">{post.content}</p>
+
+          {/* Post body */}
+          {post.title && <h3 className="font-semibold text-[15px] mb-2 leading-snug">{post.title}</h3>}
+          <p className="text-sm text-foreground/80 leading-relaxed mb-5 whitespace-pre-wrap">{post.content}</p>
           {post.image_url && (
-            <Image src={post.image_url} alt="" width={800} height={400} className="rounded-lg mb-4 max-h-64 object-cover w-full" loading="lazy" />
+            <Image src={post.image_url} alt="" width={800} height={400} className="rounded-xl mb-5 max-h-72 object-cover w-full" loading="lazy" />
           )}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+
+          {/* Actions */}
+          <div className="flex items-center gap-1 border-t pt-4">
             <button
               onClick={() => handleLike(post.id)}
-              className={`flex items-center gap-1 transition-colors ${likedPosts.has(post.id) ? "text-red-500" : "hover:text-red-500"}`}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-all ${
+                likedPosts.has(post.id)
+                  ? "text-red-500 bg-red-500/10"
+                  : "text-muted-foreground hover:text-red-500 hover:bg-red-500/5"
+              }`}
             >
               <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? "fill-red-500" : ""}`} />
-              {post.likes_count + (likedPosts.has(post.id) ? 1 : 0)}
+              <span className="font-medium">{post.likes_count + (likedPosts.has(post.id) ? 1 : 0)}</span>
             </button>
-            <button onClick={() => handleExpandComments(post.id)} className="flex items-center gap-1 hover:text-brand transition-colors">
+            <button
+              onClick={() => handleExpandComments(post.id)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-brand hover:bg-brand/5 transition-all"
+            >
               <MessageCircle className="h-4 w-4" />
-              Commenter
+              <span className="font-medium">Commenter</span>
             </button>
           </div>
+
+          {/* Comments section */}
           {expandedComments === post.id && (
-            <div className="mt-4 border-t pt-4 space-y-3">
+            <div className="mt-4 pt-4 border-t space-y-3">
+              {comments.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-2">Aucun commentaire pour le moment</p>
+              )}
               {comments.map((c) => (
-                <div key={c.id} className="flex gap-2">
-                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold shrink-0">
-                    {c.author?.full_name?.charAt(0) || "?"}
+                <div key={c.id} className="flex gap-3 group">
+                  <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[11px] font-semibold shrink-0">
+                    {c.author?.full_name?.charAt(0)?.toUpperCase() || "?"}
                   </div>
-                  <div>
-                    <p className="text-xs font-medium">{c.author?.full_name || "Anonyme"}</p>
-                    <p className="text-sm">{c.content}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-xs font-semibold">{c.author?.full_name || "Anonyme"}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: fr })}
+                      </p>
+                    </div>
+                    <p className="text-sm text-foreground/80 mt-0.5">{c.content}</p>
                   </div>
                 </div>
               ))}
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-1">
                 <Input
                   placeholder="Ajouter un commentaire..."
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddComment(post.id)}
-                  className="flex-1"
+                  className="flex-1 h-9 text-sm"
                 />
-                <Button size="sm" onClick={() => handleAddComment(post.id)}>
+                <Button size="sm" variant="outline" className="h-9 px-3 hover:bg-brand/10 hover:text-brand hover:border-brand/30" onClick={() => handleAddComment(post.id)}>
                   <Send className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -354,7 +382,7 @@ export function CommunityView({
               <Button variant="outline" size="sm"><Settings2 className="h-4 w-4 mr-2" />Mod\u00e9ration</Button>
             </Link>
           )}
-          <Button onClick={() => { setNewChannel(activeChannel === "all" ? "general" : activeChannel); setDialogOpen(true); }} className="bg-brand text-brand-dark hover:bg-brand/90">
+          <Button onClick={() => { setNewChannel(activeChannel === "all" ? "general" : activeChannel); setDialogOpen(true); }} className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold">
             <Plus className="h-4 w-4 mr-2" />
             Nouveau post
           </Button>
@@ -363,68 +391,117 @@ export function CommunityView({
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* ─── Channel sidebar ─── */}
-        <div className="lg:w-60 shrink-0">
-          <div className="sticky top-20">
-            <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-3 px-2">Canaux</h3>
-            <nav className="space-y-1">
+        <div className="lg:w-64 shrink-0">
+          {/* Mobile: horizontal scroll */}
+          <div className="lg:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
               {visibleChannels.map((ch) => {
                 const isActive = activeChannel === ch.id;
-                const count = ch.id === "all"
-                  ? channelCounts.all || 0
-                  : channelCounts[ch.id] || 0;
-
+                const count = ch.id === "all" ? channelCounts.all || 0 : channelCounts[ch.id] || 0;
                 return (
                   <button
                     key={ch.id}
                     onClick={() => setActiveChannel(ch.id)}
-                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all ${
+                    className={`flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all shrink-0 ${
                       isActive
-                        ? `bg-accent/50 border-l-2 ${ch.borderColor} font-medium`
-                        : "hover:bg-accent/30 border-l-2 border-transparent"
+                        ? `${ch.activeBg} ${ch.color} ring-1 ring-current/20`
+                        : "bg-card text-muted-foreground hover:bg-accent/30 border border-border"
                     }`}
                   >
-                    <span className={`flex h-7 w-7 items-center justify-center rounded-md ${ch.bgColor} ${ch.color}`}>
+                    <span className={`flex h-5 w-5 items-center justify-center ${ch.color}`}>
                       {ch.icon}
                     </span>
-                    <span className="flex-1 truncate">
-                      <span className="block leading-tight">{ch.label}</span>
-                      {ch.private && (
-                        <span className="text-[10px] text-purple-400 flex items-center gap-0.5 mt-0.5">
-                          <ShieldCheck className="h-2.5 w-2.5" /> Priv\u00e9
-                        </span>
-                      )}
-                    </span>
+                    {ch.label}
                     {count > 0 && (
-                      <span className="text-[11px] font-medium text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 min-w-[22px] text-center">
+                      <span className="text-[11px] bg-muted rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
                         {count}
                       </span>
                     )}
                   </button>
                 );
               })}
-            </nav>
+            </div>
+          </div>
+
+          {/* Desktop: vertical sidebar */}
+          <div className="hidden lg:block sticky top-20">
+            <div className="rounded-xl border bg-card p-3">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-2">Canaux</h3>
+              <nav className="space-y-1">
+                {visibleChannels.map((ch) => {
+                  const isActive = activeChannel === ch.id;
+                  const count = ch.id === "all"
+                    ? channelCounts.all || 0
+                    : channelCounts[ch.id] || 0;
+
+                  return (
+                    <button
+                      key={ch.id}
+                      onClick={() => setActiveChannel(ch.id)}
+                      className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all group ${
+                        isActive
+                          ? `${ch.activeBg} font-semibold ${ch.color}`
+                          : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                        isActive ? `${ch.bgColor} ${ch.color}` : `bg-muted/80 ${ch.color} group-hover:${ch.bgColor}`
+                      }`}>
+                        {ch.icon}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block leading-tight truncate">{ch.label}</span>
+                        {ch.private && (
+                          <span className="flex items-center gap-1 mt-0.5">
+                            <ShieldCheck className="h-2.5 w-2.5 text-purple-400" />
+                            <span className="text-[10px] text-purple-400 font-medium">Priv\u00e9</span>
+                          </span>
+                        )}
+                      </span>
+                      {count > 0 && (
+                        <span className={`text-[11px] font-semibold rounded-full px-2 py-0.5 min-w-[24px] text-center ${
+                          isActive ? `${ch.bgColor} ${ch.color}` : "bg-muted text-muted-foreground"
+                        }`}>
+                          {count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
           </div>
         </div>
 
         {/* ─── Main content ─── */}
         <div className="flex-1 min-w-0">
-          {/* Active channel header */}
+          {/* Active channel header banner */}
           {activeChannel !== "all" && (
-            <div className={`flex items-center gap-3 mb-5 p-4 rounded-lg border ${activeChannelDef.bgColor}`}>
-              <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${activeChannelDef.bgColor} ${activeChannelDef.color}`}>
+            <div className={`relative flex items-center gap-4 mb-6 p-5 rounded-xl border overflow-hidden ${activeChannelDef.bgColor}`}>
+              {/* Subtle gradient overlay for depth */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background/40 pointer-events-none" />
+              <span className={`relative flex h-11 w-11 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border/50 ${activeChannelDef.color}`}>
                 {activeChannelDef.icon}
               </span>
-              <div>
-                <h2 className="font-semibold flex items-center gap-2">
+              <div className="relative flex-1">
+                <h2 className="font-semibold text-base flex items-center gap-2">
                   {activeChannelDef.label}
                   {activeChannelDef.private && (
-                    <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-500">
+                    <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-500 bg-purple-500/5">
                       <ShieldCheck className="h-3 w-3 mr-0.5" /> Priv\u00e9
                     </Badge>
                   )}
                 </h2>
-                <p className="text-xs text-muted-foreground">{activeChannelDef.description}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">{activeChannelDef.description}</p>
               </div>
+              <Button
+                size="sm"
+                onClick={() => { setNewChannel(activeChannel); setDialogOpen(true); }}
+                className="relative bg-brand text-brand-dark hover:bg-brand/90 font-semibold hidden sm:flex"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Publier
+              </Button>
             </div>
           )}
 
@@ -461,14 +538,22 @@ export function CommunityView({
             </TabsContent>
           </Tabs>
 
+          {/* Empty state */}
           {filtered.length === 0 && (
             <Card className="mt-4">
-              <CardContent className="p-12 text-center text-muted-foreground">
-                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
-                  <MessageCircle className="h-7 w-7 opacity-50" />
+              <CardContent className="px-6 py-16 text-center">
+                <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-8 w-8 text-brand" />
                 </div>
-                <p className="font-medium">Aucun post dans ce canal</p>
-                <p className="text-sm">Soyez le premier \u00e0 publier !</p>
+                <p className="font-semibold text-base mb-1">Aucun post dans ce canal</p>
+                <p className="text-sm text-muted-foreground mb-5">Soyez le premier \u00e0 lancer la discussion !</p>
+                <Button
+                  onClick={() => { setNewChannel(activeChannel === "all" ? "general" : activeChannel); setDialogOpen(true); }}
+                  className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Cr\u00e9er un post
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -477,67 +562,80 @@ export function CommunityView({
         {/* ─── Leaderboard sidebar ─── */}
         {leaderboard.length > 0 && (
           <div className="lg:w-72 shrink-0">
-            <LeaderboardCard entries={leaderboard} />
+            <div className="sticky top-20">
+              <LeaderboardCard entries={leaderboard} />
+            </div>
           </div>
         )}
       </div>
 
       {/* ─── New post dialog ─── */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Nouveau post</DialogTitle>
+            <DialogTitle className="text-lg">Nouveau post</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Partagez avec la communaut\u00e9
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            {/* Channel selector */}
-            <div>
-              <Label>Canal</Label>
-              <Select
-                value={newChannel}
-                onValueChange={(v) => setNewChannel(v)}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {visibleChannels.filter((ch) => ch.id !== "all").map((ch) => (
-                    <SelectItem key={ch.id} value={ch.id}>
-                      <span className="flex items-center gap-2">
-                        {ch.label}
-                        {ch.private && <ShieldCheck className="h-3 w-3 text-purple-500" />}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-5 pt-2">
+            {/* Channel & Type row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Canal</Label>
+                <Select
+                  value={newChannel}
+                  onValueChange={(v) => setNewChannel(v)}
+                >
+                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {visibleChannels.filter((ch) => ch.id !== "all").map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id}>
+                        <span className="flex items-center gap-2">
+                          <span className={`flex h-5 w-5 items-center justify-center rounded ${ch.bgColor} ${ch.color}`}>
+                            {ch.icon}
+                          </span>
+                          {ch.label}
+                          {ch.private && <ShieldCheck className="h-3 w-3 text-purple-500" />}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</Label>
+                <Select value={newType} onValueChange={setNewType}>
+                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="discussion">Discussion</SelectItem>
+                    <SelectItem value="win">Win</SelectItem>
+                    <SelectItem value="question">Question</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label>Type</Label>
-              <Select value={newType} onValueChange={setNewType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="discussion">Discussion</SelectItem>
-                  <SelectItem value="win">Win</SelectItem>
-                  <SelectItem value="question">Question</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Titre <span className="normal-case font-normal">(optionnel)</span></Label>
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Donnez un titre \u00e0 votre post..." className="h-10" />
             </div>
-            <div>
-              <Label>Titre (optionnel)</Label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contenu</Label>
+              <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={5} placeholder="Que souhaitez-vous partager ?" className="resize-none" />
             </div>
-            <div>
-              <Label>Contenu</Label>
-              <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={5} />
-            </div>
+
             {/* Image upload */}
-            <div>
-              <Label>Image (optionnel)</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image <span className="normal-case font-normal">(optionnel)</span></Label>
               {newImagePreview ? (
-                <div className="relative mt-2">
-                  <img src={newImagePreview} alt="Aper\u00e7u" className="w-full rounded-lg max-h-48 object-cover" />
+                <div className="relative mt-1">
+                  <img src={newImagePreview} alt="Aper\u00e7u" className="w-full rounded-xl max-h-48 object-cover ring-1 ring-border" />
                   <button
                     type="button"
                     onClick={() => { setNewImageUrl(""); setNewImagePreview(""); }}
-                    className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80"
+                    className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -547,20 +645,21 @@ export function CommunityView({
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-4 text-sm text-muted-foreground hover:border-brand hover:text-brand transition-colors"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-6 text-sm text-muted-foreground hover:border-brand/50 hover:text-brand hover:bg-brand/5 transition-all"
                 >
                   {uploadingImage ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    <ImagePlus className="h-4 w-4" />
+                    <ImagePlus className="h-5 w-5" />
                   )}
                   {uploadingImage ? "Upload en cours..." : "Ajouter une image"}
                 </button>
               )}
               <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </div>
-            <Button onClick={handleCreate} disabled={isPosting || !newContent.trim()} className="w-full bg-brand text-brand-dark hover:bg-brand/90">
-              {isPosting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+
+            <Button onClick={handleCreate} disabled={isPosting || !newContent.trim()} className="w-full h-11 bg-brand text-brand-dark hover:bg-brand/90 font-semibold text-sm">
+              {isPosting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               Publier
             </Button>
           </div>

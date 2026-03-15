@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -24,7 +24,7 @@ export function ForgotPasswordForm() {
     });
 
     if (error) {
-      toast.error("Une erreur est survenue. Veuillez réessayer.");
+      toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
       setLoading(false);
       return;
     }
@@ -35,24 +35,32 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="space-y-4 text-center">
-        <CheckCircle2 className="mx-auto h-12 w-12 text-brand" />
-        <h3 className="text-lg font-semibold">Email envoyé</h3>
-        <p className="text-muted-foreground text-sm">
-          Un email de réinitialisation a été envoyé à <strong>{email}</strong>.
-          Vérifiez votre boîte de réception et cliquez sur le lien pour réinitialiser votre mot de passe.
-        </p>
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          <Link href="/login" className="text-brand-dark font-medium hover:underline">
-            Retour à la connexion
+      <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/10">
+          <CheckCircle2 className="h-8 w-8 text-brand" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold">{"Email envoy\u00e9"}</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {"Un email de r\u00e9initialisation a \u00e9t\u00e9 envoy\u00e9 \u00e0"}{" "}
+            <strong className="text-foreground">{email}</strong>.
+            {" V\u00e9rifiez votre bo\u00eete de r\u00e9ception et cliquez sur le lien pour r\u00e9initialiser votre mot de passe."}
+          </p>
+        </div>
+        <div className="pt-2">
+          <Link href="/login">
+            <Button variant="outline" className="w-full h-11">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {"Retour \u00e0 la connexion"}
+            </Button>
           </Link>
-        </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -63,20 +71,36 @@ export function ForgotPasswordForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
+          className="h-11"
         />
       </div>
-      <Button
-        type="submit"
-        className="w-full bg-brand-dark hover:bg-brand-dark/90 text-white"
-        disabled={loading}
-      >
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Réinitialiser le mot de passe
-      </Button>
 
-      <p className="text-center text-sm text-muted-foreground mt-6">
-        <Link href="/login" className="text-brand-dark font-medium hover:underline">
-          Retour à la connexion
+      <div className="pt-2">
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full h-11 bg-brand-dark hover:bg-brand-dark/90 text-white font-medium"
+          disabled={loading}
+        >
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowRight className="mr-2 h-4 w-4" />
+          )}
+          {"R\u00e9initialiser le mot de passe"}
+        </Button>
+      </div>
+
+      <div className="relative py-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
+        </div>
+      </div>
+
+      <p className="text-center text-sm text-muted-foreground">
+        <Link href="/login" className="inline-flex items-center gap-1.5 text-foreground font-medium hover:underline underline-offset-4 transition-colors">
+          <ArrowLeft className="h-3.5 w-3.5" />
+          {"Retour \u00e0 la connexion"}
         </Link>
       </p>
     </form>
