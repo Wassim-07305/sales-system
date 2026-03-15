@@ -2074,15 +2074,12 @@ export function ChatLayout({
                                       {format(new Date(message.created_at), "HH:mm")}
                                       {message.is_edited && " · modifié"}
                                     </p>
+                                    {Object.keys(messageReactions).length > 0 && (
+                                      <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
+                                    )}
                                   </>
                                 )}
                               </div>
-                              {/* Reactions directly under bubble */}
-                              {!isEditing && Object.keys(messageReactions).length > 0 && (
-                                <div className="-mt-1.5 px-2">
-                                  <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />
-                                </div>
-                              )}
                               {/* Hover toolbar */}
                               {!isEditing && (
                                 <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover border rounded-md shadow-sm px-0.5 py-0.5 z-10", isOwn ? "left-2" : "right-2")}>
