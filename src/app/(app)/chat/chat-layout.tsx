@@ -852,6 +852,8 @@ export function ChatLayout({
         .order("created_at", { ascending: false });
       setChannels(allChannels || []);
       setActiveChannel(dmChannel);
+      setActiveWA(null);
+      setActiveSocial(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur lors de la création du DM");
     }
@@ -1152,7 +1154,7 @@ export function ChatLayout({
                             ? "text-foreground font-semibold hover:bg-muted/50"
                             : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                       )}
-                      onClick={() => setActiveChannel(channel)}
+                      onClick={() => { setActiveChannel(channel); setActiveWA(null); setActiveSocial(null); }}
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />
                       <span className="truncate flex-1 text-left">{channel.name}</span>
@@ -1240,7 +1242,7 @@ export function ChatLayout({
                           ? "text-foreground font-semibold hover:bg-muted/50"
                           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
-                    onClick={() => setActiveChannel(channel)}
+                    onClick={() => { setActiveChannel(channel); setActiveWA(null); setActiveSocial(null); }}
                   >
                     <div className="relative shrink-0">
                       <div
