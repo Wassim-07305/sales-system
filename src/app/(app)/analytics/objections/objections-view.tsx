@@ -49,45 +49,39 @@ export function ObjectionsView({
 
       {/* Summary */}
       <div className="grid sm:grid-cols-3 gap-4 mb-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                <Shield className="h-5 w-5 text-red-400" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Objections détectées</p>
-                <p className="text-2xl font-bold">{totalObjections}</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center ring-1 ring-red-500/20">
+                <Shield className="h-5 w-5 text-red-500" />
               </div>
             </div>
+            <p className="text-2xl font-bold tracking-tight">{totalObjections}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Objections détectées</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <MessageSquare className="h-5 w-5 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Messages analysés</p>
-                <p className="text-2xl font-bold">{totalMessages || 0}</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <MessageSquare className="h-5 w-5 text-amber-500" />
               </div>
             </div>
+            <p className="text-2xl font-bold tracking-tight">{totalMessages || 0}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Messages analysés</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-purple-400" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Catégories</p>
-                <p className="text-2xl font-bold">{objections.length}</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+                <TrendingUp className="h-5 w-5 text-purple-500" />
               </div>
             </div>
+            <p className="text-2xl font-bold tracking-tight">{objections.length}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Catégories</p>
           </CardContent>
         </Card>
       </div>
@@ -103,12 +97,12 @@ export function ObjectionsView({
                 : 0;
 
             return (
-              <Card key={objection.category}>
+              <Card key={objection.category} className="border-border/50 hover:shadow-md transition-all">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-red-500/10 flex items-center justify-center">
-                        <Shield className="h-4 w-4 text-red-400" />
+                      <div className="h-9 w-9 rounded-xl bg-red-500/10 flex items-center justify-center ring-1 ring-red-500/20">
+                        <Shield className="h-4 w-4 text-red-500" />
                       </div>
                       <div>
                         <CardTitle className="text-base">{objection.category}</CardTitle>

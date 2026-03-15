@@ -169,7 +169,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {profiles.map((profile) => (
-            <Card key={profile.id} className="hover:shadow-md transition-shadow">
+            <Card key={profile.id} className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>

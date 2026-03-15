@@ -218,13 +218,13 @@ export function WaSettingsView({
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Paramètres WhatsApp"
         description="Configuration de la connexion WhatsApp"
       >
         <Link href="/whatsapp">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="rounded-xl font-medium">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -233,10 +233,10 @@ export function WaSettingsView({
 
       <div className="grid gap-6 max-w-2xl">
         {/* Unipile Connection — Recommended */}
-        <Card className={`border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-brand/30" : ""}`}>
+        <Card className={`shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-brand/30" : ""}`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-xl ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
                 <Unplug className="h-4 w-4 text-brand" />
               </div>
               <div className="flex-1">
@@ -254,7 +254,7 @@ export function WaSettingsView({
           </CardHeader>
           <CardContent className="space-y-4">
             {unipileConnected ? (
-              <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-brand/5 border border-brand/20">
+              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-brand/5 border border-brand/20">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand" />
                   <div>
@@ -278,7 +278,7 @@ export function WaSettingsView({
                 <Button
                   onClick={handleConnectUnipile}
                   disabled={connectingUnipile}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
                 >
                   {connectingUnipile ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -302,10 +302,10 @@ export function WaSettingsView({
         </Card>
 
         {/* Manual Connection Card (Fallback) */}
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-xl ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
                 <Phone className="h-4 w-4 text-blue-600" />
               </div>
               Connexion WhatsApp
@@ -315,7 +315,7 @@ export function WaSettingsView({
             {/* QR Code Placeholder */}
             <div className="flex justify-center">
               <div className="w-48 h-48 bg-muted rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/30">
-                <QrCode className="h-12 w-12 text-muted-foreground/50 mb-2" />
+                <QrCode className="h-12 w-12 text-muted-foreground/40 mb-2" />
                 <p className="text-sm text-muted-foreground text-center px-4">
                   Scanner le QR code
                 </p>
@@ -360,7 +360,7 @@ export function WaSettingsView({
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="+33 6 12 34 56 78"
-                className="mt-1"
+                className="mt-1 h-11 rounded-xl"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Format international avec indicatif pays
@@ -373,7 +373,7 @@ export function WaSettingsView({
                 variant="outline"
                 onClick={handleDisconnect}
                 disabled={isPending}
-                className="w-full"
+                className="w-full rounded-xl font-medium"
               >
                 <WifiOff className="h-4 w-4 mr-2" />
                 Déconnecter
@@ -382,7 +382,7 @@ export function WaSettingsView({
               <Button
                 onClick={handleConnect}
                 disabled={isPending}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
               >
                 <Wifi className="h-4 w-4 mr-2" />
                 Connecter
@@ -392,10 +392,10 @@ export function WaSettingsView({
         </Card>
 
         {/* Integrations Card */}
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-xl ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center">
                 <Link2 className="h-4 w-4 text-purple-600" />
               </div>
               Intégrations
@@ -434,7 +434,7 @@ export function WaSettingsView({
                     value={ghlKey}
                     onChange={(e) => { setGhlKey(e.target.value); setGhlSaved(false); }}
                     placeholder="ghl_xxxxxxxxxxxx"
-                    className="mt-1 h-8 font-mono text-xs"
+                    className="mt-1 h-9 rounded-xl font-mono text-xs"
                     type="password"
                   />
                   <Button
@@ -442,7 +442,7 @@ export function WaSettingsView({
                     variant={ghlSaved ? "outline" : "default"}
                     onClick={handleSaveGhlKey}
                     disabled={isPending || ghlSaved}
-                    className="shrink-0 h-8"
+                    className="shrink-0 h-9 rounded-xl font-medium"
                   >
                     {ghlSaved ? <Check className="h-4 w-4" /> : "Enregistrer"}
                   </Button>
@@ -487,7 +487,7 @@ export function WaSettingsView({
                     value={iClosedKey}
                     onChange={(e) => { setIClosedKey(e.target.value); setIClosedSaved(false); }}
                     placeholder="ic_xxxxxxxxxxxx"
-                    className="mt-1 h-8 font-mono text-xs"
+                    className="mt-1 h-9 rounded-xl font-mono text-xs"
                     type="password"
                   />
                   <Button
@@ -495,7 +495,7 @@ export function WaSettingsView({
                     variant={iClosedSaved ? "outline" : "default"}
                     onClick={handleSaveIClosedKey}
                     disabled={isPending || iClosedSaved}
-                    className="shrink-0 h-8"
+                    className="shrink-0 h-9 rounded-xl font-medium"
                   >
                     {iClosedSaved ? <Check className="h-4 w-4" /> : "Enregistrer"}
                   </Button>
@@ -509,10 +509,10 @@ export function WaSettingsView({
         </Card>
 
         {/* Webhooks Card */}
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg ring-1 ring-amber-500/20 bg-amber-500/10 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-xl ring-1 ring-amber-500/20 bg-amber-500/10 flex items-center justify-center">
                 <Webhook className="h-4 w-4 text-amber-600" />
               </div>
               Webhooks
@@ -528,13 +528,13 @@ export function WaSettingsView({
                 <Input
                   readOnly
                   value={webhookUrl}
-                  className="font-mono text-xs"
+                  className="h-11 rounded-xl font-mono text-xs"
                 />
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleCopyWebhook}
-                  className="shrink-0"
+                  className="shrink-0 rounded-xl"
                 >
                   {copied ? (
                     <Check className="h-4 w-4 text-green-600" />

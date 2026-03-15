@@ -47,7 +47,7 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
   const days = ["L", "M", "M", "J", "V", "S", "D"];
 
   return (
-    <Card className={`border ${streakBg}`}>
+    <Card className={`rounded-2xl border ${streakBg}`}>
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

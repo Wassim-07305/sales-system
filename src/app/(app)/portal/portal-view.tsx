@@ -105,55 +105,69 @@ export function PortalView({ data }: { data: PortalData | null }) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Users className="h-5 w-5 text-brand mx-auto mb-2" />
-            <p className="text-2xl font-bold">{metrics.activeSetters}</p>
-            <p className="text-xs text-muted-foreground">Setters actifs</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Setters actifs</span>
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Users className="h-4 w-4 text-brand" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{metrics.activeSetters}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <DollarSign className="h-5 w-5 text-brand mx-auto mb-2" />
-            <p className="text-2xl font-bold">
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA total</span>
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <DollarSign className="h-4 w-4 text-emerald-500" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">
               {metrics.totalRevenue.toLocaleString("fr-FR")} €
             </p>
-            <p className="text-xs text-muted-foreground">CA total généré</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <TrendingUp className="h-5 w-5 text-brand mx-auto mb-2" />
-            <p className="text-2xl font-bold">{metrics.activeDeals}</p>
-            <p className="text-xs text-muted-foreground">Deals en cours</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deals en cours</span>
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <TrendingUp className="h-4 w-4 text-blue-500" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{metrics.activeDeals}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Heart className="h-5 w-5 text-brand mx-auto mb-2" />
-            <p className="text-2xl font-bold">{metrics.avgHealthScore}%</p>
-            <p className="text-xs text-muted-foreground">
-              Score satisfaction moyen
-            </p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Satisfaction</span>
+              <div className="h-9 w-9 rounded-xl bg-rose-500/10 flex items-center justify-center ring-1 ring-rose-500/20">
+                <Heart className="h-4 w-4 text-rose-500" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{metrics.avgHealthScore}%</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Setters Performance Table */}
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-6 overflow-hidden border-border/50">
+        <CardHeader className="border-b border-border/30 bg-muted/20">
           <CardTitle className="text-lg">Performance des Setters</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {setters.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">Aucun setter attribué</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-0">
               {/* Header */}
-              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-3 pb-2 border-b">
+              <div className="grid grid-cols-12 gap-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-6 py-3.5 border-b border-border/50 bg-muted/10">
                 <div className="col-span-4">Nom</div>
                 <div className="col-span-2">Rôle</div>
                 <div className="col-span-1 text-center">Deals</div>
@@ -164,7 +178,7 @@ export function PortalView({ data }: { data: PortalData | null }) {
               {setters.map((setter) => (
                 <div
                   key={setter.id}
-                  className="grid grid-cols-12 gap-2 items-center px-3 py-2 rounded-lg hover:bg-muted/50"
+                  className="grid grid-cols-12 gap-2 items-center px-6 py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors"
                 >
                   <div className="col-span-4">
                     <p className="text-sm font-medium truncate">
@@ -206,11 +220,11 @@ export function PortalView({ data }: { data: PortalData | null }) {
       </Card>
 
       {/* Recent Deals */}
-      <Card>
-        <CardHeader>
+      <Card className="border-border/50">
+        <CardHeader className="border-b border-border/30 bg-muted/20">
           <CardTitle className="text-lg">Deals récents</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {recentDeals.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -221,7 +235,7 @@ export function PortalView({ data }: { data: PortalData | null }) {
               {recentDeals.map((deal) => (
                 <div
                   key={deal.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 hover:shadow-sm transition-all"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{deal.title}</p>

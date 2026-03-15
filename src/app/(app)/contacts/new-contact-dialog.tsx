@@ -74,7 +74,7 @@ export function NewContactDialog() {
           Nouveau contact
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-2xl">
         <DialogHeader>
           <DialogTitle>Ajouter un contact</DialogTitle>
         </DialogHeader>
@@ -87,6 +87,7 @@ export function NewContactDialog() {
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Jean Dupont"
               required
+              className="h-11 rounded-xl"
             />
           </div>
           <div className="space-y-2">
@@ -98,6 +99,7 @@ export function NewContactDialog() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jean@example.com"
               required
+              className="h-11 rounded-xl"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -108,6 +110,7 @@ export function NewContactDialog() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="06 12 34 56 78"
+                className="h-11 rounded-xl"
               />
             </div>
             <div className="space-y-2">
@@ -117,13 +120,14 @@ export function NewContactDialog() {
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="Nom de l'entreprise"
+                className="h-11 rounded-xl"
               />
             </div>
           </div>
           <div className="space-y-2">
             <Label>Rôle</Label>
             <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
+              <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -136,7 +140,7 @@ export function NewContactDialog() {
           </div>
           <Button
             type="submit"
-            className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+            className="w-full bg-brand text-brand-dark hover:bg-brand/90 h-11 rounded-xl"
             disabled={isPending}
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

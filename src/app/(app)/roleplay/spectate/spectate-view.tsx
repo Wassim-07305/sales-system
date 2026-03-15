@@ -72,7 +72,7 @@ export function SpectateView({ sessions }: Props) {
               href={`/roleplay/debrief/${session.id}`}
               className="block"
             >
-              <Card className="hover:shadow-md transition-shadow h-full">
+              <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 h-full">
                 <CardContent className="p-5">
                   {/* User */}
                   <div className="flex items-center gap-3 mb-3">

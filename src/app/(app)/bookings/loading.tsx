@@ -20,11 +20,11 @@ export default function BookingsLoading() {
         <Skeleton className="h-10 w-24" />
         <Skeleton className="h-10 w-24" />
       </div>
-      <div className="rounded-lg border">
+      <div className="rounded-xl border border-border/50 shadow-sm overflow-hidden">
         <div className="grid grid-cols-7 border-b">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="p-3 text-center border-r last:border-r-0">
-              <Skeleton className="h-4 w-12 mx-auto" />
+              <Skeleton className="h-4 w-12 mx-auto rounded-lg" />
             </div>
           ))}
         </div>
@@ -32,9 +32,9 @@ export default function BookingsLoading() {
           <div key={week} className="grid grid-cols-7 border-b last:border-b-0">
             {Array.from({ length: 7 }).map((_, day) => (
               <div key={day} className="p-2 min-h-[100px] border-r last:border-r-0">
-                <Skeleton className="h-4 w-6 mb-2" />
+                <Skeleton className="h-4 w-6 mb-2 rounded-lg" />
                 {Math.random() > 0.7 && (
-                  <Skeleton className="h-8 w-full rounded" />
+                  <Skeleton className="h-8 w-full rounded-lg" />
                 )}
               </div>
             ))}

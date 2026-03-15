@@ -113,7 +113,7 @@ export function LibraryView({ resources }: LibraryViewProps) {
               return (
                 <Card
                   key={resource.id}
-                  className="group hover:shadow-md hover:-translate-y-0.5 transition-all border-border/50"
+                  className="group rounded-2xl hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5 transition-all duration-300 border-border/40"
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
@@ -148,7 +148,7 @@ export function LibraryView({ resources }: LibraryViewProps) {
                         {resource.tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag}
-                            className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-md"
+                            className="text-[10px] text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-full"
                           >
                             {tag}
                           </span>

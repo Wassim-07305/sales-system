@@ -63,19 +63,19 @@ export function WhatsAppAnalyticsView({
 }) {
   if (!analytics) {
     return (
-      <div>
+      <div className="space-y-6">
         <PageHeader
           title="Analytics WhatsApp"
           description="Statistiques de vos campagnes WhatsApp"
         >
           <Link href="/whatsapp">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
           </Link>
         </PageHeader>
-        <Card>
+        <Card className="shadow-sm rounded-2xl border-border/50">
           <CardContent className="py-12 text-center text-muted-foreground">
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
               <MessageCircle className="h-7 w-7 text-muted-foreground" />
@@ -101,13 +101,13 @@ export function WhatsAppAnalyticsView({
   } = analytics;
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Analytics WhatsApp"
         description="Statistiques de vos campagnes WhatsApp"
       >
         <Link href="/whatsapp">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="rounded-xl font-medium">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -115,12 +115,12 @@ export function WhatsAppAnalyticsView({
       </PageHeader>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
-                <Send className="h-5 w-5 text-[#7af17a]" />
+              <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <Send className="h-5 w-5 text-brand" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{totalSent}</p>
@@ -132,11 +132,11 @@ export function WhatsAppAnalyticsView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#60a5fa]/10 ring-1 ring-[#60a5fa]/20 flex items-center justify-center">
-                <MessageCircle className="h-5 w-5 text-[#60a5fa]" />
+              <div className="h-10 w-10 rounded-xl bg-blue-400/10 ring-1 ring-blue-400/20 flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-blue-400" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{totalReceived}</p>
@@ -148,10 +148,10 @@ export function WhatsAppAnalyticsView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
               </div>
               <div>
@@ -164,10 +164,10 @@ export function WhatsAppAnalyticsView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center">
                 <Zap className="h-5 w-5 text-purple-500" />
               </div>
               <div>
@@ -182,7 +182,7 @@ export function WhatsAppAnalyticsView({
       </div>
 
       {/* Messages Chart */}
-      <Card className="mb-6">
+      <Card className="shadow-sm rounded-2xl border-border/50">
         <CardHeader>
           <CardTitle className="text-base">
             Messages envoy&eacute;s vs re&ccedil;us (30 derniers jours)
@@ -239,7 +239,7 @@ export function WhatsAppAnalyticsView({
       </Card>
 
       {/* Sequences Performance Table */}
-      <Card>
+      <Card className="shadow-sm rounded-2xl border-border/50 overflow-hidden">
         <CardHeader>
           <CardTitle className="text-base">
             Performance des s&eacute;quences
@@ -269,7 +269,7 @@ export function WhatsAppAnalyticsView({
               </TableHeader>
               <TableBody>
                 {sequenceStats.map((seq) => (
-                  <TableRow key={seq.id}>
+                  <TableRow key={seq.id} className="hover:bg-secondary/50 transition-colors">
                     <TableCell className="font-medium">{seq.name}</TableCell>
                     <TableCell className="text-center">
                       {seq.steps_count}
@@ -284,7 +284,7 @@ export function WhatsAppAnalyticsView({
                       <span
                         className={
                           seq.response_rate >= 50
-                            ? "text-[#7af17a] font-semibold"
+                            ? "text-brand font-semibold"
                             : seq.response_rate >= 25
                             ? "text-amber-500 font-semibold"
                             : "text-muted-foreground"

@@ -237,7 +237,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="LinkedIn"
         description="Prospection et outils LinkedIn"
@@ -249,7 +249,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
       </PageHeader>
 
       {/* Unipile LinkedIn connection status */}
-      <Card className={`mb-6 ${liConnected ? "border-brand/30" : ""}`}>
+      <Card className={`shadow-sm rounded-2xl ${liConnected ? "border-brand/30" : ""}`}>
         <CardContent className="flex items-center justify-between py-3 px-4">
           <div className="flex items-center gap-3">
             <Unplug className="h-5 w-5 text-muted-foreground" />
@@ -280,7 +280,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                 size="sm"
                 onClick={handleConnectUnipile}
                 disabled={connectingUnipile}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
               >
                 {connectingUnipile ? (
                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -303,7 +303,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
       </Card>
 
       <Tabs defaultValue="outils">
-        <TabsList className="mb-6">
+        <TabsList>
           <TabsTrigger value="outils">
             <Wrench className="h-4 w-4 mr-2" />
             Outils
@@ -318,7 +318,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
         <TabsContent value="outils">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Profile Analyzer */}
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Search className="h-4 w-4" />
@@ -330,11 +330,12 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                   placeholder="https://linkedin.com/in/nom-du-profil"
                   value={profileUrl}
                   onChange={(e) => setProfileUrl(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
                 <Button
                   onClick={handleAnalyze}
                   disabled={analyzingProfile}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {analyzingProfile ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -386,7 +387,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
             </Card>
 
             {/* Comment Suggester */}
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
@@ -398,11 +399,12 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                   placeholder="https://linkedin.com/feed/update/..."
                   value={commentUrl}
                   onChange={(e) => setCommentUrl(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
                 <Button
                   onClick={handleSuggestComments}
                   disabled={suggestingComments}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {suggestingComments ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -416,7 +418,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                   <ScrollArea className="max-h-60">
                     <div className="space-y-3">
                       {comments.map((c, i) => (
-                        <div key={i} className="border rounded-lg p-3">
+                        <div key={i} className="border rounded-xl p-3">
                           <Badge variant="outline" className="text-xs mb-2">
                             {c.type === "value"
                               ? "Valeur ajoutée"
@@ -442,7 +444,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
             </Card>
 
             {/* DM Generator */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
@@ -459,6 +461,7 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                       placeholder="Jean Dupont"
                       value={dmName}
                       onChange={(e) => setDmName(e.target.value)}
+                      className="h-11 rounded-xl"
                     />
                   </div>
                   <div>
@@ -469,13 +472,14 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                       placeholder="Ex: votre post sur le leadership m'a marqué"
                       value={dmContext}
                       onChange={(e) => setDmContext(e.target.value)}
+                      className="h-11 rounded-xl"
                     />
                   </div>
                 </div>
                 <Button
                   onClick={handleGenerateDm}
                   disabled={generatingDm}
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {generatingDm ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -509,18 +513,18 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
 
         {/* Prospects Tab */}
         <TabsContent value="prospects">
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher un prospect LinkedIn..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11 rounded-xl"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 h-11 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -536,16 +540,16 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
             </Select>
           </div>
 
-          <Card>
+          <Card className="shadow-sm rounded-2xl overflow-hidden">
             <CardContent className="p-0">
               <div className="divide-y">
                 {filteredProspects.map((prospect) => (
                   <div
                     key={prospect.id}
-                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-foreground/10 ring-1 ring-foreground/20 flex items-center justify-center text-foreground font-bold">
+                      <div className="h-10 w-10 rounded-xl bg-foreground/10 ring-1 ring-foreground/20 flex items-center justify-center text-foreground font-bold">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <div>

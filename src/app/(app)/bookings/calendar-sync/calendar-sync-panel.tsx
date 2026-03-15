@@ -524,7 +524,7 @@ export function CalendarSyncPanel({
               }
               disabled={!status.connected}
             >
-              <SelectTrigger className="w-full max-w-xs">
+              <SelectTrigger className="w-full max-w-xs h-11 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -567,7 +567,7 @@ export function CalendarSyncPanel({
               }
               disabled={!status.connected}
             >
-              <SelectTrigger className="w-full max-w-xs">
+              <SelectTrigger className="w-full max-w-xs h-11 rounded-xl">
                 <SelectValue placeholder="Calendrier principal" />
               </SelectTrigger>
               <SelectContent>
@@ -600,7 +600,7 @@ export function CalendarSyncPanel({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-xl border border-border/50 p-4 text-center">
               <p className="text-2xl font-bold">
                 {status.syncedEventsCount}
               </p>
@@ -608,7 +608,7 @@ export function CalendarSyncPanel({
                 Evenements synchronises
               </p>
             </div>
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-xl border border-border/50 p-4 text-center">
               <p className="text-2xl font-bold">
                 {status.lastSyncAt
                   ? new Date(status.lastSyncAt).toLocaleDateString("fr-FR", {
@@ -624,7 +624,7 @@ export function CalendarSyncPanel({
                 Derniere synchronisation
               </p>
             </div>
-            <div className="rounded-lg border p-4 text-center">
+            <div className="rounded-xl border border-border/50 p-4 text-center">
               <p className="text-2xl font-bold">
                 {settings.syncDirection === "bidirectional"
                   ? "Bidirectionnel"

@@ -314,11 +314,11 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
 
       {/* ─── View Toggle ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <div className="inline-flex rounded-lg border border-border/40 bg-muted/30 p-1">
+        <div className="inline-flex rounded-xl border border-border/40 bg-muted/30 p-1">
           <button
             onClick={() => setView("week")}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all",
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200",
               view === "week"
                 ? "bg-brand text-brand-dark font-semibold shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -330,7 +330,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
           <button
             onClick={() => setView("list")}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all",
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200",
               view === "list"
                 ? "bg-brand text-brand-dark font-semibold shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -482,7 +482,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                 >
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-sm font-bold text-brand">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-sm font-bold text-brand">
                       {booking.prospect_name
                         .split(" ")
                         .map((w) => w[0])
@@ -582,7 +582,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>Résultat du call</DialogTitle>
             {resultBooking && (

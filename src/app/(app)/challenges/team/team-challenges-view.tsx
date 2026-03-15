@@ -94,7 +94,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                 <Card
                   key={challenge.id}
                   className={cn(
-                    "border-border/50 hover:shadow-md transition-all",
+                    "rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300",
                     isCompleted && "border-emerald-500/20 bg-emerald-500/10"
                   )}
                 >
@@ -213,7 +213,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
           </div>
 
           {/* Team Leaderboard sidebar */}
-          <Card className="h-fit border-border/50 hover:shadow-md transition-all">
+          <Card className="h-fit rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Medal className="h-5 w-5 text-brand" />

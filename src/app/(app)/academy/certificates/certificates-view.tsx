@@ -74,9 +74,9 @@ export function CertificatesView({
       </PageHeader>
 
       {certificates.length === 0 ? (
-        <Card className="bg-card border-border">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#7af17a]/10 flex items-center justify-center mb-4">
+        <Card className="bg-card border-border/40 rounded-2xl">
+          <CardContent className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center mb-4">
               <GraduationCap className="w-8 h-8 text-[#7af17a]" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
@@ -93,11 +93,11 @@ export function CertificatesView({
           {certificates.map((cert) => (
             <Card
               key={cert.courseId}
-              className="bg-card border-border hover:border-[#7af17a]/30 transition-colors"
+              className="bg-card border-border/40 rounded-2xl hover:border-[#7af17a]/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
             >
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-start justify-between">
-                  <div className="w-10 h-10 rounded-lg bg-[#7af17a]/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center shrink-0">
                     <Award className="w-5 h-5 text-[#7af17a]" />
                   </div>
                   {cert.score !== null && (

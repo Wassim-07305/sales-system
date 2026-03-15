@@ -214,7 +214,7 @@ export function ScoringView({ prospects }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Scoring avancé des prospects"
         description="Evaluez et priorisez vos prospects avec un scoring multi-critères"
@@ -224,6 +224,7 @@ export function ScoringView({ prospects }: Props) {
             variant="outline"
             size="sm"
             onClick={() => setShowRules(!showRules)}
+            className="rounded-xl font-medium"
           >
             <Info className="h-4 w-4 mr-2" />
             {showRules ? "Masquer les règles" : "Règles de scoring"}
@@ -232,6 +233,7 @@ export function ScoringView({ prospects }: Props) {
             onClick={handleRecalculateAll}
             disabled={recalculatingAll}
             variant="outline"
+            className="rounded-xl font-medium"
           >
             {recalculatingAll ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -245,7 +247,7 @@ export function ScoringView({ prospects }: Props) {
 
       {/* ── Scoring Rules Explanation Card ── */}
       {showRules && (
-        <Card className="mb-6 border-brand/20">
+        <Card className="border-brand/20 shadow-sm rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Info className="h-5 w-5 text-brand" />
@@ -348,10 +350,10 @@ export function ScoringView({ prospects }: Props) {
       )}
 
       {/* ── Summary Stats ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
-        <Card>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -364,10 +366,10 @@ export function ScoringView({ prospects }: Props) {
           const cfg = tierConfig[tier];
           const TierIcon = cfg.icon;
           return (
-            <Card key={tier}>
+            <Card key={tier} className="shadow-sm rounded-2xl">
               <CardContent className="p-4 flex items-center gap-3">
                 <div
-                  className="h-10 w-10 rounded-lg flex items-center justify-center ring-1"
+                  className="h-10 w-10 rounded-xl flex items-center justify-center ring-1"
                   style={{ backgroundColor: `${cfg.color}15`, boxShadow: `inset 0 0 0 1px ${cfg.color}30` }}
                 >
                   <TierIcon className="h-5 w-5" style={{ color: cfg.color }} />
@@ -383,7 +385,7 @@ export function ScoringView({ prospects }: Props) {
       </div>
 
       {/* ── Score Distribution Chart ── */}
-      <Card className="mb-6">
+      <Card className="shadow-sm rounded-2xl">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Distribution des scores</CardTitle>
         </CardHeader>
@@ -414,21 +416,21 @@ export function ScoringView({ prospects }: Props) {
       </Card>
 
       {/* ── Search ── */}
-      <div className="relative mb-4">
+      <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Rechercher un prospect..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 h-9 text-xs"
+          className="pl-10 h-11 rounded-xl"
         />
       </div>
 
       {/* ── Scoring Table ── */}
-      <Card>
+      <Card className="shadow-sm rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           {/* Header */}
-          <div className="hidden sm:grid grid-cols-12 gap-3 p-4 border-b text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="hidden sm:grid grid-cols-12 gap-3 p-4 border-b bg-muted/30 text-xs font-medium text-muted-foreground uppercase tracking-wider">
             <div className="col-span-3">Prospect</div>
             <div className="col-span-2">Score</div>
             <div className="col-span-1">Tier</div>
@@ -448,7 +450,7 @@ export function ScoringView({ prospects }: Props) {
                 <div key={prospect.id}>
                   {/* Main row */}
                   <div
-                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 items-center hover:bg-muted/50 transition-colors cursor-pointer"
+                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 items-center hover:bg-secondary/50 transition-colors cursor-pointer"
                     onClick={() => setExpandedId(isExpanded ? null : prospect.id)}
                   >
                     {/* Name */}
@@ -581,7 +583,7 @@ export function ScoringView({ prospects }: Props) {
                   {/* ── Expanded score breakdown ── */}
                   {isExpanded && (
                     <div className="px-4 pb-4 pt-0 bg-muted/30">
-                      <div className="rounded-lg border p-4">
+                      <div className="rounded-xl border p-4">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                           Decomposition du score
                         </p>

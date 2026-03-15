@@ -74,13 +74,13 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        "cursor-grab active:cursor-grabbing transition-all border-border/50",
-        "hover:shadow-md hover:border-border hover:-translate-y-0.5",
-        dragging && "opacity-60 shadow-xl rotate-1 scale-105 border-brand/30"
+        "cursor-grab active:cursor-grabbing transition-all duration-200 border-border/50 rounded-xl",
+        "hover:shadow-md hover:border-border/80 hover:-translate-y-0.5",
+        dragging && "opacity-60 shadow-xl rotate-1 scale-105 border-brand/30 ring-1 ring-brand/10"
       )}
       onClick={onClick}
     >
-      <CardContent className="p-3">
+      <CardContent className="p-3.5">
         {/* Title + Temperature */}
         <div className="flex items-start justify-between gap-2 mb-2.5">
           <h4 className="text-[13px] font-semibold leading-tight line-clamp-2">

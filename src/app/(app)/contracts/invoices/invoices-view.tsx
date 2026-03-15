@@ -164,7 +164,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
               Générer une facture
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="rounded-2xl">
             <DialogHeader>
               <DialogTitle>Générer une facture</DialogTitle>
             </DialogHeader>
@@ -172,7 +172,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
               <div className="space-y-2">
                 <Label>Contrat</Label>
                 <Select value={selectedContractId} onValueChange={handleContractSelect}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Sélectionner un contrat" />
                   </SelectTrigger>
                   <SelectContent>
@@ -191,10 +191,11 @@ export function InvoicesView({ invoices, contracts }: Props) {
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
               </div>
               <Button
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-brand text-brand-dark hover:bg-brand/90 h-11 rounded-xl"
                 onClick={handleGenerateInvoice}
                 disabled={isPending}
               >
@@ -205,7 +206,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
         </Dialog>
       </PageHeader>
 
-      <Card className="border-border/50">
+      <Card className="border-border/50 rounded-xl shadow-sm overflow-hidden">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
@@ -221,7 +222,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
             </TableHeader>
             <TableBody>
               {invoices.map((invoice) => (
-                <TableRow key={invoice.id}>
+                <TableRow key={invoice.id} className="hover:bg-secondary/50 transition-colors">
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />

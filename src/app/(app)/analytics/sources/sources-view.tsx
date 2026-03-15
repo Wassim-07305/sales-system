@@ -67,45 +67,39 @@ export function SourcesView({
       {/* Summary cards */}
       {summary && (
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-[#7af17a]/20 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
+          <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
                   <DollarSign className="h-5 w-5 text-[#7af17a]" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total CA</p>
-                  <p className="text-2xl font-bold">{formatCurrency(summary.totalRevenue)}</p>
-                </div>
               </div>
+              <p className="text-2xl font-bold tracking-tight">{formatCurrency(summary.totalRevenue)}</p>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total CA</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-500/20 ring-1 ring-blue-500/20 flex items-center justify-center">
-                  <Hash className="h-5 w-5 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Deals</p>
-                  <p className="text-2xl font-bold">{summary.totalDeals}</p>
+          <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
+                  <Hash className="h-5 w-5 text-blue-500" />
                 </div>
               </div>
+              <p className="text-2xl font-bold tracking-tight">{summary.totalDeals}</p>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total Deals</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-amber-500/20 ring-1 ring-amber-500/20 flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Source #1</p>
-                  <p className="text-2xl font-bold capitalize">{summary.topSource}</p>
+          <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
+                  <Trophy className="h-5 w-5 text-amber-500" />
                 </div>
               </div>
+              <p className="text-2xl font-bold tracking-tight capitalize">{summary.topSource}</p>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Source #1</p>
             </CardContent>
           </Card>
         </div>
@@ -113,9 +107,9 @@ export function SourcesView({
 
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         {/* Bar chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle>CA par source</CardTitle>
+            <CardTitle className="text-base font-semibold">CA par source</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
@@ -160,24 +154,24 @@ export function SourcesView({
         </Card>
 
         {/* Table */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle>Détail par source</CardTitle>
+            <CardTitle className="text-base font-semibold">Détail par source</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-medium">Source</th>
-                    <th className="text-right p-4 font-medium">Deals</th>
-                    <th className="text-right p-4 font-medium">CA total</th>
-                    <th className="text-right p-4 font-medium">CA moyen/deal</th>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Source</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deals</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA total</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA moyen/deal</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sources.map((source, i) => (
-                    <tr key={source.name} className="border-b last:border-0">
+                    <tr key={source.name} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <div

@@ -47,7 +47,7 @@ function MetricItem({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="h-9 w-9 rounded-lg ring-1 ring-border/50 bg-muted/50 flex items-center justify-center text-muted-foreground">{icon}</div>
+      <div className="h-9 w-9 rounded-xl ring-1 ring-border/50 bg-muted/50 flex items-center justify-center text-muted-foreground">{icon}</div>
       <div>
         <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
         <p className="text-sm font-medium">{value}</p>

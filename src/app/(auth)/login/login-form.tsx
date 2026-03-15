@@ -47,7 +47,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleLogin} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
         <Input
           id="email"
           type="email"
@@ -56,15 +56,15 @@ export function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="h-11"
+          className="h-11 rounded-xl bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
           <Link
             href="/forgot-password"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs text-muted-foreground hover:text-brand transition-colors duration-200"
           >
             {"Mot de passe oubli\u00e9 ?"}
           </Link>
@@ -78,12 +78,12 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="h-11 pr-11"
+            className="h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors"
+            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
             aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
           >
@@ -100,7 +100,7 @@ export function LoginForm() {
         <Button
           type="submit"
           size="lg"
-          className="w-full h-11 bg-brand-dark hover:bg-brand-dark/90 text-white font-medium"
+          className="w-full h-12 rounded-xl bg-brand-dark hover:bg-brand-dark/90 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           disabled={loading}
         >
           {loading ? (
@@ -112,15 +112,15 @@ export function LoginForm() {
         </Button>
       </div>
 
-      <div className="relative py-4">
+      <div className="relative py-5">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
+          <div className="w-full border-t border-border/50" />
         </div>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
         {"Pas encore de compte ?\u00a0"}
-        <Link href="/register" className="text-foreground font-medium hover:underline underline-offset-4 transition-colors">
+        <Link href="/register" className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline">
           {"Cr\u00e9er un compte"}
         </Link>
       </p>

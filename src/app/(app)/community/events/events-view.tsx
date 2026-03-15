@@ -204,7 +204,7 @@ export function EventsView({
 
     return (
       <Card
-        className={`transition-all hover:shadow-md ${isPast ? "opacity-70" : ""}`}
+        className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 ${isPast ? "opacity-70" : ""}`}
       >
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">

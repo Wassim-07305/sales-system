@@ -224,7 +224,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Suivi & Relances"
         description="Gérez vos séquences de follow-up et tâches de relance"
@@ -232,7 +232,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
         <div className="flex gap-2">
           <Dialog open={showAssign} onOpenChange={setShowAssign}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="rounded-xl font-medium">
                 <UserPlus className="h-4 w-4 mr-2" />
                 Assigner séquence
               </Button>
@@ -250,7 +250,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                     value={assignProspectId}
                     onValueChange={setAssignProspectId}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-xl">
                       <SelectValue placeholder="Choisir un prospect" />
                     </SelectTrigger>
                     <SelectContent>
@@ -270,7 +270,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                     value={assignSequenceId}
                     onValueChange={setAssignSequenceId}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-xl">
                       <SelectValue placeholder="Choisir une séquence" />
                     </SelectTrigger>
                     <SelectContent>
@@ -285,7 +285,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                 <Button
                   onClick={handleAssignSequence}
                   disabled={assigning}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {assigning ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -300,7 +300,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
 
           <Dialog open={showCreateSeq} onOpenChange={setShowCreateSeq}>
             <DialogTrigger asChild>
-              <Button className="bg-brand text-brand-dark hover:bg-brand/90" size="sm">
+              <Button className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle séquence
               </Button>
@@ -318,6 +318,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                     placeholder="Ex: Relance LinkedIn 3 étapes"
                     value={seqName}
                     onChange={(e) => setSeqName(e.target.value)}
+                    className="h-11 rounded-xl"
                   />
                 </div>
 
@@ -429,7 +430,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                 <Button
                   onClick={handleCreateSequence}
                   disabled={creatingSeq}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {creatingSeq ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -445,7 +446,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
       </PageHeader>
 
       <Tabs defaultValue="today">
-        <TabsList className="mb-6">
+        <TabsList>
           <TabsTrigger value="today">
             <CalendarCheck className="h-4 w-4 mr-2" />
             Tâches du jour ({todayTasks.length})
@@ -459,10 +460,10 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
         {/* Today's Tasks Tab */}
         <TabsContent value="today">
           {/* Summary */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <Card>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <Clock className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -473,9 +474,9 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-muted/40 ring-1 ring-border/30 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center">
                   <CalendarCheck className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
@@ -484,9 +485,9 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <CheckCircle2 className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -498,13 +499,13 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
           </div>
 
           {/* Task List */}
-          <Card>
+          <Card className="shadow-sm rounded-2xl overflow-hidden">
             <CardContent className="p-0">
               <div className="divide-y">
                 {todayTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">
@@ -541,7 +542,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                       size="sm"
                       onClick={() => handleCompleteTask(task.id)}
                       disabled={isPending}
-                      className="bg-brand text-brand-dark hover:bg-brand/90"
+                      className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                     >
                       {isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -568,10 +569,10 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
           {/* Upcoming tasks */}
           {upcomingTasks.length > 0 && (
             <>
-              <h3 className="text-sm font-medium text-muted-foreground mt-6 mb-3">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">
                 À venir
               </h3>
-              <Card>
+              <Card className="shadow-sm rounded-2xl overflow-hidden">
                 <CardContent className="p-0">
                   <div className="divide-y">
                     {upcomingTasks.slice(0, 10).map((task) => (
@@ -613,7 +614,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
         {/* Sequences Tab */}
         <TabsContent value="sequences">
           {sequences.length === 0 ? (
-            <Card className="border-border/50">
+            <Card className="border-border/50 shadow-sm rounded-2xl">
               <CardContent className="p-12 text-center text-muted-foreground">
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <ListChecks className="h-6 w-6 text-muted-foreground/40" />
@@ -625,7 +626,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
           ) : (
             <div className="space-y-4">
               {sequences.map((seq) => (
-                <Card key={seq.id}>
+                <Card key={seq.id} className="shadow-sm rounded-2xl">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{seq.name}</CardTitle>
@@ -640,7 +641,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                         .sort((a, b) => a.step_order - b.step_order)
                         .map((step, i) => (
                           <div key={step.id} className="flex items-center gap-2">
-                            <div className="border rounded-lg px-3 py-2 text-sm">
+                            <div className="border rounded-xl px-3 py-2 text-sm">
                               <div className="flex items-center gap-1">
                                 <Badge
                                   variant="outline"

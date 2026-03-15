@@ -123,7 +123,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Form */}
         <div className="space-y-6">
-          <Card className="border-border/50">
+          <Card className="border-border/50 rounded-xl shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">Informations du contrat</CardTitle>
             </CardHeader>
@@ -131,7 +131,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               <div>
                 <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Template</Label>
                 <Select value={templateId} onValueChange={setTemplateId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Choisir un template" />
                   </SelectTrigger>
                   <SelectContent>
@@ -145,7 +145,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               <div>
                 <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deal associé (optionnel)</Label>
                 <Select value={dealId} onValueChange={handleDealChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Associer à un deal" />
                   </SelectTrigger>
                   <SelectContent>
@@ -161,7 +161,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               <div>
                 <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</Label>
                 <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Sélectionner le client" />
                   </SelectTrigger>
                   <SelectContent>
@@ -180,6 +180,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
                   value={offerName}
                   onChange={(e) => setOfferName(e.target.value)}
                   placeholder="ex: Accompagnement Premium 6 mois"
+                  className="h-11 rounded-xl"
                 />
               </div>
 
@@ -190,6 +191,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="ex: 3000"
+                  className="h-11 rounded-xl"
                 />
               </div>
 
@@ -199,6 +201,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
                   value={paymentSchedule}
                   onChange={(e) => setPaymentSchedule(e.target.value)}
                   placeholder="ex: 3 x 1000€ / mois"
+                  className="h-11 rounded-xl"
                 />
               </div>
             </CardContent>
@@ -207,7 +210,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
           <div className="flex gap-3">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 h-11 rounded-xl"
               onClick={() => handleSave(false)}
               disabled={loading}
             >
@@ -215,7 +218,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
               {loading ? "Sauvegarde..." : "Sauvegarder brouillon"}
             </Button>
             <Button
-              className="flex-1 bg-brand text-brand-dark hover:bg-brand/90"
+              className="flex-1 h-11 rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
               onClick={() => handleSave(true)}
               disabled={loading}
             >
@@ -226,7 +229,7 @@ export function NewContractForm({ templates, clients, deals, initialDealId, init
         </div>
 
         {/* Preview */}
-        <Card className="h-fit border-border/50">
+        <Card className="h-fit border-border/50 rounded-xl shadow-sm">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Eye className="h-4 w-4" />

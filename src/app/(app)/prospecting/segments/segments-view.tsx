@@ -300,7 +300,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
       >
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate} className="bg-[#7af17a] text-black hover:bg-[#5dd85d]">
+            <Button onClick={openCreate} className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium">
               <Plus className="h-4 w-4 mr-2" />
               Nouveau segment
             </Button>
@@ -324,6 +324,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                   placeholder="Ex: Prospects chauds"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
               </div>
 
@@ -335,6 +336,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                   placeholder="Description du segment..."
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
               </div>
 
@@ -367,7 +369,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                     variant="ghost"
                     size="sm"
                     onClick={addFilterRow}
-                    className="text-[#7af17a] hover:text-[#5dd85d]"
+                    className="text-brand hover:text-brand/80"
                   >
                     <Plus className="h-3 w-3 mr-1" />
                     Ajouter
@@ -381,7 +383,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                         value={filter.field}
                         onValueChange={(val) => updateFilter(index, "field", val)}
                       >
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-[140px] h-11 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -397,7 +399,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                         value={filter.operator}
                         onValueChange={(val) => updateFilter(index, "operator", val)}
                       >
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-[140px] h-11 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -410,7 +412,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                       </Select>
 
                       <Input
-                        className="flex-1"
+                        className="flex-1 h-11 rounded-xl"
                         placeholder="Valeur..."
                         value={filter.value}
                         onChange={(e) => updateFilter(index, "value", e.target.value)}
@@ -446,7 +448,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
               <Button
                 onClick={handleSave}
                 disabled={isPending}
-                className="bg-[#7af17a] text-black hover:bg-[#5dd85d]"
+                className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium"
               >
                 {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {editingSegment ? "Mettre a jour" : "Creer"}
@@ -458,11 +460,11 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#7af17a]/10">
-                <Filter className="h-5 w-5 text-[#7af17a]" />
+              <div className="p-2 rounded-xl bg-brand/10">
+                <Filter className="h-5 w-5 text-brand" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total segments</p>
@@ -472,10 +474,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-muted/40">
+              <div className="p-2 rounded-xl bg-muted/40">
                 <Users className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
@@ -488,10 +490,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-foreground/10">
+              <div className="p-2 rounded-xl bg-foreground/10">
                 <BarChart3 className="h-5 w-5 text-foreground" />
               </div>
               <div>
@@ -514,7 +516,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
           const isLoading = loadingProspects === segment.id;
 
           return (
-            <Card key={segment.id} className="overflow-hidden">
+            <Card key={segment.id} className="overflow-hidden shadow-sm rounded-2xl">
               {/* Color indicator bar */}
               <div className="h-1" style={{ backgroundColor: segment.color }} />
 
@@ -595,7 +597,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full"
+                  className="w-full rounded-xl font-medium"
                   onClick={() => toggleProspects(segment.id)}
                 >
                   {isLoading ? (
@@ -613,7 +615,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
 
                 {/* Expanded prospects list */}
                 {isExpanded && (
-                  <div className="border rounded-lg divide-y max-h-64 overflow-y-auto">
+                  <div className="border rounded-xl divide-y max-h-64 overflow-y-auto">
                     {isLoading ? (
                       <div className="p-4 text-center text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
@@ -623,7 +625,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                       prospects.map((prospect) => (
                         <div
                           key={prospect.id}
-                          className="px-3 py-2 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                          className="px-3 py-2 flex items-center justify-between hover:bg-secondary/50 transition-colors"
                         >
                           <div className="min-w-0">
                             <p className="text-sm font-medium truncate">
@@ -654,9 +656,11 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
 
       {/* Empty state */}
       {segments.length === 0 && (
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="py-12 text-center">
-            <Filter className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Filter className="h-7 w-7 text-muted-foreground/50" />
+            </div>
             <h3 className="text-lg font-semibold mb-2">
               Aucun segment configure
             </h3>
@@ -665,7 +669,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
             </p>
             <Button
               onClick={openCreate}
-              className="bg-[#7af17a] text-black hover:bg-[#5dd85d]"
+              className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
               Creer un segment

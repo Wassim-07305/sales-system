@@ -73,7 +73,7 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
           Nouveau deal
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-2xl">
         <DialogHeader>
           <DialogTitle>Nouveau deal</DialogTitle>
         </DialogHeader>
@@ -86,6 +86,7 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Formation Closing - Jean D."
               required
+              className="h-11 rounded-xl"
             />
           </div>
           <div className="space-y-2">
@@ -96,13 +97,14 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="3500"
+              className="h-11 rounded-xl"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Stage</Label>
               <Select value={stageId} onValueChange={setStageId}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -120,7 +122,7 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
                 value={temperature}
                 onValueChange={(v) => setTemperature(v as DealTemperature)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -134,7 +136,7 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
           <div className="space-y-2">
             <Label>Source</Label>
             <Select value={source} onValueChange={setSource}>
-              <SelectTrigger>
+              <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue placeholder="Sélectionner la source" />
               </SelectTrigger>
               <SelectContent>
@@ -147,7 +149,7 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
           </div>
           <Button
             type="submit"
-            className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+            className="w-full bg-brand text-brand-dark hover:bg-brand/90 h-11 rounded-xl"
             disabled={loading}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

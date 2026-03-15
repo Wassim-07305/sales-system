@@ -162,7 +162,7 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
               Stage du pipeline
             </label>
             <Select value={deal.stage_id || ""} onValueChange={handleStageChange}>
-              <SelectTrigger className="h-10">
+              <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue placeholder="Sélectionner un stage" />
               </SelectTrigger>
               <SelectContent>
@@ -196,7 +196,7 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                     key={temp}
                     onClick={() => handleTempChange(temp)}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border text-sm font-medium transition-all",
+                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-sm font-medium transition-all duration-200",
                       isActive
                         ? cn(cfg.bg, cfg.border, cfg.color)
                         : "border-border/50 text-muted-foreground hover:bg-muted/50",

@@ -20,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/layout/page-header";
+import { History } from "lucide-react";
 import type { AuditLogEntry } from "@/lib/actions/audit-log";
 
 interface AuditLogViewProps {
@@ -46,12 +48,10 @@ export function AuditLogView({ logs }: AuditLogViewProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Journal d&apos;audit</h1>
-        <p className="text-muted-foreground">
-          Historique des actions effectuées dans le système
-        </p>
-      </div>
+      <PageHeader
+        title="Journal d'audit"
+        description="Historique des actions effectuées dans le système"
+      />
 
       <div className="flex items-center gap-3">
         <Select value={entityFilter} onValueChange={setEntityFilter}>
@@ -69,21 +69,24 @@ export function AuditLogView({ logs }: AuditLogViewProps) {
         </Select>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
+      <Card className="overflow-hidden border-border/50">
+        <CardHeader className="border-b border-border/30 bg-muted/20">
+          <CardTitle className="text-base flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <History className="h-4 w-4 text-brand" />
+            </div>
             {filtered.length} entrée(s)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Détails</TableHead>
+              <TableRow className="border-b border-border/30 bg-muted/10 hover:bg-muted/10">
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Date</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Utilisateur</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Action</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Détails</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

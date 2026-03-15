@@ -83,10 +83,10 @@ export function PipelineStats({ deals }: PipelineStatsProps) {
       {STAT_CONFIG.map((cfg, i) => {
         const Icon = cfg.icon;
         return (
-          <Card key={cfg.key} className="group relative overflow-hidden border-transparent bg-card shadow-sm hover:shadow-md transition-all">
+          <Card key={cfg.key} className="group relative overflow-hidden border-transparent bg-card shadow-sm hover:shadow-md transition-all duration-200 rounded-xl">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1", cfg.bg, cfg.ring)}>
+                <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1", cfg.bg, cfg.ring)}>
                   <Icon className={cn("h-4.5 w-4.5", cfg.color)} />
                 </div>
                 {cfg.key === "deals" && (

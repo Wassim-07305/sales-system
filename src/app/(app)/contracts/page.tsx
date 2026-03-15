@@ -76,7 +76,7 @@ export default async function ContractsPage() {
         </div>
       </PageHeader>
 
-      <Card>
+      <Card className="rounded-xl border-border/50 shadow-sm overflow-hidden">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
@@ -91,7 +91,7 @@ export default async function ContractsPage() {
             </TableHeader>
             <TableBody>
               {(contracts || []).map((contract) => (
-                <TableRow key={contract.id}>
+                <TableRow key={contract.id} className="hover:bg-secondary/50 transition-colors">
                   <TableCell>
                     <Link
                       href={`/contracts/${contract.id}`}

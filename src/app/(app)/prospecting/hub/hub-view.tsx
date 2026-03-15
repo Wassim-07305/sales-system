@@ -180,16 +180,16 @@ export function HubView({ overview, whatsappStats }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Hub Multi-Réseaux"
         description="Vue d'ensemble de votre prospection sur tous les réseaux"
       />
 
       {/* Platform Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {overview.map((p) => (
-          <Card key={p.platform} className={`border ${platformColors[p.platform] || ""}`}>
+          <Card key={p.platform} className={`border shadow-sm rounded-2xl ${platformColors[p.platform] || ""}`}>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 {platformIcons[p.platform]}
@@ -239,7 +239,7 @@ export function HubView({ overview, whatsappStats }: Props) {
         ))}
 
         {/* WhatsApp Card */}
-        <Card className={`border ${platformColors.whatsapp}`}>
+        <Card className={`border shadow-sm rounded-2xl ${platformColors.whatsapp}`}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               {platformIcons.whatsapp}
@@ -285,12 +285,12 @@ export function HubView({ overview, whatsappStats }: Props) {
 
       {/* Quick Action Dialogs */}
       {/* Recalculate all scores */}
-      <div className="mb-8">
+      <div>
         <Button
           onClick={handleRecalculateAll}
           disabled={recalculating}
           variant="outline"
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto rounded-xl font-medium"
         >
           {recalculating ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -302,13 +302,13 @@ export function HubView({ overview, whatsappStats }: Props) {
       </div>
 
       {/* Campagnes Drip Link */}
-      <div className="mb-8">
+      <div>
         <Card
-          className="cursor-pointer hover:shadow-md transition-shadow border-brand/20"
+          className="cursor-pointer shadow-sm rounded-2xl hover:shadow-md transition-shadow border-brand/20"
           onClick={() => router.push("/prospecting/campaigns")}
         >
           <CardContent className="p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
               <Mail className="h-6 w-6 text-brand" />
             </div>
             <div>
@@ -321,14 +321,14 @@ export function HubView({ overview, whatsappStats }: Props) {
         </Card>
       </div>
 
-      <h2 className="text-lg font-semibold mb-4">Actions rapides</h2>
+      <h2 className="text-lg font-semibold">Actions rapides</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Analyze Profile Dialog */}
         <Dialog>
           <DialogTrigger asChild>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card className="cursor-pointer shadow-sm rounded-2xl hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <Search className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -353,12 +353,13 @@ export function HubView({ overview, whatsappStats }: Props) {
                   placeholder="https://linkedin.com/in/nom ou https://instagram.com/nom"
                   value={profileUrl}
                   onChange={(e) => setProfileUrl(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
               </div>
               <Button
                 onClick={handleAnalyzeProfile}
                 disabled={analyzingProfile}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
               >
                 {analyzingProfile ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -443,9 +444,9 @@ export function HubView({ overview, whatsappStats }: Props) {
         {/* Generate AI Message Dialog */}
         <Dialog>
           <DialogTrigger asChild>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card className="cursor-pointer shadow-sm rounded-2xl hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -501,7 +502,7 @@ export function HubView({ overview, whatsappStats }: Props) {
               <Button
                 onClick={handleGenerateMessage}
                 disabled={generatingMsg}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
               >
                 {generatingMsg ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -534,9 +535,9 @@ export function HubView({ overview, whatsappStats }: Props) {
         {/* Suggest Comments Dialog */}
         <Dialog>
           <DialogTrigger asChild>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card className="cursor-pointer shadow-sm rounded-2xl hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                   <MessageSquare className="h-5 w-5 text-brand" />
                 </div>
                 <div>
@@ -566,7 +567,7 @@ export function HubView({ overview, whatsappStats }: Props) {
               <Button
                 onClick={handleSuggestComments}
                 disabled={suggestingComments}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
               >
                 {suggestingComments ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

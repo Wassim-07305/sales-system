@@ -311,8 +311,10 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
         {ENTITY_TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
             {filteredFields.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-                <Settings className="size-10 text-muted-foreground mb-3" />
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/50 py-16 text-center">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Settings className="size-7 text-muted-foreground opacity-50" />
+                </div>
                 <p className="text-muted-foreground text-sm">
                   Aucun champ personnalis\u00e9 pour {tab.label}.
                 </p>
@@ -327,15 +329,15 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                 </Button>
               </div>
             ) : (
-              <div className="rounded-lg border">
+              <div className="rounded-lg border border-border/50 overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom</TableHead>
-                      <TableHead>Label</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Obligatoire</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="border-b border-border/30 bg-muted/20 hover:bg-muted/20">
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Nom</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Label</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Obligatoire</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -525,7 +527,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
             )}
 
             {/* Required */}
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center justify-between rounded-xl border border-border/50 p-3">
               <div>
                 <Label htmlFor="field-required" className="cursor-pointer">
                   Obligatoire

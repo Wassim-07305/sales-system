@@ -87,7 +87,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
   }
 
   return (
-    <Card className="border-border/50 hover:shadow-md transition-all">
+    <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg flex items-center gap-2">
           <Trophy className="h-5 w-5 text-brand" />
@@ -124,9 +124,9 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                         <TooltipTrigger asChild>
                           <div
                             className={cn(
-                              "relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all w-[90px]",
+                              "relative flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all duration-300 w-[90px]",
                               isEarned
-                                ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-md"
+                                ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5"
                                 : "border-border/50 bg-muted/30 opacity-50 grayscale"
                             )}
                           >

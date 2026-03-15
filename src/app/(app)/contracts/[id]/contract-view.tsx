@@ -106,7 +106,7 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Contract content */}
         <div className="lg:col-span-2">
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden rounded-xl border-border/50 shadow-sm">
             <CardContent className="p-6 md:p-8">
               <div className="prose prose-sm max-w-none whitespace-pre-wrap text-sm leading-relaxed">
                 {contract.content.split("\n").map((line, i) => {
@@ -167,7 +167,7 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
 
               {/* Client */}
               {contract.client && (
-                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <div className={cn(
                     "h-9 w-9 rounded-lg flex items-center justify-center text-white text-[11px] font-bold shrink-0",
                     getAvatarColor(contract.client.full_name || "?"),
@@ -222,7 +222,7 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
 
               {contract.status === "signed" && (
                 <>
-                  <div className="flex items-center gap-2 p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/10">
+                  <div className="flex items-center gap-2 p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-emerald-600">Contrat signé</p>

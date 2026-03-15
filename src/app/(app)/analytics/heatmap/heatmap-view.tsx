@@ -75,47 +75,49 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <Calendar className="h-5 w-5 text-brand" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{dayLabelsFull[data.bestDay]}</p>
-            <p className="text-sm text-muted-foreground mt-1">Meilleur jour</p>
+            <p className="text-2xl font-bold tracking-tight">{dayLabelsFull[data.bestDay]}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Meilleur jour</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-brand" />
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Clock className="h-5 w-5 text-blue-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{bestTimeSlot}</p>
-            <p className="text-sm text-muted-foreground mt-1">Meilleur créneau</p>
+            <p className="text-2xl font-bold tracking-tight">{bestTimeSlot}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Meilleur créneau</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
-                <Activity className="h-5 w-5 text-brand" />
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+                <Activity className="h-5 w-5 text-purple-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{data.totalEngagement.toLocaleString("fr-FR")}</p>
-            <p className="text-sm text-muted-foreground mt-1">Engagement total</p>
+            <p className="text-2xl font-bold tracking-tight">{data.totalEngagement.toLocaleString("fr-FR")}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Engagement total</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Heatmap Grid */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Flame className="h-3.5 w-3.5 text-brand" />
+              </div>
               Carte de chaleur
             </CardTitle>
             {hoveredCell && (

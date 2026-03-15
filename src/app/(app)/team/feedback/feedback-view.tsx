@@ -214,48 +214,54 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageCircle className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">Total feedback</span>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total feedback</span>
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <MessageCircle className="h-4 w-4 text-brand" />
+              </div>
             </div>
-            <p className="text-xl font-bold">{stats.total}</p>
+            <p className="text-2xl font-bold tracking-tight">{stats.total}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">Note moyenne</span>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Note moyenne</span>
+              <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <Star className="h-4 w-4 text-amber-500" />
+              </div>
             </div>
-            <p className="text-xl font-bold">{stats.averageRating > 0 ? `${stats.averageRating}/5` : "-"}</p>
+            <p className="text-2xl font-bold tracking-tight">{stats.averageRating > 0 ? `${stats.averageRating}/5` : "-"}</p>
           </CardContent>
         </Card>
         {isManager && (
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="h-4 w-4 text-brand" />
-                <span className="text-xs text-muted-foreground">Membres coaches</span>
+          <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Membres coaches</span>
+                <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                  <Users className="h-4 w-4 text-blue-500" />
+                </div>
               </div>
-              <p className="text-xl font-bold">{stats.membersCoached}</p>
+              <p className="text-2xl font-bold tracking-tight">{stats.membersCoached}</p>
             </CardContent>
           </Card>
         )}
       </div>
 
       {/* Feedback list */}
-      <Card>
-        <CardHeader>
+      <Card className="border-border/50 overflow-hidden">
+        <CardHeader className="border-b border-border/30 bg-muted/20">
           <CardTitle className="text-lg">
             {isManager ? "Feedback donnes" : "Feedback recus"}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="space-y-4">
             {feedbackList.map((item) => (
-              <div key={item.id} className="p-4 rounded-lg border space-y-2">
+              <div key={item.id} className="p-4 rounded-xl border border-border/50 space-y-2 hover:shadow-sm transition-all duration-150">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold">{item.title}</h3>

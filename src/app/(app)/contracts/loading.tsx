@@ -14,7 +14,7 @@ export default function ContractsLoading() {
           <Skeleton className="h-10 w-36" />
         </div>
       </div>
-      <div className="rounded-lg border">
+      <div className="rounded-xl border border-border/50 shadow-sm overflow-hidden">
         <div className="p-4 border-b">
           <div className="flex gap-4">
             <Skeleton className="h-4 w-20" />

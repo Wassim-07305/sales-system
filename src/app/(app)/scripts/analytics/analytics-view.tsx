@@ -90,24 +90,28 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <Card>
+        <Card className="rounded-2xl border-border/40">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total scripts
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center">
+              <FileText className="h-4 w-4 text-brand" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.totalScripts}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-border/40">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Flowcharts
             </CardTitle>
-            <GitBranch className="h-4 w-4 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center">
+              <GitBranch className="h-4 w-4 text-brand" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.totalFlowcharts}</div>
@@ -117,24 +121,28 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-border/40">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Mind Maps
             </CardTitle>
-            <Brain className="h-4 w-4 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-muted/60 flex items-center justify-center">
+              <Brain className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.totalMindMaps}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-border/40">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Scripts partages
             </CardTitle>
-            <Share2 className="h-4 w-4 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-muted/60 flex items-center justify-center">
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.totalShared}</div>
@@ -150,7 +158,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
       {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-3 mb-8">
         {/* Bar Chart - Scripts created per month */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 rounded-2xl border-border/40">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -198,7 +206,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
         </Card>
 
         {/* Pie Chart - Shared vs Personal */}
-        <Card>
+        <Card className="rounded-2xl border-border/40">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Share2 className="h-4 w-4" />
@@ -248,7 +256,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
       </div>
 
       {/* Top Scripts Table */}
-      <Card>
+      <Card className="rounded-2xl border-border/40">
         <CardHeader>
           <CardTitle className="text-base">Top scripts</CardTitle>
         </CardHeader>

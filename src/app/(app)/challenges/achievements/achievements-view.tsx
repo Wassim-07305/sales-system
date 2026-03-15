@@ -242,9 +242,12 @@ export function AchievementsView({ achievements, totalPoints }: Props) {
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <Trophy className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>Aucun achievement dans cette categorie</p>
+        <div className="text-center py-16 text-muted-foreground">
+          <div className="h-16 w-16 rounded-2xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center mx-auto mb-4">
+            <Trophy className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+          <p className="font-medium">Aucun achievement dans cette categorie</p>
+          <p className="text-sm mt-1 text-muted-foreground/60">Continuez a jouer pour debloquer des achievements</p>
         </div>
       )}
     </div>
@@ -268,7 +271,7 @@ function AchievementCard({
 
   return (
     <Card
-      className={`relative overflow-hidden transition-all ${
+      className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
         isHiddenLocked
           ? "bg-muted/30"
           : isNotStarted && !ach.hidden

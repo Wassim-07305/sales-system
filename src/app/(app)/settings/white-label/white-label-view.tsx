@@ -204,7 +204,7 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
       </PageHeader>
 
       {/* Active Toggle */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -219,10 +219,12 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
       </Card>
 
       {/* Brand Settings */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Palette className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+              <Palette className="h-4 w-4 text-purple-500" />
+            </div>
             Identite de marque
           </CardTitle>
         </CardHeader>
@@ -332,10 +334,12 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
       </Card>
 
       {/* Feature Toggles */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <ToggleRight className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <ToggleRight className="h-4 w-4 text-brand" />
+            </div>
             Fonctionnalites actives
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -347,7 +351,7 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
             {MODULES.map((mod) => (
               <div
                 key={mod.key}
-                className="flex items-center justify-between gap-2 rounded-lg border p-3"
+                className="flex items-center justify-between gap-2 rounded-xl border border-border/50 p-3 hover:bg-muted/30 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-muted-foreground shrink-0">{mod.icon}</span>
@@ -384,10 +388,12 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
       </Card>
 
       {/* Preview */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Eye className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+              <Eye className="h-4 w-4 text-blue-500" />
+            </div>
             Apercu en temps reel
           </CardTitle>
         </CardHeader>

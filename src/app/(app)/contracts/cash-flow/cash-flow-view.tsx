@@ -89,7 +89,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
                 <DollarSign className="h-5 w-5 text-brand" />
               </div>
             </div>
@@ -105,7 +105,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
                 <Clock className="h-5 w-5 text-blue-500" />
               </div>
             </div>
@@ -121,7 +121,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
               </div>
             </div>
@@ -135,7 +135,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
                 <CheckCircle className="h-5 w-5 text-brand" />
               </div>
             </div>

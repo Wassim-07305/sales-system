@@ -78,7 +78,7 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   return (
-    <Card>
+    <Card className="border-border/50">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Parcours complet</CardTitle>
@@ -139,7 +139,7 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
                       >
                         {/* Icon */}
                         <div
-                          className={`relative z-10 flex-shrink-0 h-7 w-7 rounded-full ${config.bg} flex items-center justify-center`}
+                          className={`relative z-10 flex-shrink-0 h-7 w-7 rounded-xl ${config.bg} flex items-center justify-center ring-1 ring-border/30`}
                         >
                           <Icon className={`h-3.5 w-3.5 ${config.color}`} />
                         </div>

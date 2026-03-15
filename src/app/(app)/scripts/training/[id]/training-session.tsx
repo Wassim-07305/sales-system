@@ -301,7 +301,7 @@ export function TrainingSession({
         </PageHeader>
 
         <div className="max-w-xl mx-auto">
-          <Card className="bg-card border-border/50 hover:shadow-md transition-all">
+          <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
             <CardHeader className="text-center">
               <div className="mx-auto h-14 w-14 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mb-2">
                 <Brain className="h-7 w-7 text-brand" />
@@ -378,7 +378,7 @@ export function TrainingSession({
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-card border-border/50 hover:shadow-md transition-all">
+          <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
             <CardHeader>
               <div className="flex items-center gap-2 mb-1">
                 <Badge className="bg-brand/10 text-brand border-brand/20 text-[11px] font-medium uppercase tracking-wider">
@@ -466,7 +466,7 @@ export function TrainingSession({
 
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Score Card */}
-        <Card className="bg-card border-border/50 hover:shadow-md transition-all">
+        <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardContent className="pt-8 pb-8 text-center">
             <div
               className={`mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-4 ring-1 ${
@@ -504,7 +504,7 @@ export function TrainingSession({
         </Card>
 
         {/* Detailed Answers */}
-        <Card className="bg-card border-border/50 hover:shadow-md transition-all">
+        <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Détail des réponses</CardTitle>
           </CardHeader>

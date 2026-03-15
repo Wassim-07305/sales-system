@@ -226,10 +226,12 @@ function B2BClientDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Performance Setter */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-4 w-4 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Users className="h-3.5 w-3.5 text-brand" />
+              </div>
               Performance Setter
             </CardTitle>
           </CardHeader>
@@ -264,58 +266,60 @@ function B2BClientDashboard({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg border p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <Send className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-border/50 p-3.5 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Send className="h-3.5 w-3.5 text-brand" />
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
                     Messages / jour
                   </span>
                 </div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold tracking-tight">
                   {data.setterPerformance.messagesPerDay}
                 </p>
               </div>
-              <div className="rounded-lg border p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
+              <div className="rounded-xl border border-border/50 p-3.5 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Users className="h-3.5 w-3.5 text-blue-500" />
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
                     Prospects contactes
                   </span>
                 </div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold tracking-tight">
                   {data.setterPerformance.prospectsContacted}
                 </p>
               </div>
-              <div className="rounded-lg border p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
+              <div className="rounded-xl border border-border/50 p-3.5 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
                     Conversations actives
                   </span>
                 </div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold tracking-tight">
                   {data.setterPerformance.activeConversations}
                 </p>
               </div>
-              <div className="rounded-lg border p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
+              <div className="rounded-xl border border-border/50 p-3.5 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
                     Taux de reponse
                   </span>
                 </div>
-                <p className="text-2xl font-bold">{data.stats.responseRate}%</p>
+                <p className="text-2xl font-bold tracking-tight">{data.stats.responseRate}%</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Pipeline Overview */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <BarChart3 className="h-3.5 w-3.5 text-brand" />
+              </div>
               Pipeline commercial
             </CardTitle>
           </CardHeader>
@@ -366,24 +370,29 @@ function B2BClientDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Prochains rendez-vous */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Calendar className="h-3.5 w-3.5 text-brand" />
+              </div>
               Prochains rendez-vous
             </CardTitle>
           </CardHeader>
           <CardContent>
             {data.upcomingBookings.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                Aucun rendez-vous a venir.
-              </p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                  <Calendar className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">Aucun rendez-vous a venir</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {data.upcomingBookings.map((booking) => (
                   <div
                     key={booking.id}
-                    className="flex items-start gap-3 py-2 border-b last:border-0"
+                    className="flex items-start gap-3 py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="mt-0.5">
                       <Calendar className="h-4 w-4 text-brand" />
@@ -409,28 +418,33 @@ function B2BClientDashboard({
         </Card>
 
         {/* Activite recente */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Activity className="h-4 w-4 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Activity className="h-3.5 w-3.5 text-brand" />
+              </div>
               Activite recente
             </CardTitle>
           </CardHeader>
           <CardContent>
             {data.recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                Aucune activite recente.
-              </p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                  <Activity className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">Aucune activite recente</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {data.recentActivity.map((activity) => {
                   const Icon = getActivityIcon(activity.type);
                   return (
                     <div
                       key={activity.id}
-                      className="flex items-start gap-3 py-2 border-b last:border-0"
+                      className="flex items-start gap-3 py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                     >
-                      <div className="mt-0.5 rounded-full bg-muted p-1.5">
+                      <div className="mt-0.5 rounded-xl bg-muted/60 p-1.5">
                         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -566,10 +580,12 @@ function B2CClientDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Course Progress */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <BookOpen className="h-3.5 w-3.5 text-brand" />
+              </div>
               Ma progression
             </CardTitle>
           </CardHeader>
@@ -614,9 +630,14 @@ function B2CClientDashboard({
         </Card>
 
         {/* Upcoming Events */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-lg">Prochains evenements</CardTitle>
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Calendar className="h-3.5 w-3.5 text-blue-500" />
+              </div>
+              Prochains evenements
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {data.upcomingEvents.length === 0 ? (
@@ -658,9 +679,12 @@ function B2CClientDashboard({
       </div>
 
       {/* Daily Journal */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
-          <CardTitle className="text-lg">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+              <Star className="h-3.5 w-3.5 text-purple-500" />
+            </div>
             {hasJournal ? "Journal du jour (deja rempli)" : "Journal du jour"}
           </CardTitle>
         </CardHeader>

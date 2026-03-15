@@ -227,7 +227,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
 
           {/* Main card */}
           <Card
-            className={`border ${config.border} shadow-2xl shadow-black/50 hover:shadow-md transition-all`}
+            className={`rounded-2xl border ${config.border} shadow-2xl shadow-black/50 hover:shadow-xl transition-all duration-300`}
           >
             <CardContent className="p-8 md:p-12">
               <p className="text-xl md:text-2xl font-semibold text-center leading-relaxed">

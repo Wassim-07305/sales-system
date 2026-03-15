@@ -26,7 +26,7 @@ export function MobileNav({ role }: MobileNavProps) {
       {showMore && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowMore(false)} />
-          <div className="absolute bottom-16 left-0 right-0 bg-background border-t rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe">
+          <div className="absolute bottom-16 left-0 right-0 bg-background border-t border-border/50 rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe shadow-2xl">
             <div className="grid grid-cols-4 gap-2">
               {overflowItems.map((item) => {
                 const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -52,7 +52,7 @@ export function MobileNav({ role }: MobileNavProps) {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm md:hidden pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur-lg md:hidden pb-safe">
         <div className="flex h-16 items-center justify-around">
           {mainItems.map((item) => {
             const isActive =
@@ -65,11 +65,14 @@ export function MobileNav({ role }: MobileNavProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[44px] px-2 py-1.5 text-[10px] font-medium transition-colors rounded-lg active:bg-muted",
+                  "relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[44px] px-2 py-1.5 text-[10px] font-medium transition-all duration-200 rounded-xl active:scale-95",
                   isActive ? "text-brand" : "text-muted-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" />
+                {isActive && (
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-brand shadow-[0_0_8px_rgba(122,241,122,0.4)]" />
+                )}
+                <Icon className={cn("h-5 w-5 transition-all duration-200", isActive && "drop-shadow-[0_0_6px_rgba(122,241,122,0.3)]")} />
                 <span className="truncate max-w-[56px]">{item.label}</span>
               </Link>
             );

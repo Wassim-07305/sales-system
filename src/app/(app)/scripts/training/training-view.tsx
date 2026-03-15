@@ -166,7 +166,7 @@ export function TrainingView({
 
             return (
               <Link key={script.id} href={`/scripts/training/${script.id}`}>
-                <Card className="bg-card border-border hover:border-[#7af17a]/40 transition-colors cursor-pointer h-full">
+                <Card className="bg-card rounded-2xl border-border/40 hover:border-[#7af17a]/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer h-full">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-base font-medium line-clamp-1">

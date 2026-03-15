@@ -239,26 +239,28 @@ function SummaryCard({
   variant?: "default" | "warning";
 }) {
   return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
+    <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            {label}
+          </span>
           <div
-            className={`p-2 rounded-lg ${
-              variant === "warning" ? "bg-orange-500/20" : "bg-[#7af17a]/20"
+            className={`h-9 w-9 rounded-xl flex items-center justify-center ring-1 ${
+              variant === "warning"
+                ? "bg-orange-500/10 ring-orange-500/20"
+                : "bg-brand/10 ring-brand/20"
             }`}
           >
             <Icon
-              className={`w-5 h-5 ${
-                variant === "warning" ? "text-orange-400" : "text-[#7af17a]"
+              className={`w-4 h-4 ${
+                variant === "warning" ? "text-orange-400" : "text-brand"
               }`}
             />
           </div>
-          <div>
-            <p className="text-2xl font-bold text-foreground">{value}</p>
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="text-xs text-muted-foreground">{subLabel}</p>
-          </div>
         </div>
+        <p className="text-2xl font-bold tracking-tight">{value}</p>
+        <p className="text-xs text-muted-foreground mt-1">{subLabel}</p>
       </CardContent>
     </Card>
   );

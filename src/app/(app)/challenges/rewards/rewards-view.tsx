@@ -109,10 +109,10 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
       </PageHeader>
 
       {/* Points balance */}
-      <Card className="mb-6 bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
+      <Card className="mb-6 rounded-2xl bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0 shadow-xl shadow-brand-dark/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-full bg-brand/20 border-2 border-brand flex items-center justify-center">
+            <div className="h-14 w-14 rounded-2xl bg-brand/20 border-2 border-brand flex items-center justify-center">
               <Star className="h-7 w-7 text-brand" />
             </div>
             <div>
@@ -135,12 +135,12 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
           return (
             <Card
               key={reward.id}
-              className={!canAfford ? "opacity-50 grayscale" : ""}
+              className={`rounded-2xl border-border/40 transition-all duration-300 ${!canAfford ? "opacity-50 grayscale" : "hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5"}`}
             >
               <CardContent className="p-5">
                 <div className="flex items-start gap-3 mb-3">
                   <div
-                    className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
                       canAfford ? "bg-brand/10 text-brand" : "bg-muted text-muted-foreground"
                     }`}
                   >

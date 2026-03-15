@@ -230,7 +230,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Instagram"
         description="Prospection et outils Instagram"
@@ -242,7 +242,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
       </PageHeader>
 
       {/* Unipile Instagram connection status */}
-      <Card className="mb-6">
+      <Card className="shadow-sm rounded-2xl">
         <CardContent className="flex items-center justify-between py-3 px-4">
           <div className="flex items-center gap-3">
             <Unplug className="h-5 w-5 text-muted-foreground" />
@@ -273,7 +273,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                 size="sm"
                 onClick={handleConnectUnipile}
                 disabled={connectingUnipile}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
               >
                 {connectingUnipile ? (
                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -296,7 +296,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
       </Card>
 
       <Tabs defaultValue="outils">
-        <TabsList className="mb-6">
+        <TabsList>
           <TabsTrigger value="outils">
             <Wrench className="h-4 w-4 mr-2" />
             Outils
@@ -311,7 +311,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
         <TabsContent value="outils">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Story Scraper */}
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Eye className="h-4 w-4" />
@@ -323,11 +323,12 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                   placeholder="@nomutilisateur"
                   value={storyUsername}
                   onChange={(e) => setStoryUsername(e.target.value)}
+                  className="h-11 rounded-xl"
                 />
                 <Button
                   onClick={handleScrapeStories}
                   disabled={scrapingStories}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {scrapingStories ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -343,7 +344,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                       {stories.map((story) => (
                         <div
                           key={story.id}
-                          className="border rounded-lg p-3 space-y-2"
+                          className="border rounded-xl p-3 space-y-2"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -393,7 +394,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
             </Card>
 
             {/* DM Generator (Instagram tone) */}
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
@@ -409,6 +410,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                     placeholder="Marie Martin"
                     value={dmName}
                     onChange={(e) => setDmName(e.target.value)}
+                    className="h-11 rounded-xl"
                   />
                 </div>
                 <div>
@@ -419,12 +421,13 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                     placeholder="Ex: j'ai adoré ta dernière story sur le bien-être"
                     value={dmContext}
                     onChange={(e) => setDmContext(e.target.value)}
+                    className="h-11 rounded-xl"
                   />
                 </div>
                 <Button
                   onClick={handleGenerateDm}
                   disabled={generatingDm}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {generatingDm ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -435,7 +438,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                 </Button>
 
                 {generatedDm && (
-                  <div className="border rounded-lg p-4">
+                  <div className="border rounded-xl p-4">
                     <pre className="whitespace-pre-wrap text-sm font-sans mb-3">
                       {generatedDm}
                     </pre>
@@ -456,18 +459,18 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
 
         {/* Prospects Tab */}
         <TabsContent value="prospects">
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher un prospect Instagram..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11 rounded-xl"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 h-11 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -483,13 +486,13 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
             </Select>
           </div>
 
-          <Card>
+          <Card className="shadow-sm rounded-2xl overflow-hidden">
             <CardContent className="p-0">
               <div className="divide-y">
                 {filteredProspects.map((prospect) => (
                   <div
                     key={prospect.id}
-                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center text-foreground font-bold">

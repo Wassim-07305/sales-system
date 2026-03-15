@@ -198,21 +198,21 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Séquences WhatsApp"
         description="Créez des séquences de messages automatisées"
       >
         <div className="flex gap-2">
           <Link href="/whatsapp">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
           </Link>
           <Button
             onClick={openCreate}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle séquence
@@ -222,7 +222,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
 
       {/* Sequence List */}
       {sequences.length === 0 ? (
-        <Card className="border-border/50">
+        <Card className="shadow-sm rounded-2xl border-border/50">
           <CardContent className="py-12 text-center text-muted-foreground">
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
               <Zap className="h-7 w-7 opacity-40" />
@@ -236,7 +236,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
       ) : (
         <div className="grid gap-4">
           {sequences.map((seq) => (
-            <Card key={seq.id} className="border-border/50 hover:shadow-md transition-all">
+            <Card key={seq.id} className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
               <CardContent className="py-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -298,6 +298,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                       size="sm"
                       onClick={() => openEdit(seq)}
                       disabled={isPending}
+                      className="rounded-xl"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -306,7 +307,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                       size="sm"
                       onClick={() => handleDelete(seq.id)}
                       disabled={isPending}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -342,6 +343,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Séquence post opt-in"
+                className="h-11 rounded-xl"
               />
             </div>
 
@@ -353,6 +355,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Description de la séquence..."
                 rows={2}
+                className="rounded-xl"
               />
             </div>
 
@@ -360,7 +363,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
             <div>
               <Label>Type de funnel</Label>
               <Select value={funnelType} onValueChange={setFunnelType}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -382,6 +385,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                   size="sm"
                   onClick={addStep}
                   type="button"
+                  className="rounded-xl font-medium"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Ajouter une étape
@@ -389,7 +393,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
               </div>
               <div className="space-y-4">
                 {steps.map((step, index) => (
-                  <Card key={index} className="border-border/50">
+                  <Card key={index} className="rounded-xl border-border/50">
                     <CardContent className="py-3">
                       <div className="flex items-start gap-3">
                         <div className="flex items-center gap-1 pt-2 text-muted-foreground">
@@ -468,7 +472,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
 
             <Button
               onClick={handleSave}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
               disabled={isPending}
             >
               {editingSequence ? "Mettre à jour" : "Créer la séquence"}

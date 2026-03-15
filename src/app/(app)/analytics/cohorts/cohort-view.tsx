@@ -71,49 +71,58 @@ export function CohortView({ data }: { data: CohortData[] }) {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Users className="h-4 w-4" />
-              <span className="text-sm">Total Deals</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Users className="h-4 w-4 text-brand" />
+              </div>
             </div>
-            <p className="text-2xl font-bold">{totalCreated}</p>
+            <p className="text-2xl font-bold tracking-tight">{totalCreated}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total Deals</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <TrendingUp className="h-4 w-4" />
-              <span className="text-sm">Deals Signes</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <TrendingUp className="h-4 w-4 text-emerald-500" />
+              </div>
             </div>
-            <p className="text-2xl font-bold">{totalSigned}</p>
+            <p className="text-2xl font-bold tracking-tight">{totalSigned}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Deals Signes</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <span className="text-sm">CA Total</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+                <TrendingUp className="h-4 w-4 text-purple-500" />
+              </div>
             </div>
-            <p className="text-2xl font-bold">
+            <p className="text-2xl font-bold tracking-tight">
               {totalValue.toLocaleString("fr-FR")} &euro;
             </p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">CA Total</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm">Taux Moyen</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Calendar className="h-4 w-4 text-blue-500" />
+              </div>
             </div>
-            <p className="text-2xl font-bold">{avgConversion}%</p>
+            <p className="text-2xl font-bold tracking-tight">{avgConversion}%</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Taux Moyen</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Cohort Table */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
-          <CardTitle>Cohortes par mois</CardTitle>
+          <CardTitle className="text-base font-semibold">Cohortes par mois</CardTitle>
         </CardHeader>
         <CardContent>
           {data.length === 0 ? (

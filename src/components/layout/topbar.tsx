@@ -139,7 +139,7 @@ export function Topbar({ title, userId }: TopbarProps) {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-96 max-h-[70vh] overflow-y-auto">
+          <DropdownMenuContent align="end" className="w-96 max-h-[70vh] overflow-y-auto rounded-2xl">
             <div className="flex items-center justify-between p-3 border-b">
               <h3 className="font-semibold text-sm">Notifications</h3>
               <div className="flex gap-2">

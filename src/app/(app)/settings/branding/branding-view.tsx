@@ -115,10 +115,12 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
       </PageHeader>
 
       {/* Profile branding */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <User className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <User className="h-4 w-4 text-brand" />
+            </div>
             Profil
           </CardTitle>
         </CardHeader>
@@ -164,10 +166,12 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
       </Card>
 
       {/* Color scheme */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Palette className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+              <Palette className="h-4 w-4 text-purple-500" />
+            </div>
             Palette de couleurs
           </CardTitle>
         </CardHeader>
@@ -181,7 +185,7 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
                 key={palette.id}
                 onClick={() => setSelectedPalette(palette.id)}
                 className={cn(
-                  "relative p-4 rounded-lg border-2 transition-all text-left",
+                  "relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-sm",
                   selectedPalette === palette.id
                     ? "border-brand ring-2 ring-brand/20"
                     : "border-muted hover:border-muted-foreground/30"

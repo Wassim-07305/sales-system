@@ -204,14 +204,14 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Campagnes Drip"
         description="Automatisez vos sequences de prospection avec des campagnes multi-étapes"
       >
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+            <Button className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle campagne
             </Button>
@@ -231,7 +231,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                       placeholder="Ex: Sequence LinkedIn Q1"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="mt-1.5"
+                      className="mt-1.5 h-11 rounded-xl"
                     />
                   </div>
                   <div>
@@ -248,7 +248,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                   <div>
                     <Label>Liste de prospects cible</Label>
                     <Select value={listId} onValueChange={setListId}>
-                      <SelectTrigger className="mt-1.5">
+                      <SelectTrigger className="mt-1.5 h-11 rounded-xl">
                         <SelectValue placeholder="Sélectionner une liste" />
                       </SelectTrigger>
                       <SelectContent>
@@ -380,7 +380,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                 <Button
                   onClick={handleCreate}
                   disabled={isPending}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -396,14 +396,14 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
       </PageHeader>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <Card>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{campaigns.length}</p>
             <p className="text-xs text-muted-foreground">Campagnes</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-brand">
               {campaigns.filter((c) => c.is_active).length}
@@ -411,7 +411,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
             <p className="text-xs text-muted-foreground">Actives</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">
               {campaigns.reduce((sum, c) => sum + (c.prospect_count || 0), 0)}
@@ -419,7 +419,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
             <p className="text-xs text-muted-foreground">Prospects cibles</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">
               {campaigns.reduce((sum, c) => sum + (c.executions_count || 0), 0)}
@@ -431,7 +431,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
 
       {/* Campaigns List */}
       {campaigns.length === 0 ? (
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="py-16 text-center">
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
               <Mail className="h-7 w-7 text-muted-foreground" />
@@ -442,7 +442,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
             </p>
             <Button
               onClick={() => setCreateOpen(true)}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
               Creer une campagne
@@ -452,7 +452,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
       ) : (
         <div className="space-y-4">
           {campaigns.map((campaign) => (
-            <Card key={campaign.id} className="overflow-hidden">
+            <Card key={campaign.id} className="overflow-hidden shadow-sm rounded-2xl">
               <CardContent className="p-0">
                 {/* Campaign Header */}
                 <div className="p-5">

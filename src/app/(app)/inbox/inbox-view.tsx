@@ -274,14 +274,14 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader title="Inbox" description="Conversations avec vos prospects">
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
+          <Button variant="outline" size="sm" className="rounded-xl font-medium" onClick={() => setImportDialogOpen(true)}>
             <Upload className="h-4 w-4 mr-2" />
             Importer
           </Button>
-          <Button onClick={() => setNewConvDialogOpen(true)} className="bg-brand text-brand-dark hover:bg-brand/90">
+          <Button onClick={() => setNewConvDialogOpen(true)} className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle conversation
           </Button>
@@ -290,11 +290,11 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
 
       <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-220px)] md:h-[calc(100dvh-200px)]">
         {/* Conversation list */}
-        <Card className={cn("flex flex-col overflow-hidden", selectedConv ? "hidden md:flex" : "flex")}>
+        <Card className={cn("flex flex-col overflow-hidden shadow-sm rounded-2xl border-border/50", selectedConv ? "hidden md:flex" : "flex")}>
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Rechercher..." className="pl-9 h-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder="Rechercher..." className="pl-9 h-9 rounded-xl" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -333,7 +333,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
             })}
             {filteredConvs.length === 0 && (
               <div className="p-8 text-center text-muted-foreground text-sm">
-                <MessageSquare className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="h-6 w-6 opacity-40" />
+                </div>
                 Aucune conversation
               </div>
             )}
@@ -341,7 +343,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
         </Card>
 
         {/* Messages area */}
-        <Card className={cn("flex flex-col overflow-hidden", !selectedConv && "hidden md:flex")}>
+        <Card className={cn("flex flex-col overflow-hidden shadow-sm rounded-2xl border-border/50", !selectedConv && "hidden md:flex")}>
           {selectedConv ? (
             <>
               {/* Header */}
@@ -365,7 +367,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                   variant="outline"
                   size="sm"
                   onClick={handleEscalate}
-                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 gap-1.5"
+                  className="rounded-xl font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 gap-1.5"
                   title="Escalader vers un humain"
                 >
                   <AlertTriangle className="h-3.5 w-3.5" />
@@ -467,7 +469,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
-                <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="h-7 w-7 opacity-40" />
+                </div>
                 <p className="font-medium">Sélectionnez une conversation</p>
                 <p className="text-sm">ou créez-en une nouvelle</p>
               </div>
@@ -486,7 +490,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
             <div>
               <Label>Prospect</Label>
               <Select value={importProspectId} onValueChange={setImportProspectId}>
-                <SelectTrigger><SelectValue placeholder="Sélectionner un prospect" /></SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Sélectionner un prospect" /></SelectTrigger>
                 <SelectContent>
                   {prospects.map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -496,9 +500,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
             </div>
             <div>
               <Label>Collez la conversation (alternance prospect/Damien par ligne)</Label>
-              <Textarea value={importText} onChange={(e) => setImportText(e.target.value)} rows={8} placeholder="Salut, j'ai vu ton profil...&#10;Merci ! Oui je suis intéressé...&#10;..." />
+              <Textarea value={importText} onChange={(e) => setImportText(e.target.value)} rows={8} className="rounded-xl" placeholder="Salut, j'ai vu ton profil...&#10;Merci ! Oui je suis intéressé...&#10;..." />
             </div>
-            <Button onClick={handleImport} className="w-full bg-brand text-brand-dark hover:bg-brand/90">Importer</Button>
+            <Button onClick={handleImport} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Importer</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -513,7 +517,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
             <div>
               <Label>Prospect</Label>
               <Select value={newConvProspectId} onValueChange={setNewConvProspectId}>
-                <SelectTrigger><SelectValue placeholder="Sélectionner un prospect" /></SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Sélectionner un prospect" /></SelectTrigger>
                 <SelectContent>
                   {prospects.map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.name} ({p.platform})</SelectItem>
@@ -521,7 +525,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleNewConversation} className="w-full bg-brand text-brand-dark hover:bg-brand/90">Créer</Button>
+            <Button onClick={handleNewConversation} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Créer</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -538,13 +542,13 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
             </p>
             <div>
               <Label>Message</Label>
-              <Textarea value={voiceAiText} onChange={(e) => setVoiceAiText(e.target.value)} rows={4} placeholder="Salut ! Je voulais te proposer..." />
+              <Textarea value={voiceAiText} onChange={(e) => setVoiceAiText(e.target.value)} rows={4} className="rounded-xl" placeholder="Salut ! Je voulais te proposer..." />
             </div>
             <div>
               <Label>Heure d&apos;envoi programmé</Label>
-              <Input type="datetime-local" value={voiceAiSchedule} onChange={(e) => setVoiceAiSchedule(e.target.value)} />
+              <Input type="datetime-local" value={voiceAiSchedule} onChange={(e) => setVoiceAiSchedule(e.target.value)} className="h-11 rounded-xl" />
             </div>
-            <Button onClick={handleVoiceAi} className="w-full bg-brand text-brand-dark hover:bg-brand/90">Programmer le vocal</Button>
+            <Button onClick={handleVoiceAi} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Programmer le vocal</Button>
             <p className="text-xs text-muted-foreground text-center">
               L&apos;intégration ElevenLabs sera activée prochainement.
             </p>

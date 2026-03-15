@@ -140,9 +140,9 @@ export function KpisView({
 
       {/* NPS Modal */}
       {npsShown && pendingNps && (
-        <Card className="mb-6 border-brand/30 bg-brand/5">
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-2">Comment évaluez-vous votre expérience Sales System ?</h3>
+        <Card className="mb-6 border-brand/20 bg-gradient-to-br from-brand/10 via-brand/5 to-transparent overflow-hidden relative">
+          <CardContent className="p-6 relative z-10">
+            <h3 className="text-lg font-semibold mb-2">Comment évaluez-vous votre expérience Sales System ?</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Jour {pendingNps.trigger_day} — Donnez une note de 0 à 10
             </p>
@@ -151,10 +151,10 @@ export function KpisView({
                 <button
                   key={i}
                   onClick={() => setNpsScore(i)}
-                  className={`h-10 w-10 rounded-lg border text-sm font-semibold transition-all ${
+                  className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-all duration-200 ${
                     npsScore === i
-                      ? "bg-brand text-brand-dark border-brand"
-                      : "hover:border-brand/50"
+                      ? "bg-brand text-brand-dark border-brand shadow-sm shadow-brand/20"
+                      : "hover:border-brand/50 hover:bg-brand/5"
                   }`}
                 >
                   {i}
@@ -207,13 +207,15 @@ export function KpisView({
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon className="h-4 w-4 text-brand" />
-                  <span className="text-xs text-muted-foreground">{stat.title}</span>
+            <Card key={stat.title} className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                    <Icon className="h-4 w-4 text-brand" />
+                  </div>
                 </div>
-                <p className="text-xl font-bold">{stat.value}</p>
+                <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">{stat.title}</p>
               </CardContent>
             </Card>
           );
@@ -229,18 +231,18 @@ export function KpisView({
           </TabsList>
 
           <TabsContent value="bookings">
-            <Card>
+            <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
               <CardHeader>
-                <CardTitle>Appels bookés</CardTitle>
+                <CardTitle className="text-base font-semibold">Appels bookés</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
                       <XAxis dataKey="date" />
                       <YAxis />
-                      <Tooltip />
+                      <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
                       <Bar dataKey="bookings" fill="#7af17a" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -250,15 +252,15 @@ export function KpisView({
           </TabsContent>
 
           <TabsContent value="revenue">
-            <Card>
+            <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
               <CardHeader>
-                <CardTitle>Évolution du CA</CardTitle>
+                <CardTitle className="text-base font-semibold">Évolution du CA</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${Number(value).toLocaleString("fr-FR")} €`, "CA"]} />
@@ -271,15 +273,15 @@ export function KpisView({
           </TabsContent>
 
           <TabsContent value="rates">
-            <Card>
+            <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
               <CardHeader>
-                <CardTitle>Taux show-up et closing</CardTitle>
+                <CardTitle className="text-base font-semibold">Taux show-up et closing</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip formatter={(value) => [`${value}%`]} />
@@ -293,11 +295,13 @@ export function KpisView({
           </TabsContent>
         </Tabs>
       ) : (
-        <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">Pas encore de donnees</p>
-            <p className="text-sm">Vos KPIs apparaitront ici au fur et a mesure de votre activite.</p>
+        <Card className="border-border/50">
+          <CardContent className="py-16 text-center">
+            <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="h-7 w-7 text-brand" />
+            </div>
+            <p className="font-semibold text-lg">Pas encore de donnees</p>
+            <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">Vos KPIs apparaitront ici au fur et a mesure de votre activite.</p>
           </CardContent>
         </Card>
       )}

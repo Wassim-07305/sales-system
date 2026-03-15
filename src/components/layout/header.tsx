@@ -176,32 +176,32 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
 
           {/* Dropdown */}
           {userMenuOpen && (
-            <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-card p-1 shadow-lg">
-              <div className="px-3 py-2">
-                <p className="text-sm font-medium text-foreground">{userName}</p>
+            <div className="absolute right-0 top-full z-50 mt-2 w-60 rounded-2xl border border-border/60 bg-card p-1.5 shadow-xl shadow-black/10 animate-in fade-in-0 slide-in-from-top-2 duration-200">
+              <div className="px-3 py-2.5">
+                <p className="text-sm font-semibold text-foreground">{userName}</p>
                 <p className="text-xs text-muted-foreground">{email}</p>
               </div>
-              <div className="mx-2 border-t border-border" />
+              <div className="mx-1.5 border-t border-border/50" />
               <button
                 onClick={() => { setUserMenuOpen(false); router.push("/profile"); }}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-foreground transition-all duration-150 hover:bg-secondary"
               >
-                <User className="h-4 w-4" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 Mon profil
               </button>
               {!["client_b2b", "client_b2c"].includes(role) && (
               <button
                 onClick={() => { setUserMenuOpen(false); router.push("/settings"); }}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-foreground transition-all duration-150 hover:bg-secondary"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="h-4 w-4 text-muted-foreground" />
                 Paramètres
               </button>
               )}
-              <div className="mx-2 border-t border-border" />
+              <div className="mx-1.5 border-t border-border/50" />
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-destructive transition-all duration-150 hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
                 Déconnexion

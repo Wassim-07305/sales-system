@@ -185,10 +185,12 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
       <PageHeader title="Voice Cloning IA" description="Clonez votre voix avec ElevenLabs pour generer des messages vocaux personnalises" />
 
       {/* Voice Profile & Upload */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Mic className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <Mic className="h-4 w-4 text-brand" />
+            </div>
             Profil vocal
           </CardTitle>
         </CardHeader>
@@ -274,10 +276,12 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
       </Card>
 
       {/* Test Voice Section */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+              <Volume2 className="h-4 w-4 text-blue-500" />
+            </div>
             Tester votre voix
           </CardTitle>
         </CardHeader>
@@ -334,9 +338,9 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
       </Card>
 
       {/* Voice Messages */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
-          <CardTitle>Mes vocaux programmes</CardTitle>
+          <CardTitle className="text-lg">Mes vocaux programmes</CardTitle>
         </CardHeader>
         <CardContent>
           {voiceMessages.length > 0 ? (

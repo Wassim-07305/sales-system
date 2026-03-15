@@ -265,7 +265,7 @@ export function CommunityView({
   function PostCard({ post, isWinGrid }: { post: Post; isWinGrid?: boolean }) {
     const postChannel = CHANNELS.find((c) => c.id === (post.channel || "general"));
     return (
-      <Card className={`transition-shadow hover:shadow-md ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}>
+      <Card className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}>
         <CardContent className="px-5 py-5 sm:px-6 sm:py-6">
           {/* Author row */}
           <div className="flex items-center gap-3 mb-4">
@@ -425,7 +425,7 @@ export function CommunityView({
 
           {/* Desktop: vertical sidebar */}
           <div className="hidden lg:block sticky top-20">
-            <div className="rounded-xl border bg-card p-3">
+            <div className="rounded-2xl border border-border/40 bg-card p-3">
               <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-2">Canaux</h3>
               <nav className="space-y-1">
                 {visibleChannels.map((ch) => {

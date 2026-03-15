@@ -50,7 +50,7 @@ export function LevelUpModal({ level, levelName }: Props) {
           />
         ))}
 
-        <div className="bg-gradient-to-b from-brand-dark to-background rounded-2xl p-8 max-w-sm w-full text-center relative overflow-hidden border border-border/50 shadow-2xl">
+        <div className="bg-gradient-to-b from-brand-dark to-background rounded-3xl p-8 max-w-sm w-full text-center relative overflow-hidden border border-border/50 shadow-2xl shadow-brand/10">
           <div className="absolute inset-0 opacity-10">
             <Sparkles className="h-full w-full text-brand" />
           </div>

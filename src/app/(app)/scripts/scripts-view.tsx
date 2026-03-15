@@ -175,7 +175,7 @@ export function ScriptsView({
             {filteredScripts.map((script) => (
               <Card
                 key={script.id}
-                className="hover:shadow-md transition-shadow"
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -212,7 +212,7 @@ export function ScriptsView({
                       {script.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
-                          className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded"
+                          className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full"
                         >
                           {tag}
                         </span>
@@ -268,7 +268,7 @@ export function ScriptsView({
             {flowcharts.map((fc) => (
               <Card
                 key={fc.id}
-                className="hover:shadow-md transition-shadow"
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -354,7 +354,7 @@ export function ScriptsView({
             {mindMaps.map((mm) => (
               <Card
                 key={mm.id}
-                className="hover:shadow-md transition-shadow"
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base line-clamp-1">

@@ -173,11 +173,11 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
             placeholder="Rechercher par nom, email, entreprise..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-            className="pl-9 h-9"
+            className="pl-9 h-11 rounded-xl"
           />
         </div>
         <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px] h-9">
+          <SelectTrigger className="w-[160px] h-11 rounded-xl">
             <SelectValue placeholder="Rôle" />
           </SelectTrigger>
           <SelectContent>
@@ -201,7 +201,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
       </div>
 
       {/* Table */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden rounded-xl border-border/50 shadow-sm">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -223,7 +223,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                   const healthBg = healthScore >= 70 ? "bg-brand" : healthScore >= 40 ? "bg-muted-foreground" : "bg-muted-foreground/40";
 
                   return (
-                    <TableRow key={contact.id} className="group">
+                    <TableRow key={contact.id} className="group hover:bg-secondary/50 transition-colors">
                       <TableCell>
                         <Link
                           href={`/contacts/${contact.id}`}

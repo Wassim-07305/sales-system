@@ -220,17 +220,17 @@ export function BenchmarkingView({ initialData }: { initialData: BenchmarkData }
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.title}>
+            <Card key={card.title} className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                     <Icon className="h-5 w-5 text-brand" />
                   </div>
                   {card.change !== null && <ChangeIndicator value={card.change} />}
                 </div>
-                <p className="text-2xl font-bold">{card.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{card.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-2xl font-bold tracking-tight">{card.value}</p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">{card.title}</p>
+                <p className="text-xs text-muted-foreground/70 mt-0.5">
                   {card.change !== null ? `vs. ${card.prev}` : card.prev}
                 </p>
               </CardContent>
@@ -240,25 +240,25 @@ export function BenchmarkingView({ initialData }: { initialData: BenchmarkData }
       </div>
 
       {/* Comparison table */}
-      <Card className="mb-8">
+      <Card className="mb-8 border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
-          <CardTitle>Comparaison par membre</CardTitle>
+          <CardTitle className="text-base font-semibold">Comparaison par membre</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="text-left p-4 font-medium">Membre</th>
-                  <th className="text-left p-4 font-medium">R\u00F4le</th>
-                  <th className="text-right p-4 font-medium">Deals</th>
-                  <th className="text-right p-4 font-medium">vs moy.</th>
-                  <th className="text-right p-4 font-medium">CA g\u00E9n\u00E9r\u00E9</th>
-                  <th className="text-right p-4 font-medium">vs moy.</th>
-                  <th className="text-right p-4 font-medium">Panier moyen</th>
-                  <th className="text-right p-4 font-medium">vs moy.</th>
-                  <th className="text-right p-4 font-medium">Conversion</th>
-                  <th className="text-right p-4 font-medium">vs moy.</th>
+                <tr className="border-b bg-muted/30">
+                  <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Membre</th>
+                  <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">R\u00F4le</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deals</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">vs moy.</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA g\u00E9n\u00E9r\u00E9</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">vs moy.</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Panier moyen</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">vs moy.</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Conversion</th>
+                  <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">vs moy.</th>
                 </tr>
               </thead>
               <tbody>
@@ -315,9 +315,9 @@ export function BenchmarkingView({ initialData }: { initialData: BenchmarkData }
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Radar chart - top performers */}
         {top5.length > 0 && (
-          <Card>
+          <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
             <CardHeader>
-              <CardTitle>Profil des top performers</CardTitle>
+              <CardTitle className="text-base font-semibold">Profil des top performers</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[350px]">
@@ -347,9 +347,9 @@ export function BenchmarkingView({ initialData }: { initialData: BenchmarkData }
         )}
 
         {/* Bar chart - revenue per member vs team average */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle>CA par membre vs moyenne</CardTitle>
+            <CardTitle className="text-base font-semibold">CA par membre vs moyenne</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">

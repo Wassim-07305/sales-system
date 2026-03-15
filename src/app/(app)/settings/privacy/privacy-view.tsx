@@ -184,17 +184,19 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
       {/* ------------------------------------------------------------------ */}
       {/* Consent Management */}
       {/* ------------------------------------------------------------------ */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <Shield className="h-4 w-4 text-brand" />
+            </div>
             Gestion des consentements
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          {consentItems.map((item, i) => (
+          {consentItems.map((item) => (
             <div key={item.key}>
-              <div className="flex items-center justify-between py-3">
+              <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
                 <div>
                   <p className="text-sm font-medium">{item.label}</p>
                   <p className="text-xs text-muted-foreground">{item.description}</p>
@@ -205,7 +207,6 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
                   disabled={saving}
                 />
               </div>
-              {i < consentItems.length - 1 && <Separator />}
             </div>
           ))}
           {consents.updated_at && (
@@ -220,10 +221,12 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
       {/* ------------------------------------------------------------------ */}
       {/* Data Portability */}
       {/* ------------------------------------------------------------------ */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Download className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+              <Download className="h-4 w-4 text-blue-500" />
+            </div>
             Portabilite des donnees
           </CardTitle>
         </CardHeader>
@@ -249,10 +252,12 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
       {/* ------------------------------------------------------------------ */}
       {/* Privacy Policy Summary */}
       {/* ------------------------------------------------------------------ */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+              <FileText className="h-4 w-4 text-purple-500" />
+            </div>
             Politique de confidentialite
           </CardTitle>
         </CardHeader>
@@ -301,10 +306,12 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
       {/* ------------------------------------------------------------------ */}
       {/* Data Processing Log */}
       {/* ------------------------------------------------------------------ */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Clock className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+              <Clock className="h-4 w-4 text-amber-500" />
+            </div>
             Journal des traitements
           </CardTitle>
         </CardHeader>
@@ -349,10 +356,12 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
       {/* ------------------------------------------------------------------ */}
       {/* Danger Zone - Account Deletion */}
       {/* ------------------------------------------------------------------ */}
-      <Card className="border-red-500/30">
+      <Card className="border-red-500/30 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2 text-red-500">
-            <Trash2 className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-red-500/10 flex items-center justify-center ring-1 ring-red-500/20">
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </div>
             Zone de danger
           </CardTitle>
         </CardHeader>

@@ -81,7 +81,7 @@ export function NewBookingDialog() {
           Nouveau RDV
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-2xl">
         <DialogHeader>
           <DialogTitle>Programmer un rendez-vous</DialogTitle>
         </DialogHeader>
@@ -94,6 +94,7 @@ export function NewBookingDialog() {
               onChange={(e) => setProspectName(e.target.value)}
               placeholder="Jean Dupont"
               required
+              className="h-11 rounded-xl"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -105,6 +106,7 @@ export function NewBookingDialog() {
                 value={prospectEmail}
                 onChange={(e) => setProspectEmail(e.target.value)}
                 placeholder="jean@example.com"
+                className="h-11 rounded-xl"
               />
             </div>
             <div className="space-y-2">
@@ -114,6 +116,7 @@ export function NewBookingDialog() {
                 value={prospectPhone}
                 onChange={(e) => setProspectPhone(e.target.value)}
                 placeholder="06 12 34 56 78"
+                className="h-11 rounded-xl"
               />
             </div>
           </div>
@@ -126,12 +129,13 @@ export function NewBookingDialog() {
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
                 required
+                className="h-11 rounded-xl"
               />
             </div>
             <div className="space-y-2">
               <Label>Durée</Label>
               <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +151,7 @@ export function NewBookingDialog() {
           <div className="space-y-2">
             <Label>Type de RDV</Label>
             <Select value={slotType} onValueChange={setSlotType}>
-              <SelectTrigger>
+              <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -171,7 +175,7 @@ export function NewBookingDialog() {
           </div>
           <Button
             type="submit"
-            className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+            className="w-full bg-brand text-brand-dark hover:bg-brand/90 h-11 rounded-xl"
             disabled={isPending}
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

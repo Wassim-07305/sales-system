@@ -263,83 +263,93 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Phone className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">
-                Appels bookes
-              </span>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Phone className="h-4 w-4 text-brand" />
+              </div>
             </div>
-            <p className="text-xl font-bold">{data.stats.bookings}</p>
+            <p className="text-2xl font-bold tracking-tight">{data.stats.bookings}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Appels bookes
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <CalendarCheck className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">
-                Taux show-up
-              </span>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <CalendarCheck className="h-4 w-4 text-blue-500" />
+              </div>
             </div>
-            <p className="text-xl font-bold">{data.stats.showUpRate}%</p>
+            <p className="text-2xl font-bold tracking-tight">{data.stats.showUpRate}%</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Taux show-up
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">
-                Taux closing
-              </span>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+                <Target className="h-4 w-4 text-purple-500" />
+              </div>
             </div>
-            <p className="text-xl font-bold">{data.stats.closingRate}%</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-2xl font-bold tracking-tight">{data.stats.closingRate}%</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Taux closing
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">
               {data.stats.dealsClosed}/{data.stats.dealsTotal} deals
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              {data.stats.revenueTrend >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-brand" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-400" />
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                {data.stats.revenueTrend >= 0 ? (
+                  <TrendingUp className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-red-400" />
+                )}
+              </div>
+              {data.stats.revenueTrend !== 0 && (
+                <span
+                  className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-md ${
+                    data.stats.revenueTrend >= 0
+                      ? "text-emerald-600 bg-emerald-500/10"
+                      : "text-red-500 bg-red-500/10"
+                  }`}
+                >
+                  {data.stats.revenueTrend >= 0 ? "+" : ""}
+                  {data.stats.revenueTrend}%
+                </span>
               )}
-              <span className="text-xs text-muted-foreground">CA genere</span>
             </div>
-            <p className="text-xl font-bold">
+            <p className="text-2xl font-bold tracking-tight">
               {formatCurrency(data.stats.revenue)}
             </p>
-            {data.stats.revenueTrend !== 0 && (
-              <p
-                className={`text-xs ${
-                  data.stats.revenueTrend >= 0
-                    ? "text-emerald-500"
-                    : "text-red-400"
-                }`}
-              >
-                {data.stats.revenueTrend >= 0 ? "+" : ""}
-                {data.stats.revenueTrend}% vs mois dernier
-              </p>
-            )}
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">CA genere</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageCircle className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">
-                Conversations
-              </span>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <MessageCircle className="h-4 w-4 text-amber-500" />
+              </div>
             </div>
-            <p className="text-xl font-bold">
+            <p className="text-2xl font-bold tracking-tight">
               {data.stats.activeConversations}
+            </p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Conversations
             </p>
           </CardContent>
         </Card>
@@ -348,10 +358,12 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
       {/* Performance Chart + Objectives Row */}
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Weekly Performance Chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-brand" />
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <BarChart3 className="h-3.5 w-3.5 text-brand" />
+              </div>
               Performance 7 jours
             </CardTitle>
           </CardHeader>
@@ -406,11 +418,13 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
         </Card>
 
         {/* Active Objectives */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="h-5 w-5 text-brand" />
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Target className="h-3.5 w-3.5 text-brand" />
+                </div>
                 Mes objectifs
               </CardTitle>
               <Link href="/team/coaching">
@@ -470,36 +484,45 @@ export function SetterDashboard({ data }: { data: SetterDashboardData }) {
       </div>
 
       {/* Upcoming calls */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Prochains appels</CardTitle>
+      <Card className="border-border/50 hover:shadow-md transition-all">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <Phone className="h-3.5 w-3.5 text-brand" />
+            </div>
+            Prochains appels
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {data.upcomingCalls.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Aucun appel prevu pour le moment.
-            </p>
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                <Phone className="h-6 w-6 text-muted-foreground/40" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">Aucun appel prevu</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Les prochains appels apparaitront ici</p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-1">
               {data.upcomingCalls.map((call) => (
                 <div
                   key={call.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                  className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                    <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-xs font-bold ring-1 ring-brand/20">
                       {call.name?.charAt(0) || "?"}
                     </div>
                     <div>
                       <p className="text-sm font-medium">
                         {call.name || "Inconnu"}
                       </p>
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5">
                         {call.type}
                       </Badge>
                     </div>
                   </div>
-                  <span className="text-sm font-medium">
+                  <span className="text-xs font-medium text-muted-foreground">
                     {format(new Date(call.time), "EEE dd MMM HH:mm", {
                       locale: fr,
                     })}

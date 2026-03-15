@@ -204,30 +204,30 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 Modifier
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg rounded-2xl">
               <DialogHeader>
                 <DialogTitle>Modifier le booking</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4 max-h-[70vh] overflow-y-auto">
                 <div>
                   <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nom du prospect</label>
-                  <Input value={editForm.prospect_name} onChange={(e) => setEditForm({ ...editForm, prospect_name: e.target.value })} className="mt-1.5 h-9" />
+                  <Input value={editForm.prospect_name} onChange={(e) => setEditForm({ ...editForm, prospect_name: e.target.value })} className="mt-1.5 h-11 rounded-xl" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email</label>
-                    <Input type="email" value={editForm.prospect_email} onChange={(e) => setEditForm({ ...editForm, prospect_email: e.target.value })} className="mt-1.5 h-9" />
+                    <Input type="email" value={editForm.prospect_email} onChange={(e) => setEditForm({ ...editForm, prospect_email: e.target.value })} className="mt-1.5 h-11 rounded-xl" />
                   </div>
                   <div>
                     <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Téléphone</label>
-                    <Input value={editForm.prospect_phone} onChange={(e) => setEditForm({ ...editForm, prospect_phone: e.target.value })} className="mt-1.5 h-9" />
+                    <Input value={editForm.prospect_phone} onChange={(e) => setEditForm({ ...editForm, prospect_phone: e.target.value })} className="mt-1.5 h-11 rounded-xl" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Type de RDV</label>
                     <Select value={editForm.slot_type} onValueChange={(v) => setEditForm({ ...editForm, slot_type: v })}>
-                      <SelectTrigger className="mt-1.5 h-9"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="discovery">Appel découverte</SelectItem>
                         <SelectItem value="demo">Démo produit</SelectItem>
@@ -239,13 +239,13 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                   </div>
                   <div>
                     <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Durée (min)</label>
-                    <Input type="number" value={editForm.duration_minutes} onChange={(e) => setEditForm({ ...editForm, duration_minutes: Number(e.target.value) })} className="mt-1.5 h-9" />
+                    <Input type="number" value={editForm.duration_minutes} onChange={(e) => setEditForm({ ...editForm, duration_minutes: Number(e.target.value) })} className="mt-1.5 h-11 rounded-xl" />
                   </div>
                 </div>
                 <div>
                   <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Assigné à</label>
                   <Select value={editForm.assigned_to} onValueChange={(v) => setEditForm({ ...editForm, assigned_to: v })}>
-                    <SelectTrigger className="mt-1.5 h-9"><SelectValue placeholder="Sélectionner un membre" /></SelectTrigger>
+                    <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue placeholder="Sélectionner un membre" /></SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((m) => (
                         <SelectItem key={m.id} value={m.id}>{m.full_name || "Sans nom"}</SelectItem>
@@ -255,7 +255,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 </div>
                 <div>
                   <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Lien de réunion</label>
-                  <Input value={editForm.meeting_link} onChange={(e) => setEditForm({ ...editForm, meeting_link: e.target.value })} placeholder="https://meet.google.com/..." className="mt-1.5 h-9" />
+                  <Input value={editForm.meeting_link} onChange={(e) => setEditForm({ ...editForm, meeting_link: e.target.value })} placeholder="https://meet.google.com/..." className="mt-1.5 h-11 rounded-xl" />
                 </div>
                 <div>
                   <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Notes</label>
@@ -276,16 +276,16 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 Reporter
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="rounded-2xl">
               <DialogHeader><DialogTitle>Reporter le booking</DialogTitle></DialogHeader>
               <div className="space-y-4 pt-4">
                 <div>
                   <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nouvelle date</label>
-                  <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-1.5 h-9" />
+                  <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-1.5 h-11 rounded-xl" />
                 </div>
                 <div>
                   <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nouvelle heure</label>
-                  <Input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="mt-1.5 h-9" />
+                  <Input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="mt-1.5 h-11 rounded-xl" />
                 </div>
                 <Button onClick={handleReschedule} className="w-full bg-brand text-brand-dark hover:bg-brand/90" disabled={saving}>
                   {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -323,7 +323,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
         {/* Main content */}
         <div className="lg:col-span-2 space-y-4">
           {/* Status and date card */}
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden rounded-xl border-border/50 shadow-sm">
             <CardContent className="p-0">
               {/* Status banner */}
               <div className={cn("px-6 py-4 border-b flex items-center justify-between", statusInfo.bg)}>
@@ -348,7 +348,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
               {/* Date/time grid */}
               <div className="px-6 py-5 grid grid-cols-3 gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
                     <Calendar className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
@@ -357,7 +357,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
                     <Clock className="h-4 w-4 text-purple-600" />
                   </div>
                   <div>
@@ -366,7 +366,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
                     <Timer className="h-4 w-4 text-amber-600" />
                   </div>
                   <div>

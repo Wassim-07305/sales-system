@@ -49,7 +49,7 @@ export function MembersView({ members, reputations = {}, leaderboard = [] }: { m
         <div className="flex-1 min-w-0">
           <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map((member) => (
-              <Card key={member.id} className="hover:shadow-md transition-shadow">
+              <Card key={member.id} className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">

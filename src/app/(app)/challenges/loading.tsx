@@ -13,7 +13,7 @@ export default function ChallengesLoading() {
           <Skeleton className="h-10 w-28" />
         </div>
       </div>
-      <div className="rounded-lg border-0 bg-gradient-to-r from-muted to-muted/80 p-6">
+      <div className="rounded-2xl border-0 bg-gradient-to-r from-muted to-muted/80 p-6">
         <div className="flex items-center gap-6">
           <Skeleton className="h-16 w-16 rounded-full bg-zinc-700" />
           <div className="flex-1 space-y-3">
@@ -52,7 +52,7 @@ export default function ChallengesLoading() {
         <div className="lg:col-span-2 space-y-4">
           <Skeleton className="h-6 w-40" />
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-lg border p-5 space-y-3">
+            <div key={i} className="rounded-2xl border border-border/40 p-5 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <Skeleton className="h-5 w-40" />
@@ -68,7 +68,7 @@ export default function ChallengesLoading() {
             </div>
           ))}
         </div>
-        <div className="rounded-lg border p-4 space-y-4">
+        <div className="rounded-2xl border border-border/40 p-4 space-y-4">
           <Skeleton className="h-5 w-24" />
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 p-3">

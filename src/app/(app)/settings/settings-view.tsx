@@ -69,10 +69,12 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
       />
 
       {/* General */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <Settings className="h-4 w-4 text-brand" />
+            </div>
             Général
           </CardTitle>
         </CardHeader>
@@ -98,15 +100,17 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
       </Card>
 
       {/* Notifications */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+              <Bell className="h-4 w-4 text-blue-500" />
+            </div>
             Notifications
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="space-y-1">
+          <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Notifications email</p>
               <p className="text-xs text-muted-foreground">
@@ -118,8 +122,7 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
               onCheckedChange={setEmailNotifications}
             />
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Rappels de booking</p>
               <p className="text-xs text-muted-foreground">
@@ -131,8 +134,7 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
               onCheckedChange={setBookingReminders}
             />
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Alertes customer success</p>
               <p className="text-xs text-muted-foreground">
@@ -164,10 +166,12 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
       </div>
 
       {/* Security */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+              <Shield className="h-4 w-4 text-amber-500" />
+            </div>
             Sécurité
           </CardTitle>
         </CardHeader>
@@ -195,10 +199,12 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
       </Card>
 
       {/* RGPD / Privacy */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+              <Shield className="h-4 w-4 text-purple-500" />
+            </div>
             Confidentialité & RGPD
           </CardTitle>
         </CardHeader>

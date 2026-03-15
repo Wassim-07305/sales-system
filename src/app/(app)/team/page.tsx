@@ -110,21 +110,23 @@ export default async function TeamPage() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.name}>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon className="h-4 w-4 text-brand" />
-                  <span className="text-xs text-muted-foreground">
+            <Card key={stat.name} className="border-border/50 hover:shadow-md transition-all duration-200">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                     {stat.name}
                   </span>
+                  <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                    <Icon className="h-4 w-4 text-brand" />
+                  </div>
                 </div>
-                <p className="text-xl font-bold">{stat.value}</p>
-                <div className="mt-1">
+                <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                <div className="mt-1.5 flex items-center">
                   <TrendBadge
                     delta={stat.name === "CA généré total" ? Math.round(stat.trend) : stat.trend}
                     suffix={stat.suffix}
                   />
-                  <span className="text-[10px] text-muted-foreground ml-1">
+                  <span className="text-[10px] text-muted-foreground ml-1.5">
                     vs mois dernier
                   </span>
                 </div>
@@ -135,93 +137,93 @@ export default async function TeamPage() {
       </div>
 
       {/* Per-member KPI table */}
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden border-border/50">
+        <CardHeader className="border-b border-border/30 bg-muted/20">
           <CardTitle className="text-lg">
             KPIs individuels de l&apos;équipe
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {kpis.members.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
+            <p className="text-center text-muted-foreground py-8">
               Aucun membre dans l&apos;équipe
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="text-left py-3 pr-4 font-medium">Membre</th>
-                    <th className="text-left py-3 px-4 font-medium">Rôle</th>
-                    <th className="text-right py-3 px-4 font-medium">
+                  <tr className="border-b border-border/50 bg-muted/10">
+                    <th className="text-left py-3.5 pl-6 pr-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Membre</th>
+                    <th className="text-left py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Rôle</th>
+                    <th className="text-right py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Bookings
                     </th>
-                    <th className="text-right py-3 px-4 font-medium">
+                    <th className="text-right py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Show-up
                     </th>
-                    <th className="text-right py-3 px-4 font-medium">
+                    <th className="text-right py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Closing
                     </th>
-                    <th className="text-right py-3 px-4 font-medium">
+                    <th className="text-right py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Deals
                     </th>
-                    <th className="text-right py-3 pl-4 font-medium">CA</th>
+                    <th className="text-right py-3.5 pr-6 pl-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">CA</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border/30">
                   {kpis.members.map((member) => (
                     <tr
                       key={member.id}
-                      className="border-b last:border-0 hover:bg-muted/50 transition-colors"
+                      className="hover:bg-muted/30 transition-colors duration-150"
                     >
-                      <td className="py-3 pr-4">
-                        <Link href={`/contacts/${member.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                          <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-xs">
+                      <td className="py-3.5 pl-6 pr-4">
+                        <Link href={`/contacts/${member.id}`} className="flex items-center gap-3 group">
+                          <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-xs ring-1 ring-brand/20 group-hover:ring-brand/40 transition-all">
                             {member.fullName?.charAt(0) || "?"}
                           </div>
-                          <span className="font-medium hover:text-brand hover:underline">
+                          <span className="font-medium group-hover:text-brand transition-colors">
                             {member.fullName || "—"}
                           </span>
                         </Link>
                       </td>
-                      <td className="py-3 px-4">
-                        <Badge variant="outline" className="capitalize">
+                      <td className="py-3.5 px-4">
+                        <Badge variant="outline" className="capitalize text-[11px] font-medium">
                           {member.role}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-medium">
                         {member.bookings}
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">
+                      <td className="py-3.5 px-4 text-right tabular-nums">
                         <span
-                          className={
+                          className={`font-medium ${
                             member.showUpRate >= 70
                               ? "text-emerald-500"
                               : member.showUpRate >= 50
                                 ? "text-amber-500"
                                 : "text-red-500"
-                          }
+                          }`}
                         >
                           {member.showUpRate}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">
+                      <td className="py-3.5 px-4 text-right tabular-nums">
                         <span
-                          className={
+                          className={`font-medium ${
                             member.closingRate >= 30
                               ? "text-emerald-500"
                               : member.closingRate >= 15
                                 ? "text-amber-500"
                                 : "text-red-500"
-                          }
+                          }`}
                         >
                           {member.closingRate}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right tabular-nums">
+                      <td className="py-3.5 px-4 text-right tabular-nums font-medium">
                         {member.dealsClosed}/{member.dealsTotal}
                       </td>
-                      <td className="py-3 pl-4 text-right tabular-nums font-medium">
+                      <td className="py-3.5 pr-6 pl-4 text-right tabular-nums font-semibold">
                         {formatCurrency(member.revenue)}
                       </td>
                     </tr>

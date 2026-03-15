@@ -373,7 +373,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-lg p-12 text-center cursor-pointer hover:border-[#7af17a]/50 hover:bg-[#7af17a]/5 transition-colors"
+              className="border-2 border-dashed border-border rounded-2xl p-12 text-center cursor-pointer hover:border-[#7af17a]/50 hover:bg-[#7af17a]/5 transition-colors duration-200"
             >
               <FileSpreadsheet className="size-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-base font-medium mb-1">
@@ -408,7 +408,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                   </div>
                 </div>
 
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border border-border/50 rounded-xl overflow-hidden">
                   <p className="text-sm font-medium px-4 py-2 bg-muted/50">
                     Aperçu (5 premières lignes)
                   </p>
@@ -466,7 +466,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
               {csvHeaders.map((header) => (
                 <div
                   key={header}
-                  className="flex items-center gap-4 p-3 rounded-lg border bg-card"
+                  className="flex items-center gap-4 p-3 rounded-xl border border-border/50 bg-card"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{header}</p>
@@ -482,7 +482,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                         updateMapping(header, val === "none" ? "" : val)
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full h-11 rounded-xl">
                         <SelectValue placeholder="Ignorer" />
                       </SelectTrigger>
                       <SelectContent>
@@ -528,7 +528,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
           <CardContent className="space-y-4">
             {/* Summary */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg border bg-[#7af17a]/5 border-[#7af17a]/20">
+              <div className="p-4 rounded-xl border bg-[#7af17a]/5 border-[#7af17a]/20">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 className="size-4 text-[#7af17a]" />
                   <span className="text-sm font-medium">Valides</span>
@@ -552,7 +552,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                   {validationErrors.length}
                 </p>
               </div>
-              <div className="p-4 rounded-lg border bg-muted/50">
+              <div className="p-4 rounded-xl border bg-muted/50">
                 <div className="flex items-center gap-2 mb-1">
                   <FileSpreadsheet className="size-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Total lignes</span>
@@ -685,7 +685,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
             {!importResult ? (
               <>
                 {/* Summary before import */}
-                <div className="p-4 rounded-lg border bg-muted/50 space-y-2">
+                <div className="p-4 rounded-xl border bg-muted/50 space-y-2">
                   <p className="text-sm">
                     <span className="font-medium">{validRows.length}</span> lignes
                     valides prêtes à être importées en tant que{" "}
@@ -768,7 +768,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-lg border bg-[#7af17a]/5 border-[#7af17a]/20 text-center">
+                  <div className="p-4 rounded-xl border bg-[#7af17a]/5 border-[#7af17a]/20 text-center">
                     <p className="text-sm text-muted-foreground mb-1">
                       Importés
                     </p>
@@ -776,7 +776,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                       {importResult.imported}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg border bg-amber-500/5 border-amber-500/20 text-center">
+                  <div className="p-4 rounded-xl border bg-amber-500/5 border-amber-500/20 text-center">
                     <p className="text-sm text-muted-foreground mb-1">
                       Ignorés (doublons)
                     </p>
@@ -784,7 +784,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                       {importResult.skipped}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg border bg-red-500/5 border-red-500/20 text-center">
+                  <div className="p-4 rounded-xl border bg-red-500/5 border-red-500/20 text-center">
                     <p className="text-sm text-muted-foreground mb-1">
                       Erreurs
                     </p>

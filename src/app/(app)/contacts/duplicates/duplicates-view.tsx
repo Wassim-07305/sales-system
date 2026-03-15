@@ -134,10 +134,10 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="bg-muted border-border">
+        <Card className="bg-muted border-border rounded-xl shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-[#7af17a]/10">
+              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#7af17a]/10">
                 <Users className="h-5 w-5 text-[#7af17a]" />
               </div>
               <div>
@@ -151,10 +151,10 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-muted border-border">
+        <Card className="bg-muted border-border rounded-xl shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-[#7af17a]/10">
+              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#7af17a]/10">
                 <Merge className="h-5 w-5 text-[#7af17a]" />
               </div>
               <div>
@@ -196,7 +196,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
           return (
             <Card
               key={group.id}
-              className="bg-card border overflow-hidden"
+              className="bg-card border rounded-xl overflow-hidden shadow-sm"
             >
               {/* Group header */}
               <button

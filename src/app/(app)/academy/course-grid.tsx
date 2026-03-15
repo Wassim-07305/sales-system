@@ -214,9 +214,9 @@ function CourseCard({
 
   return (
     <Link href={`/academy/${course.id}`} className="group">
-      <Card className="h-full gap-0 overflow-hidden rounded-xl border p-0 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
+      <Card className="h-full gap-0 overflow-hidden rounded-2xl border border-border/50 p-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/5">
         {/* ---- Thumbnail ---- */}
-        <div className="relative aspect-video overflow-hidden rounded-t-xl">
+        <div className="relative aspect-video overflow-hidden rounded-t-2xl">
           {course.thumbnail_url ? (
             <Image
               src={course.thumbnail_url}
@@ -226,8 +226,8 @@ function CourseCard({
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/80">
-              <BookOpen className="size-12 text-brand/30" />
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted/80 to-muted/40">
+              <BookOpen className="size-14 text-brand/20" />
             </div>
           )}
 
@@ -277,11 +277,11 @@ function CourseCard({
             </div>
 
             {/* Progress bar */}
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted/60">
               <div
                 className={cn(
-                  "h-full rounded-full transition-all duration-500",
-                  isComplete ? "bg-brand" : "bg-brand"
+                  "h-full rounded-full transition-all duration-700 ease-out",
+                  isComplete ? "bg-brand shadow-[0_0_8px_rgba(122,241,122,0.3)]" : "bg-brand/80"
                 )}
                 style={{ width: `${stats.percent}%` }}
               />
@@ -299,9 +299,12 @@ function CourseCard({
 
 function EmptyState() {
   return (
-    <div className="col-span-full flex flex-col items-center justify-center py-16 text-muted-foreground">
-      <GraduationCap className="mb-4 size-12 opacity-30" />
-      <p>Aucune formation disponible</p>
+    <div className="col-span-full flex flex-col items-center justify-center py-20 text-muted-foreground">
+      <div className="h-16 w-16 rounded-2xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center mb-4">
+        <GraduationCap className="size-8 text-muted-foreground/40" />
+      </div>
+      <p className="font-medium text-sm">Aucune formation disponible</p>
+      <p className="text-xs text-muted-foreground/60 mt-1">Revenez bientôt pour découvrir de nouvelles formations</p>
     </div>
   );
 }

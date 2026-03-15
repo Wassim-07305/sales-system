@@ -211,7 +211,7 @@ export function SubscriptionView({ currentTier }: Props) {
                 </div>
               )}
               <CardHeader className="text-center pb-4">
-                <div className="h-12 w-12 rounded-lg bg-brand/10 flex items-center justify-center mx-auto mb-3">
+                <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center mx-auto mb-3 ring-1 ring-brand/20">
                   <Icon className="h-6 w-6 text-brand" />
                 </div>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
@@ -263,33 +263,33 @@ export function SubscriptionView({ currentTier }: Props) {
       </div>
 
       {/* Feature comparison table */}
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden border-border/50">
+        <CardHeader className="border-b border-border/30 bg-muted/20">
           <CardTitle className="text-lg">Comparaison des plans</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 pr-4 font-medium">
+                <tr className="border-b border-border/50 bg-muted/10">
+                  <th className="text-left py-3.5 pl-6 pr-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Fonctionnalité
                   </th>
-                  <th className="text-center py-3 px-4 font-medium">Free</th>
-                  <th className="text-center py-3 px-4 font-medium">Pro</th>
-                  <th className="text-center py-3 px-4 font-medium">
+                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Free</th>
+                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Pro</th>
+                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Enterprise
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border/30">
                 {COMPARISON_FEATURES.map((feature) => (
-                  <tr key={feature.name} className="border-b last:border-0">
-                    <td className="py-3 pr-4">{feature.name}</td>
+                  <tr key={feature.name} className="hover:bg-muted/30 transition-colors">
+                    <td className="py-3.5 pl-6 pr-4">{feature.name}</td>
                     {["free", "pro", "enterprise"].map((tier) => {
                       const val = feature[tier as keyof typeof feature];
                       return (
-                        <td key={tier} className="text-center py-3 px-4">
+                        <td key={tier} className="text-center py-3.5 px-4">
                           {val === true ? (
                             <Check className="h-4 w-4 text-brand mx-auto" />
                           ) : val === false ? (

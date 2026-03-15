@@ -114,28 +114,48 @@ export function AttributionView({ data }: { data: DealAttribution[] }) {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <p className="text-2xl font-bold">{totalDeals}</p>
-            <p className="text-sm text-muted-foreground mt-1">Deals analysés</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <MousePointerClick className="h-4 w-4 text-brand" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{totalDeals}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Deals analysés</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <p className="text-2xl font-bold">{avgTouchpoints}</p>
-            <p className="text-sm text-muted-foreground mt-1">Points de contact moyens</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Share2 className="h-4 w-4 text-blue-500" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{avgTouchpoints}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Points de contact moyens</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <p className="text-2xl font-bold">{mostCommonFirst}</p>
-            <p className="text-sm text-muted-foreground mt-1">Premier contact fréquent</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Globe className="h-4 w-4 text-emerald-500" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{mostCommonFirst}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Premier contact fréquent</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
-            <p className="text-2xl font-bold">{mostCommonLast}</p>
-            <p className="text-sm text-muted-foreground mt-1">Dernier contact fréquent</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+                <DollarSign className="h-4 w-4 text-purple-500" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold tracking-tight">{mostCommonLast}</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Dernier contact fréquent</p>
           </CardContent>
         </Card>
       </div>
@@ -156,11 +176,11 @@ export function AttributionView({ data }: { data: DealAttribution[] }) {
       ) : (
         <div className="space-y-4">
           {data.map((deal) => (
-            <Card key={deal.dealId}>
+            <Card key={deal.dealId} className="border-border/50 hover:shadow-md transition-all">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-base">{deal.dealTitle}</CardTitle>
+                    <CardTitle className="text-base font-semibold">{deal.dealTitle}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-0.5">{deal.prospectName}</p>
                   </div>
                   <div className="flex items-center gap-2 bg-brand/10 text-brand px-3 py-1.5 rounded-lg">

@@ -119,9 +119,9 @@ export function PaymentsView({ installments, overdue }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card>
+        <Card className="rounded-xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
               <DollarSign className="h-5 w-5 text-blue-600" />
             </div>
             <div>
@@ -132,9 +132,9 @@ export function PaymentsView({ installments, overdue }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
@@ -145,9 +145,9 @@ export function PaymentsView({ installments, overdue }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-red-500/10 ring-1 ring-red-500/20 flex items-center justify-center">
               <AlertTriangle className="h-5 w-5 text-red-500" />
             </div>
             <div>
@@ -215,7 +215,7 @@ export function PaymentsView({ installments, overdue }: Props) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">Tous les paiements</h3>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-44 h-9 text-xs">
+          <SelectTrigger className="w-44 h-11 rounded-xl text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -228,7 +228,7 @@ export function PaymentsView({ installments, overdue }: Props) {
         </Select>
       </div>
 
-      <Card>
+      <Card className="rounded-xl border-border/50 shadow-sm overflow-hidden">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[700px]">
             <TableHeader>
@@ -243,7 +243,7 @@ export function PaymentsView({ installments, overdue }: Props) {
             </TableHeader>
             <TableBody>
               {filtered.map((installment) => (
-                <TableRow key={installment.id}>
+                <TableRow key={installment.id} className="hover:bg-secondary/50 transition-colors">
                   <TableCell className="font-medium">
                     Contrat #{installment.contract_id.slice(0, 8)}
                   </TableCell>

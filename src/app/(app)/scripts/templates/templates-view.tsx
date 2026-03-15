@@ -186,7 +186,7 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
         {filtered.map((template) => (
           <Card
             key={template.id}
-            className="hover:shadow-md transition-shadow flex flex-col"
+            className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 flex flex-col"
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-base line-clamp-2">

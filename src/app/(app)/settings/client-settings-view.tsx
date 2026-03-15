@@ -69,7 +69,7 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
       <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl ring-1 ring-blue-500/20 bg-blue-500/10">
               <Bell className="h-4 w-4 text-blue-500" />
             </div>
             Notifications
@@ -77,15 +77,14 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
           <CardDescription>Gérez comment vous souhaitez être notifié</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Notifications push</p>
               <p className="text-xs text-muted-foreground">Recevoir des alertes dans le navigateur</p>
             </div>
             <Switch checked={pushEnabled} onCheckedChange={setPushEnabled} />
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Notifications email</p>
               <p className="text-xs text-muted-foreground">Recevoir des résumés par email</p>
@@ -112,7 +111,7 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
       <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-amber-500/20 bg-amber-500/10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl ring-1 ring-amber-500/20 bg-amber-500/10">
               <Lock className="h-4 w-4 text-amber-500" />
             </div>
             Sécurité du compte
@@ -161,7 +160,7 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
       <Card className="border-border/50 hover:shadow-md transition-all">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl ring-1 ring-emerald-500/20 bg-emerald-500/10">
               <CreditCard className="h-4 w-4 text-emerald-500" />
             </div>
             Mon abonnement

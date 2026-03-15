@@ -222,13 +222,13 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title={currentProspect.name}
         description={`Prospect ${currentProspect.platform || "inconnu"} - ajoute ${formatDistanceToNow(new Date(currentProspect.created_at), { addSuffix: true, locale: fr })}`}
       >
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" className="rounded-xl font-medium" asChild>
             <Link href="/prospecting">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Retour
@@ -237,7 +237,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
           <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90">
+              <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium">
                 <ArrowRightCircle className="h-4 w-4 mr-1" />
                 Convertir en deal
               </Button>
@@ -423,7 +423,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
         <div className="lg:col-span-2 space-y-6">
           {/* Status and score */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
                   <Target className="h-3 w-3" />
@@ -432,7 +432,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
                   <Thermometer className="h-3 w-3" />
@@ -447,7 +447,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
                   <Target className="h-3 w-3" />
@@ -456,7 +456,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 <p className="text-xl font-bold">{score?.total_score ?? 0}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
                   <MessageSquare className="h-3 w-3" />
@@ -468,7 +468,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
           </div>
 
           {/* Status change */}
-          <Card>
+          <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Changer le statut</CardTitle>
             </CardHeader>
@@ -480,11 +480,11 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                     variant={currentProspect.status === status ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleStatusChange(status)}
-                    className={
+                    className={`rounded-xl font-medium ${
                       currentProspect.status === status
                         ? "bg-brand text-brand-dark hover:bg-brand/90"
                         : ""
-                    }
+                    }`}
                   >
                     {config.label}
                   </Button>
@@ -494,7 +494,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
           </Card>
 
           {/* Conversation history */}
-          <Card>
+          <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Historique des conversations</CardTitle>
             </CardHeader>
@@ -548,7 +548,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Profile info */}
-          <Card>
+          <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Informations</CardTitle>
             </CardHeader>
@@ -594,7 +594,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
           {/* Assigned setter */}
           {currentProspect.assigned_setter && (
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Assigne a</CardTitle>
               </CardHeader>
@@ -611,7 +611,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
           {/* Score details */}
           {score && (
-            <Card>
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Details du score</CardTitle>
               </CardHeader>
@@ -638,7 +638,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
           )}
 
           {/* Notes */}
-          <Card>
+          <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Notes</CardTitle>
             </CardHeader>
@@ -654,7 +654,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 size="sm"
                 onClick={saveNotes}
                 disabled={savingNotes}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
               >
                 {savingNotes ? "Enregistrement..." : "Enregistrer"}
               </Button>
@@ -662,7 +662,7 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
           </Card>
 
           {/* Metadata */}
-          <Card>
+          <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Metadonnees</CardTitle>
             </CardHeader>

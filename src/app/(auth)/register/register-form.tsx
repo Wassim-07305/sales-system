@@ -56,11 +56,11 @@ export function RegisterForm() {
   if (success) {
     return (
       <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/10">
-          <CheckCircle2 className="h-8 w-8 text-brand" />
+        <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-2xl bg-brand/10 shadow-sm">
+          <CheckCircle2 className="h-9 w-9 text-brand" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-semibold">{"Compte cr\u00e9\u00e9 avec succ\u00e8s"}</h3>
+          <h3 className="text-xl font-bold text-brand-dark">{"Compte cr\u00e9\u00e9 avec succ\u00e8s"}</h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {"Un email de confirmation a \u00e9t\u00e9 envoy\u00e9 \u00e0"}{" "}
             <strong className="text-foreground">{email}</strong>.
@@ -70,7 +70,7 @@ export function RegisterForm() {
         <div className="pt-2">
           <Button
             variant="outline"
-            className="w-full h-11"
+            className="w-full h-12 rounded-xl border-border/60 hover:border-brand/50 hover:bg-brand/5 transition-all duration-200"
             onClick={() => router.push("/login")}
           >
             {"Retour \u00e0 la connexion"}
@@ -83,7 +83,7 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleRegister} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="fullName">Nom complet</Label>
+        <Label htmlFor="fullName" className="text-sm font-medium">Nom complet</Label>
         <Input
           id="fullName"
           type="text"
@@ -92,11 +92,11 @@ export function RegisterForm() {
           onChange={(e) => setFullName(e.target.value)}
           required
           autoComplete="name"
-          className="h-11"
+          className="h-11 rounded-xl bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
         <Input
           id="email"
           type="email"
@@ -105,11 +105,11 @@ export function RegisterForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="h-11"
+          className="h-11 rounded-xl bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Mot de passe</Label>
+        <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
         <div className="relative">
           <Input
             id="password"
@@ -120,12 +120,12 @@ export function RegisterForm() {
             required
             minLength={8}
             autoComplete="new-password"
-            className="h-11 pr-11"
+            className="h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors"
+            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
             aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
           >
@@ -139,12 +139,12 @@ export function RegisterForm() {
         {/* Password strength indicator */}
         {password.length > 0 && (
           <div className="space-y-1.5 animate-in fade-in duration-300">
-            <div className="flex gap-1">
+            <div className="flex gap-1.5">
               {[1, 2, 3, 4].map((level) => (
                 <div
                   key={level}
                   className={cn(
-                    "h-1 flex-1 rounded-full transition-colors duration-300",
+                    "h-1.5 flex-1 rounded-full transition-all duration-300",
                     level <= passwordStrength.level
                       ? passwordStrength.level <= 1
                         ? "bg-destructive"
@@ -153,25 +153,25 @@ export function RegisterForm() {
                           : passwordStrength.level <= 3
                             ? "bg-brand"
                             : "bg-brand"
-                      : "bg-border"
+                      : "bg-border/40"
                   )}
                 />
               ))}
             </div>
             <p className={cn(
-              "text-xs transition-colors",
+              "text-xs font-medium transition-colors",
               passwordStrength.level <= 1
                 ? "text-destructive"
                 : passwordStrength.level <= 2
                   ? "text-amber-500"
-                  : "text-muted-foreground"
+                  : "text-brand"
             )}>
               {passwordStrength.label}
             </p>
           </div>
         )}
         {password.length === 0 && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/70">
             {"Minimum 8 caract\u00e8res"}
           </p>
         )}
@@ -181,7 +181,7 @@ export function RegisterForm() {
         <Button
           type="submit"
           size="lg"
-          className="w-full h-11 bg-brand-dark hover:bg-brand-dark/90 text-white font-medium"
+          className="w-full h-12 rounded-xl bg-brand-dark hover:bg-brand-dark/90 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           disabled={loading}
         >
           {loading ? (
@@ -193,15 +193,15 @@ export function RegisterForm() {
         </Button>
       </div>
 
-      <div className="relative py-4">
+      <div className="relative py-5">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
+          <div className="w-full border-t border-border/50" />
         </div>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
         {"D\u00e9j\u00e0 un compte ?\u00a0"}
-        <Link href="/login" className="text-foreground font-medium hover:underline underline-offset-4 transition-colors">
+        <Link href="/login" className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline">
           Se connecter
         </Link>
       </p>

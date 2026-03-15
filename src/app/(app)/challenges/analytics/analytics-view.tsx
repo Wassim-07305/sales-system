@@ -110,7 +110,7 @@ export function GamificationAnalyticsView({ data }: Props) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
@@ -123,7 +123,7 @@ export function GamificationAnalyticsView({ data }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
@@ -136,7 +136,7 @@ export function GamificationAnalyticsView({ data }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
@@ -149,7 +149,7 @@ export function GamificationAnalyticsView({ data }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
@@ -169,7 +169,7 @@ export function GamificationAnalyticsView({ data }: Props) {
       {/* Level distribution + Mood trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Level distribution bar chart */}
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="h-4 w-4 text-blue-600" />
@@ -207,7 +207,7 @@ export function GamificationAnalyticsView({ data }: Props) {
         </Card>
 
         {/* Mood trend line chart */}
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-amber-600" />
@@ -263,7 +263,7 @@ export function GamificationAnalyticsView({ data }: Props) {
       </div>
 
       {/* Badge completion grid */}
-      <Card className="mb-6 border-border/50 hover:shadow-md transition-all">
+      <Card className="mb-6 rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Star className="h-4 w-4 text-emerald-600" />
@@ -275,7 +275,7 @@ export function GamificationAnalyticsView({ data }: Props) {
             {data.badgeCompletionRates.map((badge) => (
               <div
                 key={badge.id}
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50 hover:shadow-md transition-all"
+                className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
               >
                 <div
                   className="h-9 w-9 rounded-full flex items-center justify-center shrink-0"
@@ -326,7 +326,7 @@ export function GamificationAnalyticsView({ data }: Props) {
 
       {/* Challenge completion rates */}
       {data.challengeStats.length > 0 && (
-        <Card className="mb-6 border-border/50 hover:shadow-md transition-all">
+        <Card className="mb-6 rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Trophy className="h-4 w-4 text-blue-600" />
@@ -368,7 +368,7 @@ export function GamificationAnalyticsView({ data }: Props) {
       )}
 
       {/* Impact section */}
-      <Card className="border-border/50 hover:shadow-md transition-all">
+      <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-emerald-600" />

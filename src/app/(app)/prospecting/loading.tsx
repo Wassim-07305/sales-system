@@ -15,7 +15,7 @@ export default function ProspectingLoading() {
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="rounded-lg border p-4 space-y-2">
+          <div key={i} className="rounded-2xl border p-4 space-y-2 shadow-sm">
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-8 w-12" />
           </div>
@@ -27,7 +27,7 @@ export default function ProspectingLoading() {
         <Skeleton className="h-10 w-32" />
         <Skeleton className="h-10 w-32" />
       </div>
-      <div className="rounded-lg border">
+      <div className="rounded-2xl border shadow-sm overflow-hidden">
         <div className="p-4 border-b">
           <div className="flex gap-4">
             <Skeleton className="h-4 w-8" />

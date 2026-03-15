@@ -206,9 +206,14 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
       {/* Step 0: Choose CRM source */}
       {step === 0 && (
         <div className="space-y-6">
-          <Card>
+          <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="text-base">Source CRM</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Database className="h-4 w-4 text-brand" />
+                </div>
+                Source CRM
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -277,9 +282,14 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
 
       {/* Step 1: Upload CSV */}
       {step === 1 && (
-        <Card>
+        <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-base">Importer le fichier CSV</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <FileSpreadsheet className="h-4 w-4 text-blue-500" />
+              </div>
+              Importer le fichier CSV
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
@@ -308,9 +318,12 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
 
       {/* Step 2: Mapping */}
       {step === 2 && (
-        <Card>
+        <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-base">
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
+                <Settings2 className="h-4 w-4 text-purple-500" />
+              </div>
               Mapping des colonnes ({csvRows.length} lignes détectées)
             </CardTitle>
           </CardHeader>
@@ -400,10 +413,12 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
 
       {/* Step 3: Results */}
       {step === 3 && result && (
-        <Card>
+        <Card className="border-border/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <CheckCircle className="h-4 w-4 text-emerald-500" />
+              </div>
               Migration terminée
             </CardTitle>
           </CardHeader>
@@ -494,10 +509,12 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
 
       {/* Migration History */}
       {history.length > 0 && step !== 3 && (
-        <Card className="mt-8">
-          <CardHeader>
+        <Card className="mt-8 overflow-hidden border-border/50">
+          <CardHeader className="border-b border-border/30 bg-muted/20">
             <CardTitle className="flex items-center gap-2 text-base">
-              <History className="h-4 w-4" />
+              <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <History className="h-4 w-4 text-amber-500" />
+              </div>
               Historique des migrations
             </CardTitle>
           </CardHeader>
@@ -505,17 +522,17 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-medium">Fichier</th>
-                    <th className="text-center p-4 font-medium">Type</th>
-                    <th className="text-right p-4 font-medium">Importés</th>
-                    <th className="text-right p-4 font-medium">Erreurs</th>
-                    <th className="text-right p-4 font-medium">Date</th>
+                  <tr className="border-b border-border/30 bg-muted/10">
+                    <th className="text-left p-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Fichier</th>
+                    <th className="text-center p-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
+                    <th className="text-right p-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Importés</th>
+                    <th className="text-right p-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Erreurs</th>
+                    <th className="text-right p-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {history.map((log) => (
-                    <tr key={log.id} className="border-b last:border-0">
+                    <tr key={log.id} className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="p-4 font-medium truncate max-w-[200px]">
                         {log.file_name || "—"}
                       </td>

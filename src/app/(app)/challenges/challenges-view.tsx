@@ -93,10 +93,10 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
       </PageHeader>
 
       {/* Profile banner */}
-      <Card className="mb-6 bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
+      <Card className="mb-6 rounded-2xl bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0 shadow-xl shadow-brand-dark/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-6 flex-wrap">
-            <div className="h-16 w-16 rounded-full bg-brand/20 border-2 border-brand flex items-center justify-center">
+            <div className="h-16 w-16 rounded-2xl bg-brand/20 border-2 border-brand flex items-center justify-center">
               <Star className="h-8 w-8 text-brand" />
             </div>
             <div className="flex-1 min-w-[200px]">
@@ -166,14 +166,14 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
             const current = prog?.current_value || 0;
             const percent = challenge.target_value > 0 ? Math.round((current / challenge.target_value) * 100) : 0;
             return (
-              <Card key={challenge.id}>
+              <Card key={challenge.id} className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold mb-1">{challenge.title}</h3>
                       <p className="text-sm text-muted-foreground">{challenge.description}</p>
                     </div>
-                    <Badge className="bg-brand/10 text-brand shrink-0 ml-4">
+                    <Badge className="bg-brand/10 text-brand border-brand/20 shrink-0 ml-4">
                       <Zap className="h-3 w-3 mr-1" />
                       {challenge.points_reward} pts
                     </Badge>
@@ -187,17 +187,20 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                       </span>
                     )}
                   </div>
-                  <Progress value={percent} className="h-2.5" />
+                  <Progress value={percent} className="h-2.5 [&>div]:bg-brand" />
                 </CardContent>
               </Card>
             );
           })}
 
           {activeChallenges.length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>Aucun défi en cours. De nouveaux défis arrivent bientôt !</p>
+            <Card className="rounded-2xl border-border/40">
+              <CardContent className="p-12 text-center text-muted-foreground">
+                <div className="h-14 w-14 rounded-2xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center mx-auto mb-3">
+                  <Target className="h-7 w-7 text-muted-foreground/40" />
+                </div>
+                <p className="font-medium">Aucun défi en cours</p>
+                <p className="text-sm mt-1 text-muted-foreground/60">De nouveaux défis arrivent bientôt !</p>
               </CardContent>
             </Card>
           )}
@@ -209,7 +212,7 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                 Défis complétés ({completedChallenges.length})
               </h2>
               {completedChallenges.map((challenge) => (
-                <Card key={challenge.id} className="opacity-70">
+                <Card key={challenge.id} className="rounded-2xl border-border/30 opacity-70">
                   <CardContent className="p-4 flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-brand shrink-0" />
                     <div className="flex-1">
@@ -226,7 +229,7 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
         </div>
 
         {/* Leaderboard */}
-        <Card className="h-fit">
+        <Card className="h-fit rounded-2xl border-border/40">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Medal className="h-5 w-5 text-brand" />

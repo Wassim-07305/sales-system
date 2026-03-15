@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Code, Globe, Key, ChevronDown, ChevronRight, Copy, CheckCircle } from "lucide-react";
+import { Code, Globe, Key, ChevronDown, ChevronRight, Copy, CheckCircle, AlertTriangle } from "lucide-react";
 
 const BASE_URL = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -135,39 +135,50 @@ export function ApiDocsView() {
     <div className="space-y-6">
       {/* Overview */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-3">
-            <Globe className="h-8 w-8 text-blue-400" />
-            <div>
-              <p className="text-sm text-muted-foreground">Base URL</p>
-              <p className="font-mono text-sm">{BASE_URL}/api/v1</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Base URL</span>
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Globe className="h-4 w-4 text-blue-500" />
+              </div>
             </div>
+            <p className="font-mono text-sm tracking-tight">{BASE_URL}/api/v1</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-3">
-            <Key className="h-8 w-8 text-amber-400" />
-            <div>
-              <p className="text-sm text-muted-foreground">Authentification</p>
-              <p className="text-sm">Bearer Token (Supabase)</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Authentification</span>
+              <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <Key className="h-4 w-4 text-amber-500" />
+              </div>
             </div>
+            <p className="text-sm font-medium tracking-tight">Bearer Token (Supabase)</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6 flex items-center gap-3">
-            <Code className="h-8 w-8 text-[#7af17a]" />
-            <div>
-              <p className="text-sm text-muted-foreground">Rate Limit</p>
-              <p className="text-sm">100 requêtes / minute</p>
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Rate Limit</span>
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <Code className="h-4 w-4 text-brand" />
+              </div>
             </div>
+            <p className="text-sm font-medium tracking-tight">100 requêtes / minute</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Auth */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-lg">Authentification</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+              <Key className="h-4 w-4 text-amber-500" />
+            </div>
+            Authentification
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
@@ -183,16 +194,21 @@ export function ApiDocsView() {
       </Card>
 
       {/* Endpoints */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-lg">Endpoints ({ENDPOINTS.length})</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+              <Code className="h-4 w-4 text-blue-500" />
+            </div>
+            Endpoints ({ENDPOINTS.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
           {ENDPOINTS.map((ep, i) => {
             const key = `${ep.method}-${ep.path}`;
             const isOpen = expanded === key;
             return (
-              <div key={i} className="border rounded-lg overflow-hidden">
+              <div key={i} className="border border-border/50 rounded-xl overflow-hidden">
                 <button
                   onClick={() => toggle(key)}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
@@ -249,9 +265,14 @@ export function ApiDocsView() {
       </Card>
 
       {/* Error format */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-lg">Format des erreurs</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-red-500/10 flex items-center justify-center ring-1 ring-red-500/20">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </div>
+            Format des erreurs
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <pre className="bg-muted rounded-lg p-3 text-xs font-mono">

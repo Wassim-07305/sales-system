@@ -131,7 +131,7 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
       </div>
 
       {/* Header card */}
-      <Card className="mb-6 border-border/50">
+      <Card className="mb-6 border-border/50 rounded-xl shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
             <div className="h-16 w-16 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand text-2xl font-bold shrink-0">
@@ -327,7 +327,7 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
                   {deals.map((deal) => (
                     <div
                       key={deal.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border border-border/30 hover:bg-muted/60 transition-colors"
                     >
                       <div>
                         <p className="font-medium text-sm">{deal.title}</p>
@@ -361,7 +361,7 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
               <div className="space-y-4">
                 {activities.map((activity) => (
                   <div key={activity.id} className="flex gap-3">
-                    <div className="mt-0.5 h-7 w-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                    <div className="mt-0.5 h-7 w-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground shrink-0">
                       {activityIcons[activity.type] || (
                         <FileText className="h-3.5 w-3.5" />
                       )}

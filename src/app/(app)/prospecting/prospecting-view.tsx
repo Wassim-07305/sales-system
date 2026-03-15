@@ -274,12 +274,13 @@ export function ProspectingView({
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader title="Prospection" description="Tracker de prospection et quotas journaliers">
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
+            className="rounded-xl font-medium"
             onClick={handleRecalculateAll}
             disabled={isRecalculating}
           >
@@ -291,11 +292,11 @@ export function ProspectingView({
             Recalculer les scores
           </Button>
           <Link href="/prospecting/templates">
-            <Button variant="outline" size="sm">Templates DM</Button>
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">Templates DM</Button>
           </Link>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+              <Button className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">
                 <Plus className="h-4 w-4 mr-2" />
                 Ajouter un prospect
               </Button>
@@ -307,7 +308,7 @@ export function ProspectingView({
               <div className="space-y-4">
                 <div>
                   <Label>Nom</Label>
-                  <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Jean Dupont" />
+                  <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Jean Dupont" className="h-11 rounded-xl" />
                 </div>
                 <div>
                   <Label>Plateforme</Label>
@@ -321,9 +322,9 @@ export function ProspectingView({
                 </div>
                 <div>
                   <Label>URL du profil (optionnel)</Label>
-                  <Input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://..." />
+                  <Input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://..." className="h-11 rounded-xl" />
                 </div>
-                <Button onClick={handleAdd} className="w-full bg-brand text-brand-dark hover:bg-brand/90">Ajouter</Button>
+                <Button onClick={handleAdd} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Ajouter</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -331,16 +332,16 @@ export function ProspectingView({
       </PageHeader>
 
       {/* Segment summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
             filterTemperature === "all" && !hasActiveSegmentFilters && "ring-2 ring-brand/50"
           )}
           onClick={() => { setFilterTemperature("all"); setFiltersOpen(false); }}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Users className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -351,13 +352,13 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
             filterTemperature === "hot" && "ring-2 ring-brand/50"
           )}
           onClick={() => setFilterTemperature(filterTemperature === "hot" ? "all" : "hot")}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Flame className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -368,13 +369,13 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
             filterTemperature === "warm" && "ring-2 ring-brand/50"
           )}
           onClick={() => setFilterTemperature(filterTemperature === "warm" ? "all" : "warm")}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Thermometer className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -385,13 +386,13 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all hover:ring-2 hover:ring-brand/30",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
             filterTemperature === "cold" && "ring-2 ring-brand/50"
           )}
           onClick={() => setFilterTemperature(filterTemperature === "cold" ? "all" : "cold")}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Snowflake className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -400,9 +401,9 @@ export function ProspectingView({
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <TrendingUp className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -414,11 +415,11 @@ export function ProspectingView({
       </div>
 
       {/* Daily quota */}
-      <Card className="mb-6">
+      <Card className="shadow-sm rounded-2xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
                 <Send className="h-5 w-5 text-brand" />
               </div>
               <div>
@@ -428,7 +429,7 @@ export function ProspectingView({
             </div>
             <div className="flex items-center gap-3">
               <span className="text-2xl font-bold">{dmsTarget > 0 ? Math.round((dmsSent / dmsTarget) * 100) : 0}%</span>
-              <Button size="sm" variant="outline" onClick={handleDmIncrement}>+1 DM</Button>
+              <Button size="sm" variant="outline" className="rounded-xl font-medium" onClick={handleDmIncrement}>+1 DM</Button>
             </div>
           </div>
           <Progress value={dmsTarget > 0 ? (dmsSent / dmsTarget) * 100 : 0} className="h-3" />
@@ -436,22 +437,22 @@ export function ProspectingView({
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <Card>
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <Send className="h-5 w-5 text-brand mx-auto mb-2" />
             <p className="text-2xl font-bold">{dmsSent}</p>
             <p className="text-xs text-muted-foreground">DMs envoyés</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <MessageCircle className="h-5 w-5 text-brand mx-auto mb-2" />
             <p className="text-2xl font-bold">{replies}</p>
             <p className="text-xs text-muted-foreground">Réponses reçues</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
             <Target className="h-5 w-5 text-brand mx-auto mb-2" />
             <p className="text-2xl font-bold">{bookings}</p>
@@ -461,13 +462,13 @@ export function ProspectingView({
       </div>
 
       {/* Basic filters row */}
-      <div className="flex flex-wrap gap-3 mb-2">
+      <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Rechercher un prospect..." className="pl-9 h-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input placeholder="Rechercher un prospect..." className="pl-9 h-11 rounded-xl" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={filterPlatform} onValueChange={setFilterPlatform}>
-          <SelectTrigger className="w-[150px] h-9 text-xs"><SelectValue placeholder="Plateforme" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs"><SelectValue placeholder="Plateforme" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes</SelectItem>
             <SelectItem value="linkedin">LinkedIn</SelectItem>
@@ -475,7 +476,7 @@ export function ProspectingView({
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px] h-9 text-xs"><SelectValue placeholder="Statut" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs"><SelectValue placeholder="Statut" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>
             {Object.entries(statusLabels).map(([v, l]) => (
@@ -486,7 +487,7 @@ export function ProspectingView({
       </div>
 
       {/* Collapsible segmentation filter panel */}
-      <div className="mb-4">
+      <div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -517,14 +518,14 @@ export function ProspectingView({
         </div>
 
         {filtersOpen && (
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-xl border border-border/50 bg-muted/20">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-2xl border border-border/50 bg-muted/20">
             {/* Temperature */}
             <div className="space-y-2">
               <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Température
               </Label>
               <Select value={filterTemperature} onValueChange={setFilterTemperature}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-sm h-11 rounded-xl">
                   <SelectValue placeholder="Toutes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -551,7 +552,7 @@ export function ProspectingView({
                   placeholder="Min"
                   value={scoreMin}
                   onChange={(e) => setScoreMin(e.target.value)}
-                  className="text-sm"
+                  className="text-sm h-11 rounded-xl"
                   min={0}
                   max={100}
                 />
@@ -560,7 +561,7 @@ export function ProspectingView({
                   placeholder="Max"
                   value={scoreMax}
                   onChange={(e) => setScoreMax(e.target.value)}
-                  className="text-sm"
+                  className="text-sm h-11 rounded-xl"
                   min={0}
                   max={100}
                 />
@@ -573,7 +574,7 @@ export function ProspectingView({
                 Activité récente
               </Label>
               <Select value={filterRecency} onValueChange={setFilterRecency}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-sm h-11 rounded-xl">
                   <SelectValue placeholder="Tous" />
                 </SelectTrigger>
                 <SelectContent>
@@ -589,7 +590,7 @@ export function ProspectingView({
 
       {/* Active filter badges */}
       {(filterTemperature !== "all" || filterPlatform !== "all" || filterStatus !== "all" || filterRecency !== "all" || scoreMin || scoreMax) && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2">
           {filterTemperature !== "all" && (
             <Badge
               variant="outline"
@@ -631,12 +632,12 @@ export function ProspectingView({
       )}
 
       {/* Prospects table */}
-      <Card>
+      <Card className="shadow-sm rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b">
+                <tr className="border-b bg-muted/30">
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Température</th>
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Score</th>
@@ -654,7 +655,7 @@ export function ProspectingView({
                   const TempIcon = tempConf?.icon;
 
                   return (
-                    <tr key={prospect.id} className="border-b last:border-0 hover:bg-muted/30">
+                    <tr key={prospect.id} className="border-b last:border-0 hover:bg-secondary/50 transition-colors">
                       <td className="p-4 font-medium">
                         <Link href={`/prospecting/${prospect.id}`} className="hover:text-brand hover:underline">
                           {prospect.name}

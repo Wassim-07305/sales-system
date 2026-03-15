@@ -176,7 +176,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                 key={post.id}
                 href={`/community/forum/${post.id}`}
               >
-                <Card className="border-border/50 hover:shadow-md transition-all cursor-pointer">
+                <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
                       <Pin className="h-4 w-4 text-amber-600" />
@@ -235,7 +235,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                 key={post.id}
                 href={`/community/forum/${post.id}`}
               >
-                <Card className="border-border/50 hover:shadow-md transition-all cursor-pointer mb-3">
+                <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer mb-3">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
                       <div className={cn("h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0", getAvatarColor(post.author?.full_name))}>

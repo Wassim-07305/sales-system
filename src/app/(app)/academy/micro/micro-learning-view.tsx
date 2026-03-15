@@ -125,7 +125,9 @@ export function MicroLearningView({
         </PageHeader>
 
         <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
-          <GraduationCap className="mb-4 size-16 opacity-20" />
+          <div className="h-16 w-16 rounded-2xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center mb-4">
+            <GraduationCap className="size-8 text-muted-foreground/40" />
+          </div>
           <p className="text-lg font-medium">Aucune micro-lecon disponible</p>
           <p className="mt-2 max-w-md text-center text-sm">
             Les micro-lecons sont des lecons courtes (5 min ou moins). Elles apparaitront ici
@@ -166,7 +168,7 @@ export function MicroLearningView({
 
       {/* Daily lesson hero card */}
       {dailyLesson && !localProgress[dailyLesson.id] && (
-        <Card className="mb-8 overflow-hidden border-brand/30 bg-gradient-to-br from-brand/5 to-transparent">
+        <Card className="mb-8 overflow-hidden rounded-2xl border-brand/30 bg-gradient-to-br from-brand/5 to-transparent shadow-lg shadow-brand/5">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 text-brand mb-3">
               <Sparkles className="size-5" />

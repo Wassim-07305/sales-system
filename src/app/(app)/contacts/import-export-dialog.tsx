@@ -120,7 +120,7 @@ export function ImportExportDialog() {
           Import / Export
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg rounded-2xl">
         <DialogHeader>
           <DialogTitle>Import / Export CSV</DialogTitle>
         </DialogHeader>
@@ -188,7 +188,7 @@ export function ImportExportDialog() {
             </div>
 
             {result && (
-              <div className="rounded-md border p-3 space-y-2">
+              <div className="rounded-xl border border-border/50 p-3 space-y-2">
                 <p className="text-sm font-medium text-green-600">
                   {result.imported} ligne(s) importée(s)
                 </p>

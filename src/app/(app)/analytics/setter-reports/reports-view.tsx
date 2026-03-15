@@ -201,15 +201,15 @@ export function ReportsView({
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
+            <Card key={stat.title} className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
               <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                     <Icon className="h-5 w-5 text-brand" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.title}</p>
+                <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">{stat.title}</p>
               </CardContent>
             </Card>
           );
@@ -219,9 +219,9 @@ export function ReportsView({
       {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         {/* Radar Chart */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle>Forces du setter</CardTitle>
+            <CardTitle className="text-base font-semibold">Forces du setter</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -249,9 +249,9 @@ export function ReportsView({
         </Card>
 
         {/* Weekly Comparison */}
-        <Card>
+        <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle>Comparaison hebdomadaire (Bookings)</CardTitle>
+            <CardTitle className="text-base font-semibold">Comparaison hebdomadaire (Bookings)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -286,33 +286,36 @@ export function ReportsView({
       </div>
 
       {/* Details Table */}
-      <Card>
+      <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
-          <CardTitle>Détails par setter</CardTitle>
+          <CardTitle className="text-base font-semibold">Détails par setter</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <Users className="h-7 w-7 opacity-40" />
+              </div>
               <p className="font-medium">Aucun setter trouvé</p>
-              <p className="text-sm">Les rapports setter apparaîtront ici.</p>
+              <p className="text-sm mt-1">Les rapports setter apparaîtront ici.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-medium">Setter</th>
-                    <th className="text-right p-4 font-medium">DMs</th>
-                    <th className="text-right p-4 font-medium">Réponses</th>
-                    <th className="text-right p-4 font-medium">Taux rép.</th>
-                    <th className="text-right p-4 font-medium">Bookings</th>
-                    <th className="text-right p-4 font-medium">Show-up</th>
-                    <th className="text-right p-4 font-medium">CA contribué</th>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Setter</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">DMs</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Réponses</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Taux rép.</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Bookings</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Show-up</th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA contribué</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((setter) => (
-                    <tr key={setter.setterId} className="border-b last:border-0">
+                    <tr key={setter.setterId} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="p-4 font-medium">{setter.setterName}</td>
                       <td className="p-4 text-right">{setter.dmsSent.toLocaleString("fr-FR")}</td>
                       <td className="p-4 text-right">{setter.responses.toLocaleString("fr-FR")}</td>

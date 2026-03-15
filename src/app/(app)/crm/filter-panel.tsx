@@ -69,7 +69,7 @@ export function FilterPanel({
           size="sm"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "gap-2 h-9 transition-colors",
+            "gap-2 h-10 rounded-xl transition-colors",
             isOpen && "bg-muted",
           )}
         >
@@ -88,7 +88,7 @@ export function FilterPanel({
           value={filters.sortBy || "created_at_desc"}
           onValueChange={(v) => updateFilter("sortBy", v as DealFilters["sortBy"])}
         >
-          <SelectTrigger className="w-[200px] h-9 text-xs">
+          <SelectTrigger className="w-[200px] h-10 rounded-xl text-xs">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
@@ -111,7 +111,7 @@ export function FilterPanel({
 
       {/* Collapsible panel */}
       {isOpen && (
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-xl border border-border/50 bg-muted/20">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-2xl border border-border/50 bg-muted/20">
           {/* Date range */}
           <div className="space-y-2">
             <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
@@ -122,13 +122,13 @@ export function FilterPanel({
                 type="date"
                 value={filters.dateFrom || ""}
                 onChange={(e) => updateFilter("dateFrom", e.target.value || undefined)}
-                className="text-xs h-9"
+                className="text-xs h-10 rounded-xl"
               />
               <Input
                 type="date"
                 value={filters.dateTo || ""}
                 onChange={(e) => updateFilter("dateTo", e.target.value || undefined)}
-                className="text-xs h-9"
+                className="text-xs h-10 rounded-xl"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@ export function FilterPanel({
                 placeholder="Min"
                 value={filters.amountMin || ""}
                 onChange={(e) => updateFilter("amountMin", e.target.value ? Number(e.target.value) : undefined)}
-                className="text-xs h-9"
+                className="text-xs h-10 rounded-xl"
                 min={0}
               />
               <Input
@@ -152,7 +152,7 @@ export function FilterPanel({
                 placeholder="Max"
                 value={filters.amountMax || ""}
                 onChange={(e) => updateFilter("amountMax", e.target.value ? Number(e.target.value) : undefined)}
-                className="text-xs h-9"
+                className="text-xs h-10 rounded-xl"
                 min={0}
               />
             </div>
@@ -167,7 +167,7 @@ export function FilterPanel({
               value={filters.assignedTo || "all"}
               onValueChange={(v) => updateFilter("assignedTo", v)}
             >
-              <SelectTrigger className="text-xs h-9">
+              <SelectTrigger className="text-xs h-10 rounded-xl">
                 <SelectValue placeholder="Tous les membres" />
               </SelectTrigger>
               <SelectContent>
@@ -190,7 +190,7 @@ export function FilterPanel({
               value={filters.source || "all"}
               onValueChange={(v) => updateFilter("source", v)}
             >
-              <SelectTrigger className="text-xs h-9">
+              <SelectTrigger className="text-xs h-10 rounded-xl">
                 <SelectValue placeholder="Toutes les sources" />
               </SelectTrigger>
               <SelectContent>

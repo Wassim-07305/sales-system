@@ -161,25 +161,25 @@ export function WhatsAppView({
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       <PageHeader
         title="WhatsApp"
         description="Gérez vos conversations WhatsApp"
       >
         <div className="flex gap-2">
           <Link href="/whatsapp/analytics">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </Button>
           </Link>
           <Link href="/whatsapp/sequences">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
               Séquences
             </Button>
           </Link>
           <Link href="/whatsapp/settings">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
               Paramètres
             </Button>
           </Link>
@@ -187,10 +187,10 @@ export function WhatsAppView({
       </PageHeader>
 
       {/* Connection Status Card */}
-      <Card className="mb-4 border-border/50">
+      <Card className="shadow-sm rounded-2xl border-border/50">
         <CardContent className="py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center ring-1", status === "connected" ? "ring-emerald-500/20 bg-emerald-500/10" : status === "pending" ? "ring-amber-500/20 bg-amber-500/10" : "ring-red-500/20 bg-red-500/10")}>
+            <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", status === "connected" ? "ring-emerald-500/20 bg-emerald-500/10" : status === "pending" ? "ring-amber-500/20 bg-amber-500/10" : "ring-red-500/20 bg-red-500/10")}>
               <StatusIcon className={cn("h-4 w-4", status === "connected" ? "text-emerald-600" : status === "pending" ? "text-amber-600" : "text-red-600")} />
             </div>
             <div>
@@ -221,7 +221,7 @@ export function WhatsAppView({
             <Link href="/whatsapp/settings">
               <Button
                 size="sm"
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
               >
                 Connecter
               </Button>
@@ -231,14 +231,14 @@ export function WhatsAppView({
       </Card>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <Card className="border-border/50 hover:shadow-md transition-all">
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{totalConversations}</p>
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Conversations</p>
           </CardContent>
         </Card>
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{messagesSentToday}</p>
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
@@ -246,7 +246,7 @@ export function WhatsAppView({
             </p>
           </CardContent>
         </Card>
-        <Card className="border-border/50 hover:shadow-md transition-all">
+        <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{responseRate}%</p>
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Taux de réponse</p>

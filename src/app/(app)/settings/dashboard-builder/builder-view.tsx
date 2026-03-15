@@ -136,16 +136,16 @@ export function BuilderView({
           return (
             <Card
               key={widget.type}
-              className={`cursor-pointer transition-all ${isEnabled ? "border-primary ring-1 ring-primary/20" : "opacity-70"}`}
+              className={`cursor-pointer transition-all duration-200 border-border/50 ${isEnabled ? "border-brand ring-1 ring-brand/20 hover:shadow-md" : "opacity-70 hover:opacity-90"}`}
               onClick={() => toggleWidget(widget.type)}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`rounded-lg p-2 ${isEnabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                      className={`h-9 w-9 rounded-xl flex items-center justify-center ring-1 ${isEnabled ? "bg-brand/10 text-brand ring-brand/20" : "bg-muted text-muted-foreground ring-border/50"}`}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4" />
                     </div>
                     <div>
                       <p className="font-medium text-sm">{widget.title}</p>
@@ -166,17 +166,21 @@ export function BuilderView({
       </div>
 
       {/* Preview */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+              <LayoutDashboard className="h-4 w-4 text-blue-500" />
+            </div>
             Apercu du Dashboard
           </CardTitle>
         </CardHeader>
         <CardContent>
           {enabledTypes.size === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <LayoutDashboard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <LayoutDashboard className="h-7 w-7 opacity-50" />
+              </div>
               <p className="font-medium">Aucun widget selectionne</p>
               <p className="text-sm mt-1">
                 Activez des widgets ci-dessus pour les voir apparaitre ici.
@@ -190,10 +194,10 @@ export function BuilderView({
                   return (
                     <div
                       key={widget.type}
-                      className="rounded-lg border border-dashed border-muted-foreground/30 p-4 flex items-center gap-3"
+                      className="rounded-xl border border-dashed border-border/50 p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
                     >
-                      <div className="rounded-md bg-muted p-2">
-                        <Icon className="h-4 w-4 text-muted-foreground" />
+                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                        <Icon className="h-4 w-4 text-brand" />
                       </div>
                       <div>
                         <p className="text-sm font-medium">{widget.title}</p>

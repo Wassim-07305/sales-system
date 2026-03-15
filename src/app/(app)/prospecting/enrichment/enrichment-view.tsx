@@ -232,7 +232,7 @@ export function EnrichmentView({ prospects }: Props) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Enrichissement IA des prospects"
         description="Enrichissez automatiquement vos fiches prospects grâce à l'intelligence artificielle"
@@ -240,7 +240,7 @@ export function EnrichmentView({ prospects }: Props) {
         <Button
           onClick={handleBatchEnrich}
           disabled={selectedIds.size === 0 || batchEnriching}
-          className="bg-brand hover:bg-brand/90 text-brand-foreground"
+          className="bg-brand hover:bg-brand/90 text-brand-foreground rounded-xl font-medium"
         >
           {batchEnriching ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -252,10 +252,10 @@ export function EnrichmentView({ prospects }: Props) {
       </PageHeader>
 
       {/* ── Stats Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
               <Database className="h-5 w-5 text-brand" />
             </div>
             <div>
@@ -266,9 +266,9 @@ export function EnrichmentView({ prospects }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-muted/60 ring-1 ring-border/50 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-muted/60 ring-1 ring-border/50 flex items-center justify-center">
               <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
@@ -279,9 +279,9 @@ export function EnrichmentView({ prospects }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-muted/40 ring-1 ring-border/30 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center">
               <TrendingUp className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
@@ -295,21 +295,21 @@ export function EnrichmentView({ prospects }: Props) {
       </div>
 
       {/* ── Search ── */}
-      <div className="relative mb-4">
+      <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Rechercher un prospect par nom, email ou entreprise..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10 h-11 rounded-xl"
         />
       </div>
 
       {/* ── Prospect Table ── */}
-      <Card className="mb-8">
+      <Card className="shadow-sm rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           {/* Header */}
-          <div className="hidden sm:grid grid-cols-12 gap-3 p-4 border-b text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="hidden sm:grid grid-cols-12 gap-3 p-4 border-b bg-muted/30 text-xs font-medium text-muted-foreground uppercase tracking-wider">
             <div className="col-span-1 flex items-center">
               <input
                 type="checkbox"
@@ -337,7 +337,7 @@ export function EnrichmentView({ prospects }: Props) {
               return (
                 <div key={prospect.id}>
                   {/* Main row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 items-center hover:bg-muted/50 transition-colors">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 items-center hover:bg-secondary/50 transition-colors">
                     {/* Checkbox */}
                     <div className="sm:col-span-1 flex items-center">
                       <input
@@ -350,7 +350,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                     {/* Name */}
                     <div className="sm:col-span-2 flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand font-bold text-sm shrink-0">
+                      <div className="h-8 w-8 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand font-bold text-sm shrink-0">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-medium text-sm truncate">
@@ -443,7 +443,7 @@ export function EnrichmentView({ prospects }: Props) {
                   {/* ── Expanded enrichment panel ── */}
                   {isExpanded && prospect.enrichment && (
                     <div className="px-4 pb-4 pt-0 bg-muted/30">
-                      <div className="rounded-lg border p-4">
+                      <div className="rounded-xl border p-4">
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                             Données enrichies par IA
@@ -621,7 +621,7 @@ export function EnrichmentView({ prospects }: Props) {
       </Card>
 
       {/* ── Company Insights Panel ── */}
-      <Card>
+      <Card className="shadow-sm rounded-2xl">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Building2 className="h-5 w-5 text-brand" />
@@ -636,7 +636,7 @@ export function EnrichmentView({ prospects }: Props) {
                 placeholder="Nom de l'entreprise..."
                 value={companyQuery}
                 onChange={(e) => setCompanyQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11 rounded-xl"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleCompanyInsights();
                 }}
@@ -645,7 +645,7 @@ export function EnrichmentView({ prospects }: Props) {
             <Button
               onClick={handleCompanyInsights}
               disabled={insightsLoading || !companyQuery.trim()}
-              className="bg-brand hover:bg-brand/90 text-brand-foreground"
+              className="bg-brand hover:bg-brand/90 text-brand-foreground rounded-xl font-medium"
             >
               {insightsLoading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -657,7 +657,7 @@ export function EnrichmentView({ prospects }: Props) {
           </div>
 
           {companyInsights && (
-            <div className="rounded-lg border p-4 space-y-4">
+            <div className="rounded-xl border p-4 space-y-4">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>

@@ -47,10 +47,10 @@ export default async function CallsPage() {
           <h2 className="text-lg font-semibold mb-4">Prochains calls</h2>
           <div className="space-y-3 mb-8">
             {upcomingCalls.map((call) => (
-              <Card key={call.id}>
+              <Card key={call.id} className="rounded-xl border-border/50 shadow-sm">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-brand/10 flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center">
                       <Video className="h-6 w-6 text-brand" />
                     </div>
                     <div>
@@ -88,10 +88,10 @@ export default async function CallsPage() {
       <h2 className="text-lg font-semibold mb-4">Replays</h2>
       <div className="space-y-3">
         {pastCalls.map((call) => (
-          <Card key={call.id}>
+          <Card key={call.id} className="rounded-xl border-border/50 shadow-sm">
             <CardContent className="p-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
                   <Video className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div>
@@ -119,9 +119,9 @@ export default async function CallsPage() {
           </Card>
         ))}
         {pastCalls.length === 0 && (
-          <Card>
+          <Card className="rounded-xl border-border/50 shadow-sm">
             <CardContent className="py-12 text-center">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <Video className="h-5 w-5 text-muted-foreground" />
               </div>
               <p className="font-medium mb-1">Aucun replay disponible</p>

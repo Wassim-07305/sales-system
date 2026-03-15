@@ -233,7 +233,7 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                 Modifier
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="rounded-2xl">
               <DialogHeader>
                 <DialogTitle>Modifier le deal</DialogTitle>
               </DialogHeader>
@@ -357,28 +357,28 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
         <div className="lg:col-span-2 space-y-6">
           {/* Overview cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
+            <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                  <DollarSign className="h-3 w-3" />
+                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
+                  <DollarSign className="h-3.5 w-3.5 text-brand" />
                   Valeur
                 </div>
                 <p className="text-xl font-bold">{formatCurrency(currentDeal.value)}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                  <Target className="h-3 w-3" />
+                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
+                  <Target className="h-3.5 w-3.5 text-brand" />
                   Probabilite
                 </div>
                 <p className="text-xl font-bold">{currentDeal.probability}%</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                  <TrendingUp className="h-3 w-3" />
+                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-brand" />
                   Valeur ponderee
                 </div>
                 <p className="text-xl font-bold">
@@ -386,10 +386,10 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                  <Thermometer className="h-3 w-3" />
+                <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
+                  <Thermometer className="h-3.5 w-3.5 text-brand" />
                   Temperature
                 </div>
                 <div className="flex gap-1 mt-1">
@@ -550,13 +550,13 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
         <div className="space-y-6">
           {/* Contact info */}
           {currentDeal.contact && (
-            <Card>
+            <Card className="rounded-xl border-border/50 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Contact</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-lg">
+                  <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-lg">
                     {currentDeal.contact.full_name?.charAt(0) || "?"}
                   </div>
                   <div>

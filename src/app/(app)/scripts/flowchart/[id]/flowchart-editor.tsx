@@ -108,7 +108,7 @@ function ScriptNodeComponent({ data }: NodeProps) {
 
   return (
     <div
-      className={`px-4 py-3 rounded-lg border shadow-sm min-w-[180px] ${config.bg} ${config.border} hover:shadow-md transition-all`}
+      className={`px-4 py-3 rounded-xl border shadow-sm min-w-[180px] ${config.bg} ${config.border} hover:shadow-lg transition-all duration-300`}
     >
       <Handle
         type="target"
@@ -353,7 +353,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
                   <button
                     key={type}
                     onClick={() => addNode(type)}
-                    className={`flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs font-medium border transition-all hover:shadow-md ${config.bg} ${config.border} ${config.text}`}
+                    className={`flex items-center gap-2 w-full px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-200 hover:shadow-md ${config.bg} ${config.border} ${config.text}`}
                   >
                     <Icon className="h-3.5 w-3.5" />
                     {config.label}

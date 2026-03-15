@@ -95,16 +95,16 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader title="Templates de DM" description="Gérez vos templates de prospection">
         <div className="flex gap-2">
           <Link href="/prospecting">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
           </Link>
-          <Button onClick={openNew} className="bg-brand text-brand-dark hover:bg-brand/90">
+          <Button onClick={openNew} className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium">
             <Plus className="h-4 w-4 mr-2" />
             Nouveau template
           </Button>
@@ -112,14 +112,14 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
       </PageHeader>
 
       {/* Sequence flowchart */}
-      <Card className="mb-6">
+      <Card className="shadow-sm rounded-2xl">
         <CardContent className="p-4">
           <div className="flex items-center justify-center gap-2 flex-wrap">
             {stepCounts.map((s, i) => (
               <div key={s.step} className="flex items-center gap-2">
                 <button
                   onClick={() => setFilterStep(filterStep === s.step ? "all" : s.step)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
                     filterStep === s.step ? "bg-brand text-brand-dark border-brand" : "hover:bg-muted"
                   }`}
                 >
@@ -134,9 +134,9 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
       </Card>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-3">
         <Select value={filterPlatform} onValueChange={setFilterPlatform}>
-          <SelectTrigger className="w-[150px]"><SelectValue placeholder="Plateforme" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-11 rounded-xl"><SelectValue placeholder="Plateforme" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes</SelectItem>
             <SelectItem value="linkedin">LinkedIn</SelectItem>
@@ -148,7 +148,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
       {/* Templates */}
       <div className="grid md:grid-cols-2 gap-4">
         {filtered.map((t) => (
-          <Card key={t.id} className="hover:shadow-md transition-shadow">
+          <Card key={t.id} className="shadow-sm rounded-2xl hover:shadow-md transition-shadow">
             <CardContent className="p-5">
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -174,7 +174,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
       </div>
 
       {filtered.length === 0 && (
-        <Card>
+        <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-12 text-center text-muted-foreground">
             <p className="font-medium">Aucun template</p>
             <p className="text-sm">Créez votre premier template de DM.</p>
@@ -191,7 +191,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
           <div className="space-y-4">
             <div>
               <Label>Nom</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11 rounded-xl" />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
@@ -230,7 +230,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
               <Label>Contenu</Label>
               <Textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={6} placeholder="Variables: {{prenom}}, {{niche}}, {{pain_point}}..." />
             </div>
-            <Button onClick={handleSave} className="w-full bg-brand text-brand-dark hover:bg-brand/90">
+            <Button onClick={handleSave} className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium">
               {editingTemplate ? "Mettre à jour" : "Créer"}
             </Button>
           </div>

@@ -113,9 +113,12 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
           title="Revisions"
           description="Mode flashcards pour reviser vos cours"
         />
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <BookOpen className="h-12 w-12 mb-4 opacity-30" />
-          <p className="text-sm">Aucune carte de revision disponible</p>
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <div className="h-16 w-16 rounded-2xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center mb-4">
+            <BookOpen className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+          <p className="font-medium text-sm">Aucune carte de revision disponible</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">Complétez des leçons pour générer vos flashcards</p>
         </div>
       </div>
     );
@@ -152,9 +155,11 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
       ) : sessionFinished ? (
         /* Session summary */
         <div className="max-w-lg mx-auto">
-          <Card>
+          <Card className="rounded-2xl border-border/40 shadow-lg">
             <CardContent className="p-8 text-center">
-              <Trophy className="h-16 w-16 text-brand mx-auto mb-4" />
+              <div className="h-20 w-20 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mx-auto mb-4">
+                <Trophy className="h-10 w-10 text-brand" />
+              </div>
               <h2 className="text-2xl font-bold mb-2">Session terminee !</h2>
               <p className="text-muted-foreground mb-6">
                 Vous avez revu {totalCards} cartes
@@ -245,12 +250,12 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
             >
               {/* Front */}
               <Card
-                className="w-full"
+                className="w-full rounded-2xl border-border/40"
                 style={{
                   backfaceVisibility: "hidden",
                 }}
               >
-                <CardContent className="p-8 min-h-[280px] flex flex-col items-center justify-center text-center">
+                <CardContent className="p-10 min-h-[300px] flex flex-col items-center justify-center text-center">
                   <Badge variant="outline" className="mb-4 text-xs">
                     Question
                   </Badge>
@@ -265,13 +270,13 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
 
               {/* Back */}
               <Card
-                className="w-full absolute top-0 left-0"
+                className="w-full absolute top-0 left-0 rounded-2xl border-border/40"
                 style={{
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
                 }}
               >
-                <CardContent className="p-8 min-h-[280px] flex flex-col items-center justify-center text-center">
+                <CardContent className="p-10 min-h-[300px] flex flex-col items-center justify-center text-center">
                   <Badge className="mb-4 text-xs bg-brand/10 text-brand border-brand/20">
                     Reponse
                   </Badge>

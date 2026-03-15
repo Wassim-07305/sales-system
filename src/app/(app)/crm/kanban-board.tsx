@@ -217,11 +217,11 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
             placeholder="Rechercher un deal ou contact..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
+            className="pl-9 h-11 rounded-xl"
           />
         </div>
         <Select value={tempFilter} onValueChange={setTempFilter}>
-          <SelectTrigger className="w-[160px] h-9">
+          <SelectTrigger className="w-[160px] h-11 rounded-xl">
             <Filter className="h-3.5 w-3.5 mr-2" />
             <SelectValue placeholder="Température" />
           </SelectTrigger>

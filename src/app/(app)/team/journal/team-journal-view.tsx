@@ -195,11 +195,11 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
             const isExpanded = expandedIds.has(journal.id);
 
             return (
-              <Card key={journal.id}>
+              <Card key={journal.id} className="border-border/50 hover:shadow-md transition-all duration-200">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
+                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-sm font-bold text-brand ring-1 ring-brand/20">
                         {(journal.profile?.full_name || "?").charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -220,17 +220,17 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
                 <CardContent className="pt-0">
                   {/* KPIs compact */}
                   <div className="grid grid-cols-3 gap-2 text-center my-3">
-                    <div className="bg-muted/50 rounded p-2">
+                    <div className="bg-muted/30 rounded-xl p-2.5 ring-1 ring-border/50">
                       <div className="text-base font-bold">{journal.dms_sent}</div>
-                      <div className="text-[10px] text-muted-foreground">DMs</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">DMs</div>
                     </div>
-                    <div className="bg-muted/50 rounded p-2">
+                    <div className="bg-muted/30 rounded-xl p-2.5 ring-1 ring-border/50">
                       <div className="text-base font-bold">{journal.calls_booked}</div>
-                      <div className="text-[10px] text-muted-foreground">Appels</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Appels</div>
                     </div>
-                    <div className="bg-muted/50 rounded p-2">
+                    <div className="bg-muted/30 rounded-xl p-2.5 ring-1 ring-border/50">
                       <div className="text-base font-bold">{journal.deals_closed}</div>
-                      <div className="text-[10px] text-muted-foreground">Deals</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Deals</div>
                     </div>
                   </div>
 

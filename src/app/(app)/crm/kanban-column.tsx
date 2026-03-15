@@ -36,13 +36,13 @@ export function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-xl transition-all snap-center",
-        "bg-muted/20 border border-border/50",
-        isOver && "bg-brand/5 border-brand/30 ring-2 ring-brand/20 scale-[1.01]"
+        "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-2xl transition-all duration-200 snap-center",
+        "bg-muted/20 border border-border/50 shadow-sm",
+        isOver && "bg-brand/5 border-brand/30 ring-2 ring-brand/20 scale-[1.01] shadow-md"
       )}
     >
       {/* Column header */}
-      <div className="p-3">
+      <div className="p-3.5">
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-2.5">
             <div
@@ -69,7 +69,7 @@ export function KanbanColumn({
       </div>
 
       {/* Separator */}
-      <div className="mx-3 h-px bg-border/50" />
+      <div className="mx-3.5 h-px bg-border/40" />
 
       {/* Cards */}
       <SortableContext

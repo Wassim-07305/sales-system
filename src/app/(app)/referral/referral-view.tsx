@@ -162,40 +162,40 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
-                <Send className="h-4 w-4 text-blue-600" />
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Invitations</span>
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Send className="h-4 w-4 text-blue-500" />
               </div>
-              <p className="text-xs text-muted-foreground">Invitations envoyees</p>
             </div>
-            <p className="text-2xl font-bold">{stats.total}</p>
+            <p className="text-2xl font-bold tracking-tight">{stats.total}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
-                <Clock className="h-4 w-4 text-amber-600" />
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">En attente</span>
+              <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <Clock className="h-4 w-4 text-amber-500" />
               </div>
-              <p className="text-xs text-muted-foreground">En attente</p>
             </div>
-            <p className="text-2xl font-bold">{stats.pending}</p>
+            <p className="text-2xl font-bold tracking-tight">{stats.pending}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Conversions</span>
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               </div>
-              <p className="text-xs text-muted-foreground">Conversions</p>
             </div>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold">{stats.converted}</p>
+              <p className="text-2xl font-bold tracking-tight">{stats.converted}</p>
               {stats.conversionRate > 0 && (
-                <span className="text-xs text-green-600 flex items-center">
+                <span className="text-xs text-emerald-500 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-0.5" />
                   {stats.conversionRate}%
                 </span>
@@ -203,24 +203,26 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center">
+        <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recompenses</span>
+              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <DollarSign className="h-4 w-4 text-brand" />
               </div>
-              <p className="text-xs text-muted-foreground">Recompenses</p>
             </div>
-            <p className="text-2xl font-bold">{stats.totalRewards.toLocaleString("fr-FR")} &euro;</p>
+            <p className="text-2xl font-bold tracking-tight">{stats.totalRewards.toLocaleString("fr-FR")} &euro;</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Invite section */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+              <UserPlus className="h-4 w-4 text-brand" />
+            </div>
             Inviter un contact
           </CardTitle>
         </CardHeader>
@@ -253,11 +255,13 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
       </Card>
 
       {/* Referral history */}
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
+                <Users className="h-4 w-4 text-blue-500" />
+              </div>
               Historique des parrainages
             </CardTitle>
             <div className="flex gap-1">

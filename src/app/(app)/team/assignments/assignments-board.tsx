@@ -163,10 +163,10 @@ function BusinessCard({
   const [selectedSetter, setSelectedSetter] = useState<string>("");
 
   return (
-    <Card>
+    <Card className="border-border/50 hover:shadow-md transition-all duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm shrink-0">
+          <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-sm shrink-0 ring-1 ring-brand/20">
             {business.full_name?.charAt(0) || business.email.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
