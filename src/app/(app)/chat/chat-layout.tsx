@@ -148,6 +148,8 @@ interface ChatLayoutProps {
   initialLinkedinConversations: SocialConversation[];
   initialInstagramConversations: SocialConversation[];
   unipileWhatsApp?: { connected: boolean; accountName?: string } | null;
+  unipileLinkedin?: { connected: boolean; accountName?: string } | null;
+  unipileInstagram?: { connected: boolean; accountName?: string } | null;
 }
 
 interface TeamMember {
@@ -317,6 +319,8 @@ export function ChatLayout({
   initialLinkedinConversations,
   initialInstagramConversations,
   unipileWhatsApp,
+  unipileLinkedin,
+  unipileInstagram,
 }: ChatLayoutProps) {
   const supabase = useMemo(() => createClient(), []);
   const isAdmin = ADMIN_ROLES.includes(userRole);
@@ -354,6 +358,10 @@ export function ChatLayout({
   const [activeSocial, setActiveSocial] = useState<SocialConversation | null>(null);
   const [socialMessage, setSocialMessage] = useState("");
   const [sendingSocial, setSendingSocial] = useState(false);
+  const [linkedinConnected, setLinkedinConnected] = useState(unipileLinkedin?.connected || false);
+  const [connectingLinkedin, setConnectingLinkedin] = useState(false);
+  const [instagramConnected, setInstagramConnected] = useState(unipileInstagram?.connected || false);
+  const [connectingInstagram, setConnectingInstagram] = useState(false);
 
   // ---- Image upload ----
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -1468,9 +1476,70 @@ export function ChatLayout({
                   );
                 })}
                 {filteredLinkedinConversations.length === 0 && (
-                  <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
-                    {channelSearch ? "Aucun résultat" : "Aucune conversation LinkedIn"}
-                  </p>
+                  <div className="px-2 py-4 text-center space-y-3">
+                    <p className="text-[11px] text-muted-foreground/60">
+                      {channelSearch ? "Aucun résultat" : "Aucune conversation LinkedIn"}
+                    </p>
+                    {!channelSearch && !linkedinConnected && (
+                      <div className="space-y-2">
+                        <Button
+                          size="sm"
+                          className="w-full bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90 text-xs"
+                          disabled={connectingLinkedin}
+                          onClick={async () => {
+                            setConnectingLinkedin(true);
+                            try {
+                              const result = await generateUnipileAuthLink("LINKEDIN");
+                              if (result.error) {
+                                toast.error(result.error);
+                              } else if (result.url) {
+                                window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+                                toast.info("Connectez-vous à LinkedIn dans la fenêtre");
+                              }
+                            } catch {
+                              toast.error("Erreur de connexion");
+                            }
+                            setConnectingLinkedin(false);
+                          }}
+                        >
+                          {connectingLinkedin ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <Linkedin className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          Connecter LinkedIn
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-[11px] text-muted-foreground"
+                          onClick={async () => {
+                            try {
+                              const status = await getUnipileStatus();
+                              const li = status.accounts.find((a) => a.provider.toUpperCase() === "LINKEDIN");
+                              if (li) {
+                                setLinkedinConnected(true);
+                                toast.success("LinkedIn connecté ! Rechargez la page pour voir vos conversations.");
+                              } else {
+                                toast.info("Aucun compte LinkedIn détecté");
+                              }
+                            } catch {
+                              toast.error("Erreur de vérification");
+                            }
+                          }}
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Vérifier la connexion
+                        </Button>
+                      </div>
+                    )}
+                    {!channelSearch && linkedinConnected && linkedinConversations.length === 0 && (
+                      <div className="flex items-center gap-2 justify-center text-[#0A66C2]">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span className="text-[11px]">LinkedIn connecté</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>}
           </div>
@@ -1542,9 +1611,70 @@ export function ChatLayout({
                   );
                 })}
                 {filteredInstagramConversations.length === 0 && (
-                  <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
-                    {channelSearch ? "Aucun résultat" : "Aucune conversation Instagram"}
-                  </p>
+                  <div className="px-2 py-4 text-center space-y-3">
+                    <p className="text-[11px] text-muted-foreground/60">
+                      {channelSearch ? "Aucun résultat" : "Aucune conversation Instagram"}
+                    </p>
+                    {!channelSearch && !instagramConnected && (
+                      <div className="space-y-2">
+                        <Button
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white hover:opacity-90 text-xs"
+                          disabled={connectingInstagram}
+                          onClick={async () => {
+                            setConnectingInstagram(true);
+                            try {
+                              const result = await generateUnipileAuthLink("INSTAGRAM");
+                              if (result.error) {
+                                toast.error(result.error);
+                              } else if (result.url) {
+                                window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+                                toast.info("Connectez-vous à Instagram dans la fenêtre");
+                              }
+                            } catch {
+                              toast.error("Erreur de connexion");
+                            }
+                            setConnectingInstagram(false);
+                          }}
+                        >
+                          {connectingInstagram ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <Instagram className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          Connecter Instagram
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-[11px] text-muted-foreground"
+                          onClick={async () => {
+                            try {
+                              const status = await getUnipileStatus();
+                              const ig = status.accounts.find((a) => a.provider.toUpperCase() === "INSTAGRAM");
+                              if (ig) {
+                                setInstagramConnected(true);
+                                toast.success("Instagram connecté ! Rechargez la page pour voir vos conversations.");
+                              } else {
+                                toast.info("Aucun compte Instagram détecté");
+                              }
+                            } catch {
+                              toast.error("Erreur de vérification");
+                            }
+                          }}
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Vérifier la connexion
+                        </Button>
+                      </div>
+                    )}
+                    {!channelSearch && instagramConnected && instagramConversations.length === 0 && (
+                      <div className="flex items-center gap-2 justify-center text-[#DD2A7B]">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span className="text-[11px]">Instagram connecté</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>}
           </div>

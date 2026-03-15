@@ -88,6 +88,22 @@ export default async function ChatPage() {
             }
           : null
       }
+      unipileLinkedin={
+        unipileStatus.configured
+          ? {
+              connected: !!unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "LINKEDIN"),
+              accountName: unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "LINKEDIN")?.name,
+            }
+          : null
+      }
+      unipileInstagram={
+        unipileStatus.configured
+          ? {
+              connected: !!unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "INSTAGRAM"),
+              accountName: unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "INSTAGRAM")?.name,
+            }
+          : null
+      }
     />
   );
 }
