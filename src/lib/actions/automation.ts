@@ -575,3 +575,604 @@ export async function runUpsellSequence() {
   revalidatePath("/notifications");
   return { processed: expiringContracts.length, alertsSent: alerts.length };
 }
+
+// ---------------------------------------------------------------------------
+// Auto-Relance (Follow-up) Workflow
+// ---------------------------------------------------------------------------
+
+export interface RelanceConfig {
+  prospect_id: string;
+  platform: string;
+  message_j2: string;
+  message_j3: string;
+  delay_j2_hours?: number;
+  delay_j3_hours?: number;
+}
+
+/**
+ * Create a relance (follow-up) workflow for a prospect.
+ * J+2: sends message_j2 if no response. J+3: sends message_j3 if still no response.
+ */
+export async function createRelanceWorkflow(config: RelanceConfig) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  const { data, error } = await supabase
+    .from("relance_workflows")
+    .insert({
+      prospect_id: config.prospect_id,
+      platform: config.platform,
+      created_by: user.id,
+      status: "pending",
+      delay_j2_hours: config.delay_j2_hours ?? 48,
+      delay_j3_hours: config.delay_j3_hours ?? 72,
+      message_j2: config.message_j2,
+      message_j3: config.message_j3,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (isTableMissing(error)) {
+      // Table does not exist yet — return a mock result
+      return { id: "mock", prospect_id: config.prospect_id, status: "pending" };
+    }
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/prospecting");
+  revalidatePath("/automation");
+  return data;
+}
+
+/**
+ * Process all pending relances: check timing and send messages via Unipile.
+ * Called by cron or manually from the automation dashboard.
+ */
+export async function processRelances(): Promise<{ processed: number; sent: number; errors: number }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  let processed = 0;
+  let sent = 0;
+  let errors = 0;
+
+  try {
+    const { data: pendingRelances, error } = await supabase
+      .from("relance_workflows")
+      .select("*, prospect:prospects(id, name, platform, profile_url, status)")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      if (isTableMissing(error)) return { processed: 0, sent: 0, errors: 0 };
+      throw new Error(error.message);
+    }
+
+    if (!pendingRelances || pendingRelances.length === 0) {
+      return { processed: 0, sent: 0, errors: 0 };
+    }
+
+    const now = Date.now();
+    const { sendUnipileMessage } = await import("@/lib/actions/unipile");
+    const { getUnipileStatus } = await import("@/lib/actions/unipile");
+    const status = await getUnipileStatus();
+    const accounts = status.accounts || [];
+
+    for (const relance of pendingRelances) {
+      processed++;
+      const createdAt = new Date(relance.created_at).getTime();
+      const j2Threshold = createdAt + (relance.delay_j2_hours || 48) * 60 * 60 * 1000;
+      const j3Threshold = createdAt + (relance.delay_j3_hours || 72) * 60 * 60 * 1000;
+
+      // Check if the prospect has responded (status changed to 'replied')
+      const prospect = Array.isArray(relance.prospect) ? relance.prospect[0] : relance.prospect;
+      if (prospect?.status === "replied" || prospect?.status === "booked") {
+        await supabase.from("relance_workflows").update({
+          status: "responded",
+          responded_at: new Date().toISOString(),
+        }).eq("id", relance.id);
+        continue;
+      }
+
+      // Find the correct Unipile account for this platform
+      const providerName = relance.platform === "linkedin" ? "LINKEDIN" : "INSTAGRAM";
+      const account = accounts.find(
+        (a: { provider: string }) => a.provider.toUpperCase() === providerName
+      );
+      if (!account) continue;
+
+      try {
+        // J+3 check first (takes priority if both thresholds passed)
+        if (!relance.j3_sent_at && now >= j3Threshold && relance.j2_sent_at) {
+          await sendUnipileMessage({
+            accountId: account.id,
+            recipientId: prospect?.profile_url || relance.prospect_id,
+            text: relance.message_j3,
+            channel: relance.platform,
+            prospectId: relance.prospect_id,
+          });
+
+          await supabase.from("relance_workflows").update({
+            j3_sent_at: new Date().toISOString(),
+            status: "sent",
+          }).eq("id", relance.id);
+
+          // Log in inbox_messages with IA tag
+          await supabase.from("inbox_messages").insert({
+            user_id: user.id,
+            prospect_id: relance.prospect_id,
+            channel: relance.platform,
+            direction: "outbound",
+            content: relance.message_j3,
+            status: "sent",
+            metadata: { source: "auto_relance", step: "j3", relance_id: relance.id },
+            created_at: new Date().toISOString(),
+          });
+
+          sent++;
+        }
+        // J+2 check
+        else if (!relance.j2_sent_at && now >= j2Threshold) {
+          await sendUnipileMessage({
+            accountId: account.id,
+            recipientId: prospect?.profile_url || relance.prospect_id,
+            text: relance.message_j2,
+            channel: relance.platform,
+            prospectId: relance.prospect_id,
+          });
+
+          await supabase.from("relance_workflows").update({
+            j2_sent_at: new Date().toISOString(),
+          }).eq("id", relance.id);
+
+          await supabase.from("inbox_messages").insert({
+            user_id: user.id,
+            prospect_id: relance.prospect_id,
+            channel: relance.platform,
+            direction: "outbound",
+            content: relance.message_j2,
+            status: "sent",
+            metadata: { source: "auto_relance", step: "j2", relance_id: relance.id },
+            created_at: new Date().toISOString(),
+          });
+
+          sent++;
+        }
+      } catch (err) {
+        console.error(`Relance error for prospect ${relance.prospect_id}:`, err);
+        errors++;
+      }
+    }
+  } catch (err) {
+    console.error("processRelances error:", err);
+  }
+
+  revalidatePath("/prospecting");
+  revalidatePath("/automation");
+  return { processed, sent, errors };
+}
+
+/**
+ * Cancel a pending relance workflow for a given prospect.
+ */
+export async function cancelRelance(prospectId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  try {
+    const { error } = await supabase
+      .from("relance_workflows")
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .eq("prospect_id", prospectId)
+      .eq("status", "pending");
+
+    if (error && !isTableMissing(error)) throw new Error(error.message);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!msg.includes("does not exist")) throw err;
+  }
+
+  revalidatePath("/prospecting");
+  revalidatePath("/automation");
+}
+
+/**
+ * Get relance workflows, optionally filtered by prospect.
+ */
+export async function getRelanceWorkflows(prospectId?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  try {
+    let query = supabase
+      .from("relance_workflows")
+      .select("*, prospect:prospects(id, name, platform, status)")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (prospectId) {
+      query = query.eq("prospect_id", prospectId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      if (isTableMissing(error)) return [];
+      throw new Error(error.message);
+    }
+    return data || [];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("does not exist")) return [];
+    throw err;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// AI Message Personalization
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate a personalized message using AI based on prospect profile and a template.
+ * Variables: {nom}, {activite}, {dernier_post}
+ */
+export async function generatePersonalizedMessage(
+  prospect: {
+    name: string;
+    platform?: string | null;
+    activity?: string | null;
+    recent_post?: string | null;
+    profile_url?: string | null;
+    notes?: string | null;
+  },
+  template: string
+): Promise<{ message: string; error?: string }> {
+  try {
+    // First do basic variable replacement
+    let message = template
+      .replace(/\{nom\}/g, prospect.name || "")
+      .replace(/\{activite\}/g, prospect.activity || "votre activite")
+      .replace(/\{dernier_post\}/g, prospect.recent_post || "votre dernier contenu");
+
+    // Use AI to further personalize
+    try {
+      const { aiComplete } = await import("@/lib/ai/client");
+      const aiMessage = await aiComplete(
+        `Tu es un expert en prospection commerciale via ${prospect.platform || "les reseaux sociaux"}.
+Personnalise ce message de prospection pour le rendre plus naturel et engageant.
+Ne change pas le sens du message, juste rends-le plus humain et personnel.
+
+Informations sur le prospect :
+- Nom : ${prospect.name}
+- Plateforme : ${prospect.platform || "inconnue"}
+- Activite : ${prospect.activity || "non renseignee"}
+- Dernier post/contenu : ${prospect.recent_post || "non disponible"}
+- Notes : ${prospect.notes || "aucune"}
+
+Message a personnaliser :
+${message}
+
+Reponds UNIQUEMENT avec le message personnalise, sans guillemets, sans explication.`,
+        {
+          system: "Tu es un assistant de vente expert en prospection sociale. Ecris uniquement en francais. Sois naturel, pas commercial.",
+          maxTokens: 300,
+          temperature: 0.7,
+        }
+      );
+
+      if (aiMessage && aiMessage.trim().length > 10) {
+        message = aiMessage.trim();
+      }
+    } catch {
+      // AI failed — use the template-based message
+      console.warn("[AI Personalization] OpenRouter indisponible, utilisation du template basique");
+    }
+
+    return { message };
+  } catch (err) {
+    console.error("generatePersonalizedMessage error:", err);
+    return {
+      message: template.replace(/\{nom\}/g, prospect.name || ""),
+      error: "Erreur de personnalisation IA",
+    };
+  }
+}
+
+/**
+ * Send an AI-personalized message to a prospect via Unipile.
+ */
+export async function sendAIMessage(
+  prospectId: string,
+  platform: string
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  // 1. Get prospect data
+  const { data: prospect } = await supabase
+    .from("prospects")
+    .select("*")
+    .eq("id", prospectId)
+    .single();
+
+  if (!prospect) return { success: false, error: "Prospect introuvable" };
+
+  // 2. Get AI mode config for template
+  const { data: config } = await supabase
+    .from("ai_mode_configs")
+    .select("auto_send_template, auto_send_mode, auto_send_enabled, auto_send_platforms")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!config?.auto_send_enabled) {
+    return { success: false, error: "Envoi automatique IA desactive" };
+  }
+
+  const platforms = (config.auto_send_platforms as string[]) || [];
+  if (!platforms.includes(platform)) {
+    return { success: false, error: `Plateforme ${platform} non activee pour l'envoi IA` };
+  }
+
+  const template = (config.auto_send_template as string) || "Bonjour {nom}, j'ai vu {dernier_post} et ca m'a interpelle !";
+
+  // 3. Generate personalized message
+  const metadata = typeof prospect.metadata === "object" && prospect.metadata
+    ? (prospect.metadata as Record<string, unknown>)
+    : {};
+  const enrichment = metadata.enrichment as Record<string, unknown> | undefined;
+
+  const { message } = await generatePersonalizedMessage(
+    {
+      name: prospect.name,
+      platform: prospect.platform,
+      activity: (enrichment?.headline as string) || (prospect.notes as string | null) || null,
+      recent_post: (enrichment?.recent_post as string) || null,
+      profile_url: prospect.profile_url,
+      notes: prospect.notes as string | null,
+    },
+    template
+  );
+
+  // 4. Check AI mode — if critical_validation, don't auto-send
+  if (config.auto_send_mode === "critical_validation") {
+    return { success: true, message, error: "MODE_VALIDATION_REQUISE" };
+  }
+
+  if (config.auto_send_mode === "full_human") {
+    return { success: true, message, error: "MODE_HUMAIN" };
+  }
+
+  // 5. Send via Unipile
+  const { getUnipileStatus, sendUnipileMessage } = await import("@/lib/actions/unipile");
+  const status = await getUnipileStatus();
+  const providerName = platform === "linkedin" ? "LINKEDIN" : "INSTAGRAM";
+  const account = status.accounts.find(
+    (a) => a.provider.toUpperCase() === providerName
+  );
+
+  if (!account) {
+    return { success: false, error: `Aucun compte ${platform} connecte via Unipile` };
+  }
+
+  const result = await sendUnipileMessage({
+    accountId: account.id,
+    recipientId: prospect.profile_url || prospectId,
+    text: message,
+    channel: platform,
+    prospectId,
+  });
+
+  if (result.error) {
+    return { success: false, error: result.error };
+  }
+
+  // 6. Log as AI-sent in inbox_messages
+  await supabase.from("inbox_messages").insert({
+    user_id: user.id,
+    prospect_id: prospectId,
+    channel: platform,
+    direction: "outbound",
+    content: message,
+    status: "sent",
+    metadata: { source: "ai_auto_send", ai_mode: config.auto_send_mode },
+    created_at: new Date().toISOString(),
+  });
+
+  // 7. Update prospect status
+  await supabase.from("prospects").update({
+    status: "contacted",
+    last_message_at: new Date().toISOString(),
+  }).eq("id", prospectId);
+
+  revalidatePath("/prospecting");
+  revalidatePath("/inbox");
+  return { success: true, message };
+}
+
+// ---------------------------------------------------------------------------
+// Human Escalation
+// ---------------------------------------------------------------------------
+
+/**
+ * Escalate a conversation to a human agent.
+ * Sends push notification to the assigned setter and marks the conversation.
+ */
+export async function escalateToHuman(
+  conversationId: string,
+  reason: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  try {
+    // 1. Mark the conversation as needing human attention
+    await supabase.from("dm_conversations").update({
+      needs_human: true,
+      escalation_reason: reason,
+      escalated_at: new Date().toISOString(),
+    }).eq("id", conversationId);
+  } catch {
+    // Column may not exist yet, try inbox_messages metadata update
+    try {
+      await supabase.from("inbox_messages").insert({
+        user_id: user.id,
+        channel: "system",
+        direction: "inbound",
+        content: `[ESCALATION] ${reason}`,
+        status: "received",
+        metadata: {
+          type: "escalation",
+          conversation_id: conversationId,
+          reason,
+          escalated_at: new Date().toISOString(),
+        },
+        created_at: new Date().toISOString(),
+      });
+    } catch {
+      // Graceful fallback
+    }
+  }
+
+  // 2. Find the assigned setter or admin to notify
+  let targetUserId = user.id;
+
+  // Try to find the conversation's assigned setter
+  try {
+    const { data: conv } = await supabase
+      .from("dm_conversations")
+      .select("prospect_id")
+      .eq("id", conversationId)
+      .single();
+
+    if (conv?.prospect_id) {
+      const { data: prospect } = await supabase
+        .from("prospects")
+        .select("assigned_setter_id")
+        .eq("id", conv.prospect_id)
+        .single();
+
+      if (prospect?.assigned_setter_id) {
+        targetUserId = prospect.assigned_setter_id;
+      }
+    }
+  } catch {
+    // Fallback: notify admins
+  }
+
+  // If no setter assigned, notify first admin
+  if (targetUserId === user.id) {
+    const { data: admin } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", ["admin", "manager"])
+      .limit(1)
+      .single();
+
+    if (admin) targetUserId = admin.id;
+  }
+
+  // 3. Send push notification
+  await notify(
+    targetUserId,
+    "Escalade IA — Intervention humaine requise",
+    `Raison : ${reason}. La conversation necessite une reponse humaine.`,
+    { type: "escalation", link: "/inbox" }
+  );
+
+  // 4. Create a notification record
+  await supabase.from("notifications").insert({
+    user_id: targetUserId,
+    type: "escalation",
+    title: "Intervention humaine requise",
+    body: `L'IA ne peut pas gerer cette conversation : ${reason}`,
+    link: "/inbox",
+    read: false,
+  });
+
+  revalidatePath("/inbox");
+  revalidatePath("/notifications");
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Instagram Story Auto-Reaction
+// ---------------------------------------------------------------------------
+
+/**
+ * React to an Instagram story via Unipile API.
+ */
+export async function reactToInstagramStory(
+  storyUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  // Get AI mode config for story reaction settings
+  const { data: config } = await supabase
+    .from("ai_mode_configs")
+    .select("story_reaction_enabled, story_reaction_emoji")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!config?.story_reaction_enabled) {
+    return { success: false, error: "Reaction aux stories desactivee" };
+  }
+
+  const emoji = (config.story_reaction_emoji as string) || "\u{1F525}";
+
+  // Get Unipile credentials
+  const { getApiKey } = await import("@/lib/api-keys");
+  const dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
+  const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+
+  if (!dsn || !apiKey) {
+    return { success: false, error: "Unipile non configure" };
+  }
+
+  // Find Instagram account
+  const { getUnipileStatus } = await import("@/lib/actions/unipile");
+  const status = await getUnipileStatus();
+  const igAccount = status.accounts.find(
+    (a) => a.provider.toUpperCase() === "INSTAGRAM"
+  );
+
+  if (!igAccount) {
+    return { success: false, error: "Aucun compte Instagram connecte" };
+  }
+
+  try {
+    // Use Unipile REST API to react to story
+    const res = await fetch(`${dsn}/api/v1/posts/reactions`, {
+      method: "POST",
+      headers: {
+        "X-API-KEY": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        account_id: igAccount.id,
+        post_url: storyUrl,
+        reaction: emoji,
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      return { success: false, error: `Erreur reaction story : ${errText}` };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("reactToInstagramStory error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Erreur de reaction",
+    };
+  }
+}

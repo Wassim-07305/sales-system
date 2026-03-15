@@ -12,7 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar, ImagePlus, X, Loader2 } from "lucide-react";
+import {
+  Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar, ImagePlus, X, Loader2,
+  HelpCircle, PartyPopper, MessagesSquare, ShieldCheck, Hash,
+} from "lucide-react";
 import { createCommunityPost, toggleLike, getComments, addComment } from "@/lib/actions/community";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -31,8 +34,9 @@ interface Post {
   content: string;
   image_url: string | null;
   likes_count: number;
+  channel: string | null;
   created_at: string;
-  author: { id: string; full_name: string | null; avatar_url: string | null; niche: string | null } | null;
+  author: { id: string; full_name: string | null; avatar_url: string | null; niche: string | null; role?: string } | null;
 }
 
 interface Comment {
@@ -42,6 +46,70 @@ interface Comment {
   author: { id: string; full_name: string | null; avatar_url: string | null } | null;
 }
 
+// ─── Channel definitions ───
+
+interface ChannelDef {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;          // Tailwind text color
+  bgColor: string;        // Tailwind bg color for icon container
+  borderColor: string;    // Active border accent
+  private?: boolean;
+  allowedRoles?: string[];
+}
+
+const CHANNELS: ChannelDef[] = [
+  {
+    id: "all",
+    label: "Tous les canaux",
+    description: "Voir tous les posts",
+    icon: <Hash className="h-4 w-4" />,
+    color: "text-muted-foreground",
+    bgColor: "bg-muted/50",
+    borderColor: "border-brand",
+  },
+  {
+    id: "questions",
+    label: "Questions globales",
+    description: "Posez vos questions \u00e0 la communaut\u00e9",
+    icon: <HelpCircle className="h-4 w-4" />,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500",
+  },
+  {
+    id: "wins",
+    label: "Wins & Victoires",
+    description: "Partagez vos succ\u00e8s et c\u00e9l\u00e9brez",
+    icon: <PartyPopper className="h-4 w-4" />,
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    borderColor: "border-emerald-500",
+  },
+  {
+    id: "general",
+    label: "Chat g\u00e9n\u00e9ral",
+    description: "Discussion libre entre membres",
+    icon: <MessagesSquare className="h-4 w-4" />,
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500",
+  },
+  {
+    id: "team_interne",
+    label: "Team interne",
+    description: "Canal priv\u00e9 admin / manager / setter",
+    icon: <ShieldCheck className="h-4 w-4" />,
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
+    borderColor: "border-purple-500",
+    private: true,
+    allowedRoles: ["admin", "manager", "setter"],
+  },
+];
+
 const typeColors: Record<string, string> = {
   win: "bg-brand/10 text-brand-dark border-brand/30",
   question: "bg-blue-500/10 text-blue-600 border-blue-500/20",
@@ -50,9 +118,26 @@ const typeColors: Record<string, string> = {
 
 const typeLabels: Record<string, string> = { win: "Win", question: "Question", discussion: "Discussion" };
 
-export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputations = {} }: { posts: Post[]; userId: string; isAdmin: boolean; leaderboard?: LeaderboardEntry[]; reputations?: Record<string, number> }) {
+export function CommunityView({
+  posts,
+  userId,
+  isAdmin,
+  leaderboard = [],
+  reputations = {},
+  userRole = "client_b2c",
+  channelCounts = {},
+}: {
+  posts: Post[];
+  userId: string;
+  isAdmin: boolean;
+  leaderboard?: LeaderboardEntry[];
+  reputations?: Record<string, number>;
+  userRole?: string;
+  channelCounts?: Record<string, number>;
+}) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeChannel, setActiveChannel] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
   const [newType, setNewType] = useState("discussion");
   const [newTitle, setNewTitle] = useState("");
@@ -67,7 +152,27 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
   const [commentText, setCommentText] = useState("");
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = activeTab === "all" ? posts : posts.filter((p) => p.type === activeTab);
+  // Filter channels by role
+  const visibleChannels = CHANNELS.filter((ch) => {
+    if (!ch.allowedRoles) return true;
+    return ch.allowedRoles.includes(userRole);
+  });
+
+  // Filter posts: by channel, then by type tab
+  const channelFiltered = activeChannel === "all"
+    ? posts.filter((p) => {
+        // Hide team_interne posts from users who don't have access
+        if (p.channel === "team_interne") {
+          const teamChannel = CHANNELS.find((c) => c.id === "team_interne");
+          if (teamChannel?.allowedRoles && !teamChannel.allowedRoles.includes(userRole)) return false;
+        }
+        return true;
+      })
+    : posts.filter((p) => (p.channel || "general") === activeChannel);
+
+  const filtered = activeTab === "all" ? channelFiltered : channelFiltered.filter((p) => p.type === activeTab);
+
+  const activeChannelDef = CHANNELS.find((ch) => ch.id === activeChannel) || CHANNELS[0];
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -86,7 +191,7 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
       const { data } = supabase.storage.from("community").getPublicUrl(path);
       setNewImageUrl(data.publicUrl);
       setNewImagePreview(data.publicUrl);
-      toast.success("Image ajoutée !");
+      toast.success("Image ajout\u00e9e !");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur upload image");
     } finally {
@@ -103,8 +208,9 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
         title: newTitle || undefined,
         content: newContent,
         image_url: newImageUrl || undefined,
+        channel: activeChannel === "all" ? "general" : activeChannel,
       });
-      toast.success("Post publié !");
+      toast.success("Post publi\u00e9 !");
       setDialogOpen(false);
       setNewContent("");
       setNewTitle("");
@@ -148,6 +254,7 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
   }
 
   function PostCard({ post, isWinGrid }: { post: Post; isWinGrid?: boolean }) {
+    const postChannel = CHANNELS.find((c) => c.id === (post.channel || "general"));
     return (
       <Card className={`${post.type === "win" && isWinGrid ? "border-emerald-500/20 bg-emerald-500/5" : ""}`}>
         <CardContent className="p-6">
@@ -166,10 +273,18 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
               </p>
             </div>
-            <Badge variant="outline" className={`ml-auto ${typeColors[post.type]}`}>
-              {post.type === "win" && <Trophy className="h-3 w-3 mr-1" />}
-              {typeLabels[post.type]}
-            </Badge>
+            <div className="ml-auto flex items-center gap-2">
+              {activeChannel === "all" && postChannel && postChannel.id !== "all" && (
+                <Badge variant="outline" className={`text-xs ${postChannel.color} ${postChannel.bgColor} border-transparent`}>
+                  {postChannel.private && <ShieldCheck className="h-3 w-3 mr-1" />}
+                  {postChannel.label}
+                </Badge>
+              )}
+              <Badge variant="outline" className={`${typeColors[post.type]}`}>
+                {post.type === "win" && <Trophy className="h-3 w-3 mr-1" />}
+                {typeLabels[post.type]}
+              </Badge>
+            </div>
           </div>
           {post.title && <h3 className="font-semibold mb-2">{post.title}</h3>}
           <p className="text-sm mb-4 whitespace-pre-wrap">{post.content}</p>
@@ -223,17 +338,17 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
 
   return (
     <div>
-      <PageHeader title="Communauté" description="Échangez avec les autres membres">
+      <PageHeader title="Communaut\u00e9" description="\u00c9changez avec les autres membres">
         <div className="flex gap-2">
           <Link href="/community/events">
-            <Button variant="outline" size="sm"><Calendar className="h-4 w-4 mr-2" />Événements</Button>
+            <Button variant="outline" size="sm"><Calendar className="h-4 w-4 mr-2" />\u00c9v\u00e9nements</Button>
           </Link>
           <Link href="/community/members">
             <Button variant="outline" size="sm"><Users className="h-4 w-4 mr-2" />Membres</Button>
           </Link>
           {isAdmin && (
             <Link href="/community/manage">
-              <Button variant="outline" size="sm"><Settings2 className="h-4 w-4 mr-2" />Modération</Button>
+              <Button variant="outline" size="sm"><Settings2 className="h-4 w-4 mr-2" />Mod\u00e9ration</Button>
             </Link>
           )}
           <Button onClick={() => setDialogOpen(true)} className="bg-brand text-brand-dark hover:bg-brand/90">
@@ -244,7 +359,72 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
       </PageHeader>
 
       <div className="flex flex-col lg:flex-row gap-6">
+        {/* ─── Channel sidebar ─── */}
+        <div className="lg:w-60 shrink-0">
+          <div className="sticky top-20">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-3 px-2">Canaux</h3>
+            <nav className="space-y-1">
+              {visibleChannels.map((ch) => {
+                const isActive = activeChannel === ch.id;
+                const count = ch.id === "all"
+                  ? Object.values(channelCounts).reduce((s, v) => s + v, 0) - (channelCounts.all || 0) || channelCounts.all || 0
+                  : channelCounts[ch.id] || 0;
+
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => setActiveChannel(ch.id)}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all ${
+                      isActive
+                        ? `bg-accent/50 border-l-2 ${ch.borderColor} font-medium`
+                        : "hover:bg-accent/30 border-l-2 border-transparent"
+                    }`}
+                  >
+                    <span className={`flex h-7 w-7 items-center justify-center rounded-md ${ch.bgColor} ${ch.color}`}>
+                      {ch.icon}
+                    </span>
+                    <span className="flex-1 truncate">
+                      <span className="block leading-tight">{ch.label}</span>
+                      {ch.private && (
+                        <span className="text-[10px] text-purple-400 flex items-center gap-0.5 mt-0.5">
+                          <ShieldCheck className="h-2.5 w-2.5" /> Priv\u00e9
+                        </span>
+                      )}
+                    </span>
+                    {count > 0 && (
+                      <span className="text-[11px] font-medium text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 min-w-[22px] text-center">
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* ─── Main content ─── */}
         <div className="flex-1 min-w-0">
+          {/* Active channel header */}
+          {activeChannel !== "all" && (
+            <div className={`flex items-center gap-3 mb-5 p-4 rounded-lg border ${activeChannelDef.bgColor}`}>
+              <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${activeChannelDef.bgColor} ${activeChannelDef.color}`}>
+                {activeChannelDef.icon}
+              </span>
+              <div>
+                <h2 className="font-semibold flex items-center gap-2">
+                  {activeChannelDef.label}
+                  {activeChannelDef.private && (
+                    <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-500">
+                      <ShieldCheck className="h-3 w-3 mr-0.5" /> Priv\u00e9
+                    </Badge>
+                  )}
+                </h2>
+                <p className="text-xs text-muted-foreground">{activeChannelDef.description}</p>
+              </div>
+            </div>
+          )}
+
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="all">Tout</TabsTrigger>
@@ -284,13 +464,14 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <MessageCircle className="h-7 w-7 opacity-50" />
                 </div>
-                <p className="font-medium">Aucun post</p>
-                <p className="text-sm">Soyez le premier à publier !</p>
+                <p className="font-medium">Aucun post dans ce canal</p>
+                <p className="text-sm">Soyez le premier \u00e0 publier !</p>
               </CardContent>
             </Card>
           )}
         </div>
 
+        {/* ─── Leaderboard sidebar ─── */}
         {leaderboard.length > 0 && (
           <div className="lg:w-72 shrink-0">
             <LeaderboardCard entries={leaderboard} />
@@ -298,12 +479,33 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
         )}
       </div>
 
+      {/* ─── New post dialog ─── */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Nouveau post</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Channel selector */}
+            <div>
+              <Label>Canal</Label>
+              <Select
+                value={activeChannel === "all" ? "general" : activeChannel}
+                onValueChange={(v) => setActiveChannel(v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {visibleChannels.filter((ch) => ch.id !== "all").map((ch) => (
+                    <SelectItem key={ch.id} value={ch.id}>
+                      <span className="flex items-center gap-2">
+                        {ch.label}
+                        {ch.private && <ShieldCheck className="h-3 w-3 text-purple-500" />}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label>Type</Label>
               <Select value={newType} onValueChange={setNewType}>
@@ -328,7 +530,7 @@ export function CommunityView({ posts, userId, isAdmin, leaderboard = [], reputa
               <Label>Image (optionnel)</Label>
               {newImagePreview ? (
                 <div className="relative mt-2">
-                  <img src={newImagePreview} alt="Aperçu" className="w-full rounded-lg max-h-48 object-cover" />
+                  <img src={newImagePreview} alt="Aper\u00e7u" className="w-full rounded-lg max-h-48 object-cover" />
                   <button
                     type="button"
                     onClick={() => { setNewImageUrl(""); setNewImagePreview(""); }}

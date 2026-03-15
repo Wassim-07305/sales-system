@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify } from "@/lib/actions/notifications";
 
-export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" | "b2c") {
+export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" | "b2c", channel?: string) {
   const supabase = await createClient();
   let query = supabase
     .from("community_posts")
@@ -13,6 +13,11 @@ export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" 
     .order("created_at", { ascending: false });
 
   if (type && type !== "all") query = query.eq("type", type);
+
+  // Filter by channel
+  if (channel && channel !== "all") {
+    query = query.eq("channel", channel);
+  }
 
   // Filter by audience segment (B2B vs B2C separation)
   if (audience === "b2b") {
@@ -28,16 +33,51 @@ export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" 
   }));
 }
 
+export async function getCommunityChannelCounts() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("community_posts")
+    .select("channel")
+    .eq("hidden", false);
+
+  const counts: Record<string, number> = {
+    all: 0,
+    questions: 0,
+    wins: 0,
+    general: 0,
+    team_interne: 0,
+  };
+
+  for (const row of data || []) {
+    counts.all += 1;
+    const ch = (row as Record<string, unknown>).channel as string | null;
+    if (ch && counts[ch] !== undefined) {
+      counts[ch] += 1;
+    }
+  }
+
+  return counts;
+}
+
 export async function createCommunityPost(formData: {
   type: string;
   title?: string;
   content: string;
   image_url?: string;
   target_audience?: "all" | "b2b" | "b2c";
+  channel?: string;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+
+  // If posting to team_interne, verify role
+  if (formData.channel === "team_interne") {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    if (!profile || !["admin", "manager", "setter"].includes(profile.role)) {
+      throw new Error("Accès refusé à ce canal");
+    }
+  }
 
   const { error } = await supabase.from("community_posts").insert({
     author_id: user.id,
@@ -46,6 +86,7 @@ export async function createCommunityPost(formData: {
     content: formData.content,
     image_url: formData.image_url || null,
     target_audience: formData.target_audience || "all",
+    channel: formData.channel || "general",
     likes_count: 0,
   });
   if (error) throw new Error(error.message);

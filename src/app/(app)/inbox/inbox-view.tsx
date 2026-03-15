@@ -10,9 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Send, Mic, MicOff, Instagram, MessageSquare, Upload, Bot, Plus, X, Sparkles, Loader2 } from "lucide-react";
+import { Search, Send, Mic, MicOff, Instagram, MessageSquare, Upload, Bot, Plus, X, Sparkles, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendMessage, createConversation, importConversation, generateQuickReplies } from "@/lib/actions/inbox";
+import { escalateToHuman } from "@/lib/actions/automation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ interface DmMessage {
   content: string;
   type: string;
   timestamp: string;
+  metadata?: { source?: string; ai_mode?: string; step?: string } | null;
 }
 
 interface Conversation {
@@ -252,9 +254,23 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   }
 
   async function handleVoiceAi() {
-    toast.success("Vocal IA programmé (en attente d'intégration ElevenLabs)");
+    toast.success("Vocal IA programme (en attente d'integration ElevenLabs)");
     setVoiceAiDialogOpen(false);
     setVoiceAiText("");
+  }
+
+  async function handleEscalate() {
+    if (!selectedConv) return;
+    try {
+      const result = await escalateToHuman(selectedConv.id, "Reponse complexe — intervention humaine requise");
+      if (result.success) {
+        toast.success("Conversation escaladee — notification envoyee au setter/manager");
+      } else {
+        toast.error(result.error || "Erreur d'escalade");
+      }
+    } catch {
+      toast.error("Erreur lors de l'escalade");
+    }
   }
 
   return (
@@ -345,31 +361,52 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                     <Badge variant="outline" className="text-[10px]">{selectedConv.platform}</Badge>
                   </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEscalate}
+                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 gap-1.5"
+                  title="Escalader vers un humain"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline text-xs">Escalader</span>
+                </Button>
               </div>
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {(selectedConv.messages || []).map((msg, i) => (
-                  <div key={i} className={`flex ${msg.sender === "damien" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                      msg.sender === "damien"
-                        ? "bg-brand text-brand-dark rounded-br-md"
-                        : "bg-muted rounded-bl-md"
-                    }`}>
-                      {msg.type === "voice" ? (
-                        <div className="flex items-center gap-2">
-                          <Mic className="h-4 w-4" />
-                          <span>Message vocal</span>
+                {(selectedConv.messages || []).map((msg, i) => {
+                  const isAiSent = msg.metadata?.source === "ai_auto_send" || msg.metadata?.source === "auto_relance";
+                  return (
+                    <div key={i} className={`flex ${msg.sender === "damien" ? "justify-end" : "justify-start"}`}>
+                      <div className="flex flex-col items-end gap-0.5">
+                        {isAiSent && msg.sender === "damien" && (
+                          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 gap-0.5 text-[9px] px-1.5 py-0">
+                            <Bot className="h-2.5 w-2.5" />
+                            IA{msg.metadata?.step ? ` (${msg.metadata.step.toUpperCase()})` : ""}
+                          </Badge>
+                        )}
+                        <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
+                          msg.sender === "damien"
+                            ? "bg-brand text-brand-dark rounded-br-md"
+                            : "bg-muted rounded-bl-md"
+                        }`}>
+                          {msg.type === "voice" ? (
+                            <div className="flex items-center gap-2">
+                              <Mic className="h-4 w-4" />
+                              <span>Message vocal</span>
+                            </div>
+                          ) : (
+                            msg.content
+                          )}
+                          <p className={`text-[10px] mt-1 ${msg.sender === "damien" ? "text-brand-dark/60" : "text-muted-foreground"}`}>
+                            {new Date(msg.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          </p>
                         </div>
-                      ) : (
-                        msg.content
-                      )}
-                      <p className={`text-[10px] mt-1 ${msg.sender === "damien" ? "text-brand-dark/60" : "text-muted-foreground"}`}>
-                        {new Date(msg.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 

@@ -38,9 +38,25 @@ export default async function ProspectingPage() {
     };
   }
 
+  // Fetch relance statuses for all prospects
+  const { data: relances } = await supabase
+    .from("relance_workflows")
+    .select("prospect_id, status")
+    .in("prospect_id", prospectIds.length > 0 ? prospectIds : ["__none__"])
+    .order("created_at", { ascending: false });
+
+  const relanceMap: Record<string, string> = {};
+  for (const r of relances || []) {
+    // Keep the most recent relance status per prospect
+    if (!relanceMap[r.prospect_id as string]) {
+      relanceMap[r.prospect_id as string] = r.status as string;
+    }
+  }
+
   const prospectsWithScores = prospects.map((p: Record<string, unknown>) => ({
     ...p,
     computed_score: scoresMap[p.id as string] ?? null,
+    relance_status: relanceMap[p.id as string] ?? null,
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

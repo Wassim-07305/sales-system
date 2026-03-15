@@ -670,6 +670,169 @@ export async function setRoleplayRequirement(courseId: string, minScore: number)
   revalidatePath("/academy");
 }
 
+// ---------------------------------------------------------------------------
+// Module locking — modules unlock sequentially based on quiz scores
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns unlock status for every module in a course.
+ * Module 0 is always unlocked. Module N is unlocked only if the user's best
+ * quiz score for module N-1's *last lesson quiz* is >= 90%.
+ * Also returns daily attempt info so the UI can show remaining attempts.
+ */
+export async function getModuleUnlockStatus(courseId: string): Promise<{
+  moduleStatus: Record<
+    string,
+    {
+      unlocked: boolean;
+      previousModuleQuizPassed: boolean;
+      previousModuleQuizBestScore: number | null;
+      previousModuleQuizTodayAttempts: number;
+      previousModuleQuizMaxAttempts: number;
+      previousModuleTitle: string | null;
+    }
+  >;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { moduleStatus: {} };
+
+  // Fetch course modules with their lessons (need quiz info)
+  const { data: course } = await supabase
+    .from("courses")
+    .select("modules:course_modules(id, title, position, lessons:lessons(id, position))")
+    .eq("id", courseId)
+    .single();
+
+  if (!course) return { moduleStatus: {} };
+
+  const modules = Array.isArray(course.modules)
+    ? (course.modules as Array<{
+        id: string;
+        title: string;
+        position: number;
+        lessons: Array<{ id: string; position: number }>;
+      }>).sort((a, b) => a.position - b.position)
+    : [];
+
+  if (modules.length === 0) return { moduleStatus: {} };
+
+  // Collect all lesson IDs to batch-fetch quizzes and attempts
+  const allLessonIds = modules.flatMap((m) => m.lessons.map((l) => l.id));
+  if (allLessonIds.length === 0) return { moduleStatus: {} };
+
+  // Fetch all quizzes for lessons in this course
+  const { data: quizzes } = await supabase
+    .from("quizzes")
+    .select("id, lesson_id, max_attempts_per_day")
+    .in("lesson_id", allLessonIds);
+
+  const quizByLessonId: Record<string, { id: string; max_attempts_per_day: number }> = {};
+  for (const q of quizzes || []) {
+    quizByLessonId[q.lesson_id] = {
+      id: q.id,
+      max_attempts_per_day: q.max_attempts_per_day || 3,
+    };
+  }
+
+  // Fetch all quiz attempts for this user in this course
+  const { data: attempts } = await supabase
+    .from("quiz_attempts")
+    .select("lesson_id, score, attempted_at")
+    .eq("user_id", user.id)
+    .in("lesson_id", allLessonIds)
+    .order("attempted_at", { ascending: false });
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Helper: get best score and today attempts for a specific lesson
+  function getAttemptInfo(lessonId: string) {
+    const lessonAttempts = (attempts || []).filter((a) => a.lesson_id === lessonId);
+    const todayAttempts = lessonAttempts.filter(
+      (a) => a.attempted_at >= `${today}T00:00:00.000Z`
+    );
+    const bestScore = lessonAttempts.length > 0
+      ? Math.max(0, ...lessonAttempts.map((a) => a.score ?? 0))
+      : 0;
+    return { bestScore, todayAttempts: todayAttempts.length };
+  }
+
+  // For each module, find its "gate quiz" — the quiz on the last lesson of the module
+  // that must be passed to unlock the next module
+  function getModuleGateLesson(mod: typeof modules[number]): string | null {
+    const sortedLessons = [...mod.lessons].sort((a, b) => a.position - b.position);
+    // Find the last lesson that has a quiz
+    for (let i = sortedLessons.length - 1; i >= 0; i--) {
+      if (quizByLessonId[sortedLessons[i].id]) {
+        return sortedLessons[i].id;
+      }
+    }
+    return null;
+  }
+
+  const moduleStatus: Record<
+    string,
+    {
+      unlocked: boolean;
+      previousModuleQuizPassed: boolean;
+      previousModuleQuizBestScore: number | null;
+      previousModuleQuizTodayAttempts: number;
+      previousModuleQuizMaxAttempts: number;
+      previousModuleTitle: string | null;
+    }
+  > = {};
+
+  for (let i = 0; i < modules.length; i++) {
+    const mod = modules[i];
+
+    if (i === 0) {
+      // First module is always unlocked
+      moduleStatus[mod.id] = {
+        unlocked: true,
+        previousModuleQuizPassed: true,
+        previousModuleQuizBestScore: null,
+        previousModuleQuizTodayAttempts: 0,
+        previousModuleQuizMaxAttempts: 3,
+        previousModuleTitle: null,
+      };
+      continue;
+    }
+
+    const prevModule = modules[i - 1];
+    const gateLessonId = getModuleGateLesson(prevModule);
+
+    if (!gateLessonId) {
+      // Previous module has no quiz — module is unlocked by default
+      moduleStatus[mod.id] = {
+        unlocked: true,
+        previousModuleQuizPassed: true,
+        previousModuleQuizBestScore: null,
+        previousModuleQuizTodayAttempts: 0,
+        previousModuleQuizMaxAttempts: 3,
+        previousModuleTitle: prevModule.title,
+      };
+      continue;
+    }
+
+    const quizInfo = quizByLessonId[gateLessonId];
+    const attemptInfo = getAttemptInfo(gateLessonId);
+    const passed = attemptInfo.bestScore >= 90;
+
+    moduleStatus[mod.id] = {
+      unlocked: passed,
+      previousModuleQuizPassed: passed,
+      previousModuleQuizBestScore: attemptInfo.bestScore > 0 ? attemptInfo.bestScore : null,
+      previousModuleQuizTodayAttempts: attemptInfo.todayAttempts,
+      previousModuleQuizMaxAttempts: quizInfo.max_attempts_per_day,
+      previousModuleTitle: prevModule.title,
+    };
+  }
+
+  return { moduleStatus };
+}
+
 // --- Feature F32.6: Micro-learning ---
 
 export async function getMicroLessons() {

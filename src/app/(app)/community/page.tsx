@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getCommunityPosts, getCommunityLeaderboard, getUserReputationBatch } from "@/lib/actions/community";
+import { getCommunityPosts, getCommunityLeaderboard, getUserReputationBatch, getCommunityChannelCounts } from "@/lib/actions/community";
 import { CommunityView } from "./community-view";
 
 export default async function CommunityPage() {
@@ -14,16 +14,18 @@ export default async function CommunityPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager", "client_b2c"].includes(profile.role)) {
+  if (!profile || !["admin", "manager", "client_b2c", "setter", "closer"].includes(profile.role)) {
     redirect("/dashboard");
   }
 
-  const [posts, leaderboard] = await Promise.all([
+  const [posts, leaderboard, channelCounts] = await Promise.all([
     getCommunityPosts(),
     getCommunityLeaderboard(),
+    getCommunityChannelCounts(),
   ]);
 
   const isAdmin = profile?.role === "admin" || profile?.role === "manager";
+  const userRole = profile?.role || "client_b2c";
 
   // Collect unique author IDs from posts for batch reputation lookup
   const authorIds = [...new Set(
@@ -33,5 +35,5 @@ export default async function CommunityPage() {
   const reputations = await getUserReputationBatch(authorIds);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <CommunityView posts={posts as any} userId={user.id} isAdmin={isAdmin} leaderboard={leaderboard} reputations={reputations} />;
+  return <CommunityView posts={posts as any} userId={user.id} isAdmin={isAdmin} leaderboard={leaderboard} reputations={reputations} userRole={userRole} channelCounts={channelCounts} />;
 }

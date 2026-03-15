@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -14,9 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Bot, ShieldCheck, Clock, User, Save, Linkedin, Instagram, MessageCircle, Mail } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Bot, ShieldCheck, Clock, User, Save, Linkedin, Instagram,
+  MessageCircle, Mail, Send, Sparkles, Eye, Heart,
+} from "lucide-react";
 import { updateAiModeConfig } from "@/lib/actions/ai-modes";
+import { generatePersonalizedMessage } from "@/lib/actions/automation";
 import type { AiMode, AiModeConfig } from "@/lib/types/database";
+import { toast } from "sonner";
 
 interface AiModesViewProps {
   config: AiModeConfig;
@@ -69,6 +77,20 @@ const CRITICAL_ACTIONS = [
   "Envoi de contrat",
 ];
 
+const STORY_EMOJIS = [
+  { value: "\u{1F525}", label: "Feu" },
+  { value: "\u{2764}\u{FE0F}", label: "Coeur" },
+  { value: "\u{1F44F}", label: "Applaudissements" },
+  { value: "\u{1F60D}", label: "Yeux coeurs" },
+  { value: "\u{1F4AA}", label: "Biceps" },
+  { value: "\u{1F680}", label: "Fusee" },
+];
+
+const AUTO_SEND_PLATFORMS = [
+  { key: "instagram", label: "Instagram", icon: <Instagram className="h-4 w-4" /> },
+  { key: "linkedin", label: "LinkedIn", icon: <Linkedin className="h-4 w-4" /> },
+];
+
 export function AiModesView({ config }: AiModesViewProps) {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
@@ -79,6 +101,26 @@ export function AiModesView({ config }: AiModesViewProps) {
   const [criticalActions, setCriticalActions] = useState<string[]>(
     config.critical_actions || []
   );
+
+  // Auto-send state
+  const [autoSendEnabled, setAutoSendEnabled] = useState(config.auto_send_enabled ?? false);
+  const [autoSendPlatforms, setAutoSendPlatforms] = useState<string[]>(
+    config.auto_send_platforms || []
+  );
+  const [autoSendTemplate, setAutoSendTemplate] = useState(
+    config.auto_send_template || "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !"
+  );
+  const [autoSendMode, setAutoSendMode] = useState<AiMode>(
+    config.auto_send_mode || "critical_validation"
+  );
+
+  // Story reaction state
+  const [storyReactionEnabled, setStoryReactionEnabled] = useState(config.story_reaction_enabled ?? false);
+  const [storyReactionEmoji, setStoryReactionEmoji] = useState(config.story_reaction_emoji || "\u{1F525}");
+
+  // Preview state
+  const [previewMessage, setPreviewMessage] = useState<string | null>(null);
+  const [isGeneratingPreview, startPreviewTransition] = useTransition();
 
   function handleToggleCriticalAction(action: string) {
     setCriticalActions((prev) =>
@@ -100,16 +142,51 @@ export function AiModesView({ config }: AiModesViewProps) {
     });
   }
 
+  function handleToggleAutoSendPlatform(platform: string) {
+    setAutoSendPlatforms((prev) =>
+      prev.includes(platform)
+        ? prev.filter((p) => p !== platform)
+        : [...prev, platform]
+    );
+  }
+
+  function handlePreview() {
+    startPreviewTransition(async () => {
+      const { message } = await generatePersonalizedMessage(
+        {
+          name: "Marie Dupont",
+          platform: autoSendPlatforms[0] || "instagram",
+          activity: "le coaching en developpement personnel",
+          recent_post: "votre video sur la gestion du stress",
+          notes: null,
+        },
+        autoSendTemplate
+      );
+      setPreviewMessage(message);
+    });
+  }
+
   function handleSave() {
     setSaved(false);
     startTransition(async () => {
-      await updateAiModeConfig({
+      const result = await updateAiModeConfig({
         global_mode: globalMode,
         network_overrides: networkOverrides,
         critical_actions: criticalActions,
+        auto_send_enabled: autoSendEnabled,
+        auto_send_platforms: autoSendPlatforms,
+        auto_send_template: autoSendTemplate,
+        auto_send_mode: autoSendMode,
+        story_reaction_enabled: storyReactionEnabled,
+        story_reaction_emoji: storyReactionEmoji,
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      if (result && "error" in result && result.error) {
+        toast.error(result.error);
+      } else {
+        setSaved(true);
+        toast.success("Configuration sauvegardee");
+        setTimeout(() => setSaved(false), 3000);
+      }
     });
   }
 
@@ -117,7 +194,7 @@ export function AiModesView({ config }: AiModesViewProps) {
     <div>
       <PageHeader
         title="Modes IA"
-        description="Configurez le niveau d'assistance IA"
+        description="Configurez le niveau d'assistance IA et l'envoi automatique"
       >
         <Button onClick={handleSave} disabled={isPending}>
           <Save className="h-4 w-4 mr-2" />
@@ -171,6 +248,226 @@ export function AiModesView({ config }: AiModesViewProps) {
             })}
           </div>
         </CardContent>
+      </Card>
+
+      {/* AI Auto-Send Configuration */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
+                <Send className="h-5 w-5 text-brand" />
+              </div>
+              <div>
+                <CardTitle>Envoi automatique IA</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  L&apos;IA personnalise et envoie des messages de prospection
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={autoSendEnabled}
+              onCheckedChange={setAutoSendEnabled}
+            />
+          </div>
+        </CardHeader>
+        {autoSendEnabled && (
+          <CardContent className="space-y-6">
+            {/* Platform selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Plateformes actives</Label>
+              <div className="flex flex-wrap gap-3">
+                {AUTO_SEND_PLATFORMS.map((p) => {
+                  const isActive = autoSendPlatforms.includes(p.key);
+                  return (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => handleToggleAutoSendPlatform(p.key)}
+                      className={`flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 transition-colors cursor-pointer ${
+                        isActive
+                          ? "border-brand bg-brand/5 text-brand"
+                          : "border-border hover:border-muted-foreground/30 text-muted-foreground"
+                      }`}
+                    >
+                      {p.icon}
+                      <span className="text-sm font-medium">{p.label}</span>
+                      {isActive && (
+                        <Badge variant="outline" className="ml-1 bg-brand/10 text-brand border-brand/20 text-[10px]">
+                          Actif
+                        </Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* AI Mode for auto-send */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Mode IA pour l&apos;envoi</Label>
+              <Select value={autoSendMode} onValueChange={(v) => setAutoSendMode(v as AiMode)}>
+                <SelectTrigger className="w-full max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full_ai">
+                    <div className="flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      Full IA — Envoi direct sans validation
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="critical_validation">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4" />
+                      Validation critique — Relecture avant envoi
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="full_human">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Full humain — Genere mais n&apos;envoie pas
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {autoSendMode === "full_ai" && "L'IA envoie les messages directement sans votre validation."}
+                {autoSendMode === "critical_validation" && "L'IA genere le message et attend votre validation avant envoi."}
+                {autoSendMode === "full_human" && "L'IA genere une suggestion de message mais ne l'envoie jamais."}
+              </p>
+            </div>
+
+            <Separator />
+
+            {/* Message template editor */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Template de message</Label>
+                <div className="flex gap-1.5">
+                  <Badge variant="outline" className="text-[10px] cursor-help" title="Remplace par le nom du prospect">
+                    {"{nom}"}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] cursor-help" title="Remplace par l'activite du prospect">
+                    {"{activite}"}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] cursor-help" title="Remplace par le dernier post du prospect">
+                    {"{dernier_post}"}
+                  </Badge>
+                </div>
+              </div>
+              <Textarea
+                value={autoSendTemplate}
+                onChange={(e) => setAutoSendTemplate(e.target.value)}
+                placeholder="Bonjour {nom}, j'ai vu votre activite..."
+                rows={4}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                L&apos;IA utilisera ce template comme base et le personnalisera pour chaque prospect.
+              </p>
+            </div>
+
+            <Separator />
+
+            {/* Preview section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Apercu du message genere</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreview}
+                  disabled={isGeneratingPreview}
+                >
+                  {isGeneratingPreview ? (
+                    <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Eye className="h-4 w-4 mr-2" />
+                  )}
+                  {isGeneratingPreview ? "Generation..." : "Generer un apercu"}
+                </Button>
+              </div>
+              {previewMessage && (
+                <div className="rounded-lg border bg-muted/30 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 gap-1">
+                      <Bot className="h-3 w-3" />
+                      IA
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      Exemple pour : Marie Dupont (Instagram)
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed">{previewMessage}</p>
+                </div>
+              )}
+              {!previewMessage && (
+                <div className="rounded-lg border border-dashed border-border/50 p-6 text-center">
+                  <Sparkles className="h-6 w-6 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">
+                    Cliquez sur &quot;Generer un apercu&quot; pour voir un exemple de message personnalise
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Instagram Story Reactions */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                <Heart className="h-5 w-5 text-pink-500" />
+              </div>
+              <div>
+                <CardTitle>Reaction automatique aux stories</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Reagir automatiquement aux stories Instagram des prospects
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={storyReactionEnabled}
+              onCheckedChange={setStoryReactionEnabled}
+            />
+          </div>
+        </CardHeader>
+        {storyReactionEnabled && (
+          <CardContent>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Emoji de reaction</Label>
+              <div className="flex flex-wrap gap-3">
+                {STORY_EMOJIS.map((e) => (
+                  <button
+                    key={e.value}
+                    type="button"
+                    onClick={() => setStoryReactionEmoji(e.value)}
+                    className={`flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 transition-colors cursor-pointer ${
+                      storyReactionEmoji === e.value
+                        ? "border-brand bg-brand/5"
+                        : "border-border hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    <span className="text-xl">{e.value}</span>
+                    <span className="text-xs text-muted-foreground">{e.label}</span>
+                  </button>
+                ))}
+              </div>
+              <Input
+                value={storyReactionEmoji}
+                onChange={(e) => setStoryReactionEmoji(e.target.value)}
+                placeholder="Ou saisissez un emoji personnalise..."
+                className="max-w-xs mt-2"
+              />
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       {/* Network Overrides */}

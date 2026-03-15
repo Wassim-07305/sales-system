@@ -12,6 +12,8 @@ const DEFAULT_CRITICAL_ACTIONS = [
   "Envoi de contrat",
 ];
 
+const DEFAULT_TEMPLATE = "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !";
+
 export async function getAiModeConfig() {
   const supabase = await createClient();
   const {
@@ -33,6 +35,12 @@ export async function getAiModeConfig() {
     global_mode: "critical_validation" as AiMode,
     network_overrides: {} as Record<string, AiMode>,
     critical_actions: DEFAULT_CRITICAL_ACTIONS,
+    auto_send_enabled: false,
+    auto_send_platforms: [] as string[],
+    auto_send_template: DEFAULT_TEMPLATE,
+    auto_send_mode: "critical_validation" as AiMode,
+    story_reaction_enabled: false,
+    story_reaction_emoji: "\u{1F525}",
   };
 
   const { data: newConfig } = await supabase
@@ -48,6 +56,12 @@ export async function updateAiModeConfig(data: {
   global_mode: AiMode;
   network_overrides: Record<string, AiMode>;
   critical_actions: string[];
+  auto_send_enabled?: boolean;
+  auto_send_platforms?: string[];
+  auto_send_template?: string;
+  auto_send_mode?: AiMode;
+  story_reaction_enabled?: boolean;
+  story_reaction_emoji?: string;
 }) {
   const supabase = await createClient();
   const {
@@ -55,14 +69,24 @@ export async function updateAiModeConfig(data: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  const updatePayload: Record<string, unknown> = {
+    global_mode: data.global_mode,
+    network_overrides: data.network_overrides,
+    critical_actions: data.critical_actions,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Include auto-send fields if provided
+  if (data.auto_send_enabled !== undefined) updatePayload.auto_send_enabled = data.auto_send_enabled;
+  if (data.auto_send_platforms !== undefined) updatePayload.auto_send_platforms = data.auto_send_platforms;
+  if (data.auto_send_template !== undefined) updatePayload.auto_send_template = data.auto_send_template;
+  if (data.auto_send_mode !== undefined) updatePayload.auto_send_mode = data.auto_send_mode;
+  if (data.story_reaction_enabled !== undefined) updatePayload.story_reaction_enabled = data.story_reaction_enabled;
+  if (data.story_reaction_emoji !== undefined) updatePayload.story_reaction_emoji = data.story_reaction_emoji;
+
   const { error } = await supabase
     .from("ai_mode_configs")
-    .update({
-      global_mode: data.global_mode,
-      network_overrides: data.network_overrides,
-      critical_actions: data.critical_actions,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq("user_id", user.id);
 
   if (error) return { error: error.message };

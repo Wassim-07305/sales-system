@@ -71,6 +71,15 @@ interface QuizAttemptInfo {
   maxAttempts: number;
 }
 
+interface ModuleUnlockInfo {
+  unlocked: boolean;
+  previousModuleQuizPassed: boolean;
+  previousModuleQuizBestScore: number | null;
+  previousModuleQuizTodayAttempts: number;
+  previousModuleQuizMaxAttempts: number;
+  previousModuleTitle: string | null;
+}
+
 interface CourseViewProps {
   course: {
     id: string;
@@ -84,6 +93,7 @@ interface CourseViewProps {
   allPrereqsMet: boolean;
   userId: string;
   quizAttempts?: Record<string, QuizAttemptInfo>;
+  moduleUnlockStatus?: Record<string, ModuleUnlockInfo>;
 }
 
 // ---------------------------------------------------------------------------
@@ -148,6 +158,7 @@ export function CourseView({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userId,
   quizAttempts: initialQuizAttempts = {},
+  moduleUnlockStatus = {},
 }: CourseViewProps) {
   // -- Flatten all lessons with module context for navigation
   const flatLessons = useMemo(() => {
@@ -173,16 +184,43 @@ export function CourseView({
   const completedCount = completedLessonIds.size;
   const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  // -- Sequential unlock logic
+  // -- Module unlock status (driven by server-side quiz score checks)
+  const [localModuleUnlock, setLocalModuleUnlock] = useState(moduleUnlockStatus);
+
+  const isModuleUnlocked = useCallback(
+    (moduleId: string): boolean => {
+      if (!allPrereqsMet) return false;
+      const status = localModuleUnlock[moduleId];
+      // If no status info, assume unlocked (first module or no quizzes)
+      if (!status) return true;
+      return status.unlocked;
+    },
+    [allPrereqsMet, localModuleUnlock]
+  );
+
+  const getModuleUnlockInfo = useCallback(
+    (moduleId: string): ModuleUnlockInfo | null => {
+      return localModuleUnlock[moduleId] || null;
+    },
+    [localModuleUnlock]
+  );
+
+  // -- Sequential unlock logic (now also checks module lock)
   const isLessonUnlocked = useCallback(
     (lessonId: string): boolean => {
       if (!allPrereqsMet) return false;
       const idx = flatLessons.findIndex((l) => l.id === lessonId);
+      if (idx < 0) return false;
+
+      // Check if the lesson's module is unlocked
+      const lessonEntry = flatLessons[idx];
+      if (!isModuleUnlocked(lessonEntry.moduleId)) return false;
+
       if (idx <= 0) return true; // premiere lecon toujours accessible
       const prevLesson = flatLessons[idx - 1];
       return completedLessonIds.has(prevLesson.id);
     },
-    [allPrereqsMet, flatLessons, completedLessonIds]
+    [allPrereqsMet, flatLessons, completedLessonIds, isModuleUnlocked]
   );
 
   // -- Find first incomplete lesson
@@ -371,6 +409,37 @@ export function CourseView({
           ...prev,
           [selectedLessonId]: { completed: true, quiz_score: score },
         }));
+
+        // Optimistically unlock the next module if this quiz gates it
+        if (score >= 90) {
+          setLocalModuleUnlock((prev) => {
+            const next = { ...prev };
+            for (const [modId, info] of Object.entries(next)) {
+              if (!info.unlocked && !info.previousModuleQuizPassed) {
+                // Check if the current lesson belongs to the previous module
+                const currentLessonEntry = flatLessons.find((l) => l.id === selectedLessonId);
+                if (currentLessonEntry) {
+                  const prevModuleIdx = course.modules.findIndex(
+                    (m) => m.id === currentLessonEntry.moduleId
+                  );
+                  const thisModuleIdx = course.modules.findIndex(
+                    (m) => m.id === modId
+                  );
+                  if (thisModuleIdx === prevModuleIdx + 1) {
+                    next[modId] = {
+                      ...info,
+                      unlocked: true,
+                      previousModuleQuizPassed: true,
+                      previousModuleQuizBestScore: score,
+                    };
+                  }
+                }
+              }
+            }
+            return next;
+          });
+        }
+
         toast.success(`Quiz reussi ! Score : ${score}%`);
       } else {
         toast.error(
@@ -452,28 +521,80 @@ export function CourseView({
               const moduleCompletedCount = mod.lessons.filter((l) =>
                 completedLessonIds.has(l.id)
               ).length;
+              const moduleAllComplete = moduleLessonCount > 0 && moduleCompletedCount === moduleLessonCount;
+              const modUnlocked = isModuleUnlocked(mod.id);
+              const modUnlockInfo = getModuleUnlockInfo(mod.id);
 
               return (
                 <div key={mod.id}>
                   {/* Module header */}
                   <button
                     onClick={() => toggleModule(mod.id)}
-                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-muted/50 transition-colors group"
+                    className={cn(
+                      "w-full flex items-center justify-between px-5 py-3 transition-colors group",
+                      modUnlocked ? "hover:bg-muted/50" : "opacity-60"
+                    )}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      {isExpanded ? (
+                      {/* Module status icon */}
+                      {!modUnlocked ? (
+                        <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                      ) : moduleAllComplete ? (
+                        <CheckCircle2 className="h-4 w-4 text-brand fill-brand/20 shrink-0" />
+                      ) : isExpanded ? (
                         <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
                       ) : (
                         <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                       )}
-                      <span className="text-xs font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-foreground truncate transition-colors">
+                      <span className={cn(
+                        "text-xs font-semibold tracking-wider uppercase truncate transition-colors",
+                        modUnlocked
+                          ? "text-muted-foreground group-hover:text-foreground"
+                          : "text-muted-foreground"
+                      )}>
                         {mod.title}
                       </span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
-                      {moduleCompletedCount}/{moduleLessonCount}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      {moduleAllComplete && (
+                        <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px] px-1.5 py-0">
+                          Termine
+                        </Badge>
+                      )}
+                      <span className="text-[10px] text-muted-foreground">
+                        {moduleCompletedCount}/{moduleLessonCount}
+                      </span>
+                    </div>
                   </button>
+
+                  {/* Module locked banner */}
+                  {!modUnlocked && modUnlockInfo && isExpanded && (
+                    <div className="mx-5 mb-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30 px-3 py-2.5">
+                      <div className="flex items-start gap-2">
+                        <Lock className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="text-xs">
+                          <p className="font-medium text-amber-800 dark:text-amber-200">
+                            Module verrouille
+                          </p>
+                          <p className="text-amber-700 dark:text-amber-300 mt-0.5">
+                            Reussissez le quiz du module precedent (90% min.) pour debloquer
+                          </p>
+                          {modUnlockInfo.previousModuleQuizBestScore !== null && modUnlockInfo.previousModuleQuizBestScore > 0 && (
+                            <p className="text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                              <Trophy className="h-3 w-3" />
+                              Votre meilleur score : {modUnlockInfo.previousModuleQuizBestScore}%
+                            </p>
+                          )}
+                          {modUnlockInfo.previousModuleQuizTodayAttempts > 0 && (
+                            <p className="text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Il vous reste {Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts)} tentative(s) aujourd&apos;hui
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Lesson items */}
                   {isExpanded && (
@@ -488,6 +609,12 @@ export function CourseView({
                             key={lesson.id}
                             disabled={!unlocked}
                             onClick={() => selectLesson(lesson.id)}
+                            title={!modUnlocked
+                              ? "Reussissez le quiz du module precedent (90% min.) pour debloquer"
+                              : !unlocked
+                              ? "Terminez la lecon precedente pour debloquer"
+                              : undefined
+                            }
                             className={cn(
                               "w-full flex items-center gap-3 pl-7 pr-4 py-2.5 text-left transition-colors relative",
                               isActive &&
@@ -766,18 +893,26 @@ export function CourseView({
                         Passer le quiz
                       </Button>
                       {activeAttempts && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>
-                            {activeAttempts.todayAttempts}/{activeAttempts.maxAttempts}{" "}
-                            tentatives aujourd&apos;hui
-                          </span>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              Il vous reste {Math.max(0, activeAttempts.maxAttempts - activeAttempts.todayAttempts)} tentative(s) aujourd&apos;hui
+                            </span>
+                          </div>
                           {activeAttempts.bestScore > 0 && (
-                            <>
-                              <span className="mx-0.5">|</span>
+                            <div className={cn(
+                              "flex items-center gap-1.5 text-xs",
+                              activeAttempts.bestScore >= 90
+                                ? "text-green-600"
+                                : "text-amber-600"
+                            )}>
                               <Trophy className="h-3 w-3" />
-                              <span>Meilleur : {activeAttempts.bestScore}%</span>
-                            </>
+                              <span>
+                                Meilleur score : {activeAttempts.bestScore}%
+                                {activeAttempts.bestScore < 90 && " (90% requis)"}
+                              </span>
+                            </div>
                           )}
                         </div>
                       )}

@@ -36,7 +36,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that don't require auth
-  const publicRoutes = ["/login", "/register", "/book"];
+  const publicRoutes = ["/login", "/register", "/book", "/forgot-password", "/reset-password"];
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
   if (!user && !isPublicRoute && pathname !== "/") {
@@ -51,11 +51,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
+  // Landing page at "/" is public for all users (authenticated and unauthenticated)
 
   // Redirect clients with incomplete onboarding to /onboarding
   // Skip DB query for API routes and paths that don't need onboarding check

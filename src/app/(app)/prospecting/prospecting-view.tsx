@@ -14,9 +14,11 @@ import {
   Plus, Search, Send, MessageCircle, Target, Linkedin, Instagram,
   RefreshCw, Loader2, SlidersHorizontal, ChevronDown, ChevronUp,
   X, Flame, Thermometer, Snowflake, Users, TrendingUp, ExternalLink, Eye,
+  Bot, Clock3, CheckCircle2, XCircle, RotateCcw,
 } from "lucide-react";
 import { addProspect, updateProspectStatus, incrementDmsSent } from "@/lib/actions/prospecting";
 import { recalculateAllScores } from "@/lib/actions/hub-setting";
+import { sendAIMessage, createRelanceWorkflow, cancelRelance } from "@/lib/actions/automation";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -38,6 +40,7 @@ interface Prospect {
   last_message_at: string | null;
   created_at: string;
   computed_score: ComputedScore | null;
+  relance_status?: string | null;
 }
 
 interface Quota {
@@ -217,8 +220,57 @@ export function ProspectingView({
 
   async function handleDmIncrement() {
     await incrementDmsSent();
-    toast.success("+1 DM envoyé !");
+    toast.success("+1 DM envoye !");
     router.refresh();
+  }
+
+  async function handleAISend(prospectId: string, platform: string) {
+    try {
+      const result = await sendAIMessage(prospectId, platform);
+      if (result.error === "MODE_VALIDATION_REQUISE") {
+        toast.info("Message IA genere — Validation requise avant envoi", {
+          description: result.message?.slice(0, 100) + "...",
+          duration: 6000,
+        });
+      } else if (result.error === "MODE_HUMAIN") {
+        toast.info("Suggestion IA generee (mode humain)", {
+          description: result.message?.slice(0, 100) + "...",
+          duration: 6000,
+        });
+      } else if (result.success) {
+        toast.success("Message IA envoye avec succes");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Erreur d'envoi IA");
+      }
+    } catch {
+      toast.error("Erreur lors de l'envoi IA");
+    }
+  }
+
+  async function handleCreateRelance(prospectId: string, platform: string) {
+    try {
+      await createRelanceWorkflow({
+        prospect_id: prospectId,
+        platform: platform || "instagram",
+        message_j2: "Bonjour, je me permets de vous relancer suite a mon message precedent. Avez-vous eu le temps d'y jeter un oeil ?",
+        message_j3: "Bonjour, je comprends que vous etes sans doute tres occupe(e). Je reste disponible si vous souhaitez en discuter. Belle journee !",
+      });
+      toast.success("Relance automatique programmee (J+2 et J+3)");
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de la creation de la relance");
+    }
+  }
+
+  async function handleCancelRelance(prospectId: string) {
+    try {
+      await cancelRelance(prospectId);
+      toast.success("Relance annulee");
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de l'annulation");
+    }
   }
 
   return (
@@ -591,6 +643,7 @@ export function ProspectingView({
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Plateforme</th>
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</th>
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Dernier msg</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Relance</th>
                   <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -664,7 +717,47 @@ export function ProspectingView({
                       <td className="p-4 text-muted-foreground">
                         {prospect.last_message_at
                           ? formatDistanceToNow(new Date(prospect.last_message_at), { addSuffix: true, locale: fr })
-                          : "—"}
+                          : "\u2014"}
+                      </td>
+                      <td className="p-4">
+                        {prospect.relance_status === "pending" && (
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1">
+                              <Clock3 className="h-3 w-3" />
+                              En cours
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-muted-foreground hover:text-red-500"
+                              onClick={() => handleCancelRelance(prospect.id)}
+                              title="Annuler la relance"
+                            >
+                              <XCircle className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                        {prospect.relance_status === "sent" && (
+                          <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Envoyee
+                          </Badge>
+                        )}
+                        {prospect.relance_status === "responded" && (
+                          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 gap-1">
+                            <MessageCircle className="h-3 w-3" />
+                            Repondu
+                          </Badge>
+                        )}
+                        {prospect.relance_status === "cancelled" && (
+                          <Badge variant="outline" className="bg-muted/40 text-muted-foreground/60 border-border/30 gap-1">
+                            <XCircle className="h-3 w-3" />
+                            Annulee
+                          </Badge>
+                        )}
+                        {!prospect.relance_status && (
+                          <span className="text-xs text-muted-foreground">\u2014</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-1">
@@ -673,6 +766,28 @@ export function ProspectingView({
                               <Eye className="h-4 w-4" />
                             </Link>
                           </Button>
+                          {prospect.platform && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleAISend(prospect.id, prospect.platform || "instagram")}
+                              title="Envoyer un message IA"
+                              className="text-brand hover:text-brand/80"
+                            >
+                              <Bot className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {prospect.status === "contacted" && !prospect.relance_status && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCreateRelance(prospect.id, prospect.platform || "instagram")}
+                              title="Programmer une relance automatique"
+                              className="text-amber-600 hover:text-amber-700"
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
+                          )}
                           {prospect.profile_url && (
                             <Button variant="ghost" size="sm" asChild>
                               <a href={prospect.profile_url} target="_blank" rel="noopener noreferrer">

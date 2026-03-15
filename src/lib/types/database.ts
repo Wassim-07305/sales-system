@@ -400,6 +400,7 @@ export interface CommunityPost {
   hidden: boolean;
   module_id: string | null;
   is_pinned: boolean;
+  channel: string | null;
   created_at: string;
   author?: Profile;
 }
@@ -628,8 +629,34 @@ export interface AiModeConfig {
   global_mode: AiMode;
   network_overrides: Record<string, AiMode>;
   critical_actions: string[];
+  auto_send_enabled: boolean;
+  auto_send_platforms: string[];
+  auto_send_template: string;
+  auto_send_mode: AiMode;
+  story_reaction_enabled: boolean;
+  story_reaction_emoji: string;
   updated_at: string;
   created_at: string;
+}
+
+export type RelanceStatus = "pending" | "sent" | "responded" | "cancelled";
+
+export interface RelanceWorkflow {
+  id: string;
+  prospect_id: string;
+  platform: string;
+  created_by: string;
+  status: RelanceStatus;
+  delay_j2_hours: number;
+  delay_j3_hours: number;
+  message_j2: string;
+  message_j3: string;
+  j2_sent_at: string | null;
+  j3_sent_at: string | null;
+  cancelled_at: string | null;
+  responded_at: string | null;
+  created_at: string;
+  prospect?: Prospect;
 }
 
 export interface WhatsAppConnection {
@@ -1002,6 +1029,7 @@ export interface Database {
       channel_reads: { Row: ChannelRead; Insert: Partial<ChannelRead> & { channel_id: string; user_id: string }; Update: Partial<ChannelRead> };
       coaching_objectives: { Row: CoachingObjective; Insert: Partial<CoachingObjective> & { assignee_id: string; title: string; category: CoachingObjectiveCategory; target_value: number; target_date: string }; Update: Partial<CoachingObjective> };
       development_plans: { Row: DevelopmentPlan; Insert: Partial<DevelopmentPlan> & { user_id: string }; Update: Partial<DevelopmentPlan> };
+      relance_workflows: { Row: RelanceWorkflow; Insert: Partial<RelanceWorkflow> & { prospect_id: string; platform: string; created_by: string }; Update: Partial<RelanceWorkflow> };
     };
   };
 }

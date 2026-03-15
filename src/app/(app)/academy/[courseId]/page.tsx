@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { getCourseDetail } from "@/lib/actions/academy";
+import { getCourseDetail, getModuleUnlockStatus } from "@/lib/actions/academy";
 import { CourseView } from "./course-view";
 
 export default async function CoursePage({
@@ -15,7 +15,10 @@ export default async function CoursePage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const result = await getCourseDetail(courseId);
+  const [result, { moduleStatus }] = await Promise.all([
+    getCourseDetail(courseId),
+    getModuleUnlockStatus(courseId),
+  ]);
   if (!result) notFound();
 
   // Fetch ALL quiz attempts in a single query instead of N+1
@@ -61,6 +64,7 @@ export default async function CoursePage({
       allPrereqsMet={result.allPrereqsMet}
       userId={user.id}
       quizAttempts={quizAttempts}
+      moduleUnlockStatus={moduleStatus}
     />
   );
 }
