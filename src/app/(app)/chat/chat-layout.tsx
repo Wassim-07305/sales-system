@@ -173,7 +173,7 @@ const PAGE_SIZE = 50;
 // ---------------------------------------------------------------------------
 
 function getDateLabel(date: Date): string {
-  if (isToday(date)) return "Aujourd\u2019hui";
+  if (isToday(date)) return "Aujourd’hui";
   if (isYesterday(date)) return "Hier";
   return format(date, "EEEE d MMMM yyyy", { locale: fr });
 }
@@ -710,7 +710,7 @@ export function ChatLayout({
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("L\u2019image doit faire moins de 10 Mo"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("L’image doit faire moins de 10 Mo"); return; }
     setUploadingImage(true);
     try {
       const ext = file.name.split(".").pop();
@@ -749,7 +749,7 @@ export function ChatLayout({
     };
     if (isImage) insertData.file_url = imageUrl;
     const { data: inserted, error } = await supabase.from("messages").insert(insertData).select("*, sender:profiles(*)").single();
-    if (error) { toast.error("Erreur : " + (error.message || "v\u00e9rifiez vos permissions")); setMessages((prev) => prev.filter((m) => m.id !== optimisticId)); return; }
+    if (error) { toast.error("Erreur : " + (error.message || "vérifiez vos permissions")); setMessages((prev) => prev.filter((m) => m.id !== optimisticId)); return; }
     if (inserted) { setMessages((prev) => prev.map((m) => (m.id === optimisticId ? inserted : m))); }
   }
 
@@ -804,7 +804,7 @@ export function ChatLayout({
       const { data: allChannels } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(allChannels || []);
       setActiveChannel(dmChannel); setActiveWA(null); setActiveSocial(null);
-    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur lors de la cr\u00e9ation du DM"); }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur lors de la création du DM"); }
   }
 
   async function handleSendWAMessage(e: React.FormEvent) {
@@ -841,7 +841,7 @@ export function ChatLayout({
     setSaving(true);
     try {
       await createChannel({ name: newChannelName.trim(), description: newChannelDescription.trim() || undefined, type: newChannelType, memberIds: selectedMemberIds });
-      toast.success("Channel cr\u00e9\u00e9"); setShowCreateDialog(false); resetCreateForm();
+      toast.success("Channel créé"); setShowCreateDialog(false); resetCreateForm();
       const { data } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(data || []);
     } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
@@ -853,7 +853,7 @@ export function ChatLayout({
     setSaving(true);
     try {
       await deleteChannel(channelToManage.id);
-      toast.success("Channel supprim\u00e9"); setShowDeleteConfirm(false); setChannelToManage(null);
+      toast.success("Channel supprimé"); setShowDeleteConfirm(false); setChannelToManage(null);
       if (activeChannel?.id === channelToManage.id) setActiveChannel(null);
       const { data } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(data || []);
@@ -866,7 +866,7 @@ export function ChatLayout({
     setSaving(true);
     try {
       await updateChannelMembers(channelToManage.id, selectedMemberIds);
-      toast.success("Membres mis \u00e0 jour"); setShowMembersDialog(false); setChannelToManage(null); setSelectedMemberIds([]);
+      toast.success("Membres mis à jour"); setShowMembersDialog(false); setChannelToManage(null); setSelectedMemberIds([]);
       const { data } = await supabase.from("channels").select("*").order("created_at", { ascending: false });
       setChannels(data || []);
     } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
@@ -963,7 +963,7 @@ export function ChatLayout({
               onToggle={() => setChannelsOpen((v) => !v)}
               dotColor="bg-[#7af17a]"
               action={isAdmin ? (
-                <button onClick={openCreateDialog} className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground/50 hover:text-foreground transition-all" title="Cr\u00e9er un channel">
+                <button onClick={openCreateDialog} className="h-6 w-6 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground/50 hover:text-foreground transition-all" title="Créer un channel">
                   <Plus className="h-3.5 w-3.5" />
                 </button>
               ) : undefined}
@@ -1010,7 +1010,7 @@ export function ChatLayout({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 rounded-xl">
                             <DropdownMenuItem onClick={() => openMembersDialog(channel)} className="rounded-lg">
-                              <Users className="h-3.5 w-3.5 mr-2" /> G\u00e9rer les membres
+                              <Users className="h-3.5 w-3.5 mr-2" /> Gérer les membres
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-destructive focus:text-destructive rounded-lg" onClick={() => { setChannelToManage(channel); setShowDeleteConfirm(true); }}>
@@ -1024,7 +1024,7 @@ export function ChatLayout({
                 })}
                 {filteredGroupChannels.length === 0 && !channelSearch && (
                   <p className="text-[11px] text-muted-foreground/40 px-3 py-3">
-                    {isAdmin ? "Cr\u00e9ez votre premier channel" : "Aucun channel"}
+                    {isAdmin ? "Créez votre premier channel" : "Aucun channel"}
                   </p>
                 )}
               </div>
@@ -1133,7 +1133,7 @@ export function ChatLayout({
                 })}
                 {filteredWAConversations.length === 0 && (
                   <div className="px-3 py-5 text-center space-y-3">
-                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun r\u00e9sultat" : "Aucune conversation"}</p>
+                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun résultat" : "Aucune conversation"}</p>
                     {!channelSearch && !waConnected && (
                       <div className="space-y-2">
                         <Button size="sm" className="w-full bg-[#25D366] text-white hover:bg-[#25D366]/90 text-xs rounded-xl h-9 font-medium" disabled={connectingWA} onClick={async () => {
@@ -1146,17 +1146,17 @@ export function ChatLayout({
                           Connecter WhatsApp
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full text-[11px] text-muted-foreground/60 rounded-xl" onClick={async () => {
-                          try { const status = await getUnipileStatus(); const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP"); if (wa) { setWaConnected(true); toast.success("WhatsApp connect\u00e9 ! Rechargez la page."); } else { toast.info("Aucun compte d\u00e9tect\u00e9"); } }
-                          catch { toast.error("Erreur de v\u00e9rification"); }
+                          try { const status = await getUnipileStatus(); const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP"); if (wa) { setWaConnected(true); toast.success("WhatsApp connecté ! Rechargez la page."); } else { toast.info("Aucun compte détecté"); } }
+                          catch { toast.error("Erreur de vérification"); }
                         }}>
-                          <RefreshCw className="h-3 w-3 mr-1" /> V\u00e9rifier
+                          <RefreshCw className="h-3 w-3 mr-1" /> Vérifier
                         </Button>
                       </div>
                     )}
                     {!channelSearch && waConnected && waConversations.length === 0 && (
                       <div className="flex items-center gap-2 justify-center text-[#25D366]">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        <span className="text-[11px] font-medium">Connect\u00e9</span>
+                        <span className="text-[11px] font-medium">Connecté</span>
                       </div>
                     )}
                   </div>
@@ -1199,12 +1199,12 @@ export function ChatLayout({
                 })}
                 {filteredLinkedinConversations.length === 0 && (
                   <div className="px-3 py-5 text-center space-y-3">
-                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun r\u00e9sultat" : "Aucune conversation"}</p>
+                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun résultat" : "Aucune conversation"}</p>
                     {!channelSearch && !linkedinConnected && (
                       <div className="space-y-2">
                         <Button size="sm" className="w-full bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90 text-xs rounded-xl h-9 font-medium" disabled={connectingLinkedin} onClick={async () => {
                           setConnectingLinkedin(true);
-                          try { const result = await generateUnipileAuthLink("LINKEDIN"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Connectez-vous \u00e0 LinkedIn"); } }
+                          try { const result = await generateUnipileAuthLink("LINKEDIN"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Connectez-vous à LinkedIn"); } }
                           catch { toast.error("Erreur de connexion"); }
                           setConnectingLinkedin(false);
                         }}>
@@ -1212,16 +1212,16 @@ export function ChatLayout({
                           Connecter LinkedIn
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full text-[11px] text-muted-foreground/60 rounded-xl" onClick={async () => {
-                          try { const status = await getUnipileStatus(); const li = status.accounts.find((a) => a.provider.toUpperCase() === "LINKEDIN"); if (li) { setLinkedinConnected(true); toast.success("LinkedIn connect\u00e9 ! Rechargez la page."); } else { toast.info("Aucun compte d\u00e9tect\u00e9"); } }
-                          catch { toast.error("Erreur de v\u00e9rification"); }
+                          try { const status = await getUnipileStatus(); const li = status.accounts.find((a) => a.provider.toUpperCase() === "LINKEDIN"); if (li) { setLinkedinConnected(true); toast.success("LinkedIn connecté ! Rechargez la page."); } else { toast.info("Aucun compte détecté"); } }
+                          catch { toast.error("Erreur de vérification"); }
                         }}>
-                          <RefreshCw className="h-3 w-3 mr-1" /> V\u00e9rifier
+                          <RefreshCw className="h-3 w-3 mr-1" /> Vérifier
                         </Button>
                       </div>
                     )}
                     {!channelSearch && linkedinConnected && linkedinConversations.length === 0 && (
                       <div className="flex items-center gap-2 justify-center text-[#0A66C2]">
-                        <CheckCircle2 className="h-3.5 w-3.5" /><span className="text-[11px] font-medium">Connect\u00e9</span>
+                        <CheckCircle2 className="h-3.5 w-3.5" /><span className="text-[11px] font-medium">Connecté</span>
                       </div>
                     )}
                   </div>
@@ -1264,12 +1264,12 @@ export function ChatLayout({
                 })}
                 {filteredInstagramConversations.length === 0 && (
                   <div className="px-3 py-5 text-center space-y-3">
-                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun r\u00e9sultat" : "Aucune conversation"}</p>
+                    <p className="text-[11px] text-muted-foreground/40">{channelSearch ? "Aucun résultat" : "Aucune conversation"}</p>
                     {!channelSearch && !instagramConnected && (
                       <div className="space-y-2">
                         <Button size="sm" className="w-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white hover:opacity-90 text-xs rounded-xl h-9 font-medium" disabled={connectingInstagram} onClick={async () => {
                           setConnectingInstagram(true);
-                          try { const result = await generateUnipileAuthLink("INSTAGRAM"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Connectez-vous \u00e0 Instagram"); } }
+                          try { const result = await generateUnipileAuthLink("INSTAGRAM"); if (result.error) toast.error(result.error); else if (result.url) { window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes"); toast.info("Connectez-vous à Instagram"); } }
                           catch { toast.error("Erreur de connexion"); }
                           setConnectingInstagram(false);
                         }}>
@@ -1277,16 +1277,16 @@ export function ChatLayout({
                           Connecter Instagram
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full text-[11px] text-muted-foreground/60 rounded-xl" onClick={async () => {
-                          try { const status = await getUnipileStatus(); const ig = status.accounts.find((a) => a.provider.toUpperCase() === "INSTAGRAM"); if (ig) { setInstagramConnected(true); toast.success("Instagram connect\u00e9 ! Rechargez la page."); } else { toast.info("Aucun compte d\u00e9tect\u00e9"); } }
-                          catch { toast.error("Erreur de v\u00e9rification"); }
+                          try { const status = await getUnipileStatus(); const ig = status.accounts.find((a) => a.provider.toUpperCase() === "INSTAGRAM"); if (ig) { setInstagramConnected(true); toast.success("Instagram connecté ! Rechargez la page."); } else { toast.info("Aucun compte détecté"); } }
+                          catch { toast.error("Erreur de vérification"); }
                         }}>
-                          <RefreshCw className="h-3 w-3 mr-1" /> V\u00e9rifier
+                          <RefreshCw className="h-3 w-3 mr-1" /> Vérifier
                         </Button>
                       </div>
                     )}
                     {!channelSearch && instagramConnected && instagramConversations.length === 0 && (
                       <div className="flex items-center gap-2 justify-center text-[#DD2A7B]">
-                        <CheckCircle2 className="h-3.5 w-3.5" /><span className="text-[11px] font-medium">Connect\u00e9</span>
+                        <CheckCircle2 className="h-3.5 w-3.5" /><span className="text-[11px] font-medium">Connecté</span>
                       </div>
                     )}
                   </div>
@@ -1345,7 +1345,7 @@ export function ChatLayout({
             </ScrollArea>
             <div className="px-5 py-4 border-t border-border/50">
               <form onSubmit={handleSendWAMessage} className="relative">
-                <Textarea value={waMessage} onChange={(e) => setWAMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendWAMessage(e); } }} placeholder={`Message \u00e0 ${activeWA.prospect?.name || "prospect"}...`} className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40" rows={1} />
+                <Textarea value={waMessage} onChange={(e) => setWAMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendWAMessage(e); } }} placeholder={`Message à ${activeWA.prospect?.name || "prospect"}...`} className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40" rows={1} />
                 <Button type="submit" size="icon" className={cn("absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200", waMessage.trim() ? "bg-[#25D366] text-white hover:bg-[#25D366]/90 shadow-sm shadow-[#25D366]/30" : "bg-secondary text-muted-foreground/40")} disabled={!waMessage.trim() || sendingWA}>
                   {sendingWA ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
@@ -1398,7 +1398,7 @@ export function ChatLayout({
             </ScrollArea>
             <div className="px-5 py-4 border-t border-border/50">
               <form onSubmit={handleSendSocialMessage} className="relative">
-                <Textarea value={socialMessage} onChange={(e) => setSocialMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendSocialMessage(e); } }} placeholder={`Message \u00e0 ${activeSocial.prospect?.name || "prospect"}...`} className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40" rows={1} />
+                <Textarea value={socialMessage} onChange={(e) => setSocialMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendSocialMessage(e); } }} placeholder={`Message à ${activeSocial.prospect?.name || "prospect"}...`} className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40" rows={1} />
                 <Button type="submit" size="icon" className={cn("absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200", socialMessage.trim() ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30" : "bg-secondary text-muted-foreground/40")} disabled={!socialMessage.trim() || sendingSocial}>
                   {sendingSocial ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
@@ -1463,15 +1463,15 @@ export function ChatLayout({
                           <Sparkles className="h-9 w-9 text-[#7af17a]/40" />
                         </div>
                         <p className="font-semibold text-base text-foreground/80">
-                          {activeChannel.type === "direct" ? `Dites bonjour \u00e0 ${activePartner?.full_name || "cet utilisateur"}` : `Bienvenue dans #${activeChannel.name}`}
+                          {activeChannel.type === "direct" ? `Dites bonjour à ${activePartner?.full_name || "cet utilisateur"}` : `Bienvenue dans #${activeChannel.name}`}
                         </p>
-                        <p className="text-[13px] mt-1.5 text-muted-foreground/50">Envoyez le premier message pour d\u00e9marrer la conversation</p>
+                        <p className="text-[13px] mt-1.5 text-muted-foreground/50">Envoyez le premier message pour démarrer la conversation</p>
                       </div>
                     )}
                     {hasMore && (
                       <div className="text-center py-3">
                         <Button variant="ghost" size="sm" onClick={loadOlderMessages} disabled={loadingMore} className="text-xs text-muted-foreground/60 rounded-xl hover:text-foreground">
-                          {loadingMore ? <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Chargement...</> : "Charger les messages pr\u00e9c\u00e9dents"}
+                          {loadingMore ? <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Chargement...</> : "Charger les messages précédents"}
                         </Button>
                       </div>
                     )}
@@ -1511,7 +1511,7 @@ export function ChatLayout({
                                     )}
                                     <p className={cn("text-[10px] mt-1.5 font-medium", isOwn ? "text-muted-foreground/40 text-right" : "text-muted-foreground/40")}>
                                       {format(new Date(message.created_at), "HH:mm")}
-                                      {message.is_edited && " \u00b7 modifi\u00e9"}
+                                      {message.is_edited && " · modifié"}
                                     </p>
                                     {Object.keys(messageReactions).length > 0 && <ReactionPills messageId={message.id} reactions={messageReactions} currentUserId={currentUserId} onToggle={handleToggleReaction} />}
                                   </>
@@ -1520,7 +1520,7 @@ export function ChatLayout({
                               {!isEditing && (
                                 <div className={cn("absolute -top-3 hidden group-hover:flex items-center gap-0.5 bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg px-1 py-1 z-10", isOwn ? "left-2" : "right-2")}>
                                   <div className="relative">
-                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="R\u00e9agir"><SmilePlus className="h-3.5 w-3.5" /></button>
+                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Réagir"><SmilePlus className="h-3.5 w-3.5" /></button>
                                     {emojiPickerFor === message.id && <QuickEmojiPicker onSelect={(emoji) => handleToggleReaction(message.id, emoji)} onClose={() => setEmojiPickerFor(null)} />}
                                   </div>
                                   {isOwn && <button onClick={() => { setEditingMessageId(message.id); setEditContent(message.content || ""); }} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Modifier"><Pencil className="h-3.5 w-3.5" /></button>}
@@ -1541,7 +1541,7 @@ export function ChatLayout({
                                   <div className="flex items-baseline gap-2 mb-0.5">
                                     <span className="text-[13px] font-semibold text-foreground">{senderName}</span>
                                     <span className="text-[10px] text-muted-foreground/40 font-medium">{format(new Date(message.created_at), "HH:mm", { locale: fr })}</span>
-                                    {message.is_edited && <span className="text-[10px] text-muted-foreground/30">(modifi\u00e9)</span>}
+                                    {message.is_edited && <span className="text-[10px] text-muted-foreground/30">(modifié)</span>}
                                   </div>
                                 )}
                                 {isEditing ? (
@@ -1566,7 +1566,7 @@ export function ChatLayout({
                               {!isEditing && (
                                 <div className="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg px-1 py-1">
                                   <div className="relative">
-                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="R\u00e9agir"><SmilePlus className="h-3.5 w-3.5" /></button>
+                                    <button onClick={() => setEmojiPickerFor(emojiPickerFor === message.id ? null : message.id)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Réagir"><SmilePlus className="h-3.5 w-3.5" /></button>
                                     {emojiPickerFor === message.id && <QuickEmojiPicker onSelect={(emoji) => handleToggleReaction(message.id, emoji)} onClose={() => setEmojiPickerFor(null)} />}
                                   </div>
                                   {isOwn && <button onClick={() => { setEditingMessageId(message.id); setEditContent(message.content || ""); }} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Modifier"><Pencil className="h-3.5 w-3.5" /></button>}
@@ -1587,7 +1587,7 @@ export function ChatLayout({
             {imagePreview && (
               <div className="px-5 pb-2">
                 <div className="relative inline-block">
-                  <img src={imagePreview} alt="Aper\u00e7u" className="h-20 rounded-xl object-cover shadow-sm" />
+                  <img src={imagePreview} alt="Aperçu" className="h-20 rounded-xl object-cover shadow-sm" />
                   <button type="button" onClick={() => { setImagePreview(null); setImageUrl(null); }} className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-foreground/80 flex items-center justify-center text-background hover:bg-foreground transition-colors shadow-sm"><X className="h-3 w-3" /></button>
                 </div>
               </div>
@@ -1605,7 +1605,7 @@ export function ChatLayout({
                     value={newMessage}
                     onChange={handleInputChange}
                     onKeyDown={handleInputKeyDown}
-                    placeholder={activeChannel.type === "direct" ? `Message \u00e0 ${activePartner?.full_name || "utilisateur"}...` : `Message dans #${activeChannel.name}...`}
+                    placeholder={activeChannel.type === "direct" ? `Message à ${activePartner?.full_name || "utilisateur"}...` : `Message dans #${activeChannel.name}...`}
                     className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
                     rows={1}
                   />
@@ -1631,7 +1631,7 @@ export function ChatLayout({
               <MessageSquare className="h-10 w-10 text-[#7af17a]/30" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-base text-foreground/70">S\u00e9lectionnez une conversation</p>
+              <p className="font-semibold text-base text-foreground/70">Sélectionnez une conversation</p>
               <p className="text-[13px] text-muted-foreground/40 mt-1 max-w-xs">
                 Choisissez un channel, un message direct ou une conversation pour commencer
               </p>
@@ -1647,13 +1647,13 @@ export function ChatLayout({
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg">Cr\u00e9er un channel</DialogTitle>
+            <DialogTitle className="text-lg">Créer un channel</DialogTitle>
             <DialogDescription>Ajoutez un nouveau channel de discussion.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="channel-name">Nom</Label>
-              <Input id="channel-name" placeholder="ex: g\u00e9n\u00e9ral, ventes, support..." value={newChannelName} onChange={(e) => setNewChannelName(e.target.value)} className="rounded-xl" />
+              <Input id="channel-name" placeholder="ex: général, ventes, support..." value={newChannelName} onChange={(e) => setNewChannelName(e.target.value)} className="rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="channel-desc">Description (optionnel)</Label>
@@ -1695,7 +1695,7 @@ export function ChatLayout({
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="rounded-xl">Annuler</Button>
             <Button onClick={handleCreateChannel} disabled={saving} className="rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90">
-              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Cr\u00e9er
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Créer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1705,7 +1705,7 @@ export function ChatLayout({
         <DialogContent className="sm:max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg"><UserPlus className="h-4.5 w-4.5" /> Nouveau message</DialogTitle>
-            <DialogDescription>S\u00e9lectionnez un membre pour d\u00e9marrer une conversation.</DialogDescription>
+            <DialogDescription>Sélectionnez un membre pour démarrer une conversation.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="relative">
@@ -1723,7 +1723,7 @@ export function ChatLayout({
                     </div>
                   </button>
                 ))}
-                {filteredDMUsers.length === 0 && <p className="text-xs text-muted-foreground/50 text-center py-6">Aucun membre trouv\u00e9</p>}
+                {filteredDMUsers.length === 0 && <p className="text-xs text-muted-foreground/50 text-center py-6">Aucun membre trouvé</p>}
               </div>
             </ScrollArea>
           </div>
@@ -1733,8 +1733,8 @@ export function ChatLayout({
       <Dialog open={showMembersDialog} onOpenChange={setShowMembersDialog}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg">Membres \u2014 {channelToManage?.name}</DialogTitle>
-            <DialogDescription>G\u00e9rez les membres de ce channel.</DialogDescription>
+            <DialogTitle className="text-lg">Membres — {channelToManage?.name}</DialogTitle>
+            <DialogDescription>Gérez les membres de ce channel.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <Input placeholder="Rechercher..." value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} className="h-9 text-sm rounded-xl" />
@@ -1770,7 +1770,7 @@ export function ChatLayout({
         <DialogContent className="sm:max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg">Supprimer le channel</DialogTitle>
-            <DialogDescription>\u00cates-vous s\u00fbr de vouloir supprimer &quot;{channelToManage?.name}&quot; ? Tous les messages seront d\u00e9finitivement supprim\u00e9s.</DialogDescription>
+            <DialogDescription>Êtes-vous sûr de vouloir supprimer &quot;{channelToManage?.name}&quot; ? Tous les messages seront définitivement supprimés.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} className="rounded-xl">Annuler</Button>
