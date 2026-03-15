@@ -90,6 +90,24 @@ export async function updateAutomationRule(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // Ownership check: only the creator or admin/manager can update
+  const { data: rule } = await supabase
+    .from("automation_rules")
+    .select("created_by")
+    .eq("id", id)
+    .single();
+  if (!rule) throw new Error("Règle introuvable");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = ["admin", "manager"].includes(profile?.role || "");
+  if (rule.created_by !== user.id && !isAdmin) {
+    throw new Error("Accès refusé");
+  }
+
   const { error } = await supabase
     .from("automation_rules")
     .update(ruleData)
@@ -103,6 +121,24 @@ export async function deleteAutomationRule(id: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+
+  // Ownership check: only the creator or admin/manager can delete
+  const { data: rule } = await supabase
+    .from("automation_rules")
+    .select("created_by")
+    .eq("id", id)
+    .single();
+  if (!rule) throw new Error("Règle introuvable");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = ["admin", "manager"].includes(profile?.role || "");
+  if (rule.created_by !== user.id && !isAdmin) {
+    throw new Error("Accès refusé");
+  }
 
   // Clean up related executions first
   try {
@@ -213,6 +249,16 @@ export async function runAutomationCheck() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+
+  // Only admin/manager can trigger automation checks
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    throw new Error("Accès réservé aux administrateurs");
+  }
 
   // Fetch all active rules
   const { data: rules, error: rulesErr } = await supabase
@@ -440,6 +486,16 @@ export async function runPlacementWorkflow() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // Only admin/manager can run placement workflows
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    throw new Error("Accès réservé aux administrateurs");
+  }
+
   // Trouver les setters prêts à être placés
   const { data: setters } = await supabase
     .from("profiles")
@@ -505,6 +561,19 @@ export async function runPlacementWorkflow() {
  */
 export async function runUpsellSequence() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Only admin/manager can run upsell sequences
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    throw new Error("Accès réservé aux administrateurs");
+  }
+
   const now = new Date();
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
 

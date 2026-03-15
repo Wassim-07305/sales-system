@@ -11,6 +11,9 @@ import { notifyMany } from "@/lib/actions/notifications";
 
 export async function getVideoRooms() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data } = await supabase
     .from("video_rooms")
     .select("*, host:profiles!video_rooms_host_id_fkey(id, email, full_name, avatar_url, role)")
@@ -84,6 +87,8 @@ export async function joinRoom(roomId: string) {
 
 export async function startRoom(roomId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase
     .from("video_rooms")
@@ -100,6 +105,8 @@ export async function startRoom(roomId: string) {
 
 export async function endRoom(roomId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase
     .from("video_rooms")
@@ -124,6 +131,8 @@ export async function endRoom(roomId: string) {
 
 export async function getVideoRoom(roomId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
 
   const { data: room } = await supabase
     .from("video_rooms")
@@ -152,6 +161,9 @@ export async function getVideoRoom(roomId: string) {
 export async function getRecording(roomId: string) {
   // Récupérer l'enregistrement depuis la base — transcription externe si configurée
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data: room } = await supabase
     .from("video_rooms")
     .select("recording_url, ai_summary, chapters, title, started_at, ended_at")
@@ -195,6 +207,16 @@ export async function sendBroadcast(data: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
+  // Only admin/manager can send broadcasts
+  const { data: senderProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!senderProfile || !["admin", "manager"].includes(senderProfile.role)) {
+    throw new Error("Accès réservé aux administrateurs");
+  }
+
   // Find matching users based on target roles
   let query = supabase.from("profiles").select("id, role");
 
@@ -230,6 +252,9 @@ export async function sendBroadcast(data: {
 
 export async function getBroadcasts() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data } = await supabase
     .from("broadcast_messages")
     .select("*, sender:profiles!broadcast_messages_sender_id_fkey(id, email, full_name, avatar_url, role)")
@@ -277,6 +302,8 @@ export async function createPoll(data: {
 
 export async function votePoll(pollId: string, optionIndex: number) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
 
   // Get current poll
   const { data: poll } = await supabase
@@ -305,6 +332,9 @@ export async function votePoll(pollId: string, optionIndex: number) {
 
 export async function getRoomPolls(roomId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data } = await supabase
     .from("polls")
     .select("*")
@@ -337,6 +367,8 @@ export async function submitQuestion(roomId: string, question: string) {
 
 export async function upvoteQuestion(questionId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
 
   const { data: q } = await supabase
     .from("live_questions")
@@ -356,6 +388,9 @@ export async function upvoteQuestion(questionId: string) {
 
 export async function markQuestionAnswered(questionId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   await supabase
     .from("live_questions")
     .update({ is_answered: true, answered_at: new Date().toISOString() })
@@ -365,6 +400,9 @@ export async function markQuestionAnswered(questionId: string) {
 
 export async function getRoomQuestions(roomId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data } = await supabase
     .from("live_questions")
     .select("*, user:profiles!live_questions_user_id_fkey(full_name, avatar_url)")
@@ -481,6 +519,10 @@ export async function markChannelAsRead(channelId: string) {
 // ---------------------------------------------------------------------------
 
 export async function generateAiReply(context: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   try {
     const suggestion = await aiComplete(
       `Contexte de la conversation :\n${context}\n\nGénère une réponse professionnelle et naturelle en français, adaptée au contexte. 2-3 phrases maximum. Sois direct et utile.`,
@@ -501,6 +543,8 @@ export async function generateAiReply(context: string) {
 
 export async function generatePostCallSummary(roomId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
 
   // Fetch room details for context
   const { data: room } = await supabase
