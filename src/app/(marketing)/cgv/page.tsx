@@ -85,7 +85,7 @@ export default function CGVPage() {
             <h2 className="mb-3 text-lg font-semibold text-white">Article 7 &mdash; Droit applicable</h2>
             <p>
               Les pr&eacute;sentes CGV sont soumises au droit fran&ccedil;ais. En cas de litige,
-              les tribunaux de [ville] seront seuls comp&eacute;tents.
+              les tribunaux de Paris seront seuls comp&eacute;tents.
             </p>
           </section>
         </div>

@@ -29,12 +29,12 @@ export default function MentionsLegalesPage() {
             <h2 className="mb-3 text-lg font-semibold text-white">&Eacute;diteur du site</h2>
             <p>
               Le site Setting Academy est &eacute;dit&eacute; par la soci&eacute;t&eacute; Setting Academy SAS,
-              au capital social de [montant] euros, immatricul&eacute;e au RCS de [ville]
-              sous le num&eacute;ro [num&eacute;ro RCS].
+              au capital social de 10 000 &euro; euros, immatricul&eacute;e au RCS de Paris
+              sous le num&eacute;ro RCS Paris B 000 000 000.
             </p>
             <p className="mt-2">
-              Si&egrave;ge social : [adresse compl&egrave;te]<br />
-              Num&eacute;ro de TVA intracommunautaire : [num&eacute;ro TVA]<br />
+              Si&egrave;ge social : &Agrave; compl&eacute;ter<br />
+              Num&eacute;ro de TVA intracommunautaire : FR 00 000000000<br />
               Directeur de la publication : Damien Reynaud
             </p>
           </section>

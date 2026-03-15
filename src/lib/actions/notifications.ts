@@ -116,9 +116,6 @@ export async function sendPushNotification(
     .eq("user_id", userId);
 
   if (!subscriptions || subscriptions.length === 0) {
-    console.log(
-      `[Push] Aucun abonnement push pour l'utilisateur ${userId}. Notification enregistrée en DB uniquement.`
-    );
     return {
       success: true,
       notificationId: notification?.id,
@@ -132,10 +129,6 @@ export async function sendPushNotification(
   const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
 
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    console.log(
-      `[Push] VAPID non configuré — notification push simulée pour ${userId}:`,
-      { title, body, link }
-    );
     return {
       success: true,
       notificationId: notification?.id,

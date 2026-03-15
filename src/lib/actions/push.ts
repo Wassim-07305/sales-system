@@ -151,9 +151,6 @@ export async function sendBulkPush(
   }
 
   const sentCount = results.filter((r) => r.sent).length;
-  console.log(
-    `[Push] Envoi en masse : ${sentCount}/${userIds.length} notifications envoyées`
-  );
 
   return { total: userIds.length, sent: sentCount, results };
 }

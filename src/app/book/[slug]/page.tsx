@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { BookingForm } from "./booking-form";
+
+export const metadata: Metadata = {
+  title: "Réserver un créneau — Setting Academy",
+  description: "Prenez rendez-vous avec notre équipe pour découvrir Setting Academy.",
+};
 
 interface Props {
   params: Promise<{ slug: string }>;

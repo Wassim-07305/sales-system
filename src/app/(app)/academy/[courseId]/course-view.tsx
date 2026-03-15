@@ -34,6 +34,7 @@ import {
   Loader2,
   Sparkles,
   Star,
+  Award,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -532,6 +533,21 @@ export function CourseView({
             />
           </div>
         </div>
+
+        {/* Certificate button — shown when all lessons completed */}
+        {progressPercent === 100 && (
+          <div className="px-5 py-3 border-b border-border">
+            <Link href={`/academy/certificates`}>
+              <Button
+                variant="outline"
+                className="w-full bg-[#7af17a]/10 text-[#7af17a] hover:bg-[#7af17a]/20 border-[#7af17a]/20 hover:border-[#7af17a]/40 transition-all"
+              >
+                <Award className="h-4 w-4 mr-2" />
+                Télécharger le certificat
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Module sections */}
         <ScrollArea className="flex-1">

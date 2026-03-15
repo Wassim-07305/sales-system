@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: "Setting Academy",
+    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "Setting Academy" }],
   },
   twitter: {
     card: "summary_large_image",

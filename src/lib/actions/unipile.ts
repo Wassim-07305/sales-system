@@ -738,10 +738,9 @@ export async function handleUnipileWebhook(body: Record<string, unknown>): Promi
 
     case "account_connected":
     case "account_disconnected":
-      console.log(`Unipile account event: ${eventType}`, data);
       break;
 
     default:
-      console.log(`Unipile webhook event: ${eventType}`);
+      break;
   }
 }

@@ -149,7 +149,6 @@ export async function enrichProspect(prospectId: string) {
 
   if (domain) {
     try {
-      console.log(`[enrichProspect] Tentative Apify pour domaine: ${domain}`);
       const apifyResults = await callApifyActor<ApifyCompanyEnrichment>(
         "george.the.developer/company-enrichment-api",
         { domain }
@@ -161,7 +160,6 @@ export async function enrichProspect(prospectId: string) {
         if (companyData.industry || companyData.employees || companyData.tech) {
           enrichmentData = mapApifyToEnrichment(companyData);
           enrichmentSource = "apify_verified";
-          console.log(`[enrichProspect] Apify OK pour ${domain}`);
         }
       }
     } catch (apifyError) {
@@ -303,7 +301,6 @@ export async function enrichBatch(prospectIds: string[]) {
 
   if (domains.length > 0) {
     try {
-      console.log(`[enrichBatch] Appel Apify bulk pour ${domains.length} domaines`);
       const batchResults = await callApifyActor<ApifyCompanyEnrichment>(
         "george.the.developer/company-enrichment-api",
         { domains },
@@ -317,7 +314,6 @@ export async function enrichBatch(prospectIds: string[]) {
             apifyBatchResults.set(result.domain.toLowerCase(), result);
           }
         }
-        console.log(`[enrichBatch] Apify batch: ${apifyBatchResults.size}/${domains.length} résultats`);
       }
     } catch (apifyErr) {
       console.error("[enrichBatch] Erreur Apify batch, fallback individuel:", apifyErr);
