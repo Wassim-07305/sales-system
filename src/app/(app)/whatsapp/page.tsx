@@ -4,6 +4,7 @@ import {
   getWhatsAppConnection,
   getConversations,
 } from "@/lib/actions/whatsapp";
+import { getUnipileStatus } from "@/lib/actions/unipile";
 import { WhatsAppView } from "./whatsapp-view";
 
 export default async function WhatsAppPage() {
@@ -23,8 +24,27 @@ export default async function WhatsAppPage() {
     redirect("/dashboard");
   }
 
-  const connection = await getWhatsAppConnection();
-  const conversations = await getConversations();
+  const [dbConnection, conversations, unipileStatus] = await Promise.all([
+    getWhatsAppConnection(),
+    getConversations(),
+    getUnipileStatus(),
+  ]);
+
+  // If no Meta connection but Unipile WhatsApp is connected, provide a virtual connection
+  let connection = dbConnection;
+  if (!connection) {
+    const waAccount = unipileStatus.accounts.find(
+      (a) => a.provider.toUpperCase() === "WHATSAPP"
+    );
+    if (waAccount) {
+      connection = {
+        id: `unipile-${waAccount.id}`,
+        phone_number: waAccount.name || null,
+        status: "connected",
+        connected_at: new Date().toISOString(),
+      };
+    }
+  }
 
   return (
     <WhatsAppView

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { IntegrationsView } from "./integrations-view";
 import { PageHeader } from "@/components/layout/page-header";
 import { getIntegrationStatus } from "@/lib/api-keys";
+import { getUnipileStatus } from "@/lib/actions/unipile";
 
 export default async function IntegrationsPage() {
   const supabase = await createClient();
@@ -19,7 +20,10 @@ export default async function IntegrationsPage() {
     redirect("/dashboard");
   }
 
-  const status = await getIntegrationStatus();
+  const [status, unipileStatus] = await Promise.all([
+    getIntegrationStatus(),
+    getUnipileStatus(),
+  ]);
 
   return (
     <>
@@ -27,7 +31,7 @@ export default async function IntegrationsPage() {
         title="Intégrations"
         description="Configurez les clés API et connexions aux services externes"
       />
-      <IntegrationsView initialStatus={status} />
+      <IntegrationsView initialStatus={status} unipileStatus={unipileStatus} />
     </>
   );
 }

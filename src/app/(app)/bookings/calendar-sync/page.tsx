@@ -6,6 +6,7 @@ import {
   getCalendarSyncStatus,
   getCalendarSettings,
 } from "@/lib/actions/calendar-sync";
+import { getUnipileStatus } from "@/lib/actions/unipile";
 
 export default async function CalendarSyncPage() {
   const supabase = await createClient();
@@ -14,10 +15,18 @@ export default async function CalendarSyncPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [syncStatus, settings] = await Promise.all([
+  const [syncStatus, settings, unipileStatus] = await Promise.all([
     getCalendarSyncStatus(),
     getCalendarSettings(),
+    getUnipileStatus(),
   ]);
+
+  const googleAccount = unipileStatus.accounts.find(
+    (a) => a.provider.toUpperCase() === "GOOGLE"
+  );
+  const unipileCalendar = unipileStatus.configured
+    ? { connected: !!googleAccount, accountName: googleAccount?.name }
+    : null;
 
   return (
     <div>
@@ -25,7 +34,7 @@ export default async function CalendarSyncPage() {
         title="Synchronisation Google Calendar"
         description="Connectez votre Google Calendar pour synchroniser vos rendez-vous"
       />
-      <CalendarSyncPanel initialStatus={syncStatus} initialSettings={settings} />
+      <CalendarSyncPanel initialStatus={syncStatus} initialSettings={settings} unipileCalendar={unipileCalendar} />
     </div>
   );
 }

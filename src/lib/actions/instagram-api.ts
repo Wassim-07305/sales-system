@@ -3,13 +3,30 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getApiKey } from "@/lib/api-keys";
+import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
 
 // ---------------------------------------------------------------------------
-// Instagram Graph API stubs
-// All functions gracefully fall back when no API token is available.
+// Instagram API — Unipile preferred, Graph API fallback, then local DB.
 // ---------------------------------------------------------------------------
 
 const GRAPH_API_BASE = "https://graph.instagram.com/v21.0";
+
+/** Find the Unipile Instagram account ID if available */
+async function getUnipileInstagramAccountId(): Promise<string | null> {
+  if (!isUnipileConfigured()) return null;
+  try {
+    const client = getUnipileClient();
+    if (!client) return null;
+    const response = await client.account.getAll();
+    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const instaAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
+      (a) => (a.type || a.provider || "").toUpperCase() === "INSTAGRAM"
+    );
+    return instaAccount?.id || null;
+  } catch {
+    return null;
+  }
+}
 
 /** Resolve the Instagram access token: env var → user_settings row → null */
 async function resolveToken(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -120,7 +137,38 @@ export async function getInstagramProfile(username: string) {
 
   const token = await resolveToken(user.id, supabase);
 
-  // --- Live API path ---
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileInstagramAccountId();
+  if (unipileAccountId) {
+    try {
+      const client = getUnipileClient();
+      if (client) {
+        const response = await client.users.getProfile({
+          account_id: unipileAccountId,
+          identifier: username,
+        });
+        const p = response as { id?: string; first_name?: string; last_name?: string; username?: string; biography?: string; followers_count?: number; following_count?: number; media_count?: number; profile_picture_url?: string };
+        if (p.username || p.first_name) {
+          return {
+            data: {
+              username: p.username || username,
+              name: [p.first_name, p.last_name].filter(Boolean).join(" ") || p.username || username,
+              biography: p.biography || null,
+              followers_count: p.followers_count ?? null,
+              follows_count: p.following_count ?? null,
+              media_count: p.media_count ?? null,
+              profile_picture_url: p.profile_picture_url || null,
+              source: "unipile" as const,
+            },
+          };
+        }
+      }
+    } catch (err) {
+      console.error("Unipile Instagram profile error, falling back:", err);
+    }
+  }
+
+  // --- Graph API path ---
   if (token) {
     try {
       // The Instagram Graph API requires the user's IG User ID for business discovery.
@@ -212,8 +260,28 @@ export async function sendInstagramDM(recipientId: string, message: string) {
   let externalId: string | null = null;
   let status: "sent" | "queued" | "failed" = "queued";
 
-  // --- Live API path (Instagram Messaging API via Pages) ---
-  if (token && pageId) {
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileInstagramAccountId();
+  if (unipileAccountId) {
+    try {
+      const client = getUnipileClient();
+      if (client) {
+        const response = await client.messaging.startNewChat({
+          account_id: unipileAccountId,
+          text: message,
+          attendees_ids: [recipientId],
+        });
+        const result = response as { chat_id?: string };
+        externalId = result.chat_id || null;
+        status = "sent";
+      }
+    } catch (err) {
+      console.error("Unipile Instagram DM error, falling back:", err);
+    }
+  }
+
+  // --- Direct API path (fallback) ---
+  if (status !== "sent" && token && pageId) {
     try {
       const res = await fetch(
         `https://graph.facebook.com/v21.0/${pageId}/messages`,
@@ -298,7 +366,38 @@ export async function getInstagramConversations() {
   const token = await resolveToken(user.id, supabase);
   const pageId = await getApiKey("INSTAGRAM_BUSINESS_ACCOUNT_ID");
 
-  // --- Live API path ---
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileInstagramAccountId();
+  if (unipileAccountId) {
+    try {
+      const client = getUnipileClient();
+      if (client) {
+        const response = await client.messaging.getAllChats({
+          account_id: unipileAccountId,
+          limit: 50,
+        });
+        const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+        const conversations = (items as Array<{
+          id: string;
+          attendees?: Array<{ display_name?: string; id?: string }>;
+          last_message?: { text?: string; timestamp?: string };
+          unread_count?: number;
+        }>).map((chat) => ({
+          id: chat.id,
+          participants: (chat.attendees || []).map((a) => ({ id: a.id || "", name: a.display_name || "" })),
+          messages: chat.last_message
+            ? [{ id: chat.id, message: chat.last_message.text || "", from: { id: "", name: "" }, created_time: chat.last_message.timestamp || "" }]
+            : [],
+          source: "unipile" as const,
+        }));
+        return { data: conversations };
+      }
+    } catch (err) {
+      console.error("Unipile Instagram conversations error, falling back:", err);
+    }
+  }
+
+  // --- Direct API path ---
   if (token && pageId) {
     try {
       const res = await fetch(

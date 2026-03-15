@@ -33,11 +33,19 @@ import {
   HelpCircle,
   BarChart3,
   Bot,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Unplug,
 } from "lucide-react";
 import {
   scrapeStories,
   generateAiMessage,
 } from "@/lib/actions/hub-setting";
+import {
+  generateUnipileAuthLink,
+  getUnipileStatus,
+} from "@/lib/actions/unipile";
 import { updateProspectStatus } from "@/lib/actions/prospecting";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -67,6 +75,7 @@ interface Story {
 
 interface Props {
   prospects: Prospect[];
+  unipileInstagram?: { connected: boolean; accountName?: string } | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -89,9 +98,47 @@ const statusColors: Record<string, string> = {
   lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
-export function InstagramView({ prospects }: Props) {
+export function InstagramView({ prospects, unipileInstagram }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+
+  // Unipile state
+  const [connectingUnipile, setConnectingUnipile] = useState(false);
+  const [igConnected, setIgConnected] = useState(unipileInstagram?.connected ?? false);
+  const [igName, setIgName] = useState(unipileInstagram?.accountName ?? "");
+  const [refreshingUnipile, setRefreshingUnipile] = useState(false);
+
+  async function handleConnectUnipile() {
+    setConnectingUnipile(true);
+    try {
+      const result = await generateUnipileAuthLink("INSTAGRAM");
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.url) {
+        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        toast.info("Connectez votre compte Instagram, puis cliquez Rafraîchir");
+      }
+    } catch {
+      toast.error("Erreur lors de la génération du lien");
+    }
+    setConnectingUnipile(false);
+  }
+
+  async function handleRefreshUnipile() {
+    setRefreshingUnipile(true);
+    try {
+      const result = await getUnipileStatus();
+      const igAccount = result.accounts.find(
+        (a) => a.provider.toUpperCase() === "INSTAGRAM"
+      );
+      setIgConnected(!!igAccount);
+      setIgName(igAccount?.name ?? "");
+      toast.success(igAccount ? "Instagram connecté via Unipile" : "Aucun compte Instagram détecté");
+    } catch {
+      toast.error("Erreur lors du rafraîchissement");
+    }
+    setRefreshingUnipile(false);
+  }
 
   // Search & filter
   const [search, setSearch] = useState("");
@@ -193,6 +240,60 @@ export function InstagramView({ prospects }: Props) {
           {prospects.length} prospects
         </Badge>
       </PageHeader>
+
+      {/* Unipile Instagram connection status */}
+      <Card className="mb-6">
+        <CardContent className="flex items-center justify-between py-3 px-4">
+          <div className="flex items-center gap-3">
+            <Unplug className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              {igConnected ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-brand" />
+                  <span className="text-sm font-medium text-brand">
+                    Instagram connecté via Unipile
+                  </span>
+                  {igName && (
+                    <span className="text-xs text-muted-foreground">({igName})</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Instagram non connecté
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {!igConnected && (
+              <Button
+                size="sm"
+                onClick={handleConnectUnipile}
+                disabled={connectingUnipile}
+                className="bg-brand text-brand-dark hover:bg-brand/90"
+              >
+                {connectingUnipile ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Instagram className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Connecter
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleRefreshUnipile}
+              disabled={refreshingUnipile}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshingUnipile ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="outils">
         <TabsList className="mb-6">

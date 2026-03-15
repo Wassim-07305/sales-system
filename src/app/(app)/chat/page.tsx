@@ -4,6 +4,7 @@ import { ChatLayout } from "./chat-layout";
 import type { UserRole } from "@/lib/types/database";
 import { getConversations as getWAConversations } from "@/lib/actions/whatsapp";
 import { getConversations as getInboxConversations } from "@/lib/actions/inbox";
+import { getUnipileStatus } from "@/lib/actions/unipile";
 
 export default async function ChatPage() {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export default async function ChatPage() {
   if (!user) redirect("/login");
 
   // Fetch all data in parallel
-  const [channelsRes, profileRes, teamRes, waConversations, inboxConversations] = await Promise.all([
+  const [channelsRes, profileRes, teamRes, waConversations, inboxConversations, unipileStatus] = await Promise.all([
     supabase
       .from("channels")
       .select("*")
@@ -25,6 +26,7 @@ export default async function ChatPage() {
       .neq("id", user.id),
     getWAConversations().catch(() => []),
     getInboxConversations().catch(() => []),
+    getUnipileStatus().catch(() => ({ configured: false, accounts: [] })),
   ]);
 
   // Compute unread counts inline
@@ -75,6 +77,14 @@ export default async function ChatPage() {
       }
       initialWAConversations={waConversations as Parameters<typeof ChatLayout>[0]["initialWAConversations"]}
       initialInboxConversations={inboxConversations as Parameters<typeof ChatLayout>[0]["initialInboxConversations"]}
+      unipileWhatsApp={
+        unipileStatus.configured
+          ? {
+              connected: !!unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "WHATSAPP"),
+              accountName: unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "WHATSAPP")?.name,
+            }
+          : null
+      }
     />
   );
 }

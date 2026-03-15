@@ -28,17 +28,21 @@ import {
   Wrench,
   ExternalLink,
   Copy,
-  Chrome,
   CheckCircle2,
   XCircle,
   RefreshCw,
   Bot,
+  Unplug,
 } from "lucide-react";
 import {
   analyzeProfile,
   suggestComments,
   generateAiMessage,
 } from "@/lib/actions/hub-setting";
+import {
+  generateUnipileAuthLink,
+  getUnipileStatus,
+} from "@/lib/actions/unipile";
 import { updateProspectStatus } from "@/lib/actions/prospecting";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -54,16 +58,9 @@ interface Prospect {
   list: { id: string; name: string } | null;
 }
 
-interface SyncStatus {
-  connected: boolean;
-  lastSyncAt: string | null;
-  conversationsSynced: number;
-  prospectsSynced: number;
-}
-
 interface Props {
   prospects: Prospect[];
-  syncStatus: SyncStatus | null;
+  unipileLinkedin?: { connected: boolean; accountName?: string } | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -86,9 +83,47 @@ const statusColors: Record<string, string> = {
   lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
-export function LinkedinView({ prospects, syncStatus }: Props) {
+export function LinkedinView({ prospects, unipileLinkedin }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+
+  // Unipile state
+  const [connectingUnipile, setConnectingUnipile] = useState(false);
+  const [liConnected, setLiConnected] = useState(unipileLinkedin?.connected ?? false);
+  const [liName, setLiName] = useState(unipileLinkedin?.accountName ?? "");
+  const [refreshingUnipile, setRefreshingUnipile] = useState(false);
+
+  async function handleConnectUnipile() {
+    setConnectingUnipile(true);
+    try {
+      const result = await generateUnipileAuthLink("LINKEDIN");
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.url) {
+        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        toast.info("Connectez votre compte LinkedIn, puis cliquez Rafraîchir");
+      }
+    } catch {
+      toast.error("Erreur lors de la génération du lien");
+    }
+    setConnectingUnipile(false);
+  }
+
+  async function handleRefreshUnipile() {
+    setRefreshingUnipile(true);
+    try {
+      const result = await getUnipileStatus();
+      const liAccount = result.accounts.find(
+        (a) => a.provider.toUpperCase() === "LINKEDIN"
+      );
+      setLiConnected(!!liAccount);
+      setLiName(liAccount?.name ?? "");
+      toast.success(liAccount ? "LinkedIn connecté via Unipile" : "Aucun compte LinkedIn détecté");
+    } catch {
+      toast.error("Erreur lors du rafraîchissement");
+    }
+    setRefreshingUnipile(false);
+  }
 
   // Search & filter
   const [search, setSearch] = useState("");
@@ -213,49 +248,57 @@ export function LinkedinView({ prospects, syncStatus }: Props) {
         </Badge>
       </PageHeader>
 
-      {/* Extension Chrome status bar */}
-      <Card className="mb-6">
+      {/* Unipile LinkedIn connection status */}
+      <Card className={`mb-6 ${liConnected ? "border-brand/30" : ""}`}>
         <CardContent className="flex items-center justify-between py-3 px-4">
           <div className="flex items-center gap-3">
-            <Chrome className="h-5 w-5 text-muted-foreground" />
+            <Unplug className="h-5 w-5 text-muted-foreground" />
             <div className="flex items-center gap-2">
-              {syncStatus?.connected ? (
+              {liConnected ? (
                 <>
                   <CheckCircle2 className="h-4 w-4 text-brand" />
                   <span className="text-sm font-medium text-brand">
-                    Extension connectée
+                    LinkedIn connecté via Unipile
                   </span>
+                  {liName && (
+                    <span className="text-xs text-muted-foreground">({liName})</span>
+                  )}
                 </>
               ) : (
                 <>
                   <XCircle className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    Extension non connectée
+                    LinkedIn non connecté (Unipile)
                   </span>
                 </>
               )}
             </div>
           </div>
-
-          {syncStatus ? (
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span>{syncStatus.prospectsSynced} prospects synchronisés</span>
-              <span>{syncStatus.conversationsSynced} conversations</span>
-              {syncStatus.lastSyncAt && (
-                <span className="flex items-center gap-1">
-                  <RefreshCw className="h-3 w-3" />
-                  {formatDistanceToNow(new Date(syncStatus.lastSyncAt), {
-                    addSuffix: true,
-                    locale: fr,
-                  })}
-                </span>
-              )}
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              Installez l&apos;extension Chrome pour synchroniser LinkedIn
-            </p>
-          )}
+          <div className="flex items-center gap-2">
+            {!liConnected && (
+              <Button
+                size="sm"
+                onClick={handleConnectUnipile}
+                disabled={connectingUnipile}
+                className="bg-brand text-brand-dark hover:bg-brand/90"
+              >
+                {connectingUnipile ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Linkedin className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Connecter
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleRefreshUnipile}
+              disabled={refreshingUnipile}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshingUnipile ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

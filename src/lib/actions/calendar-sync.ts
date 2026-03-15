@@ -2,6 +2,24 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
+
+/** Find the Unipile Google Calendar account ID if available */
+async function getUnipileGoogleCalendarAccountId(): Promise<string | null> {
+  if (!isUnipileConfigured()) return null;
+  try {
+    const client = getUnipileClient();
+    if (!client) return null;
+    const response = await client.account.getAll();
+    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const gcalAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
+      (a) => (a.type || a.provider || "").toUpperCase() === "GOOGLE"
+    );
+    return gcalAccount?.id || null;
+  } catch {
+    return null;
+  }
+}
 
 export interface CalendarSyncStatus {
   connected: boolean;
@@ -266,23 +284,148 @@ export async function syncCalendarEvents(): Promise<{
     return { success: false, message: "Utilisateur non authentifié" };
   }
 
-  const accessToken = await getGoogleAccessToken(supabase, user.id);
-  if (!accessToken) {
-    return {
-      success: false,
-      message: "Google Calendar non connecté. Connectez votre compte Google d'abord.",
-    };
-  }
-
   // Récupérer les paramètres de sync
   const settings = await getCalendarSettings();
 
   try {
     let syncedCount = 0;
 
+    // --- Unipile path (preferred) ---
+    const unipileAccountId = await getUnipileGoogleCalendarAccountId();
+    if (unipileAccountId) {
+      try {
+        const dsn = process.env.UNIPILE_DSN;
+        const apiKey = process.env.UNIPILE_API_KEY;
+        if (dsn && apiKey) {
+          // Export bookings via Unipile
+          if (settings.syncDirection === "export_only" || settings.syncDirection === "bidirectional") {
+            const { data: bookings } = await supabase
+              .from("bookings")
+              .select("*, contact:contacts(id, first_name, last_name, email)")
+              .eq("user_id", user.id)
+              .is("google_event_id", null)
+              .gte("date", new Date().toISOString().split("T")[0]);
+
+            for (const booking of bookings || []) {
+              const contact = Array.isArray(booking.contact) ? booking.contact[0] : booking.contact;
+              const contactName = contact
+                ? `${contact.first_name || ""} ${contact.last_name || ""}`.trim()
+                : "Contact";
+
+              const startDateTime = booking.date && booking.time
+                ? `${booking.date}T${booking.time}:00`
+                : booking.date;
+              const endDate = new Date(startDateTime);
+              endDate.setMinutes(endDate.getMinutes() + (booking.duration || 30));
+
+              const res = await fetch(`${dsn}/api/v1/calendar/events`, {
+                method: "POST",
+                headers: {
+                  "X-API-KEY": apiKey,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  account_id: unipileAccountId,
+                  title: `${booking.type || "RDV"} — ${contactName}`,
+                  description: booking.notes || "Rendez-vous via Sales System",
+                  start_date: startDateTime,
+                  end_date: endDate.toISOString(),
+                  timezone: "Europe/Paris",
+                }),
+              });
+
+              if (res.ok) {
+                const event = (await res.json()) as { id?: string };
+                await supabase
+                  .from("bookings")
+                  .update({ google_event_id: event.id || `unipile_${Date.now()}` })
+                  .eq("id", booking.id);
+                syncedCount++;
+              }
+            }
+          }
+
+          // Import events via Unipile
+          if (settings.syncDirection === "import_only" || settings.syncDirection === "bidirectional") {
+            const now = new Date().toISOString();
+            const oneMonthLater = new Date();
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+            const res = await fetch(
+              `${dsn}/api/v1/calendar/events?account_id=${unipileAccountId}&start_date=${now}&end_date=${oneMonthLater.toISOString()}&limit=50`,
+              { headers: { "X-API-KEY": apiKey } }
+            );
+
+            if (res.ok) {
+              const data = (await res.json()) as { items?: Array<{ id?: string; title?: string; start_date?: string; end_date?: string }> };
+              for (const event of data.items || []) {
+                if (!event.start_date) continue;
+                const { data: existing } = await supabase
+                  .from("bookings")
+                  .select("id")
+                  .eq("google_event_id", event.id || "")
+                  .single();
+
+                if (!existing) {
+                  const startDate = new Date(event.start_date);
+                  const endDate = event.end_date ? new Date(event.end_date) : null;
+                  const durationMinutes = endDate
+                    ? Math.round((endDate.getTime() - startDate.getTime()) / 60000)
+                    : 30;
+
+                  await supabase.from("bookings").insert({
+                    user_id: user.id,
+                    date: startDate.toISOString().split("T")[0],
+                    time: startDate.toTimeString().substring(0, 5),
+                    duration: durationMinutes,
+                    type: "google_import",
+                    notes: event.title || "Événement Google Calendar",
+                    status: "confirmed",
+                    google_event_id: event.id || `unipile_import_${Date.now()}`,
+                  });
+                  syncedCount++;
+                }
+              }
+            }
+          }
+
+          // Update sync stats
+          await supabase.from("user_settings").upsert(
+            {
+              user_id: user.id,
+              key: "calendar_sync_stats",
+              value: {
+                last_sync_at: new Date().toISOString(),
+                synced_count: syncedCount,
+              } as unknown as Record<string, unknown>,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "user_id,key" }
+          );
+
+          revalidatePath("/bookings/calendar-sync");
+          return {
+            success: true,
+            message: `Synchronisation réussie via Unipile : ${syncedCount} événement${syncedCount > 1 ? "s" : ""} synchronisé${syncedCount > 1 ? "s" : ""}`,
+            syncedCount,
+          };
+        }
+      } catch (err) {
+        console.error("Unipile calendar sync error, falling back to Google API:", err);
+      }
+    }
+
+    // --- Direct Google API path (fallback) ---
+    const accessToken = await getGoogleAccessToken(supabase, user.id);
+    if (!accessToken) {
+      return {
+        success: false,
+        message: "Google Calendar non connecté. Connectez votre compte Google d'abord.",
+      };
+    }
+
     // Export : envoyer les bookings vers Google Calendar
     if (settings.syncDirection === "export_only" || settings.syncDirection === "bidirectional") {
-      // Récupérer les bookings non synchronisés
       const { data: bookings } = await supabase
         .from("bookings")
         .select("*, contact:contacts(id, first_name, last_name, email)")
@@ -331,7 +474,6 @@ export async function syncCalendarEvents(): Promise<{
 
         if (createResponse.ok) {
           const event = await createResponse.json();
-          // Marquer le booking comme synchronisé
           await supabase
             .from("bookings")
             .update({ google_event_id: event.id })
@@ -365,7 +507,6 @@ export async function syncCalendarEvents(): Promise<{
         const events = eventsData.items || [];
 
         for (const event of events) {
-          // Vérifier si l'événement est déjà importé
           const { data: existing } = await supabase
             .from("bookings")
             .select("id")
@@ -374,9 +515,9 @@ export async function syncCalendarEvents(): Promise<{
 
           if (!existing && event.start?.dateTime) {
             const startDate = new Date(event.start.dateTime);
-            const endDate = event.end?.dateTime ? new Date(event.end.dateTime) : null;
-            const durationMinutes = endDate
-              ? Math.round((endDate.getTime() - startDate.getTime()) / 60000)
+            const endDateVal = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+            const durationMinutes = endDateVal
+              ? Math.round((endDateVal.getTime() - startDate.getTime()) / 60000)
               : 30;
 
             await supabase.from("bookings").insert({

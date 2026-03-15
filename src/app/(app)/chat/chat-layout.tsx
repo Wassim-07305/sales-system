@@ -64,6 +64,11 @@ import {
   Inbox,
   Instagram,
   Linkedin,
+  ExternalLink,
+  RefreshCw,
+  Settings,
+  Unplug,
+  CheckCircle2,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -84,6 +89,10 @@ import {
 import {
   sendWhatsAppMessage,
 } from "@/lib/actions/whatsapp";
+import {
+  generateUnipileAuthLink,
+  getUnipileStatus,
+} from "@/lib/actions/unipile";
 import {
   sendMessage as sendInboxMessage,
 } from "@/lib/actions/inbox";
@@ -138,6 +147,7 @@ interface ChatLayoutProps {
   teamMembers: TeamMember[];
   initialWAConversations: WAConversation[];
   initialInboxConversations: InboxConversation[];
+  unipileWhatsApp?: { connected: boolean; accountName?: string } | null;
 }
 
 interface TeamMember {
@@ -305,6 +315,7 @@ export function ChatLayout({
   teamMembers,
   initialWAConversations,
   initialInboxConversations,
+  unipileWhatsApp,
 }: ChatLayoutProps) {
   const supabase = useMemo(() => createClient(), []);
   const isAdmin = ADMIN_ROLES.includes(userRole);
@@ -326,6 +337,8 @@ export function ChatLayout({
   const [activeWA, setActiveWA] = useState<WAConversation | null>(null);
   const [waMessage, setWAMessage] = useState("");
   const [sendingWA, setSendingWA] = useState(false);
+  const [waConnected, setWaConnected] = useState(unipileWhatsApp?.connected || false);
+  const [connectingWA, setConnectingWA] = useState(false);
 
   // ---- Inbox state ----
   const [inboxConversations, setInboxConversations] = useState<InboxConversation[]>(initialInboxConversations);
@@ -1316,9 +1329,70 @@ export function ChatLayout({
                   );
                 })}
                 {filteredWAConversations.length === 0 && (
-                  <p className="text-[11px] text-muted-foreground/60 px-2 py-4 text-center">
-                    {channelSearch ? "Aucun résultat" : "Aucune conversation WhatsApp"}
-                  </p>
+                  <div className="px-2 py-4 text-center space-y-3">
+                    <p className="text-[11px] text-muted-foreground/60">
+                      {channelSearch ? "Aucun résultat" : "Aucune conversation WhatsApp"}
+                    </p>
+                    {!channelSearch && !waConnected && (
+                      <div className="space-y-2">
+                        <Button
+                          size="sm"
+                          className="w-full bg-brand text-brand-dark hover:bg-brand/90 text-xs"
+                          disabled={connectingWA}
+                          onClick={async () => {
+                            setConnectingWA(true);
+                            try {
+                              const result = await generateUnipileAuthLink("WHATSAPP");
+                              if (result.error) {
+                                toast.error(result.error);
+                              } else if (result.url) {
+                                window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+                                toast.info("Scannez le QR code WhatsApp dans la fenêtre");
+                              }
+                            } catch {
+                              toast.error("Erreur de connexion");
+                            }
+                            setConnectingWA(false);
+                          }}
+                        >
+                          {connectingWA ? (
+                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                          )}
+                          Connecter WhatsApp
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-[11px] text-muted-foreground"
+                          onClick={async () => {
+                            try {
+                              const status = await getUnipileStatus();
+                              const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP");
+                              if (wa) {
+                                setWaConnected(true);
+                                toast.success("WhatsApp connecté ! Rechargez la page pour voir vos conversations.");
+                              } else {
+                                toast.info("Aucun compte WhatsApp détecté");
+                              }
+                            } catch {
+                              toast.error("Erreur de vérification");
+                            }
+                          }}
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Vérifier la connexion
+                        </Button>
+                      </div>
+                    )}
+                    {!channelSearch && waConnected && waConversations.length === 0 && (
+                      <div className="flex items-center gap-2 justify-center text-brand">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span className="text-[11px]">WhatsApp connecté</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

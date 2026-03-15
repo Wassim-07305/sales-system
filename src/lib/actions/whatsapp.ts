@@ -3,6 +3,24 @@
 import { createClient } from "@/lib/supabase/server";
 import { getApiKey } from "@/lib/api-keys";
 import { revalidatePath } from "next/cache";
+import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
+
+/** Find the Unipile WhatsApp account ID if available */
+async function getUnipileWhatsAppAccountId(): Promise<string | null> {
+  if (!isUnipileConfigured()) return null;
+  try {
+    const client = getUnipileClient();
+    if (!client) return null;
+    const response = await client.account.getAll();
+    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const waAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
+      (a) => (a.type || a.provider || "").toUpperCase() === "WHATSAPP"
+    );
+    return waAccount?.id || null;
+  } catch {
+    return null;
+  }
+}
 
 export async function getWhatsAppConnection() {
   const supabase = await createClient();
@@ -82,7 +100,94 @@ export async function getConversations() {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Get the user's connection
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileWhatsAppAccountId();
+  if (unipileAccountId) {
+    try {
+      const client = getUnipileClient();
+      if (client) {
+        const chatsResponse = await client.messaging.getAllChats({
+          account_id: unipileAccountId,
+          limit: 50,
+        });
+        const chats = Array.isArray(chatsResponse)
+          ? chatsResponse
+          : (chatsResponse as { items?: unknown[] }).items || [];
+
+        interface UnipileChat {
+          id: string;
+          name?: string;
+          timestamp?: string;
+          updated_at?: string;
+          unread_count?: number;
+          last_message?: {
+            text?: string;
+            timestamp?: string;
+            is_sender?: boolean;
+          };
+          attendees?: Array<{
+            id?: string;
+            display_name?: string;
+            name?: string;
+          }>;
+        }
+
+        const conversations = (chats as UnipileChat[]).map((chat) => {
+          const attendee = chat.attendees?.[0];
+          const contactName =
+            chat.name || attendee?.display_name || attendee?.name || "Contact";
+          const lastMsgTime =
+            chat.last_message?.timestamp ||
+            chat.timestamp ||
+            chat.updated_at ||
+            new Date().toISOString();
+          const messages: Array<{
+            id: string;
+            direction: string;
+            content: string | null;
+            media_url: string | null;
+            status: string;
+            created_at: string;
+          }> = [];
+
+          if (chat.last_message?.text) {
+            messages.push({
+              id: `unipile-${chat.id}-last`,
+              direction: chat.last_message.is_sender ? "outbound" : "inbound",
+              content: chat.last_message.text,
+              media_url: null,
+              status: "delivered",
+              created_at: lastMsgTime,
+            });
+          }
+
+          return {
+            prospect_id: `unipile-${chat.id}`,
+            prospect: {
+              id: `unipile-${chat.id}`,
+              name: contactName,
+              profile_url: null,
+              platform: "whatsapp",
+              status: "active",
+            },
+            messages,
+            last_message_at: lastMsgTime,
+            unread_count: chat.unread_count || 0,
+          };
+        });
+
+        return conversations.sort(
+          (a, b) =>
+            new Date(b.last_message_at).getTime() -
+            new Date(a.last_message_at).getTime()
+        );
+      }
+    } catch (err) {
+      console.error("Unipile WhatsApp getConversations error, falling back to local DB:", err);
+    }
+  }
+
+  // --- Local DB path (fallback) ---
   const { data: connection } = await supabase
     .from("whatsapp_connections")
     .select("id")
@@ -168,41 +273,63 @@ export async function sendWhatsAppMessage(data: {
   let waMessageId: string | null = null;
   let status = "sent";
 
-  // Envoyer via l'API WhatsApp Business si configurée
-  const accessToken = await getApiKey("WHATSAPP_ACCESS_TOKEN");
-  const phoneNumberId = await getApiKey("WHATSAPP_PHONE_NUMBER_ID");
-
-  if (accessToken && phoneNumberId && prospect?.phone) {
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileWhatsAppAccountId();
+  if (unipileAccountId && prospect?.phone) {
     try {
-      const response = await fetch(
-        `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messaging_product: "whatsapp",
-            to: prospect.phone.replace(/[^0-9]/g, ""),
-            type: "text",
-            text: { body: data.content },
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        waMessageId = result.messages?.[0]?.id || null;
+      const client = getUnipileClient();
+      if (client) {
+        const response = await client.messaging.startNewChat({
+          account_id: unipileAccountId,
+          text: data.content,
+          attendees_ids: [prospect.phone.replace(/[^0-9]/g, "")],
+        });
+        const result = response as { chat_id?: string };
+        waMessageId = result.chat_id || null;
         status = "sent";
-      } else {
-        const errorBody = await response.json();
-        console.error("WhatsApp API error:", errorBody);
-        status = "failed";
       }
     } catch (err) {
-      console.error("WhatsApp send error:", err);
-      status = "failed";
+      console.error("Unipile WhatsApp send error, falling back:", err);
+    }
+  }
+
+  // --- Direct Meta API path (fallback) ---
+  if (status !== "sent" || !waMessageId) {
+    const accessToken = await getApiKey("WHATSAPP_ACCESS_TOKEN");
+    const phoneNumberId = await getApiKey("WHATSAPP_PHONE_NUMBER_ID");
+
+    if (accessToken && phoneNumberId && prospect?.phone) {
+      try {
+        const response = await fetch(
+          `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              to: prospect.phone.replace(/[^0-9]/g, ""),
+              type: "text",
+              text: { body: data.content },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          waMessageId = result.messages?.[0]?.id || null;
+          status = "sent";
+        } else {
+          const errorBody = await response.json();
+          console.error("WhatsApp API error:", errorBody);
+          status = "failed";
+        }
+      } catch (err) {
+        console.error("WhatsApp send error:", err);
+        status = "failed";
+      }
     }
   }
 

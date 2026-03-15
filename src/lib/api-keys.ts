@@ -90,6 +90,8 @@ export async function getIntegrationStatus(): Promise<Record<string, boolean>> {
     "OPENROUTER_API_KEY",
     "GOOGLE_CLIENT_SECRET",
     "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+    "UNIPILE_DSN",
+    "UNIPILE_API_KEY",
   ];
 
   const status: Record<string, boolean> = {};

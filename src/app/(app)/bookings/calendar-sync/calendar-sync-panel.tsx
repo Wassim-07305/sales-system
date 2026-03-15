@@ -34,6 +34,8 @@ import {
   AlertTriangle,
   Copy,
   ChevronLeft,
+  Loader2,
+  Unplug,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -46,15 +48,21 @@ import {
   saveCalendarSettings,
   disconnectGoogleCalendar,
 } from "@/lib/actions/calendar-sync";
+import {
+  generateUnipileAuthLink,
+  getUnipileStatus,
+} from "@/lib/actions/unipile";
 
 interface CalendarSyncPanelProps {
   initialStatus: CalendarSyncStatus;
   initialSettings: CalendarSettings;
+  unipileCalendar?: { connected: boolean; accountName?: string } | null;
 }
 
 export function CalendarSyncPanel({
   initialStatus,
   initialSettings,
+  unipileCalendar,
 }: CalendarSyncPanelProps) {
   const [status, setStatus] = useState<CalendarSyncStatus>(initialStatus);
   const [settings, setSettings] = useState<CalendarSettings>(initialSettings);
@@ -62,6 +70,44 @@ export function CalendarSyncPanel({
   const [isSyncing, startSyncTransition] = useTransition();
   const [isSaving, startSaveTransition] = useTransition();
   const [isDisconnecting, startDisconnectTransition] = useTransition();
+
+  // Unipile state
+  const [connectingUnipile, setConnectingUnipile] = useState(false);
+  const [unipileConnected, setUnipileConnected] = useState(unipileCalendar?.connected ?? false);
+  const [unipileName, setUnipileName] = useState(unipileCalendar?.accountName ?? "");
+  const [refreshingUnipile, setRefreshingUnipile] = useState(false);
+
+  async function handleConnectUnipile() {
+    setConnectingUnipile(true);
+    try {
+      const result = await generateUnipileAuthLink("GOOGLE");
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.url) {
+        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        toast.info("Connectez votre Google Calendar dans la fenêtre, puis cliquez Rafraîchir");
+      }
+    } catch {
+      toast.error("Erreur lors de la génération du lien");
+    }
+    setConnectingUnipile(false);
+  }
+
+  async function handleRefreshUnipile() {
+    setRefreshingUnipile(true);
+    try {
+      const result = await getUnipileStatus();
+      const googleAccount = result.accounts.find(
+        (a) => a.provider.toUpperCase() === "GOOGLE"
+      );
+      setUnipileConnected(!!googleAccount);
+      setUnipileName(googleAccount?.name ?? "");
+      toast.success(googleAccount ? "Google Calendar connecté via Unipile" : "Aucun compte Google détecté");
+    } catch {
+      toast.error("Erreur lors du rafraîchissement");
+    }
+    setRefreshingUnipile(false);
+  }
 
   function handleSync() {
     startSyncTransition(async () => {
@@ -150,16 +196,67 @@ export function CalendarSyncPanel({
         Retour aux bookings
       </Link>
 
-      {/* Connection status card */}
+      {/* Unipile connection — recommended */}
+      <Card className={unipileConnected ? "border-brand/30" : ""}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Unplug className="h-5 w-5" />
+              Google Calendar via Unipile
+            </CardTitle>
+            <Badge className="bg-brand/15 text-brand border-brand/20 text-[10px]">Recommandé</Badge>
+          </div>
+          <CardDescription>
+            Connexion en un clic — pas besoin de configurer OAuth manuellement
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {unipileConnected ? (
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-brand" />
+              <div>
+                <p className="text-sm font-medium text-brand">Connecté via Unipile</p>
+                {unipileName && <p className="text-xs text-muted-foreground">{unipileName}</p>}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Connectez votre Google Calendar directement via Unipile pour synchroniser vos rendez-vous.
+            </p>
+          )}
+        </CardContent>
+        <CardFooter className="flex gap-2">
+          {!unipileConnected && (
+            <Button onClick={handleConnectUnipile} disabled={connectingUnipile}>
+              {connectingUnipile ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Calendar className="h-4 w-4 mr-2" />
+              )}
+              Connecter Google Calendar
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefreshUnipile}
+            disabled={refreshingUnipile}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshingUnipile ? "animate-spin" : ""}`} />
+            Rafraîchir
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {/* Google OAuth — fallback */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Statut de connexion
+            Google OAuth (avancé)
           </CardTitle>
           <CardDescription>
-            Connectez votre compte Google pour synchroniser automatiquement vos
-            rendez-vous avec Google Calendar
+            Connexion manuelle via OAuth — nécessite un projet Google Cloud configuré
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -206,9 +303,9 @@ export function CalendarSyncPanel({
               {isDisconnecting ? "Déconnexion..." : "Déconnecter"}
             </Button>
           ) : (
-            <Button onClick={handleConnectGoogle}>
+            <Button variant="outline" onClick={handleConnectGoogle}>
               <Calendar className="h-4 w-4 mr-2" />
-              Connecter Google Calendar
+              Connecter via OAuth
             </Button>
           )}
         </CardFooter>

@@ -20,8 +20,14 @@ import {
   ArrowLeft,
   Link2,
   Webhook,
+  Unplug,
+  CheckCircle2,
+  Loader2,
+  RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 import { connectWhatsApp, disconnectWhatsApp } from "@/lib/actions/whatsapp";
+import { generateUnipileAuthLink, getUnipileStatus } from "@/lib/actions/unipile";
 import { saveApiKey, deleteApiKey } from "@/lib/api-keys";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -61,9 +67,11 @@ const statusConfig = {
 export function WaSettingsView({
   connection,
   integrationKeys,
+  unipileWhatsApp,
 }: {
   connection: WhatsAppConnection | null;
   integrationKeys?: IntegrationKeys;
+  unipileWhatsApp?: { connected: boolean; accountName?: string } | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -77,6 +85,41 @@ export function WaSettingsView({
   const [iClosedKey, setIClosedKey] = useState(integrationKeys?.iclosed_api_key || "");
   const [ghlSaved, setGhlSaved] = useState(!!integrationKeys?.ghl_api_key);
   const [iClosedSaved, setIClosedSaved] = useState(!!integrationKeys?.iclosed_api_key);
+  const [connectingUnipile, setConnectingUnipile] = useState(false);
+  const [unipileConnected, setUnipileConnected] = useState(unipileWhatsApp?.connected || false);
+  const [unipileName, setUnipileName] = useState(unipileWhatsApp?.accountName || "");
+
+  async function handleConnectUnipile() {
+    setConnectingUnipile(true);
+    try {
+      const result = await generateUnipileAuthLink("WHATSAPP");
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.url) {
+        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        toast.info("Scannez le QR code WhatsApp dans la fenêtre, puis cliquez Rafraîchir");
+      }
+    } catch {
+      toast.error("Erreur lors de la connexion Unipile");
+    }
+    setConnectingUnipile(false);
+  }
+
+  async function handleRefreshUnipile() {
+    try {
+      const status = await getUnipileStatus();
+      const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP");
+      setUnipileConnected(!!wa);
+      setUnipileName(wa?.name || "");
+      if (wa) {
+        toast.success("WhatsApp connecté via Unipile");
+      } else {
+        toast.info("Aucun compte WhatsApp détecté");
+      }
+    } catch {
+      toast.error("Erreur de vérification");
+    }
+  }
 
   const status = connection?.status || "disconnected";
   const statusInfo = statusConfig[status];
@@ -189,7 +232,76 @@ export function WaSettingsView({
       </PageHeader>
 
       <div className="grid gap-6 max-w-2xl">
-        {/* Connection Card */}
+        {/* Unipile Connection — Recommended */}
+        <Card className={`border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-brand/30" : ""}`}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
+                <Unplug className="h-4 w-4 text-brand" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  Connexion via Unipile
+                  <Badge variant="outline" className="text-[10px] bg-brand/10 text-brand border-brand/20">
+                    Recommandé
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground font-normal mt-0.5">
+                  Connectez WhatsApp en un clic — scannez le QR code, c&apos;est tout
+                </p>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {unipileConnected ? (
+              <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-brand/5 border border-brand/20">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-brand" />
+                  <div>
+                    <p className="text-sm font-medium text-brand">WhatsApp connecté</p>
+                    {unipileName && (
+                      <p className="text-xs text-muted-foreground">{unipileName}</p>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefreshUnipile}
+                  className="text-xs"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Button
+                  onClick={handleConnectUnipile}
+                  disabled={connectingUnipile}
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                >
+                  {connectingUnipile ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                  )}
+                  Connecter WhatsApp
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefreshUnipile}
+                  className="w-full text-xs text-muted-foreground"
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  Vérifier la connexion
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Manual Connection Card (Fallback) */}
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">

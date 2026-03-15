@@ -3,13 +3,30 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getApiKey } from "@/lib/api-keys";
+import { getUnipileClient, isUnipileConfigured } from "@/lib/unipile";
 
 // ---------------------------------------------------------------------------
-// LinkedIn API stubs
-// All functions gracefully fall back when no API token is available.
+// LinkedIn API — Unipile preferred, direct API fallback, then local DB.
 // ---------------------------------------------------------------------------
 
 const LINKEDIN_API_BASE = "https://api.linkedin.com/v2";
+
+/** Find the Unipile LinkedIn account ID if available */
+async function getUnipileLinkedInAccountId(): Promise<string | null> {
+  if (!isUnipileConfigured()) return null;
+  try {
+    const client = getUnipileClient();
+    if (!client) return null;
+    const response = await client.account.getAll();
+    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const linkedinAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
+      (a) => (a.type || a.provider || "").toUpperCase() === "LINKEDIN"
+    );
+    return linkedinAccount?.id || null;
+  } catch {
+    return null;
+  }
+}
 
 /** Resolve the LinkedIn access token: env var → user_settings row → null */
 async function resolveToken(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -131,7 +148,36 @@ export async function getLinkedInProfile(profileUrl: string) {
 
   const token = await resolveToken(user.id, supabase);
 
-  // --- Live API path ---
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileLinkedInAccountId();
+  if (unipileAccountId) {
+    try {
+      const client = getUnipileClient();
+      if (client) {
+        const vanity = profileUrl.match(/linkedin\.com\/in\/([^/?#]+)/)?.[1] || profileUrl;
+        const response = await client.users.getProfile({
+          account_id: unipileAccountId,
+          identifier: vanity,
+        });
+        const p = response as { id?: string; first_name?: string; last_name?: string; headline?: string };
+        if (p.first_name || p.last_name) {
+          return {
+            data: {
+              id: p.id || vanity,
+              name: [p.first_name, p.last_name].filter(Boolean).join(" "),
+              headline: p.headline || null,
+              profile_url: profileUrl,
+              source: "unipile" as const,
+            },
+          };
+        }
+      }
+    } catch (err) {
+      console.error("Unipile LinkedIn profile error, falling back:", err);
+    }
+  }
+
+  // --- Direct API path ---
   if (token) {
     try {
       // Extract vanity name from URL (e.g. linkedin.com/in/john-doe)
@@ -233,8 +279,28 @@ export async function sendLinkedInMessage(profileId: string, message: string) {
   let externalId: string | null = null;
   let status: "sent" | "queued" | "failed" = "queued";
 
-  // --- Live API path (LinkedIn Messaging API) ---
-  if (token) {
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileLinkedInAccountId();
+  if (unipileAccountId) {
+    try {
+      const client = getUnipileClient();
+      if (client) {
+        const response = await client.messaging.startNewChat({
+          account_id: unipileAccountId,
+          text: message,
+          attendees_ids: [profileId],
+        });
+        const result = response as { chat_id?: string };
+        externalId = result.chat_id || null;
+        status = "sent";
+      }
+    } catch (err) {
+      console.error("Unipile LinkedIn message error, falling back:", err);
+    }
+  }
+
+  // --- Direct API path (fallback) ---
+  if (status !== "sent" && token) {
     try {
       // Get the sender's LinkedIn URN
       const { data: senderSetting } = await supabase
@@ -336,7 +402,36 @@ export async function searchLinkedInProfiles(query: string) {
 
   const token = await resolveToken(user.id, supabase);
 
-  // --- Live API path ---
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileLinkedInAccountId();
+  if (unipileAccountId) {
+    try {
+      const dsn = process.env.UNIPILE_DSN;
+      const apiKey = process.env.UNIPILE_API_KEY;
+      if (dsn && apiKey) {
+        const res = await fetch(
+          `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(query)}&limit=20`,
+          { headers: { "X-API-KEY": apiKey } }
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { items?: Array<{ id?: string; first_name?: string; last_name?: string; headline?: string; public_identifier?: string }> };
+          const results = (data.items || []).map((p) => ({
+            id: p.id || p.public_identifier || "",
+            name: [p.first_name, p.last_name].filter(Boolean).join(" ") || "",
+            headline: p.headline || null,
+            source: "unipile" as const,
+          }));
+          if (results.length > 0) {
+            return { data: results };
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Unipile LinkedIn search error, falling back:", err);
+    }
+  }
+
+  // --- Direct API path ---
   if (token) {
     try {
       const res = await fetch(
