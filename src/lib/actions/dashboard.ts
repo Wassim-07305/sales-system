@@ -1112,6 +1112,7 @@ export interface B2BDashboardData {
     responseRate: number;
     bookingsBooked: number;
     closingRate: number;
+    totalSetters: number;
   };
   setterPerformance: {
     setterId: string | null;
@@ -1164,57 +1165,33 @@ export async function getB2BDashboardData(
     59,
   ).toISOString();
 
-  // Get matched setter for this B2B client
-  const { data: profile } = await supabase
+  // Find ALL setters assigned to this B2B entrepreneur
+  // Setters have matched_entrepreneur_id pointing to this B2B user
+  const { data: assignedSetters } = await supabase
     .from("profiles")
-    .select("matched_entrepreneur_id")
-    .eq("id", userId)
-    .single();
+    .select("id, full_name, avatar_url")
+    .eq("role", "client_b2c")
+    .eq("matched_entrepreneur_id", userId);
 
-  // The B2B client may have a matched setter via matched_entrepreneur_id
-  // or deals assigned with setter_id
-  let setterId: string | null = null;
-  let setterName = "Non assigne";
-  let setterAvatar: string | null = null;
+  const setterIds = (assignedSetters || []).map((s) => s.id);
+  const totalSetters = setterIds.length;
 
-  // Check if there's a setter linked via deals
-  const { data: clientDeals } = await supabase
-    .from("deals")
-    .select("id, setter_id, assigned_to")
-    .eq("contact_id", userId)
-    .limit(1);
+  // Use first setter for the "primary setter" display (backward compat)
+  const primarySetter = assignedSetters && assignedSetters.length > 0 ? assignedSetters[0] : null;
+  const setterId = primarySetter?.id || null;
+  const setterName = primarySetter?.full_name || "Non assigné";
+  const setterAvatar = primarySetter?.avatar_url || null;
 
-  if (clientDeals && clientDeals.length > 0) {
-    setterId = clientDeals[0].setter_id || clientDeals[0].assigned_to || null;
-  }
-
-  // Fallback: check matched_entrepreneur_id
-  if (!setterId && profile?.matched_entrepreneur_id) {
-    setterId = profile.matched_entrepreneur_id;
-  }
-
-  if (setterId) {
-    const { data: setterProfile } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url")
-      .eq("id", setterId)
-      .single();
-    if (setterProfile) {
-      setterName = setterProfile.full_name || "Setter";
-      setterAvatar = setterProfile.avatar_url;
-    }
-  }
-
-  // Get setter's DM stats this month (from daily_quotas)
+  // Aggregate DM stats across ALL setters this month
   let messagesThisMonth = 0;
   let messagesPerDay = 0;
   let repliesThisMonth = 0;
 
-  if (setterId) {
+  if (setterIds.length > 0) {
     const { data: quotas } = await supabase
       .from("daily_quotas")
       .select("dms_sent, replies_received, date")
-      .eq("user_id", setterId)
+      .in("user_id", setterIds)
       .gte("date", startOfMonth.split("T")[0]);
 
     messagesThisMonth = (quotas || []).reduce(
@@ -1239,16 +1216,16 @@ export async function getB2BDashboardData(
       ? Math.round((repliesThisMonth / messagesThisMonth) * 100)
       : 0;
 
-  // Prospects contacted by setter
+  // Prospects contacted by ALL setters
   let prospectsContacted = 0;
   let activeConversations = 0;
   let lastActivityAt: string | null = null;
 
-  if (setterId) {
+  if (setterIds.length > 0) {
     const { data: prospects } = await supabase
       .from("prospects")
       .select("id, status, updated_at")
-      .eq("assigned_setter_id", setterId)
+      .in("assigned_setter_id", setterIds)
       .order("updated_at", { ascending: false });
 
     prospectsContacted = (prospects || []).length;
@@ -1259,24 +1236,19 @@ export async function getB2BDashboardData(
       prospects && prospects.length > 0 ? prospects[0].updated_at : null;
   }
 
-  // Pipeline overview - get all stages and count deals
+  // Pipeline overview - get all stages and count deals from ALL setters
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, name, color, position")
     .order("position");
 
-  const { data: allDeals } = await supabase
-    .from("deals")
-    .select("id, stage_id, value")
-    .eq("contact_id", userId);
+  let dealsForPipeline: { id: string; stage_id: string | null; value: number }[] = [];
 
-  // If no deals linked to contact_id, try via setter
-  let dealsForPipeline = allDeals || [];
-  if (dealsForPipeline.length === 0 && setterId) {
+  if (setterIds.length > 0) {
     const { data: setterDeals } = await supabase
       .from("deals")
       .select("id, stage_id, value")
-      .eq("assigned_to", setterId);
+      .in("assigned_to", setterIds);
     dealsForPipeline = setterDeals || [];
   }
 
@@ -1307,26 +1279,26 @@ export async function getB2BDashboardData(
       ? Math.round((closedDeals / dealsForPipeline.length) * 100)
       : 0;
 
-  // Upcoming bookings (scoped to this client's setter if available)
+  // Upcoming bookings (scoped to ALL setters)
   let bookingsQuery = supabase
     .from("bookings")
     .select("id, prospect_name, scheduled_at, slot_type")
     .gte("scheduled_at", now.toISOString())
     .order("scheduled_at")
     .limit(5);
-  if (setterId) bookingsQuery = bookingsQuery.eq("assigned_to", setterId);
+  if (setterIds.length > 0) bookingsQuery = bookingsQuery.in("assigned_to", setterIds);
   const { data: bookings } = await bookingsQuery;
 
-  // Bookings count this month (scoped to this client's setter)
+  // Bookings count this month (scoped to ALL setters)
   let bookingsCountQuery = supabase
     .from("bookings")
     .select("id", { count: "exact", head: true })
     .gte("scheduled_at", startOfMonth)
     .lte("scheduled_at", endOfMonth);
-  if (setterId) bookingsCountQuery = bookingsCountQuery.eq("assigned_to", setterId);
+  if (setterIds.length > 0) bookingsCountQuery = bookingsCountQuery.in("assigned_to", setterIds);
   const { count: bookingsMonthCount } = await bookingsCountQuery;
 
-  // Recent activity - deal activities
+  // Recent activity - deal activities from ALL setters' deals
   const dealIds = dealsForPipeline.map((d) => d.id);
   let recentActivity: B2BDashboardData["recentActivity"] = [];
 
@@ -1358,6 +1330,7 @@ export async function getB2BDashboardData(
       responseRate,
       bookingsBooked: bookingsMonthCount || 0,
       closingRate,
+      totalSetters,
     },
     setterPerformance: {
       setterId,

@@ -55,12 +55,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
 
-  // Admin/Manager
+  // Admin/Manager + B2B (lecture seule pour B2B)
   {
     label: "CRM",
     href: "/crm",
     icon: Kanban,
-    roles: ["admin", "manager", "setter", "closer"],
+    roles: ["admin", "manager", "setter", "closer", "client_b2b"],
   },
   {
     label: "Contacts",

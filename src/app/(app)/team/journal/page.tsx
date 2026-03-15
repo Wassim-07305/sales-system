@@ -14,7 +14,7 @@ export default async function TeamJournalPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager"].includes(profile.role)) {
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role)) {
     redirect("/dashboard");
   }
 

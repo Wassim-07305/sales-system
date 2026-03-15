@@ -66,6 +66,10 @@ import {
   CheckCircle2,
   Circle,
   Sparkles,
+  Mic,
+  Square,
+  Play,
+  Pause,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -316,6 +320,101 @@ function QuickEmojiPicker({
   );
 }
 
+// Voice message player
+function VoicePlayer({ url, duration }: { url: string; duration?: number }) {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(duration || 0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const animRef = useRef<number | null>(null);
+
+  const updateProgress = useCallback(() => {
+    const audio = audioRef.current;
+    if (audio && audio.duration && isFinite(audio.duration)) {
+      setProgress((audio.currentTime / audio.duration) * 100);
+      setCurrentTime(Math.floor(audio.currentTime));
+    }
+    if (playing) animRef.current = requestAnimationFrame(updateProgress);
+  }, [playing]);
+
+  useEffect(() => {
+    if (playing) {
+      animRef.current = requestAnimationFrame(updateProgress);
+    }
+    return () => {
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, [playing, updateProgress]);
+
+  const toggle = () => {
+    if (!audioRef.current) {
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onloadedmetadata = () => {
+        if (isFinite(audio.duration)) setTotalDuration(Math.floor(audio.duration));
+      };
+      audio.onended = () => {
+        setPlaying(false);
+        setProgress(0);
+        setCurrentTime(0);
+      };
+    }
+    if (playing) {
+      audioRef.current.pause();
+      setPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => {});
+      setPlaying(true);
+    }
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio || !isFinite(audio.duration)) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    audio.currentTime = pct * audio.duration;
+    setProgress(pct * 100);
+    setCurrentTime(Math.floor(audio.currentTime));
+  };
+
+  const formatSec = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="flex items-center gap-2.5 bg-muted/30 rounded-2xl px-3 py-2 min-w-[180px] max-w-[260px]">
+      <button
+        onClick={toggle}
+        className="h-8 w-8 shrink-0 rounded-full bg-[#7af17a]/10 flex items-center justify-center hover:bg-[#7af17a]/20 transition-colors"
+      >
+        {playing ? (
+          <Pause className="h-3.5 w-3.5 text-[#7af17a]" />
+        ) : (
+          <Play className="h-3.5 w-3.5 text-[#7af17a] ml-0.5" />
+        )}
+      </button>
+      <div className="flex-1 flex flex-col gap-1">
+        <div
+          className="h-1.5 bg-border/60 rounded-full cursor-pointer overflow-hidden"
+          onClick={handleSeek}
+        >
+          <div
+            className="h-full bg-[#7af17a] rounded-full transition-[width] duration-100"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <span className="text-[10px] text-muted-foreground/60 font-medium tabular-nums">
+          {playing || currentTime > 0 ? formatSec(currentTime) : formatSec(totalDuration)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // Sidebar conversation row for social channels
 function SocialConvRow({
   name,
@@ -487,6 +586,14 @@ export function ChatLayout({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  // ---- Voice recording ----
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [uploadingVoice, setUploadingVoice] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ---- Reactions ----
   const [rawReactions, setRawReactions] = useState<RawReaction[]>([]);
@@ -763,6 +870,123 @@ export function ChatLayout({
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(e); }
   };
+
+  // ---- Voice recording handlers ----
+
+  const startRecording = useCallback(async () => {
+    if (!activeChannel) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      setRecordingDuration(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration((d) => d + 1);
+      }, 1000);
+    } catch {
+      toast.error("Impossible d'accéder au microphone");
+    }
+  }, [activeChannel]);
+
+  const stopRecording = useCallback(async () => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state === "inactive") return;
+
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    const duration = recordingDuration;
+    setIsRecording(false);
+    setUploadingVoice(true);
+
+    return new Promise<void>((resolve) => {
+      recorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+        recorder.stream.getTracks().forEach((t) => t.stop());
+
+        try {
+          const ext = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
+          const fileName = `chat/${currentUserId}/voice-${Date.now()}.${ext}`;
+          const { error: uploadError } = await supabase.storage
+            .from("chat-media")
+            .upload(fileName, blob, { contentType: recorder.mimeType, upsert: true });
+
+          if (uploadError) throw new Error(uploadError.message);
+
+          const { data: urlData } = supabase.storage.from("chat-media").getPublicUrl(fileName);
+
+          if (activeChannel) {
+            const optimisticId = `optimistic-${Date.now()}`;
+            const optimisticMessage = {
+              id: optimisticId, channel_id: activeChannel.id, sender_id: currentUserId,
+              content: "Message vocal", message_type: "voice" as const,
+              file_url: urlData.publicUrl, file_name: `${duration}`,
+              created_at: new Date().toISOString(),
+              sender: { id: currentUserId, full_name: "Moi", avatar_url: null },
+              is_edited: false, reply_to: null,
+            } as unknown as Message;
+            setMessages((prev) => [...prev, optimisticMessage]);
+            setTimeout(scrollToBottom, 50);
+
+            const { data: inserted, error: insertError } = await supabase
+              .from("messages")
+              .insert({
+                channel_id: activeChannel.id,
+                sender_id: currentUserId,
+                content: "Message vocal",
+                message_type: "voice",
+                file_url: urlData.publicUrl,
+                file_name: `${duration}`,
+              })
+              .select("*, sender:profiles(*)")
+              .single();
+
+            if (insertError) {
+              toast.error("Erreur envoi vocal : " + insertError.message);
+              setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+            } else if (inserted) {
+              setMessages((prev) => prev.map((m) => (m.id === optimisticId ? inserted : m)));
+            }
+          }
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Erreur upload vocal");
+        } finally {
+          setUploadingVoice(false);
+          resolve();
+        }
+      };
+      recorder.stop();
+    });
+  }, [activeChannel, currentUserId, recordingDuration, scrollToBottom, supabase]);
+
+  const cancelRecording = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stream.getTracks().forEach((t) => t.stop());
+      recorder.stop();
+    }
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    chunksRef.current = [];
+    mediaRecorderRef.current = null;
+    setIsRecording(false);
+    setRecordingDuration(0);
+  }, []);
 
   async function handleToggleReaction(messageId: string, emoji: string) {
     const userId = currentUserId;
@@ -1504,7 +1728,9 @@ export function ChatLayout({
                                   </div>
                                 ) : (
                                   <>
-                                    {message.message_type === "image" && message.file_url ? (
+                                    {message.message_type === "voice" && message.file_url ? (
+                                      <VoicePlayer url={message.file_url} duration={message.file_name ? parseInt(message.file_name, 10) || 0 : 0} />
+                                    ) : message.message_type === "image" && message.file_url ? (
                                       <img src={message.file_url} alt="Image" className="rounded-xl max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(message.file_url!, "_blank")} />
                                     ) : (
                                       <p className="whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
@@ -1554,7 +1780,9 @@ export function ChatLayout({
                                   </div>
                                 ) : (
                                   <>
-                                    {message.message_type === "image" && message.file_url ? (
+                                    {message.message_type === "voice" && message.file_url ? (
+                                      <VoicePlayer url={message.file_url} duration={message.file_name ? parseInt(message.file_name, 10) || 0 : 0} />
+                                    ) : message.message_type === "image" && message.file_url ? (
                                       <img src={message.file_url} alt="Image" className="rounded-xl max-h-60 max-w-xs object-cover cursor-pointer hover:opacity-90 transition-opacity mt-0.5" onClick={() => window.open(message.file_url!, "_blank")} />
                                     ) : (
                                       <p className="text-[13px] text-foreground/85 whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
@@ -1595,34 +1823,62 @@ export function ChatLayout({
 
             <div className="px-5 py-4 border-t border-border/50">
               {typingUsers.length > 0 && <div className="mb-2"><TypingIndicator users={typingUsers} /></div>}
-              <form onSubmit={handleSendMessage} className="flex items-end gap-2.5">
-                <Button type="button" variant="ghost" size="icon" className="shrink-0 h-9 w-9 mb-0.5 rounded-xl" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage}>
-                  {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
-                </Button>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                <div className="flex-1 relative">
-                  <Textarea
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    onKeyDown={handleInputKeyDown}
-                    placeholder={activeChannel.type === "direct" ? `Message à ${activePartner?.full_name || "utilisateur"}...` : `Message dans #${activeChannel.name}...`}
-                    className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
-                    rows={1}
-                  />
-                  <Button
-                    type="submit" size="icon"
-                    className={cn(
-                      "absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200",
-                      newMessage.trim() || imageUrl
-                        ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30"
-                        : "bg-secondary text-muted-foreground/40",
-                    )}
-                    disabled={!newMessage.trim() && !imageUrl}
-                  >
-                    <Send className="h-4 w-4" />
+              {isRecording ? (
+                <div className="flex items-center gap-3">
+                  <Button type="button" variant="ghost" size="icon" className="shrink-0 h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground" onClick={cancelRecording} title="Annuler">
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 flex items-center gap-3 bg-secondary/40 rounded-2xl px-4 py-3">
+                    <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[13px] text-red-400 font-medium tabular-nums">
+                      {Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, "0")}
+                    </span>
+                    <div className="flex-1 flex items-center gap-0.5">
+                      {Array.from({ length: 20 }).map((_, i) => (
+                        <div key={i} className="flex-1 h-1 rounded-full bg-red-500/30" style={{ height: `${Math.random() * 12 + 4}px`, opacity: i < (recordingDuration % 20) + 5 ? 1 : 0.3 }} />
+                      ))}
+                    </div>
+                    <span className="text-[11px] text-muted-foreground">Enregistrement...</span>
+                  </div>
+                  <Button type="button" size="icon" className="shrink-0 h-9 w-9 rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30" onClick={stopRecording} title="Envoyer" disabled={uploadingVoice}>
+                    {uploadingVoice ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </div>
-              </form>
+              ) : (
+                <form onSubmit={handleSendMessage} className="flex items-end gap-2.5">
+                  <Button type="button" variant="ghost" size="icon" className="shrink-0 h-9 w-9 mb-0.5 rounded-xl" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage}>
+                    {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+                  </Button>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <div className="flex-1 relative">
+                    <Textarea
+                      value={newMessage}
+                      onChange={handleInputChange}
+                      onKeyDown={handleInputKeyDown}
+                      placeholder={activeChannel.type === "direct" ? `Message à ${activePartner?.full_name || "utilisateur"}...` : `Message dans #${activeChannel.name}...`}
+                      className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
+                      rows={1}
+                    />
+                    <Button
+                      type="submit" size="icon"
+                      className={cn(
+                        "absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200",
+                        newMessage.trim() || imageUrl
+                          ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30"
+                          : "bg-secondary text-muted-foreground/40",
+                      )}
+                      disabled={!newMessage.trim() && !imageUrl}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {!newMessage.trim() && !imageUrl && (
+                    <Button type="button" variant="ghost" size="icon" className="shrink-0 h-9 w-9 mb-0.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary" onClick={startRecording} title="Message vocal">
+                      <Mic className="h-4 w-4" />
+                    </Button>
+                  )}
+                </form>
+              )}
             </div>
           </>
         ) : (

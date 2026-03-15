@@ -100,6 +100,10 @@ export async function updateSession(request: NextRequest) {
         "/portal", "/community", "/chat", "/resources", "/support",
         "/referral", "/challenges", "/kpis", "/bookings",
       ];
+      // B2B entrepreneurs can also access the CRM (read-only view of their setters' deals)
+      if (role === "client_b2b") {
+        clientAllowedRoutes.push("/crm");
+      }
       const isAllowed = clientAllowedRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
         const url = request.nextUrl.clone();

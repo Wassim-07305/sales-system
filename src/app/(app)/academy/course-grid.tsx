@@ -14,6 +14,7 @@ import {
   BookOpen,
   CheckCircle2,
   GraduationCap,
+  Lock,
   Search,
   Settings,
   Zap,
@@ -42,6 +43,7 @@ interface CourseGridProps {
   }>;
   progressMap: Record<string, boolean>;
   isAdmin: boolean;
+  moduleUnlockCounts?: Record<string, { unlocked: number; total: number }>;
 }
 
 type FilterTab = "all" | "in_progress" | "completed" | "not_started";
@@ -78,7 +80,7 @@ function getCourseStats(
 // Component
 // ---------------------------------------------------------------------------
 
-export function CourseGrid({ courses, progressMap, isAdmin }: CourseGridProps) {
+export function CourseGrid({ courses, progressMap, isAdmin, moduleUnlockCounts = {} }: CourseGridProps) {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<FilterTab>("all");
 
@@ -185,6 +187,7 @@ export function CourseGrid({ courses, progressMap, isAdmin }: CourseGridProps) {
                       key={course.id}
                       course={course}
                       stats={course.stats}
+                      moduleUnlock={moduleUnlockCounts[course.id]}
                     />
                   ))}
                 </div>
@@ -206,11 +209,14 @@ export function CourseGrid({ courses, progressMap, isAdmin }: CourseGridProps) {
 function CourseCard({
   course,
   stats,
+  moduleUnlock,
 }: {
   course: CourseGridProps["courses"][number];
   stats: ReturnType<typeof getCourseStats>;
+  moduleUnlock?: { unlocked: number; total: number };
 }) {
   const isComplete = stats.totalLessons > 0 && stats.percent === 100;
+  const hasLockedModules = moduleUnlock && moduleUnlock.total > 1 && moduleUnlock.unlocked < moduleUnlock.total;
 
   return (
     <Link href={`/academy/${course.id}`} className="group">
@@ -266,6 +272,16 @@ function CourseCard({
               </>
             )}
           </div>
+
+          {/* Module unlock progress */}
+          {hasLockedModules && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs">
+              <Lock className="size-3 text-amber-500" />
+              <span className="text-amber-600 dark:text-amber-400 font-medium">
+                Module {moduleUnlock.unlocked}/{moduleUnlock.total} débloqué
+              </span>
+            </div>
+          )}
 
           {/* Progress */}
           <div className="mt-auto pt-4">

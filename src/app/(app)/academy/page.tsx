@@ -11,7 +11,7 @@ export default async function AcademyPage() {
   if (!user) redirect("/login");
 
   // Fetch profile + courses in parallel
-  const [{ data: profile }, { courses, progressMap }] = await Promise.all([
+  const [{ data: profile }, { courses, progressMap, moduleUnlockCounts }] = await Promise.all([
     supabase.from("profiles").select("role").eq("id", user.id).single(),
     getCoursesWithModules(),
   ]);
@@ -22,6 +22,7 @@ export default async function AcademyPage() {
       courses={courses as CourseGridCourse[]}
       progressMap={progressMap}
       isAdmin={isAdmin}
+      moduleUnlockCounts={moduleUnlockCounts}
     />
   );
 }

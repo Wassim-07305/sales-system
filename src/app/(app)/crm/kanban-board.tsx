@@ -42,12 +42,19 @@ interface TeamMember {
   role: string;
 }
 
+interface SetterInfo {
+  id: string;
+  full_name: string | null;
+}
+
 interface KanbanBoardProps {
   initialStages: PipelineStage[];
   initialDeals: Deal[];
+  readOnly?: boolean;
+  setterFilter?: SetterInfo[];
 }
 
-export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
+export function KanbanBoard({ initialStages, initialDeals, readOnly = false, setterFilter }: KanbanBoardProps) {
   const stages =
     initialStages.length > 0
       ? initialStages
@@ -62,6 +69,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [tempFilter, setTempFilter] = useState<string>("all");
+  const [selectedSetter, setSelectedSetter] = useState<string>("all");
 
   // Advanced filters
   const [advancedFilters, setAdvancedFilters] = useState<DealFilters>({ sortBy: "created_at_desc" });
@@ -132,7 +140,9 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
       deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       deal.contact?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTemp = tempFilter === "all" || deal.temperature === tempFilter;
-    return matchesSearch && matchesTemp;
+    const matchesSetter =
+      selectedSetter === "all" || deal.assigned_to === selectedSetter;
+    return matchesSearch && matchesTemp && matchesSetter;
   });
 
   const getDealsForStage = useCallback(
@@ -155,6 +165,7 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
     const { active, over } = event;
     setActiveDeal(null);
 
+    if (readOnly) return;
     if (!over) return;
 
     const dealId = active.id as string;
@@ -232,9 +243,26 @@ export function KanbanBoard({ initialStages, initialDeals }: KanbanBoardProps) {
             <SelectItem value="cold">❄️ Cold</SelectItem>
           </SelectContent>
         </Select>
-        <div className="ml-auto">
-          <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
-        </div>
+        {setterFilter && setterFilter.length > 0 && (
+          <Select value={selectedSetter} onValueChange={setSelectedSetter}>
+            <SelectTrigger className="w-[200px] h-11 rounded-xl">
+              <SelectValue placeholder="Filtrer par setter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les setters</SelectItem>
+              {setterFilter.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.full_name || "Setter sans nom"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {!readOnly && (
+          <div className="ml-auto">
+            <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+          </div>
+        )}
       </div>
 
       {/* Empty state: zero deals */}

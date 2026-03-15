@@ -871,6 +871,25 @@ export async function submitDailyJournal(data: {
     link: "/team/journal",
   });
 
+  // Notify the assigned B2B entrepreneur (matched_entrepreneur_id)
+  try {
+    const { data: setterProfile } = await supabase
+      .from("profiles")
+      .select("full_name, matched_entrepreneur_id")
+      .eq("id", user.id)
+      .single();
+
+    if (setterProfile?.matched_entrepreneur_id) {
+      const setterName = setterProfile.full_name || "Setter";
+      notify(setterProfile.matched_entrepreneur_id, `EOD de ${setterName}`, `Messages envoyés: ${data.dms_sent}, Réponses: ${data.replies_received}, Appels: ${data.calls_booked}`, {
+        type: "eod_report",
+        link: "/team/journal",
+      });
+    }
+  } catch {
+    // Don't block EOD submission if entrepreneur notification fails
+  }
+
   // Award gamification points for daily journal
   try {
     await addPoints(user.id, 5, "Journal quotidien soumis");
@@ -922,12 +941,32 @@ export async function getTeamJournals(date?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Only admin/manager can view team journals
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role)) return [];
 
   const targetDate = date || new Date().toISOString().split("T")[0];
 
+  // B2B clients only see journals from their assigned setters
+  if (profile.role === "client_b2b") {
+    const { data: assignedSetters } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("matched_entrepreneur_id", user.id);
+
+    const setterIds = (assignedSetters || []).map((s) => s.id);
+    if (setterIds.length === 0) return [];
+
+    const { data } = await supabase
+      .from("daily_journals")
+      .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
+      .eq("date", targetDate)
+      .in("user_id", setterIds)
+      .order("submitted_at", { ascending: false });
+
+    return data || [];
+  }
+
+  // Admin/Manager see all journals
   const { data } = await supabase
     .from("daily_journals")
     .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
@@ -943,24 +982,38 @@ export async function getMissingEodSetters(date?: string) {
   if (!user) return [];
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role)) return [];
 
   const targetDate = date || new Date().toISOString().split("T")[0];
 
-  // Get all setters
-  const { data: setters } = await supabase
-    .from("profiles")
-    .select("id, full_name, avatar_url")
-    .in("role", ["setter", "closer"]);
+  // B2B clients only see missing EODs from their assigned setters
+  let setters: { id: string; full_name: string | null; avatar_url: string | null }[] = [];
 
-  // Get who submitted today
+  if (profile.role === "client_b2b") {
+    const { data: assignedSetters } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .eq("matched_entrepreneur_id", user.id);
+    setters = assignedSetters || [];
+  } else {
+    // Admin/Manager see all setters/closers
+    const { data: allSetters } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("role", ["setter", "closer"]);
+    setters = allSetters || [];
+  }
+
+  if (setters.length === 0) return [];
+
+  // Get who submitted for this date
   const { data: submitted } = await supabase
     .from("daily_journals")
     .select("user_id")
     .eq("date", targetDate);
 
   const submittedIds = new Set((submitted || []).map(s => s.user_id));
-  return (setters || []).filter(s => !submittedIds.has(s.id));
+  return setters.filter(s => !submittedIds.has(s.id));
 }
 
 export async function getRedemptionHistory() {

@@ -148,6 +148,24 @@ export async function getQuizAttempts(lessonId: string, userId: string) {
   };
 }
 
+export async function getQuizAttemptsToday(quizId: string): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const today = new Date().toISOString().split("T")[0];
+  const { data: todayAttempts } = await supabase
+    .from("quiz_attempts")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("quiz_id", quizId)
+    .gte("attempted_at", `${today}T00:00:00.000Z`);
+
+  return (todayAttempts || []).length;
+}
+
 export async function getResourceLibrary() {
   const supabase = await createClient();
 
@@ -255,21 +273,90 @@ export async function getCoursesWithModules() {
     }
   }
 
+  const sortedCourses = (courses || []).map((c: Record<string, unknown>) => ({
+    ...c,
+    modules: Array.isArray(c.modules)
+      ? (c.modules as Record<string, unknown>[])
+          .sort((a, b) => (a.position as number) - (b.position as number))
+          .map((m) => ({
+            ...m,
+            lessons: Array.isArray(m.lessons)
+              ? (m.lessons as Record<string, unknown>[]).sort((a, b) => (a.position as number) - (b.position as number))
+              : [],
+          }))
+      : [],
+  }));
+
+  // Compute module unlock counts per course for the grid display
+  const moduleUnlockCounts: Record<string, { unlocked: number; total: number }> = {};
+  if (user) {
+    // Gather all lesson IDs across all courses to batch-fetch quizzes & attempts
+    const allLessonIds: string[] = [];
+    for (const c of sortedCourses) {
+      for (const m of c.modules as Array<{ lessons: Array<{ id: string }> }>) {
+        for (const l of m.lessons) {
+          allLessonIds.push(l.id);
+        }
+      }
+    }
+
+    if (allLessonIds.length > 0) {
+      const { data: quizzes } = await supabase
+        .from("quizzes")
+        .select("id, lesson_id")
+        .in("lesson_id", allLessonIds);
+
+      const quizLessonIds = new Set((quizzes || []).map((q) => q.lesson_id));
+
+      const { data: attempts } = await supabase
+        .from("quiz_attempts")
+        .select("lesson_id, score")
+        .eq("user_id", user.id)
+        .in("lesson_id", allLessonIds);
+
+      // Best score per lesson
+      const bestScoreByLesson: Record<string, number> = {};
+      for (const a of attempts || []) {
+        bestScoreByLesson[a.lesson_id] = Math.max(bestScoreByLesson[a.lesson_id] || 0, a.score ?? 0);
+      }
+
+      for (const c of sortedCourses) {
+        const courseId = (c as Record<string, unknown>).id as string;
+        const mods = c.modules as Array<{ id: string; lessons: Array<{ id: string; position: number }> }>;
+        let unlockedCount = 0;
+        for (let i = 0; i < mods.length; i++) {
+          if (i === 0) {
+            unlockedCount++;
+            continue;
+          }
+          // Find gate lesson (last lesson with quiz) in previous module
+          const prevMod = mods[i - 1];
+          const sortedLessons = [...prevMod.lessons].sort((a, b) => a.position - b.position);
+          let gateLessonId: string | null = null;
+          for (let j = sortedLessons.length - 1; j >= 0; j--) {
+            if (quizLessonIds.has(sortedLessons[j].id)) {
+              gateLessonId = sortedLessons[j].id;
+              break;
+            }
+          }
+          if (!gateLessonId) {
+            // No quiz in previous module = unlocked by default
+            unlockedCount++;
+          } else if ((bestScoreByLesson[gateLessonId] || 0) >= 90) {
+            unlockedCount++;
+          } else {
+            break; // Sequential: if one is locked, all after are locked too
+          }
+        }
+        moduleUnlockCounts[courseId] = { unlocked: unlockedCount, total: mods.length };
+      }
+    }
+  }
+
   return {
-    courses: (courses || []).map((c: Record<string, unknown>) => ({
-      ...c,
-      modules: Array.isArray(c.modules)
-        ? (c.modules as Record<string, unknown>[])
-            .sort((a, b) => (a.position as number) - (b.position as number))
-            .map((m) => ({
-              ...m,
-              lessons: Array.isArray(m.lessons)
-                ? (m.lessons as Record<string, unknown>[]).sort((a, b) => (a.position as number) - (b.position as number))
-                : [],
-            }))
-        : [],
-    })),
+    courses: sortedCourses,
     progressMap,
+    moduleUnlockCounts,
   };
 }
 

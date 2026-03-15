@@ -76,6 +76,20 @@ export interface DealFilters {
     | "title_desc";
 }
 
+/**
+ * Récupère les IDs des setters B2C assignés à un entrepreneur B2B.
+ */
+export async function getSetterIdsForEntrepreneur(entrepreneurId: string): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "client_b2c")
+    .eq("matched_entrepreneur_id", entrepreneurId);
+
+  return (data || []).map((s) => s.id);
+}
+
 export async function getFilteredDeals(filters: DealFilters) {
   const supabase = await createClient();
   const {
@@ -83,11 +97,33 @@ export async function getFilteredDeals(filters: DealFilters) {
   } = await supabase.auth.getUser();
   if (!user) return { deals: [], error: "Non authentifié" };
 
+  // Determine role-based scoping
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
   let query = supabase
     .from("deals")
     .select(
       "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*), stage:pipeline_stages(*)",
     );
+
+  // Role-based deal scoping
+  if (profile?.role === "client_b2b") {
+    // B2B: only see deals from their assigned setters
+    const setterIds = await getSetterIdsForEntrepreneur(user.id);
+    if (setterIds.length > 0) {
+      query = query.in("assigned_to", setterIds);
+    } else {
+      return { deals: [], error: null };
+    }
+  } else if (profile?.role === "setter" || profile?.role === "closer") {
+    // Setter/Closer: only their own deals
+    query = query.eq("assigned_to", user.id);
+  }
+  // Admin/Manager: no scoping — see all deals
 
   // Date range filter
   if (filters.dateFrom) {
@@ -257,6 +293,7 @@ export async function createDeal(params: {
       stage_id: params.stage_id,
       temperature: params.temperature,
       source: params.source || null,
+      assigned_to: user.id,
     })
     .select(
       "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",
@@ -498,6 +535,7 @@ export async function createDealFromBooking(params: {
       stage_id: firstStage.id,
       temperature: "warm",
       source: "booking",
+      assigned_to: user.id,
     })
     .select(
       "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",

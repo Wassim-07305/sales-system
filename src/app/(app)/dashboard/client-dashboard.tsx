@@ -180,7 +180,7 @@ function B2BClientDashboard({
             Bonjour {userName.split(" ")[0]}, voici votre activite du mois
           </h2>
           <p className="text-muted-foreground text-sm mb-4">
-            Suivez les performances de votre setter et l&apos;avancement de
+            Suivez les performances de {data.stats.totalSetters > 1 ? `vos ${data.stats.totalSetters} setters` : "votre setter"} et l&apos;avancement de
             votre pipeline commercial.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
