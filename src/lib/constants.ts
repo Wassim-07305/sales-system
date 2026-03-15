@@ -140,9 +140,9 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "client_b2c"],
   },
 
-  // Chat (unified: team channels, DMs, WhatsApp, Inbox)
+  // Messages (unified: team channels, DMs, WhatsApp, Inbox)
   {
-    label: "Chat",
+    label: "Messages",
     href: "/chat",
     icon: MessageSquare,
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
@@ -333,7 +333,7 @@ export interface NavSection {
 export const NAV_SECTIONS: NavSection[] = [
   {
     label: "",
-    items: NAV_ITEMS.filter((i) => i.href === "/dashboard"),
+    items: NAV_ITEMS.filter((i) => ["/dashboard", "/chat"].includes(i.href)),
   },
   {
     label: "Ventes",
@@ -347,12 +347,6 @@ export const NAV_SECTIONS: NavSection[] = [
         "/analytics/performance",
         "/journal",
       ].includes(i.href),
-    ),
-  },
-  {
-    label: "Communication",
-    items: NAV_ITEMS.filter((i) =>
-      ["/chat"].includes(i.href),
     ),
   },
   {
@@ -426,7 +420,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   templates: "Templates",
   campaigns: "Campagnes",
   inbox: "Inbox",
-  chat: "Chat",
+  chat: "Messages",
   broadcast: "Diffusion",
   video: "Vidéo",
   replays: "Replays",
