@@ -38,19 +38,25 @@ export default async function ProspectingPage() {
     };
   }
 
-  // Fetch relance statuses for all prospects
-  const { data: relances } = await supabase
-    .from("relance_workflows")
-    .select("prospect_id, status")
-    .in("prospect_id", prospectIds.length > 0 ? prospectIds : ["__none__"])
-    .order("created_at", { ascending: false });
-
+  // Fetch relance statuses for all prospects (table may not exist yet)
   const relanceMap: Record<string, string> = {};
-  for (const r of relances || []) {
-    // Keep the most recent relance status per prospect
-    if (!relanceMap[r.prospect_id as string]) {
-      relanceMap[r.prospect_id as string] = r.status as string;
+  try {
+    const { data: relances, error: relanceError } = await supabase
+      .from("relance_workflows")
+      .select("prospect_id, status")
+      .in("prospect_id", prospectIds.length > 0 ? prospectIds : ["__none__"])
+      .order("created_at", { ascending: false });
+
+    if (!relanceError) {
+      for (const r of relances || []) {
+        // Keep the most recent relance status per prospect
+        if (!relanceMap[r.prospect_id as string]) {
+          relanceMap[r.prospect_id as string] = r.status as string;
+        }
+      }
     }
+  } catch {
+    // relance_workflows table may not exist yet — continue without relance data
   }
 
   const prospectsWithScores = prospects.map((p: Record<string, unknown>) => ({

@@ -51,8 +51,12 @@ export async function getCommunityChannelCounts() {
   for (const row of data || []) {
     counts.all += 1;
     const ch = (row as Record<string, unknown>).channel as string | null;
-    if (ch && counts[ch] !== undefined) {
-      counts[ch] += 1;
+    const resolved = ch || "general";
+    if (counts[resolved] !== undefined) {
+      counts[resolved] += 1;
+    } else {
+      // Unknown channel — still count it
+      counts[resolved] = 1;
     }
   }
 

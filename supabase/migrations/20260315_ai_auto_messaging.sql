@@ -85,3 +85,14 @@ CREATE POLICY "Admins can view all relances"
       AND profiles.role IN ('admin', 'manager')
     )
   );
+
+-- Admins/managers can update all relances (needed for processRelances cron)
+CREATE POLICY "Admins can update all relances"
+  ON relance_workflows FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role IN ('admin', 'manager')
+    )
+  );

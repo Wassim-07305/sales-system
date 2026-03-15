@@ -656,10 +656,22 @@ export async function processRelances(): Promise<{ processed: number; sent: numb
     }
 
     const now = Date.now();
-    const { sendUnipileMessage } = await import("@/lib/actions/unipile");
-    const { getUnipileStatus } = await import("@/lib/actions/unipile");
-    const status = await getUnipileStatus();
-    const accounts = status.accounts || [];
+    let sendUnipileMessage: typeof import("@/lib/actions/unipile").sendUnipileMessage;
+    let accounts: Array<{ id: string; provider: string; channel: string; name: string; status: string }> = [];
+
+    try {
+      const unipileModule = await import("@/lib/actions/unipile");
+      sendUnipileMessage = unipileModule.sendUnipileMessage;
+      const status = await unipileModule.getUnipileStatus();
+      accounts = status.accounts || [];
+    } catch {
+      console.warn("[processRelances] Unipile non disponible");
+      return { processed: 0, sent: 0, errors: 0 };
+    }
+
+    if (accounts.length === 0) {
+      return { processed: 0, sent: 0, errors: 0 };
+    }
 
     for (const relance of pendingRelances) {
       processed++;
@@ -700,17 +712,26 @@ export async function processRelances(): Promise<{ processed: number; sent: numb
             status: "sent",
           }).eq("id", relance.id);
 
-          // Log in inbox_messages with IA tag
-          await supabase.from("inbox_messages").insert({
-            user_id: user.id,
-            prospect_id: relance.prospect_id,
-            channel: relance.platform,
-            direction: "outbound",
-            content: relance.message_j3,
-            status: "sent",
-            metadata: { source: "auto_relance", step: "j3", relance_id: relance.id },
-            created_at: new Date().toISOString(),
-          });
+          // Tag the inbox_messages entry (already created by sendUnipileMessage) with relance metadata
+          try {
+            const { data: lastMsg } = await supabase
+              .from("inbox_messages")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("prospect_id", relance.prospect_id)
+              .eq("direction", "outbound")
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .single();
+
+            if (lastMsg) {
+              await supabase.from("inbox_messages").update({
+                metadata: { source: "auto_relance", step: "j3", relance_id: relance.id },
+              }).eq("id", lastMsg.id);
+            }
+          } catch {
+            // Non-critical
+          }
 
           sent++;
         }
@@ -728,16 +749,26 @@ export async function processRelances(): Promise<{ processed: number; sent: numb
             j2_sent_at: new Date().toISOString(),
           }).eq("id", relance.id);
 
-          await supabase.from("inbox_messages").insert({
-            user_id: user.id,
-            prospect_id: relance.prospect_id,
-            channel: relance.platform,
-            direction: "outbound",
-            content: relance.message_j2,
-            status: "sent",
-            metadata: { source: "auto_relance", step: "j2", relance_id: relance.id },
-            created_at: new Date().toISOString(),
-          });
+          // Tag the inbox_messages entry (already created by sendUnipileMessage) with relance metadata
+          try {
+            const { data: lastMsg } = await supabase
+              .from("inbox_messages")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("prospect_id", relance.prospect_id)
+              .eq("direction", "outbound")
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .single();
+
+            if (lastMsg) {
+              await supabase.from("inbox_messages").update({
+                metadata: { source: "auto_relance", step: "j2", relance_id: relance.id },
+              }).eq("id", lastMsg.id);
+            }
+          } catch {
+            // Non-critical
+          }
 
           sent++;
         }
@@ -948,7 +979,17 @@ export async function sendAIMessage(
   }
 
   // 5. Send via Unipile
-  const { getUnipileStatus, sendUnipileMessage } = await import("@/lib/actions/unipile");
+  let getUnipileStatus: typeof import("@/lib/actions/unipile").getUnipileStatus;
+  let sendUnipileMessage: typeof import("@/lib/actions/unipile").sendUnipileMessage;
+
+  try {
+    const unipileModule = await import("@/lib/actions/unipile");
+    getUnipileStatus = unipileModule.getUnipileStatus;
+    sendUnipileMessage = unipileModule.sendUnipileMessage;
+  } catch {
+    return { success: false, error: "Unipile non disponible" };
+  }
+
   const status = await getUnipileStatus();
   const providerName = platform === "linkedin" ? "LINKEDIN" : "INSTAGRAM";
   const account = status.accounts.find(
@@ -971,17 +1012,26 @@ export async function sendAIMessage(
     return { success: false, error: result.error };
   }
 
-  // 6. Log as AI-sent in inbox_messages
-  await supabase.from("inbox_messages").insert({
-    user_id: user.id,
-    prospect_id: prospectId,
-    channel: platform,
-    direction: "outbound",
-    content: message,
-    status: "sent",
-    metadata: { source: "ai_auto_send", ai_mode: config.auto_send_mode },
-    created_at: new Date().toISOString(),
-  });
+  // 6. Update the inbox_messages entry added by sendUnipileMessage with AI metadata
+  try {
+    const { data: lastMsg } = await supabase
+      .from("inbox_messages")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("prospect_id", prospectId)
+      .eq("direction", "outbound")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (lastMsg) {
+      await supabase.from("inbox_messages").update({
+        metadata: { source: "ai_auto_send", ai_mode: config.auto_send_mode },
+      }).eq("id", lastMsg.id);
+    }
+  } catch {
+    // Non-critical — metadata tagging failed
+  }
 
   // 7. Update prospect status
   await supabase.from("prospects").update({
@@ -1010,15 +1060,16 @@ export async function escalateToHuman(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  try {
-    // 1. Mark the conversation as needing human attention
-    await supabase.from("dm_conversations").update({
-      needs_human: true,
-      escalation_reason: reason,
-      escalated_at: new Date().toISOString(),
-    }).eq("id", conversationId);
-  } catch {
-    // Column may not exist yet, try inbox_messages metadata update
+  // 1. Mark the conversation as needing human attention
+  const { error: updateError } = await supabase.from("dm_conversations").update({
+    needs_human: true,
+    escalation_reason: reason,
+    escalated_at: new Date().toISOString(),
+  }).eq("id", conversationId);
+
+  if (updateError) {
+    // Column or table may not exist yet — log as inbox_messages instead
+    console.warn("[escalateToHuman] dm_conversations update failed:", updateError.message);
     try {
       await supabase.from("inbox_messages").insert({
         user_id: user.id,
@@ -1035,7 +1086,7 @@ export async function escalateToHuman(
         created_at: new Date().toISOString(),
       });
     } catch {
-      // Graceful fallback
+      // inbox_messages also missing — continue anyway, notification will still be sent
     }
   }
 
@@ -1043,57 +1094,42 @@ export async function escalateToHuman(
   let targetUserId = user.id;
 
   // Try to find the conversation's assigned setter
-  try {
-    const { data: conv } = await supabase
-      .from("dm_conversations")
-      .select("prospect_id")
-      .eq("id", conversationId)
+  const { data: conv } = await supabase
+    .from("dm_conversations")
+    .select("prospect_id")
+    .eq("id", conversationId)
+    .single();
+
+  if (conv?.prospect_id) {
+    const { data: prospect } = await supabase
+      .from("prospects")
+      .select("assigned_setter_id")
+      .eq("id", conv.prospect_id)
       .single();
 
-    if (conv?.prospect_id) {
-      const { data: prospect } = await supabase
-        .from("prospects")
-        .select("assigned_setter_id")
-        .eq("id", conv.prospect_id)
-        .single();
-
-      if (prospect?.assigned_setter_id) {
-        targetUserId = prospect.assigned_setter_id;
-      }
+    if (prospect?.assigned_setter_id) {
+      targetUserId = prospect.assigned_setter_id;
     }
-  } catch {
-    // Fallback: notify admins
   }
 
   // If no setter assigned, notify first admin
   if (targetUserId === user.id) {
-    const { data: admin } = await supabase
+    const { data: admins } = await supabase
       .from("profiles")
       .select("id")
       .in("role", ["admin", "manager"])
-      .limit(1)
-      .single();
+      .limit(1);
 
-    if (admin) targetUserId = admin.id;
+    if (admins && admins.length > 0) targetUserId = admins[0].id;
   }
 
-  // 3. Send push notification
+  // 3. Send notification (DB insert + push) via notify helper
   await notify(
     targetUserId,
     "Escalade IA — Intervention humaine requise",
     `Raison : ${reason}. La conversation necessite une reponse humaine.`,
     { type: "escalation", link: "/inbox" }
   );
-
-  // 4. Create a notification record
-  await supabase.from("notifications").insert({
-    user_id: targetUserId,
-    type: "escalation",
-    title: "Intervention humaine requise",
-    body: `L'IA ne peut pas gerer cette conversation : ${reason}`,
-    link: "/inbox",
-    read: false,
-  });
 
   revalidatePath("/inbox");
   revalidatePath("/notifications");
@@ -1127,29 +1163,40 @@ export async function reactToInstagramStory(
 
   const emoji = (config.story_reaction_emoji as string) || "\u{1F525}";
 
-  // Get Unipile credentials
-  const { getApiKey } = await import("@/lib/api-keys");
-  const dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
-  const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+  // Find Instagram account via Unipile
+  let igAccount: { id: string; provider: string } | undefined;
+  let dsn: string | null = null;
+  let apiKey: string | null = null;
+
+  try {
+    const { getUnipileStatus } = await import("@/lib/actions/unipile");
+    const status = await getUnipileStatus();
+    igAccount = status.accounts.find(
+      (a) => a.provider.toUpperCase() === "INSTAGRAM"
+    );
+
+    if (!igAccount) {
+      return { success: false, error: "Aucun compte Instagram connecte" };
+    }
+
+    // Get Unipile credentials for direct REST call
+    const { getApiKey } = await import("@/lib/api-keys");
+    dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
+    apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+  } catch {
+    return { success: false, error: "Erreur de connexion Unipile" };
+  }
 
   if (!dsn || !apiKey) {
     return { success: false, error: "Unipile non configure" };
   }
 
-  // Find Instagram account
-  const { getUnipileStatus } = await import("@/lib/actions/unipile");
-  const status = await getUnipileStatus();
-  const igAccount = status.accounts.find(
-    (a) => a.provider.toUpperCase() === "INSTAGRAM"
-  );
-
-  if (!igAccount) {
-    return { success: false, error: "Aucun compte Instagram connecte" };
-  }
-
   try {
+    // Ensure DSN has protocol
+    const baseUrl = dsn.startsWith("http") ? dsn : `https://${dsn}`;
+
     // Use Unipile REST API to react to story
-    const res = await fetch(`${dsn}/api/v1/posts/reactions`, {
+    const res = await fetch(`${baseUrl}/api/v1/posts/reactions`, {
       method: "POST",
       headers: {
         "X-API-KEY": apiKey,

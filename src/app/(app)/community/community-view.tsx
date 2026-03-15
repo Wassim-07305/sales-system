@@ -139,6 +139,7 @@ export function CommunityView({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeChannel, setActiveChannel] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
+  const [newChannel, setNewChannel] = useState("general");
   const [newType, setNewType] = useState("discussion");
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -208,12 +209,14 @@ export function CommunityView({
         title: newTitle || undefined,
         content: newContent,
         image_url: newImageUrl || undefined,
-        channel: activeChannel === "all" ? "general" : activeChannel,
+        channel: newChannel,
       });
       toast.success("Post publi\u00e9 !");
       setDialogOpen(false);
       setNewContent("");
       setNewTitle("");
+      setNewType("discussion");
+      setNewChannel("general");
       setNewImageUrl("");
       setNewImagePreview("");
       router.refresh();
@@ -351,7 +354,7 @@ export function CommunityView({
               <Button variant="outline" size="sm"><Settings2 className="h-4 w-4 mr-2" />Mod\u00e9ration</Button>
             </Link>
           )}
-          <Button onClick={() => setDialogOpen(true)} className="bg-brand text-brand-dark hover:bg-brand/90">
+          <Button onClick={() => { setNewChannel(activeChannel === "all" ? "general" : activeChannel); setDialogOpen(true); }} className="bg-brand text-brand-dark hover:bg-brand/90">
             <Plus className="h-4 w-4 mr-2" />
             Nouveau post
           </Button>
@@ -367,7 +370,7 @@ export function CommunityView({
               {visibleChannels.map((ch) => {
                 const isActive = activeChannel === ch.id;
                 const count = ch.id === "all"
-                  ? Object.values(channelCounts).reduce((s, v) => s + v, 0) - (channelCounts.all || 0) || channelCounts.all || 0
+                  ? channelCounts.all || 0
                   : channelCounts[ch.id] || 0;
 
                 return (
@@ -490,8 +493,8 @@ export function CommunityView({
             <div>
               <Label>Canal</Label>
               <Select
-                value={activeChannel === "all" ? "general" : activeChannel}
-                onValueChange={(v) => setActiveChannel(v)}
+                value={newChannel}
+                onValueChange={(v) => setNewChannel(v)}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

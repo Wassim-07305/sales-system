@@ -49,7 +49,7 @@ export default async function CoursePage({
 
       quizAttempts[lessonId] = {
         todayAttempts: todayAttempts.length,
-        bestScore: Math.max(0, ...attempts.map((a) => a.score)),
+        bestScore: Math.max(0, ...attempts.map((a) => a.score ?? 0)),
         maxAttempts: quiz.max_attempts_per_day || 3,
       };
     }

@@ -532,6 +532,7 @@ export interface CoursePrerequisite {
 export interface QuizAttempt {
   id: string;
   user_id: string;
+  quiz_id: string;
   lesson_id: string;
   answers: Record<string, unknown>;
   score: number;

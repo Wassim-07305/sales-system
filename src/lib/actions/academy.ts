@@ -693,6 +693,7 @@ export async function getModuleUnlockStatus(courseId: string): Promise<{
     }
   >;
 }> {
+  try {
   const supabase = await createClient();
   const {
     data: { user },
@@ -700,21 +701,23 @@ export async function getModuleUnlockStatus(courseId: string): Promise<{
   if (!user) return { moduleStatus: {} };
 
   // Fetch course modules with their lessons (need quiz info)
-  const { data: course } = await supabase
+  const { data: course, error: courseError } = await supabase
     .from("courses")
     .select("modules:course_modules(id, title, position, lessons:lessons(id, position))")
     .eq("id", courseId)
     .single();
 
-  if (!course) return { moduleStatus: {} };
+  if (courseError || !course) return { moduleStatus: {} };
 
   const modules = Array.isArray(course.modules)
     ? (course.modules as Array<{
         id: string;
         title: string;
         position: number;
-        lessons: Array<{ id: string; position: number }>;
-      }>).sort((a, b) => a.position - b.position)
+        lessons: Array<{ id: string; position: number }> | null;
+      }>)
+      .map((m) => ({ ...m, lessons: Array.isArray(m.lessons) ? m.lessons : [] }))
+      .sort((a, b) => a.position - b.position)
     : [];
 
   if (modules.length === 0) return { moduleStatus: {} };
@@ -831,6 +834,11 @@ export async function getModuleUnlockStatus(courseId: string): Promise<{
   }
 
   return { moduleStatus };
+  } catch (error) {
+    // Graceful fallback: if tables don't exist or queries fail, unlock everything
+    console.error("[getModuleUnlockStatus] Error fetching module status:", error);
+    return { moduleStatus: {} };
+  }
 }
 
 // --- Feature F32.6: Micro-learning ---

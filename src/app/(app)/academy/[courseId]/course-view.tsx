@@ -580,7 +580,14 @@ export function CourseView({
                             Reussissez le quiz du module precedent (90% min.) pour debloquer
                           </p>
                           {modUnlockInfo.previousModuleQuizBestScore !== null && modUnlockInfo.previousModuleQuizBestScore > 0 && (
-                            <p className="text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                            <p className={cn(
+                              "mt-1 flex items-center gap-1",
+                              modUnlockInfo.previousModuleQuizBestScore >= 90
+                                ? "text-green-600 dark:text-green-400"
+                                : modUnlockInfo.previousModuleQuizBestScore >= 50
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-red-600 dark:text-red-400"
+                            )}>
                               <Trophy className="h-3 w-3" />
                               Votre meilleur score : {modUnlockInfo.previousModuleQuizBestScore}%
                             </p>
@@ -905,7 +912,9 @@ export function CourseView({
                               "flex items-center gap-1.5 text-xs",
                               activeAttempts.bestScore >= 90
                                 ? "text-green-600"
-                                : "text-amber-600"
+                                : activeAttempts.bestScore >= 50
+                                ? "text-amber-600"
+                                : "text-red-600"
                             )}>
                               <Trophy className="h-3 w-3" />
                               <span>

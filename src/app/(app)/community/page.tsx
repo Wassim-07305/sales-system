@@ -14,7 +14,7 @@ export default async function CommunityPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager", "client_b2c", "setter", "closer"].includes(profile.role)) {
+  if (!profile || !["admin", "manager", "client_b2b", "client_b2c", "setter", "closer"].includes(profile.role)) {
     redirect("/dashboard");
   }
 
