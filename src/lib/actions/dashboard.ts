@@ -78,12 +78,69 @@ export async function getAdminDashboardData() {
     .select("assigned_to, value, stage_id")
     .gte("created_at", startOfMonth);
 
+  // Fetch latest daily journal for each setter (graceful if table/columns missing)
+  let journalMap: Record<string, {
+    date: string;
+    mood: number | null;
+    dms_sent: number;
+    replies_received: number;
+    calls_booked: number;
+    deals_closed: number;
+    conversations_count: number;
+  }> = {};
+  try {
+    const setterIds = (setters || []).map((s) => s.id);
+    if (setterIds.length > 0) {
+      const { data: journals } = await supabase
+        .from("daily_journals")
+        .select("user_id, date, mood, dms_sent, replies_received, calls_booked, deals_closed, conversations_count")
+        .in("user_id", setterIds)
+        .order("date", { ascending: false });
+
+      // Keep only the most recent journal per setter
+      for (const j of journals || []) {
+        if (!journalMap[j.user_id]) {
+          journalMap[j.user_id] = {
+            date: j.date,
+            mood: j.mood,
+            dms_sent: (j as Record<string, unknown>).dms_sent as number ?? 0,
+            replies_received: (j as Record<string, unknown>).replies_received as number ?? 0,
+            calls_booked: (j as Record<string, unknown>).calls_booked as number ?? 0,
+            deals_closed: (j as Record<string, unknown>).deals_closed as number ?? 0,
+            conversations_count: j.conversations_count ?? 0,
+          };
+        }
+      }
+    }
+  } catch {
+    // daily_journals table or new columns may not exist yet — continue without journal data
+    journalMap = {};
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
   const setterStats = (setters || []).map((s) => {
     const deals = (setterDeals || []).filter((d) => d.assigned_to === s.id);
     const revenue = deals
       .filter((d) => d.stage_id === signedStageId)
       .reduce((sum, d) => sum + (d.value || 0), 0);
-    return { ...s, dealCount: deals.length, revenue };
+    const journal = journalMap[s.id] || null;
+    const daysSinceJournal = journal
+      ? Math.floor((new Date(today).getTime() - new Date(journal.date).getTime()) / (1000 * 60 * 60 * 24))
+      : null;
+    return {
+      ...s,
+      dealCount: deals.length,
+      revenue,
+      lastJournalDate: journal?.date || null,
+      daysSinceJournal,
+      journalMood: journal?.mood ?? null,
+      journalDmsSent: journal?.dms_sent ?? 0,
+      journalReplies: journal?.replies_received ?? 0,
+      journalCallsBooked: journal?.calls_booked ?? 0,
+      journalDealsClosed: journal?.deals_closed ?? 0,
+      journalConversations: journal?.conversations_count ?? 0,
+    };
   });
 
   // Alerts: prospects without activity in 7 days

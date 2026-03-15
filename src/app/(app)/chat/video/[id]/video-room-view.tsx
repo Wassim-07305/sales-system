@@ -41,6 +41,7 @@ import {
   createPoll,
   votePoll,
   getRoomPolls,
+  saveRecordingMetadata,
 } from "@/lib/actions/communication";
 import { useMediaStream } from "@/lib/hooks/use-media-stream";
 import { createClient } from "@/lib/supabase/client";
@@ -150,6 +151,7 @@ export function VideoRoomView({
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const recordingStartedAtRef = useRef<number | null>(null);
 
   // Chat state (local only — broadcast via Realtime)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -597,6 +599,11 @@ export function VideoRoomView({
         const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
         if (blob.size === 0) return;
 
+        // Calculate recording duration in seconds
+        const durationSec = recordingStartedAtRef.current
+          ? Math.round((Date.now() - recordingStartedAtRef.current) / 1000)
+          : null;
+
         try {
           const supabase = supabaseRef.current;
           const filename = `room-${room.id}-${Date.now()}.webm`;
@@ -617,13 +624,23 @@ export function VideoRoomView({
 
           const recordingUrl = urlData?.publicUrl || null;
 
-          // Update the room record
+          // Save recording metadata via server action (updates video_rooms + ensures replay visibility)
           if (recordingUrl) {
-            await supabase
-              .from("video_rooms")
-              .update({ recording_url: recordingUrl })
-              .eq("id", room.id);
-            toast.success("Enregistrement sauvegardé");
+            try {
+              await saveRecordingMetadata({
+                roomId: room.id,
+                recordingUrl,
+                durationSeconds: durationSec,
+              });
+              toast.success("Enregistrement sauvegardé — disponible dans les replays");
+            } catch {
+              // Fallback: update directly from client if server action fails
+              await supabase
+                .from("video_rooms")
+                .update({ recording_url: recordingUrl })
+                .eq("id", room.id);
+              toast.success("Enregistrement sauvegardé");
+            }
           }
         } catch (err) {
           console.error("[Recording] Save error:", err);
@@ -631,6 +648,7 @@ export function VideoRoomView({
         }
       };
 
+      recordingStartedAtRef.current = Date.now();
       recorder.start(1000); // Collect data every second
       mediaRecorderRef.current = recorder;
       setIsRecording(true);

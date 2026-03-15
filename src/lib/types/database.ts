@@ -519,6 +519,10 @@ export interface DailyJournal {
   struggles: string | null;
   goals_tomorrow: string | null;
   conversations_count: number;
+  dms_sent: number;
+  replies_received: number;
+  calls_booked: number;
+  deals_closed: number;
   created_at: string;
 }
 

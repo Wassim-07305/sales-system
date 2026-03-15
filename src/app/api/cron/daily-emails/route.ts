@@ -25,7 +25,16 @@ export async function GET(request: Request) {
     serviceRoleKey
   );
 
-  const results = { digests: 0, reminders: 0, errors: 0 };
+  const results = { digests: 0, reminders: 0, callReminders: 0, errors: 0 };
+
+  // --- 0. Video Call Reminders (today's scheduled calls) ---
+  try {
+    const { notifyUpcomingCalls } = await import("@/lib/actions/communication");
+    const callResult = await notifyUpcomingCalls();
+    results.callReminders = callResult.sent;
+  } catch {
+    results.errors++;
+  }
 
   // --- 1. Notification Digests ---
   try {

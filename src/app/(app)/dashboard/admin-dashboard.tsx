@@ -24,6 +24,9 @@ import {
   ChevronRight,
   Phone,
   ExternalLink,
+  MessageSquare,
+  Send,
+  Smile,
 } from "lucide-react";
 import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
@@ -71,6 +74,14 @@ interface AdminDashboardData {
     avatar_url: string | null;
     dealCount: number;
     revenue: number;
+    lastJournalDate: string | null;
+    daysSinceJournal: number | null;
+    journalMood: number | null;
+    journalDmsSent: number;
+    journalReplies: number;
+    journalCallsBooked: number;
+    journalDealsClosed: number;
+    journalConversations: number;
   }>;
   alerts: Array<{
     id: string;
@@ -466,10 +477,20 @@ export function AdminDashboard({
                 {data.setterStats.slice(0, 5).map((setter, index) => {
                   const maxRevenue = Math.max(...data.setterStats.map((s) => s.revenue), 1);
                   const percent = (setter.revenue / maxRevenue) * 100;
+                  const moodEmojis: Record<number, string> = { 1: "😞", 2: "😐", 3: "🙂", 4: "😊", 5: "🔥" };
+                  const moodColors: Record<number, string> = {
+                    1: "text-red-400",
+                    2: "text-orange-400",
+                    3: "text-yellow-400",
+                    4: "text-green-400",
+                    5: "text-brand",
+                  };
+                  const noJournalToday = setter.daysSinceJournal === null || setter.daysSinceJournal > 0;
+                  const journalWarning = setter.daysSinceJournal !== null && setter.daysSinceJournal > 2;
                   return (
                     <div
                       key={setter.id}
-                      className="flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex items-center gap-3 py-3 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       <span className="text-xs font-bold text-muted-foreground/50 w-4 text-center">
                         {index + 1}
@@ -482,7 +503,24 @@ export function AdminDashboard({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm font-medium truncate">{setter.full_name || "Sans nom"}</p>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <p className="text-sm font-medium truncate">{setter.full_name || "Sans nom"}</p>
+                            {setter.journalMood !== null && (
+                              <span className={cn("text-xs", moodColors[setter.journalMood] || "text-muted-foreground")} title={`Humeur : ${setter.journalMood}/5`}>
+                                {moodEmojis[setter.journalMood] || "—"}
+                              </span>
+                            )}
+                            {noJournalToday && (
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-red-500/10 text-red-400 border-red-500/20 shrink-0">
+                                Pas d&apos;EOD
+                              </Badge>
+                            )}
+                            {journalWarning && (
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-orange-500/10 text-orange-400 border-orange-500/20 shrink-0">
+                                {setter.daysSinceJournal}j sans EOD
+                              </Badge>
+                            )}
+                          </div>
                           <span className="text-sm font-bold shrink-0 ml-2">
                             {formatCurrency(setter.revenue)}
                           </span>
@@ -498,6 +536,30 @@ export function AdminDashboard({
                             {setter.dealCount} deal{setter.dealCount > 1 ? "s" : ""}
                           </span>
                         </div>
+                        {/* Journal KPI row */}
+                        {setter.lastJournalDate && (
+                          <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                            <span className="flex items-center gap-1" title="DMs envoyés">
+                              <Send className="h-3 w-3" />
+                              {setter.journalDmsSent}
+                            </span>
+                            <span className="flex items-center gap-1" title="Réponses reçues">
+                              <MessageSquare className="h-3 w-3" />
+                              {setter.journalReplies}
+                            </span>
+                            <span className="flex items-center gap-1" title="Appels bookés">
+                              <Phone className="h-3 w-3" />
+                              {setter.journalCallsBooked}
+                            </span>
+                            <span className="flex items-center gap-1" title="Deals closés">
+                              <Target className="h-3 w-3" />
+                              {setter.journalDealsClosed}
+                            </span>
+                            <span className="text-muted-foreground/40 ml-auto" title="Dernier EOD">
+                              EOD : {format(new Date(setter.lastJournalDate), "dd/MM", { locale: fr })}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

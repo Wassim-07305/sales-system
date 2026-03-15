@@ -54,6 +54,37 @@ export async function createVideoRoom(data: {
     .single();
 
   if (error) throw new Error(error.message);
+
+  // --- Push notification: notify all team members about the new video room ---
+  try {
+    const { data: allUsers } = await supabase
+      .from("profiles")
+      .select("id")
+      .neq("id", user.id);
+
+    if (allUsers && allUsers.length > 0) {
+      const userIds = allUsers.map((u: { id: string }) => u.id);
+      const scheduledLabel = data.scheduledAt
+        ? new Date(data.scheduledAt).toLocaleString("fr-FR", {
+            dateStyle: "long",
+            timeStyle: "short",
+          })
+        : "maintenant";
+      const notifBody = isInstant
+        ? `Un appel vidéo "${data.title}" vient de démarrer. Rejoignez-le !`
+        : `Un appel vidéo "${data.title}" est prévu le ${scheduledLabel}.`;
+
+      await notifyMany(
+        userIds,
+        "Nouvel appel vidéo",
+        notifBody,
+        { link: `/chat/video/${room.id}`, type: "video_call" }
+      );
+    }
+  } catch {
+    // Ne pas bloquer la création de la room si les notifications échouent
+  }
+
   revalidatePath("/chat/video");
   return room;
 }
@@ -761,4 +792,185 @@ export async function deleteMessage(messageId: string) {
       .eq("sender_id", user.id);
     if (error) throw new Error(error.message);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Save Recording Metadata (GAP 1: auto-import replay after recording)
+// ---------------------------------------------------------------------------
+
+/**
+ * Called after a recording is uploaded to Supabase Storage.
+ * Updates the video_rooms record with recording_url and duration,
+ * ensuring the replay appears in the replays section.
+ */
+export async function saveRecordingMetadata(data: {
+  roomId: string;
+  recordingUrl: string;
+  durationSeconds?: number | null;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Build the update payload
+  const updatePayload: Record<string, unknown> = {
+    recording_url: data.recordingUrl,
+  };
+
+  // If the room doesn't have ended_at set yet, set it now
+  const { data: room } = await supabase
+    .from("video_rooms")
+    .select("started_at, ended_at, status, title")
+    .eq("id", data.roomId)
+    .single();
+
+  if (!room) throw new Error("Salle introuvable");
+
+  // Ensure the room is marked as ended so it appears in replays
+  if (room.status !== "ended") {
+    updatePayload.status = "ended";
+    updatePayload.ended_at = new Date().toISOString();
+  }
+
+  // If we have duration and no ended_at, compute ended_at from started_at + duration
+  if (data.durationSeconds && room.started_at && !room.ended_at) {
+    const endTime = new Date(
+      new Date(room.started_at).getTime() + data.durationSeconds * 1000
+    ).toISOString();
+    updatePayload.ended_at = endTime;
+  }
+
+  const { error } = await supabase
+    .from("video_rooms")
+    .update(updatePayload)
+    .eq("id", data.roomId);
+
+  if (error) throw new Error(error.message);
+
+  // Also try to save to group_calls table if it exists (graceful fallback)
+  try {
+    const title = room.title || `Appel du ${new Date().toLocaleDateString("fr-FR")}`;
+    await supabase.from("group_calls").insert({
+      room_id: data.roomId,
+      title,
+      recording_url: data.recordingUrl,
+      recorded_at: new Date().toISOString(),
+      duration: data.durationSeconds || null,
+      host_id: user.id,
+    });
+  } catch {
+    // group_calls table may not exist — that's fine, video_rooms is the primary source
+  }
+
+  revalidatePath("/chat/replays");
+  revalidatePath("/chat/video");
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Notify Upcoming Calls (GAP 2: push reminders for today's calls)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sends push notifications for video rooms scheduled today.
+ * Designed to be called from the daily cron job.
+ * Uses admin client (service role) — no auth required.
+ */
+export async function notifyUpcomingCalls() {
+  const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!serviceRoleKey || !supabaseUrl) {
+    return { sent: 0, error: "Service role key ou Supabase URL non configurés" };
+  }
+
+  const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
+
+  const now = new Date();
+  const endOfDay = new Date(now);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  // Find all scheduled video rooms for today
+  const { data: upcomingRooms } = await supabase
+    .from("video_rooms")
+    .select("id, title, scheduled_at, host_id")
+    .eq("status", "scheduled")
+    .gte("scheduled_at", now.toISOString())
+    .lte("scheduled_at", endOfDay.toISOString());
+
+  if (!upcomingRooms || upcomingRooms.length === 0) {
+    return { sent: 0 };
+  }
+
+  let totalSent = 0;
+
+  for (const room of upcomingRooms) {
+    // Fetch all team members to notify
+    const { data: allUsers } = await supabase
+      .from("profiles")
+      .select("id");
+
+    if (!allUsers || allUsers.length === 0) continue;
+
+    const scheduledTime = new Date(room.scheduled_at).toLocaleString("fr-FR", {
+      timeStyle: "short",
+    });
+
+    const userIds = allUsers.map((u: { id: string }) => u.id);
+
+    // Insert notifications directly (no auth needed with service role)
+    const notifications = userIds.map((uid: string) => ({
+      user_id: uid,
+      title: "Rappel : appel vidéo aujourd'hui",
+      body: `"${room.title}" prévu à ${scheduledTime}`,
+      type: "video_call_reminder",
+      link: `/chat/video/${room.id}`,
+    }));
+
+    const { error } = await supabase.from("notifications").insert(notifications);
+    if (!error) totalSent += userIds.length;
+
+    // Send web push via push_subscriptions (fire-and-forget)
+    try {
+      const { data: subscriptions } = await supabase
+        .from("push_subscriptions")
+        .select("user_id, endpoint, keys")
+        .in("user_id", userIds);
+
+      if (subscriptions && subscriptions.length > 0) {
+        const webPush = (await import("web-push")).default;
+        const { getApiKey } = await import("@/lib/api-keys");
+        const publicKey = await getApiKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
+        const privateKey = await getApiKey("VAPID_PRIVATE_KEY");
+        const email = (await getApiKey("VAPID_EMAIL")) || "mailto:admin@salessystem.com";
+
+        if (publicKey && privateKey) {
+          webPush.setVapidDetails(email, publicKey, privateKey);
+          for (const sub of subscriptions) {
+            try {
+              await webPush.sendNotification(
+                {
+                  endpoint: sub.endpoint,
+                  keys: sub.keys as { p256dh: string; auth: string },
+                },
+                JSON.stringify({
+                  title: "Rappel : appel vidéo aujourd'hui",
+                  body: `"${room.title}" prévu à ${scheduledTime}`,
+                  icon: "/icons/icon-192x192.png",
+                  data: { url: `/chat/video/${room.id}` },
+                })
+              );
+            } catch {
+              // Ignore individual push failures
+            }
+          }
+        }
+      }
+    } catch {
+      // Push delivery is best-effort
+    }
+  }
+
+  return { sent: totalSent };
 }
