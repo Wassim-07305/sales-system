@@ -25,7 +25,7 @@ export async function getMultiNetworkOverview() {
   const platforms = ["linkedin", "instagram"];
   const overview = platforms.map((platform) => {
     const filtered = allProspects.filter(
-      (p: Record<string, unknown>) => p.platform === platform
+      (p: Record<string, unknown>) => p.platform === platform,
     );
     const scores = filtered
       .map((p: Record<string, unknown>) => {
@@ -38,13 +38,13 @@ export async function getMultiNetworkOverview() {
       platform,
       total: filtered.length,
       contacted: filtered.filter(
-        (p: Record<string, unknown>) => p.status === "contacted"
+        (p: Record<string, unknown>) => p.status === "contacted",
       ).length,
       replied: filtered.filter(
-        (p: Record<string, unknown>) => p.status === "replied"
+        (p: Record<string, unknown>) => p.status === "replied",
       ).length,
       booked: filtered.filter(
-        (p: Record<string, unknown>) => p.status === "booked"
+        (p: Record<string, unknown>) => p.status === "booked",
       ).length,
       avgScore:
         scores.length > 0
@@ -61,7 +61,7 @@ export async function getMultiNetworkOverview() {
 export async function generateAiMessage(
   prospectName: string,
   context: string,
-  platform: string
+  platform: string,
 ) {
   try {
     const message = await aiComplete(
@@ -81,9 +81,10 @@ Règles :
 
 Écris uniquement le texte du message, sans guillemets.`,
       {
-        system: "Tu es un expert en copywriting et prospection par DM. Tu crées des messages d'approche naturels qui génèrent un taux de réponse élevé.",
+        system:
+          "Tu es un expert en copywriting et prospection par DM. Tu crées des messages d'approche naturels qui génèrent un taux de réponse élevé.",
         maxTokens: 300,
-      }
+      },
     );
     return message;
   } catch {
@@ -91,7 +92,10 @@ Règles :
       linkedin: `Bonjour ${prospectName},\n\nJ'ai vu votre profil et ${context}. Je travaille avec des professionnels comme vous pour les aider à développer leur activité.\n\nSeriez-vous ouvert(e) à un échange rapide de 15 min cette semaine ?\n\nBien cordialement`,
       instagram: `Hey ${prospectName} ! 👋\n\nJ'ai vu ton contenu et ${context}. Trop cool ce que tu fais !\n\nJe bosse avec des créateurs dans ta niche et j'ai quelques idées qui pourraient t'intéresser. On en parle en DM ? 🚀`,
     };
-    return templates[platform] || `Bonjour ${prospectName},\n\n${context}\n\nÀ bientôt !`;
+    return (
+      templates[platform] ||
+      `Bonjour ${prospectName},\n\n${context}\n\nÀ bientôt !`
+    );
   }
 }
 
@@ -100,7 +104,11 @@ Règles :
 export async function analyzeProfile(profileUrl: string) {
   const isLinkedin = profileUrl.includes("linkedin");
   const isInstagram = profileUrl.includes("instagram");
-  const platform = isLinkedin ? "linkedin" : isInstagram ? "instagram" : "autre";
+  const platform = isLinkedin
+    ? "linkedin"
+    : isInstagram
+      ? "instagram"
+      : "autre";
 
   // --- Enrichissement Apify pour les profils Instagram & LinkedIn ---
   let apifyEnrichment: {
@@ -125,7 +133,11 @@ export async function analyzeProfile(profileUrl: string) {
         followersCount?: number;
         connectionsCount?: number;
         experienceCount?: number;
-        experience?: Array<{ title?: string; companyName?: string; duration?: string }>;
+        experience?: Array<{
+          title?: string;
+          companyName?: string;
+          duration?: string;
+        }>;
         skills?: string[];
         location?: string;
         profileUrl?: string;
@@ -135,13 +147,16 @@ export async function analyzeProfile(profileUrl: string) {
       const results = await callApifyActor<ApifyLinkedInProfile>(
         "dev_fusion/Linkedin-Profile-Scraper",
         { profileUrls: [profileUrl] },
-        120 // Timeout 120s pour LinkedIn
+        120, // Timeout 120s pour LinkedIn
       );
 
       if (results && results.length > 0) {
         const p = results[0];
         const experienceSummary = p.experience
-          ? p.experience.slice(0, 3).map(e => `${e.title || ""} @ ${e.companyName || ""}`).join(", ")
+          ? p.experience
+              .slice(0, 3)
+              .map((e) => `${e.title || ""} @ ${e.companyName || ""}`)
+              .join(", ")
           : undefined;
 
         apifyEnrichment = {
@@ -154,7 +169,10 @@ export async function analyzeProfile(profileUrl: string) {
         };
       }
     } catch (err) {
-      console.error("[analyzeProfile] Apify enrichissement LinkedIn echoue:", err);
+      console.error(
+        "[analyzeProfile] Apify enrichissement LinkedIn echoue:",
+        err,
+      );
     }
   }
 
@@ -176,7 +194,7 @@ export async function analyzeProfile(profileUrl: string) {
 
         const results = await callApifyActor<ApifyInstagramProfile>(
           "apify/instagram-profile-scraper",
-          { usernames: [username] }
+          { usernames: [username] },
         );
 
         if (results && results.length > 0) {
@@ -198,7 +216,10 @@ export async function analyzeProfile(profileUrl: string) {
 
   // Si Apify a retourné des données enrichies, les utiliser pour améliorer l'analyse
   if (apifyEnrichment?.name || apifyEnrichment?.biography) {
-    const enrichedName = apifyEnrichment.name || profileUrl.split("/").filter(Boolean).pop() || "Profil";
+    const enrichedName =
+      apifyEnrichment.name ||
+      profileUrl.split("/").filter(Boolean).pop() ||
+      "Profil";
     const enrichedBio = apifyEnrichment.biography || "";
     const enrichedFollowers = apifyEnrichment.followers || 0;
 
@@ -233,9 +254,10 @@ Genere une analyse basee sur ces VRAIES donnees :
 
 Reponds en JSON.`,
         {
-          system: "Tu es un expert en social selling et prospection digitale. Analyse les profils pour identifier les meilleures opportunités commerciales.",
+          system:
+            "Tu es un expert en social selling et prospection digitale. Analyse les profils pour identifier les meilleures opportunités commerciales.",
           maxTokens: 500,
-        }
+        },
       );
 
       return {
@@ -247,7 +269,8 @@ Reponds en JSON.`,
         lastActive: result.lastActive || "Inconnu",
         topics: result.topics || [],
         score: Math.min(100, Math.max(0, result.score || 50)),
-        recommendation: result.recommendation || "Aucune recommandation disponible.",
+        recommendation:
+          result.recommendation || "Aucune recommandation disponible.",
         source: "apify" as const,
       };
     } catch {
@@ -261,7 +284,8 @@ Reponds en JSON.`,
         lastActive: "Inconnu",
         topics: [],
         score: 50,
-        recommendation: "Données enrichies via Apify. Consultez le profil pour affiner l'analyse.",
+        recommendation:
+          "Données enrichies via Apify. Consultez le profil pour affiner l'analyse.",
         source: "apify" as const,
       };
     }
@@ -295,9 +319,10 @@ Génère une analyse réaliste du profil avec les informations suivantes :
 Contexte : profil ${isLinkedin ? "B2B professionnel" : isInstagram ? "créateur/influenceur" : "professionnel"}.
 Réponds en JSON.`,
       {
-        system: "Tu es un expert en social selling et prospection digitale. Analyse les profils pour identifier les meilleures opportunités commerciales.",
+        system:
+          "Tu es un expert en social selling et prospection digitale. Analyse les profils pour identifier les meilleures opportunités commerciales.",
         maxTokens: 500,
-      }
+      },
     );
 
     return {
@@ -309,7 +334,8 @@ Réponds en JSON.`,
       lastActive: result.lastActive || "Inconnu",
       topics: result.topics || [],
       score: Math.min(100, Math.max(0, result.score || 50)),
-      recommendation: result.recommendation || "Aucune recommandation disponible.",
+      recommendation:
+        result.recommendation || "Aucune recommandation disponible.",
     };
   } catch {
     // Fallback sans IA
@@ -324,7 +350,8 @@ Réponds en JSON.`,
       lastActive: "Inconnu",
       topics: [],
       score: 50,
-      recommendation: "Analyse IA indisponible. Consultez le profil manuellement pour évaluer le prospect.",
+      recommendation:
+        "Analyse IA indisponible. Consultez le profil manuellement pour évaluer le prospect.",
     };
   }
 }
@@ -359,14 +386,29 @@ Règles :
 - Ton professionnel mais humain
 - Objectif : se faire remarquer positivement par l'auteur du post
 - En français`,
-      { system: "Tu es un expert en social selling et engagement sur les réseaux sociaux." }
+      {
+        system:
+          "Tu es un expert en social selling et engagement sur les réseaux sociaux.",
+      },
     );
     return result.comments;
   } catch {
     return [
-      { type: "value" as const, comment: "Super article ! Le point sur la stratégie de contenu est particulièrement pertinent. J'ai appliqué une approche similaire et les résultats ont été bluffants. Merci du partage 🙌" },
-      { type: "question" as const, comment: "Très intéressant ! Quelle a été la plus grosse difficulté que vous avez rencontrée en mettant cela en place ? Je suis curieux d'en savoir plus sur les coulisses." },
-      { type: "story" as const, comment: "Ça me parle tellement ! J'accompagne des professionnels sur ce sujet et je retrouve exactement ces tendances. Le marché évolue vite et il faut s'adapter. Bravo pour cette analyse 👏" },
+      {
+        type: "value" as const,
+        comment:
+          "Super article ! Le point sur la stratégie de contenu est particulièrement pertinent. J'ai appliqué une approche similaire et les résultats ont été bluffants. Merci du partage 🙌",
+      },
+      {
+        type: "question" as const,
+        comment:
+          "Très intéressant ! Quelle a été la plus grosse difficulté que vous avez rencontrée en mettant cela en place ? Je suis curieux d'en savoir plus sur les coulisses.",
+      },
+      {
+        type: "story" as const,
+        comment:
+          "Ça me parle tellement ! J'accompagne des professionnels sur ce sujet et je retrouve exactement ces tendances. Le marché évolue vite et il faut s'adapter. Bravo pour cette analyse 👏",
+      },
     ];
   }
 }
@@ -383,7 +425,7 @@ export async function scrapeStories(username: string) {
       // Récupérer les stories via Instagram Graph API
       const response = await fetch(
         `https://graph.facebook.com/v21.0/${businessAccountId}/stories?fields=id,media_type,timestamp,caption&access_token=${accessToken}`,
-        { next: { revalidate: 300 } } // Cache 5 min
+        { next: { revalidate: 300 } }, // Cache 5 min
       );
 
       if (response.ok) {
@@ -391,7 +433,10 @@ export async function scrapeStories(username: string) {
         return (data.data || []).map((story: Record<string, unknown>) => ({
           id: story.id as string,
           username,
-          type: ((story.media_type as string) || "IMAGE").toLowerCase() === "video" ? "video" as const : "image" as const,
+          type:
+            ((story.media_type as string) || "IMAGE").toLowerCase() === "video"
+              ? ("video" as const)
+              : ("image" as const),
           timestamp: (story.timestamp as string) || new Date().toISOString(),
           caption: (story.caption as string) || "",
           hasQuestion: false,
@@ -426,15 +471,21 @@ export async function scrapeStories(username: string) {
         resultsType: "stories",
         resultsLimit: 10,
       },
-      120 // Timeout 120s pour le scraping Instagram
+      120, // Timeout 120s pour le scraping Instagram
     );
 
     if (apifyStories && apifyStories.length > 0) {
       return apifyStories.map((story, i) => ({
         id: story.id || `story_apify_${i + 1}`,
         username,
-        type: (story.type === "video" || story.mediaType === 2) ? "video" as const : "image" as const,
-        timestamp: story.timestamp || story.takenAt || new Date(Date.now() - (i + 1) * 3 * 60 * 60 * 1000).toISOString(),
+        type:
+          story.type === "video" || story.mediaType === 2
+            ? ("video" as const)
+            : ("image" as const),
+        timestamp:
+          story.timestamp ||
+          story.takenAt ||
+          new Date(Date.now() - (i + 1) * 3 * 60 * 60 * 1000).toISOString(),
         caption: story.caption || "",
         hasQuestion: false,
         hasPoll: false,
@@ -442,7 +493,10 @@ export async function scrapeStories(username: string) {
       }));
     }
   } catch (apifyErr) {
-    console.error("[scrapeStories] Apify Instagram scraper échoué, fallback IA:", apifyErr);
+    console.error(
+      "[scrapeStories] Apify Instagram scraper échoué, fallback IA:",
+      apifyErr,
+    );
   }
 
   // ─── Tier 3 : Fallback IA (stories simulées — disclaimer) ──────
@@ -470,23 +524,27 @@ Pour chaque story, indique :
 
 Réponds en JSON : { "stories": [...] }`,
       {
-        system: "Tu es un expert en analyse de profils Instagram. Génère du contenu réaliste basé sur la niche probable du profil.",
+        system:
+          "Tu es un expert en analyse de profils Instagram. Génère du contenu réaliste basé sur la niche probable du profil.",
         maxTokens: 500,
-      }
+      },
     );
 
     return (result.stories || []).map((story, i) => ({
       id: `story_ai_${i + 1}`,
       username,
       type: story.type || "image",
-      timestamp: new Date(Date.now() - (i + 1) * 3 * 60 * 60 * 1000).toISOString(),
+      timestamp: new Date(
+        Date.now() - (i + 1) * 3 * 60 * 60 * 1000,
+      ).toISOString(),
       caption: story.caption || "",
       hasQuestion: story.hasQuestion || false,
       questionText: story.questionText,
       hasPoll: story.hasPoll || false,
       pollQuestion: story.pollQuestion,
       source: "ai_simulated" as const,
-      disclaimer: "Stories simulees par IA — les donnees reelles n'ont pas pu etre recuperees via Instagram API ni Apify.",
+      disclaimer:
+        "Stories simulees par IA — les donnees reelles n'ont pas pu etre recuperees via Instagram API ni Apify.",
     }));
   } catch {
     // Fallback statique
@@ -548,7 +606,7 @@ export async function calculateProspectScore(prospectId: string) {
       temperature: temperatureMap[breakdown.tier] || "cold",
       computed_at: new Date().toISOString(),
     },
-    { onConflict: "prospect_id" }
+    { onConflict: "prospect_id" },
   );
 
   if (error) throw new Error(error.message);
@@ -604,7 +662,8 @@ export async function getHubUnifiedStats() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { linkedin: null, instagram: null, whatsapp: null, totals: null };
+  if (!user)
+    return { linkedin: null, instagram: null, whatsapp: null, totals: null };
 
   // Prospects stats (LinkedIn + Instagram)
   const { data: prospects } = await supabase
@@ -634,7 +693,12 @@ export async function getHubUnifiedStats() {
     .eq("user_id", user.id)
     .single();
 
-  let whatsapp = { conversations: 0, messagesSent: 0, messagesReceived: 0, connected: false };
+  let whatsapp = {
+    conversations: 0,
+    messagesSent: 0,
+    messagesReceived: 0,
+    connected: false,
+  };
 
   if (connection) {
     whatsapp.connected = connection.status === "connected";
@@ -645,20 +709,26 @@ export async function getHubUnifiedStats() {
       .eq("connection_id", connection.id);
 
     const allMessages = messages || [];
-    const uniqueProspects = new Set(allMessages.map((m) => m.prospect_id).filter(Boolean));
+    const uniqueProspects = new Set(
+      allMessages.map((m) => m.prospect_id).filter(Boolean),
+    );
 
     whatsapp = {
       connected: connection.status === "connected",
       conversations: uniqueProspects.size,
-      messagesSent: allMessages.filter((m) => m.direction === "outbound").length,
-      messagesReceived: allMessages.filter((m) => m.direction === "inbound").length,
+      messagesSent: allMessages.filter((m) => m.direction === "outbound")
+        .length,
+      messagesReceived: allMessages.filter((m) => m.direction === "inbound")
+        .length,
     };
   }
 
   const totals = {
     totalProspects: linkedin.total + instagram.total + whatsapp.conversations,
-    totalContacted: linkedin.contacted + instagram.contacted + whatsapp.messagesSent,
-    totalReplied: linkedin.replied + instagram.replied + whatsapp.messagesReceived,
+    totalContacted:
+      linkedin.contacted + instagram.contacted + whatsapp.messagesSent,
+    totalReplied:
+      linkedin.replied + instagram.replied + whatsapp.messagesReceived,
     totalBooked: linkedin.booked + instagram.booked,
   };
 
@@ -673,7 +743,7 @@ export async function getSmartFollowUps() {
   const { data: tasks } = await supabase
     .from("follow_up_tasks")
     .select(
-      "*, prospect:prospects(id, name, platform, status, profile_url), sequence:follow_up_sequences(id, name)"
+      "*, prospect:prospects(id, name, platform, status, profile_url), sequence:follow_up_sequences(id, name)",
     )
     .order("scheduled_at", { ascending: true });
 
@@ -704,7 +774,8 @@ export async function createFollowUpSequence(data: {
     .select()
     .single();
 
-  if (error || !sequence) throw new Error(error?.message || "Erreur création séquence");
+  if (error || !sequence)
+    throw new Error(error?.message || "Erreur création séquence");
 
   revalidatePath("/prospecting/follow-ups");
   return sequence;
@@ -727,7 +798,7 @@ export async function completeFollowUpTask(taskId: string) {
 
 export async function assignFollowUpSequence(
   prospectId: string,
-  sequenceId: string
+  sequenceId: string,
 ) {
   const supabase = await createClient();
 
@@ -745,8 +816,7 @@ export async function assignFollowUpSequence(
     message_template: string;
   }>;
 
-  if (steps.length === 0)
-    throw new Error("Séquence vide ou introuvable");
+  if (steps.length === 0) throw new Error("Séquence vide ou introuvable");
 
   // Create tasks for each step
   const now = new Date();
@@ -756,7 +826,7 @@ export async function assignFollowUpSequence(
     step_index: step.step_order - 1,
     message_content: step.message_template,
     scheduled_at: new Date(
-      now.getTime() + step.day_offset * 24 * 60 * 60 * 1000
+      now.getTime() + step.day_offset * 24 * 60 * 60 * 1000,
     ).toISOString(),
     completed: false,
   }));
@@ -811,40 +881,83 @@ Règles :
 - Les réponses suggérées doivent être empathiques et orientées valeur
 - Si pas d'objection, donne un conseil pour continuer la conversation
 - En français`,
-      { system: "Tu es un coach expert en vente/setting. Tu analyses les messages de prospects pour aider les setters à mieux gérer les objections." }
+      {
+        system:
+          "Tu es un coach expert en vente/setting. Tu analyses les messages de prospects pour aider les setters à mieux gérer les objections.",
+      },
     );
     return result;
   } catch {
     // Fallback: regex-based detection
     const patterns = [
-      { pattern: /trop cher|prix|budget|coût|cher/i, type: "prix", response: "Je comprends votre préoccupation sur le prix. Nos clients constatent un ROI en moyenne de 3x leur investissement dès le premier mois. On peut en discuter ?" },
-      { pattern: /pas le temps|occupé|débordé|plus tard|pas maintenant/i, type: "temps", response: "Je comprends, le temps est précieux. Un call de 15 min pourrait vous montrer comment gagner du temps." },
-      { pattern: /pas intéressé|ça ne m'intéresse pas|non merci/i, type: "intérêt", response: "Pas de souci ! Par curiosité, quel est votre plus gros défi actuellement ?" },
-      { pattern: /déjà.*solution|j'utilise|on a déjà/i, type: "concurrence", response: "Super que vous soyez déjà équipé ! Ça vaut le coup de comparer les approches." },
-      { pattern: /réfléchir|j'y pense|je vais voir/i, type: "hésitation", response: "Bien sûr. Je peux vous envoyer une étude de cas pour aider votre réflexion ?" },
+      {
+        pattern: /trop cher|prix|budget|coût|cher/i,
+        type: "prix",
+        response:
+          "Je comprends votre préoccupation sur le prix. Nos clients constatent un ROI en moyenne de 3x leur investissement dès le premier mois. On peut en discuter ?",
+      },
+      {
+        pattern: /pas le temps|occupé|débordé|plus tard|pas maintenant/i,
+        type: "temps",
+        response:
+          "Je comprends, le temps est précieux. Un call de 15 min pourrait vous montrer comment gagner du temps.",
+      },
+      {
+        pattern: /pas intéressé|ça ne m'intéresse pas|non merci/i,
+        type: "intérêt",
+        response:
+          "Pas de souci ! Par curiosité, quel est votre plus gros défi actuellement ?",
+      },
+      {
+        pattern: /déjà.*solution|j'utilise|on a déjà/i,
+        type: "concurrence",
+        response:
+          "Super que vous soyez déjà équipé ! Ça vaut le coup de comparer les approches.",
+      },
+      {
+        pattern: /réfléchir|j'y pense|je vais voir/i,
+        type: "hésitation",
+        response:
+          "Bien sûr. Je peux vous envoyer une étude de cas pour aider votre réflexion ?",
+      },
     ];
-    const detected = patterns.filter(({ pattern }) => pattern.test(message)).map(({ type, response }) => ({ type, suggestedResponse: response }));
+    const detected = patterns
+      .filter(({ pattern }) => pattern.test(message))
+      .map(({ type, response }) => ({ type, suggestedResponse: response }));
     return {
       hasObjection: detected.length > 0,
       objections: detected,
       sentiment: detected.length > 0 ? "négatif" : "neutre",
-      suggestion: detected.length > 0 ? `${detected.length} objection(s) détectée(s).` : "Aucune objection détectée. Continuez la conversation !",
+      suggestion:
+        detected.length > 0
+          ? `${detected.length} objection(s) détectée(s).`
+          : "Aucune objection détectée. Continuez la conversation !",
     };
   }
 }
 
 // ─── Analyse de Sentiment (F75) ─────────────────────────────────────
 
-export async function analyzeSentiment(messages: Array<{ sender: string; content: string }>) {
-  const defaultResult = { sentiment: "neutral" as const, score: 50, signals: [] as string[] };
+export async function analyzeSentiment(
+  messages: Array<{ sender: string; content: string }>,
+) {
+  const defaultResult = {
+    sentiment: "neutral" as const,
+    score: 50,
+    signals: [] as string[],
+  };
   if (!messages.length) return defaultResult;
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return defaultResult;
 
   const lastMessages = messages.slice(-5);
-  const conversationText = lastMessages.map(m => `${m.sender}: ${m.content}`).join("\n");
+  const conversationText = lastMessages
+    .map((m) => `${m.sender}: ${m.content}`)
+    .join("\n");
 
   try {
     const parsed = await aiJSON<{
@@ -852,7 +965,8 @@ export async function analyzeSentiment(messages: Array<{ sender: string; content
       score: number;
       signals: string[];
     }>(conversationText, {
-      system: "Analyse le sentiment de cette conversation de prospection. Retourne du JSON: {\"sentiment\": \"positive\"|\"hesitant\"|\"negative\"|\"neutral\"|\"hot\", \"score\": 0-100, \"signals\": [\"signal1\", \"signal2\"]}",
+      system:
+        'Analyse le sentiment de cette conversation de prospection. Retourne du JSON: {"sentiment": "positive"|"hesitant"|"negative"|"neutral"|"hot", "score": 0-100, "signals": ["signal1", "signal2"]}',
       maxTokens: 256,
     });
     return {
@@ -866,18 +980,46 @@ export async function analyzeSentiment(messages: Array<{ sender: string; content
 
   // Simple keyword-based fallback
   const text = conversationText.toLowerCase();
-  const positiveWords = ["intéressé", "oui", "super", "parfait", "ok", "quand", "comment"];
+  const positiveWords = [
+    "intéressé",
+    "oui",
+    "super",
+    "parfait",
+    "ok",
+    "quand",
+    "comment",
+  ];
   const negativeWords = ["non", "pas intéressé", "arrête", "spam", "stop"];
   const hesitantWords = ["peut-être", "je sais pas", "je réfléchis", "pas sûr"];
 
-  const posCount = positiveWords.filter(w => text.includes(w)).length;
-  const negCount = negativeWords.filter(w => text.includes(w)).length;
-  const hesCount = hesitantWords.filter(w => text.includes(w)).length;
+  const posCount = positiveWords.filter((w) => text.includes(w)).length;
+  const negCount = negativeWords.filter((w) => text.includes(w)).length;
+  const hesCount = hesitantWords.filter((w) => text.includes(w)).length;
 
-  if (negCount > posCount) return { sentiment: "negative", score: 20, signals: ["Mots négatifs détectés"] };
-  if (hesCount > posCount) return { sentiment: "hesitant", score: 45, signals: ["Hésitation détectée"] };
-  if (posCount >= 2) return { sentiment: "hot", score: 85, signals: ["Signaux d'achat détectés"] };
-  if (posCount > 0) return { sentiment: "positive", score: 65, signals: ["Réponses positives"] };
+  if (negCount > posCount)
+    return {
+      sentiment: "negative",
+      score: 20,
+      signals: ["Mots négatifs détectés"],
+    };
+  if (hesCount > posCount)
+    return {
+      sentiment: "hesitant",
+      score: 45,
+      signals: ["Hésitation détectée"],
+    };
+  if (posCount >= 2)
+    return {
+      sentiment: "hot",
+      score: 85,
+      signals: ["Signaux d'achat détectés"],
+    };
+  if (posCount > 0)
+    return {
+      sentiment: "positive",
+      score: 65,
+      signals: ["Réponses positives"],
+    };
   return { sentiment: "neutral", score: 50, signals: [] };
 }
 
@@ -887,7 +1029,7 @@ export async function generateFollowUpMessage(
   prospectName: string,
   platform: string,
   previousMessages: string[],
-  daysSinceLastContact: number
+  daysSinceLastContact: number,
 ) {
   try {
     const message = await aiComplete(
@@ -909,9 +1051,10 @@ Règles :
 
 Écris uniquement le texte du message.`,
       {
-        system: "Tu es un expert en relance commerciale. Tu crées des messages de follow-up qui réengagent naturellement les prospects sans être pushy.",
+        system:
+          "Tu es un expert en relance commerciale. Tu crées des messages de follow-up qui réengagent naturellement les prospects sans être pushy.",
         maxTokens: 256,
-      }
+      },
     );
     return message;
   } catch {
@@ -933,10 +1076,13 @@ export async function analyzeProfileComplet(profileData: {
   platform: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { name, bio, headline, experience, followers, following, platform } = profileData;
+  const { name, bio, headline, experience, followers, following, platform } =
+    profileData;
 
   // Build analysis prompt from available data
   const dataPoints = [
@@ -945,7 +1091,9 @@ export async function analyzeProfileComplet(profileData: {
     experience && `Expérience: ${experience}`,
     followers && `Followers: ${followers}`,
     following && `Following: ${following}`,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   if (!dataPoints) {
     return {
@@ -965,7 +1113,8 @@ export async function analyzeProfileComplet(profileData: {
       approachAngle: string;
       confidence: string;
     }>(`Profil ${platform} de ${name}:\n${dataPoints}`, {
-      system: "Tu es un expert en prospection commerciale. Analyse ce profil et génère un message d'accroche personnalisé. Retourne du JSON: {\"accroche\": \"message\", \"interests\": [\"intérêt1\"], \"approachAngle\": \"angle\", \"confidence\": \"high\"|\"medium\"|\"low\"}",
+      system:
+        'Tu es un expert en prospection commerciale. Analyse ce profil et génère un message d\'accroche personnalisé. Retourne du JSON: {"accroche": "message", "interests": ["intérêt1"], "approachAngle": "angle", "confidence": "high"|"medium"|"low"}',
       maxTokens: 512,
     });
     return {
@@ -985,7 +1134,7 @@ export async function analyzeProfileComplet(profileData: {
   const interests: string[] = [];
 
   if (bio) {
-    const keywords = bio.split(/[\s,.|]+/).filter(w => w.length > 4);
+    const keywords = bio.split(/[\s,.|]+/).filter((w) => w.length > 4);
     if (keywords.length > 0) {
       accroche = `Salut ${name} ! J'ai vu dans ta bio que tu t'intéresses à ${keywords.slice(0, 2).join(" et ")}. `;
       interests.push(...keywords.slice(0, 3));
@@ -999,10 +1148,98 @@ export async function analyzeProfileComplet(profileData: {
 
   return {
     analysis: {
-      accroche: accroche + "j'ai pensé que notre approche pourrait t'intéresser. Est-ce que tu aurais 15 min pour en discuter ?",
+      accroche:
+        accroche +
+        "j'ai pensé que notre approche pourrait t'intéresser. Est-ce que tu aurais 15 min pour en discuter ?",
       interests,
       approachAngle: bio ? "Personnalisé via la bio" : "Approche directe",
       confidence: bio ? "medium" : "low",
     },
+  };
+}
+
+// ─── Feature #32: Campagne Setting IA Full Auto ──────────────────────
+
+export async function runAutoSettingCampaign(profileUrls: string[]) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié", results: [] };
+
+  const results: Array<{
+    url: string;
+    status: "sent" | "failed" | "queued";
+    message?: string;
+    error?: string;
+  }> = [];
+
+  for (let i = 0; i < profileUrls.length; i++) {
+    const url = profileUrls[i];
+
+    try {
+      // 1. Analyser le profil
+      const analysis = await analyzeProfile(url);
+
+      // 2. Générer un message personnalisé
+      const context = `${analysis.headline || "professionnel"} — ${analysis.recommendation || ""}`;
+      const message = await generateAiMessage(
+        analysis.name || "Prospect",
+        context,
+        analysis.platform || "linkedin",
+      );
+
+      // 3. Sauvegarder comme prospect
+      const { data: prospect } = await supabase
+        .from("prospects")
+        .insert({
+          name: analysis.name || url.split("/").pop(),
+          platform: analysis.platform || "linkedin",
+          profile_url: url,
+          status: "contacted",
+          engagement_score: analysis.score || 50,
+          last_message: message,
+          contacted_at: new Date().toISOString(),
+          user_id: user.id,
+        })
+        .select("id")
+        .single();
+
+      // 4. Log l'activité
+      if (prospect) {
+        await supabase.from("prospect_activities").insert({
+          prospect_id: prospect.id,
+          type: "message_sent",
+          content: message,
+          platform: analysis.platform || "linkedin",
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      results.push({ url, status: "queued", message: message.slice(0, 80) + "..." });
+    } catch (err) {
+      results.push({
+        url,
+        status: "failed",
+        error: err instanceof Error ? err.message : "Erreur inconnue",
+      });
+    }
+
+    // Rate limit: délai aléatoire entre 2s et 5s entre chaque profil (en mode serveur)
+    if (i < profileUrls.length - 1) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, 2000 + Math.random() * 3000),
+      );
+    }
+  }
+
+  revalidatePath("/prospecting/hub");
+  revalidatePath("/prospecting");
+
+  return {
+    total: results.length,
+    sent: results.filter((r) => r.status === "queued").length,
+    failed: results.filter((r) => r.status === "failed").length,
+    results,
   };
 }

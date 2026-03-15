@@ -366,7 +366,12 @@ export async function triggerAutoBooking(userId: string) {
   if (error) return { success: false, message: error.message };
 
   // Notify user
-  await notify(userId, "Appel d'onboarding programme !", `Ton premier appel est prevu le ${targetDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} a ${targetDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.`, { type: "onboarding_call", link: "/bookings" });
+  await notify(
+    userId,
+    "Appel d'onboarding programme !",
+    `Ton premier appel est prevu le ${targetDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} a ${targetDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}.`,
+    { type: "onboarding_call", link: "/bookings" },
+  );
 
   // Notify admins
   const { data: admins } = await supabase
@@ -375,7 +380,12 @@ export async function triggerAutoBooking(userId: string) {
     .in("role", ["admin", "manager"]);
 
   if (admins && admins.length > 0) {
-    await notifyMany(admins.map((a) => a.id), "Nouvel appel d'onboarding", `${profile.full_name || "Nouveau client"} — appel programme le ${targetDate.toLocaleDateString("fr-FR")}.`, { type: "onboarding_call", link: "/bookings" });
+    await notifyMany(
+      admins.map((a) => a.id),
+      "Nouvel appel d'onboarding",
+      `${profile.full_name || "Nouveau client"} — appel programme le ${targetDate.toLocaleDateString("fr-FR")}.`,
+      { type: "onboarding_call", link: "/bookings" },
+    );
   }
 
   revalidatePath("/bookings");
@@ -617,6 +627,9 @@ export async function completeSimpleOnboarding(data: {
   prospection_channels?: string[];
   linkedin_url?: string;
   instagram_username?: string;
+  objectif_financier?: string;
+  disponibilites_heures?: string;
+  situation_actuelle?: string;
 }) {
   const supabase = await createClient();
   const {
@@ -654,6 +667,9 @@ export async function completeSimpleOnboarding(data: {
     },
     { key: "linkedin_url", value: data.linkedin_url || "" },
     { key: "instagram_username", value: data.instagram_username || "" },
+    { key: "objectif_financier", value: data.objectif_financier || "" },
+    { key: "disponibilites_heures", value: data.disponibilites_heures || "" },
+    { key: "situation_actuelle", value: data.situation_actuelle || "" },
   ].filter((e) => e.value !== "" && e.value !== "[]");
 
   for (const entry of settingsEntries) {
@@ -681,7 +697,9 @@ export async function generateB2BWorkspace(data: {
   communicationTone: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Generate SOP document
@@ -704,20 +722,23 @@ export async function generateB2BWorkspace(data: {
     },
     scriptTemplate: `Salut [PRÉNOM] ! J'ai vu que [ACCROCHE PERSONNALISÉE]. Chez ${data.companyName}, on aide [${data.targetAudience}] à [BÉNÉFICE PRINCIPAL]. Est-ce que tu aurais 15 min cette semaine pour en discuter ?`,
     objectionHandling: {
-      "Pas le temps": "Je comprends, c'est justement pour ça qu'on propose un format court de 15 min. On peut trouver un créneau qui t'arrange ?",
+      "Pas le temps":
+        "Je comprends, c'est justement pour ça qu'on propose un format court de 15 min. On peut trouver un créneau qui t'arrange ?",
       "Trop cher": `L'investissement de ${data.price} est rentabilisé dès le premier mois grâce à [RÉSULTAT CONCRET].`,
-      "J'y réfléchis": "Bien sûr ! Qu'est-ce qui te ferait passer à l'action aujourd'hui ?",
+      "J'y réfléchis":
+        "Bien sûr ! Qu'est-ce qui te ferait passer à l'action aujourd'hui ?",
     },
   };
 
   // Save SOP
-  const { error: sopError } = await supabase
-    .from("client_sops")
-    .upsert({
+  const { error: sopError } = await supabase.from("client_sops").upsert(
+    {
       client_id: user.id,
       sop_data: sop,
       generated_at: new Date().toISOString(),
-    }, { onConflict: "client_id" });
+    },
+    { onConflict: "client_id" },
+  );
 
   if (sopError) return { error: sopError.message };
 

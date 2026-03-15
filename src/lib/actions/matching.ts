@@ -11,7 +11,7 @@ export async function getMatchingMatrix() {
   const { data: clients } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, avatar_url, role, is_ready_to_place, matched_entrepreneur_id"
+      "id, full_name, avatar_url, role, is_ready_to_place, matched_entrepreneur_id",
     )
     .in("role", ["client_b2b", "client_b2c"])
     .eq("is_ready_to_place", true);
@@ -19,9 +19,7 @@ export async function getMatchingMatrix() {
   // Get available setters
   const { data: setters } = await supabase
     .from("profiles")
-    .select(
-      "id, full_name, avatar_url, role, setter_maturity_score"
-    )
+    .select("id, full_name, avatar_url, role, setter_maturity_score")
     .in("role", ["setter", "closer"]);
 
   // Get entrepreneurs
@@ -37,10 +35,7 @@ export async function getMatchingMatrix() {
   };
 }
 
-export async function assignSetterToClient(
-  setterId: string,
-  clientId: string
-) {
+export async function assignSetterToClient(setterId: string, clientId: string) {
   const supabase = await createClient();
 
   await supabase
@@ -51,9 +46,132 @@ export async function assignSetterToClient(
   revalidatePath("/dashboard");
 }
 
+/**
+ * Feature #3 : Suggestions automatiques de matching setter ↔ entrepreneur
+ * Retourne les top 3 entrepreneurs compatibles pour un setter donné.
+ */
+export async function getSuggestedMatches(setterId: string) {
+  const supabase = await createClient();
+
+  // Récupérer le profil setter + ses settings
+  const { data: setter } = await supabase
+    .from("profiles")
+    .select(
+      "id, full_name, setter_maturity_score, skills, industries, bio, niche",
+    )
+    .eq("id", setterId)
+    .single();
+
+  if (!setter) return { suggestions: [] };
+
+  // Récupérer les settings du setter (objectif, dispo, situation)
+  const { data: settings } = await supabase
+    .from("user_settings")
+    .select("key, value")
+    .eq("user_id", setterId)
+    .in("key", [
+      "objectif_financier",
+      "disponibilites_heures",
+      "situation_actuelle",
+      "skills",
+    ]);
+
+  const settingsMap: Record<string, string> = {};
+  for (const s of settings || []) settingsMap[s.key] = s.value;
+
+  // Récupérer les entrepreneurs B2B sans setter ou avec capacité d'en prendre plus
+  const { data: entrepreneurs } = await supabase
+    .from("profiles")
+    .select("id, full_name, company, industry, bio, needs, niche")
+    .eq("role", "client_b2b");
+
+  if (!entrepreneurs || entrepreneurs.length === 0) return { suggestions: [] };
+
+  // Récupérer les settings B2B (business_description, etc.)
+  const entrepreneurIds = entrepreneurs.map((e) => e.id);
+  const { data: b2bSettings } = await supabase
+    .from("user_settings")
+    .select("user_id, key, value")
+    .in("user_id", entrepreneurIds)
+    .in("key", ["business_description", "prospection_channels"]);
+
+  const b2bSettingsMap: Record<string, Record<string, string>> = {};
+  for (const s of b2bSettings || []) {
+    if (!b2bSettingsMap[s.user_id]) b2bSettingsMap[s.user_id] = {};
+    b2bSettingsMap[s.user_id][s.key] = s.value;
+  }
+
+  // Scorer chaque entrepreneur
+  const scored = entrepreneurs.map((e) => {
+    let score = 50; // base
+    const reasons: string[] = [];
+    const eSettings = b2bSettingsMap[e.id] || {};
+
+    // Bonus maturité setter
+    const maturity = setter.setter_maturity_score || 0;
+    if (maturity >= 70) {
+      score += 15;
+      reasons.push("Setter expérimenté");
+    } else if (maturity >= 40) {
+      score += 8;
+      reasons.push("Setter niveau intermédiaire");
+    }
+
+    // Matching industrie/niche
+    const setterNiche = (setter.niche || "").toLowerCase();
+    const eNiche = (e.niche || e.industry || "").toLowerCase();
+    const eBusiness = (eSettings.business_description || "").toLowerCase();
+    if (
+      setterNiche &&
+      (eNiche.includes(setterNiche) || eBusiness.includes(setterNiche))
+    ) {
+      score += 20;
+      reasons.push("Niche compatible");
+    }
+
+    // Disponibilité
+    const heures = parseInt(settingsMap.disponibilites_heures || "4", 10);
+    if (heures >= 6) {
+      score += 10;
+      reasons.push(`${heures}h/jour disponibles`);
+    } else if (heures >= 3) {
+      score += 5;
+      reasons.push(`${heures}h/jour`);
+    }
+
+    // Objectif financier → matching charge de travail
+    if (settingsMap.objectif_financier === "remplacement") {
+      score += 5;
+      reasons.push("Motivé temps plein");
+    }
+
+    return {
+      entrepreneur: e,
+      score: Math.min(100, score),
+      reasons,
+      businessDesc: eSettings.business_description || e.bio || "",
+    };
+  });
+
+  // Trier par score décroissant, retourner top 3
+  scored.sort((a, b) => b.score - a.score);
+
+  return {
+    suggestions: scored.slice(0, 3).map((s) => ({
+      entrepreneurId: s.entrepreneur.id,
+      entrepreneurName:
+        s.entrepreneur.full_name || s.entrepreneur.company || "Entrepreneur",
+      company: s.entrepreneur.company || "",
+      score: s.score,
+      reasons: s.reasons,
+      businessDesc: s.businessDesc.slice(0, 100),
+    })),
+  };
+}
+
 export async function calculateMatchScore(
   setterId: string,
-  entrepreneurId: string
+  entrepreneurId: string,
 ) {
   const supabase = await createClient();
 
@@ -116,9 +234,10 @@ Retourne un JSON avec:
 - factors: tableau de 3-5 facteurs clés (en français) qui influencent le score positivement ou négativement
 - recommendation: phrase courte en français`,
       {
-        system: "Tu es un expert en matching commercial setter-entrepreneur. Évalue la compatibilité en tenant compte de l'expérience, l'industrie, les compétences et les besoins.",
+        system:
+          "Tu es un expert en matching commercial setter-entrepreneur. Évalue la compatibilité en tenant compte de l'expérience, l'industrie, les compétences et les besoins.",
         maxTokens: 500,
-      }
+      },
     );
 
     return {

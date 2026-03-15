@@ -105,22 +105,29 @@ interface WidgetDataItem {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  "Prospect": "bg-muted/60 text-muted-foreground border-border/60",
-  "Contacté": "bg-muted/60 text-muted-foreground border-border/60",
+  Prospect: "bg-muted/60 text-muted-foreground border-border/60",
+  Contacté: "bg-muted/60 text-muted-foreground border-border/60",
   "Appel Découverte": "bg-muted/60 text-muted-foreground border-border/60",
-  "Proposition": "bg-muted/60 text-muted-foreground border-border/60",
-  "Closing": "bg-foreground/5 text-foreground border-foreground/10",
+  Proposition: "bg-muted/60 text-muted-foreground border-border/60",
+  Closing: "bg-foreground/5 text-foreground border-foreground/10",
   "Client Signé": "bg-foreground/5 text-foreground border-foreground/10",
 };
 
 const AVATAR_COLORS = [
-  "bg-zinc-700", "bg-zinc-600", "bg-zinc-700", "bg-zinc-600",
-  "bg-zinc-700", "bg-zinc-600", "bg-zinc-700", "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
 ];
 
 function getAvatarColor(str: string) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < str.length; i++)
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -133,7 +140,13 @@ const WIDGET_ICONS: Record<string, typeof DollarSign> = {
   recent_deals: Trophy,
 };
 
-function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }) {
+function CustomWidgetCard({
+  type,
+  data,
+}: {
+  type: string;
+  data: WidgetDataItem;
+}) {
   const Icon = WIDGET_ICONS[type] || BarChart3;
 
   if (type === "top_sources" && Array.isArray(data.value)) {
@@ -147,12 +160,16 @@ function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }
             <p className="text-sm font-semibold">{data.label}</p>
           </div>
           <div className="space-y-2.5">
-            {(data.value as Array<{ name: string; count: number }>).map((s, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{s.name}</span>
-                <span className="text-sm font-semibold">{s.count}</span>
-              </div>
-            ))}
+            {(data.value as Array<{ name: string; count: number }>).map(
+              (s, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {s.name}
+                  </span>
+                  <span className="text-sm font-semibold">{s.count}</span>
+                </div>
+              ),
+            )}
             {(data.value as Array<unknown>).length === 0 && (
               <p className="text-xs text-muted-foreground/60">Aucune donnée</p>
             )}
@@ -173,10 +190,18 @@ function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }
             <p className="text-sm font-semibold">{data.label}</p>
           </div>
           <div className="space-y-2.5">
-            {(data.value as Array<{ title: string; value: number; stage: string }>).map((d, i) => (
+            {(
+              data.value as Array<{
+                title: string;
+                value: number;
+                stage: string;
+              }>
+            ).map((d, i) => (
               <div key={i} className="flex items-center justify-between">
                 <span className="text-sm truncate mr-3">{d.title}</span>
-                <span className="text-sm font-bold shrink-0">{formatCurrency(d.value || 0)}</span>
+                <span className="text-sm font-bold shrink-0">
+                  {formatCurrency(d.value || 0)}
+                </span>
               </div>
             ))}
           </div>
@@ -185,11 +210,12 @@ function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }
     );
   }
 
-  const displayValue = typeof data.value === "number"
-    ? type.includes("revenue") || type.includes("pipeline")
-      ? formatCurrency(data.value)
-      : `${data.value}${data.suffix || ""}`
-    : "—";
+  const displayValue =
+    typeof data.value === "number"
+      ? type.includes("revenue") || type.includes("pipeline")
+        ? formatCurrency(data.value)
+        : `${data.value}${data.suffix || ""}`
+      : "—";
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -198,7 +224,9 @@ function CustomWidgetCard({ type, data }: { type: string; data: WidgetDataItem }
           <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center">
             <Icon className="h-4.5 w-4.5 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium text-muted-foreground">{data.label}</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            {data.label}
+          </p>
         </div>
         <p className="text-2xl font-bold tracking-tight">{displayValue}</p>
       </CardContent>
@@ -215,8 +243,11 @@ export function AdminDashboard({
   customWidgets?: CustomWidget[];
   widgetData?: Record<string, unknown>;
 }) {
-  const isEmpty = data.stats.monthlyRevenue === 0 && data.stats.pipelineTotal === 0
-    && data.stats.activeClients === 0 && data.stats.weeklyBookings === 0;
+  const isEmpty =
+    data.stats.monthlyRevenue === 0 &&
+    data.stats.pipelineTotal === 0 &&
+    data.stats.activeClients === 0 &&
+    data.stats.weeklyBookings === 0;
 
   const statCards = [
     {
@@ -265,9 +296,12 @@ export function AdminDashboard({
                 <Sparkles className="h-7 w-7 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold mb-1">Bienvenue sur votre Dashboard</h2>
+                <h2 className="text-xl font-bold mb-1">
+                  Bienvenue sur votre Dashboard
+                </h2>
                 <p className="text-sm text-muted-foreground max-w-lg">
-                  Votre espace est prêt. Commencez par créer un deal dans le CRM pour voir vos métriques apparaître ici en temps réel.
+                  Votre espace est prêt. Commencez par créer un deal dans le CRM
+                  pour voir vos métriques apparaître ici en temps réel.
                 </p>
               </div>
               <Link href="/crm">
@@ -296,7 +330,9 @@ export function AdminDashboard({
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                   </div>
-                  <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                  <p className="text-2xl font-bold tracking-tight">
+                    {stat.value}
+                  </p>
                   <p className="text-[11px] font-medium text-muted-foreground mt-1.5 uppercase tracking-wider">
                     {stat.title}
                   </p>
@@ -319,7 +355,10 @@ export function AdminDashboard({
                 </div>
                 Deals récents
               </CardTitle>
-              <Link href="/crm" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Link
+                href="/crm"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
                 Voir tout <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -330,8 +369,12 @@ export function AdminDashboard({
                 <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                   <Target className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Aucun deal</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Créez votre premier deal dans le CRM</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Aucun deal
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Créez votre premier deal dans le CRM
+                </p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -342,22 +385,29 @@ export function AdminDashboard({
                     className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors group/item"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0",
-                        getAvatarColor(deal.contactName || deal.id),
-                      )}>
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0",
+                          getAvatarColor(deal.contactName || deal.id),
+                        )}
+                      >
                         {deal.contactName?.charAt(0)?.toUpperCase() || "?"}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{deal.title}</p>
+                        <p className="text-sm font-medium truncate">
+                          {deal.title}
+                        </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[11px] text-muted-foreground truncate">
                             {deal.contactName}
                           </span>
-                          <span className={cn(
-                            "text-[10px] px-1.5 py-px rounded-md font-medium border",
-                            STAGE_COLORS[deal.stage] || "bg-muted text-muted-foreground border-border",
-                          )}>
+                          <span
+                            className={cn(
+                              "text-[10px] px-1.5 py-px rounded-md font-medium border",
+                              STAGE_COLORS[deal.stage] ||
+                                "bg-muted text-muted-foreground border-border",
+                            )}
+                          >
                             {deal.stage}
                           </span>
                         </div>
@@ -383,7 +433,10 @@ export function AdminDashboard({
                 </div>
                 Prochains RDV
               </CardTitle>
-              <Link href="/bookings" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Link
+                href="/bookings"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
                 Voir tout <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -394,14 +447,19 @@ export function AdminDashboard({
                 <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                   <Calendar className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Aucun RDV prévu</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Les prochains rendez-vous apparaîtront ici</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Aucun RDV prévu
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Les prochains rendez-vous apparaîtront ici
+                </p>
               </div>
             ) : (
               <div className="space-y-1">
                 {data.upcomingBookings.slice(0, 5).map((booking) => {
                   const bookingDate = new Date(booking.time);
-                  const isToday = new Date().toDateString() === bookingDate.toDateString();
+                  const isToday =
+                    new Date().toDateString() === bookingDate.toDateString();
                   return (
                     <Link
                       key={booking.id}
@@ -409,10 +467,14 @@ export function AdminDashboard({
                       className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "h-10 w-10 rounded-xl flex flex-col items-center justify-center text-center shrink-0 border",
-                          isToday ? "bg-foreground/5 border-foreground/10 text-foreground" : "bg-muted/50 border-transparent text-muted-foreground",
-                        )}>
+                        <div
+                          className={cn(
+                            "h-10 w-10 rounded-xl flex flex-col items-center justify-center text-center shrink-0 border",
+                            isToday
+                              ? "bg-foreground/5 border-foreground/10 text-foreground"
+                              : "bg-muted/50 border-transparent text-muted-foreground",
+                          )}
+                        >
                           <span className="text-[10px] font-bold uppercase leading-none">
                             {format(bookingDate, "EEE", { locale: fr })}
                           </span>
@@ -421,19 +483,28 @@ export function AdminDashboard({
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{booking.name || "Inconnu"}</p>
+                          <p className="text-sm font-medium">
+                            {booking.name || "Inconnu"}
+                          </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <Clock className="h-3 w-3 text-muted-foreground/60" />
                             <span className="text-[11px] text-muted-foreground">
                               {format(bookingDate, "HH:mm")}
                             </span>
-                            <span className="text-[11px] text-muted-foreground/40">·</span>
-                            <span className="text-[11px] text-muted-foreground">{booking.type}</span>
+                            <span className="text-[11px] text-muted-foreground/40">
+                              ·
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {booking.type}
+                            </span>
                           </div>
                         </div>
                       </div>
                       {isToday && (
-                        <Badge variant="outline" className="bg-foreground/5 text-foreground border-foreground/10 text-[10px] font-semibold">
+                        <Badge
+                          variant="outline"
+                          className="bg-foreground/5 text-foreground border-foreground/10 text-[10px] font-semibold"
+                        >
                           Aujourd&apos;hui
                         </Badge>
                       )}
@@ -445,6 +516,113 @@ export function AdminDashboard({
           </CardContent>
         </Card>
       </div>
+
+      {/* Pipeline Setters B2C */}
+      {data.setterStats.length > 0 && (
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Users className="h-3.5 w-3.5 text-brand" />
+                </div>
+                Pipeline Setters B2C
+              </CardTitle>
+              <Link
+                href="/team/assignments"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                Voir tout <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+              {[
+                {
+                  label: "Onboarding",
+                  color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+                },
+                {
+                  label: "En formation",
+                  color:
+                    "bg-violet-500/20 text-violet-400 border-violet-500/30",
+                },
+                {
+                  label: "Tests en cours",
+                  color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+                },
+                {
+                  label: "Prêt à placer",
+                  color:
+                    "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+                },
+                {
+                  label: "Placé",
+                  color: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+                },
+                {
+                  label: "Actif",
+                  color: "bg-green-500/20 text-green-400 border-green-500/30",
+                },
+                {
+                  label: "Inactif",
+                  color: "bg-red-500/20 text-red-400 border-red-500/30",
+                },
+              ].map((stage) => {
+                const count = data.setterStats.filter((s) => {
+                  const hasEntrepreneur = !!s.revenue;
+                  const isActive = s.dealCount > 0;
+                  const hasJournal =
+                    s.daysSinceJournal !== null && s.daysSinceJournal <= 7;
+                  switch (stage.label) {
+                    case "Onboarding":
+                      return !s.full_name;
+                    case "En formation":
+                      return (
+                        !!s.full_name &&
+                        s.journalDmsSent === 0 &&
+                        !hasEntrepreneur
+                      );
+                    case "Tests en cours":
+                      return (
+                        s.journalDmsSent > 0 && !hasEntrepreneur && !isActive
+                      );
+                    case "Prêt à placer":
+                      return !!s.full_name && !hasEntrepreneur && isActive;
+                    case "Placé":
+                      return hasEntrepreneur && !isActive;
+                    case "Actif":
+                      return hasEntrepreneur && isActive && hasJournal;
+                    case "Inactif":
+                      return (
+                        hasEntrepreneur &&
+                        !hasJournal &&
+                        (s.daysSinceJournal === null || s.daysSinceJournal > 7)
+                      );
+                    default:
+                      return false;
+                  }
+                }).length;
+                return (
+                  <div
+                    key={stage.label}
+                    className={cn(
+                      "flex flex-col items-center gap-1 p-3 rounded-xl border text-center",
+                      stage.color,
+                    )}
+                  >
+                    <span className="text-2xl font-bold">{count}</span>
+                    <span className="text-[10px] font-medium leading-tight">
+                      {stage.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Secondary Grid: Performance + Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -458,7 +636,10 @@ export function AdminDashboard({
                 </div>
                 Performance équipe
               </CardTitle>
-              <Link href="/team/leaderboard" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <Link
+                href="/team/leaderboard"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
                 Classement <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -469,15 +650,28 @@ export function AdminDashboard({
                 <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                   <Users className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Aucun membre</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Invitez votre équipe pour suivre les performances</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Aucun membre
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Invitez votre équipe pour suivre les performances
+                </p>
               </div>
             ) : (
               <div className="space-y-1">
                 {data.setterStats.slice(0, 5).map((setter, index) => {
-                  const maxRevenue = Math.max(...data.setterStats.map((s) => s.revenue), 1);
+                  const maxRevenue = Math.max(
+                    ...data.setterStats.map((s) => s.revenue),
+                    1,
+                  );
                   const percent = (setter.revenue / maxRevenue) * 100;
-                  const moodEmojis: Record<number, string> = { 1: "😞", 2: "😐", 3: "🙂", 4: "😊", 5: "🔥" };
+                  const moodEmojis: Record<number, string> = {
+                    1: "😞",
+                    2: "😐",
+                    3: "🙂",
+                    4: "😊",
+                    5: "🔥",
+                  };
                   const moodColors: Record<number, string> = {
                     1: "text-red-400",
                     2: "text-orange-400",
@@ -485,8 +679,12 @@ export function AdminDashboard({
                     4: "text-green-400",
                     5: "text-brand",
                   };
-                  const noJournalToday = setter.daysSinceJournal === null || setter.daysSinceJournal > 0;
-                  const journalWarning = setter.daysSinceJournal !== null && setter.daysSinceJournal > 2;
+                  const noJournalToday =
+                    setter.daysSinceJournal === null ||
+                    setter.daysSinceJournal > 0;
+                  const journalWarning =
+                    setter.daysSinceJournal !== null &&
+                    setter.daysSinceJournal > 2;
                   return (
                     <div
                       key={setter.id}
@@ -495,28 +693,50 @@ export function AdminDashboard({
                       <span className="text-xs font-bold text-muted-foreground/50 w-4 text-center">
                         {index + 1}
                       </span>
-                      <div className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0",
-                        getAvatarColor(setter.id),
-                      )}>
-                        {setter.full_name?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?"}
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0",
+                          getAvatarColor(setter.id),
+                        )}
+                      >
+                        {setter.full_name
+                          ?.split(" ")
+                          .map((w) => w[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase() || "?"}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2 min-w-0">
-                            <p className="text-sm font-medium truncate">{setter.full_name || "Sans nom"}</p>
+                            <p className="text-sm font-medium truncate">
+                              {setter.full_name || "Sans nom"}
+                            </p>
                             {setter.journalMood !== null && (
-                              <span className={cn("text-xs", moodColors[setter.journalMood] || "text-muted-foreground")} title={`Humeur : ${setter.journalMood}/5`}>
+                              <span
+                                className={cn(
+                                  "text-xs",
+                                  moodColors[setter.journalMood] ||
+                                    "text-muted-foreground",
+                                )}
+                                title={`Humeur : ${setter.journalMood}/5`}
+                              >
                                 {moodEmojis[setter.journalMood] || "—"}
                               </span>
                             )}
                             {noJournalToday && (
-                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-red-500/10 text-red-400 border-red-500/20 shrink-0">
+                              <Badge
+                                variant="outline"
+                                className="text-[9px] px-1.5 py-0 h-4 bg-red-500/10 text-red-400 border-red-500/20 shrink-0"
+                              >
                                 Pas d&apos;EOD
                               </Badge>
                             )}
                             {journalWarning && (
-                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-orange-500/10 text-orange-400 border-orange-500/20 shrink-0">
+                              <Badge
+                                variant="outline"
+                                className="text-[9px] px-1.5 py-0 h-4 bg-orange-500/10 text-orange-400 border-orange-500/20 shrink-0"
+                              >
                                 {setter.daysSinceJournal}j sans EOD
                               </Badge>
                             )}
@@ -533,30 +753,51 @@ export function AdminDashboard({
                             />
                           </div>
                           <span className="text-[10px] text-muted-foreground shrink-0">
-                            {setter.dealCount} deal{setter.dealCount > 1 ? "s" : ""}
+                            {setter.dealCount} deal
+                            {setter.dealCount > 1 ? "s" : ""}
                           </span>
                         </div>
                         {/* Journal KPI row */}
                         {setter.lastJournalDate && (
                           <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
-                            <span className="flex items-center gap-1" title="DMs envoyés">
+                            <span
+                              className="flex items-center gap-1"
+                              title="DMs envoyés"
+                            >
                               <Send className="h-3 w-3" />
                               {setter.journalDmsSent}
                             </span>
-                            <span className="flex items-center gap-1" title="Réponses reçues">
+                            <span
+                              className="flex items-center gap-1"
+                              title="Réponses reçues"
+                            >
                               <MessageSquare className="h-3 w-3" />
                               {setter.journalReplies}
                             </span>
-                            <span className="flex items-center gap-1" title="Appels bookés">
+                            <span
+                              className="flex items-center gap-1"
+                              title="Appels bookés"
+                            >
                               <Phone className="h-3 w-3" />
                               {setter.journalCallsBooked}
                             </span>
-                            <span className="flex items-center gap-1" title="Deals closés">
+                            <span
+                              className="flex items-center gap-1"
+                              title="Deals closés"
+                            >
                               <Target className="h-3 w-3" />
                               {setter.journalDealsClosed}
                             </span>
-                            <span className="text-muted-foreground/40 ml-auto" title="Dernier EOD">
-                              EOD : {format(new Date(setter.lastJournalDate), "dd/MM", { locale: fr })}
+                            <span
+                              className="text-muted-foreground/40 ml-auto"
+                              title="Dernier EOD"
+                            >
+                              EOD :{" "}
+                              {format(
+                                new Date(setter.lastJournalDate),
+                                "dd/MM",
+                                { locale: fr },
+                              )}
                             </span>
                           </div>
                         )}
@@ -592,15 +833,27 @@ export function AdminDashboard({
                 <div className="h-12 w-12 rounded-2xl bg-brand/10 flex items-center justify-center mb-3">
                   <Sparkles className="h-6 w-6 text-brand/60" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Tout est à jour</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Aucune alerte, continuez comme ça !</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Tout est à jour
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Aucune alerte, continuez comme ça !
+                </p>
               </div>
             ) : (
               <div className="space-y-1">
                 {data.alerts.slice(0, 5).map((alert) => {
                   const updatedDate = new Date(alert.updated_at);
-                  const daysAgo = Math.floor((Date.now() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
-                  const severity = daysAgo > 14 ? "critical" : daysAgo > 7 ? "warning" : "info";
+                  const daysAgo = Math.floor(
+                    (Date.now() - updatedDate.getTime()) /
+                      (1000 * 60 * 60 * 24),
+                  );
+                  const severity =
+                    daysAgo > 14
+                      ? "critical"
+                      : daysAgo > 7
+                        ? "warning"
+                        : "info";
                   return (
                     <Link
                       key={alert.id}
@@ -611,25 +864,43 @@ export function AdminDashboard({
                       )}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={cn(
-                          "h-2 w-2 rounded-full shrink-0",
-                          severity === "critical" ? "bg-foreground" : "bg-muted-foreground/40",
-                        )} />
+                        <div
+                          className={cn(
+                            "h-2 w-2 rounded-full shrink-0",
+                            severity === "critical"
+                              ? "bg-foreground"
+                              : "bg-muted-foreground/40",
+                          )}
+                        />
                         <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{alert.title}</p>
+                          <p className="text-sm font-medium truncate">
+                            {alert.title}
+                          </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className={cn(
-                              "text-[10px] px-1.5 py-px rounded-md font-medium border",
-                              STAGE_COLORS[alert.stage] || "bg-muted text-muted-foreground border-border",
-                            )}>
+                            <span
+                              className={cn(
+                                "text-[10px] px-1.5 py-px rounded-md font-medium border",
+                                STAGE_COLORS[alert.stage] ||
+                                  "bg-muted text-muted-foreground border-border",
+                              )}
+                            >
                               {alert.stage}
                             </span>
-                            <span className="text-[10px] text-muted-foreground/60">·</span>
-                            <span className={cn(
-                              "text-[10px]",
-                              severity === "critical" ? "text-foreground font-medium" : "text-muted-foreground/60",
-                            )}>
-                              {formatDistanceToNow(updatedDate, { locale: fr, addSuffix: true })}
+                            <span className="text-[10px] text-muted-foreground/60">
+                              ·
+                            </span>
+                            <span
+                              className={cn(
+                                "text-[10px]",
+                                severity === "critical"
+                                  ? "text-foreground font-medium"
+                                  : "text-muted-foreground/60",
+                              )}
+                            >
+                              {formatDistanceToNow(updatedDate, {
+                                locale: fr,
+                                addSuffix: true,
+                              })}
                             </span>
                           </div>
                         </div>
@@ -674,7 +945,12 @@ export function AdminDashboard({
               <CustomWidgetCard
                 key={widget.id}
                 type={widget.type}
-                data={(widgetData[widget.type] as WidgetDataItem) || { value: null, label: widget.type }}
+                data={
+                  (widgetData[widget.type] as WidgetDataItem) || {
+                    value: null,
+                    label: widget.type,
+                  }
+                }
               />
             ))}
           </div>

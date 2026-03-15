@@ -45,6 +45,7 @@ interface StepDef {
     | "textarea"
     | "chips"
     | "social"
+    | "setter_profile"
     | "summary";
   title: string;
   subtitle?: string;
@@ -74,6 +75,12 @@ const B2C_STEPS: StepDef[] = [
     type: "text",
     title: "Ton numéro de téléphone",
     subtitle: "Pour qu'on puisse te contacter",
+  },
+  {
+    id: "setter_profile",
+    type: "setter_profile",
+    title: "Ton profil de setter",
+    subtitle: "Ces infos nous aident à te placer chez le bon entrepreneur",
   },
   {
     id: "bio",
@@ -172,6 +179,11 @@ export function OnboardingFlow({
   const [channels, setChannels] = useState<string[]>([]);
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [instagramUsername, setInstagramUsername] = useState("");
+  const [objectifFinancier, setObjectifFinancier] = useState<
+    "complement" | "remplacement" | "hybride" | ""
+  >("");
+  const [disponibilitesHeures, setDisponibilitesHeures] = useState("4");
+  const [situationActuelle, setSituationActuelle] = useState("");
   const [welcomeVideoData, setWelcomeVideoData] = useState<{
     videoUrl: string;
     title: string;
@@ -218,7 +230,10 @@ export function OnboardingFlow({
         e.preventDefault();
         if (isLast) {
           handleComplete();
-        } else if (currentStep.type !== "welcome" && currentStep.type !== "video") {
+        } else if (
+          currentStep.type !== "welcome" &&
+          currentStep.type !== "video"
+        ) {
           goNext();
         }
       }
@@ -275,6 +290,9 @@ export function OnboardingFlow({
         prospection_channels: channels.length > 0 ? channels : undefined,
         linkedin_url: linkedinUrl || undefined,
         instagram_username: instagramUsername || undefined,
+        objectif_financier: objectifFinancier || undefined,
+        disponibilites_heures: disponibilitesHeures || undefined,
+        situation_actuelle: situationActuelle || undefined,
       });
       if (result?.error) {
         toast.error(result.error);
@@ -537,6 +555,120 @@ export function OnboardingFlow({
     );
   }
 
+  function renderSetterProfile() {
+    const OBJECTIFS = [
+      {
+        value: "complement" as const,
+        label: "Complément de revenu",
+        color: "bg-emerald-500",
+        emoji: "🟢",
+      },
+      {
+        value: "remplacement" as const,
+        label: "Remplacement de salaire",
+        color: "bg-red-500",
+        emoji: "🔴",
+      },
+      {
+        value: "hybride" as const,
+        label: "Profil hybride",
+        color: "bg-amber-500",
+        emoji: "🟡",
+      },
+    ];
+    const SITUATIONS = [
+      "Étudiant(e)",
+      "Salarié(e)",
+      "Freelance",
+      "Sans emploi",
+      "Entrepreneur(e)",
+    ];
+
+    return (
+      <div className="w-full max-w-md mx-auto space-y-8">
+        {/* Objectif financier */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Quel est ton objectif ?
+          </label>
+          <div className="space-y-2">
+            {OBJECTIFS.map((obj) => (
+              <button
+                key={obj.value}
+                type="button"
+                onClick={() => setObjectifFinancier(obj.value)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-sm font-medium transition-all duration-200",
+                  objectifFinancier === obj.value
+                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
+                )}
+              >
+                <span className="text-lg">{obj.emoji}</span>
+                <span>{obj.label}</span>
+                {objectifFinancier === obj.value && (
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Heures disponibles */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Heures disponibles par jour :{" "}
+            <span className="text-[#7af17a] font-bold">
+              {disponibilitesHeures}h
+            </span>
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            value={disponibilitesHeures}
+            onChange={(e) => setDisponibilitesHeures(e.target.value)}
+            className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#7af17a]"
+          />
+          <div className="flex justify-between text-xs text-white/30">
+            <span>1h</span>
+            <span>5h</span>
+            <span>10h+</span>
+          </div>
+        </div>
+
+        {/* Situation actuelle */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Ta situation actuelle
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {SITUATIONS.map((sit) => (
+              <button
+                key={sit}
+                type="button"
+                onClick={() => setSituationActuelle(sit)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-200",
+                  situationActuelle === sit
+                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a] shadow-sm shadow-[#7af17a]/10"
+                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
+                )}
+              >
+                {situationActuelle === sit ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                ) : (
+                  <div className="h-4 w-4 rounded-full border border-current shrink-0" />
+                )}
+                {sit}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function renderSocial() {
     return (
       <div className="w-full max-w-md mx-auto space-y-6">
@@ -613,6 +745,23 @@ export function OnboardingFlow({
             { icon: User, label: "Nom", value: fullName || "Non défini" },
             { icon: Phone, label: "Téléphone", value: phone || "Non défini" },
             {
+              icon: Target,
+              label: "Objectif",
+              value:
+                objectifFinancier === "complement"
+                  ? "🟢 Complément de revenu"
+                  : objectifFinancier === "remplacement"
+                    ? "🔴 Remplacement de salaire"
+                    : objectifFinancier === "hybride"
+                      ? "🟡 Profil hybride"
+                      : "Non défini",
+            },
+            {
+              icon: Sparkles,
+              label: "Disponibilité",
+              value: `${disponibilitesHeures}h/jour — ${situationActuelle || "Non défini"}`,
+            },
+            {
               icon: FileText,
               label: "Bio",
               value: bio ? bio.slice(0, 50) + "..." : "Non définie",
@@ -645,7 +794,11 @@ export function OnboardingFlow({
                   {item.value === "__avatar__" ? (
                     <div className="flex items-center gap-2 mt-0.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={avatarPreview} alt="" className="w-6 h-6 rounded-full object-cover" />
+                      <img
+                        src={avatarPreview}
+                        alt=""
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
                       <CheckCircle2 className="h-4 w-4 text-[#7af17a]" />
                     </div>
                   ) : (
@@ -700,6 +853,8 @@ export function OnboardingFlow({
         return renderTextarea();
       case "chips":
         return renderChips();
+      case "setter_profile":
+        return renderSetterProfile();
       case "social":
         return renderSocial();
       case "summary":
