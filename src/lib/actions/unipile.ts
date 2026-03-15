@@ -96,7 +96,10 @@ export async function generateUnipileAuthLink(provider?: string): Promise<{
     const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
     if (!dsn || !apiKey) return { error: "Unipile non configuré. Ajoutez UNIPILE_DSN et UNIPILE_API_KEY." };
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+      || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null)
+      || "http://localhost:3001";
 
     // Use REST API directly for connect link (more control over parameters)
     const body: Record<string, unknown> = {
