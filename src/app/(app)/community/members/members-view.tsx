@@ -11,7 +11,10 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { ReputationBadge } from "@/components/community/reputation-badge";
-import { LeaderboardCard, type LeaderboardEntry } from "@/components/community/leaderboard-card";
+import {
+  LeaderboardCard,
+  type LeaderboardEntry,
+} from "@/components/community/leaderboard-card";
 
 interface Member {
   id: string;
@@ -22,16 +25,30 @@ interface Member {
   role: string;
 }
 
-export function MembersView({ members, reputations = {}, leaderboard = [] }: { members: Member[]; reputations?: Record<string, number>; leaderboard?: LeaderboardEntry[] }) {
+export function MembersView({
+  members,
+  reputations = {},
+  leaderboard = [],
+}: {
+  members: Member[];
+  reputations?: Record<string, number>;
+  leaderboard?: LeaderboardEntry[];
+}) {
   const [search, setSearch] = useState("");
 
-  const filtered = members.filter((m) =>
-    !search || m.full_name?.toLowerCase().includes(search.toLowerCase()) || m.niche?.toLowerCase().includes(search.toLowerCase())
+  const filtered = members.filter(
+    (m) =>
+      !search ||
+      m.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      m.niche?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div>
-      <PageHeader title="Annuaire des membres" description={`${members.length} membres`}>
+      <PageHeader
+        title="Annuaire des membres"
+        description={`${members.length} membres`}
+      >
         <Link href="/community">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -42,14 +59,22 @@ export function MembersView({ members, reputations = {}, leaderboard = [] }: { m
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Rechercher par nom ou niche..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input
+          placeholder="Rechercher par nom ou niche..."
+          className="pl-9"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 min-w-0">
           <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map((member) => (
-              <Card key={member.id} className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+              <Card
+                key={member.id}
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+              >
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">
@@ -57,15 +82,25 @@ export function MembersView({ members, reputations = {}, leaderboard = [] }: { m
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <p className="font-medium">{member.full_name || "Anonyme"}</p>
+                        <p className="font-medium">
+                          {member.full_name || "Anonyme"}
+                        </p>
                         <ReputationBadge score={reputations[member.id] || 0} />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Membre {formatDistanceToNow(new Date(member.created_at), { addSuffix: true, locale: fr })}
+                        Membre{" "}
+                        {formatDistanceToNow(new Date(member.created_at), {
+                          addSuffix: true,
+                          locale: fr,
+                        })}
                       </p>
                     </div>
                   </div>
-                  {member.niche && <Badge variant="outline" className="text-xs">{member.niche}</Badge>}
+                  {member.niche && (
+                    <Badge variant="outline" className="text-xs">
+                      {member.niche}
+                    </Badge>
+                  )}
                 </CardContent>
               </Card>
             ))}

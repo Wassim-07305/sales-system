@@ -62,7 +62,13 @@ interface FlowchartData {
 
 const nodeTypeConfig: Record<
   string,
-  { label: string; bg: string; border: string; text: string; icon: typeof MessageSquare }
+  {
+    label: string;
+    bg: string;
+    border: string;
+    text: string;
+    icon: typeof MessageSquare;
+  }
 > = {
   opening: {
     label: "Accroche",
@@ -117,7 +123,9 @@ function ScriptNodeComponent({ data }: NodeProps) {
       />
       <div className="flex items-center gap-2 mb-1">
         <Icon className={`h-3.5 w-3.5 ${config.text}`} />
-        <span className={`text-[10px] font-medium uppercase tracking-wider ${config.text}`}>
+        <span
+          className={`text-[10px] font-medium uppercase tracking-wider ${config.text}`}
+        >
           {config.label}
         </span>
       </div>
@@ -155,7 +163,11 @@ interface FlowchartEditorProps {
   userName?: string;
 }
 
-export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditorProps) {
+export function FlowchartEditor({
+  flowchart,
+  userId,
+  userName,
+}: FlowchartEditorProps) {
   const [title, setTitle] = useState(flowchart.title);
   const [category, setCategory] = useState(flowchart.category || "");
   const [isPending, startTransition] = useTransition();
@@ -165,14 +177,14 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
   const { onlineUsers } = usePresence(
     userId ? `script:${flowchart.id}` : null,
     userId || "",
-    userName || ""
+    userName || "",
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    (flowchart.nodes as Node[]) || []
+    (flowchart.nodes as Node[]) || [],
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    (flowchart.edges as Edge[]) || []
+    (flowchart.edges as Edge[]) || [],
   );
 
   // Real-time sync of nodes/edges
@@ -181,7 +193,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
       setNodes(data.nodes);
       setEdges(data.edges);
     },
-    [setNodes, setEdges]
+    [setNodes, setEdges],
   );
 
   const { broadcastChanges } = useRealtimeSync({
@@ -194,7 +206,7 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
     (params) => {
       setEdges((eds) => addEdge(params, eds));
     },
-    [setEdges]
+    [setEdges],
   );
 
   function handleSave() {
@@ -213,20 +225,23 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
     });
   }
 
-  const addNode = useCallback((type: string) => {
-    const id = `${type}-${Date.now()}`;
-    const config = nodeTypeConfig[type];
-    const newNode: Node = {
-      id,
-      type,
-      position: {
-        x: 250 + Math.random() * 200 - 100,
-        y: 100 + nodes.length * 120,
-      },
-      data: { label: config.label, type },
-    };
-    setNodes((nds) => [...nds, newNode]);
-  }, [nodes.length, setNodes]);
+  const addNode = useCallback(
+    (type: string) => {
+      const id = `${type}-${Date.now()}`;
+      const config = nodeTypeConfig[type];
+      const newNode: Node = {
+        id,
+        type,
+        position: {
+          x: 250 + Math.random() * 200 - 100,
+          y: 100 + nodes.length * 120,
+        },
+        data: { label: config.label, type },
+      };
+      setNodes((nds) => [...nds, newNode]);
+    },
+    [nodes.length, setNodes],
+  );
 
   return (
     <div className="h-[calc(100dvh-180px)] md:h-[calc(100dvh-120px)] flex flex-col">
@@ -281,7 +296,9 @@ export function FlowchartEditor({ flowchart, userId, userName }: FlowchartEditor
               ))}
               {onlineUsers.length > 3 && (
                 <div className="h-6 w-6 rounded-full bg-muted border-2 border-background flex items-center justify-center">
-                  <span className="text-[10px] font-medium">+{onlineUsers.length - 3}</span>
+                  <span className="text-[10px] font-medium">
+                    +{onlineUsers.length - 3}
+                  </span>
                 </div>
               )}
             </div>

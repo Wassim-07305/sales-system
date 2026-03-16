@@ -5,7 +5,9 @@ import { ReportsView } from "./reports-view";
 
 export default async function SetterReportsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -30,7 +32,10 @@ export default async function SetterReportsPage() {
   return (
     <ReportsView
       data={reportData}
-      setters={(setters || []).map((s) => ({ id: s.id, name: s.full_name || "Setter" }))}
+      setters={(setters || []).map((s) => ({
+        id: s.id,
+        name: s.full_name || "Setter",
+      }))}
     />
   );
 }

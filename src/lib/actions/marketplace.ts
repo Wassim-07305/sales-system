@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 
 export async function getMarketplaceListings() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data, error } = await supabase
@@ -17,13 +19,17 @@ export async function getMarketplaceListings() {
   if (error) throw new Error(error.message);
   return (data || []).map((d: Record<string, unknown>) => ({
     ...d,
-    entrepreneur: Array.isArray(d.entrepreneur) ? d.entrepreneur[0] || null : d.entrepreneur,
+    entrepreneur: Array.isArray(d.entrepreneur)
+      ? d.entrepreneur[0] || null
+      : d.entrepreneur,
   }));
 }
 
 export async function getMyApplications() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data, error } = await supabase
@@ -38,7 +44,9 @@ export async function getMyApplications() {
 
 export async function applyToListing(listingId: string, message: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // Check if already applied
@@ -69,7 +77,9 @@ export async function applyToListing(listingId: string, message: string) {
 
 export async function getListingApplications(listingId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data, error } = await supabase

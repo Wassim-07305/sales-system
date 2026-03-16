@@ -261,8 +261,8 @@ export function UpsellView({ rules, executions }: Props) {
                 {isPending
                   ? "Sauvegarde..."
                   : editingRule
-                  ? "Mettre à jour"
-                  : "Créer la règle"}
+                    ? "Mettre à jour"
+                    : "Créer la règle"}
               </Button>
             </div>
           </DialogContent>
@@ -282,12 +282,20 @@ export function UpsellView({ rules, executions }: Props) {
                   <div>
                     <p className="font-medium">{rule.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="bg-purple-500/10 text-purple-600 border-purple-500/20 text-xs">
+                      <Badge
+                        variant="outline"
+                        className="bg-purple-500/10 text-purple-600 border-purple-500/20 text-xs"
+                      >
                         Upsell
                       </Badge>
                       {rule.trigger_conditions?.event ? (
                         <span className="text-xs text-muted-foreground">
-                          Trigger: {triggerConditions.find((tc) => tc.value === String(rule.trigger_conditions.event))?.label || String(rule.trigger_conditions.event)}
+                          Trigger:{" "}
+                          {triggerConditions.find(
+                            (tc) =>
+                              tc.value ===
+                              String(rule.trigger_conditions.event),
+                          )?.label || String(rule.trigger_conditions.event)}
                         </span>
                       ) : null}
                       {rule.trigger_conditions?.min_deal_value ? (
@@ -311,7 +319,9 @@ export function UpsellView({ rules, executions }: Props) {
                     </span>
                     <Switch
                       checked={rule.is_active}
-                      onCheckedChange={() => handleToggle(rule.id, rule.is_active)}
+                      onCheckedChange={() =>
+                        handleToggle(rule.id, rule.is_active)
+                      }
                       disabled={isPending}
                     />
                   </div>
@@ -343,7 +353,9 @@ export function UpsellView({ rules, executions }: Props) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="h-6 w-6 text-muted-foreground/50" />
               </div>
-              <p className="text-sm">Aucune règle d&apos;upsell. Créez-en une pour commencer.</p>
+              <p className="text-sm">
+                Aucune règle d&apos;upsell. Créez-en une pour commencer.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -365,11 +377,16 @@ export function UpsellView({ rules, executions }: Props) {
                   <div className="flex items-center gap-3">
                     <Zap className="h-4 w-4 text-purple-500" />
                     <div>
-                      <p className="text-sm font-medium">{exec.rule?.name || "Règle"}</p>
+                      <p className="text-sm font-medium">
+                        {exec.rule?.name || "Règle"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {exec.target_user?.full_name || "Utilisateur"} —{" "}
                         {exec.executed_at
-                          ? formatDistanceToNow(new Date(exec.executed_at), { addSuffix: true, locale: fr })
+                          ? formatDistanceToNow(new Date(exec.executed_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })
                           : "En attente"}
                       </p>
                     </div>
@@ -380,15 +397,15 @@ export function UpsellView({ rules, executions }: Props) {
                       exec.status === "completed"
                         ? "bg-green-500/10 text-green-600 border-green-500/20"
                         : exec.status === "failed"
-                        ? "bg-red-500/10 text-red-600 border-red-500/20"
-                        : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                          ? "bg-red-500/10 text-red-600 border-red-500/20"
+                          : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                     }
                   >
                     {exec.status === "completed"
                       ? "Terminé"
                       : exec.status === "failed"
-                      ? "Échoué"
-                      : "En cours"}
+                        ? "Échoué"
+                        : "En cours"}
                   </Badge>
                 </div>
               ))}

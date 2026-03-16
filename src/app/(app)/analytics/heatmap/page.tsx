@@ -5,7 +5,9 @@ import { HeatmapView } from "./heatmap-view";
 
 export default async function HeatmapPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase

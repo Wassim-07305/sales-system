@@ -18,12 +18,17 @@ export default async function LinkedinPage() {
   ]);
 
   const liAccount = unipileStatus.accounts.find(
-    (a) => a.provider.toUpperCase() === "LINKEDIN"
+    (a) => a.provider.toUpperCase() === "LINKEDIN",
   );
   const unipileLinkedin = unipileStatus.configured
     ? { connected: !!liAccount, accountName: liAccount?.name }
     : null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <LinkedinView prospects={prospects as any} unipileLinkedin={unipileLinkedin} />;
+  return (
+    <LinkedinView
+      prospects={prospects as any}
+      unipileLinkedin={unipileLinkedin}
+    />
+  );
 }

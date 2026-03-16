@@ -25,7 +25,10 @@ import {
   MessageSquare,
   CheckCircle2,
 } from "lucide-react";
-import { calculateProspectScore, recalculateAllScores } from "@/lib/actions/hub-setting";
+import {
+  calculateProspectScore,
+  recalculateAllScores,
+} from "@/lib/actions/hub-setting";
 import { createRelanceWorkflow } from "@/lib/actions/automation";
 import { qualifyProspect } from "@/lib/actions/prospecting";
 import type { ScoreBreakdown, ScoreTier } from "@/lib/scoring";
@@ -88,7 +91,10 @@ const platformLabels: Record<string, string> = {
   instagram: "Instagram",
 };
 
-const tierConfig: Record<ScoreTier, { label: string; color: string; badgeClass: string; icon: typeof Snowflake }> = {
+const tierConfig: Record<
+  ScoreTier,
+  { label: string; color: string; badgeClass: string; icon: typeof Snowflake }
+> = {
   froid: {
     label: "Froid",
     color: "#3b82f6",
@@ -119,11 +125,26 @@ const tierConfig: Record<ScoreTier, { label: string; color: string; badgeClass: 
 
 const scoreFactors = [
   { key: "statusScore" as const, label: "Statut", max: 30, color: "#7af17a" },
-  { key: "engagementScore" as const, label: "Engagement", max: 15, color: "#3b82f6" },
+  {
+    key: "engagementScore" as const,
+    label: "Engagement",
+    max: 15,
+    color: "#3b82f6",
+  },
   { key: "recencyScore" as const, label: "Recence", max: 15, color: "#8b5cf6" },
   { key: "notesScore" as const, label: "Notes", max: 10, color: "#f59e0b" },
-  { key: "platformFitScore" as const, label: "Fit plateforme", max: 10, color: "#06b6d4" },
-  { key: "behavioralScore" as const, label: "Comportemental", max: 15, color: "#ec4899" },
+  {
+    key: "platformFitScore" as const,
+    label: "Fit plateforme",
+    max: 10,
+    color: "#06b6d4",
+  },
+  {
+    key: "behavioralScore" as const,
+    label: "Comportemental",
+    max: 15,
+    color: "#ec4899",
+  },
 ];
 
 // ─── Component ──────────────────────────────────────────────────────
@@ -147,7 +168,12 @@ export function ScoringView({ prospects }: Props) {
       : 0;
 
   const tierCounts = useMemo(() => {
-    const counts: Record<ScoreTier, number> = { froid: 0, tiede: 0, chaud: 0, brulant: 0 };
+    const counts: Record<ScoreTier, number> = {
+      froid: 0,
+      tiede: 0,
+      chaud: 0,
+      brulant: 0,
+    };
     prospects.forEach((p) => {
       counts[p.breakdown.tier]++;
     });
@@ -176,7 +202,7 @@ export function ScoringView({ prospects }: Props) {
   }, [scores]);
 
   const filtered = prospects.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   // ── Handlers ──
@@ -245,7 +271,9 @@ export function ScoringView({ prospects }: Props) {
         if (result && "error" in result) {
           toast.error(result.error as string);
         } else if (result.dealCreated) {
-          toast.success(`${prospect.name} qualifié et deal créé automatiquement`);
+          toast.success(
+            `${prospect.name} qualifié et deal créé automatiquement`,
+          );
         } else {
           toast.success(`${prospect.name} marqué comme qualifié`);
         }
@@ -311,27 +339,43 @@ export function ScoringView({ prospects }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="h-3 w-3 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: "#7af17a" }} />
+                  <div
+                    className="h-3 w-3 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: "#7af17a" }}
+                  />
                   <div>
-                    <p className="font-medium">Statut du pipeline (30 pts max)</p>
+                    <p className="font-medium">
+                      Statut du pipeline (30 pts max)
+                    </p>
                     <p className="text-muted-foreground">
-                      Nouveau (4), Contacté (12), Répondu (20), Intéressé (25), RDV pris (28), Converti (30)
+                      Nouveau (4), Contacté (12), Répondu (20), Intéressé (25),
+                      RDV pris (28), Converti (30)
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="h-3 w-3 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: "#3b82f6" }} />
+                  <div
+                    className="h-3 w-3 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: "#3b82f6" }}
+                  />
                   <div>
-                    <p className="font-medium">Engagement existant (15 pts max)</p>
+                    <p className="font-medium">
+                      Engagement existant (15 pts max)
+                    </p>
                     <p className="text-muted-foreground">
                       Base sur le score d&apos;engagement de la fiche prospect
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="h-3 w-3 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: "#8b5cf6" }} />
+                  <div
+                    className="h-3 w-3 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: "#8b5cf6" }}
+                  />
                   <div>
-                    <p className="font-medium">Recence du dernier message (15 pts max)</p>
+                    <p className="font-medium">
+                      Recence du dernier message (15 pts max)
+                    </p>
                     <p className="text-muted-foreground">
                       Hier (15), 3j (12), 7j (9), 14j (5), 30j (2), +30j (0)
                     </p>
@@ -340,62 +384,84 @@ export function ScoringView({ prospects }: Props) {
               </div>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="h-3 w-3 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: "#f59e0b" }} />
+                  <div
+                    className="h-3 w-3 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: "#f59e0b" }}
+                  />
                   <div>
-                    <p className="font-medium">Profondeur des notes (10 pts max)</p>
+                    <p className="font-medium">
+                      Profondeur des notes (10 pts max)
+                    </p>
                     <p className="text-muted-foreground">
                       Plus les notes sont detaillees, plus le score est eleve
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="h-3 w-3 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: "#06b6d4" }} />
+                  <div
+                    className="h-3 w-3 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: "#06b6d4" }}
+                  />
                   <div>
                     <p className="font-medium">Fit plateforme (10 pts max)</p>
                     <p className="text-muted-foreground">
-                      Bonus si le prospect est sur votre plateforme la plus performante
+                      Bonus si le prospect est sur votre plateforme la plus
+                      performante
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="h-3 w-3 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: "#ec4899" }} />
+                  <div
+                    className="h-3 w-3 rounded-full mt-1.5 shrink-0"
+                    style={{ backgroundColor: "#ec4899" }}
+                  />
                   <div>
-                    <p className="font-medium">Score comportemental (15 pts max)</p>
+                    <p className="font-medium">
+                      Score comportemental (15 pts max)
+                    </p>
                     <p className="text-muted-foreground">
-                      Frequence des messages (8 pts) + profondeur de conversation (7 pts)
+                      Frequence des messages (8 pts) + profondeur de
+                      conversation (7 pts)
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="h-3 w-3 rounded-full mt-1.5 shrink-0 bg-destructive" />
                   <div>
-                    <p className="font-medium">Penalite d&apos;inactivite (jusqu&apos;a -15 pts)</p>
+                    <p className="font-medium">
+                      Penalite d&apos;inactivite (jusqu&apos;a -15 pts)
+                    </p>
                     <p className="text-muted-foreground">
-                      Malus progressif pour les prospects inactifs depuis plus de 14 jours
+                      Malus progressif pour les prospects inactifs depuis plus
+                      de 14 jours
                     </p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t">
-              <p className="text-sm font-medium mb-2">Niveaux de temperature :</p>
+              <p className="text-sm font-medium mb-2">
+                Niveaux de temperature :
+              </p>
               <div className="flex flex-wrap gap-3">
-                {(["froid", "tiede", "chaud", "brulant"] as ScoreTier[]).map((tier) => {
-                  const cfg = tierConfig[tier];
-                  const TierIcon = cfg.icon;
-                  const ranges: Record<ScoreTier, string> = {
-                    froid: "0-25",
-                    tiede: "26-50",
-                    chaud: "51-75",
-                    brulant: "76-100",
-                  };
-                  return (
-                    <Badge key={tier} className={`${cfg.badgeClass} gap-1`}>
-                      <TierIcon className="h-3 w-3" />
-                      {cfg.label} ({ranges[tier]})
-                    </Badge>
-                  );
-                })}
+                {(["froid", "tiede", "chaud", "brulant"] as ScoreTier[]).map(
+                  (tier) => {
+                    const cfg = tierConfig[tier];
+                    const TierIcon = cfg.icon;
+                    const ranges: Record<ScoreTier, string> = {
+                      froid: "0-25",
+                      tiede: "26-50",
+                      chaud: "51-75",
+                      brulant: "76-100",
+                    };
+                    return (
+                      <Badge key={tier} className={`${cfg.badgeClass} gap-1`}>
+                        <TierIcon className="h-3 w-3" />
+                        {cfg.label} ({ranges[tier]})
+                      </Badge>
+                    );
+                  },
+                )}
               </div>
             </div>
           </CardContent>
@@ -423,7 +489,10 @@ export function ScoringView({ prospects }: Props) {
               <CardContent className="p-4 flex items-center gap-3">
                 <div
                   className="h-10 w-10 rounded-xl flex items-center justify-center ring-1"
-                  style={{ backgroundColor: `${cfg.color}15`, boxShadow: `inset 0 0 0 1px ${cfg.color}30` }}
+                  style={{
+                    backgroundColor: `${cfg.color}15`,
+                    boxShadow: `inset 0 0 0 1px ${cfg.color}30`,
+                  }}
                 >
                   <TierIcon className="h-5 w-5" style={{ color: cfg.color }} />
                 </div>
@@ -450,8 +519,17 @@ export function ScoringView({ prospects }: Props) {
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  formatter={((value: number) => [`${Number(value || 0)} prospect(s)`, "Nombre"]) as any}
-                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }}
+                  formatter={
+                    ((value: number) => [
+                      `${Number(value || 0)} prospect(s)`,
+                      "Nombre",
+                    ]) as any
+                  }
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 8,
+                  }}
                   labelStyle={{ color: "#ccc" }}
                 />
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
@@ -504,7 +582,9 @@ export function ScoringView({ prospects }: Props) {
                   {/* Main row */}
                   <div
                     className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 items-center hover:bg-secondary/50 transition-colors cursor-pointer"
-                    onClick={() => setExpandedId(isExpanded ? null : prospect.id)}
+                    onClick={() =>
+                      setExpandedId(isExpanded ? null : prospect.id)
+                    }
                   >
                     {/* Name */}
                     <div className="sm:col-span-3 flex items-center gap-3">
@@ -528,7 +608,9 @@ export function ScoringView({ prospects }: Props) {
                         className={`h-2 flex-1 [&>div]:transition-all`}
                         style={{ ["--bar-color" as string]: cfg.color }}
                       />
-                      <Badge className={`${cfg.badgeClass} text-xs min-w-[3rem] justify-center`}>
+                      <Badge
+                        className={`${cfg.badgeClass} text-xs min-w-[3rem] justify-center`}
+                      >
                         {breakdown.total}
                       </Badge>
                     </div>
@@ -556,23 +638,24 @@ export function ScoringView({ prospects }: Props) {
                       {prospect.scores?.computed_at
                         ? formatDistanceToNow(
                             new Date(prospect.scores.computed_at),
-                            { addSuffix: true, locale: fr }
+                            { addSuffix: true, locale: fr },
                           )
                         : prospect.updated_at
-                        ? formatDistanceToNow(new Date(prospect.updated_at), {
-                            addSuffix: true,
-                            locale: fr,
-                          })
-                        : formatDistanceToNow(new Date(prospect.created_at), {
-                            addSuffix: true,
-                            locale: fr,
-                          })}
+                          ? formatDistanceToNow(new Date(prospect.updated_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })
+                          : formatDistanceToNow(new Date(prospect.created_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })}
                     </div>
 
                     {/* Actions */}
                     <div className="sm:col-span-2 flex items-center gap-1 justify-end">
                       {/* Quick action based on tier */}
-                      {(breakdown.tier === "froid" || breakdown.tier === "tiede") && (
+                      {(breakdown.tier === "froid" ||
+                        breakdown.tier === "tiede") && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -591,7 +674,8 @@ export function ScoringView({ prospects }: Props) {
                           Relancer
                         </Button>
                       )}
-                      {(breakdown.tier === "chaud" || breakdown.tier === "brulant") && (
+                      {(breakdown.tier === "chaud" ||
+                        breakdown.tier === "brulant") && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -696,14 +780,19 @@ export function ScoringView({ prospects }: Props) {
                             const value = breakdown[factor.key];
                             const pct = Math.round((value / factor.max) * 100);
                             return (
-                              <div key={factor.key} className="flex items-center gap-2">
+                              <div
+                                key={factor.key}
+                                className="flex items-center gap-2"
+                              >
                                 <div
                                   className="h-2.5 w-2.5 rounded-full shrink-0"
                                   style={{ backgroundColor: factor.color }}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex justify-between items-baseline">
-                                    <span className="text-xs truncate">{factor.label}</span>
+                                    <span className="text-xs truncate">
+                                      {factor.label}
+                                    </span>
                                     <span className="text-xs font-medium ml-1">
                                       {value}/{factor.max}
                                     </span>
@@ -726,7 +815,9 @@ export function ScoringView({ prospects }: Props) {
                               <div className="h-2.5 w-2.5 rounded-full shrink-0 bg-destructive" />
                               <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-baseline">
-                                  <span className="text-xs truncate text-destructive">Penalite inactivite</span>
+                                  <span className="text-xs truncate text-destructive">
+                                    Penalite inactivite
+                                  </span>
                                   <span className="text-xs font-medium ml-1 text-destructive">
                                     {breakdown.decayPenalty}
                                   </span>
@@ -748,7 +839,9 @@ export function ScoringView({ prospects }: Props) {
                   <Users className="h-6 w-6 text-muted-foreground/40" />
                 </div>
                 <p className="font-medium text-sm">Aucun prospect trouvé</p>
-                <p className="text-xs mt-1">Ajoutez des prospects pour commencer le scoring</p>
+                <p className="text-xs mt-1">
+                  Ajoutez des prospects pour commencer le scoring
+                </p>
               </div>
             )}
           </div>

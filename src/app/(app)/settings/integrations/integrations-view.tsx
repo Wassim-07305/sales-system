@@ -219,7 +219,10 @@ interface IntegrationsViewProps {
   };
 }
 
-export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsViewProps) {
+export function IntegrationsView({
+  initialStatus,
+  unipileStatus,
+}: IntegrationsViewProps) {
   const [status, setStatus] = useState(initialStatus);
   const [values, setValues] = useState<Record<string, string>>({});
   const [visible, setVisible] = useState<Record<string, boolean>>({});
@@ -227,8 +230,12 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
   const [isPending, startTransition] = useTransition();
 
   // Unipile state
-  const [accounts, setAccounts] = useState<UnipileAccount[]>(unipileStatus.accounts);
-  const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<UnipileAccount[]>(
+    unipileStatus.accounts,
+  );
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(
+    null,
+  );
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -306,8 +313,14 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-        toast.info("Connectez votre compte dans la fenêtre ouverte, puis cliquez sur Rafraîchir");
+        window.open(
+          result.url,
+          "_blank",
+          "width=600,height=700,scrollbars=yes",
+        );
+        toast.info(
+          "Connectez votre compte dans la fenêtre ouverte, puis cliquez sur Rafraîchir",
+        );
       }
     } catch {
       toast.error("Erreur lors de la génération du lien");
@@ -336,7 +349,9 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
     try {
       const result = await getUnipileStatus();
       setAccounts(result.accounts);
-      toast.success(`${result.accounts.length} compte${result.accounts.length > 1 ? "s" : ""} détecté${result.accounts.length > 1 ? "s" : ""}`);
+      toast.success(
+        `${result.accounts.length} compte${result.accounts.length > 1 ? "s" : ""} détecté${result.accounts.length > 1 ? "s" : ""}`,
+      );
     } catch {
       toast.error("Erreur lors du rafraîchissement");
     }
@@ -354,7 +369,9 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
     return <Unplug className="h-4 w-4" />;
   }
 
-  const connectedProviders = new Set(accounts.map((a) => a.provider.toUpperCase()));
+  const connectedProviders = new Set(
+    accounts.map((a) => a.provider.toUpperCase()),
+  );
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-12">
@@ -373,7 +390,9 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
             disabled={refreshing}
             className="text-xs"
           >
-            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`}
+            />
             Rafraîchir
           </Button>
         </div>
@@ -388,8 +407,15 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
                 <div>
                   <p className="text-sm font-medium">Unipile non configuré</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Ajoutez les variables <code className="text-[11px] bg-muted px-1 py-0.5 rounded">UNIPILE_DSN</code> et{" "}
-                    <code className="text-[11px] bg-muted px-1 py-0.5 rounded">UNIPILE_API_KEY</code> dans votre fichier .env.local pour activer les intégrations.
+                    Ajoutez les variables{" "}
+                    <code className="text-[11px] bg-muted px-1 py-0.5 rounded">
+                      UNIPILE_DSN
+                    </code>{" "}
+                    et{" "}
+                    <code className="text-[11px] bg-muted px-1 py-0.5 rounded">
+                      UNIPILE_API_KEY
+                    </code>{" "}
+                    dans votre fichier .env.local pour activer les intégrations.
                   </p>
                 </div>
               </div>
@@ -449,7 +475,8 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Connecter un compte</CardTitle>
                 <CardDescription className="text-xs">
-                  Votre client se connecte directement — aucune clé API à configurer manuellement
+                  Votre client se connecte directement — aucune clé API à
+                  configurer manuellement
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -469,9 +496,11 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
                             : "border-border hover:border-foreground/20 hover:bg-muted/50"
                         }`}
                       >
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                          isConnected ? "bg-brand/15" : "bg-muted"
-                        }`}>
+                        <div
+                          className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                            isConnected ? "bg-brand/15" : "bg-muted"
+                          }`}
+                        >
                           {isConnecting ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : isConnected ? (
@@ -531,7 +560,9 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
                         {service.icon}
                       </div>
                       <div>
-                        <CardTitle className="text-base">{service.name}</CardTitle>
+                        <CardTitle className="text-base">
+                          {service.name}
+                        </CardTitle>
                         <CardDescription className="text-xs">
                           {service.description}
                         </CardDescription>
@@ -543,11 +574,17 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
                         Connecté
                       </Badge>
                     ) : partial ? (
-                      <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30">
+                      <Badge
+                        variant="outline"
+                        className="text-muted-foreground border-muted-foreground/30"
+                      >
                         Partiel
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-muted-foreground">
+                      <Badge
+                        variant="outline"
+                        className="text-muted-foreground"
+                      >
                         <XCircle className="h-3 w-3 mr-1" />
                         Non configuré
                       </Badge>
@@ -569,11 +606,11 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
                         <Input
                           type={visible[k.key] ? "text" : "password"}
                           value={values[k.key] || ""}
-                          onChange={(e) => handleValueChange(k.key, e.target.value)}
+                          onChange={(e) =>
+                            handleValueChange(k.key, e.target.value)
+                          }
                           placeholder={
-                            status[k.key]
-                              ? "••••••••••••••••"
-                              : k.placeholder
+                            status[k.key] ? "••••••••••••••••" : k.placeholder
                           }
                           className="pr-10 font-mono text-xs"
                         />
@@ -628,8 +665,10 @@ export function IntegrationsView({ initialStatus, unipileStatus }: IntegrationsV
       <Card>
         <CardContent className="pt-6">
           <p className="text-xs text-muted-foreground">
-            Les comptes Unipile sont connectés en un clic — pas besoin de clés API individuelles pour LinkedIn, Instagram, WhatsApp ou Google Calendar.
-            Les clés API ci-dessous servent de fallback ou pour les services non couverts par Unipile.
+            Les comptes Unipile sont connectés en un clic — pas besoin de clés
+            API individuelles pour LinkedIn, Instagram, WhatsApp ou Google
+            Calendar. Les clés API ci-dessous servent de fallback ou pour les
+            services non couverts par Unipile.
           </p>
         </CardContent>
       </Card>

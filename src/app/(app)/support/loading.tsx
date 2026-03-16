@@ -21,7 +21,10 @@ export default function SupportLoading() {
         <Skeleton className="h-5 w-40" />
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
+            <div
+              key={i}
+              className="flex items-center gap-3 p-3 border rounded-lg"
+            >
               <Skeleton className="h-5 w-5" />
               <Skeleton className="h-4 w-full" />
             </div>

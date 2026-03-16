@@ -180,8 +180,11 @@ function B2BClientDashboard({
             Bonjour {userName.split(" ")[0]}, voici votre activite du mois
           </h2>
           <p className="text-muted-foreground text-sm mb-4">
-            Suivez les performances de {data.stats.totalSetters > 1 ? `vos ${data.stats.totalSetters} setters` : "votre setter"} et l&apos;avancement de
-            votre pipeline commercial.
+            Suivez les performances de{" "}
+            {data.stats.totalSetters > 1
+              ? `vos ${data.stats.totalSetters} setters`
+              : "votre setter"}{" "}
+            et l&apos;avancement de votre pipeline commercial.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
@@ -190,7 +193,9 @@ function B2BClientDashboard({
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.messagesSent}
                 </p>
-                <p className="text-[11px] text-muted-foreground">Messages envoyes</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Messages envoyes
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
@@ -199,7 +204,9 @@ function B2BClientDashboard({
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.responseRate}%
                 </p>
-                <p className="text-[11px] text-muted-foreground">Taux de reponse</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Taux de reponse
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
@@ -208,7 +215,9 @@ function B2BClientDashboard({
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.bookingsBooked}
                 </p>
-                <p className="text-[11px] text-muted-foreground">RDV decroches</p>
+                <p className="text-[11px] text-muted-foreground">
+                  RDV decroches
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
@@ -217,7 +226,9 @@ function B2BClientDashboard({
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.closingRate}%
                 </p>
-                <p className="text-[11px] text-muted-foreground">Taux de closing</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Taux de closing
+                </p>
               </div>
             </div>
           </div>
@@ -307,7 +318,9 @@ function B2BClientDashboard({
                     Taux de reponse
                   </span>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{data.stats.responseRate}%</p>
+                <p className="text-2xl font-bold tracking-tight">
+                  {data.stats.responseRate}%
+                </p>
               </div>
             </div>
           </CardContent>
@@ -385,7 +398,9 @@ function B2BClientDashboard({
                 <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                   <Calendar className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Aucun rendez-vous a venir</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Aucun rendez-vous a venir
+                </p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -433,7 +448,9 @@ function B2BClientDashboard({
                 <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                   <Activity className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Aucune activite recente</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Aucune activite recente
+                </p>
               </div>
             ) : (
               <div className="space-y-1">

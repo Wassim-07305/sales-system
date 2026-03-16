@@ -12,7 +12,8 @@ const DEFAULT_CRITICAL_ACTIONS = [
   "Envoi de contrat",
 ];
 
-const DEFAULT_TEMPLATE = "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !";
+const DEFAULT_TEMPLATE =
+  "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !";
 
 export async function getAiModeConfig() {
   const supabase = await createClient();
@@ -77,12 +78,18 @@ export async function updateAiModeConfig(data: {
   };
 
   // Include auto-send fields if provided
-  if (data.auto_send_enabled !== undefined) updatePayload.auto_send_enabled = data.auto_send_enabled;
-  if (data.auto_send_platforms !== undefined) updatePayload.auto_send_platforms = data.auto_send_platforms;
-  if (data.auto_send_template !== undefined) updatePayload.auto_send_template = data.auto_send_template;
-  if (data.auto_send_mode !== undefined) updatePayload.auto_send_mode = data.auto_send_mode;
-  if (data.story_reaction_enabled !== undefined) updatePayload.story_reaction_enabled = data.story_reaction_enabled;
-  if (data.story_reaction_emoji !== undefined) updatePayload.story_reaction_emoji = data.story_reaction_emoji;
+  if (data.auto_send_enabled !== undefined)
+    updatePayload.auto_send_enabled = data.auto_send_enabled;
+  if (data.auto_send_platforms !== undefined)
+    updatePayload.auto_send_platforms = data.auto_send_platforms;
+  if (data.auto_send_template !== undefined)
+    updatePayload.auto_send_template = data.auto_send_template;
+  if (data.auto_send_mode !== undefined)
+    updatePayload.auto_send_mode = data.auto_send_mode;
+  if (data.story_reaction_enabled !== undefined)
+    updatePayload.story_reaction_enabled = data.story_reaction_enabled;
+  if (data.story_reaction_emoji !== undefined)
+    updatePayload.story_reaction_emoji = data.story_reaction_emoji;
 
   const { error } = await supabase
     .from("ai_mode_configs")

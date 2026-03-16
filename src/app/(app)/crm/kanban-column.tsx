@@ -27,8 +27,10 @@ export function KanbanColumn({
   });
 
   const formatValue = (value: number) => {
-    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(".0", "")}M €`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1).replace(".0", "")}k €`;
+    if (value >= 1_000_000)
+      return `${(value / 1_000_000).toFixed(1).replace(".0", "")}M €`;
+    if (value >= 1000)
+      return `${(value / 1000).toFixed(1).replace(".0", "")}k €`;
     return `${value.toLocaleString("fr-FR")} €`;
   };
 
@@ -38,7 +40,8 @@ export function KanbanColumn({
       className={cn(
         "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-2xl transition-all duration-200 snap-center",
         "bg-muted/20 border border-border/50 shadow-sm",
-        isOver && "bg-brand/5 border-brand/30 ring-2 ring-brand/20 scale-[1.01] shadow-md"
+        isOver &&
+          "bg-brand/5 border-brand/30 ring-2 ring-brand/20 scale-[1.01] shadow-md",
       )}
     >
       {/* Column header */}
@@ -47,21 +50,32 @@ export function KanbanColumn({
           <div className="flex items-center gap-2.5">
             <div
               className="h-3 w-3 rounded-full ring-2 ring-offset-1 ring-offset-background"
-              style={{ backgroundColor: stage.color, boxShadow: `0 0 8px ${stage.color}40` }}
+              style={{
+                backgroundColor: stage.color,
+                boxShadow: `0 0 8px ${stage.color}40`,
+              }}
             />
-            <h3 className="text-[13px] font-semibold tracking-tight">{stage.name}</h3>
+            <h3 className="text-[13px] font-semibold tracking-tight">
+              {stage.name}
+            </h3>
           </div>
           <span className="text-[11px] font-semibold text-muted-foreground bg-muted/80 rounded-full min-w-[24px] text-center px-2 py-0.5">
             {deals.length}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-xs font-medium text-muted-foreground">{formatValue(totalValue)}</p>
+          <p className="text-xs font-medium text-muted-foreground">
+            {formatValue(totalValue)}
+          </p>
           {deals.length > 0 && (
             <div className="flex-1 h-1 bg-muted/50 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ backgroundColor: stage.color, width: "100%", opacity: 0.6 }}
+                style={{
+                  backgroundColor: stage.color,
+                  width: "100%",
+                  opacity: 0.6,
+                }}
               />
             </div>
           )}

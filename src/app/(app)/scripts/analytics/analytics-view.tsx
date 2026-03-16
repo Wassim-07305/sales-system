@@ -169,14 +169,23 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
                   <XAxis
                     dataKey="month"
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{
+                      fontSize: 12,
+                      fill: "hsl(var(--muted-foreground))",
+                    }}
                   />
                   <YAxis
                     allowDecimals={false}
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tick={{
+                      fontSize: 12,
+                      fill: "hsl(var(--muted-foreground))",
+                    }}
                   />
                   <Tooltip
                     contentStyle={{
@@ -269,7 +278,9 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
                   <TableHead>Type</TableHead>
                   <TableHead className="text-center">Noeuds</TableHead>
                   <TableHead className="text-center">Partages</TableHead>
-                  <TableHead className="text-right">Derniere mise a jour</TableHead>
+                  <TableHead className="text-right">
+                    Derniere mise a jour
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -317,7 +328,8 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
             <div className="py-8 text-center text-muted-foreground">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">
-                Aucun script disponible. Creez votre premier flowchart ou mind map.
+                Aucun script disponible. Creez votre premier flowchart ou mind
+                map.
               </p>
             </div>
           )}

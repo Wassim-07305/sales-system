@@ -6,7 +6,9 @@ import { CrmExportButton } from "./crm-export-button";
 
 export default async function CRMPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -15,7 +17,12 @@ export default async function CRMPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager", "setter", "closer", "client_b2b"].includes(profile.role)) {
+  if (
+    !profile ||
+    !["admin", "manager", "setter", "closer", "client_b2b"].includes(
+      profile.role,
+    )
+  ) {
     redirect("/dashboard");
   }
 
@@ -50,7 +57,9 @@ export default async function CRMPage() {
   // Build the deals query based on role
   let dealsQuery = supabase
     .from("deals")
-    .select("*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)")
+    .select(
+      "*, contact:profiles!deals_contact_id_fkey(*), assigned_user:profiles!deals_assigned_to_fkey(*)",
+    )
     .order("created_at", { ascending: false });
 
   if (isB2B) {
@@ -59,7 +68,10 @@ export default async function CRMPage() {
       dealsQuery = dealsQuery.in("assigned_to", setterIds);
     } else {
       // No setters assigned — show empty pipeline
-      dealsQuery = dealsQuery.eq("assigned_to", "00000000-0000-0000-0000-000000000000");
+      dealsQuery = dealsQuery.eq(
+        "assigned_to",
+        "00000000-0000-0000-0000-000000000000",
+      );
     }
   } else if (!isAdmin) {
     // Setter/Closer: only their own deals

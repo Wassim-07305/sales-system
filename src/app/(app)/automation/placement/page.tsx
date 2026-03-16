@@ -1,13 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getAutomationRules, getAutomationExecutions } from "@/lib/actions/automation";
+import {
+  getAutomationRules,
+  getAutomationExecutions,
+} from "@/lib/actions/automation";
 import { PlacementView } from "./placement-view";
 
 type PlacementViewProps = React.ComponentProps<typeof PlacementView>;
 
 export default async function PlacementPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const rules = await getAutomationRules("placement");
@@ -15,9 +20,9 @@ export default async function PlacementPage() {
 
   // Filter executions to placement rules only
   const ruleIds = new Set(rules.map((r: { id: string }) => r.id));
-  const placementExecutions = (executions as PlacementViewProps["executions"]).filter(
-    (e) => ruleIds.has(e.rule_id)
-  );
+  const placementExecutions = (
+    executions as PlacementViewProps["executions"]
+  ).filter((e) => ruleIds.has(e.rule_id));
 
   return (
     <PlacementView

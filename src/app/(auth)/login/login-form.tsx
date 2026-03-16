@@ -39,7 +39,9 @@ export function LoginForm() {
       router.refresh();
       setLoading(false);
     } catch {
-      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      toast.error(
+        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+      );
       setLoading(false);
     }
   }
@@ -47,7 +49,9 @@ export function LoginForm() {
   return (
     <form onSubmit={handleLogin} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+        <Label htmlFor="email" className="text-sm font-medium">
+          Email
+        </Label>
         <Input
           id="email"
           type="email"
@@ -61,7 +65,9 @@ export function LoginForm() {
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+          <Label htmlFor="password" className="text-sm font-medium">
+            Mot de passe
+          </Label>
           <Link
             href="/forgot-password"
             className="text-xs text-muted-foreground hover:text-brand transition-colors duration-200"
@@ -85,7 +91,11 @@ export function LoginForm() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
-            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-label={
+              showPassword
+                ? "Masquer le mot de passe"
+                : "Afficher le mot de passe"
+            }
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -120,7 +130,10 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         {"Pas encore de compte ?\u00a0"}
-        <Link href="/register" className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline">
+        <Link
+          href="/register"
+          className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
+        >
           {"Cr\u00e9er un compte"}
         </Link>
       </p>

@@ -4,15 +4,26 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify } from "@/lib/actions/notifications";
 
-export async function getCommunityPosts(type?: string, audience?: "all" | "b2b" | "b2c", channel?: string) {
+export async function getCommunityPosts(
+  type?: string,
+  audience?: "all" | "b2b" | "b2c",
+  channel?: string,
+) {
   const supabase = await createClient();
 
   // Check user role for team_interne access
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   let canSeeTeamInterne = false;
   if (user) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-    canSeeTeamInterne = !!profile && ["admin", "manager", "setter"].includes(profile.role);
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    canSeeTeamInterne =
+      !!profile && ["admin", "manager", "setter"].includes(profile.role);
   }
 
   let query = supabase
@@ -87,12 +98,18 @@ export async function createCommunityPost(formData: {
   channel?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // If posting to team_interne, verify role
   if (formData.channel === "team_interne") {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
     if (!profile || !["admin", "manager", "setter"].includes(profile.role)) {
       throw new Error("Accès refusé à ce canal");
     }
@@ -114,12 +131,21 @@ export async function createCommunityPost(formData: {
 
 export async function toggleLike(postId: string, increment: boolean) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
-  const { data: post } = await supabase.from("community_posts").select("likes_count").eq("id", postId).single();
+  const { data: post } = await supabase
+    .from("community_posts")
+    .select("likes_count")
+    .eq("id", postId)
+    .single();
   if (!post) return;
   const newCount = Math.max(0, (post.likes_count || 0) + (increment ? 1 : -1));
-  await supabase.from("community_posts").update({ likes_count: newCount }).eq("id", postId);
+  await supabase
+    .from("community_posts")
+    .update({ likes_count: newCount })
+    .eq("id", postId);
   revalidatePath("/community");
 }
 
@@ -138,7 +164,9 @@ export async function getComments(postId: string) {
 
 export async function addComment(postId: string, content: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase.from("community_comments").insert({
@@ -163,10 +191,15 @@ export async function addComment(postId: string, content: string) {
         .eq("id", user.id)
         .single();
 
-      notify(post.author_id, "Nouvelle réponse", `${commenter?.full_name || "Quelqu'un"} a répondu à votre post${post.title ? ` "${post.title}"` : ""}`, {
-        type: "community",
-        link: `/community/${postId}`,
-      });
+      notify(
+        post.author_id,
+        "Nouvelle réponse",
+        `${commenter?.full_name || "Quelqu'un"} a répondu à votre post${post.title ? ` "${post.title}"` : ""}`,
+        {
+          type: "community",
+          link: `/community/${postId}`,
+        },
+      );
     }
   } catch {
     // Non-blocking
@@ -190,13 +223,23 @@ export async function getMembers(search?: string) {
 
 export async function hidePost(postId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return { error: "Accès refusé" };
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role))
+    return { error: "Accès refusé" };
 
-  await supabase.from("community_posts").update({ hidden: true }).eq("id", postId);
+  await supabase
+    .from("community_posts")
+    .update({ hidden: true })
+    .eq("id", postId);
   revalidatePath("/community");
   revalidatePath("/community/manage");
   return { success: true };
@@ -204,13 +247,23 @@ export async function hidePost(postId: string) {
 
 export async function unhidePost(postId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return { error: "Accès refusé" };
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role))
+    return { error: "Accès refusé" };
 
-  await supabase.from("community_posts").update({ hidden: false }).eq("id", postId);
+  await supabase
+    .from("community_posts")
+    .update({ hidden: false })
+    .eq("id", postId);
   revalidatePath("/community");
   revalidatePath("/community/manage");
   return { success: true };
@@ -218,11 +271,18 @@ export async function unhidePost(postId: string) {
 
 export async function deleteCommunityPost(postId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return { error: "Accès refusé" };
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role))
+    return { error: "Accès refusé" };
 
   await supabase.from("community_posts").delete().eq("id", postId);
   revalidatePath("/community");
@@ -232,17 +292,27 @@ export async function deleteCommunityPost(postId: string) {
 
 export async function deleteComment(commentId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Only allow deleting own comments or admin/manager
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   const isAdmin = profile && ["admin", "manager"].includes(profile.role);
 
   if (isAdmin) {
     await supabase.from("community_comments").delete().eq("id", commentId);
   } else {
-    await supabase.from("community_comments").delete().eq("id", commentId).eq("author_id", user.id);
+    await supabase
+      .from("community_comments")
+      .delete()
+      .eq("id", commentId)
+      .eq("author_id", user.id);
   }
   revalidatePath("/community");
   return { success: true };
@@ -262,7 +332,9 @@ export async function searchCommunity(query: string) {
 
   const { data: comments } = await supabase
     .from("community_comments")
-    .select("*, author:profiles(id, full_name, avatar_url), post:community_posts(id, title)")
+    .select(
+      "*, author:profiles(id, full_name, avatar_url), post:community_posts(id, title)",
+    )
     .ilike("content", pattern)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -312,8 +384,9 @@ export async function getUserReputationScore(userId: string): Promise<number> {
     .eq("hidden", false);
 
   const totalLikes = (likesData || []).reduce(
-    (sum: number, p: { likes_count: number | null }) => sum + (p.likes_count || 0),
-    0
+    (sum: number, p: { likes_count: number | null }) =>
+      sum + (p.likes_count || 0),
+    0,
   );
 
   const score =
@@ -332,7 +405,9 @@ export async function getUserReputation(userId?: string) {
 
   let targetUserId = userId;
   if (!targetUserId) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error("Non authentifié");
     targetUserId = user.id;
   }
@@ -360,8 +435,9 @@ export async function getUserReputation(userId?: string) {
       .eq("hidden", false);
 
     const totalLikes = (likesData || []).reduce(
-      (sum: number, p: { likes_count: number | null }) => sum + (p.likes_count || 0),
-      0
+      (sum: number, p: { likes_count: number | null }) =>
+        sum + (p.likes_count || 0),
+      0,
     );
 
     // Count best answers (win / success_story posts as proxy)
@@ -421,14 +497,33 @@ export async function getReputationLeaderboard() {
       .select("author_id")
       .neq("content", "__RSVP__");
 
-    if ((!posts || posts.length === 0) && (!comments || comments.length === 0)) {
+    if (
+      (!posts || posts.length === 0) &&
+      (!comments || comments.length === 0)
+    ) {
       return [];
     }
 
-    const scores: Record<string, { points: number; posts: number; replies: number; likes: number; bestAnswers: number }> = {};
+    const scores: Record<
+      string,
+      {
+        points: number;
+        posts: number;
+        replies: number;
+        likes: number;
+        bestAnswers: number;
+      }
+    > = {};
 
     const ensure = (uid: string) => {
-      if (!scores[uid]) scores[uid] = { points: 0, posts: 0, replies: 0, likes: 0, bestAnswers: 0 };
+      if (!scores[uid])
+        scores[uid] = {
+          points: 0,
+          posts: 0,
+          replies: 0,
+          likes: 0,
+          bestAnswers: 0,
+        };
     };
 
     for (const post of posts || []) {
@@ -483,9 +578,15 @@ export async function getReputationLeaderboard() {
   }
 }
 
-export async function awardReputation(userId: string, action: string, points: number) {
+export async function awardReputation(
+  userId: string,
+  action: string,
+  points: number,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // Try to insert into reputation_events table; if it doesn't exist, silently skip
@@ -509,7 +610,9 @@ export async function getReputationActivity(userId?: string) {
 
   let targetUserId = userId;
   if (!targetUserId) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error("Non authentifié");
     targetUserId = user.id;
   }
@@ -566,27 +669,71 @@ export async function getReputationActivity(userId?: string) {
     }
 
     // Sort by date desc and take 10
-    events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    events.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
     return events.slice(0, 10);
   } catch {
     // Fallback demo activity
     const now = new Date();
     return [
-      { label: "Nouveau post", points: 10, date: new Date(now.getTime() - 1000 * 60 * 30).toISOString() },
-      { label: "Meilleure réponse", points: 50, date: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString() },
-      { label: "Réponse à un post", points: 5, date: new Date(now.getTime() - 1000 * 60 * 60 * 5).toISOString() },
-      { label: "3 likes reçus", points: 6, date: new Date(now.getTime() - 1000 * 60 * 60 * 8).toISOString() },
-      { label: "Nouveau post : Astuce closing", points: 10, date: new Date(now.getTime() - 1000 * 60 * 60 * 24).toISOString() },
-      { label: "Réponse à un post", points: 5, date: new Date(now.getTime() - 1000 * 60 * 60 * 30).toISOString() },
-      { label: "2 likes reçus", points: 4, date: new Date(now.getTime() - 1000 * 60 * 60 * 48).toISOString() },
-      { label: "Nouveau post", points: 10, date: new Date(now.getTime() - 1000 * 60 * 60 * 72).toISOString() },
-      { label: "Réponse à un post", points: 5, date: new Date(now.getTime() - 1000 * 60 * 60 * 96).toISOString() },
-      { label: "Meilleure réponse", points: 50, date: new Date(now.getTime() - 1000 * 60 * 60 * 120).toISOString() },
+      {
+        label: "Nouveau post",
+        points: 10,
+        date: new Date(now.getTime() - 1000 * 60 * 30).toISOString(),
+      },
+      {
+        label: "Meilleure réponse",
+        points: 50,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString(),
+      },
+      {
+        label: "Réponse à un post",
+        points: 5,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 5).toISOString(),
+      },
+      {
+        label: "3 likes reçus",
+        points: 6,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 8).toISOString(),
+      },
+      {
+        label: "Nouveau post : Astuce closing",
+        points: 10,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 24).toISOString(),
+      },
+      {
+        label: "Réponse à un post",
+        points: 5,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 30).toISOString(),
+      },
+      {
+        label: "2 likes reçus",
+        points: 4,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 48).toISOString(),
+      },
+      {
+        label: "Nouveau post",
+        points: 10,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 72).toISOString(),
+      },
+      {
+        label: "Réponse à un post",
+        points: 5,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 96).toISOString(),
+      },
+      {
+        label: "Meilleure réponse",
+        points: 50,
+        date: new Date(now.getTime() - 1000 * 60 * 60 * 120).toISOString(),
+      },
     ];
   }
 }
 
-export async function getUserReputationBatch(userIds: string[]): Promise<Record<string, number>> {
+export async function getUserReputationBatch(
+  userIds: string[],
+): Promise<Record<string, number>> {
   if (userIds.length === 0) return {};
   const supabase = await createClient();
 
@@ -624,7 +771,12 @@ export async function getUserReputationBatch(userIds: string[]): Promise<Record<
 }
 
 export async function getCommunityLeaderboard(): Promise<
-  { user_id: string; full_name: string | null; avatar_url: string | null; score: number }[]
+  {
+    user_id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    score: number;
+  }[]
 > {
   const supabase = await createClient();
 
@@ -754,24 +906,36 @@ export async function getUpcomingEvents() {
   const upcoming = parsed
     .filter((e) => {
       if (!e.metadata) return false;
-      const eventDate = new Date(`${e.metadata.event_date}T${e.metadata.event_time}`);
+      const eventDate = new Date(
+        `${e.metadata.event_date}T${e.metadata.event_time}`,
+      );
       return eventDate >= now;
     })
     .sort((a, b) => {
-      const da = new Date(`${a.metadata!.event_date}T${a.metadata!.event_time}`);
-      const db = new Date(`${b.metadata!.event_date}T${b.metadata!.event_time}`);
+      const da = new Date(
+        `${a.metadata!.event_date}T${a.metadata!.event_time}`,
+      );
+      const db = new Date(
+        `${b.metadata!.event_date}T${b.metadata!.event_time}`,
+      );
       return da.getTime() - db.getTime();
     });
 
   const past = parsed
     .filter((e) => {
       if (!e.metadata) return false;
-      const eventDate = new Date(`${e.metadata.event_date}T${e.metadata.event_time}`);
+      const eventDate = new Date(
+        `${e.metadata.event_date}T${e.metadata.event_time}`,
+      );
       return eventDate < now;
     })
     .sort((a, b) => {
-      const da = new Date(`${a.metadata!.event_date}T${a.metadata!.event_time}`);
-      const db = new Date(`${b.metadata!.event_date}T${b.metadata!.event_time}`);
+      const da = new Date(
+        `${a.metadata!.event_date}T${a.metadata!.event_time}`,
+      );
+      const db = new Date(
+        `${b.metadata!.event_date}T${b.metadata!.event_time}`,
+      );
       return db.getTime() - da.getTime();
     });
 
@@ -857,13 +1021,21 @@ export async function getEventParticipants(eventId: string) {
     .eq("content", "__RSVP__")
     .order("created_at");
 
-  return (data || []).map((d: Record<string, unknown>) => {
-    const author = Array.isArray(d.author) ? d.author[0] || null : d.author;
-    return author as { id: string; full_name: string | null; avatar_url: string | null } | null;
-  }).filter(Boolean);
+  return (data || [])
+    .map((d: Record<string, unknown>) => {
+      const author = Array.isArray(d.author) ? d.author[0] || null : d.author;
+      return author as {
+        id: string;
+        full_name: string | null;
+        avatar_url: string | null;
+      } | null;
+    })
+    .filter(Boolean);
 }
 
-export async function getEventParticipantCount(eventId: string): Promise<number> {
+export async function getEventParticipantCount(
+  eventId: string,
+): Promise<number> {
   const supabase = await createClient();
   const { count } = await supabase
     .from("community_comments")
@@ -873,7 +1045,9 @@ export async function getEventParticipantCount(eventId: string): Promise<number>
   return count || 0;
 }
 
-export async function getEventParticipantCounts(eventIds: string[]): Promise<Record<string, number>> {
+export async function getEventParticipantCounts(
+  eventIds: string[],
+): Promise<Record<string, number>> {
   if (eventIds.length === 0) return {};
   const supabase = await createClient();
   const { data } = await supabase
@@ -890,7 +1064,10 @@ export async function getEventParticipantCounts(eventIds: string[]): Promise<Rec
   return counts;
 }
 
-export async function getUserRsvps(userId: string, eventIds: string[]): Promise<Set<string>> {
+export async function getUserRsvps(
+  userId: string,
+  eventIds: string[],
+): Promise<Set<string>> {
   if (eventIds.length === 0) return new Set();
   const supabase = await createClient();
   const { data } = await supabase
@@ -905,9 +1082,15 @@ export async function getUserRsvps(userId: string, eventIds: string[]): Promise<
 
 export async function getAllPostsForModeration() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
   if (!profile || !["admin", "manager"].includes(profile.role)) return [];
 
   const { data } = await supabase

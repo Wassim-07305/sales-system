@@ -91,7 +91,12 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
   const [listId, setListId] = useState("");
   const [description, setDescription] = useState("");
   const [steps, setSteps] = useState<StepFormData[]>([
-    { delay_days: 0, template_id: "", action_type: "send_dm", custom_message: "" },
+    {
+      delay_days: 0,
+      template_id: "",
+      action_type: "send_dm",
+      custom_message: "",
+    },
   ]);
 
   function addStep() {
@@ -112,7 +117,11 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
     setSteps(steps.filter((_, i) => i !== index));
   }
 
-  function updateStep(index: number, field: keyof StepFormData, value: string | number) {
+  function updateStep(
+    index: number,
+    field: keyof StepFormData,
+    value: string | number,
+  ) {
     const updated = [...steps];
     updated[index] = { ...updated[index], [field]: value };
     setSteps(updated);
@@ -123,7 +132,12 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
     setListId("");
     setDescription("");
     setSteps([
-      { delay_days: 0, template_id: "", action_type: "send_dm", custom_message: "" },
+      {
+        delay_days: 0,
+        template_id: "",
+        action_type: "send_dm",
+        custom_message: "",
+      },
     ]);
   }
 
@@ -190,17 +204,35 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
 
   function getStatusBadge(campaign: DripCampaign) {
     if (campaign.is_active) {
-      return <Badge className="bg-brand/10 text-brand border border-brand/20">Active</Badge>;
+      return (
+        <Badge className="bg-brand/10 text-brand border border-brand/20">
+          Active
+        </Badge>
+      );
     }
-    if (campaign.executions_count && campaign.executions_count > 0 && campaign.completed_count === campaign.executions_count) {
-      return <Badge className="bg-muted/40 text-muted-foreground/60 border border-border/30">Terminée</Badge>;
+    if (
+      campaign.executions_count &&
+      campaign.executions_count > 0 &&
+      campaign.completed_count === campaign.executions_count
+    ) {
+      return (
+        <Badge className="bg-muted/40 text-muted-foreground/60 border border-border/30">
+          Terminée
+        </Badge>
+      );
     }
-    return <Badge variant="outline" className="text-muted-foreground">En pause</Badge>;
+    return (
+      <Badge variant="outline" className="text-muted-foreground">
+        En pause
+      </Badge>
+    );
   }
 
   function getProgress(campaign: DripCampaign) {
     if (!campaign.executions_count || campaign.executions_count === 0) return 0;
-    return Math.round((campaign.completed_count || 0) / campaign.executions_count * 100);
+    return Math.round(
+      ((campaign.completed_count || 0) / campaign.executions_count) * 100,
+    );
   }
 
   return (
@@ -235,7 +267,9 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="campaign-desc">Description (optionnel)</Label>
+                    <Label htmlFor="campaign-desc">
+                      Description (optionnel)
+                    </Label>
                     <Textarea
                       id="campaign-desc"
                       placeholder="Objectif de cette campagne..."
@@ -266,7 +300,9 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                 {/* Steps */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <Label className="text-base font-semibold">Étapes de la séquence</Label>
+                    <Label className="text-base font-semibold">
+                      Étapes de la séquence
+                    </Label>
                     <Button
                       type="button"
                       variant="outline"
@@ -314,7 +350,11 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                                   min={0}
                                   value={step.delay_days}
                                   onChange={(e) =>
-                                    updateStep(idx, "delay_days", parseInt(e.target.value) || 0)
+                                    updateStep(
+                                      idx,
+                                      "delay_days",
+                                      parseInt(e.target.value) || 0,
+                                    )
                                   }
                                   className="mt-1"
                                 />
@@ -323,16 +363,26 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                                 <Label className="text-xs">Action</Label>
                                 <Select
                                   value={step.action_type}
-                                  onValueChange={(v) => updateStep(idx, "action_type", v)}
+                                  onValueChange={(v) =>
+                                    updateStep(idx, "action_type", v)
+                                  }
                                 >
                                   <SelectTrigger className="mt-1">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="send_dm">Envoyer un DM</SelectItem>
-                                    <SelectItem value="follow_up">Relance</SelectItem>
-                                    <SelectItem value="like_post">Liker un post</SelectItem>
-                                    <SelectItem value="comment">Commenter</SelectItem>
+                                    <SelectItem value="send_dm">
+                                      Envoyer un DM
+                                    </SelectItem>
+                                    <SelectItem value="follow_up">
+                                      Relance
+                                    </SelectItem>
+                                    <SelectItem value="like_post">
+                                      Liker un post
+                                    </SelectItem>
+                                    <SelectItem value="comment">
+                                      Commenter
+                                    </SelectItem>
                                     <SelectItem value="connection_request">
                                       Demande de connexion
                                     </SelectItem>
@@ -343,7 +393,9 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                                 <Label className="text-xs">Template</Label>
                                 <Select
                                   value={step.template_id}
-                                  onValueChange={(v) => updateStep(idx, "template_id", v)}
+                                  onValueChange={(v) =>
+                                    updateStep(idx, "template_id", v)
+                                  }
                                 >
                                   <SelectTrigger className="mt-1">
                                     <SelectValue placeholder="Optionnel" />
@@ -359,12 +411,18 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                               </div>
                             </div>
                             <div className="mt-3">
-                              <Label className="text-xs">Message personnalisé (optionnel)</Label>
+                              <Label className="text-xs">
+                                Message personnalisé (optionnel)
+                              </Label>
                               <Textarea
                                 placeholder="Message spécifique pour cette étape..."
                                 value={step.custom_message}
                                 onChange={(e) =>
-                                  updateStep(idx, "custom_message", e.target.value)
+                                  updateStep(
+                                    idx,
+                                    "custom_message",
+                                    e.target.value,
+                                  )
                                 }
                                 rows={2}
                                 className="mt-1"
@@ -438,7 +496,8 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
             </div>
             <h3 className="text-lg font-semibold mb-2">Aucune campagne</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              Créez votre première campagne drip pour automatiser votre prospection
+              Créez votre première campagne drip pour automatiser votre
+              prospection
             </p>
             <Button
               onClick={() => setCreateOpen(true)}
@@ -452,7 +511,10 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
       ) : (
         <div className="space-y-4">
           {campaigns.map((campaign) => (
-            <Card key={campaign.id} className="overflow-hidden shadow-sm rounded-2xl">
+            <Card
+              key={campaign.id}
+              className="overflow-hidden shadow-sm rounded-2xl"
+            >
               <CardContent className="p-0">
                 {/* Campaign Header */}
                 <div className="p-5">
@@ -472,11 +534,13 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users className="h-3.5 w-3.5" />
-                          {campaign.list_name || "Liste inconnue"} ({campaign.prospect_count} prospects)
+                          {campaign.list_name || "Liste inconnue"} (
+                          {campaign.prospect_count} prospects)
                         </span>
                         <span className="flex items-center gap-1">
                           <Zap className="h-3.5 w-3.5" />
-                          {campaign.steps.length} étape{campaign.steps.length > 1 ? "s" : ""}
+                          {campaign.steps.length} étape
+                          {campaign.steps.length > 1 ? "s" : ""}
                         </span>
                         <span className="flex items-center gap-1">
                           <BarChart3 className="h-3.5 w-3.5" />
@@ -488,8 +552,12 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                       {(campaign.executions_count || 0) > 0 && (
                         <div className="mt-3">
                           <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="text-muted-foreground">Progression</span>
-                            <span className="font-medium">{getProgress(campaign)}%</span>
+                            <span className="text-muted-foreground">
+                              Progression
+                            </span>
+                            <span className="font-medium">
+                              {getProgress(campaign)}%
+                            </span>
                           </div>
                           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
@@ -517,7 +585,9 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          setExpandedId(expandedId === campaign.id ? null : campaign.id)
+                          setExpandedId(
+                            expandedId === campaign.id ? null : campaign.id,
+                          )
                         }
                         className="h-8 w-8 p-0"
                       >
@@ -543,7 +613,9 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                 {/* Expanded: Workflow Visualization */}
                 {expandedId === campaign.id && (
                   <div className="border-t bg-muted/30 p-5">
-                    <h4 className="text-sm font-semibold mb-4">Workflow de la séquence</h4>
+                    <h4 className="text-sm font-semibold mb-4">
+                      Workflow de la séquence
+                    </h4>
                     <div className="space-y-0">
                       {campaign.steps.map((step, idx) => (
                         <div key={step.id || idx}>
@@ -570,7 +642,8 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                               <div className="flex items-center gap-2 mb-1">
                                 {ACTION_TYPE_ICONS[step.action_type]}
                                 <span className="font-medium text-sm">
-                                  {ACTION_TYPE_LABELS[step.action_type] || step.action_type}
+                                  {ACTION_TYPE_LABELS[step.action_type] ||
+                                    step.action_type}
                                 </span>
                                 <Badge variant="outline" className="text-xs">
                                   <Clock className="h-3 w-3 mr-1" />
@@ -591,9 +664,13 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                               )}
                               {/* Execution stats if available */}
                               {(() => {
-                                const s = step as unknown as Record<string, unknown>;
+                                const s = step as unknown as Record<
+                                  string,
+                                  unknown
+                                >;
                                 const sent = (s.sent as number) || 0;
-                                const completed = (s.step_completed as number) || 0;
+                                const completed =
+                                  (s.step_completed as number) || 0;
                                 if (sent <= 0) return null;
                                 return (
                                   <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
@@ -601,7 +678,8 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                                       {sent} envoyé{sent > 1 ? "s" : ""}
                                     </span>
                                     <span>
-                                      {completed} terminé{completed > 1 ? "s" : ""}
+                                      {completed} terminé
+                                      {completed > 1 ? "s" : ""}
                                     </span>
                                   </div>
                                 );

@@ -101,7 +101,10 @@ const CATEGORY_ICONS: Record<string, typeof Target> = {
   other: BarChart3,
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof CheckCircle }> = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; icon: typeof CheckCircle }
+> = {
   in_progress: {
     label: "En cours",
     color: "bg-[#7af17a]/20 text-[#7af17a]",
@@ -138,7 +141,13 @@ interface SetterTask {
   completed_at: string | null;
 }
 
-export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardData; tasks?: SetterTask[] }) {
+export function SetterDashboard({
+  data,
+  tasks = [],
+}: {
+  data: SetterDashboardData;
+  tasks?: SetterTask[];
+}) {
   const currentLevel = getCurrentLevel(data.gamification.level);
   const nextLevel = getNextLevel(data.gamification.level);
 
@@ -148,12 +157,12 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
     : Math.round(
         ((data.gamification.points - currentLevel.min_points) /
           (nextLevel.min_points - currentLevel.min_points)) *
-          100
+          100,
       );
 
   const quotaProgress = Math.min(
     100,
-    Math.round((data.dailyQuota.dmsSent / data.dailyQuota.dmsTarget) * 100)
+    Math.round((data.dailyQuota.dmsSent / data.dailyQuota.dmsTarget) * 100),
   );
 
   return (
@@ -230,8 +239,8 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                   quotaProgress >= 100
                     ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                     : quotaProgress >= 70
-                    ? "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30"
-                    : "bg-orange-500/20 text-orange-400 border-orange-500/30"
+                      ? "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30"
+                      : "bg-orange-500/20 text-orange-400 border-orange-500/30"
                 }
               >
                 {quotaProgress}%
@@ -239,7 +248,9 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">DMs envoyes</span>
+                <span className="text-sm text-muted-foreground">
+                  DMs envoyes
+                </span>
                 <span className="font-medium text-foreground">
                   {data.dailyQuota.dmsSent} / {data.dailyQuota.dmsTarget}
                 </span>
@@ -279,7 +290,9 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                 <Phone className="h-4 w-4 text-brand" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{data.stats.bookings}</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {data.stats.bookings}
+            </p>
             <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
               Appels bookes
             </p>
@@ -293,7 +306,9 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                 <CalendarCheck className="h-4 w-4 text-blue-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{data.stats.showUpRate}%</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {data.stats.showUpRate}%
+            </p>
             <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
               Taux show-up
             </p>
@@ -307,7 +322,9 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                 <Target className="h-4 w-4 text-purple-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{data.stats.closingRate}%</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {data.stats.closingRate}%
+            </p>
             <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
               Taux closing
             </p>
@@ -343,7 +360,9 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
             <p className="text-2xl font-bold tracking-tight">
               {formatCurrency(data.stats.revenue)}
             </p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">CA genere</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              CA genere
+            </p>
           </CardContent>
         </Card>
 
@@ -382,9 +401,23 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data.dailyPerformance}>
                     <defs>
-                      <linearGradient id="colorDeals" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#7af17a" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#7af17a" stopOpacity={0} />
+                      <linearGradient
+                        id="colorDeals"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#7af17a"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#7af17a"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
                     <XAxis
@@ -458,7 +491,8 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
             ) : (
               <div className="space-y-3">
                 {data.objectives.map((obj) => {
-                  const statusCfg = STATUS_CONFIG[obj.status] || STATUS_CONFIG.in_progress;
+                  const statusCfg =
+                    STATUS_CONFIG[obj.status] || STATUS_CONFIG.in_progress;
                   const CatIcon = CATEGORY_ICONS[obj.category] || Target;
                   return (
                     <div
@@ -513,8 +547,12 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                 <div className="h-12 w-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                   <Phone className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Aucun appel prevu</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Les prochains appels apparaitront ici</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Aucun appel prevu
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  Les prochains appels apparaitront ici
+                </p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -531,7 +569,10 @@ export function SetterDashboard({ data, tasks = [] }: { data: SetterDashboardDat
                         <p className="text-sm font-medium">
                           {call.name || "Inconnu"}
                         </p>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1.5 py-0 mt-0.5"
+                        >
                           {call.type}
                         </Badge>
                       </div>

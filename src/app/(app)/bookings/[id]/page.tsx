@@ -19,9 +19,6 @@ export default async function BookingPage({ params }: Props) {
   }
 
   return (
-    <BookingDetail
-      booking={bookingResult.booking}
-      teamMembers={members}
-    />
+    <BookingDetail booking={bookingResult.booking} teamMembers={members} />
   );
 }

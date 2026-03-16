@@ -16,10 +16,7 @@ export default async function SupportPage() {
     .eq("id", user.id)
     .single();
 
-  const [tickets, stats] = await Promise.all([
-    getTickets(),
-    getTicketStats(),
-  ]);
+  const [tickets, stats] = await Promise.all([getTickets(), getTicketStats()]);
 
   return (
     <SupportView

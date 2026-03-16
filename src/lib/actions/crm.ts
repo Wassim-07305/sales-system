@@ -50,7 +50,9 @@ export async function getDealActivities(dealId: string) {
 
 export async function getPipelineStages() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data } = await supabase
@@ -79,7 +81,9 @@ export interface DealFilters {
 /**
  * Récupère les IDs des setters B2C assignés à un entrepreneur B2B.
  */
-export async function getSetterIdsForEntrepreneur(entrepreneurId: string): Promise<string[]> {
+export async function getSetterIdsForEntrepreneur(
+  entrepreneurId: string,
+): Promise<string[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
@@ -217,7 +221,9 @@ export async function getRecentDeals(limit = 10) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("deals")
-    .select("id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)")
+    .select(
+      "id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)",
+    )
     .order("updated_at", { ascending: false })
     .limit(limit);
   return data || [];
@@ -227,7 +233,9 @@ export async function searchDeals(query: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("deals")
-    .select("id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)")
+    .select(
+      "id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)",
+    )
     .ilike("title", `%${query}%`)
     .limit(20);
   return data || [];
@@ -275,7 +283,10 @@ export async function createDeal(params: {
     const { checkCriticalAction } = await import("@/lib/actions/ai-modes");
     const aiCheck = await checkCriticalAction("Envoi de contrat");
     if (aiCheck.requiresValidation) {
-      return { error: "Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)" };
+      return {
+        error:
+          "Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)",
+      };
     }
   } catch {
     // Ignore — AI mode config not set up
@@ -302,7 +313,12 @@ export async function createDeal(params: {
 
   if (error) return { error: error.message };
 
-  logAuditEvent({ action: "create", entity_type: "deal", entity_id: data.id, details: { title: params.title } }).catch(() => {});
+  logAuditEvent({
+    action: "create",
+    entity_type: "deal",
+    entity_id: data.id,
+    details: { title: params.title },
+  }).catch(() => {});
 
   revalidatePath("/crm");
   return { deal: data };
@@ -340,37 +356,62 @@ export async function updateDealStage(dealId: string, stageId: string) {
   if (error) return { error: error.message };
 
   // Everything below is non-critical — fire-and-forget
-  logAuditEvent({ action: "update", entity_type: "deal", entity_id: dealId, details: { stage_id: stageId } }).catch(() => {});
+  logAuditEvent({
+    action: "update",
+    entity_type: "deal",
+    entity_id: dealId,
+    details: { stage_id: stageId },
+  }).catch(() => {});
 
   // Notifications (wrapped in try-catch to never block the response)
   try {
     if (deal?.assigned_to) {
-      const [{ data: oldStage }, { data: newStage }, { data: assignee }] = await Promise.all([
-        supabase.from("pipeline_stages").select("name").eq("id", deal.stage_id).single(),
-        supabase.from("pipeline_stages").select("name").eq("id", stageId).single(),
-        supabase.from("profiles").select("email, full_name").eq("id", deal.assigned_to).single(),
-      ]);
+      const [{ data: oldStage }, { data: newStage }, { data: assignee }] =
+        await Promise.all([
+          supabase
+            .from("pipeline_stages")
+            .select("name")
+            .eq("id", deal.stage_id)
+            .single(),
+          supabase
+            .from("pipeline_stages")
+            .select("name")
+            .eq("id", stageId)
+            .single(),
+          supabase
+            .from("profiles")
+            .select("email, full_name")
+            .eq("id", deal.assigned_to)
+            .single(),
+        ]);
 
       const oldStageName = oldStage?.name || "—";
       const newStageName = newStage?.name || "—";
 
       // In-app + push notification
-      notify(deal.assigned_to, "Deal déplacé", `"${deal.title}" est passé de ${oldStageName} à ${newStageName}`, {
-        type: "deal",
-        link: `/crm/${dealId}`,
-      });
+      notify(
+        deal.assigned_to,
+        "Deal déplacé",
+        `"${deal.title}" est passé de ${oldStageName} à ${newStageName}`,
+        {
+          type: "deal",
+          link: `/crm/${dealId}`,
+        },
+      );
 
       // Email notification (fire-and-forget)
       if (assignee?.email && newStageName) {
-        import("@/lib/actions/email").then(({ sendDealStageEmail }) =>
-          sendDealStageEmail({
-            email: assignee.email,
-            name: assignee.full_name || "",
-            dealTitle: deal.title,
-            oldStage: oldStageName,
-            newStage: newStageName,
-          }).catch(() => {})
-        ).catch(() => {});
+        import("@/lib/actions/email")
+          .then(({ sendDealStageEmail }) =>
+            sendDealStageEmail({
+              email: assignee.email,
+              name: assignee.full_name || "",
+              dealTitle: deal.title,
+              oldStage: oldStageName,
+              newStage: newStageName,
+            }).catch(() => {}),
+          )
+          .catch(() => {});
       }
     }
   } catch {
@@ -489,7 +530,10 @@ export async function deleteDeal(dealId: string) {
   if (!user) return { error: "Non authentifié" };
 
   // Unlink contracts from this deal (prevent orphans)
-  await supabase.from("contracts").update({ deal_id: null }).eq("deal_id", dealId);
+  await supabase
+    .from("contracts")
+    .update({ deal_id: null })
+    .eq("deal_id", dealId);
 
   // Delete activities first
   await supabase.from("deal_activities").delete().eq("deal_id", dealId);
@@ -498,7 +542,11 @@ export async function deleteDeal(dealId: string) {
 
   if (error) return { error: error.message };
 
-  logAuditEvent({ action: "delete", entity_type: "deal", entity_id: dealId }).catch(() => {});
+  logAuditEvent({
+    action: "delete",
+    entity_type: "deal",
+    entity_id: dealId,
+  }).catch(() => {});
 
   revalidatePath("/crm");
   return { success: true };
@@ -567,7 +615,7 @@ export async function getOverdueFollowUps(daysThreshold = 2) {
   const { data, error } = await supabase
     .from("deals")
     .select(
-      "id, title, value, temperature, last_contact_at, stage_id, contact:profiles!deals_contact_id_fkey(id, full_name, email, phone), assigned_user:profiles!deals_assigned_to_fkey(id, full_name)"
+      "id, title, value, temperature, last_contact_at, stage_id, contact:profiles!deals_contact_id_fkey(id, full_name, email, phone), assigned_user:profiles!deals_assigned_to_fkey(id, full_name)",
     )
     .lt("last_contact_at", cutoffDate.toISOString())
     .not("last_contact_at", "is", null)
@@ -579,7 +627,7 @@ export async function getOverdueFollowUps(daysThreshold = 2) {
     const lastContact = new Date(deal.last_contact_at as string);
     const now = new Date();
     const daysOverdue = Math.floor(
-      (now.getTime() - lastContact.getTime()) / (1000 * 60 * 60 * 24)
+      (now.getTime() - lastContact.getTime()) / (1000 * 60 * 60 * 24),
     );
     return { ...deal, daysOverdue };
   });
@@ -590,10 +638,7 @@ export async function getOverdueFollowUps(daysThreshold = 2) {
 /**
  * Create an automated follow-up task (deal activity) for a given deal.
  */
-export async function createAutoFollowUp(
-  dealId: string,
-  daysOverdue: number
-) {
+export async function createAutoFollowUp(dealId: string, daysOverdue: number) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -623,9 +668,8 @@ export async function createAutoFollowUp(
 
       if (contact) {
         // Determine best channel: WhatsApp if phone, else email
-        const { generateFollowUpMessage, sendMessageToContact } = await import(
-          "@/lib/actions/messaging"
-        );
+        const { generateFollowUpMessage, sendMessageToContact } =
+          await import("@/lib/actions/messaging");
 
         const channel = contact.phone ? "whatsapp" : "email";
 
@@ -665,7 +709,10 @@ export async function createAutoFollowUp(
       }
     } catch (err) {
       // Non-critical: AI/sending failed, continue with notification-only follow-up
-      console.error("[AutoFollowUp] AI/send error:", err instanceof Error ? err.message : err);
+      console.error(
+        "[AutoFollowUp] AI/send error:",
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 
@@ -691,10 +738,15 @@ export async function createAutoFollowUp(
     ? `Relance IA envoyée via ${channelUsed} pour le deal "${deal.title}" (${daysOverdue}j sans contact).`
     : `Le deal "${deal.title}" n'a pas eu de contact depuis ${daysOverdue} jour(s).`;
 
-  notify(notifyUserId, messageSent ? "Relance IA envoyée" : "Relance automatique", notifBody, {
-    type: "follow_up",
-    link: `/crm/${dealId}`,
-  });
+  notify(
+    notifyUserId,
+    messageSent ? "Relance IA envoyée" : "Relance automatique",
+    notifBody,
+    {
+      type: "follow_up",
+      link: `/crm/${dealId}`,
+    },
+  );
 
   // Update next_action on the deal
   await supabase

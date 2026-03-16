@@ -23,10 +23,12 @@ export default function AuthError({
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-2xl font-bold text-brand-dark">Erreur d&apos;authentification</h2>
+        <h2 className="text-2xl font-bold text-brand-dark">
+          Erreur d&apos;authentification
+        </h2>
         <p className="max-w-md text-muted-foreground text-sm leading-relaxed">
-          Un probl&egrave;me est survenu lors de l&apos;authentification. Veuillez
-          r&eacute;essayer.
+          Un probl&egrave;me est survenu lors de l&apos;authentification.
+          Veuillez r&eacute;essayer.
         </p>
         {error.digest && (
           <p className="text-xs text-muted-foreground/50 font-mono">

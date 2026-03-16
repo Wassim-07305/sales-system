@@ -16,7 +16,9 @@ export interface ProspectRow {
   list: { name: string } | null;
 }
 
-function mapProspectRow(d: Record<string, unknown>): Omit<ProspectRow, "created_by_name"> {
+function mapProspectRow(
+  d: Record<string, unknown>,
+): Omit<ProspectRow, "created_by_name"> {
   return {
     id: d.id as string,
     name: d.name as string,
@@ -26,7 +28,9 @@ function mapProspectRow(d: Record<string, unknown>): Omit<ProspectRow, "created_
     notes: (d.notes ?? null) as string | null,
     created_at: d.created_at as string,
     created_by: (d.created_by ?? null) as string | null,
-    list: Array.isArray(d.list) ? (d.list[0] as { name: string }) || null : (d.list as { name: string } | null),
+    list: Array.isArray(d.list)
+      ? (d.list[0] as { name: string }) || null
+      : (d.list as { name: string } | null),
   };
 }
 
@@ -69,7 +73,9 @@ export async function getMyProspects(): Promise<ProspectRow[]> {
 
     if (linkedSetters && linkedSetters.length > 0) {
       const setterIds = linkedSetters.map((s) => s.id);
-      const setterNameMap = new Map(linkedSetters.map((s) => [s.id, s.full_name]));
+      const setterNameMap = new Map(
+        linkedSetters.map((s) => [s.id, s.full_name]),
+      );
 
       const { data: setterProspects } = await supabase
         .from("prospects")
@@ -85,7 +91,8 @@ export async function getMyProspects(): Promise<ProspectRow[]> {
 
       // Fusionner et trier par date décroissante
       return [...ownRows, ...setterRows].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
     }
   }
@@ -111,7 +118,8 @@ export async function getMyProspects(): Promise<ProspectRow[]> {
     }));
 
     return [...ownRows, ...b2bRows].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
   }
 

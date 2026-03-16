@@ -13,7 +13,12 @@ export interface DripCampaignStep {
   delay_days: number;
   template_id: string | null;
   template_name?: string;
-  action_type: "send_dm" | "follow_up" | "like_post" | "comment" | "connection_request";
+  action_type:
+    | "send_dm"
+    | "follow_up"
+    | "like_post"
+    | "comment"
+    | "connection_request";
   custom_message?: string;
 }
 
@@ -34,7 +39,9 @@ export interface DripCampaign {
 
 export async function getDripCampaigns(): Promise<DripCampaign[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -48,7 +55,10 @@ export async function getDripCampaigns(): Promise<DripCampaign[]> {
 
   // Gather list IDs to fetch prospect counts
   const listIds = data
-    .map((r) => (r.trigger_conditions as Record<string, unknown>)?.list_id as string)
+    .map(
+      (r) =>
+        (r.trigger_conditions as Record<string, unknown>)?.list_id as string,
+    )
     .filter(Boolean);
 
   // Fetch prospect counts per list
@@ -93,7 +103,7 @@ export async function getDripCampaigns(): Promise<DripCampaign[]> {
   return data.map((rule) => {
     const meta = (rule.trigger_conditions || {}) as Record<string, unknown>;
     const steps = ((rule.actions || []) as DripCampaignStep[]).sort(
-      (a, b) => a.order - b.order
+      (a, b) => a.order - b.order,
     );
     const listId = meta.list_id as string | null;
 
@@ -121,7 +131,9 @@ export async function createDripCampaign(campaignData: {
   steps: Omit<DripCampaignStep, "id">[];
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Generate IDs for each step
@@ -152,9 +164,13 @@ export async function createDripCampaign(campaignData: {
   return data;
 }
 
-export async function getDripCampaignDetail(id: string): Promise<DripCampaign | null> {
+export async function getDripCampaignDetail(
+  id: string,
+): Promise<DripCampaign | null> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: rule, error } = await supabase
@@ -195,7 +211,8 @@ export async function getDripCampaignDetail(id: string): Promise<DripCampaign | 
     .order("created_at", { ascending: false });
 
   const totalExec = executions?.length || 0;
-  const completedExec = executions?.filter((e) => e.status === "completed").length || 0;
+  const completedExec =
+    executions?.filter((e) => e.status === "completed").length || 0;
 
   // Build step execution stats
   const stepStats: Record<string, { sent: number; completed: number }> = {};
@@ -209,7 +226,12 @@ export async function getDripCampaignDetail(id: string): Promise<DripCampaign | 
     }
   }
 
-  const steps = ((rule.actions || []) as (DripCampaignStep & { sent?: number; step_completed?: number })[])
+  const steps = (
+    (rule.actions || []) as (DripCampaignStep & {
+      sent?: number;
+      step_completed?: number;
+    })[]
+  )
     .sort((a, b) => a.order - b.order)
     .map((step) => ({
       ...step,
@@ -258,7 +280,9 @@ export async function getDripCampaignDetail(id: string): Promise<DripCampaign | 
 
 export async function toggleDripCampaign(id: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Get current state
@@ -281,14 +305,13 @@ export async function toggleDripCampaign(id: string) {
 
 export async function deleteDripCampaign(id: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Delete executions first
-  await supabase
-    .from("automation_executions")
-    .delete()
-    .eq("rule_id", id);
+  await supabase.from("automation_executions").delete().eq("rule_id", id);
 
   const { error } = await supabase
     .from("automation_rules")

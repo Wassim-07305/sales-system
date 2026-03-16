@@ -8,13 +8,13 @@
 export type ScoreTier = "froid" | "tiede" | "chaud" | "brulant";
 
 export interface ScoreBreakdown {
-  statusScore: number;        // max 30
-  engagementScore: number;    // max 15
-  recencyScore: number;       // max 15
-  notesScore: number;         // max 10
-  platformFitScore: number;   // max 10
-  behavioralScore: number;    // max 15 (message frequency + conversation depth)
-  decayPenalty: number;       // 0 to -15
+  statusScore: number; // max 30
+  engagementScore: number; // max 15
+  recencyScore: number; // max 15
+  notesScore: number; // max 10
+  platformFitScore: number; // max 10
+  behavioralScore: number; // max 15 (message frequency + conversation depth)
+  decayPenalty: number; // 0 to -15
   total: number;
   tier: ScoreTier;
   tierLabel: string;
@@ -56,7 +56,7 @@ export function getScoreTierLabel(tier: ScoreTier): string {
  */
 export function computeScoreBreakdown(
   prospect: Record<string, unknown>,
-  allProspects: Record<string, unknown>[]
+  allProspects: Record<string, unknown>[],
 ): ScoreBreakdown {
   // ── 1. Statut (30 pts max) ──
   const statusWeights: Record<string, number> = {
@@ -72,7 +72,10 @@ export function computeScoreBreakdown(
   const statusScore = statusWeights[prospect.status as string] ?? 4;
 
   // ── 2. Engagement existant (15 pts max) ──
-  const rawEngagement = typeof prospect.engagement_score === "number" ? prospect.engagement_score : 0;
+  const rawEngagement =
+    typeof prospect.engagement_score === "number"
+      ? prospect.engagement_score
+      : 0;
   const engagementScore = Math.round((Math.min(rawEngagement, 100) / 100) * 15);
 
   // ── 3. Recence du dernier message (15 pts max) ──
@@ -84,7 +87,7 @@ export function computeScoreBreakdown(
   let daysSinceMessage = -1;
   if (lastMessageDate) {
     daysSinceMessage = Math.floor(
-      (Date.now() - lastMessageDate.getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - lastMessageDate.getTime()) / (1000 * 60 * 60 * 24),
     );
     if (daysSinceMessage <= 1) recencyScore = 15;
     else if (daysSinceMessage <= 3) recencyScore = 12;
@@ -105,10 +108,12 @@ export function computeScoreBreakdown(
   // ── 5. Fit plateforme (10 pts max) ──
   let platformFitScore = 5; // default middle score
   if (allProspects.length > 0) {
-    const platformStats: Record<string, { total: number; converted: number }> = {};
+    const platformStats: Record<string, { total: number; converted: number }> =
+      {};
     for (const p of allProspects) {
       const plat = (p.platform as string) || "autre";
-      if (!platformStats[plat]) platformStats[plat] = { total: 0, converted: 0 };
+      if (!platformStats[plat])
+        platformStats[plat] = { total: 0, converted: 0 };
       platformStats[plat].total++;
       const positiveStatuses = ["interested", "booked", "converted"];
       if (positiveStatuses.includes(p.status as string)) {
@@ -166,8 +171,13 @@ export function computeScoreBreakdown(
 
   // ── Total (clamp 0-100) ──
   const rawTotal =
-    statusScore + engagementScore + recencyScore + notesScore +
-    platformFitScore + behavioralScore + decayPenalty;
+    statusScore +
+    engagementScore +
+    recencyScore +
+    notesScore +
+    platformFitScore +
+    behavioralScore +
+    decayPenalty;
   const total = Math.max(0, Math.min(100, rawTotal));
 
   const tier = getScoreTier(total);

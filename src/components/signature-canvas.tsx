@@ -25,7 +25,11 @@ const WIDTHS: { value: StrokeWidth; label: string }[] = [
   { value: 4, label: "Épaisse" },
 ];
 
-export function SignatureCanvas({ onSign, width, height }: SignatureCanvasProps) {
+export function SignatureCanvas({
+  onSign,
+  width,
+  height,
+}: SignatureCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -142,7 +146,9 @@ export function SignatureCanvas({ onSign, width, height }: SignatureCanvasProps)
         />
         {!hasDrawn && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-gray-400 text-sm">Dessinez votre signature ici</span>
+            <span className="text-gray-400 text-sm">
+              Dessinez votre signature ici
+            </span>
           </div>
         )}
       </div>
@@ -162,7 +168,7 @@ export function SignatureCanvas({ onSign, width, height }: SignatureCanvasProps)
                 "w-6 h-6 rounded-full border-2 transition-all",
                 color === c.value
                   ? "border-[#7af17a] scale-110"
-                  : "border-border hover:border-muted-foreground"
+                  : "border-border hover:border-muted-foreground",
               )}
               style={{ backgroundColor: c.value }}
             />
@@ -182,7 +188,7 @@ export function SignatureCanvas({ onSign, width, height }: SignatureCanvasProps)
                 "px-2 py-0.5 rounded text-xs border transition-all",
                 strokeWidth === w.value
                   ? "border-[#7af17a] bg-[#7af17a]/10 text-foreground"
-                  : "border-border text-muted-foreground hover:border-muted-foreground"
+                  : "border-border text-muted-foreground hover:border-muted-foreground",
               )}
             >
               {w.label}
@@ -216,7 +222,9 @@ export function SignatureCanvas({ onSign, width, height }: SignatureCanvasProps)
       {/* Preview */}
       {preview && (
         <div className="rounded-lg border bg-white p-3">
-          <p className="text-xs text-muted-foreground mb-2">Apercu de la signature :</p>
+          <p className="text-xs text-muted-foreground mb-2">
+            Apercu de la signature :
+          </p>
           <img
             src={preview}
             alt="Apercu de la signature"

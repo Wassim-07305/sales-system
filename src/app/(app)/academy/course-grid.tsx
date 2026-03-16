@@ -54,14 +54,14 @@ type FilterTab = "all" | "in_progress" | "completed" | "not_started";
 
 function getCourseStats(
   course: CourseGridProps["courses"][number],
-  progressMap: Record<string, boolean>
+  progressMap: Record<string, boolean>,
 ) {
   const allLessons = course.modules.flatMap((m) => m.lessons);
   const totalModules = course.modules.length;
   const totalLessons = allLessons.length;
   const totalDuration = allLessons.reduce(
     (sum, l) => sum + (l.duration_minutes ?? 0),
-    0
+    0,
   );
   const completedLessons = allLessons.filter((l) => progressMap[l.id]).length;
   const percent =
@@ -80,7 +80,12 @@ function getCourseStats(
 // Component
 // ---------------------------------------------------------------------------
 
-export function CourseGrid({ courses, progressMap, isAdmin, moduleUnlockCounts = {} }: CourseGridProps) {
+export function CourseGrid({
+  courses,
+  progressMap,
+  isAdmin,
+  moduleUnlockCounts = {},
+}: CourseGridProps) {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<FilterTab>("all");
 
@@ -91,7 +96,7 @@ export function CourseGrid({ courses, progressMap, isAdmin, moduleUnlockCounts =
         ...c,
         stats: getCourseStats(c, progressMap),
       })),
-    [courses, progressMap]
+    [courses, progressMap],
   );
 
   // Filtered list
@@ -110,14 +115,14 @@ export function CourseGrid({ courses, progressMap, isAdmin, moduleUnlockCounts =
         list = list.filter(
           (c) =>
             c.stats.completedLessons > 0 &&
-            c.stats.completedLessons < c.stats.totalLessons
+            c.stats.completedLessons < c.stats.totalLessons,
         );
         break;
       case "completed":
         list = list.filter(
           (c) =>
             c.stats.totalLessons > 0 &&
-            c.stats.completedLessons === c.stats.totalLessons
+            c.stats.completedLessons === c.stats.totalLessons,
         );
         break;
       case "not_started":
@@ -195,7 +200,7 @@ export function CourseGrid({ courses, progressMap, isAdmin, moduleUnlockCounts =
                 <EmptyState />
               )}
             </TabsContent>
-          )
+          ),
         )}
       </Tabs>
     </div>
@@ -216,7 +221,10 @@ function CourseCard({
   moduleUnlock?: { unlocked: number; total: number };
 }) {
   const isComplete = stats.totalLessons > 0 && stats.percent === 100;
-  const hasLockedModules = moduleUnlock && moduleUnlock.total > 1 && moduleUnlock.unlocked < moduleUnlock.total;
+  const hasLockedModules =
+    moduleUnlock &&
+    moduleUnlock.total > 1 &&
+    moduleUnlock.unlocked < moduleUnlock.total;
 
   return (
     <Link href={`/academy/${course.id}`} className="group">
@@ -297,7 +305,9 @@ function CourseCard({
               <div
                 className={cn(
                   "h-full rounded-full transition-all duration-700 ease-out",
-                  isComplete ? "bg-brand shadow-[0_0_8px_rgba(122,241,122,0.3)]" : "bg-brand/80"
+                  isComplete
+                    ? "bg-brand shadow-[0_0_8px_rgba(122,241,122,0.3)]"
+                    : "bg-brand/80",
                 )}
                 style={{ width: `${stats.percent}%` }}
               />
@@ -320,7 +330,9 @@ function EmptyState() {
         <GraduationCap className="size-8 text-muted-foreground/40" />
       </div>
       <p className="font-medium text-sm">Aucune formation disponible</p>
-      <p className="text-xs text-muted-foreground/60 mt-1">Revenez bientôt pour découvrir de nouvelles formations</p>
+      <p className="text-xs text-muted-foreground/60 mt-1">
+        Revenez bientôt pour découvrir de nouvelles formations
+      </p>
     </div>
   );
 }

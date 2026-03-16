@@ -45,7 +45,10 @@ export function FilterPanel({
     (filters.source && filters.source !== "all") ||
     (filters.sortBy && filters.sortBy !== "created_at_desc");
 
-  function updateFilter<K extends keyof DealFilters>(key: K, value: DealFilters[K]) {
+  function updateFilter<K extends keyof DealFilters>(
+    key: K,
+    value: DealFilters[K],
+  ) {
     onFiltersChange({ ...filters, [key]: value });
   }
 
@@ -55,7 +58,8 @@ export function FilterPanel({
 
   const activeCount = [
     filters.dateFrom || filters.dateTo,
-    (filters.amountMin && filters.amountMin > 0) || (filters.amountMax && filters.amountMax > 0),
+    (filters.amountMin && filters.amountMin > 0) ||
+      (filters.amountMax && filters.amountMax > 0),
     filters.assignedTo && filters.assignedTo !== "all",
     filters.source && filters.source !== "all",
   ].filter(Boolean).length;
@@ -80,20 +84,30 @@ export function FilterPanel({
               {activeCount}
             </span>
           )}
-          {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          {isOpen ? (
+            <ChevronUp className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )}
         </Button>
 
         {/* Sort - always visible */}
         <Select
           value={filters.sortBy || "created_at_desc"}
-          onValueChange={(v) => updateFilter("sortBy", v as DealFilters["sortBy"])}
+          onValueChange={(v) =>
+            updateFilter("sortBy", v as DealFilters["sortBy"])
+          }
         >
           <SelectTrigger className="w-[200px] h-10 rounded-xl text-xs">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="created_at_desc">Date (récent → ancien)</SelectItem>
-            <SelectItem value="created_at_asc">Date (ancien → récent)</SelectItem>
+            <SelectItem value="created_at_desc">
+              Date (récent → ancien)
+            </SelectItem>
+            <SelectItem value="created_at_asc">
+              Date (ancien → récent)
+            </SelectItem>
             <SelectItem value="value_desc">Montant (décroissant)</SelectItem>
             <SelectItem value="value_asc">Montant (croissant)</SelectItem>
             <SelectItem value="title_asc">Titre (A → Z)</SelectItem>
@@ -102,7 +116,12 @@ export function FilterPanel({
         </Select>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1.5 text-muted-foreground h-9 text-xs">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetFilters}
+            className="gap-1.5 text-muted-foreground h-9 text-xs"
+          >
             <X className="h-3.5 w-3.5" />
             Réinitialiser
           </Button>
@@ -121,13 +140,17 @@ export function FilterPanel({
               <Input
                 type="date"
                 value={filters.dateFrom || ""}
-                onChange={(e) => updateFilter("dateFrom", e.target.value || undefined)}
+                onChange={(e) =>
+                  updateFilter("dateFrom", e.target.value || undefined)
+                }
                 className="text-xs h-10 rounded-xl"
               />
               <Input
                 type="date"
                 value={filters.dateTo || ""}
-                onChange={(e) => updateFilter("dateTo", e.target.value || undefined)}
+                onChange={(e) =>
+                  updateFilter("dateTo", e.target.value || undefined)
+                }
                 className="text-xs h-10 rounded-xl"
               />
             </div>
@@ -143,7 +166,12 @@ export function FilterPanel({
                 type="number"
                 placeholder="Min"
                 value={filters.amountMin || ""}
-                onChange={(e) => updateFilter("amountMin", e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  updateFilter(
+                    "amountMin",
+                    e.target.value ? Number(e.target.value) : undefined,
+                  )
+                }
                 className="text-xs h-10 rounded-xl"
                 min={0}
               />
@@ -151,7 +179,12 @@ export function FilterPanel({
                 type="number"
                 placeholder="Max"
                 value={filters.amountMax || ""}
-                onChange={(e) => updateFilter("amountMax", e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  updateFilter(
+                    "amountMax",
+                    e.target.value ? Number(e.target.value) : undefined,
+                  )
+                }
                 className="text-xs h-10 rounded-xl"
                 min={0}
               />

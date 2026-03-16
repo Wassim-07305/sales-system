@@ -30,8 +30,13 @@ export async function POST(request: NextRequest) {
     const webhookSecret = process.env.UNIPILE_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
-      console.error("UNIPILE_WEBHOOK_SECRET not configured — rejecting webhook");
-      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+      console.error(
+        "UNIPILE_WEBHOOK_SECRET not configured — rejecting webhook",
+      );
+      return NextResponse.json(
+        { error: "Webhook not configured" },
+        { status: 500 },
+      );
     }
 
     if (!signature) {
@@ -60,7 +65,7 @@ export async function POST(request: NextRequest) {
     console.error("Unipile webhook error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

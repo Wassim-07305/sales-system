@@ -5,7 +5,9 @@ import { WelcomePackView } from "./welcome-pack-view";
 
 export default async function WelcomePackPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const data = await getWelcomePack(user.id);

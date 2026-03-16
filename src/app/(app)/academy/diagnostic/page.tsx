@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getDiagnosticQuiz, getSkillAssessment, getAdaptivePath } from "@/lib/actions/academy";
+import {
+  getDiagnosticQuiz,
+  getSkillAssessment,
+  getAdaptivePath,
+} from "@/lib/actions/academy";
 import { DiagnosticView } from "./diagnostic-view";
 
 export default async function DiagnosticPage() {

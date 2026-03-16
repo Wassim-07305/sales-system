@@ -1,11 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getRevenueProjections, getAIForecasting } from "@/lib/actions/analytics-v2";
+import {
+  getRevenueProjections,
+  getAIForecasting,
+} from "@/lib/actions/analytics-v2";
 import { ProjectionsView } from "./projections-view";
 
 export default async function ProjectionsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase

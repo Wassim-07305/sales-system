@@ -2,7 +2,17 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Bell, Menu, Sun, Moon, Monitor, User, LogOut, Search, Settings } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Sun,
+  Moon,
+  Monitor,
+  User,
+  LogOut,
+  Search,
+  Settings,
+} from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { BREADCRUMB_LABELS } from "@/lib/constants";
 import { useUIStore } from "@/stores/ui-store";
@@ -18,7 +28,13 @@ interface HeaderProps {
   unreadCount: number;
 }
 
-export function Header({ userName, email, avatarUrl, role, unreadCount }: HeaderProps) {
+export function Header({
+  userName,
+  email,
+  avatarUrl,
+  role,
+  unreadCount,
+}: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -33,7 +49,10 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
         setUserMenuOpen(false);
       }
     }
@@ -42,11 +61,15 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
   }, []);
 
   // Breadcrumb from pathname — skip UUID segments
-  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const segments = pathname.split("/").filter(Boolean);
   const breadcrumbs = segments
     .filter((seg) => !UUID_RE.test(seg))
-    .map((seg) => BREADCRUMB_LABELS[seg] || seg.charAt(0).toUpperCase() + seg.slice(1));
+    .map(
+      (seg) =>
+        BREADCRUMB_LABELS[seg] || seg.charAt(0).toUpperCase() + seg.slice(1),
+    );
 
   async function handleLogout() {
     const supabase = createClient();
@@ -79,7 +102,7 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
                 className={cn(
                   idx === breadcrumbs.length - 1
                     ? "font-medium text-foreground"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 {crumb}
@@ -95,7 +118,7 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
           onClick={() => setSearchOpen(true)}
           className={cn(
             "flex h-10 w-full max-w-md items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm text-muted-foreground",
-            "transition-all duration-200 hover:border-border hover:bg-background"
+            "transition-all duration-200 hover:border-border hover:bg-background",
           )}
         >
           <Search className="h-4 w-4" />
@@ -120,7 +143,11 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
         <button
           onClick={() =>
             setTheme(
-              theme === "light" ? "dark" : theme === "dark" ? "system" : "light"
+              theme === "light"
+                ? "dark"
+                : theme === "dark"
+                  ? "system"
+                  : "light",
             )
           }
           className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -178,25 +205,33 @@ export function Header({ userName, email, avatarUrl, role, unreadCount }: Header
           {userMenuOpen && (
             <div className="absolute right-0 top-full z-50 mt-2 w-60 rounded-2xl border border-border/60 bg-card p-1.5 shadow-xl shadow-black/10 animate-in fade-in-0 slide-in-from-top-2 duration-200">
               <div className="px-3 py-2.5">
-                <p className="text-sm font-semibold text-foreground">{userName}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {userName}
+                </p>
                 <p className="text-xs text-muted-foreground">{email}</p>
               </div>
               <div className="mx-1.5 border-t border-border/50" />
               <button
-                onClick={() => { setUserMenuOpen(false); router.push("/profile"); }}
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  router.push("/profile");
+                }}
                 className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-foreground transition-all duration-150 hover:bg-secondary"
               >
                 <User className="h-4 w-4 text-muted-foreground" />
                 Mon profil
               </button>
               {!["client_b2b", "client_b2c"].includes(role) && (
-              <button
-                onClick={() => { setUserMenuOpen(false); router.push("/settings"); }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-foreground transition-all duration-150 hover:bg-secondary"
-              >
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                Paramètres
-              </button>
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    router.push("/settings");
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-foreground transition-all duration-150 hover:bg-secondary"
+                >
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  Paramètres
+                </button>
               )}
               <div className="mx-1.5 border-t border-border/50" />
               <button

@@ -120,7 +120,9 @@ export async function saveWhiteLabelConfig(data: {
 
     if (error) return { error: error.message };
   } catch {
-    return { error: "La table white_label_configs n'est pas encore configurée" };
+    return {
+      error: "La table white_label_configs n'est pas encore configurée",
+    };
   }
 
   revalidatePath("/settings/white-label");
@@ -163,7 +165,9 @@ export async function updateWhiteLabelConfig(data: {
 
     if (error) return { error: error.message };
   } catch {
-    return { error: "La table white_label_configs n'est pas encore configurée" };
+    return {
+      error: "La table white_label_configs n'est pas encore configurée",
+    };
   }
 
   revalidatePath("/settings/white-label");
@@ -208,7 +212,9 @@ export async function updateFeatureToggles(toggles: string[]) {
 
     if (error) return { error: error.message };
   } catch {
-    return { error: "La table white_label_configs n'est pas encore configurée" };
+    return {
+      error: "La table white_label_configs n'est pas encore configurée",
+    };
   }
 
   revalidatePath("/settings/white-label");
@@ -252,11 +258,11 @@ export async function getPortalData() {
   // Compute setter stats
   const setterStats = (setters || []).map((setter: Record<string, unknown>) => {
     const setterDeals = (deals || []).filter(
-      (d: Record<string, unknown>) => d.assigned_to === setter.id
+      (d: Record<string, unknown>) => d.assigned_to === setter.id,
     );
     const revenue = setterDeals.reduce(
       (sum: number, d: Record<string, unknown>) => sum + Number(d.value || 0),
-      0
+      0,
     );
     return {
       ...setter,
@@ -268,14 +274,14 @@ export async function getPortalData() {
   // Client metrics
   const totalRevenue = (deals || []).reduce(
     (sum: number, d: Record<string, unknown>) => sum + Number(d.value || 0),
-    0
+    0,
   );
   const avgHealthScore =
     (setters || []).length > 0
       ? (setters || []).reduce(
           (sum: number, s: Record<string, unknown>) =>
             sum + Number(s.health_score || 0),
-          0
+          0,
         ) / (setters || []).length
       : 0;
 
@@ -313,7 +319,14 @@ export async function generateMonthlyReport() {
 
   // Get date range for this month
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+  );
 
   // Get setters matched to this entrepreneur
   const { data: setters } = await supabase
@@ -365,12 +378,17 @@ export async function generateMonthlyReport() {
   }
 
   // Calculate conversion rate
-  const conversionRate = totalDeals > 0 ? Math.round((dealsClosed / totalDeals) * 100) : 0;
+  const conversionRate =
+    totalDeals > 0 ? Math.round((dealsClosed / totalDeals) * 100) : 0;
 
   // Calculate average setter performance (health score)
-  const avgSetterPerformance = setters && setters.length > 0
-    ? Math.round(setters.reduce((sum, s) => sum + (s.health_score || 0), 0) / setters.length)
-    : 0;
+  const avgSetterPerformance =
+    setters && setters.length > 0
+      ? Math.round(
+          setters.reduce((sum, s) => sum + (s.health_score || 0), 0) /
+            setters.length,
+        )
+      : 0;
 
   // Calculate average deal value
   const avgDealValue = dealsClosed > 0 ? Math.round(revenue / dealsClosed) : 0;

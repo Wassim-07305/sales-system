@@ -5,7 +5,10 @@ import { revalidatePath } from "next/cache";
 import { aiJSON } from "@/lib/ai/client";
 import { notifyMany } from "@/lib/actions/notifications";
 
-export async function getCourseWithPrerequisites(courseId: string, userId: string) {
+export async function getCourseWithPrerequisites(
+  courseId: string,
+  userId: string,
+) {
   const supabase = await createClient();
 
   const { data: course } = await supabase
@@ -19,7 +22,9 @@ export async function getCourseWithPrerequisites(courseId: string, userId: strin
   // Check prerequisites
   const { data: prerequisites } = await supabase
     .from("course_prerequisites")
-    .select("prerequisite_course_id, courses!course_prerequisites_prerequisite_course_id_fkey(title)")
+    .select(
+      "prerequisite_course_id, courses!course_prerequisites_prerequisite_course_id_fkey(title)",
+    )
     .eq("course_id", courseId);
 
   const prereqStatus = await Promise.all(
@@ -56,7 +61,7 @@ export async function getCourseWithPrerequisites(courseId: string, userId: strin
         title: (prereqCourseTitle as string) || "Cours requis",
         completed: (completed || []).length >= lessonIds.length,
       };
-    })
+    }),
   );
 
   const allPrereqsMet = prereqStatus.every((p) => p.completed);
@@ -69,7 +74,7 @@ export async function submitQuizAttempt(
   lessonId: string,
   answers: Record<number, number>,
   score: number,
-  passed: boolean
+  passed: boolean,
 ) {
   const supabase = await createClient();
   const {
@@ -89,11 +94,19 @@ export async function submitQuizAttempt(
   // Recompute score server-side to prevent client manipulation
   let verifiedScore = score;
   let verifiedPassed = passed;
-  if (quizData?.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
-    const questions = quizData.questions as Array<{ correct_index?: number; correctIndex?: number }>;
+  if (
+    quizData?.questions &&
+    Array.isArray(quizData.questions) &&
+    quizData.questions.length > 0
+  ) {
+    const questions = quizData.questions as Array<{
+      correct_index?: number;
+      correctIndex?: number;
+    }>;
     let correct = 0;
     for (let i = 0; i < questions.length; i++) {
-      const correctIdx = questions[i].correct_index ?? questions[i].correctIndex;
+      const correctIdx =
+        questions[i].correct_index ?? questions[i].correctIndex;
       if (answers[i] === correctIdx) correct++;
     }
     verifiedScore = Math.round((correct / questions.length) * 100);
@@ -123,7 +136,11 @@ export async function submitQuizAttempt(
   });
 
   revalidatePath("/academy");
-  return { attemptsLeft: maxAttempts - (todayAttempts || []).length - 1, score: verifiedScore, passed: verifiedPassed };
+  return {
+    attemptsLeft: maxAttempts - (todayAttempts || []).length - 1,
+    score: verifiedScore,
+    passed: verifiedPassed,
+  };
 }
 
 export async function getQuizAttempts(lessonId: string, userId: string) {
@@ -138,7 +155,7 @@ export async function getQuizAttempts(lessonId: string, userId: string) {
     .order("attempted_at", { ascending: false });
 
   const todayAttempts = (attempts || []).filter(
-    (a) => a.attempted_at >= `${today}T00:00:00.000Z`
+    (a) => a.attempted_at >= `${today}T00:00:00.000Z`,
   );
 
   return {
@@ -194,7 +211,7 @@ export async function getRevisionCards(courseId?: string) {
     if (lessons && lessons.length > 0) {
       query = query.in(
         "lesson_id",
-        lessons.map((l) => l.id)
+        lessons.map((l) => l.id),
       );
     }
   }
@@ -208,7 +225,7 @@ export async function getRevisionCards(courseId?: string) {
 
 export async function aiCorrectExercise(
   exerciseText: string,
-  userAnswer: string
+  userAnswer: string,
 ) {
   try {
     const result = await aiJSON<{
@@ -232,13 +249,17 @@ ${userAnswer}
 }
 
 Sois constructif mais exigeant. Le score doit refléter la qualité réelle de la réponse.`,
-      { system: "Tu es un coach expert en vente/setting chez S Academy. Réponds uniquement en français." }
+      {
+        system:
+          "Tu es un coach expert en vente/setting chez S Academy. Réponds uniquement en français.",
+      },
     );
     return result;
   } catch {
     return {
       score: 0,
-      feedback: "Correction IA indisponible — réessayez dans quelques instants. Vérifiez la configuration de l'API IA.",
+      feedback:
+        "Correction IA indisponible — réessayez dans quelques instants. Vérifiez la configuration de l'API IA.",
       suggestions: [],
     };
   }
@@ -246,11 +267,15 @@ Sois constructif mais exigeant. Le score doit refléter la qualité réelle de l
 
 export async function getCoursesWithModules() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: courses } = await supabase
     .from("courses")
-    .select("*, modules:course_modules(*, lessons:lessons(id, title, position, duration_minutes, video_url))")
+    .select(
+      "*, modules:course_modules(*, lessons:lessons(id, title, position, duration_minutes, video_url))",
+    )
     .eq("is_published", true)
     .order("position", { ascending: true });
 
@@ -264,7 +289,9 @@ export async function getCoursesWithModules() {
       .eq("completed", true);
 
     if (progress) {
-      progressMap = Object.fromEntries(progress.map((p: { lesson_id: string }) => [p.lesson_id, true]));
+      progressMap = Object.fromEntries(
+        progress.map((p: { lesson_id: string }) => [p.lesson_id, true]),
+      );
     }
   }
 
@@ -276,14 +303,19 @@ export async function getCoursesWithModules() {
           .map((m) => ({
             ...m,
             lessons: Array.isArray(m.lessons)
-              ? (m.lessons as Record<string, unknown>[]).sort((a, b) => (a.position as number) - (b.position as number))
+              ? (m.lessons as Record<string, unknown>[]).sort(
+                  (a, b) => (a.position as number) - (b.position as number),
+                )
               : [],
           }))
       : [],
   }));
 
   // Compute module unlock counts per course for the grid display
-  const moduleUnlockCounts: Record<string, { unlocked: number; total: number }> = {};
+  const moduleUnlockCounts: Record<
+    string,
+    { unlocked: number; total: number }
+  > = {};
   if (user) {
     // Gather all lesson IDs across all courses to batch-fetch quizzes & attempts
     const allLessonIds: string[] = [];
@@ -312,12 +344,18 @@ export async function getCoursesWithModules() {
       // Best score per lesson
       const bestScoreByLesson: Record<string, number> = {};
       for (const a of attempts || []) {
-        bestScoreByLesson[a.lesson_id] = Math.max(bestScoreByLesson[a.lesson_id] || 0, a.score ?? 0);
+        bestScoreByLesson[a.lesson_id] = Math.max(
+          bestScoreByLesson[a.lesson_id] || 0,
+          a.score ?? 0,
+        );
       }
 
       for (const c of sortedCourses) {
         const courseId = (c as Record<string, unknown>).id as string;
-        const mods = c.modules as Array<{ id: string; lessons: Array<{ id: string; position: number }> }>;
+        const mods = c.modules as Array<{
+          id: string;
+          lessons: Array<{ id: string; position: number }>;
+        }>;
         let unlockedCount = 0;
         for (let i = 0; i < mods.length; i++) {
           if (i === 0) {
@@ -326,7 +364,9 @@ export async function getCoursesWithModules() {
           }
           // Find gate lesson (last lesson with quiz) in previous module
           const prevMod = mods[i - 1];
-          const sortedLessons = [...prevMod.lessons].sort((a, b) => a.position - b.position);
+          const sortedLessons = [...prevMod.lessons].sort(
+            (a, b) => a.position - b.position,
+          );
           let gateLessonId: string | null = null;
           for (let j = sortedLessons.length - 1; j >= 0; j--) {
             if (quizLessonIds.has(sortedLessons[j].id)) {
@@ -343,7 +383,10 @@ export async function getCoursesWithModules() {
             break; // Sequential: if one is locked, all after are locked too
           }
         }
-        moduleUnlockCounts[courseId] = { unlocked: unlockedCount, total: mods.length };
+        moduleUnlockCounts[courseId] = {
+          unlocked: unlockedCount,
+          total: mods.length,
+        };
       }
     }
   }
@@ -357,7 +400,9 @@ export async function getCoursesWithModules() {
 
 export async function getCourseDetail(courseId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   // Fetch course with modules and lessons
@@ -376,14 +421,16 @@ export async function getCourseDetail(courseId: string) {
         .map((m) => ({
           ...m,
           lessons: Array.isArray(m.lessons)
-            ? (m.lessons as Record<string, unknown>[]).sort((a, b) => (a.position as number) - (b.position as number))
+            ? (m.lessons as Record<string, unknown>[]).sort(
+                (a, b) => (a.position as number) - (b.position as number),
+              )
             : [],
         }))
     : [];
 
   // Get all lesson IDs
   const lessonIds = modules.flatMap((m) =>
-    (m.lessons as Array<{ id: string }>).map((l) => l.id)
+    (m.lessons as Array<{ id: string }>).map((l) => l.id),
   );
 
   // Fetch progress
@@ -393,10 +440,16 @@ export async function getCourseDetail(courseId: string) {
     .eq("user_id", user.id)
     .in("lesson_id", lessonIds.length > 0 ? lessonIds : ["none"]);
 
-  const progressMap: Record<string, { completed: boolean; quiz_score: number | null }> = {};
+  const progressMap: Record<
+    string,
+    { completed: boolean; quiz_score: number | null }
+  > = {};
   if (progress) {
     for (const p of progress) {
-      progressMap[p.lesson_id] = { completed: p.completed, quiz_score: p.quiz_score };
+      progressMap[p.lesson_id] = {
+        completed: p.completed,
+        quiz_score: p.quiz_score,
+      };
     }
   }
 
@@ -444,10 +497,11 @@ export async function getCourseDetail(courseId: string) {
         .eq("completed", true)
         .in("lesson_id", prereqLessonIds);
 
-      const completed = (completedLessons || []).length >= prereqLessonIds.length;
+      const completed =
+        (completedLessons || []).length >= prereqLessonIds.length;
       if (!completed) allPrereqsMet = false;
       return { ...p, completed };
-    })
+    }),
   );
 
   // Check roleplay prerequisite
@@ -468,7 +522,9 @@ export async function getCourseDetail(courseId: string) {
 
 export async function markLessonComplete(lessonId: string, quizScore?: number) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const upsertData: Record<string, unknown> = {
@@ -489,7 +545,8 @@ export async function markLessonComplete(lessonId: string, quizScore?: number) {
 
   // Award gamification points for lesson completion
   try {
-    const { addPoints, updateChallengeProgress, checkBadgeEligibility } = await import("@/lib/actions/gamification");
+    const { addPoints, updateChallengeProgress, checkBadgeEligibility } =
+      await import("@/lib/actions/gamification");
     await addPoints(user.id, 15, "Leçon complétée");
     await updateChallengeProgress(user.id, "lessons_completed", 1);
 
@@ -511,9 +568,16 @@ export async function markLessonComplete(lessonId: string, quizScore?: number) {
         .select("id")
         .eq("user_id", user.id)
         .eq("completed", true)
-        .in("lesson_id", (allLessons || []).map((l) => l.id));
+        .in(
+          "lesson_id",
+          (allLessons || []).map((l) => l.id),
+        );
 
-      if (allLessons && completedLessons && completedLessons.length >= allLessons.length) {
+      if (
+        allLessons &&
+        completedLessons &&
+        completedLessons.length >= allLessons.length
+      ) {
         await addPoints(user.id, 50, "Cours complété !");
         await updateChallengeProgress(user.id, "courses_completed", 1);
       }
@@ -533,8 +597,15 @@ export async function markLessonComplete(lessonId: string, quizScore?: number) {
  */
 export async function generateQuizQuestions(
   lessonId: string,
-  count: number = 5
-): Promise<Array<{ question: string; options: string[]; correctIndex: number; explanation: string }>> {
+  count: number = 5,
+): Promise<
+  Array<{
+    question: string;
+    options: string[];
+    correctIndex: number;
+    explanation: string;
+  }>
+> {
   const supabase = await createClient();
 
   // Get lesson + course context
@@ -545,11 +616,15 @@ export async function generateQuizQuestions(
     .single();
 
   const courseTitle = lesson?.courses
-    ? (Array.isArray(lesson.courses) ? (lesson.courses[0] as { title: string })?.title : (lesson.courses as { title: string }).title)
+    ? Array.isArray(lesson.courses)
+      ? (lesson.courses[0] as { title: string })?.title
+      : (lesson.courses as { title: string }).title
     : "Formation";
 
   // Get previous attempts to avoid repetition
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: pastAttempts } = user
     ? await supabase
         .from("quiz_attempts")
@@ -560,9 +635,10 @@ export async function generateQuizQuestions(
         .limit(3)
     : { data: null };
 
-  const pastContext = pastAttempts && pastAttempts.length > 0
-    ? `\nL'apprenant a déjà passé ${pastAttempts.length} tentatives. Génère des questions DIFFÉRENTES de celles qu'il a déjà vues.`
-    : "";
+  const pastContext =
+    pastAttempts && pastAttempts.length > 0
+      ? `\nL'apprenant a déjà passé ${pastAttempts.length} tentatives. Génère des questions DIFFÉRENTES de celles qu'il a déjà vues.`
+      : "";
 
   try {
     const result = await aiJSON<{
@@ -597,11 +673,16 @@ Règles :
 - Questions variées : compréhension, application, mise en situation
 - Niveau adapté à des setters en formation
 - En français, tutoiement`,
-      { system: "Tu es un formateur expert en vente/setting chez S Academy. Tu crées des quiz pédagogiques." }
+      {
+        system:
+          "Tu es un formateur expert en vente/setting chez S Academy. Tu crées des quiz pédagogiques.",
+      },
     );
     return result.questions;
   } catch {
-    throw new Error("Génération de quiz indisponible — vérifiez la configuration de l'API IA.");
+    throw new Error(
+      "Génération de quiz indisponible — vérifiez la configuration de l'API IA.",
+    );
   }
 }
 
@@ -619,13 +700,16 @@ export async function getDetailedQuizResults(attemptId: string) {
 
   if (!attempt) return null;
 
-  const quiz = Array.isArray(attempt.quizzes) ? attempt.quizzes[0] : attempt.quizzes;
-  const questions = (quiz as Record<string, unknown>)?.questions as Array<{
-    question: string;
-    options: string[];
-    correctIndex: number;
-    explanation?: string;
-  }> || [];
+  const quiz = Array.isArray(attempt.quizzes)
+    ? attempt.quizzes[0]
+    : attempt.quizzes;
+  const questions =
+    ((quiz as Record<string, unknown>)?.questions as Array<{
+      question: string;
+      options: string[];
+      correctIndex: number;
+      explanation?: string;
+    }>) || [];
 
   const userAnswers = (attempt.answers || {}) as Record<number, number>;
 
@@ -650,11 +734,16 @@ export async function getDetailedQuizResults(attemptId: string) {
   };
 }
 
-export async function trackVideoProgress(lessonId: string, watchedPercent: number) {
+export async function trackVideoProgress(
+  lessonId: string,
+  watchedPercent: number,
+) {
   if (watchedPercent < 80) return;
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   // Check if already completed
@@ -667,17 +756,15 @@ export async function trackVideoProgress(lessonId: string, watchedPercent: numbe
 
   if (existing?.completed) return;
 
-  await supabase
-    .from("lesson_progress")
-    .upsert(
-      {
-        user_id: user.id,
-        lesson_id: lessonId,
-        completed: true,
-        completed_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,lesson_id" }
-    );
+  await supabase.from("lesson_progress").upsert(
+    {
+      user_id: user.id,
+      lesson_id: lessonId,
+      completed: true,
+      completed_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id,lesson_id" },
+  );
 
   revalidatePath("/academy");
 }
@@ -686,7 +773,10 @@ export async function trackVideoProgress(lessonId: string, watchedPercent: numbe
  * Check if user has met the roleplay score requirement to access a course.
  * Some courses require a minimum roleplay score of 75/100.
  */
-export async function checkRoleplayPrerequisite(courseId: string, userId: string): Promise<{
+export async function checkRoleplayPrerequisite(
+  courseId: string,
+  userId: string,
+): Promise<{
   required: boolean;
   met: boolean;
   bestScore: number;
@@ -718,7 +808,8 @@ export async function checkRoleplayPrerequisite(courseId: string, userId: string
     .order("score", { ascending: false })
     .limit(1);
 
-  const bestScore = sessions && sessions.length > 0 ? (sessions[0].score || 0) : 0;
+  const bestScore =
+    sessions && sessions.length > 0 ? sessions[0].score || 0 : 0;
 
   return {
     required: true,
@@ -731,9 +822,14 @@ export async function checkRoleplayPrerequisite(courseId: string, userId: string
 /**
  * Admin function: set roleplay score requirement on a course.
  */
-export async function setRoleplayRequirement(courseId: string, minScore: number) {
+export async function setRoleplayRequirement(
+  courseId: string,
+  minScore: number,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: course } = await supabase
@@ -778,149 +874,168 @@ export async function getModuleUnlockStatus(courseId: string): Promise<{
   >;
 }> {
   try {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { moduleStatus: {} };
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { moduleStatus: {} };
 
-  // Fetch course modules with their lessons (need quiz info)
-  const { data: course, error: courseError } = await supabase
-    .from("courses")
-    .select("modules:course_modules(id, title, position, lessons:lessons(id, position))")
-    .eq("id", courseId)
-    .single();
+    // Fetch course modules with their lessons (need quiz info)
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select(
+        "modules:course_modules(id, title, position, lessons:lessons(id, position))",
+      )
+      .eq("id", courseId)
+      .single();
 
-  if (courseError || !course) return { moduleStatus: {} };
+    if (courseError || !course) return { moduleStatus: {} };
 
-  const modules = Array.isArray(course.modules)
-    ? (course.modules as Array<{
-        id: string;
-        title: string;
-        position: number;
-        lessons: Array<{ id: string; position: number }> | null;
-      }>)
-      .map((m) => ({ ...m, lessons: Array.isArray(m.lessons) ? m.lessons : [] }))
-      .sort((a, b) => a.position - b.position)
-    : [];
+    const modules = Array.isArray(course.modules)
+      ? (
+          course.modules as Array<{
+            id: string;
+            title: string;
+            position: number;
+            lessons: Array<{ id: string; position: number }> | null;
+          }>
+        )
+          .map((m) => ({
+            ...m,
+            lessons: Array.isArray(m.lessons) ? m.lessons : [],
+          }))
+          .sort((a, b) => a.position - b.position)
+      : [];
 
-  if (modules.length === 0) return { moduleStatus: {} };
+    if (modules.length === 0) return { moduleStatus: {} };
 
-  // Collect all lesson IDs to batch-fetch quizzes and attempts
-  const allLessonIds = modules.flatMap((m) => m.lessons.map((l) => l.id));
-  if (allLessonIds.length === 0) return { moduleStatus: {} };
+    // Collect all lesson IDs to batch-fetch quizzes and attempts
+    const allLessonIds = modules.flatMap((m) => m.lessons.map((l) => l.id));
+    if (allLessonIds.length === 0) return { moduleStatus: {} };
 
-  // Fetch all quizzes for lessons in this course
-  const { data: quizzes } = await supabase
-    .from("quizzes")
-    .select("id, lesson_id, max_attempts_per_day")
-    .in("lesson_id", allLessonIds);
+    // Fetch all quizzes for lessons in this course
+    const { data: quizzes } = await supabase
+      .from("quizzes")
+      .select("id, lesson_id, max_attempts_per_day")
+      .in("lesson_id", allLessonIds);
 
-  const quizByLessonId: Record<string, { id: string; max_attempts_per_day: number }> = {};
-  for (const q of quizzes || []) {
-    quizByLessonId[q.lesson_id] = {
-      id: q.id,
-      max_attempts_per_day: q.max_attempts_per_day || 3,
-    };
-  }
-
-  // Fetch all quiz attempts for this user in this course
-  const { data: attempts } = await supabase
-    .from("quiz_attempts")
-    .select("lesson_id, score, attempted_at")
-    .eq("user_id", user.id)
-    .in("lesson_id", allLessonIds)
-    .order("attempted_at", { ascending: false });
-
-  const today = new Date().toISOString().split("T")[0];
-
-  // Helper: get best score and today attempts for a specific lesson
-  function getAttemptInfo(lessonId: string) {
-    const lessonAttempts = (attempts || []).filter((a) => a.lesson_id === lessonId);
-    const todayAttempts = lessonAttempts.filter(
-      (a) => a.attempted_at >= `${today}T00:00:00.000Z`
-    );
-    const bestScore = lessonAttempts.length > 0
-      ? Math.max(0, ...lessonAttempts.map((a) => a.score ?? 0))
-      : 0;
-    return { bestScore, todayAttempts: todayAttempts.length };
-  }
-
-  // For each module, find its "gate quiz" — the quiz on the last lesson of the module
-  // that must be passed to unlock the next module
-  function getModuleGateLesson(mod: typeof modules[number]): string | null {
-    const sortedLessons = [...mod.lessons].sort((a, b) => a.position - b.position);
-    // Find the last lesson that has a quiz
-    for (let i = sortedLessons.length - 1; i >= 0; i--) {
-      if (quizByLessonId[sortedLessons[i].id]) {
-        return sortedLessons[i].id;
-      }
-    }
-    return null;
-  }
-
-  const moduleStatus: Record<
-    string,
-    {
-      unlocked: boolean;
-      previousModuleQuizPassed: boolean;
-      previousModuleQuizBestScore: number | null;
-      previousModuleQuizTodayAttempts: number;
-      previousModuleQuizMaxAttempts: number;
-      previousModuleTitle: string | null;
-    }
-  > = {};
-
-  for (let i = 0; i < modules.length; i++) {
-    const mod = modules[i];
-
-    if (i === 0) {
-      // First module is always unlocked
-      moduleStatus[mod.id] = {
-        unlocked: true,
-        previousModuleQuizPassed: true,
-        previousModuleQuizBestScore: null,
-        previousModuleQuizTodayAttempts: 0,
-        previousModuleQuizMaxAttempts: 3,
-        previousModuleTitle: null,
+    const quizByLessonId: Record<
+      string,
+      { id: string; max_attempts_per_day: number }
+    > = {};
+    for (const q of quizzes || []) {
+      quizByLessonId[q.lesson_id] = {
+        id: q.id,
+        max_attempts_per_day: q.max_attempts_per_day || 3,
       };
-      continue;
     }
 
-    const prevModule = modules[i - 1];
-    const gateLessonId = getModuleGateLesson(prevModule);
+    // Fetch all quiz attempts for this user in this course
+    const { data: attempts } = await supabase
+      .from("quiz_attempts")
+      .select("lesson_id, score, attempted_at")
+      .eq("user_id", user.id)
+      .in("lesson_id", allLessonIds)
+      .order("attempted_at", { ascending: false });
 
-    if (!gateLessonId) {
-      // Previous module has no quiz — module is unlocked by default
+    const today = new Date().toISOString().split("T")[0];
+
+    // Helper: get best score and today attempts for a specific lesson
+    function getAttemptInfo(lessonId: string) {
+      const lessonAttempts = (attempts || []).filter(
+        (a) => a.lesson_id === lessonId,
+      );
+      const todayAttempts = lessonAttempts.filter(
+        (a) => a.attempted_at >= `${today}T00:00:00.000Z`,
+      );
+      const bestScore =
+        lessonAttempts.length > 0
+          ? Math.max(0, ...lessonAttempts.map((a) => a.score ?? 0))
+          : 0;
+      return { bestScore, todayAttempts: todayAttempts.length };
+    }
+
+    // For each module, find its "gate quiz" — the quiz on the last lesson of the module
+    // that must be passed to unlock the next module
+    function getModuleGateLesson(mod: (typeof modules)[number]): string | null {
+      const sortedLessons = [...mod.lessons].sort(
+        (a, b) => a.position - b.position,
+      );
+      // Find the last lesson that has a quiz
+      for (let i = sortedLessons.length - 1; i >= 0; i--) {
+        if (quizByLessonId[sortedLessons[i].id]) {
+          return sortedLessons[i].id;
+        }
+      }
+      return null;
+    }
+
+    const moduleStatus: Record<
+      string,
+      {
+        unlocked: boolean;
+        previousModuleQuizPassed: boolean;
+        previousModuleQuizBestScore: number | null;
+        previousModuleQuizTodayAttempts: number;
+        previousModuleQuizMaxAttempts: number;
+        previousModuleTitle: string | null;
+      }
+    > = {};
+
+    for (let i = 0; i < modules.length; i++) {
+      const mod = modules[i];
+
+      if (i === 0) {
+        // First module is always unlocked
+        moduleStatus[mod.id] = {
+          unlocked: true,
+          previousModuleQuizPassed: true,
+          previousModuleQuizBestScore: null,
+          previousModuleQuizTodayAttempts: 0,
+          previousModuleQuizMaxAttempts: 3,
+          previousModuleTitle: null,
+        };
+        continue;
+      }
+
+      const prevModule = modules[i - 1];
+      const gateLessonId = getModuleGateLesson(prevModule);
+
+      if (!gateLessonId) {
+        // Previous module has no quiz — module is unlocked by default
+        moduleStatus[mod.id] = {
+          unlocked: true,
+          previousModuleQuizPassed: true,
+          previousModuleQuizBestScore: null,
+          previousModuleQuizTodayAttempts: 0,
+          previousModuleQuizMaxAttempts: 3,
+          previousModuleTitle: prevModule.title,
+        };
+        continue;
+      }
+
+      const quizInfo = quizByLessonId[gateLessonId];
+      const attemptInfo = getAttemptInfo(gateLessonId);
+      const passed = attemptInfo.bestScore >= 90;
+
       moduleStatus[mod.id] = {
-        unlocked: true,
-        previousModuleQuizPassed: true,
-        previousModuleQuizBestScore: null,
-        previousModuleQuizTodayAttempts: 0,
-        previousModuleQuizMaxAttempts: 3,
+        unlocked: passed,
+        previousModuleQuizPassed: passed,
+        previousModuleQuizBestScore:
+          attemptInfo.bestScore > 0 ? attemptInfo.bestScore : null,
+        previousModuleQuizTodayAttempts: attemptInfo.todayAttempts,
+        previousModuleQuizMaxAttempts: quizInfo.max_attempts_per_day,
         previousModuleTitle: prevModule.title,
       };
-      continue;
     }
 
-    const quizInfo = quizByLessonId[gateLessonId];
-    const attemptInfo = getAttemptInfo(gateLessonId);
-    const passed = attemptInfo.bestScore >= 90;
-
-    moduleStatus[mod.id] = {
-      unlocked: passed,
-      previousModuleQuizPassed: passed,
-      previousModuleQuizBestScore: attemptInfo.bestScore > 0 ? attemptInfo.bestScore : null,
-      previousModuleQuizTodayAttempts: attemptInfo.todayAttempts,
-      previousModuleQuizMaxAttempts: quizInfo.max_attempts_per_day,
-      previousModuleTitle: prevModule.title,
-    };
-  }
-
-  return { moduleStatus };
+    return { moduleStatus };
   } catch (error) {
     // Graceful fallback: if tables don't exist, lock everything by default (safer)
-    console.error("[getModuleUnlockStatus] Error fetching module status:", error);
+    console.error(
+      "[getModuleUnlockStatus] Error fetching module status:",
+      error,
+    );
     return { moduleStatus: {} };
   }
 }
@@ -938,12 +1053,13 @@ export async function getMicroLessons() {
   const { data: courses } = await supabase
     .from("courses")
     .select(
-      "id, title, modules:course_modules(id, title, lessons:lessons(id, title, content, duration_minutes, position, type))"
+      "id, title, modules:course_modules(id, title, lessons:lessons(id, title, content, duration_minutes, position, type))",
     )
     .eq("is_published", true)
     .order("position", { ascending: true });
 
-  if (!courses || courses.length === 0) return { microLessons: [], progressMap: {} };
+  if (!courses || courses.length === 0)
+    return { microLessons: [], progressMap: {} };
 
   // Flatten and filter micro lessons (duration <= 5 or null)
   const microLessons: Array<{
@@ -1004,7 +1120,7 @@ export async function getMicroLessons() {
 
     if (progress) {
       progressMap = Object.fromEntries(
-        progress.map((p: { lesson_id: string }) => [p.lesson_id, true])
+        progress.map((p: { lesson_id: string }) => [p.lesson_id, true]),
       );
     }
   }
@@ -1060,7 +1176,10 @@ export async function getUserCertificates() {
     .order("position", { ascending: true });
 
   if (!courses || courses.length === 0) {
-    return { certificates: [], userName: profile?.full_name || user.email || "Apprenant" };
+    return {
+      certificates: [],
+      userName: profile?.full_name || user.email || "Apprenant",
+    };
   }
 
   // Get all user's completed lessons
@@ -1071,9 +1190,15 @@ export async function getUserCertificates() {
     .eq("completed", true);
 
   const completedSet = new Set((progress || []).map((p) => p.lesson_id));
-  const completionMap: Record<string, { completed_at: string | null; quiz_score: number | null }> = {};
+  const completionMap: Record<
+    string,
+    { completed_at: string | null; quiz_score: number | null }
+  > = {};
   for (const p of progress || []) {
-    completionMap[p.lesson_id] = { completed_at: p.completed_at, quiz_score: p.quiz_score };
+    completionMap[p.lesson_id] = {
+      completed_at: p.completed_at,
+      quiz_score: p.quiz_score,
+    };
   }
 
   // Build certificates for fully-completed courses
@@ -1106,16 +1231,21 @@ export async function getUserCertificates() {
     const scores = lessonIds
       .map((id) => completionMap[id]?.quiz_score)
       .filter((s): s is number => s !== null && s !== undefined);
-    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+    const avgScore =
+      scores.length > 0
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : null;
 
     const dates = lessonIds
       .map((id) => completionMap[id]?.completed_at)
       .filter((d): d is string => d !== null && d !== undefined)
       .sort();
-    const lastDate = dates.length > 0 ? dates[dates.length - 1] : new Date().toISOString();
+    const lastDate =
+      dates.length > 0 ? dates[dates.length - 1] : new Date().toISOString();
 
     // Deterministic certificate ID based on user + course
-    const certId = `${user.id.slice(0, 8)}-${course.id.slice(0, 8)}-CERT`.toUpperCase();
+    const certId =
+      `${user.id.slice(0, 8)}-${course.id.slice(0, 8)}-CERT`.toUpperCase();
 
     certificates.push({
       courseId: course.id,
@@ -1181,15 +1311,20 @@ export async function getCertificateData(courseId: string) {
   const scores = (progress || [])
     .map((p) => p.quiz_score)
     .filter((s): s is number => s !== null && s !== undefined);
-  const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  const avgScore =
+    scores.length > 0
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : null;
 
   const dates = (progress || [])
     .map((p) => p.completed_at)
     .filter((d): d is string => d !== null && d !== undefined)
     .sort();
-  const completionDate = dates.length > 0 ? dates[dates.length - 1] : new Date().toISOString();
+  const completionDate =
+    dates.length > 0 ? dates[dates.length - 1] : new Date().toISOString();
 
-  const certId = `${user.id.slice(0, 8)}-${course.id.slice(0, 8)}-CERT`.toUpperCase();
+  const certId =
+    `${user.id.slice(0, 8)}-${course.id.slice(0, 8)}-CERT`.toUpperCase();
 
   return {
     courseId: course.id,
@@ -1283,8 +1418,7 @@ const DIAGNOSTIC_QUESTIONS: Array<{
     id: "n1",
     category: "negociation",
     categoryLabel: "Négociation",
-    question:
-      "En négociation, qu'est-ce que la technique d'ancrage ?",
+    question: "En négociation, qu'est-ce que la technique d'ancrage ?",
     options: [
       "Commencer par un prix bas pour attirer le prospect",
       "Fixer un point de référence élevé pour que toute concession semble avantageuse",
@@ -1316,8 +1450,7 @@ const DIAGNOSTIC_QUESTIONS: Array<{
     id: "com1",
     category: "communication",
     categoryLabel: "Communication",
-    question:
-      "Qu'est-ce que l'écoute active implique principalement ?",
+    question: "Qu'est-ce que l'écoute active implique principalement ?",
     options: [
       "Prendre des notes détaillées sans rien dire",
       "Reformuler les propos du prospect et poser des questions de clarification",
@@ -1400,7 +1533,7 @@ export async function getDiagnosticQuiz() {
 }
 
 export async function submitDiagnosticResults(
-  answers: { questionId: string; answer: string }[]
+  answers: { questionId: string; answer: string }[],
 ) {
   const supabase = await createClient();
   const {
@@ -1434,7 +1567,8 @@ export async function submitDiagnosticResults(
   }
 
   const skills = Object.entries(categoryScores).map(([category, data]) => {
-    const score = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+    const score =
+      data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
     return {
       category,
       categoryLabel: data.label,
@@ -1472,7 +1606,7 @@ export async function submitDiagnosticResults(
     .eq("id", user.id)
     .single();
 
-  const currentMetadata = ((profile?.metadata as Record<string, unknown>) || {});
+  const currentMetadata = (profile?.metadata as Record<string, unknown>) || {};
 
   await supabase
     .from("profiles")
@@ -1518,16 +1652,14 @@ export async function getSkillAssessment(userId?: string) {
   if (assessments && assessments.length > 0) {
     return {
       source: "skill_assessments" as const,
-      skills: assessments.map(
-        (a: Record<string, unknown>) => ({
-          category: a.skill_name as string,
-          categoryLabel: a.skill_name as string,
-          score: (a.score as number) || 0,
-          level: computeSkillLevel((a.score as number) || 0),
-          correct: 0,
-          total: 0,
-        })
-      ),
+      skills: assessments.map((a: Record<string, unknown>) => ({
+        category: a.skill_name as string,
+        categoryLabel: a.skill_name as string,
+        score: (a.score as number) || 0,
+        level: computeSkillLevel((a.score as number) || 0),
+        correct: 0,
+        total: 0,
+      })),
     };
   }
 
@@ -1540,7 +1672,11 @@ export async function getSkillAssessment(userId?: string) {
 
   const metadata = (profile?.metadata || {}) as Record<string, unknown>;
   const diagnosticResult = metadata.diagnostic_result as
-    | { skills: Array<Record<string, unknown>>; overallScore: number; completedAt: string }
+    | {
+        skills: Array<Record<string, unknown>>;
+        overallScore: number;
+        completedAt: string;
+      }
     | undefined;
 
   if (diagnosticResult && diagnosticResult.skills) {
@@ -1563,7 +1699,12 @@ export async function getSkillAssessment(userId?: string) {
 }
 
 async function buildRecommendedCourses(
-  skills: Array<{ category: string; categoryLabel: string; score: number; level: string }>
+  skills: Array<{
+    category: string;
+    categoryLabel: string;
+    score: number;
+    level: string;
+  }>,
 ) {
   const supabase = await createClient();
 
@@ -1574,7 +1715,9 @@ async function buildRecommendedCourses(
   // Fetch all published courses
   const { data: courses } = await supabase
     .from("courses")
-    .select("id, title, description, modules:course_modules(lessons:lessons(id, duration_minutes))")
+    .select(
+      "id, title, description, modules:course_modules(lessons:lessons(id, duration_minutes))",
+    )
     .eq("is_published", true)
     .order("position", { ascending: true });
 
@@ -1591,7 +1734,7 @@ async function buildRecommendedCourses(
 
     if (progress) {
       progressMap = Object.fromEntries(
-        progress.map((p: { lesson_id: string }) => [p.lesson_id, true])
+        progress.map((p: { lesson_id: string }) => [p.lesson_id, true]),
       );
     }
   }
@@ -1601,10 +1744,25 @@ async function buildRecommendedCourses(
 
   // Map courses to skill categories (simple keyword matching on title/description)
   const skillKeywords: Record<string, string[]> = {
-    prospection: ["prospect", "lead", "outreach", "acquisition", "qualification", "dm", "message"],
+    prospection: [
+      "prospect",
+      "lead",
+      "outreach",
+      "acquisition",
+      "qualification",
+      "dm",
+      "message",
+    ],
     closing: ["clos", "vente", "conversion", "sign", "deal", "offre"],
     negociation: ["négo", "nego", "prix", "remise", "concession", "ancrage"],
-    communication: ["communi", "écoute", "rapport", "présent", "pitch", "relation"],
+    communication: [
+      "communi",
+      "écoute",
+      "rapport",
+      "présent",
+      "pitch",
+      "relation",
+    ],
     objection: ["objection", "refus", "hésit", "doute", "freins", "blocage"],
   };
 
@@ -1631,12 +1789,15 @@ async function buildRecommendedCourses(
       const titleLower = (course.title || "").toLowerCase();
       const descLower = (course.description || "").toLowerCase();
       const matches = keywords.some(
-        (kw) => titleLower.includes(kw) || descLower.includes(kw)
+        (kw) => titleLower.includes(kw) || descLower.includes(kw),
       );
 
       if (matches || recommended.length < 3) {
         const modules = Array.isArray(course.modules) ? course.modules : [];
-        const allLessons: Array<{ id: string; duration_minutes: number | null }> = [];
+        const allLessons: Array<{
+          id: string;
+          duration_minutes: number | null;
+        }> = [];
         for (const mod of modules as Array<{
           lessons: Array<{ id: string; duration_minutes: number | null }>;
         }>) {
@@ -1646,9 +1807,11 @@ async function buildRecommendedCourses(
 
         const totalMinutes = allLessons.reduce(
           (sum, l) => sum + (l.duration_minutes || 10),
-          0
+          0,
         );
-        const completedCount = allLessons.filter((l) => progressMap[l.id]).length;
+        const completedCount = allLessons.filter(
+          (l) => progressMap[l.id],
+        ).length;
         const progressPct =
           allLessons.length > 0
             ? Math.round((completedCount / allLessons.length) * 100)
@@ -1700,14 +1863,14 @@ export async function getAdaptivePath(userId?: string) {
       categoryLabel: s.categoryLabel,
       score: s.score,
       level: s.level,
-    }))
+    })),
   );
 
   const overallScore =
     assessment.skills.length > 0
       ? Math.round(
           assessment.skills.reduce((sum, s) => sum + s.score, 0) /
-            assessment.skills.length
+            assessment.skills.length,
         )
       : 0;
 
@@ -1724,9 +1887,14 @@ export async function getAdaptivePath(userId?: string) {
 
 // --- Feature #30: Notifications de mise a jour contenu ---
 
-export async function notifyContentUpdate(courseId: string, changeDescription: string) {
+export async function notifyContentUpdate(
+  courseId: string,
+  changeDescription: string,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Verify admin
@@ -1777,7 +1945,12 @@ export async function notifyContentUpdate(courseId: string, changeDescription: s
   }
 
   if (userIds.length > 0) {
-    await notifyMany(userIds, `Mise a jour : ${course.title}`, changeDescription, { type: "content_update", link: `/academy/${courseId}` });
+    await notifyMany(
+      userIds,
+      `Mise a jour : ${course.title}`,
+      changeDescription,
+      { type: "content_update", link: `/academy/${courseId}` },
+    );
   }
 
   revalidatePath("/academy");
@@ -1788,13 +1961,17 @@ export async function notifyContentUpdate(courseId: string, changeDescription: s
 
 export async function getPersonalizedRecommendations() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { recommendations: [] };
 
   // Get user's quiz scores grouped by lesson
   const { data: progress } = await supabase
     .from("lesson_progress")
-    .select("lesson_id, completed, quiz_score, lessons(title, course_id, courses(title))")
+    .select(
+      "lesson_id, completed, quiz_score, lessons(title, course_id, courses(title))",
+    )
     .eq("user_id", user.id);
 
   // Get all courses with lessons
@@ -1805,23 +1982,34 @@ export async function getPersonalizedRecommendations() {
 
   // Identify weak areas (low quiz scores)
   const weakLessons = (progress || [])
-    .filter(p => p.quiz_score !== null && p.quiz_score < 70)
-    .map(p => ({
+    .filter((p) => p.quiz_score !== null && p.quiz_score < 70)
+    .map((p) => ({
       lessonId: p.lesson_id,
       score: p.quiz_score,
-      title: (p as Record<string, unknown>).lessons ? ((p as Record<string, unknown>).lessons as { title?: string }).title || "Leçon" : "Leçon",
+      title: (p as Record<string, unknown>).lessons
+        ? ((p as Record<string, unknown>).lessons as { title?: string })
+            .title || "Leçon"
+        : "Leçon",
       courseTitle: "Cours",
       reason: `Score de ${p.quiz_score}% — révision recommandée`,
     }));
 
   // Identify not-started courses
-  const completedLessonIds = new Set((progress || []).filter(p => p.completed).map(p => p.lesson_id));
+  const completedLessonIds = new Set(
+    (progress || []).filter((p) => p.completed).map((p) => p.lesson_id),
+  );
   const notStarted = (courses || [])
-    .filter(c => {
-      const lessons = c.modules?.flatMap((m: { lessons?: { id: string }[] }) => m.lessons || []) || [];
-      return lessons.length > 0 && !lessons.some((l: { id: string }) => completedLessonIds.has(l.id));
+    .filter((c) => {
+      const lessons =
+        c.modules?.flatMap(
+          (m: { lessons?: { id: string }[] }) => m.lessons || [],
+        ) || [];
+      return (
+        lessons.length > 0 &&
+        !lessons.some((l: { id: string }) => completedLessonIds.has(l.id))
+      );
     })
-    .map(c => ({
+    .map((c) => ({
       courseId: c.id,
       title: c.title,
       description: c.description,
@@ -1830,14 +2018,24 @@ export async function getPersonalizedRecommendations() {
 
   // Identify partially completed courses (stalled)
   const partiallyCompleted = (courses || [])
-    .filter(c => {
-      const lessons = c.modules?.flatMap((m: { lessons?: { id: string }[] }) => m.lessons || []) || [];
-      const completed = lessons.filter((l: { id: string }) => completedLessonIds.has(l.id)).length;
+    .filter((c) => {
+      const lessons =
+        c.modules?.flatMap(
+          (m: { lessons?: { id: string }[] }) => m.lessons || [],
+        ) || [];
+      const completed = lessons.filter((l: { id: string }) =>
+        completedLessonIds.has(l.id),
+      ).length;
       return completed > 0 && completed < lessons.length;
     })
-    .map(c => {
-      const lessons = c.modules?.flatMap((m: { lessons?: { id: string }[] }) => m.lessons || []) || [];
-      const completed = lessons.filter((l: { id: string }) => completedLessonIds.has(l.id)).length;
+    .map((c) => {
+      const lessons =
+        c.modules?.flatMap(
+          (m: { lessons?: { id: string }[] }) => m.lessons || [],
+        ) || [];
+      const completed = lessons.filter((l: { id: string }) =>
+        completedLessonIds.has(l.id),
+      ).length;
       const pct = Math.round((completed / lessons.length) * 100);
       return {
         courseId: c.id,
@@ -1854,4 +2052,123 @@ export async function getPersonalizedRecommendations() {
       toDiscover: notStarted.slice(0, 3),
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// Exercices Pratiques avec Correction IA
+// ---------------------------------------------------------------------------
+
+export async function getExercisePrompts(courseId?: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  let query = supabase
+    .from("lessons")
+    .select("id, title, course_id, description, courses(title)")
+    .not("description", "is", null)
+    .order("position");
+
+  if (courseId) {
+    query = query.eq("course_id", courseId);
+  }
+
+  const { data } = await query.limit(20);
+
+  return (data || []).map(
+    (l: {
+      id: string;
+      title: string;
+      course_id: string;
+      description: string | null;
+      courses: { title: string } | { title: string }[] | null;
+    }) => ({
+      id: l.id,
+      lessonTitle: l.title,
+      courseTitle: Array.isArray(l.courses)
+        ? l.courses[0]?.title || ""
+        : l.courses?.title || "",
+      prompt: `Exercice basé sur "${l.title}": Rédigez un premier message de prospection pour un prospect dans le contexte de cette leçon. Expliquez votre approche.`,
+    }),
+  );
+}
+
+export type ExerciseResult = {
+  score: number;
+  feedback: string;
+  strengths: string[];
+  improvements: string[];
+  correctedVersion: string;
+};
+
+export async function submitExercise(
+  lessonId: string,
+  submission: string,
+): Promise<ExerciseResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  if (!submission || submission.trim().length < 20) {
+    throw new Error("Votre réponse doit contenir au moins 20 caractères.");
+  }
+
+  const { data: lesson } = await supabase
+    .from("lessons")
+    .select("title, description, courses(title)")
+    .eq("id", lessonId)
+    .single();
+
+  const courseTitle = lesson?.courses
+    ? Array.isArray(lesson.courses)
+      ? (lesson.courses[0] as { title: string })?.title
+      : (lesson.courses as { title: string }).title
+    : "Formation";
+
+  try {
+    const result = await aiJSON<ExerciseResult>(
+      `Tu es un coach expert en vente et setting. Analyse cet exercice d'un setter en formation.
+
+Module: ${courseTitle}
+Leçon: ${lesson?.title || "Exercice"}
+
+Soumission du setter:
+"""
+${submission}
+"""
+
+Évalue sur ces critères:
+1. Pertinence par rapport au module (0-25)
+2. Qualité rédactionnelle (0-25)
+3. Personnalisation du message (0-25)
+4. Technique de vente utilisée (0-25)
+
+Réponds en JSON:
+{
+  "score": number (0-100),
+  "feedback": "feedback global constructif en 2-3 phrases",
+  "strengths": ["point fort 1", "point fort 2"],
+  "improvements": ["amélioration 1", "amélioration 2"],
+  "correctedVersion": "version améliorée du message"
+}`,
+      {
+        system:
+          "Tu es un coach expert en vente/setting chez S Academy. Réponds uniquement en français.",
+      },
+    );
+    return result;
+  } catch {
+    return {
+      score: 0,
+      feedback:
+        "Correction IA indisponible — réessayez dans quelques instants.",
+      strengths: [],
+      improvements: [],
+      correctedVersion: "",
+    };
+  }
 }

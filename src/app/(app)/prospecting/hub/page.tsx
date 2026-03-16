@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getMultiNetworkOverview, getHubUnifiedStats } from "@/lib/actions/hub-setting";
+import {
+  getMultiNetworkOverview,
+  getHubUnifiedStats,
+} from "@/lib/actions/hub-setting";
 import { HubView } from "./hub-view";
 
 export default async function HubPage() {

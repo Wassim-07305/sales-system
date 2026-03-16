@@ -43,10 +43,7 @@ export async function subscribePush(subscription: {
   if (!user) throw new Error("Non authentifié");
 
   // Remove existing subscription for this user (if any)
-  await supabase
-    .from("push_subscriptions")
-    .delete()
-    .eq("user_id", user.id);
+  await supabase.from("push_subscriptions").delete().eq("user_id", user.id);
 
   // Insert new subscription
   const { error } = await supabase.from("push_subscriptions").insert({
@@ -79,11 +76,13 @@ export async function sendPush(
   userId: string,
   title: string,
   body: string,
-  url?: string
+  url?: string,
 ) {
   const supabase = await createClient();
   // Verify caller is authenticated
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { sent: false, reason: "unauthenticated" };
 
   // Get the user's push subscription
@@ -123,10 +122,7 @@ export async function sendPush(
     const statusCode = (err as { statusCode?: number }).statusCode;
     // If the browser revoked the subscription (410 Gone / 404), clean up
     if (statusCode === 410 || statusCode === 404) {
-      await supabase
-        .from("push_subscriptions")
-        .delete()
-        .eq("user_id", userId);
+      await supabase.from("push_subscriptions").delete().eq("user_id", userId);
       return { sent: false, reason: "subscription_expired" };
     }
     console.error(`[Push] Erreur envoi à ${userId}:`, err);
@@ -138,10 +134,12 @@ export async function sendBulkPush(
   userIds: string[],
   title: string,
   body: string,
-  url?: string
+  url?: string,
 ) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
   const results = [];
 

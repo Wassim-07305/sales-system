@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 
 /** Auth guard — returns authenticated user or throws. */
 async function requireAuth(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
   return user;
 }
@@ -79,21 +81,26 @@ export async function getAdminDashboardData() {
     .gte("created_at", startOfMonth);
 
   // Fetch latest daily journal for each setter (graceful if table/columns missing)
-  let journalMap: Record<string, {
-    date: string;
-    mood: number | null;
-    dms_sent: number;
-    replies_received: number;
-    calls_booked: number;
-    deals_closed: number;
-    conversations_count: number;
-  }> = {};
+  let journalMap: Record<
+    string,
+    {
+      date: string;
+      mood: number | null;
+      dms_sent: number;
+      replies_received: number;
+      calls_booked: number;
+      deals_closed: number;
+      conversations_count: number;
+    }
+  > = {};
   try {
     const setterIds = (setters || []).map((s) => s.id);
     if (setterIds.length > 0) {
       const { data: journals } = await supabase
         .from("daily_journals")
-        .select("user_id, date, mood, dms_sent, replies_received, calls_booked, deals_closed, conversations_count")
+        .select(
+          "user_id, date, mood, dms_sent, replies_received, calls_booked, deals_closed, conversations_count",
+        )
         .in("user_id", setterIds)
         .order("date", { ascending: false });
 
@@ -103,10 +110,13 @@ export async function getAdminDashboardData() {
           journalMap[j.user_id] = {
             date: j.date,
             mood: j.mood,
-            dms_sent: (j as Record<string, unknown>).dms_sent as number ?? 0,
-            replies_received: (j as Record<string, unknown>).replies_received as number ?? 0,
-            calls_booked: (j as Record<string, unknown>).calls_booked as number ?? 0,
-            deals_closed: (j as Record<string, unknown>).deals_closed as number ?? 0,
+            dms_sent: ((j as Record<string, unknown>).dms_sent as number) ?? 0,
+            replies_received:
+              ((j as Record<string, unknown>).replies_received as number) ?? 0,
+            calls_booked:
+              ((j as Record<string, unknown>).calls_booked as number) ?? 0,
+            deals_closed:
+              ((j as Record<string, unknown>).deals_closed as number) ?? 0,
             conversations_count: j.conversations_count ?? 0,
           };
         }
@@ -126,7 +136,10 @@ export async function getAdminDashboardData() {
       .reduce((sum, d) => sum + (d.value || 0), 0);
     const journal = journalMap[s.id] || null;
     const daysSinceJournal = journal
-      ? Math.floor((new Date(today).getTime() - new Date(journal.date).getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor(
+          (new Date(today).getTime() - new Date(journal.date).getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
       : null;
     return {
       ...s,
@@ -147,7 +160,15 @@ export async function getAdminDashboardData() {
   const sevenDaysAgo = new Date(
     Date.now() - 7 * 24 * 60 * 60 * 1000,
   ).toISOString();
-  let staleDeals: { id: string; title: string; stage_id: string | null; updated_at: string; pipeline_stages: { name: string } | { name: string }[] | null }[] | null = null;
+  let staleDeals:
+    | {
+        id: string;
+        title: string;
+        stage_id: string | null;
+        updated_at: string;
+        pipeline_stages: { name: string } | { name: string }[] | null;
+      }[]
+    | null = null;
   if (signedStageId) {
     const { data } = await supabase
       .from("deals")
@@ -310,7 +331,11 @@ export async function getSetterDashboardData(userId: string) {
   const supabase = await createClient();
   const authUser = await requireAuth(supabase);
   // Setters can only view their own data; admin/manager can view anyone
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", authUser.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", authUser.id)
+    .single();
   const isAdmin = profile && ["admin", "manager"].includes(profile.role);
   if (authUser.id !== userId && !isAdmin) throw new Error("Accès refusé");
   const now = new Date();
@@ -544,7 +569,11 @@ export async function saveDailyJournal(data: {
 export async function getSetterHubData(userId: string) {
   const supabase = await createClient();
   const authUser = await requireAuth(supabase);
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", authUser.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", authUser.id)
+    .single();
   const isAdmin = profile && ["admin", "manager"].includes(profile.role);
   if (authUser.id !== userId && !isAdmin) throw new Error("Accès refusé");
   const now = new Date();
@@ -721,7 +750,11 @@ export async function getPersonalPerformanceReport(
 ): Promise<PersonalPerformanceReport> {
   const supabase = await createClient();
   const authUser = await requireAuth(supabase);
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", authUser.id).single();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", authUser.id)
+    .single();
   const isAdmin = profile && ["admin", "manager"].includes(profile.role);
   if (authUser.id !== userId && !isAdmin) throw new Error("Accès refusé");
   const now = new Date();
@@ -1234,7 +1267,8 @@ export async function getB2BDashboardData(
   const totalSetters = setterIds.length;
 
   // Use first setter for the "primary setter" display (backward compat)
-  const primarySetter = assignedSetters && assignedSetters.length > 0 ? assignedSetters[0] : null;
+  const primarySetter =
+    assignedSetters && assignedSetters.length > 0 ? assignedSetters[0] : null;
   const setterId = primarySetter?.id || null;
   const setterName = primarySetter?.full_name || "Non assigné";
   const setterAvatar = primarySetter?.avatar_url || null;
@@ -1299,7 +1333,11 @@ export async function getB2BDashboardData(
     .select("id, name, color, position")
     .order("position");
 
-  let dealsForPipeline: { id: string; stage_id: string | null; value: number }[] = [];
+  let dealsForPipeline: {
+    id: string;
+    stage_id: string | null;
+    value: number;
+  }[] = [];
 
   if (setterIds.length > 0) {
     const { data: setterDeals } = await supabase
@@ -1325,9 +1363,7 @@ export async function getB2BDashboardData(
   );
 
   // Get "Client Signé" stage for closing rate
-  const signedStage = (stages || []).find(
-    (s) => s.name === "Client Signé",
-  );
+  const signedStage = (stages || []).find((s) => s.name === "Client Signé");
   const closedDeals = signedStage
     ? dealsForPipeline.filter((d) => d.stage_id === signedStage.id).length
     : 0;
@@ -1343,7 +1379,8 @@ export async function getB2BDashboardData(
     .gte("scheduled_at", now.toISOString())
     .order("scheduled_at")
     .limit(5);
-  if (setterIds.length > 0) bookingsQuery = bookingsQuery.in("assigned_to", setterIds);
+  if (setterIds.length > 0)
+    bookingsQuery = bookingsQuery.in("assigned_to", setterIds);
   const { data: bookings } = await bookingsQuery;
 
   // Bookings count this month (scoped to ALL setters)
@@ -1352,7 +1389,8 @@ export async function getB2BDashboardData(
     .select("id", { count: "exact", head: true })
     .gte("scheduled_at", startOfMonth)
     .lte("scheduled_at", endOfMonth);
-  if (setterIds.length > 0) bookingsCountQuery = bookingsCountQuery.in("assigned_to", setterIds);
+  if (setterIds.length > 0)
+    bookingsCountQuery = bookingsCountQuery.in("assigned_to", setterIds);
   const { count: bookingsMonthCount } = await bookingsCountQuery;
 
   // Recent activity - deal activities from ALL setters' deals
@@ -1414,8 +1452,11 @@ export async function getB2BDashboardData(
 
 export async function getMobileDashboardWidgetData() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { dealsEnCours: 0, caDuMois: 0, tachesDuJour: 0, prochainsRdv: 0 };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return { dealsEnCours: 0, caDuMois: 0, tachesDuJour: 0, prochainsRdv: 0 };
 
   const now = new Date();
   const today = now.toISOString().split("T")[0];

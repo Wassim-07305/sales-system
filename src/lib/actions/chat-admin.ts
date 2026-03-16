@@ -68,7 +68,7 @@ export async function deleteChannel(channelId: string) {
 
 export async function updateChannelMembers(
   channelId: string,
-  memberIds: string[]
+  memberIds: string[],
 ) {
   await requireAdmin();
   const adminClient = createAdminClient();

@@ -34,7 +34,10 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { ConsentSettings, DataProcessingLogEntry } from "@/lib/actions/gdpr";
+import type {
+  ConsentSettings,
+  DataProcessingLogEntry,
+} from "@/lib/actions/gdpr";
 import {
   exportUserData,
   deleteUserData,
@@ -78,7 +81,10 @@ interface PrivacyViewProps {
 // Component
 // ---------------------------------------------------------------------------
 
-export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps) {
+export function PrivacyView({
+  initialConsents,
+  processingLog,
+}: PrivacyViewProps) {
   const [consents, setConsents] = useState<ConsentSettings>(initialConsents);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -87,7 +93,10 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
   const [confirmText, setConfirmText] = useState("");
 
   // --- Consent toggle ---
-  async function handleToggle(key: keyof Omit<ConsentSettings, "updated_at">, value: boolean) {
+  async function handleToggle(
+    key: keyof Omit<ConsentSettings, "updated_at">,
+    value: boolean,
+  ) {
     const updated = { ...consents, [key]: value };
     setConsents(updated);
     setSaving(true);
@@ -117,7 +126,9 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
         toast.error("Impossible d\u2019exporter les donnees");
         return;
       }
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -160,7 +171,8 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
     {
       key: "analytics",
       label: "Analytiques",
-      description: "Collecte de donnees d\u2019utilisation pour ameliorer nos services",
+      description:
+        "Collecte de donnees d\u2019utilisation pour ameliorer nos services",
     },
     {
       key: "marketing",
@@ -170,7 +182,8 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
     {
       key: "communication",
       label: "Communication",
-      description: "Newsletters, mises a jour produit et notifications par email",
+      description:
+        "Newsletters, mises a jour produit et notifications par email",
     },
     {
       key: "third_party_sharing",
@@ -199,7 +212,9 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
               <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
                 <div>
                   <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.description}
+                  </p>
                 </div>
                 <Switch
                   checked={consents[item.key]}
@@ -232,11 +247,16 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Conformement a l&apos;article 20 du RGPD, vous pouvez exporter l&apos;ensemble de vos
-            donnees personnelles dans un format structure et lisible par machine (JSON).
+            Conformement a l&apos;article 20 du RGPD, vous pouvez exporter
+            l&apos;ensemble de vos donnees personnelles dans un format structure
+            et lisible par machine (JSON).
           </p>
           <div className="flex items-center gap-3">
-            <Button onClick={handleExport} disabled={exporting} variant="outline">
+            <Button
+              onClick={handleExport}
+              disabled={exporting}
+              variant="outline"
+            >
               {exporting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -266,37 +286,51 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
               <span>
-                <strong className="text-foreground">Droit d&apos;acces (Art. 15)</strong> - Vous
-                pouvez consulter et exporter toutes vos donnees personnelles a tout moment.
+                <strong className="text-foreground">
+                  Droit d&apos;acces (Art. 15)
+                </strong>{" "}
+                - Vous pouvez consulter et exporter toutes vos donnees
+                personnelles a tout moment.
               </span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
               <span>
-                <strong className="text-foreground">Droit a l&apos;effacement (Art. 17)</strong> -
-                Vous pouvez demander la suppression de vos donnees personnelles.
+                <strong className="text-foreground">
+                  Droit a l&apos;effacement (Art. 17)
+                </strong>{" "}
+                - Vous pouvez demander la suppression de vos donnees
+                personnelles.
               </span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
               <span>
-                <strong className="text-foreground">Droit a la portabilite (Art. 20)</strong> - Vos
-                donnees peuvent etre exportees dans un format structure (JSON).
+                <strong className="text-foreground">
+                  Droit a la portabilite (Art. 20)
+                </strong>{" "}
+                - Vos donnees peuvent etre exportees dans un format structure
+                (JSON).
               </span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
               <span>
-                <strong className="text-foreground">Consentement (Art. 7)</strong> - Vous pouvez
-                modifier vos consentements a tout moment. Le retrait du consentement est aussi
-                simple que son octroi.
+                <strong className="text-foreground">
+                  Consentement (Art. 7)
+                </strong>{" "}
+                - Vous pouvez modifier vos consentements a tout moment. Le
+                retrait du consentement est aussi simple que son octroi.
               </span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
               <span>
-                <strong className="text-foreground">Registre des traitements (Art. 30)</strong> -
-                Toutes les operations sur vos donnees sont tracees dans le journal ci-dessous.
+                <strong className="text-foreground">
+                  Registre des traitements (Art. 30)
+                </strong>{" "}
+                - Toutes les operations sur vos donnees sont tracees dans le
+                journal ci-dessous.
               </span>
             </div>
           </div>
@@ -333,13 +367,17 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
               <TableBody>
                 {processingLog.map((entry) => (
                   <TableRow key={entry.id}>
-                    <TableCell className="text-xs">{formatDate(entry.created_at)}</TableCell>
+                    <TableCell className="text-xs">
+                      {formatDate(entry.created_at)}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
                         {actionLabel(entry.action)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs capitalize">{entry.entity_type}</TableCell>
+                    <TableCell className="text-xs capitalize">
+                      {entry.entity_type}
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
                       {entry.details?.description
                         ? String(entry.details.description)
@@ -370,12 +408,15 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-red-500">Suppression du compte</p>
+                <p className="text-sm font-medium text-red-500">
+                  Suppression du compte
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Cette action est irreversible. Toutes vos donnees personnelles seront
-                  anonymisees ou supprimees conformement a l&apos;article 17 du RGPD (droit a
-                  l&apos;effacement). Les donnees necessaires a des fins legales ou comptables
-                  seront conservees sous forme anonymisee.
+                  Cette action est irreversible. Toutes vos donnees personnelles
+                  seront anonymisees ou supprimees conformement a l&apos;article
+                  17 du RGPD (droit a l&apos;effacement). Les donnees
+                  necessaires a des fins legales ou comptables seront conservees
+                  sous forme anonymisee.
                 </p>
               </div>
             </div>
@@ -392,9 +433,10 @@ export function PrivacyView({ initialConsents, processingLog }: PrivacyViewProps
               <DialogHeader>
                 <DialogTitle>Confirmer la suppression</DialogTitle>
                 <DialogDescription>
-                  Cette action est definitive. Vos donnees personnelles seront anonymisees et ne
-                  pourront pas etre recuperees. Tapez{" "}
-                  <strong className="text-foreground">SUPPRIMER</strong> pour confirmer.
+                  Cette action est definitive. Vos donnees personnelles seront
+                  anonymisees et ne pourront pas etre recuperees. Tapez{" "}
+                  <strong className="text-foreground">SUPPRIMER</strong> pour
+                  confirmer.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">

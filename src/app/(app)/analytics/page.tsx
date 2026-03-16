@@ -11,7 +11,9 @@ import { AnalyticsView } from "./analytics-view";
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -24,15 +26,21 @@ export default async function AnalyticsPage() {
     redirect("/dashboard");
   }
 
-  const [analytics, teamPerformance, revenueSummary, recentPayments, subscriptionStats, stripeConfigured] =
-    await Promise.all([
-      getAnalyticsData(),
-      getTeamPerformance(),
-      getStripeRevenueSummary(),
-      getStripeRecentPayments(5),
-      getStripeSubscriptionStats(),
-      isStripeConfigured(),
-    ]);
+  const [
+    analytics,
+    teamPerformance,
+    revenueSummary,
+    recentPayments,
+    subscriptionStats,
+    stripeConfigured,
+  ] = await Promise.all([
+    getAnalyticsData(),
+    getTeamPerformance(),
+    getStripeRevenueSummary(),
+    getStripeRecentPayments(5),
+    getStripeSubscriptionStats(),
+    isStripeConfigured(),
+  ]);
 
   return (
     <AnalyticsView

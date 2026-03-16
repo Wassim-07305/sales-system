@@ -159,7 +159,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
         setFormName(slugify(value));
       }
     },
-    [editingField]
+    [editingField],
   );
 
   const addOption = useCallback(() => {
@@ -209,8 +209,8 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                   required: formRequired,
                   options: formType === "select" ? formOptions : undefined,
                 }
-              : f
-          )
+              : f,
+          ),
         );
         toast.success("Champ personnalis\u00e9 mis \u00e0 jour");
       } else {
@@ -333,11 +333,21 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b border-border/30 bg-muted/20 hover:bg-muted/20">
-                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Nom</TableHead>
-                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Label</TableHead>
-                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
-                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Obligatoire</TableHead>
-                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Nom
+                      </TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Label
+                      </TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Type
+                      </TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Obligatoire
+                      </TableHead>
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-right">
+                        Actions
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -626,9 +636,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                 {field.type === "number" && (
                   <Input type="number" placeholder="0" disabled />
                 )}
-                {field.type === "date" && (
-                  <Input type="date" disabled />
-                )}
+                {field.type === "date" && <Input type="date" disabled />}
                 {field.type === "select" && (
                   <Select disabled>
                     <SelectTrigger className="w-full">

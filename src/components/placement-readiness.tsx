@@ -41,11 +41,26 @@ const LEVEL_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const BREAKDOWN_ITEMS = [
-  { key: "modules" as const, label: "Modules", icon: GraduationCap, weight: "40%" },
+  {
+    key: "modules" as const,
+    label: "Modules",
+    icon: GraduationCap,
+    weight: "40%",
+  },
   { key: "quizzes" as const, label: "Quiz", icon: BrainCircuit, weight: "25%" },
   { key: "roleplay" as const, label: "Roleplay", icon: Swords, weight: "15%" },
-  { key: "journal" as const, label: "Journal", icon: CalendarDays, weight: "10%" },
-  { key: "community" as const, label: "Communauté", icon: Users, weight: "10%" },
+  {
+    key: "journal" as const,
+    label: "Journal",
+    icon: CalendarDays,
+    weight: "10%",
+  },
+  {
+    key: "community" as const,
+    label: "Communauté",
+    icon: Users,
+    weight: "10%",
+  },
 ];
 
 function getScoreColor(score: number) {
@@ -55,7 +70,13 @@ function getScoreColor(score: number) {
   return "#7af17a"; // brand green with glow
 }
 
-function CircularGauge({ score, size = 140 }: { score: number; size?: number }) {
+function CircularGauge({
+  score,
+  size = 140,
+}: {
+  score: number;
+  size?: number;
+}) {
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -95,7 +116,9 @@ function CircularGauge({ score, size = 140 }: { score: number; size?: number }) 
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           className="transition-all duration-1000 ease-out"
-          style={hasGlow ? { filter: `drop-shadow(0 0 8px ${color})` } : undefined}
+          style={
+            hasGlow ? { filter: `drop-shadow(0 0 8px ${color})` } : undefined
+          }
         />
       </svg>
       {/* Score in center */}
@@ -130,7 +153,9 @@ export function PlacementReadiness({ data, compact }: Props) {
       <div className="flex items-center gap-3">
         <CircularGauge score={data.score} size={64} />
         <div>
-          <p className={cn("text-sm font-semibold", levelInfo.color)}>{levelInfo.label}</p>
+          <p className={cn("text-sm font-semibold", levelInfo.color)}>
+            {levelInfo.label}
+          </p>
           <p className="text-xs text-muted-foreground">{data.score}% prêt</p>
         </div>
       </div>
@@ -175,10 +200,7 @@ export function PlacementReadiness({ data, compact }: Props) {
                   </div>
                   <span className="text-xs font-medium">{value}%</span>
                 </div>
-                <Progress
-                  value={value}
-                  className="h-2"
-                />
+                <Progress value={value} className="h-2" />
               </div>
             );
           })}

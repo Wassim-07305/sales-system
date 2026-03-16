@@ -42,8 +42,13 @@ export default function ChatLoading() {
           </div>
           <div className="flex-1 p-4 space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                <Skeleton className={`h-12 rounded-2xl ${i % 2 === 0 ? "w-52" : "w-44"}`} />
+              <div
+                key={i}
+                className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
+              >
+                <Skeleton
+                  className={`h-12 rounded-2xl ${i % 2 === 0 ? "w-52" : "w-44"}`}
+                />
               </div>
             ))}
           </div>

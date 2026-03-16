@@ -34,7 +34,9 @@ export default async function CourseEditorPage({
   if (!course) notFound();
 
   // Trier les modules et lecons par position
-  const sortedCourse: Course & { modules: (CourseModule & { lessons: Lesson[] })[] } = {
+  const sortedCourse: Course & {
+    modules: (CourseModule & { lessons: Lesson[] })[];
+  } = {
     ...course,
     modules: Array.isArray(course.modules)
       ? (course.modules as (CourseModule & { lessons: Lesson[] })[])

@@ -5,7 +5,9 @@ import { PageHeader } from "@/components/layout/page-header";
 
 export default async function ApiDocsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -20,7 +22,10 @@ export default async function ApiDocsPage() {
 
   return (
     <>
-      <PageHeader title="API REST" description="Documentation et gestion de l'API publique" />
+      <PageHeader
+        title="API REST"
+        description="Documentation et gestion de l'API publique"
+      />
       <ApiDocsView />
     </>
   );

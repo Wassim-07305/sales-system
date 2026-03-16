@@ -4,12 +4,11 @@ import { createClient } from "@supabase/supabase-js";
 function getSupabaseAdmin() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for webhook processing");
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for webhook processing",
+    );
   }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey
-  );
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
 }
 
 // Vérification du webhook (challenge Meta)
@@ -36,7 +35,10 @@ export async function POST(request: NextRequest) {
   const appSecret = process.env.META_APP_SECRET;
   if (!appSecret) {
     console.error("META_APP_SECRET not configured — rejecting webhook");
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Webhook not configured" },
+      { status: 500 },
+    );
   }
 
   const signature = request.headers.get("x-hub-signature-256");
@@ -61,18 +63,18 @@ export async function POST(request: NextRequest) {
 
 async function processInstagramWebhook(
   supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ) {
   const entries = (payload.entry as Array<Record<string, unknown>>) || [];
 
   for (const entry of entries) {
-    const messaging =
-      (entry.messaging as Array<Record<string, unknown>>) || [];
+    const messaging = (entry.messaging as Array<Record<string, unknown>>) || [];
 
     for (const event of messaging) {
       const senderId = (event.sender as Record<string, unknown>)?.id as string;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const recipientId = (event.recipient as Record<string, unknown>)?.id as string;
+      const recipientId = (event.recipient as Record<string, unknown>)
+        ?.id as string;
       const message = event.message as Record<string, unknown> | undefined;
       const timestamp = event.timestamp as number;
 
@@ -147,7 +149,8 @@ async function processInstagramWebhook(
       await supabaseAdmin.from("notifications").insert({
         user_id: userId,
         title: "Nouveau DM Instagram",
-        body: content.length > 100 ? content.substring(0, 100) + "..." : content,
+        body:
+          content.length > 100 ? content.substring(0, 100) + "..." : content,
         type: "instagram",
         link: "/inbox",
         read: false,

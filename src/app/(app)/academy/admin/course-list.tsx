@@ -20,10 +20,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  updateCourse,
-  deleteCourse,
-} from "@/lib/actions/academy-admin";
+import { updateCourse, deleteCourse } from "@/lib/actions/academy-admin";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { CourseFormDialog } from "./course-form-dialog";
@@ -84,9 +81,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
         is_published: !course.is_published,
       });
       toast.success(
-        course.is_published
-          ? "Formation depubliee"
-          : "Formation publiee"
+        course.is_published ? "Formation depubliee" : "Formation publiee",
       );
       startTransition(() => {
         router.refresh();
@@ -99,7 +94,9 @@ export function CourseList({ initialCourses }: CourseListProps) {
   }
 
   async function handleDelete(courseId: string) {
-    if (!confirm("Supprimer cette formation ? Cette action est irreversible.")) {
+    if (
+      !confirm("Supprimer cette formation ? Cette action est irreversible.")
+    ) {
       return;
     }
 
@@ -125,7 +122,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
     return (
       course.modules?.reduce(
         (acc, mod) => acc + (mod.lessons?.length ?? 0),
-        0
+        0,
       ) ?? 0
     );
   }
@@ -145,9 +142,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
       {initialCourses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <GraduationCap className="h-16 w-16 text-muted-foreground/30 mb-4" />
-          <h3 className="text-lg font-semibold mb-1">
-            Aucune formation
-          </h3>
+          <h3 className="text-lg font-semibold mb-1">Aucune formation</h3>
           <p className="text-sm text-muted-foreground mb-6">
             Commencez par creer votre premiere formation
           </p>
@@ -169,7 +164,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
                 key={course.id}
                 className={cn(
                   "group overflow-hidden transition-all hover:shadow-lg",
-                  isDeleting && "opacity-50 pointer-events-none"
+                  isDeleting && "opacity-50 pointer-events-none",
                 )}
               >
                 {/* Thumbnail */}
@@ -195,7 +190,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
                       className={cn(
                         course.is_published
                           ? "bg-emerald-500/90 text-white hover:bg-emerald-500"
-                          : "bg-muted/80 text-muted-foreground"
+                          : "bg-muted/80 text-muted-foreground",
                       )}
                     >
                       {course.is_published ? "Publie" : "Brouillon"}
@@ -263,9 +258,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
                         size="sm"
                         onClick={() => handleTogglePublish(course)}
                         disabled={isToggling || isPending}
-                        title={
-                          course.is_published ? "Depublier" : "Publier"
-                        }
+                        title={course.is_published ? "Depublier" : "Publier"}
                       >
                         {isToggling ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

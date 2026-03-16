@@ -178,14 +178,11 @@ function FeatureCard({
               "flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 shrink-0 rounded-lg transition-colors",
               item.votedByUser
                 ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
-                : "hover:bg-white/5 text-muted-foreground hover:text-white"
+                : "hover:bg-white/5 text-muted-foreground hover:text-white",
             )}
           >
             <ThumbsUp
-              className={cn(
-                "h-3.5 w-3.5",
-                item.votedByUser && "fill-current"
-              )}
+              className={cn("h-3.5 w-3.5", item.votedByUser && "fill-current")}
             />
             <span className="text-xs font-medium">{item.votes}</span>
           </Button>
@@ -241,7 +238,12 @@ function StatusColumn({
       </div>
       <div className="space-y-2">
         {items.map((item) => (
-          <FeatureCard key={item.id} item={item} onVote={onVote} voting={voting} />
+          <FeatureCard
+            key={item.id}
+            item={item}
+            onVote={onVote}
+            voting={voting}
+          />
         ))}
       </div>
     </div>
@@ -276,7 +278,7 @@ export function RoadmapView({
     } else {
       items.sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
     }
     return items;
@@ -408,7 +410,7 @@ export function RoadmapView({
                     "text-xs h-7 px-3 rounded-full transition-colors",
                     statusFilter === f.key
                       ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
-                      : "text-muted-foreground hover:text-white hover:bg-white/5"
+                      : "text-muted-foreground hover:text-white hover:bg-white/5",
                   )}
                 >
                   {f.label}
@@ -420,9 +422,7 @@ export function RoadmapView({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() =>
-                  setSortBy(sortBy === "votes" ? "date" : "votes")
-                }
+                onClick={() => setSortBy(sortBy === "votes" ? "date" : "votes")}
                 className="text-xs h-7 text-muted-foreground hover:text-white"
               >
                 {sortBy === "votes" ? "Par votes" : "Par date"}
@@ -433,14 +433,35 @@ export function RoadmapView({
           {/* Column view (when "all" is selected) */}
           {statusFilter === "all" ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <StatusColumn status="planned" items={grouped.planned} onVote={handleVote} voting={isPending} />
-              <StatusColumn status="in_progress" items={grouped.in_progress} onVote={handleVote} voting={isPending} />
-              <StatusColumn status="done" items={grouped.done} onVote={handleVote} voting={isPending} />
+              <StatusColumn
+                status="planned"
+                items={grouped.planned}
+                onVote={handleVote}
+                voting={isPending}
+              />
+              <StatusColumn
+                status="in_progress"
+                items={grouped.in_progress}
+                onVote={handleVote}
+                voting={isPending}
+              />
+              <StatusColumn
+                status="done"
+                items={grouped.done}
+                onVote={handleVote}
+                voting={isPending}
+              />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredItems.map((item) => (
-                <FeatureCard key={item.id} item={item} showStatus onVote={handleVote} voting={isPending} />
+                <FeatureCard
+                  key={item.id}
+                  item={item}
+                  showStatus
+                  onVote={handleVote}
+                  voting={isPending}
+                />
               ))}
             </div>
           )}
@@ -507,7 +528,9 @@ export function RoadmapView({
               </div>
               <Button
                 onClick={handleSuggest}
-                disabled={isPending || !sugTitle.trim() || !sugDescription.trim()}
+                disabled={
+                  isPending || !sugTitle.trim() || !sugDescription.trim()
+                }
                 className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-medium"
               >
                 {isPending ? (
@@ -562,13 +585,13 @@ export function RoadmapView({
                             "flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 shrink-0 rounded-lg transition-colors",
                             sug.votedByUser
                               ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
-                              : "hover:bg-white/5 text-muted-foreground hover:text-white"
+                              : "hover:bg-white/5 text-muted-foreground hover:text-white",
                           )}
                         >
                           <ThumbsUp
                             className={cn(
                               "h-3.5 w-3.5",
-                              sug.votedByUser && "fill-current"
+                              sug.votedByUser && "fill-current",
                             )}
                           />
                           <span className="text-xs font-medium">
@@ -581,7 +604,7 @@ export function RoadmapView({
                           variant="outline"
                           className={cn(
                             "text-[10px] px-1.5 py-0",
-                            categoryColor
+                            categoryColor,
                           )}
                         >
                           {sug.category}
@@ -614,7 +637,7 @@ export function RoadmapView({
                         "h-10 w-10 rounded-full flex items-center justify-center border",
                         index === 0
                           ? "bg-[#7af17a]/15 border-[#7af17a]/30 text-[#7af17a]"
-                          : "bg-card border-border text-muted-foreground"
+                          : "bg-card border-border text-muted-foreground",
                       )}
                     >
                       <Tag className="h-4 w-4" />
@@ -630,7 +653,7 @@ export function RoadmapView({
                             "w-fit font-mono text-xs",
                             index === 0
                               ? "bg-[#7af17a]/15 text-[#7af17a] border-[#7af17a]/30"
-                              : "bg-white/5 text-muted-foreground border-border"
+                              : "bg-white/5 text-muted-foreground border-border",
                           )}
                           variant="outline"
                         >
@@ -680,14 +703,11 @@ export function RoadmapView({
                             <div
                               className={cn(
                                 "shrink-0 h-5 w-5 rounded flex items-center justify-center mt-0.5",
-                                changeConfig.bg
+                                changeConfig.bg,
                               )}
                             >
                               <changeConfig.icon
-                                className={cn(
-                                  "h-3 w-3",
-                                  changeConfig.color
-                                )}
+                                className={cn("h-3 w-3", changeConfig.color)}
                               />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -700,7 +720,7 @@ export function RoadmapView({
                               className={cn(
                                 "text-[10px] px-1.5 py-0 shrink-0 hidden sm:flex",
                                 changeConfig.color,
-                                "border-current/20"
+                                "border-current/20",
                               )}
                             >
                               {changeConfig.label}

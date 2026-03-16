@@ -103,19 +103,23 @@ export function CourseEditor({ course }: CourseEditorProps) {
   const [modules, setModules] = useState<ModuleWithLessons[]>(course.modules);
   const [selection, setSelection] = useState<Selection>(null);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
-    new Set(modules.map((m) => m.id))
+    new Set(modules.map((m) => m.id)),
   );
   const [, startTransition] = useTransition();
 
   // Dialogs
   const [moduleDialogOpen, setModuleDialogOpen] = useState(false);
-  const [editingModule, setEditingModule] = useState<ModuleWithLessons | null>(null);
+  const [editingModule, setEditingModule] = useState<ModuleWithLessons | null>(
+    null,
+  );
   const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
-  const [lessonDialogModuleId, setLessonDialogModuleId] = useState<string | null>(null);
+  const [lessonDialogModuleId, setLessonDialogModuleId] = useState<
+    string | null
+  >(null);
 
   // dnd-kit sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
   // ─── Expand / Collapse ───────────────────────────────────
@@ -134,19 +138,13 @@ export function CourseEditor({ course }: CourseEditorProps) {
 
   // ─── Selection ───────────────────────────────────────────
 
-  const selectModule = useCallback(
-    (mod: ModuleWithLessons) => {
-      setSelection({ type: "module", module: mod });
-    },
-    []
-  );
+  const selectModule = useCallback((mod: ModuleWithLessons) => {
+    setSelection({ type: "module", module: mod });
+  }, []);
 
-  const selectLesson = useCallback(
-    (mod: ModuleWithLessons, lesson: Lesson) => {
-      setSelection({ type: "lesson", module: mod, lesson });
-    },
-    []
-  );
+  const selectLesson = useCallback((mod: ModuleWithLessons, lesson: Lesson) => {
+    setSelection({ type: "lesson", module: mod, lesson });
+  }, []);
 
   // ─── Module actions ──────────────────────────────────────
 
@@ -162,10 +160,16 @@ export function CourseEditor({ course }: CourseEditorProps) {
         try {
           await deleteModule(moduleId);
           setModules((prev) => prev.filter((m) => m.id !== moduleId));
-          if (selection?.type === "module" && selection.module.id === moduleId) {
+          if (
+            selection?.type === "module" &&
+            selection.module.id === moduleId
+          ) {
             setSelection(null);
           }
-          if (selection?.type === "lesson" && selection.module.id === moduleId) {
+          if (
+            selection?.type === "lesson" &&
+            selection.module.id === moduleId
+          ) {
             setSelection(null);
           }
           toast.success("Module supprime");
@@ -174,11 +178,15 @@ export function CourseEditor({ course }: CourseEditorProps) {
         }
       });
     },
-    [selection]
+    [selection],
   );
 
   const handleModuleSaved = useCallback(
-    (savedModule: { id: string; title: string; description: string | null }) => {
+    (savedModule: {
+      id: string;
+      title: string;
+      description: string | null;
+    }) => {
       setModules((prev) => {
         // Mise a jour existant
         const idx = prev.findIndex((m) => m.id === savedModule.id);
@@ -202,7 +210,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
       setExpandedModules((prev) => new Set([...prev, savedModule.id]));
       setEditingModule(null);
     },
-    [course.id]
+    [course.id],
   );
 
   // ─── Lesson actions ──────────────────────────────────────
@@ -222,10 +230,13 @@ export function CourseEditor({ course }: CourseEditorProps) {
             prev.map((m) =>
               m.id === moduleId
                 ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) }
-                : m
-            )
+                : m,
+            ),
           );
-          if (selection?.type === "lesson" && selection.lesson.id === lessonId) {
+          if (
+            selection?.type === "lesson" &&
+            selection.lesson.id === lessonId
+          ) {
             setSelection(null);
           }
           toast.success("Lecon supprimee");
@@ -234,15 +245,22 @@ export function CourseEditor({ course }: CourseEditorProps) {
         }
       });
     },
-    [selection]
+    [selection],
   );
 
   const handleLessonSaved = useCallback(
-    (savedLesson: { id: string; title: string; description: string | null; module_id: string }) => {
+    (savedLesson: {
+      id: string;
+      title: string;
+      description: string | null;
+      module_id: string;
+    }) => {
       setModules((prev) =>
         prev.map((m) => {
           if (m.id !== savedLesson.module_id) return m;
-          const existingIdx = m.lessons.findIndex((l) => l.id === savedLesson.id);
+          const existingIdx = m.lessons.findIndex(
+            (l) => l.id === savedLesson.id,
+          );
           if (existingIdx !== -1) {
             const updated = [...m.lessons];
             updated[existingIdx] = { ...updated[existingIdx], ...savedLesson };
@@ -264,11 +282,11 @@ export function CourseEditor({ course }: CourseEditorProps) {
             created_at: new Date().toISOString(),
           };
           return { ...m, lessons: [...m.lessons, newLesson] };
-        })
+        }),
       );
       setExpandedModules((prev) => new Set([...prev, savedLesson.module_id]));
     },
-    [course.id]
+    [course.id],
   );
 
   // ─── Drag & Drop: Modules ───────────────────────────────
@@ -289,7 +307,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
         try {
           await reorderModules(
             course.id,
-            reordered.map((m) => m.id)
+            reordered.map((m) => m.id),
           );
         } catch {
           toast.error("Erreur lors du reordonnancement des modules");
@@ -297,7 +315,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
         }
       });
     },
-    [modules, course.id]
+    [modules, course.id],
   );
 
   // ─── Drag & Drop: Lecons dans un module ─────────────────
@@ -320,7 +338,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
             try {
               await reorderLessons(
                 moduleId,
-                reordered.map((l) => l.id)
+                reordered.map((l) => l.id),
               );
             } catch {
               toast.error("Erreur lors du reordonnancement des lecons");
@@ -328,10 +346,10 @@ export function CourseEditor({ course }: CourseEditorProps) {
           });
 
           return { ...m, lessons: reordered };
-        })
+        }),
       );
     },
-    []
+    [],
   );
 
   // ─── Rendu ──────────────────────────────────────────────
@@ -350,11 +368,15 @@ export function CourseEditor({ course }: CourseEditorProps) {
               <ArrowLeft className="h-4 w-4" />
               Retour
             </Link>
-            <h1 className="text-lg font-semibold leading-tight">{course.title}</h1>
+            <h1 className="text-lg font-semibold leading-tight">
+              {course.title}
+            </h1>
             <p className="text-xs text-muted-foreground">
               {modules.length} module{modules.length > 1 ? "s" : ""} &middot;{" "}
               {modules.reduce((sum, m) => sum + m.lessons.length, 0)} lecon
-              {modules.reduce((sum, m) => sum + m.lessons.length, 0) > 1 ? "s" : ""}
+              {modules.reduce((sum, m) => sum + m.lessons.length, 0) > 1
+                ? "s"
+                : ""}
             </p>
           </div>
 
@@ -386,7 +408,8 @@ export function CourseEditor({ course }: CourseEditorProps) {
                 {modules.map((mod) => {
                   const isExpanded = expandedModules.has(mod.id);
                   const isModuleSelected =
-                    selection?.type === "module" && selection.module.id === mod.id;
+                    selection?.type === "module" &&
+                    selection.module.id === mod.id;
 
                   return (
                     <SortableItem key={mod.id} id={mod.id}>
@@ -396,7 +419,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
                           <div
                             className={cn(
                               "flex items-center gap-1 px-2 py-2 rounded-t-lg transition-colors cursor-pointer",
-                              isModuleSelected && "bg-brand/10"
+                              isModuleSelected && "bg-brand/10",
                             )}
                           >
                             <button
@@ -424,7 +447,10 @@ export function CourseEditor({ course }: CourseEditorProps) {
                               {mod.title}
                             </button>
 
-                            <Badge variant="secondary" className="text-[10px] shrink-0">
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] shrink-0"
+                            >
                               {mod.lessons.length}
                             </Badge>
 
@@ -468,26 +494,34 @@ export function CourseEditor({ course }: CourseEditorProps) {
                                         selection.lesson.id === lesson.id;
 
                                       return (
-                                        <SortableItem key={lesson.id} id={lesson.id}>
+                                        <SortableItem
+                                          key={lesson.id}
+                                          id={lesson.id}
+                                        >
                                           {(lessonListeners) => (
                                             <div
                                               className={cn(
                                                 "flex items-center gap-1 px-3 py-1.5 ml-4 mr-2 rounded transition-colors",
                                                 isLessonSelected
                                                   ? "bg-brand/10"
-                                                  : "hover:bg-muted/50"
+                                                  : "hover:bg-muted/50",
                                               )}
                                             >
                                               <button
                                                 className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-0.5"
-                                                {...(lessonListeners as Record<string, unknown>)}
+                                                {...(lessonListeners as Record<
+                                                  string,
+                                                  unknown
+                                                >)}
                                               >
                                                 <GripVertical className="h-3.5 w-3.5" />
                                               </button>
 
                                               <button
                                                 className="flex-1 text-left text-xs truncate"
-                                                onClick={() => selectLesson(mod, lesson)}
+                                                onClick={() =>
+                                                  selectLesson(mod, lesson)
+                                                }
                                               >
                                                 {lesson.title}
                                               </button>
@@ -514,7 +548,10 @@ export function CourseEditor({ course }: CourseEditorProps) {
                                               <button
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  handleDeleteLesson(mod.id, lesson.id);
+                                                  handleDeleteLesson(
+                                                    mod.id,
+                                                    lesson.id,
+                                                  );
                                                 }}
                                                 className="shrink-0 p-0.5 text-muted-foreground hover:text-destructive rounded"
                                               >
@@ -551,7 +588,9 @@ export function CourseEditor({ course }: CourseEditorProps) {
                   <div className="text-center py-8 text-sm text-muted-foreground">
                     <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-40" />
                     <p>Aucun module</p>
-                    <p className="text-xs mt-1">Commencez par ajouter un module</p>
+                    <p className="text-xs mt-1">
+                      Commencez par ajouter un module
+                    </p>
                   </div>
                 )}
               </div>
@@ -579,9 +618,14 @@ export function CourseEditor({ course }: CourseEditorProps) {
             mod={selection.module}
             onUpdate={(updated) => {
               setModules((prev) =>
-                prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m))
+                prev.map((m) =>
+                  m.id === updated.id ? { ...m, ...updated } : m,
+                ),
               );
-              setSelection({ type: "module", module: { ...selection.module, ...updated } });
+              setSelection({
+                type: "module",
+                module: { ...selection.module, ...updated },
+              });
             }}
           />
         )}
@@ -597,11 +641,11 @@ export function CourseEditor({ course }: CourseEditorProps) {
                     ? {
                         ...m,
                         lessons: m.lessons.map((l) =>
-                          l.id === updated.id ? { ...l, ...updated } : l
+                          l.id === updated.id ? { ...l, ...updated } : l,
                         ),
                       }
-                    : m
-                )
+                    : m,
+                ),
               );
               setSelection({
                 type: "lesson",
@@ -648,7 +692,8 @@ function EmptyState() {
       </div>
       <h2 className="text-lg font-semibold mb-1">Selectionnez un element</h2>
       <p className="text-sm text-muted-foreground max-w-xs">
-        Cliquez sur un module ou une lecon dans le panneau de gauche pour modifier son contenu.
+        Cliquez sur un module ou une lecon dans le panneau de gauche pour
+        modifier son contenu.
       </p>
     </div>
   );
@@ -678,7 +723,11 @@ function ModuleEditor({
         title: title.trim(),
         description: description.trim() || undefined,
       });
-      onUpdate({ id: mod.id, title: title.trim(), description: description.trim() || null });
+      onUpdate({
+        id: mod.id,
+        title: title.trim(),
+        description: description.trim() || null,
+      });
       toast.success("Module mis a jour");
     } catch {
       toast.error("Erreur lors de la sauvegarde");
@@ -755,7 +804,7 @@ function LessonEditor({
   const [videoUrl, setVideoUrl] = useState(lesson.video_url || "");
   const [subtitleUrl, setSubtitleUrl] = useState(lesson.subtitle_url || "");
   const [duration, setDuration] = useState<string>(
-    lesson.duration_minutes?.toString() || ""
+    lesson.duration_minutes?.toString() || "",
   );
   const [attachments, setAttachments] = useState(lesson.attachments || []);
   const [saving, setSaving] = useState(false);
@@ -899,7 +948,9 @@ function LessonEditor({
             {/* Preview de la video actuelle */}
             {videoUrl && (
               <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Video actuelle :</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Video actuelle :
+                </p>
                 <p className="text-sm truncate">{videoUrl}</p>
                 <Button
                   variant="ghost"
@@ -914,7 +965,9 @@ function LessonEditor({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="video-url">URL de la video (YouTube, Vimeo, etc.)</Label>
+              <Label htmlFor="video-url">
+                URL de la video (YouTube, Vimeo, etc.)
+              </Label>
               <Input
                 id="video-url"
                 value={videoUrl}
@@ -925,7 +978,9 @@ function LessonEditor({
 
             <div className="relative flex items-center">
               <div className="flex-1 border-t" />
-              <span className="px-3 text-xs text-muted-foreground bg-background">ou</span>
+              <span className="px-3 text-xs text-muted-foreground bg-background">
+                ou
+              </span>
               <div className="flex-1 border-t" />
             </div>
 
@@ -945,14 +1000,20 @@ function LessonEditor({
             {/* Sous-titres */}
             <div className="relative flex items-center mt-4">
               <div className="flex-1 border-t" />
-              <span className="px-3 text-xs text-muted-foreground bg-background">Sous-titres (optionnel)</span>
+              <span className="px-3 text-xs text-muted-foreground bg-background">
+                Sous-titres (optionnel)
+              </span>
               <div className="flex-1 border-t" />
             </div>
 
             {subtitleUrl && (
               <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Sous-titres actuels :</p>
-                <p className="text-sm truncate">{subtitleUrl.split("/").pop()}</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  Sous-titres actuels :
+                </p>
+                <p className="text-sm truncate">
+                  {subtitleUrl.split("/").pop()}
+                </p>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -973,7 +1034,9 @@ function LessonEditor({
               onUpload={(url) => setSubtitleUrl(url)}
               onRemove={() => setSubtitleUrl("")}
               currentUrl={
-                subtitleUrl && subtitleUrl.includes("supabase") ? subtitleUrl : undefined
+                subtitleUrl && subtitleUrl.includes("supabase")
+                  ? subtitleUrl
+                  : undefined
               }
               label="Uploader un fichier de sous-titres (.vtt, .srt)"
             />
@@ -1000,7 +1063,9 @@ function LessonEditor({
                   <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate">{att.name}</p>
-                    <p className="text-xs text-muted-foreground uppercase">{att.type}</p>
+                    <p className="text-xs text-muted-foreground uppercase">
+                      {att.type}
+                    </p>
                   </div>
                   <a
                     href={att.url}

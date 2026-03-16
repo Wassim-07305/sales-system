@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Linkedin, Instagram, RefreshCw, Save, Clock } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -32,16 +38,19 @@ interface SettingsIAViewProps {
   lastSync: string | null;
 }
 
-export function SettingsIAView({ initialSettings, lastSync }: SettingsIAViewProps) {
+export function SettingsIAView({
+  initialSettings,
+  lastSync,
+}: SettingsIAViewProps) {
   const [linkedinUrl, setLinkedinUrl] = useState(initialSettings.linkedin_url);
   const [instagramUsername, setInstagramUsername] = useState(
-    initialSettings.instagram_username
+    initialSettings.instagram_username,
   );
   const [syncFrequency, setSyncFrequency] = useState(
-    initialSettings.sync_frequency
+    initialSettings.sync_frequency,
   );
   const [businessDescription, setBusinessDescription] = useState(
-    initialSettings.business_description
+    initialSettings.business_description,
   );
   const [offer, setOffer] = useState(initialSettings.offer);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(lastSync);
@@ -134,7 +143,9 @@ export function SettingsIAView({ initialSettings, lastSync }: SettingsIAViewProp
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="instagram-username">Nom d&apos;utilisateur Instagram</Label>
+              <Label htmlFor="instagram-username">
+                Nom d&apos;utilisateur Instagram
+              </Label>
               <div className="flex items-center">
                 <span className="inline-flex h-9 items-center rounded-l-md border border-r-0 bg-muted px-3 text-sm text-muted-foreground">
                   @
@@ -154,14 +165,19 @@ export function SettingsIAView({ initialSettings, lastSync }: SettingsIAViewProp
         {/* Description de l'offre */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-base">Description de votre offre</CardTitle>
+            <CardTitle className="text-base">
+              Description de votre offre
+            </CardTitle>
             <CardDescription>
-              Ces informations permettent à l&apos;IA de personnaliser vos scripts de prospection
+              Ces informations permettent à l&apos;IA de personnaliser vos
+              scripts de prospection
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="business-description">Description du business</Label>
+              <Label htmlFor="business-description">
+                Description du business
+              </Label>
               <Textarea
                 id="business-description"
                 placeholder="Décrivez ce que vous faites, votre secteur d'activité, votre mission..."
@@ -231,4 +247,3 @@ export function SettingsIAView({ initialSettings, lastSync }: SettingsIAViewProp
     </div>
   );
 }
-

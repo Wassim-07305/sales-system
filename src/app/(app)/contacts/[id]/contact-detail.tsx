@@ -24,7 +24,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ClientTimeline } from "@/components/client-timeline";
-import { sendMessageToContact, generateFollowUpMessage, type MessageChannel } from "@/lib/actions/messaging";
+import {
+  sendMessageToContact,
+  generateFollowUpMessage,
+  type MessageChannel,
+} from "@/lib/actions/messaging";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
@@ -44,14 +48,31 @@ const activityIcons: Record<string, React.ReactNode> = {
   status_change: <Target className="h-3.5 w-3.5" />,
 };
 
-const channelOptions: { value: MessageChannel; label: string; icon: React.ReactNode }[] = [
+const channelOptions: {
+  value: MessageChannel;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
   { value: "email", label: "Email", icon: <Mail className="h-4 w-4" /> },
   { value: "whatsapp", label: "WhatsApp", icon: <Phone className="h-4 w-4" /> },
-  { value: "linkedin", label: "LinkedIn", icon: <MessageSquare className="h-4 w-4" /> },
-  { value: "instagram", label: "Instagram", icon: <MessageSquare className="h-4 w-4" /> },
+  {
+    value: "linkedin",
+    label: "LinkedIn",
+    icon: <MessageSquare className="h-4 w-4" />,
+  },
+  {
+    value: "instagram",
+    label: "Instagram",
+    icon: <MessageSquare className="h-4 w-4" />,
+  },
 ];
 
-export function ContactDetail({ contact, deals, activities, timelineEvents }: ContactDetailProps) {
+export function ContactDetail({
+  contact,
+  deals,
+  activities,
+  timelineEvents,
+}: ContactDetailProps) {
   const totalDealValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const [showMessaging, setShowMessaging] = useState(false);
   const [channel, setChannel] = useState<MessageChannel>("email");
@@ -157,26 +178,34 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
               {/* Quick stats */}
               <div className="flex gap-6 mt-4">
                 <div>
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Health Score</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Health Score
+                  </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div
                       className={`h-2 w-2 rounded-full ${
                         contact.health_score >= 70
                           ? "bg-emerald-500"
                           : contact.health_score >= 40
-                          ? "bg-amber-500"
-                          : "bg-red-500"
+                            ? "bg-amber-500"
+                            : "bg-red-500"
                       }`}
                     />
-                    <span className="text-lg font-bold">{contact.health_score}</span>
+                    <span className="text-lg font-bold">
+                      {contact.health_score}
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total deals</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Total deals
+                  </p>
                   <p className="text-lg font-bold mt-0.5">{deals.length}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Valeur totale</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Valeur totale
+                  </p>
                   <p className="text-lg font-bold mt-0.5">
                     {totalDealValue.toLocaleString("fr-FR")} €
                   </p>
@@ -297,7 +326,10 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
 
             {/* Send button */}
             <div className="flex justify-end">
-              <Button onClick={handleSend} disabled={sending || !messageText.trim()}>
+              <Button
+                onClick={handleSend}
+                disabled={sending || !messageText.trim()}
+              >
                 {sending ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                 ) : (
@@ -367,14 +399,19 @@ export function ContactDetail({ contact, deals, activities, timelineEvents }: Co
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm">{activity.content || activity.type}</p>
+                      <p className="text-sm">
+                        {activity.content || activity.type}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(activity.created_at).toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(activity.created_at).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
                       </p>
                     </div>
                   </div>

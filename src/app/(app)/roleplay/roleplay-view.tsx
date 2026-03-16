@@ -74,7 +74,8 @@ export function RoleplayView({ profiles, sessions }: Props) {
   const avgScore =
     totalSessions > 0
       ? Math.round(
-          completedSessions.reduce((sum, s) => sum + (s.score || 0), 0) / totalSessions
+          completedSessions.reduce((sum, s) => sum + (s.score || 0), 0) /
+            totalSessions,
         )
       : 0;
   const bestScore =
@@ -125,7 +126,9 @@ export function RoleplayView({ profiles, sessions }: Props) {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">Total sessions</span>
+              <span className="text-xs text-muted-foreground">
+                Total sessions
+              </span>
             </div>
             <p className="text-2xl font-bold">{totalSessions}</p>
           </CardContent>
@@ -136,16 +139,28 @@ export function RoleplayView({ profiles, sessions }: Props) {
               <Star className="h-4 w-4 text-brand" />
               <span className="text-xs text-muted-foreground">Score moyen</span>
             </div>
-            <p className="text-2xl font-bold">{avgScore || "--"}<span className="text-sm text-muted-foreground font-normal">/100</span></p>
+            <p className="text-2xl font-bold">
+              {avgScore || "--"}
+              <span className="text-sm text-muted-foreground font-normal">
+                /100
+              </span>
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Trophy className="h-4 w-4 text-brand" />
-              <span className="text-xs text-muted-foreground">Meilleure session</span>
+              <span className="text-xs text-muted-foreground">
+                Meilleure session
+              </span>
             </div>
-            <p className="text-2xl font-bold">{bestScore || "--"}<span className="text-sm text-muted-foreground font-normal">/100</span></p>
+            <p className="text-2xl font-bold">
+              {bestScore || "--"}
+              <span className="text-sm text-muted-foreground font-normal">
+                /100
+              </span>
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -169,7 +184,10 @@ export function RoleplayView({ profiles, sessions }: Props) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {profiles.map((profile) => (
-            <Card key={profile.id} className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+            <Card
+              key={profile.id}
+              className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+            >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
@@ -230,7 +248,9 @@ export function RoleplayView({ profiles, sessions }: Props) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="text-sm text-muted-foreground min-w-[100px]">
-                        {format(new Date(session.started_at), "d MMM yyyy", { locale: fr })}
+                        {format(new Date(session.started_at), "d MMM yyyy", {
+                          locale: fr,
+                        })}
                       </div>
                       <div>
                         <p className="font-medium text-sm">
@@ -255,7 +275,8 @@ export function RoleplayView({ profiles, sessions }: Props) {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      {session.status === "completed" && session.score !== null ? (
+                      {session.status === "completed" &&
+                      session.score !== null ? (
                         <Badge
                           variant="outline"
                           className={`text-xs ${
@@ -270,7 +291,9 @@ export function RoleplayView({ profiles, sessions }: Props) {
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="text-xs">
-                          {session.status === "active" ? "En cours" : session.status}
+                          {session.status === "active"
+                            ? "En cours"
+                            : session.status}
                         </Badge>
                       )}
                       {session.status === "completed" ? (
@@ -281,7 +304,10 @@ export function RoleplayView({ profiles, sessions }: Props) {
                         </Link>
                       ) : session.status === "active" ? (
                         <Link href={`/roleplay/session/${session.id}`}>
-                          <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90">
+                          <Button
+                            size="sm"
+                            className="bg-brand text-brand-dark hover:bg-brand/90"
+                          >
                             Reprendre
                           </Button>
                         </Link>

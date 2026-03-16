@@ -4,7 +4,9 @@ import { LeaderboardView } from "./leaderboard-view";
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: leaderboard } = await supabase
@@ -14,9 +16,6 @@ export default async function LeaderboardPage() {
     .limit(50);
 
   return (
-    <LeaderboardView
-      leaderboard={leaderboard || []}
-      currentUserId={user.id}
-    />
+    <LeaderboardView leaderboard={leaderboard || []} currentUserId={user.id} />
   );
 }

@@ -1,5 +1,10 @@
 import { notFound } from "next/navigation";
-import { getDealById, getDealActivities, getPipelineStages, getTeamMembers } from "@/lib/actions/crm";
+import {
+  getDealById,
+  getDealActivities,
+  getPipelineStages,
+  getTeamMembers,
+} from "@/lib/actions/crm";
 import { DealDetail } from "./deal-detail";
 
 interface Props {

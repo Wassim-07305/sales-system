@@ -27,10 +27,15 @@ interface AIScriptsViewProps {
   userId: string;
 }
 
-export function AIScriptsView({ script: initialScript, role }: AIScriptsViewProps) {
+export function AIScriptsView({
+  script: initialScript,
+  role,
+}: AIScriptsViewProps) {
   const [script, setScript] = useState<AIScriptData | null>(initialScript);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [expandedObjections, setExpandedObjections] = useState<Record<string, boolean>>({});
+  const [expandedObjections, setExpandedObjections] = useState<
+    Record<string, boolean>
+  >({});
   const [isGenerating, startGenerating] = useTransition();
 
   const handleCopy = async (text: string, key: string) => {
@@ -113,7 +118,7 @@ export function AIScriptsView({ script: initialScript, role }: AIScriptsViewProp
             <p className="text-lg font-medium">Aucun script généré</p>
             <p className="text-sm text-muted-foreground">
               {isB2B
-                ? "Cliquez sur \"Générer le script\" pour créer votre script personnalisé"
+                ? 'Cliquez sur "Générer le script" pour créer votre script personnalisé'
                 : "Votre manager n'a pas encore généré de script pour vous"}
             </p>
           </CardContent>
@@ -213,7 +218,7 @@ export function AIScriptsView({ script: initialScript, role }: AIScriptsViewProp
                                 <ChevronRight
                                   className={cn(
                                     "h-4 w-4 text-muted-foreground transition-transform shrink-0",
-                                    isExpanded && "rotate-90"
+                                    isExpanded && "rotate-90",
                                   )}
                                 />
                               </button>

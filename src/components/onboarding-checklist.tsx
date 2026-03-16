@@ -3,7 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, User, BookOpen, Target, PenLine, Calendar, Users } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  User,
+  BookOpen,
+  Target,
+  PenLine,
+  Calendar,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { toggleChecklistItem } from "@/lib/actions/onboarding";
 import { useTransition } from "react";
@@ -28,7 +37,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function OnboardingChecklist({ items }: { items: ChecklistItem[] }) {
   const [isPending, startTransition] = useTransition();
   const completedCount = items.filter((i) => i.completed).length;
-  const progress = items.length > 0 ? Math.round((completedCount / items.length) * 100) : 0;
+  const progress =
+    items.length > 0 ? Math.round((completedCount / items.length) * 100) : 0;
 
   function handleToggle(itemId: string) {
     startTransition(async () => {
@@ -49,7 +59,9 @@ export function OnboardingChecklist({ items }: { items: ChecklistItem[] }) {
       <CardContent className="space-y-4">
         <div>
           <Progress value={progress} className="h-2 [&>div]:bg-green-500" />
-          <p className="text-xs text-muted-foreground mt-1">{progress}% complete</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {progress}% complete
+          </p>
         </div>
         <div className="space-y-1">
           {items.map((item) => {
@@ -59,7 +71,7 @@ export function OnboardingChecklist({ items }: { items: ChecklistItem[] }) {
                 key={item.id}
                 className={cn(
                   "flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors",
-                  item.completed && "opacity-60"
+                  item.completed && "opacity-60",
                 )}
               >
                 <button
@@ -78,7 +90,7 @@ export function OnboardingChecklist({ items }: { items: ChecklistItem[] }) {
                   href={item.link}
                   className={cn(
                     "text-sm flex-1",
-                    item.completed && "line-through text-muted-foreground"
+                    item.completed && "line-through text-muted-foreground",
                   )}
                 >
                   {item.label}

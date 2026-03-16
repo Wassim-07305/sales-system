@@ -14,40 +14,40 @@ import {
 
 const STAGE_MAP: Record<string, string> = {
   // HubSpot stages
-  "appointmentscheduled": "Prospect",
-  "qualifiedtobuy": "Contacte",
-  "presentationscheduled": "Appel Decouverte",
-  "decisionmakerboughtin": "Proposition",
-  "contractsent": "Closing",
-  "closedwon": "Client Signé",
-  "closedlost": "Perdu",
+  appointmentscheduled: "Prospect",
+  qualifiedtobuy: "Contacte",
+  presentationscheduled: "Appel Decouverte",
+  decisionmakerboughtin: "Proposition",
+  contractsent: "Closing",
+  closedwon: "Client Signé",
+  closedlost: "Perdu",
   // Pipedrive stages (French)
-  "contact": "Contacte",
-  "contacté": "Contacte",
-  "découverte": "Appel Decouverte",
-  "proposition": "Proposition",
-  "négociation": "Closing",
-  "gagné": "Client Signé",
-  "perdu": "Perdu",
+  contact: "Contacte",
+  contacté: "Contacte",
+  découverte: "Appel Decouverte",
+  proposition: "Proposition",
+  négociation: "Closing",
+  gagné: "Client Signé",
+  perdu: "Perdu",
   // Salesforce stages
-  "prospecting": "Prospect",
-  "qualification": "Contacte",
+  prospecting: "Prospect",
+  qualification: "Contacte",
   "needs analysis": "Appel Decouverte",
   "proposal/price quote": "Proposition",
   "negotiation/review": "Closing",
   "closed won": "Client Signé",
   "closed lost": "Perdu",
   // Generic
-  "nouveau": "Prospect",
-  "new": "Prospect",
-  "prospect": "Prospect",
-  "lead": "Prospect",
-  "qualified": "Contacte",
-  "demo": "Appel Decouverte",
-  "proposal": "Proposition",
-  "closing": "Closing",
-  "won": "Client Signé",
-  "lost": "Perdu",
+  nouveau: "Prospect",
+  new: "Prospect",
+  prospect: "Prospect",
+  lead: "Prospect",
+  qualified: "Contacte",
+  demo: "Appel Decouverte",
+  proposal: "Proposition",
+  closing: "Closing",
+  won: "Client Signé",
+  lost: "Perdu",
 };
 
 function mapStageName(input: string): string {
@@ -62,7 +62,9 @@ function transformValue(value: string, transform?: string): string {
 
   switch (transform) {
     case "number":
-      return String(parseFloat(value.replace(/[^\d.,\-]/g, "").replace(",", ".")) || 0);
+      return String(
+        parseFloat(value.replace(/[^\d.,\-]/g, "").replace(",", ".")) || 0,
+      );
     case "date": {
       const d = new Date(value);
       return isNaN(d.getTime()) ? "" : d.toISOString();
@@ -82,10 +84,12 @@ export async function executeMigration(
   contactRows: Record<string, string>[],
   dealRows: Record<string, string>[],
   config: MigrationConfig,
-  fileName?: string
+  fileName?: string,
 ): Promise<MigrationResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const result: MigrationResult = {
@@ -106,8 +110,10 @@ export async function executeMigration(
 
   const stageByName = new Map<string, string>();
   (stages || []).forEach((s) => stageByName.set(s.name, s.id));
-  const defaultStageId = stageByName.get(config.options.defaultStage || "Prospect")
-    || stages?.[0]?.id || "";
+  const defaultStageId =
+    stageByName.get(config.options.defaultStage || "Prospect") ||
+    stages?.[0]?.id ||
+    "";
 
   // Build mapping lookup
   const contactMap = new Map<string, { target: string; transform?: string }>();
@@ -116,7 +122,9 @@ export async function executeMigration(
   for (const m of config.mappings) {
     if (m.target === "_ignore") continue;
     const preset = CRM_PRESETS[config.source];
-    const isContactMapping = preset.contactMappings.some((cm) => cm.source === m.source);
+    const isContactMapping = preset.contactMappings.some(
+      (cm) => cm.source === m.source,
+    );
     if (isContactMapping) {
       contactMap.set(m.source, { target: m.target, transform: m.transform });
     } else {
@@ -139,7 +147,10 @@ export async function executeMigration(
 
       if (!mapped.email && !mapped.first_name && !mapped.last_name) {
         result.contactsErrors++;
-        result.errors.push({ row: i + 1, message: "Contact sans email ni nom" });
+        result.errors.push({
+          row: i + 1,
+          message: "Contact sans email ni nom",
+        });
         continue;
       }
 
@@ -155,7 +166,10 @@ export async function executeMigration(
             await supabase
               .from("contacts")
               .update({
-                full_name: [mapped.first_name, mapped.last_name].filter(Boolean).join(" ") || undefined,
+                full_name:
+                  [mapped.first_name, mapped.last_name]
+                    .filter(Boolean)
+                    .join(" ") || undefined,
                 phone: mapped.phone || undefined,
                 company: mapped.company || undefined,
                 position: mapped.position || undefined,
@@ -171,9 +185,13 @@ export async function executeMigration(
         }
       }
 
-      const fullName = [mapped.first_name, mapped.last_name].filter(Boolean).join(" ") || null;
+      const fullName =
+        [mapped.first_name, mapped.last_name].filter(Boolean).join(" ") || null;
       const tags = mapped.tags
-        ? mapped.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
+        ? mapped.tags
+            .split(",")
+            .map((t: string) => t.trim())
+            .filter(Boolean)
         : [];
 
       const { error } = await supabase.from("contacts").insert({
@@ -182,7 +200,8 @@ export async function executeMigration(
         phone: mapped.phone || null,
         company: mapped.company || null,
         position: mapped.position || null,
-        source: mapped.source || `Migration ${CRM_PRESETS[config.source].label}`,
+        source:
+          mapped.source || `Migration ${CRM_PRESETS[config.source].label}`,
         tags,
         notes: mapped.notes || null,
         created_by: user.id,
@@ -235,7 +254,8 @@ export async function executeMigration(
         title: mapped.title,
         value: mapped.value ? Number(mapped.value) : 0,
         stage_id: stageId,
-        source: mapped.source || `Migration ${CRM_PRESETS[config.source].label}`,
+        source:
+          mapped.source || `Migration ${CRM_PRESETS[config.source].label}`,
         notes: mapped.notes || null,
         contact_id: contactId,
         assigned_to: user.id,
@@ -263,7 +283,9 @@ export async function executeMigration(
       imported: result.contactsImported + result.dealsImported,
       skipped: result.contactsSkipped + result.dealsSkipped,
       errors: result.contactsErrors + result.dealsErrors,
-      file_name: fileName ? `[${CRM_PRESETS[config.source].label}] ${fileName}` : null,
+      file_name: fileName
+        ? `[${CRM_PRESETS[config.source].label}] ${fileName}`
+        : null,
     });
   } catch {
     // Table might not exist
@@ -277,7 +299,9 @@ export async function executeMigration(
 
 export async function getMigrationHistory(): Promise<MigrationLog[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   try {
@@ -290,13 +314,20 @@ export async function getMigrationHistory(): Promise<MigrationLog[]> {
 
     return ((data || []) as unknown as MigrationLog[]).map((d) => ({
       ...d,
-      source: (d.file_name?.startsWith("[HubSpot]") ? "hubspot"
-        : d.file_name?.startsWith("[Pipedrive]") ? "pipedrive"
-        : d.file_name?.startsWith("[Salesforce]") ? "salesforce"
-        : "custom") as CrmSource,
-      contacts_imported: d.contacts_imported ?? (d as unknown as { imported?: number }).imported ?? 0,
+      source: (d.file_name?.startsWith("[HubSpot]")
+        ? "hubspot"
+        : d.file_name?.startsWith("[Pipedrive]")
+          ? "pipedrive"
+          : d.file_name?.startsWith("[Salesforce]")
+            ? "salesforce"
+            : "custom") as CrmSource,
+      contacts_imported:
+        d.contacts_imported ??
+        (d as unknown as { imported?: number }).imported ??
+        0,
       deals_imported: d.deals_imported ?? 0,
-      total_errors: d.total_errors ?? (d as unknown as { errors?: number }).errors ?? 0,
+      total_errors:
+        d.total_errors ?? (d as unknown as { errors?: number }).errors ?? 0,
     }));
   } catch {
     return [];

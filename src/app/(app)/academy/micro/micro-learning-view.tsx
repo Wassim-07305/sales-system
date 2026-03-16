@@ -80,10 +80,16 @@ export function MicroLearningView({
 
   // Group by course
   const grouped = useMemo(() => {
-    const groups: Record<string, { courseTitle: string; lessons: MicroLesson[] }> = {};
+    const groups: Record<
+      string,
+      { courseTitle: string; lessons: MicroLesson[] }
+    > = {};
     for (const lesson of filtered) {
       if (!groups[lesson.course_id]) {
-        groups[lesson.course_id] = { courseTitle: lesson.course_title, lessons: [] };
+        groups[lesson.course_id] = {
+          courseTitle: lesson.course_title,
+          lessons: [],
+        };
       }
       groups[lesson.course_id].lessons.push(lesson);
     }
@@ -93,7 +99,8 @@ export function MicroLearningView({
   // Progress stats
   const completedCount = microLessons.filter((l) => localProgress[l.id]).length;
   const totalCount = microLessons.length;
-  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const progressPercent =
+    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   function handleComplete(lessonId: string) {
     startTransition(async () => {
@@ -115,7 +122,10 @@ export function MicroLearningView({
   if (totalCount === 0) {
     return (
       <div>
-        <PageHeader title="Micro-learning" description="Lecons courtes pour progresser chaque jour">
+        <PageHeader
+          title="Micro-learning"
+          description="Lecons courtes pour progresser chaque jour"
+        >
           <Button asChild variant="outline" size="sm">
             <Link href="/academy">
               <ArrowLeft className="size-4" />
@@ -130,8 +140,9 @@ export function MicroLearningView({
           </div>
           <p className="text-lg font-medium">Aucune micro-lecon disponible</p>
           <p className="mt-2 max-w-md text-center text-sm">
-            Les micro-lecons sont des lecons courtes (5 min ou moins). Elles apparaitront ici
-            automatiquement lorsque des lecons de ce format seront ajoutees a vos formations.
+            Les micro-lecons sont des lecons courtes (5 min ou moins). Elles
+            apparaitront ici automatiquement lorsque des lecons de ce format
+            seront ajoutees a vos formations.
           </p>
           <Button asChild className="mt-6" variant="outline">
             <Link href="/academy">Voir toutes les formations</Link>
@@ -144,7 +155,10 @@ export function MicroLearningView({
   return (
     <div>
       {/* Header */}
-      <PageHeader title="Micro-learning" description="Lecons courtes pour progresser chaque jour">
+      <PageHeader
+        title="Micro-learning"
+        description="Lecons courtes pour progresser chaque jour"
+      >
         <Button asChild variant="outline" size="sm">
           <Link href="/academy">
             <ArrowLeft className="size-4" />
@@ -192,7 +206,8 @@ export function MicroLearningView({
 
             {dailyLesson.content && (
               <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                {dailyLesson.content.replace(/<[^>]*>/g, "").substring(0, 200)}...
+                {dailyLesson.content.replace(/<[^>]*>/g, "").substring(0, 200)}
+                ...
               </p>
             )}
 
@@ -213,7 +228,10 @@ export function MicroLearningView({
                     <CheckCircle2 className="size-4" />
                     Marquer comme terminee
                   </Button>
-                  <Button variant="ghost" onClick={() => setExpandedLessonId(null)}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setExpandedLessonId(null)}
+                  >
                     Reduire
                   </Button>
                 </div>
@@ -267,7 +285,7 @@ export function MicroLearningView({
                     className={cn(
                       "transition-all duration-200",
                       isCompleted && "opacity-70",
-                      isExpanded && "sm:col-span-2 lg:col-span-3"
+                      isExpanded && "sm:col-span-2 lg:col-span-3",
                     )}
                   >
                     <CardContent className="p-4">
@@ -280,7 +298,8 @@ export function MicroLearningView({
                             <h5
                               className={cn(
                                 "font-medium text-sm truncate",
-                                isCompleted && "line-through text-muted-foreground"
+                                isCompleted &&
+                                  "line-through text-muted-foreground",
                               )}
                             >
                               {lesson.title}
@@ -301,7 +320,9 @@ export function MicroLearningView({
                           {lesson.content && (
                             <div
                               className="prose prose-sm prose-invert max-w-none rounded-lg bg-muted/50 p-4"
-                              dangerouslySetInnerHTML={{ __html: lesson.content }}
+                              dangerouslySetInnerHTML={{
+                                __html: lesson.content,
+                              }}
                             />
                           )}
                           {!lesson.content && (

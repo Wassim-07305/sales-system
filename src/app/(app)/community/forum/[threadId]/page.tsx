@@ -27,21 +27,23 @@ export default async function ThreadPage({
 
   const normalizedPost = {
     ...post,
-    author: Array.isArray(post.author)
-      ? post.author[0] || null
-      : post.author,
+    author: Array.isArray(post.author) ? post.author[0] || null : post.author,
   };
 
   // Fetch comments
   const comments = await getComments(threadId);
 
   // Batch fetch reputations for post author + comment authors
-  const authorIds = [...new Set([
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (normalizedPost.author as any)?.id,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...(comments as any[]).map((c: any) => c.author?.id),
-  ].filter(Boolean))] as string[];
+  const authorIds = [
+    ...new Set(
+      [
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (normalizedPost.author as any)?.id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(comments as any[]).map((c: any) => c.author?.id),
+      ].filter(Boolean),
+    ),
+  ] as string[];
   const reputations = await getUserReputationBatch(authorIds);
 
   return (

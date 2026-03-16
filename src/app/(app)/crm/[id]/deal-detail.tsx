@@ -38,7 +38,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { Deal, DealActivity, PipelineStage, DealActivityType } from "@/lib/types/database";
+import type {
+  Deal,
+  DealActivity,
+  PipelineStage,
+  DealActivityType,
+} from "@/lib/types/database";
 import {
   ArrowLeft,
   User,
@@ -95,7 +100,12 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export function DealDetail({ deal, activities, stages, teamMembers }: DealDetailProps) {
+export function DealDetail({
+  deal,
+  activities,
+  stages,
+  teamMembers,
+}: DealDetailProps) {
   const router = useRouter();
   const [currentDeal, setCurrentDeal] = useState(deal);
   const [notes, setNotes] = useState(deal.notes || "");
@@ -186,7 +196,7 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
     const result = await addDealActivity(
       currentDeal.id,
       newActivity.type,
-      newActivity.content
+      newActivity.content,
     );
 
     if (result.error) {
@@ -242,7 +252,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                   <label className="text-sm font-medium">Titre</label>
                   <Input
                     value={editForm.title}
-                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, title: e.target.value })
+                    }
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -251,17 +263,29 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                     <Input
                       type="number"
                       value={editForm.value}
-                      onChange={(e) => setEditForm({ ...editForm, value: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          value: Number(e.target.value),
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Probabilite (%)</label>
+                    <label className="text-sm font-medium">
+                      Probabilite (%)
+                    </label>
                     <Input
                       type="number"
                       min={0}
                       max={100}
                       value={editForm.probability}
-                      onChange={(e) => setEditForm({ ...editForm, probability: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          probability: Number(e.target.value),
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -269,7 +293,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                   <label className="text-sm font-medium">Source</label>
                   <Input
                     value={editForm.source}
-                    onChange={(e) => setEditForm({ ...editForm, source: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, source: e.target.value })
+                    }
                     placeholder="ex: LinkedIn, Referral..."
                   />
                 </div>
@@ -277,7 +303,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                   <label className="text-sm font-medium">Assigne a</label>
                   <Select
                     value={editForm.assigned_to}
-                    onValueChange={(v) => setEditForm({ ...editForm, assigned_to: v })}
+                    onValueChange={(v) =>
+                      setEditForm({ ...editForm, assigned_to: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selectionner un membre" />
@@ -292,19 +320,30 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Prochaine action</label>
+                  <label className="text-sm font-medium">
+                    Prochaine action
+                  </label>
                   <Input
                     value={editForm.next_action}
-                    onChange={(e) => setEditForm({ ...editForm, next_action: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, next_action: e.target.value })
+                    }
                     placeholder="ex: Relancer par email"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Date prochaine action</label>
+                  <label className="text-sm font-medium">
+                    Date prochaine action
+                  </label>
                   <Input
                     type="date"
                     value={editForm.next_action_date}
-                    onChange={(e) => setEditForm({ ...editForm, next_action_date: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        next_action_date: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <Button
@@ -318,7 +357,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
           </Dialog>
 
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/contracts/new?dealId=${currentDeal.id}&clientId=${currentDeal.contact_id || ""}&amount=${currentDeal.value}`}>
+            <Link
+              href={`/contracts/new?dealId=${currentDeal.id}&clientId=${currentDeal.contact_id || ""}&amount=${currentDeal.value}`}
+            >
               <FileText className="h-4 w-4 mr-1" />
               Contrat
             </Link>
@@ -326,7 +367,11 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:text-red-700"
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -334,7 +379,8 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer ce deal ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Cette action est irreversible. Toutes les activites associees seront egalement supprimees.
+                  Cette action est irreversible. Toutes les activites associees
+                  seront egalement supprimees.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -363,7 +409,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                   <DollarSign className="h-3.5 w-3.5 text-brand" />
                   Valeur
                 </div>
-                <p className="text-xl font-bold">{formatCurrency(currentDeal.value)}</p>
+                <p className="text-xl font-bold">
+                  {formatCurrency(currentDeal.value)}
+                </p>
               </CardContent>
             </Card>
             <Card className="rounded-xl border-border/50 shadow-sm">
@@ -382,7 +430,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                   Valeur ponderee
                 </div>
                 <p className="text-xl font-bold">
-                  {formatCurrency(currentDeal.value * (currentDeal.probability / 100))}
+                  {formatCurrency(
+                    currentDeal.value * (currentDeal.probability / 100),
+                  )}
                 </p>
               </CardContent>
             </Card>
@@ -404,7 +454,11 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                       }`}
                       onClick={() => handleTempChange(temp)}
                     >
-                      {temp === "hot" ? "Hot" : temp === "warm" ? "Warm" : "Cold"}
+                      {temp === "hot"
+                        ? "Hot"
+                        : temp === "warm"
+                          ? "Warm"
+                          : "Cold"}
                     </Badge>
                   ))}
                 </div>
@@ -422,7 +476,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                 {stages.map((stage) => (
                   <Button
                     key={stage.id}
-                    variant={currentDeal.stage_id === stage.id ? "default" : "outline"}
+                    variant={
+                      currentDeal.stage_id === stage.id ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => handleStageChange(stage.id)}
                     className={
@@ -445,7 +501,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
           {/* Activities timeline */}
           <Card>
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Historique des activites</CardTitle>
+              <CardTitle className="text-base">
+                Historique des activites
+              </CardTitle>
               <Dialog open={activityOpen} onOpenChange={setActivityOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline">
@@ -462,7 +520,12 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                       <label className="text-sm font-medium">Type</label>
                       <Select
                         value={newActivity.type}
-                        onValueChange={(v) => setNewActivity({ ...newActivity, type: v as DealActivityType })}
+                        onValueChange={(v) =>
+                          setNewActivity({
+                            ...newActivity,
+                            type: v as DealActivityType,
+                          })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -480,7 +543,12 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                       <label className="text-sm font-medium">Contenu</label>
                       <Textarea
                         value={newActivity.content}
-                        onChange={(e) => setNewActivity({ ...newActivity, content: e.target.value })}
+                        onChange={(e) =>
+                          setNewActivity({
+                            ...newActivity,
+                            content: e.target.value,
+                          })
+                        }
                         placeholder="Decrivez l'activite..."
                         rows={4}
                       />
@@ -532,9 +600,13 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                             {activity.content}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {format(new Date(activity.created_at), "d MMM yyyy 'a' HH:mm", {
-                              locale: fr,
-                            })}
+                            {format(
+                              new Date(activity.created_at),
+                              "d MMM yyyy 'a' HH:mm",
+                              {
+                                locale: fr,
+                              },
+                            )}
                           </p>
                         </div>
                       </div>
@@ -560,7 +632,9 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                     {currentDeal.contact.full_name?.charAt(0) || "?"}
                   </div>
                   <div>
-                    <p className="font-medium">{currentDeal.contact.full_name}</p>
+                    <p className="font-medium">
+                      {currentDeal.contact.full_name}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {currentDeal.contact.email}
                     </p>
@@ -602,9 +676,13 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                 <p className="font-medium">{currentDeal.next_action}</p>
                 {currentDeal.next_action_date && (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {format(new Date(currentDeal.next_action_date), "EEEE d MMMM yyyy", {
-                      locale: fr,
-                    })}
+                    {format(
+                      new Date(currentDeal.next_action_date),
+                      "EEEE d MMMM yyyy",
+                      {
+                        locale: fr,
+                      },
+                    )}
                   </p>
                 )}
               </CardContent>
@@ -683,9 +761,13 @@ export function DealDetail({ deal, activities, stages, teamMembers }: DealDetail
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Dernier contact</span>
                   <span>
-                    {format(new Date(currentDeal.last_contact_at), "d MMM yyyy", {
-                      locale: fr,
-                    })}
+                    {format(
+                      new Date(currentDeal.last_contact_at),
+                      "d MMM yyyy",
+                      {
+                        locale: fr,
+                      },
+                    )}
                   </span>
                 </div>
               )}

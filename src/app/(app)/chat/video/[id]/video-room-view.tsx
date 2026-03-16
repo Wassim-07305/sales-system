@@ -125,7 +125,9 @@ export function VideoRoomView({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [screenSharing, setScreenSharing] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<"participants" | "chat" | "polls">("participants");
+  const [sidebarTab, setSidebarTab] = useState<
+    "participants" | "chat" | "polls"
+  >("participants");
 
   // Media stream hook
   const {
@@ -167,8 +169,12 @@ export function VideoRoomView({
   // WebRTC state
   // ---------------------------------------------------------------------------
   const peersRef = useRef<Map<string, PeerState>>(new Map());
-  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
-  const signalingChannelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(
+    new Map(),
+  );
+  const signalingChannelRef = useRef<ReturnType<
+    ReturnType<typeof createClient>["channel"]
+  > | null>(null);
   const supabaseRef = useRef(createClient());
   // Track whether we have already joined the signaling channel
   const signalingJoinedRef = useRef(false);
@@ -236,7 +242,10 @@ export function VideoRoomView({
       };
 
       pc.oniceconnectionstatechange = () => {
-        if (pc.iceConnectionState === "failed" || pc.iceConnectionState === "disconnected") {
+        if (
+          pc.iceConnectionState === "failed" ||
+          pc.iceConnectionState === "disconnected"
+        ) {
           // Cleanup on disconnect
           cleanupPeer(remoteUserId);
         }
@@ -322,7 +331,10 @@ export function VideoRoomView({
         }
 
         case "offer": {
-          const { sdp } = payload as { sdp: RTCSessionDescriptionInit; from: string };
+          const { sdp } = payload as {
+            sdp: RTCSessionDescriptionInit;
+            from: string;
+          };
           // Create peer connection for the offerer if we don't have one
           let pc: RTCPeerConnection;
           const existing = peersRef.current.get(from);
@@ -353,11 +365,16 @@ export function VideoRoomView({
         }
 
         case "answer": {
-          const { sdp } = payload as { sdp: RTCSessionDescriptionInit; from: string };
+          const { sdp } = payload as {
+            sdp: RTCSessionDescriptionInit;
+            from: string;
+          };
           const peer = peersRef.current.get(from);
           if (peer) {
             try {
-              await peer.pc.setRemoteDescription(new RTCSessionDescription(sdp));
+              await peer.pc.setRemoteDescription(
+                new RTCSessionDescription(sdp),
+              );
             } catch (err) {
               console.error("[WebRTC] Error setting remote description:", err);
             }
@@ -366,7 +383,10 @@ export function VideoRoomView({
         }
 
         case "ice-candidate": {
-          const { candidate } = payload as { candidate: RTCIceCandidateInit; from: string };
+          const { candidate } = payload as {
+            candidate: RTCIceCandidateInit;
+            from: string;
+          };
           const peer = peersRef.current.get(from);
           if (peer && candidate) {
             try {
@@ -461,7 +481,9 @@ export function VideoRoomView({
     peersRef.current.forEach((peer) => {
       const senders = peer.pc.getSenders();
       stream.getTracks().forEach((track) => {
-        const existingSender = senders.find((s) => s.track?.kind === track.kind);
+        const existingSender = senders.find(
+          (s) => s.track?.kind === track.kind,
+        );
         if (existingSender) {
           existingSender.replaceTrack(track).catch(() => {});
         } else {
@@ -522,7 +544,9 @@ export function VideoRoomView({
       // Replace video track on all peer connections with screen share track
       const screenTrack = displayStream.getVideoTracks()[0];
       peersRef.current.forEach((peer) => {
-        const videoSender = peer.pc.getSenders().find((s) => s.track?.kind === "video");
+        const videoSender = peer.pc
+          .getSenders()
+          .find((s) => s.track?.kind === "video");
         if (videoSender) {
           videoSender.replaceTrack(screenTrack).catch(() => {});
         }
@@ -536,7 +560,9 @@ export function VideoRoomView({
         const cameraTrack = localStreamRef.current?.getVideoTracks()[0];
         if (cameraTrack) {
           peersRef.current.forEach((peer) => {
-            const videoSender = peer.pc.getSenders().find((s) => s.track?.kind === "video");
+            const videoSender = peer.pc
+              .getSenders()
+              .find((s) => s.track?.kind === "video");
             if (videoSender) {
               videoSender.replaceTrack(cameraTrack).catch(() => {});
             }
@@ -547,7 +573,9 @@ export function VideoRoomView({
       if (err instanceof DOMException && err.name === "NotAllowedError") {
         return;
       }
-      toast.error("Impossible de partager l'écran. Vérifiez les autorisations de votre navigateur.");
+      toast.error(
+        "Impossible de partager l'écran. Vérifiez les autorisations de votre navigateur.",
+      );
     }
   }, [screenSharing]);
 
@@ -567,7 +595,9 @@ export function VideoRoomView({
     if (remoteStreams.size > 0) {
       const firstRemote = remoteStreams.values().next().value;
       if (firstRemote) {
-        (firstRemote as MediaStream).getTracks().forEach((t: MediaStreamTrack) => tracks.push(t));
+        (firstRemote as MediaStream)
+          .getTracks()
+          .forEach((t: MediaStreamTrack) => tracks.push(t));
       }
     }
 
@@ -596,7 +626,9 @@ export function VideoRoomView({
       };
 
       recorder.onstop = async () => {
-        const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        const blob = new Blob(recordedChunksRef.current, {
+          type: "video/webm",
+        });
         if (blob.size === 0) return;
 
         // Calculate recording duration in seconds
@@ -632,7 +664,9 @@ export function VideoRoomView({
                 recordingUrl,
                 durationSeconds: durationSec,
               });
-              toast.success("Enregistrement sauvegardé — disponible dans les replays");
+              toast.success(
+                "Enregistrement sauvegardé — disponible dans les replays",
+              );
             } catch {
               // Fallback: update directly from client if server action fails
               await supabase
@@ -660,7 +694,10 @@ export function VideoRoomView({
   }
 
   function stopRecording() {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
     }
@@ -696,13 +733,17 @@ export function VideoRoomView({
       id: `${currentUserId}-${Date.now()}`,
       sender: "Vous",
       text: chatInput,
-      time: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+      time: new Date().toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     };
     setChatMessages((prev) => [...prev, msg]);
     // Broadcast to other participants
     if (signalingChannelRef.current) {
       const participantName =
-        room.participants.find((p) => p.user_id === currentUserId)?.user?.full_name ||
+        room.participants.find((p) => p.user_id === currentUserId)?.user
+          ?.full_name ||
         room.host?.full_name ||
         "Participant";
       signalingChannelRef.current.send({
@@ -878,7 +919,9 @@ export function VideoRoomView({
   const remotePeerName = (() => {
     if (remoteStreams.size === 0) return null;
     const remotePeerId = remoteStreams.keys().next().value;
-    const participant = room.participants.find((p) => p.user_id === remotePeerId);
+    const participant = room.participants.find(
+      (p) => p.user_id === remotePeerId,
+    );
     if (participant?.user?.full_name) return participant.user.full_name;
     if (participant?.user?.email) return participant.user.email;
     // Check if it's the host
@@ -915,7 +958,10 @@ export function VideoRoomView({
           {/* Auto Recording toggle */}
           {isHost && (isScheduled || isLive) && (
             <div className="flex items-center gap-1.5 mr-2">
-              <Label htmlFor="auto-record" className="text-xs text-muted-foreground cursor-pointer">
+              <Label
+                htmlFor="auto-record"
+                className="text-xs text-muted-foreground cursor-pointer"
+              >
                 Enreg. auto
               </Label>
               <Switch
@@ -998,7 +1044,9 @@ export function VideoRoomView({
                       <div className="h-full flex items-center justify-center">
                         <div className="text-center text-gray-500">
                           <Users className="h-12 w-12 mx-auto mb-2 opacity-40" />
-                          <p className="text-sm">En attente d&apos;un participant...</p>
+                          <p className="text-sm">
+                            En attente d&apos;un participant...
+                          </p>
                           <p className="text-xs text-gray-600 mt-1">
                             La connexion s&apos;établira automatiquement
                           </p>
@@ -1059,9 +1107,13 @@ export function VideoRoomView({
                       Visioconférence en cours...
                     </p>
                   ) : isScheduled ? (
-                    <p className="text-lg font-medium">En attente de démarrage</p>
+                    <p className="text-lg font-medium">
+                      En attente de démarrage
+                    </p>
                   ) : (
-                    <p className="text-lg font-medium">Visioconférence terminée</p>
+                    <p className="text-lg font-medium">
+                      Visioconférence terminée
+                    </p>
                   )}
                   {isScheduled && !isHost && (
                     <Button
@@ -1094,14 +1146,20 @@ export function VideoRoomView({
 
             {/* Connection status */}
             {isLive && stream && (
-              <div className={`absolute top-4 left-32 rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 ${
-                hasRemoteStream
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-yellow-500/20 text-yellow-400"
-              }`}>
-                <div className={`h-2 w-2 rounded-full ${
-                  hasRemoteStream ? "bg-green-500" : "bg-yellow-500 animate-pulse"
-                }`} />
+              <div
+                className={`absolute top-4 left-32 rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 ${
+                  hasRemoteStream
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-yellow-500/20 text-yellow-400"
+                }`}
+              >
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    hasRemoteStream
+                      ? "bg-green-500"
+                      : "bg-yellow-500 animate-pulse"
+                  }`}
+                />
                 {hasRemoteStream ? "Connecté" : "En attente..."}
               </div>
             )}
@@ -1123,7 +1181,9 @@ export function VideoRoomView({
                 variant={videoEnabled ? "secondary" : "destructive"}
                 onClick={toggleVideo}
                 className="rounded-full h-10 w-10 p-0"
-                title={videoEnabled ? "Désactiver la caméra" : "Activer la caméra"}
+                title={
+                  videoEnabled ? "Désactiver la caméra" : "Activer la caméra"
+                }
               >
                 {videoEnabled ? (
                   <Camera className="h-4 w-4" />
@@ -1149,7 +1209,9 @@ export function VideoRoomView({
                 variant={screenSharing ? "default" : "secondary"}
                 onClick={handleScreenShare}
                 className="rounded-full h-10 w-10 p-0"
-                title={screenSharing ? "Arrêter le partage" : "Partager l'écran"}
+                title={
+                  screenSharing ? "Arrêter le partage" : "Partager l'écran"
+                }
               >
                 {screenSharing ? (
                   <MonitorOff className="h-4 w-4" />
@@ -1162,7 +1224,7 @@ export function VideoRoomView({
                 variant="destructive"
                 onClick={handleLeave}
                 className="rounded-full h-10 w-10 p-0"
-                title="Quitter l&apos;appel"
+                title="Quitter l'appel"
               >
                 <PhoneOff className="h-4 w-4" />
               </Button>
@@ -1217,7 +1279,8 @@ export function VideoRoomView({
                 {room.host && (
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-brand/5">
                     <div className="h-8 w-8 rounded-full bg-brand/20 flex items-center justify-center text-brand text-xs font-bold">
-                      {room.host.full_name?.charAt(0) || room.host.email.charAt(0)}
+                      {room.host.full_name?.charAt(0) ||
+                        room.host.email.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">
@@ -1251,10 +1314,14 @@ export function VideoRoomView({
                               "Participant"}
                           </p>
                           {isConnected && (
-                            <p className="text-[10px] text-green-500">Connecté</p>
+                            <p className="text-[10px] text-green-500">
+                              Connecté
+                            </p>
                           )}
                         </div>
-                        <div className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-brand"}`} />
+                        <div
+                          className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-brand"}`}
+                        />
                       </div>
                     );
                   })}
@@ -1281,7 +1348,9 @@ export function VideoRoomView({
                     chatMessages.map((msg) => (
                       <div key={msg.id} className="text-sm">
                         <div className="flex items-baseline gap-2">
-                          <span className="font-medium text-xs">{msg.sender}</span>
+                          <span className="font-medium text-xs">
+                            {msg.sender}
+                          </span>
                           <span className="text-[10px] text-muted-foreground">
                             {msg.time}
                           </span>
@@ -1304,7 +1373,11 @@ export function VideoRoomView({
                     e.key === "Enter" && !e.shiftKey && handleSendChat()
                   }
                 />
-                <Button size="sm" className="h-8 w-8 p-0" onClick={handleSendChat}>
+                <Button
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={handleSendChat}
+                >
                   <Send className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -1334,7 +1407,7 @@ export function VideoRoomView({
                     polls.map((poll) => {
                       const totalVotes = poll.options.reduce(
                         (sum, o) => sum + o.vote_count,
-                        0
+                        0,
                       );
                       return (
                         <Card key={poll.id}>
@@ -1354,15 +1427,14 @@ export function VideoRoomView({
                                 const pct =
                                   totalVotes > 0
                                     ? Math.round(
-                                        (option.vote_count / totalVotes) * 100
+                                        (option.vote_count / totalVotes) * 100,
                                       )
                                     : 0;
                                 return (
                                   <button
                                     key={idx}
                                     onClick={() =>
-                                      poll.is_active &&
-                                      handleVote(poll.id, idx)
+                                      poll.is_active && handleVote(poll.id, idx)
                                     }
                                     disabled={!poll.is_active || isPending}
                                     className="w-full text-left"

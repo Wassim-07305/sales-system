@@ -63,7 +63,7 @@ export async function getCashFlowData(): Promise<CashFlowData> {
   const { data: installments } = await supabase
     .from("payment_installments")
     .select(
-      "*, contract:contracts(id, amount, status, client:profiles(id, full_name))"
+      "*, contract:contracts(id, amount, status, client:profiles(id, full_name))",
     )
     .gte("due_date", startDate)
     .lte("due_date", endDate)
@@ -80,7 +80,7 @@ export async function getCashFlowData(): Promise<CashFlowData> {
 
   const overdueTotal = (overdueInstallments || []).reduce(
     (s, p) => s + (p.amount || 0),
-    0
+    0,
   );
 
   // Revenue recognized = sum of all paid installments ever
@@ -91,12 +91,12 @@ export async function getCashFlowData(): Promise<CashFlowData> {
 
   const recognizedTotal = (allPaid || []).reduce(
     (s, p) => s + (p.amount || 0),
-    0
+    0,
   );
 
   // This month metrics
   const thisMonthInstallments = all.filter(
-    (p) => p.due_date >= monthStart && p.due_date <= monthEnd
+    (p) => p.due_date >= monthStart && p.due_date <= monthEnd,
   );
   const receivedThisMonth = thisMonthInstallments
     .filter((p) => p.status === "paid")
@@ -130,17 +130,14 @@ export async function getCashFlowData(): Promise<CashFlowData> {
       .split("T")[0];
 
     const monthInstallments = all.filter(
-      (p) => p.due_date >= mStart && p.due_date <= mEnd
+      (p) => p.due_date >= mStart && p.due_date <= mEnd,
     );
 
     const isPast = offset <= 0;
     const received = monthInstallments
       .filter((p) => p.status === "paid")
       .reduce((s, p) => s + (p.amount || 0), 0);
-    const expected = monthInstallments.reduce(
-      (s, p) => s + (p.amount || 0),
-      0
-    );
+    const expected = monthInstallments.reduce((s, p) => s + (p.amount || 0), 0);
 
     chartData.push({
       month: `${monthNames[d.getMonth()]} ${d.getFullYear()}`,
@@ -160,7 +157,7 @@ export async function getCashFlowData(): Promise<CashFlowData> {
       (p) =>
         p.due_date >= futureStart &&
         p.due_date <= futureEnd &&
-        p.status !== "paid"
+        p.status !== "paid",
     )
     .map((p) => ({
       id: p.id,

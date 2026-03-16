@@ -13,10 +13,12 @@ async function getUnipileWhatsAppAccountId(): Promise<string | null> {
     const client = getUnipileClient();
     if (!client) return null;
     const response = await client.account.getAll();
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
-    const waAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
-      (a) => (a.type || a.provider || "").toUpperCase() === "WHATSAPP"
-    );
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
+    const waAccount = (
+      items as Array<{ id: string; type?: string; provider?: string }>
+    ).find((a) => (a.type || a.provider || "").toUpperCase() === "WHATSAPP");
     return waAccount?.id || null;
   } catch {
     return null;
@@ -37,7 +39,7 @@ interface WhatsAppValidationResult {
  * Si APIFY_TOKEN n'est pas configuré, retourne null (skip la validation).
  */
 export async function validateWhatsAppNumber(
-  phone: string
+  phone: string,
 ): Promise<WhatsAppValidationResult | null> {
   interface ApifyValidationItem {
     phone_number?: string;
@@ -50,14 +52,18 @@ export async function validateWhatsAppNumber(
 
   const results = await callApifyActor<ApifyValidationItem>(
     "clearpath/whatsapp-phone-number-validator-api",
-    { phoneNumbers: [phone], onlyWhatsappUsers: false }
+    { phoneNumbers: [phone], onlyWhatsappUsers: false },
   );
 
   if (!results || results.length === 0) return null;
 
   const item = results[0];
   const hasWhatsApp =
-    item.exists ?? item.isWhatsappUser ?? item.is_whatsapp_user ?? item.hasWhatsApp ?? false;
+    item.exists ??
+    item.isWhatsappUser ??
+    item.is_whatsapp_user ??
+    item.hasWhatsApp ??
+    false;
 
   return {
     phone,
@@ -70,7 +76,7 @@ export async function validateWhatsAppNumber(
  * Si APIFY_TOKEN n'est pas configuré, retourne null (skip la validation).
  */
 export async function validateWhatsAppNumbers(
-  phones: string[]
+  phones: string[],
 ): Promise<WhatsAppValidationResult[] | null> {
   if (phones.length === 0) return [];
 
@@ -89,14 +95,18 @@ export async function validateWhatsAppNumbers(
   const results = await callApifyActor<ApifyValidationItem>(
     "clearpath/whatsapp-phone-number-validator-api",
     { phoneNumbers: batch, onlyWhatsappUsers: false },
-    120 // timeout plus long pour le bulk
+    120, // timeout plus long pour le bulk
   );
 
   if (!results) return null;
 
   return results.map((item, idx) => {
     const hasWhatsApp =
-      item.exists ?? item.isWhatsappUser ?? item.is_whatsapp_user ?? item.hasWhatsApp ?? false;
+      item.exists ??
+      item.isWhatsappUser ??
+      item.is_whatsapp_user ??
+      item.hasWhatsApp ??
+      false;
     return {
       phone: item.phone_number || item.phoneNumber || batch[idx] || "",
       hasWhatsApp: Boolean(hasWhatsApp),
@@ -225,7 +235,10 @@ export async function getConversations() {
             return "Groupe WhatsApp";
           }
           // Status broadcast
-          if (providerId === "status@broadcast" || providerId.endsWith("@broadcast")) {
+          if (
+            providerId === "status@broadcast" ||
+            providerId.endsWith("@broadcast")
+          ) {
             return "Status";
           }
 
@@ -273,9 +286,12 @@ export async function getConversations() {
         const lastMessages = await Promise.all(
           chatsToProcess.map(async (chat) => {
             try {
-              const res = await fetch(`${dsn}/api/v1/chats/${chat.id}/messages?limit=1`, {
-                headers: { "X-API-KEY": apiKey!, Accept: "application/json" },
-              });
+              const res = await fetch(
+                `${dsn}/api/v1/chats/${chat.id}/messages?limit=1`,
+                {
+                  headers: { "X-API-KEY": apiKey!, Accept: "application/json" },
+                },
+              );
               if (!res.ok) return null;
               const data = await res.json();
               const items = data?.items as UnipileMessage[] | undefined;
@@ -283,17 +299,18 @@ export async function getConversations() {
             } catch {
               return null;
             }
-          })
+          }),
         );
 
         const conversations = chatsToProcess.map((chat, idx) => {
           const attendee = chat.attendees?.[0];
           const contactName =
-            chat.name || attendee?.display_name || attendee?.name || extractPhoneName(chat);
+            chat.name ||
+            attendee?.display_name ||
+            attendee?.name ||
+            extractPhoneName(chat);
           const lastMsgTime =
-            chat.timestamp ||
-            chat.updated_at ||
-            new Date().toISOString();
+            chat.timestamp || chat.updated_at || new Date().toISOString();
           const messages: Array<{
             id: string;
             direction: string;
@@ -305,9 +322,13 @@ export async function getConversations() {
 
           const lastMsg = lastMessages[idx];
           if (lastMsg) {
-            const hasAttachment = lastMsg.attachments && lastMsg.attachments.length > 0;
-            const content = lastMsg.text
-              || (hasAttachment ? `[${lastMsg.attachments![0].type || "pièce jointe"}]` : null);
+            const hasAttachment =
+              lastMsg.attachments && lastMsg.attachments.length > 0;
+            const content =
+              lastMsg.text ||
+              (hasAttachment
+                ? `[${lastMsg.attachments![0].type || "pièce jointe"}]`
+                : null);
             messages.push({
               id: `unipile-${lastMsg.id}`,
               direction: lastMsg.is_sender ? "outbound" : "inbound",
@@ -336,11 +357,14 @@ export async function getConversations() {
         return conversations.sort(
           (a, b) =>
             new Date(b.last_message_at).getTime() -
-            new Date(a.last_message_at).getTime()
+            new Date(a.last_message_at).getTime(),
         );
       }
     } catch (err) {
-      console.error("Unipile WhatsApp getConversations error, falling back to local DB:", err);
+      console.error(
+        "Unipile WhatsApp getConversations error, falling back to local DB:",
+        err,
+      );
     }
   }
 
@@ -397,7 +421,7 @@ export async function getConversations() {
   return Object.values(grouped).sort(
     (a, b) =>
       new Date(b.last_message_at).getTime() -
-      new Date(a.last_message_at).getTime()
+      new Date(a.last_message_at).getTime(),
   );
 }
 
@@ -416,11 +440,14 @@ export async function sendWhatsAppMessage(data: {
     const { checkCriticalAction } = await import("@/lib/actions/ai-modes");
     const aiCheck = await checkCriticalAction("Envoi de message initial");
     if (aiCheck.requiresValidation) {
-      throw new Error("Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)");
+      throw new Error(
+        "Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)",
+      );
     }
   } catch (err) {
     // If it's our own validation error, re-throw it
-    if (err instanceof Error && err.message.startsWith("Action bloquée")) throw err;
+    if (err instanceof Error && err.message.startsWith("Action bloquée"))
+      throw err;
     // Otherwise ignore (config not set up, table missing, etc.)
   }
 
@@ -475,16 +502,22 @@ export async function sendWhatsAppMessage(data: {
       const validation = await validateWhatsAppNumber(prospect.phone);
       if (validation && !validation.hasWhatsApp) {
         throw new Error(
-          `Le numéro ${prospect.phone} n'est pas actif sur WhatsApp. Vérifiez le numéro avant de réessayer.`
+          `Le numéro ${prospect.phone} n'est pas actif sur WhatsApp. Vérifiez le numéro avant de réessayer.`,
         );
       }
     } catch (err) {
       // Si c'est notre erreur de validation, on la remonte
-      if (err instanceof Error && err.message.includes("n'est pas actif sur WhatsApp")) {
+      if (
+        err instanceof Error &&
+        err.message.includes("n'est pas actif sur WhatsApp")
+      ) {
         throw err;
       }
       // Sinon (erreur réseau Apify, etc.), on continue sans validation
-      console.warn("Validation WhatsApp Apify échouée, envoi sans validation:", err);
+      console.warn(
+        "Validation WhatsApp Apify échouée, envoi sans validation:",
+        err,
+      );
     }
   }
 
@@ -532,7 +565,7 @@ export async function sendWhatsAppMessage(data: {
               type: "text",
               text: { body: data.content },
             }),
-          }
+          },
         );
 
         if (response.ok) {
@@ -573,7 +606,9 @@ export async function sendWhatsAppMessage(data: {
 
 export async function getWhatsAppSequences() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
   const { data } = await supabase
     .from("whatsapp_sequences")
@@ -620,7 +655,7 @@ export async function updateWhatsAppSequence(
       media_url?: string;
     }>;
     is_active?: boolean;
-  }
+  },
 ) {
   const supabase = await createClient();
   const { error } = await supabase
@@ -657,7 +692,7 @@ export async function getWhatsAppAnalytics() {
   const messages = allMessages || [];
   const totalSent = messages.filter((m) => m.direction === "outbound").length;
   const totalReceived = messages.filter(
-    (m) => m.direction === "inbound"
+    (m) => m.direction === "inbound",
   ).length;
   const responseRate =
     totalSent > 0 ? Math.round((totalReceived / totalSent) * 100) : 0;
@@ -708,10 +743,10 @@ export async function getWhatsAppAnalytics() {
   const sequenceStats = allSequences.map((seq) => {
     const seqMessages = messages.filter((m) => m.sequence_id === seq.id);
     const seqSent = seqMessages.filter(
-      (m) => m.direction === "outbound"
+      (m) => m.direction === "outbound",
     ).length;
     const seqReceived = seqMessages.filter(
-      (m) => m.direction === "inbound"
+      (m) => m.direction === "inbound",
     ).length;
     const seqResponseRate =
       seqSent > 0 ? Math.round((seqReceived / seqSent) * 100) : 0;
@@ -742,7 +777,9 @@ export async function getWhatsAppAnalytics() {
 
 export async function deleteWhatsAppSequence(id: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
   const { error } = await supabase
     .from("whatsapp_sequences")
@@ -762,7 +799,7 @@ const WA_GRAPH_API = "https://graph.facebook.com/v21.0";
 
 export async function connectWhatsAppBusiness(
   phoneNumberId: string,
-  token: string
+  token: string,
 ) {
   const supabase = await createClient();
   const {
@@ -777,7 +814,7 @@ export async function connectWhatsAppBusiness(
   // Validate credentials by fetching the phone number info
   try {
     const res = await fetch(
-      `${WA_GRAPH_API}/${phoneNumberId}?fields=verified_name,display_phone_number,quality_rating&access_token=${token}`
+      `${WA_GRAPH_API}/${phoneNumberId}?fields=verified_name,display_phone_number,quality_rating&access_token=${token}`,
     );
 
     if (!res.ok) {
@@ -841,14 +878,16 @@ export async function connectWhatsAppBusiness(
     };
   } catch (err) {
     console.error("WhatsApp Business connect error:", err);
-    return { error: "Impossible de valider les identifiants WhatsApp Business" };
+    return {
+      error: "Impossible de valider les identifiants WhatsApp Business",
+    };
   }
 }
 
 export async function sendWhatsAppTemplate(
   to: string,
   templateName: string,
-  params: Record<string, string>
+  params: Record<string, string>,
 ) {
   const supabase = await createClient();
   const {
@@ -917,26 +956,23 @@ export async function sendWhatsAppTemplate(
   }
 
   try {
-    const res = await fetch(
-      `${WA_GRAPH_API}/${phoneNumberId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+    const res = await fetch(`${WA_GRAPH_API}/${phoneNumberId}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: to.replace(/[^0-9]/g, ""),
+        type: "template",
+        template: {
+          name: templateName,
+          language: { code: "fr" },
+          components,
         },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: to.replace(/[^0-9]/g, ""),
-          type: "template",
-          template: {
-            name: templateName,
-            language: { code: "fr" },
-            components,
-          },
-        }),
-      }
-    );
+      }),
+    });
 
     if (!res.ok) {
       const errorBody = await res.json().catch(() => ({}));
@@ -1026,7 +1062,7 @@ export async function getWhatsAppBusinessProfile() {
   // --- Live API path ---
   try {
     const res = await fetch(
-      `${WA_GRAPH_API}/${phoneNumberId}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical&access_token=${accessToken}`
+      `${WA_GRAPH_API}/${phoneNumberId}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical&access_token=${accessToken}`,
     );
 
     if (res.ok) {
@@ -1046,7 +1082,7 @@ export async function getWhatsAppBusinessProfile() {
 
       // Also fetch phone number details
       const phoneRes = await fetch(
-        `${WA_GRAPH_API}/${phoneNumberId}?fields=verified_name,display_phone_number,quality_rating&access_token=${accessToken}`
+        `${WA_GRAPH_API}/${phoneNumberId}?fields=verified_name,display_phone_number,quality_rating&access_token=${accessToken}`,
       );
       const phoneInfo = phoneRes.ok
         ? ((await phoneRes.json()) as Record<string, string>)
@@ -1054,7 +1090,8 @@ export async function getWhatsAppBusinessProfile() {
 
       return {
         data: {
-          phone_number: phoneInfo.display_phone_number || connection?.phone_number || null,
+          phone_number:
+            phoneInfo.display_phone_number || connection?.phone_number || null,
           verified_name: phoneInfo.verified_name || null,
           quality_rating: phoneInfo.quality_rating || null,
           about: profile.about || null,
@@ -1093,7 +1130,7 @@ export async function getWhatsAppBusinessProfile() {
 
 export async function triggerOptInSequence(
   prospectId: string,
-  sequenceId: string
+  sequenceId: string,
 ) {
   const supabase = await createClient();
   const {
@@ -1120,7 +1157,12 @@ export async function triggerOptInSequence(
   if (!sequence) throw new Error("Séquence introuvable");
 
   // Envoyer le premier message de la séquence pour déclencher le nurturing
-  const steps = (sequence.steps as Array<{ delay_minutes: number; message: string; media_url?: string }>) || [];
+  const steps =
+    (sequence.steps as Array<{
+      delay_minutes: number;
+      message: string;
+      media_url?: string;
+    }>) || [];
   if (steps.length > 0) {
     await supabase.from("whatsapp_messages").insert({
       connection_id: connection.id,
@@ -1135,7 +1177,9 @@ export async function triggerOptInSequence(
     const now = new Date();
     for (let i = 1; i < steps.length; i++) {
       const step = steps[i];
-      const scheduledAt = new Date(now.getTime() + step.delay_minutes * 60 * 1000);
+      const scheduledAt = new Date(
+        now.getTime() + step.delay_minutes * 60 * 1000,
+      );
       try {
         await supabase.from("follow_up_tasks").insert({
           sequence_id: sequenceId,

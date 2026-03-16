@@ -96,7 +96,9 @@ export async function findDuplicateContacts() {
 
   const { data: contacts, error } = await supabase
     .from("profiles")
-    .select("id, email, full_name, phone, company, role, avatar_url, niche, created_at, updated_at")
+    .select(
+      "id, email, full_name, phone, company, role, avatar_url, niche, created_at, updated_at",
+    )
     .order("created_at", { ascending: true });
 
   if (error) return { groups: [], error: error.message };
@@ -113,7 +115,7 @@ export async function findDuplicateContacts() {
     contactA: ContactRecord,
     contactB: ContactRecord,
     confidence: DuplicateConfidence,
-    reason: string
+    reason: string,
   ) {
     const key = pairKey(contactA.id, contactB.id);
     if (usedPairs.has(key)) return;
@@ -123,9 +125,7 @@ export async function findDuplicateContacts() {
     const existingGroup = groups.find(
       (g) =>
         g.confidence === confidence &&
-        g.contacts.some(
-          (c) => c.id === contactA.id || c.id === contactB.id
-        )
+        g.contacts.some((c) => c.id === contactA.id || c.id === contactB.id),
     );
 
     if (existingGroup) {
@@ -151,7 +151,11 @@ export async function findDuplicateContacts() {
       const b = contacts[j] as ContactRecord;
 
       // Exact email match → high
-      if (a.email && b.email && normalizeStr(a.email) === normalizeStr(b.email)) {
+      if (
+        a.email &&
+        b.email &&
+        normalizeStr(a.email) === normalizeStr(b.email)
+      ) {
         addToGroup(a, b, "high", "Email identique");
         continue;
       }
@@ -183,7 +187,8 @@ export async function findDuplicateContacts() {
         b.full_name &&
         a.company &&
         b.company &&
-        normalizeStr(a.full_name).split(" ").pop() === normalizeStr(b.full_name).split(" ").pop() &&
+        normalizeStr(a.full_name).split(" ").pop() ===
+          normalizeStr(b.full_name).split(" ").pop() &&
         normalizeStr(a.company) === normalizeStr(b.company)
       ) {
         addToGroup(a, b, "medium", "Même nom de famille et entreprise");
@@ -225,7 +230,7 @@ export async function findDuplicateContacts() {
 export async function mergeContacts(
   primaryId: string,
   secondaryIds: string[],
-  fieldSelections: Record<string, string>
+  fieldSelections: Record<string, string>,
 ) {
   const supabase = await createClient();
   const {
@@ -245,7 +250,10 @@ export async function mergeContacts(
     .in("id", allIds);
 
   if (fetchError || !contacts) {
-    return { success: false, error: fetchError?.message || "Contacts introuvables" };
+    return {
+      success: false,
+      error: fetchError?.message || "Contacts introuvables",
+    };
   }
 
   // Build the merged data from field selections

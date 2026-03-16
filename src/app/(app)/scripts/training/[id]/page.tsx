@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getScriptForTraining, getTrainingHistory } from "@/lib/actions/scripts-v2";
+import {
+  getScriptForTraining,
+  getTrainingHistory,
+} from "@/lib/actions/scripts-v2";
 import { TrainingSession } from "./training-session";
 
 export default async function TrainingSessionPage({

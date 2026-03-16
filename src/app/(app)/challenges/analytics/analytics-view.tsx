@@ -118,7 +118,9 @@ export function GamificationAnalyticsView({ data }: Props) {
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.avgPoints}</p>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Pts moyens</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Pts moyens
+                </p>
               </div>
             </div>
           </CardContent>
@@ -131,7 +133,9 @@ export function GamificationAnalyticsView({ data }: Props) {
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.avgStreak}</p>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Streak moyen</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Streak moyen
+                </p>
               </div>
             </div>
           </CardContent>
@@ -143,8 +147,12 @@ export function GamificationAnalyticsView({ data }: Props) {
                 <Trophy className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{data.totalChallengesCompleted}</p>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Defis completes</p>
+                <p className="text-2xl font-bold">
+                  {data.totalChallengesCompleted}
+                </p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Defis completes
+                </p>
               </div>
             </div>
           </CardContent>
@@ -159,7 +167,9 @@ export function GamificationAnalyticsView({ data }: Props) {
                 <p className="text-2xl font-bold truncate">
                   {data.mostPopularBadge?.name || "—"}
                 </p>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Badge populaire</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Badge populaire
+                </p>
               </div>
             </div>
           </CardContent>
@@ -188,7 +198,10 @@ export function GamificationAnalyticsView({ data }: Props) {
                     textAnchor="end"
                     height={60}
                   />
-                  <YAxis tick={{ fontSize: 12, fill: "#999" }} allowDecimals={false} />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#999" }}
+                    allowDecimals={false}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1c1c1c",
@@ -197,7 +210,12 @@ export function GamificationAnalyticsView({ data }: Props) {
                       fontSize: 13,
                     }}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    formatter={((value: any) => [`${value} utilisateurs`, "Nombre"]) as any}
+                    formatter={
+                      ((value: any) => [
+                        `${value} utilisateurs`,
+                        "Nombre",
+                      ]) as any
+                    }
                   />
                   <Bar dataKey="count" fill="#7af17a" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -238,7 +256,9 @@ export function GamificationAnalyticsView({ data }: Props) {
                         fontSize: 13,
                       }}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      formatter={((value: any) => [`${value}/5`, "Humeur"]) as any}
+                      formatter={
+                        ((value: any) => [`${value}/5`, "Humeur"]) as any
+                      }
                     />
                     <Line
                       type="monotone"
@@ -311,11 +331,10 @@ export function GamificationAnalyticsView({ data }: Props) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Progress
-                      value={badge.rate}
-                      className="h-1.5 flex-1"
-                    />
-                    <span className="text-xs font-medium w-8 text-right">{badge.rate}%</span>
+                    <Progress value={badge.rate} className="h-1.5 flex-1" />
+                    <span className="text-xs font-medium w-8 text-right">
+                      {badge.rate}%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -343,7 +362,7 @@ export function GamificationAnalyticsView({ data }: Props) {
                       "shrink-0",
                       ch.isActive
                         ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                        : "bg-zinc-500/10 text-zinc-600 border-zinc-500/20"
+                        : "bg-zinc-500/10 text-zinc-600 border-zinc-500/20",
                     )}
                   >
                     {ch.isActive ? "Actif" : "Termine"}
@@ -377,8 +396,8 @@ export function GamificationAnalyticsView({ data }: Props) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Comparaison des performances entre les joueurs actifs (streak de 7 jours ou plus)
-            et les autres membres de l&apos;equipe.
+            Comparaison des performances entre les joueurs actifs (streak de 7
+            jours ou plus) et les autres membres de l&apos;equipe.
           </p>
           <Table>
             <TableHeader>
@@ -394,10 +413,14 @@ export function GamificationAnalyticsView({ data }: Props) {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-[#7af17a]" />
-                    <span className="font-medium">Joueurs actifs (streak 7+)</span>
+                    <span className="font-medium">
+                      Joueurs actifs (streak 7+)
+                    </span>
                   </div>
                 </TableCell>
-                <TableCell className="text-center">{data.impact.active.count}</TableCell>
+                <TableCell className="text-center">
+                  {data.impact.active.count}
+                </TableCell>
                 <TableCell className="text-center font-medium">
                   {data.impact.active.avgDeals}
                 </TableCell>
@@ -412,7 +435,9 @@ export function GamificationAnalyticsView({ data }: Props) {
                     <span className="font-medium">Autres</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-center">{data.impact.others.count}</TableCell>
+                <TableCell className="text-center">
+                  {data.impact.others.count}
+                </TableCell>
                 <TableCell className="text-center font-medium">
                   {data.impact.others.avgDeals}
                 </TableCell>
@@ -425,15 +450,17 @@ export function GamificationAnalyticsView({ data }: Props) {
           {data.impact.active.count > 0 && data.impact.others.count > 0 && (
             <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
               <p className="text-sm">
-                {data.impact.active.avgRevenue > data.impact.others.avgRevenue ? (
+                {data.impact.active.avgRevenue >
+                data.impact.others.avgRevenue ? (
                   <>
                     Les joueurs actifs generent en moyenne{" "}
                     <span className="font-semibold text-[#7af17a]">
                       {data.impact.others.avgRevenue > 0
                         ? `${Math.round(
-                            ((data.impact.active.avgRevenue - data.impact.others.avgRevenue) /
+                            ((data.impact.active.avgRevenue -
+                              data.impact.others.avgRevenue) /
                               data.impact.others.avgRevenue) *
-                              100
+                              100,
                           )}% de plus`
                         : formatCurrency(data.impact.active.avgRevenue)}
                     </span>{" "}
@@ -441,8 +468,8 @@ export function GamificationAnalyticsView({ data }: Props) {
                   </>
                 ) : (
                   <>
-                    Pas encore assez de donnees pour identifier un ecart significatif entre les
-                    groupes.
+                    Pas encore assez de donnees pour identifier un ecart
+                    significatif entre les groupes.
                   </>
                 )}
               </p>

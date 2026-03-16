@@ -34,7 +34,7 @@ export default async function WhatsAppPage() {
   let connection = dbConnection;
   if (!connection) {
     const waAccount = unipileStatus.accounts.find(
-      (a) => a.provider.toUpperCase() === "WHATSAPP"
+      (a) => a.provider.toUpperCase() === "WHATSAPP",
     );
     if (waAccount) {
       connection = {

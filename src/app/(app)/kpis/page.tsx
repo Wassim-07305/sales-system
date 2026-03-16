@@ -5,7 +5,9 @@ import { getSimulatorInputs } from "@/lib/actions/simulator";
 
 export default async function KpisPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profileRole } = await supabase
@@ -14,7 +16,10 @@ export default async function KpisPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profileRole || !["client_b2b", "client_b2c"].includes(profileRole.role)) {
+  if (
+    !profileRole ||
+    !["client_b2b", "client_b2c"].includes(profileRole.role)
+  ) {
     redirect("/dashboard");
   }
 

@@ -54,7 +54,7 @@ export function SignatureDialog({
       setAccepted(false);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Erreur lors de la signature"
+        err instanceof Error ? err.message : "Erreur lors de la signature",
       );
     } finally {
       setLoading(false);

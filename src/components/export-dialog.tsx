@@ -43,9 +43,17 @@ interface ExportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const FORMAT_OPTIONS: { value: ExportFormat; label: string; icon: React.ReactNode }[] = [
+const FORMAT_OPTIONS: {
+  value: ExportFormat;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
   { value: "csv", label: "CSV", icon: <FileText className="h-4 w-4" /> },
-  { value: "xlsx", label: "Excel (.xls)", icon: <FileSpreadsheet className="h-4 w-4" /> },
+  {
+    value: "xlsx",
+    label: "Excel (.xls)",
+    icon: <FileSpreadsheet className="h-4 w-4" />,
+  },
   { value: "pdf", label: "PDF", icon: <File className="h-4 w-4" /> },
 ];
 
@@ -135,7 +143,8 @@ export function ExportDialog({ type, open, onOpenChange }: ExportDialogProps) {
         const data = await getExportableData(type, {
           dateFrom: dateFrom || undefined,
           dateTo: dateTo || undefined,
-          status: statusFilter && statusFilter !== "all" ? statusFilter : undefined,
+          status:
+            statusFilter && statusFilter !== "all" ? statusFilter : undefined,
         });
 
         if (data.length === 0) {
@@ -242,7 +251,10 @@ export function ExportDialog({ type, open, onOpenChange }: ExportDialogProps) {
           {/* Date range filter */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Période <span className="text-muted-foreground font-normal">(optionnel)</span>
+              Période{" "}
+              <span className="text-muted-foreground font-normal">
+                (optionnel)
+              </span>
             </Label>
             <div className="flex gap-2">
               <div className="flex-1">
@@ -268,7 +280,9 @@ export function ExportDialog({ type, open, onOpenChange }: ExportDialogProps) {
           <div className="space-y-2">
             <Label className="text-sm font-medium">
               Filtre{" "}
-              <span className="text-muted-foreground font-normal">(optionnel)</span>
+              <span className="text-muted-foreground font-normal">
+                (optionnel)
+              </span>
             </Label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>

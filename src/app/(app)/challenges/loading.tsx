@@ -52,7 +52,10 @@ export default function ChallengesLoading() {
         <div className="lg:col-span-2 space-y-4">
           <Skeleton className="h-6 w-40" />
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border/40 p-5 space-y-3">
+            <div
+              key={i}
+              className="rounded-2xl border border-border/40 p-5 space-y-3"
+            >
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <Skeleton className="h-5 w-40" />

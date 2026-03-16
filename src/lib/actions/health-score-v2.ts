@@ -32,7 +32,7 @@ export async function detectChurnRisk(): Promise<ChurnRiskClient[]> {
   if (!clients || clients.length === 0) return [];
 
   const thirtyDaysAgo = new Date(
-    Date.now() - 30 * 24 * 60 * 60 * 1000
+    Date.now() - 30 * 24 * 60 * 60 * 1000,
   ).toISOString();
 
   const atRiskClients: ChurnRiskClient[] = [];
@@ -62,21 +62,19 @@ export async function detectChurnRisk(): Promise<ChurnRiskClient[]> {
     const mostRecentActivity =
       activityDates.length > 0
         ? new Date(
-            Math.max(...activityDates.map((d) => new Date(d!).getTime()))
+            Math.max(...activityDates.map((d) => new Date(d!).getTime())),
           )
         : null;
 
     const daysInactive = mostRecentActivity
       ? Math.floor(
-          (Date.now() - mostRecentActivity.getTime()) / (1000 * 60 * 60 * 24)
+          (Date.now() - mostRecentActivity.getTime()) / (1000 * 60 * 60 * 24),
         )
       : 999;
 
     // Only include if no recent activity (30+ days)
-    const noRecentBooking =
-      !lastBookingDate || lastBookingDate < thirtyDaysAgo;
-    const noRecentLessons =
-      !lastLessonDate || lastLessonDate < thirtyDaysAgo;
+    const noRecentBooking = !lastBookingDate || lastBookingDate < thirtyDaysAgo;
+    const noRecentLessons = !lastLessonDate || lastLessonDate < thirtyDaysAgo;
 
     if (noRecentBooking && noRecentLessons) {
       atRiskClients.push({
@@ -131,9 +129,15 @@ export async function getChurnAlerts(): Promise<ChurnAlert[]> {
 
   // Sort by risk level (critical first) then by health score
   alerts.sort((a, b) => {
-    if (a.client.risk_level === "critical" && b.client.risk_level !== "critical")
+    if (
+      a.client.risk_level === "critical" &&
+      b.client.risk_level !== "critical"
+    )
       return -1;
-    if (a.client.risk_level !== "critical" && b.client.risk_level === "critical")
+    if (
+      a.client.risk_level !== "critical" &&
+      b.client.risk_level === "critical"
+    )
       return 1;
     return a.client.health_score - b.client.health_score;
   });

@@ -5,11 +5,13 @@ import { revalidatePath } from "next/cache";
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
-function isTableMissing(error: { message?: string; code?: string } | null): boolean {
+function isTableMissing(
+  error: { message?: string; code?: string } | null,
+): boolean {
   if (!error) return false;
   const msg = (error.message || "").toLowerCase();
   return (
-    msg.includes("relation") && msg.includes("does not exist") ||
+    (msg.includes("relation") && msg.includes("does not exist")) ||
     error.code === "42P01"
   );
 }
@@ -23,7 +25,17 @@ export async function getMfaStatus() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { enrolled: false, factors: [] as { id: string; friendly_name: string; factor_type: string; status: string; created_at: string }[] };
+  if (!user)
+    return {
+      enrolled: false,
+      factors: [] as {
+        id: string;
+        friendly_name: string;
+        factor_type: string;
+        status: string;
+        created_at: string;
+      }[],
+    };
 
   const { data, error } = await supabase.auth.mfa.listFactors();
   if (error || !data) return { enrolled: false, factors: [] };
@@ -60,7 +72,10 @@ export async function enrollMfa() {
   });
 
   if (error || !data) {
-    return { success: false as const, error: error?.message ?? "Erreur lors de l'activation" };
+    return {
+      success: false as const,
+      error: error?.message ?? "Erreur lors de l'activation",
+    };
   }
 
   return {
@@ -87,7 +102,10 @@ export async function verifyMfaEnrollment(factorId: string, code: string) {
     await supabase.auth.mfa.challenge({ factorId });
 
   if (challengeError || !challenge) {
-    return { success: false, error: challengeError?.message ?? "Erreur de challenge" };
+    return {
+      success: false,
+      error: challengeError?.message ?? "Erreur de challenge",
+    };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
@@ -206,7 +224,9 @@ export async function getLoginHistory() {
       date: (log.created_at as string) || "",
       ip: (log.ip_address as string) || (meta.ip as string) || "",
       device: (log.user_agent as string) || (meta.device as string) || "",
-      status: ((log.action as string) || "").includes("failed") ? "failed" as const : "success" as const,
+      status: ((log.action as string) || "").includes("failed")
+        ? ("failed" as const)
+        : ("success" as const),
       location: (meta.location as string) || "",
     };
   });

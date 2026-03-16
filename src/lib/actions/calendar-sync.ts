@@ -11,10 +11,12 @@ async function getUnipileGoogleCalendarAccountId(): Promise<string | null> {
     const client = getUnipileClient();
     if (!client) return null;
     const response = await client.account.getAll();
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
-    const gcalAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
-      (a) => (a.type || a.provider || "").toUpperCase() === "GOOGLE"
-    );
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
+    const gcalAccount = (
+      items as Array<{ id: string; type?: string; provider?: string }>
+    ).find((a) => (a.type || a.provider || "").toUpperCase() === "GOOGLE");
     return gcalAccount?.id || null;
   } catch {
     return null;
@@ -156,7 +158,7 @@ export async function connectGoogleCalendar(authCode: string): Promise<{
     // Récupérer l'email Google
     const userInfoResponse = await fetch(
       "https://www.googleapis.com/oauth2/v2/userinfo",
-      { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+      { headers: { Authorization: `Bearer ${tokens.access_token}` } },
     );
     const userInfo = userInfoResponse.ok ? await userInfoResponse.json() : {};
 
@@ -173,7 +175,7 @@ export async function connectGoogleCalendar(authCode: string): Promise<{
         } as unknown as Record<string, unknown>,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id,key" }
+      { onConflict: "user_id,key" },
     );
 
     revalidatePath("/bookings/calendar-sync");
@@ -207,7 +209,10 @@ export async function disconnectGoogleCalendar(): Promise<{
   return { success: true, message: "Google Calendar déconnecté" };
 }
 
-async function getGoogleAccessToken(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<string | null> {
+async function getGoogleAccessToken(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<string | null> {
   const { data: tokenData } = await supabase
     .from("user_settings")
     .select("value")
@@ -230,16 +235,19 @@ async function getGoogleAccessToken(supabase: Awaited<ReturnType<typeof createCl
     if (!clientId || !clientSecret) return null;
 
     try {
-      const refreshResponse = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          refresh_token: refreshToken,
-          client_id: clientId,
-          client_secret: clientSecret,
-          grant_type: "refresh_token",
-        }),
-      });
+      const refreshResponse = await fetch(
+        "https://oauth2.googleapis.com/token",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            refresh_token: refreshToken,
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: "refresh_token",
+          }),
+        },
+      );
 
       if (refreshResponse.ok) {
         const newTokens = await refreshResponse.json();
@@ -257,7 +265,7 @@ async function getGoogleAccessToken(supabase: Awaited<ReturnType<typeof createCl
             } as unknown as Record<string, unknown>,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "user_id,key" }
+          { onConflict: "user_id,key" },
         );
       } else {
         return null;
@@ -298,7 +306,10 @@ export async function syncCalendarEvents(): Promise<{
         const apiKey = process.env.UNIPILE_API_KEY;
         if (dsn && apiKey) {
           // Export bookings via Unipile
-          if (settings.syncDirection === "export_only" || settings.syncDirection === "bidirectional") {
+          if (
+            settings.syncDirection === "export_only" ||
+            settings.syncDirection === "bidirectional"
+          ) {
             const { data: bookings } = await supabase
               .from("bookings")
               .select("*, contact:contacts(id, first_name, last_name, email)")
@@ -307,16 +318,21 @@ export async function syncCalendarEvents(): Promise<{
               .gte("date", new Date().toISOString().split("T")[0]);
 
             for (const booking of bookings || []) {
-              const contact = Array.isArray(booking.contact) ? booking.contact[0] : booking.contact;
+              const contact = Array.isArray(booking.contact)
+                ? booking.contact[0]
+                : booking.contact;
               const contactName = contact
                 ? `${contact.first_name || ""} ${contact.last_name || ""}`.trim()
                 : "Contact";
 
-              const startDateTime = booking.date && booking.time
-                ? `${booking.date}T${booking.time}:00`
-                : booking.date;
+              const startDateTime =
+                booking.date && booking.time
+                  ? `${booking.date}T${booking.time}:00`
+                  : booking.date;
               const endDate = new Date(startDateTime);
-              endDate.setMinutes(endDate.getMinutes() + (booking.duration || 30));
+              endDate.setMinutes(
+                endDate.getMinutes() + (booking.duration || 30),
+              );
 
               const res = await fetch(`${dsn}/api/v1/calendar/events`, {
                 method: "POST",
@@ -338,7 +354,9 @@ export async function syncCalendarEvents(): Promise<{
                 const event = (await res.json()) as { id?: string };
                 await supabase
                   .from("bookings")
-                  .update({ google_event_id: event.id || `unipile_${Date.now()}` })
+                  .update({
+                    google_event_id: event.id || `unipile_${Date.now()}`,
+                  })
                   .eq("id", booking.id);
                 syncedCount++;
               }
@@ -346,18 +364,28 @@ export async function syncCalendarEvents(): Promise<{
           }
 
           // Import events via Unipile
-          if (settings.syncDirection === "import_only" || settings.syncDirection === "bidirectional") {
+          if (
+            settings.syncDirection === "import_only" ||
+            settings.syncDirection === "bidirectional"
+          ) {
             const now = new Date().toISOString();
             const oneMonthLater = new Date();
             oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
 
             const res = await fetch(
               `${dsn}/api/v1/calendar/events?account_id=${unipileAccountId}&start_date=${now}&end_date=${oneMonthLater.toISOString()}&limit=50`,
-              { headers: { "X-API-KEY": apiKey } }
+              { headers: { "X-API-KEY": apiKey } },
             );
 
             if (res.ok) {
-              const data = (await res.json()) as { items?: Array<{ id?: string; title?: string; start_date?: string; end_date?: string }> };
+              const data = (await res.json()) as {
+                items?: Array<{
+                  id?: string;
+                  title?: string;
+                  start_date?: string;
+                  end_date?: string;
+                }>;
+              };
               for (const event of data.items || []) {
                 if (!event.start_date) continue;
                 const { data: existing } = await supabase
@@ -368,9 +396,13 @@ export async function syncCalendarEvents(): Promise<{
 
                 if (!existing) {
                   const startDate = new Date(event.start_date);
-                  const endDate = event.end_date ? new Date(event.end_date) : null;
+                  const endDate = event.end_date
+                    ? new Date(event.end_date)
+                    : null;
                   const durationMinutes = endDate
-                    ? Math.round((endDate.getTime() - startDate.getTime()) / 60000)
+                    ? Math.round(
+                        (endDate.getTime() - startDate.getTime()) / 60000,
+                      )
                     : 30;
 
                   await supabase.from("bookings").insert({
@@ -400,7 +432,7 @@ export async function syncCalendarEvents(): Promise<{
               } as unknown as Record<string, unknown>,
               updated_at: new Date().toISOString(),
             },
-            { onConflict: "user_id,key" }
+            { onConflict: "user_id,key" },
           );
 
           revalidatePath("/bookings/calendar-sync");
@@ -411,7 +443,10 @@ export async function syncCalendarEvents(): Promise<{
           };
         }
       } catch (err) {
-        console.error("Unipile calendar sync error, falling back to Google API:", err);
+        console.error(
+          "Unipile calendar sync error, falling back to Google API:",
+          err,
+        );
       }
     }
 
@@ -420,12 +455,16 @@ export async function syncCalendarEvents(): Promise<{
     if (!accessToken) {
       return {
         success: false,
-        message: "Google Calendar non connecté. Connectez votre compte Google d'abord.",
+        message:
+          "Google Calendar non connecté. Connectez votre compte Google d'abord.",
       };
     }
 
     // Export : envoyer les bookings vers Google Calendar
-    if (settings.syncDirection === "export_only" || settings.syncDirection === "bidirectional") {
+    if (
+      settings.syncDirection === "export_only" ||
+      settings.syncDirection === "bidirectional"
+    ) {
       const { data: bookings } = await supabase
         .from("bookings")
         .select("*, contact:contacts(id, first_name, last_name, email)")
@@ -434,14 +473,17 @@ export async function syncCalendarEvents(): Promise<{
         .gte("date", new Date().toISOString().split("T")[0]);
 
       for (const booking of bookings || []) {
-        const contact = Array.isArray(booking.contact) ? booking.contact[0] : booking.contact;
+        const contact = Array.isArray(booking.contact)
+          ? booking.contact[0]
+          : booking.contact;
         const contactName = contact
           ? `${contact.first_name || ""} ${contact.last_name || ""}`.trim()
           : "Contact";
 
-        const startDateTime = booking.date && booking.time
-          ? `${booking.date}T${booking.time}:00`
-          : booking.date;
+        const startDateTime =
+          booking.date && booking.time
+            ? `${booking.date}T${booking.time}:00`
+            : booking.date;
 
         const endDate = new Date(startDateTime);
         endDate.setMinutes(endDate.getMinutes() + (booking.duration || 30));
@@ -469,7 +511,7 @@ export async function syncCalendarEvents(): Promise<{
               "Content-Type": "application/json",
             },
             body: JSON.stringify(eventBody),
-          }
+          },
         );
 
         if (createResponse.ok) {
@@ -484,7 +526,10 @@ export async function syncCalendarEvents(): Promise<{
     }
 
     // Import : récupérer les événements Google Calendar
-    if (settings.syncDirection === "import_only" || settings.syncDirection === "bidirectional") {
+    if (
+      settings.syncDirection === "import_only" ||
+      settings.syncDirection === "bidirectional"
+    ) {
       const calendarId = settings.defaultCalendarId || "primary";
       const now = new Date().toISOString();
       const oneMonthLater = new Date();
@@ -499,7 +544,7 @@ export async function syncCalendarEvents(): Promise<{
             orderBy: "startTime",
             maxResults: "50",
           }),
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } },
       );
 
       if (eventsResponse.ok) {
@@ -515,7 +560,9 @@ export async function syncCalendarEvents(): Promise<{
 
           if (!existing && event.start?.dateTime) {
             const startDate = new Date(event.start.dateTime);
-            const endDateVal = event.end?.dateTime ? new Date(event.end.dateTime) : null;
+            const endDateVal = event.end?.dateTime
+              ? new Date(event.end.dateTime)
+              : null;
             const durationMinutes = endDateVal
               ? Math.round((endDateVal.getTime() - startDate.getTime()) / 60000)
               : 30;
@@ -547,7 +594,7 @@ export async function syncCalendarEvents(): Promise<{
         } as unknown as Record<string, unknown>,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id,key" }
+      { onConflict: "user_id,key" },
     );
 
     revalidatePath("/bookings/calendar-sync");
@@ -560,7 +607,8 @@ export async function syncCalendarEvents(): Promise<{
     console.error("Calendar sync error:", err);
     return {
       success: false,
-      message: "Erreur lors de la synchronisation. Vérifiez votre connexion Google.",
+      message:
+        "Erreur lors de la synchronisation. Vérifiez votre connexion Google.",
     };
   }
 }
@@ -586,10 +634,13 @@ export async function getCalendarSettings(): Promise<CalendarSettings> {
     try {
       const parsed = settings.value as unknown as CalendarSettings;
       return {
-        autoSyncEnabled: parsed.autoSyncEnabled ?? DEFAULT_SETTINGS.autoSyncEnabled,
+        autoSyncEnabled:
+          parsed.autoSyncEnabled ?? DEFAULT_SETTINGS.autoSyncEnabled,
         syncDirection: parsed.syncDirection ?? DEFAULT_SETTINGS.syncDirection,
-        defaultCalendarId: parsed.defaultCalendarId ?? DEFAULT_SETTINGS.defaultCalendarId,
-        defaultCalendarName: parsed.defaultCalendarName ?? DEFAULT_SETTINGS.defaultCalendarName,
+        defaultCalendarId:
+          parsed.defaultCalendarId ?? DEFAULT_SETTINGS.defaultCalendarId,
+        defaultCalendarName:
+          parsed.defaultCalendarName ?? DEFAULT_SETTINGS.defaultCalendarName,
       };
     } catch {
       return DEFAULT_SETTINGS;
@@ -600,7 +651,7 @@ export async function getCalendarSettings(): Promise<CalendarSettings> {
 }
 
 export async function saveCalendarSettings(
-  settings: CalendarSettings
+  settings: CalendarSettings,
 ): Promise<{ success: boolean; message: string }> {
   const supabase = await createClient();
   const {
@@ -618,7 +669,7 @@ export async function saveCalendarSettings(
       value: settings as unknown as Record<string, unknown>,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "user_id,key" }
+    { onConflict: "user_id,key" },
   );
 
   if (error) {

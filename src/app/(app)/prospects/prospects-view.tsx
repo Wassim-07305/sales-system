@@ -104,7 +104,7 @@ export function ProspectsView({
         toast.success("Prospect ajouté");
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Erreur lors de la création"
+          err instanceof Error ? err.message : "Erreur lors de la création",
         );
       }
     });
@@ -115,7 +115,7 @@ export function ProspectsView({
       try {
         await updateProspectStatus(id, status);
         setProspects((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, status } : p))
+          prev.map((p) => (p.id === id ? { ...p, status } : p)),
         );
         toast.success("Statut mis à jour");
       } catch {
@@ -125,7 +125,12 @@ export function ProspectsView({
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce prospect ? Cette action est irréversible.")) return;
+    if (
+      !confirm(
+        "Êtes-vous sûr de vouloir supprimer ce prospect ? Cette action est irréversible.",
+      )
+    )
+      return;
     startTransition(async () => {
       try {
         await deleteProspect(id);
@@ -139,7 +144,7 @@ export function ProspectsView({
 
   const total = prospects.length;
   const contacted = prospects.filter((p) =>
-    ["contacted", "replied", "booked"].includes(p.status)
+    ["contacted", "replied", "booked"].includes(p.status),
   ).length;
   const booked = prospects.filter((p) => p.status === "booked").length;
 
@@ -182,7 +187,9 @@ export function ProspectsView({
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <UserCheck className="mb-4 h-12 w-12 text-muted-foreground/40" />
-            <p className="text-lg font-medium">Aucun prospect pour l&apos;instant</p>
+            <p className="text-lg font-medium">
+              Aucun prospect pour l&apos;instant
+            </p>
             <p className="text-sm text-muted-foreground">
               Cliquez sur &quot;Nouveau prospect&quot; pour commencer
             </p>
@@ -216,7 +223,7 @@ export function ProspectsView({
                 <span
                   className={cn(
                     "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-                    STATUS_CLASS[prospect.status] ?? STATUS_CLASS.new
+                    STATUS_CLASS[prospect.status] ?? STATUS_CLASS.new,
                   )}
                 >
                   {STATUS_LABELS[prospect.status] ?? prospect.status}
@@ -257,7 +264,11 @@ export function ProspectsView({
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value} className="text-xs">
+                        <SelectItem
+                          key={value}
+                          value={value}
+                          className="text-xs"
+                        >
                           {label}
                         </SelectItem>
                       ))}

@@ -96,7 +96,7 @@ export function NotificationPreferencesView({
     } else if (result.permission === "denied") {
       setPushStatus("denied");
       toast.error(
-        "Permission refusée. Activez les notifications dans les paramètres de votre navigateur."
+        "Permission refusée. Activez les notifications dans les paramètres de votre navigateur.",
       );
     } else if (result.error) {
       toast.error(result.error);

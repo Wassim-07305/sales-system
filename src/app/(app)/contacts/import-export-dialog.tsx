@@ -34,7 +34,9 @@ function downloadCSV(csv: string, filename: string) {
 export function ImportExportDialog() {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [importType, setImportType] = useState<"contacts" | "deals">("contacts");
+  const [importType, setImportType] = useState<"contacts" | "deals">(
+    "contacts",
+  );
   const [result, setResult] = useState<{
     imported: number;
     errors: string[];
@@ -61,7 +63,7 @@ export function ImportExportDialog() {
 
           if (res.imported > 0) {
             toast.success(
-              `${res.imported} ${importType === "contacts" ? "contact(s)" : "deal(s)"} importé(s)`
+              `${res.imported} ${importType === "contacts" ? "contact(s)" : "deal(s)"} importé(s)`,
             );
           }
           if (res.errors.length > 0) {

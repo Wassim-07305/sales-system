@@ -31,10 +31,12 @@ export default async function ForumPage() {
     .order("order_index");
 
   // Batch fetch reputations for post authors
-  const authorIds = [...new Set(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    normalizedPosts.map((p: any) => (p.author as any)?.id).filter(Boolean)
-  )] as string[];
+  const authorIds = [
+    ...new Set(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      normalizedPosts.map((p: any) => (p.author as any)?.id).filter(Boolean),
+    ),
+  ] as string[];
   const reputations = await getUserReputationBatch(authorIds);
 
   return (

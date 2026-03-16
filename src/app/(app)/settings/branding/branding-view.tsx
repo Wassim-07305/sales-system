@@ -7,13 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Palette,
-  User,
-  Save,
-  Check,
-  ArrowLeft,
-} from "lucide-react";
+import { Palette, User, Save, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -130,8 +124,12 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
               {displayName?.charAt(0) || "?"}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">{displayName || "Votre nom"}</p>
-              <p className="text-xs text-muted-foreground">{bio || "Votre tagline"}</p>
+              <p className="text-sm font-medium">
+                {displayName || "Votre nom"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {bio || "Votre tagline"}
+              </p>
             </div>
           </div>
 
@@ -188,7 +186,7 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
                   "relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-sm",
                   selectedPalette === palette.id
                     ? "border-brand ring-2 ring-brand/20"
-                    : "border-muted hover:border-muted-foreground/30"
+                    : "border-muted hover:border-muted-foreground/30",
                 )}
               >
                 {selectedPalette === palette.id && (

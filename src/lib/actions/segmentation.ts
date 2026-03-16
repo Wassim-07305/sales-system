@@ -32,7 +32,9 @@ function parseFilters(raw: unknown): SegmentFilter[] {
 
 export async function getSegments() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   try {
@@ -68,7 +70,9 @@ export async function createSegment(data: {
   color?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase.from("prospect_segments").insert({
@@ -92,10 +96,12 @@ export async function updateSegment(
     description?: string;
     filters?: { field: string; operator: string; value: string }[];
     color?: string;
-  }
+  },
 ) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const updateData: Record<string, unknown> = {};
@@ -118,7 +124,9 @@ export async function updateSegment(
 
 export async function deleteSegment(id: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase
@@ -134,7 +142,9 @@ export async function deleteSegment(id: string) {
 
 export async function getSegmentProspects(segmentId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   // Get segment filters
@@ -152,7 +162,9 @@ export async function getSegmentProspects(segmentId: string) {
   // Build query with filters
   let query = supabase
     .from("prospects")
-    .select("id, name, status, platform, company, created_at, last_message_at, profile_url")
+    .select(
+      "id, name, status, platform, company, created_at, last_message_at, profile_url",
+    )
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -160,21 +172,28 @@ export async function getSegmentProspects(segmentId: string) {
     switch (filter.field) {
       case "status":
         if (filter.operator === "eq") query = query.eq("status", filter.value);
-        if (filter.operator === "neq") query = query.neq("status", filter.value);
+        if (filter.operator === "neq")
+          query = query.neq("status", filter.value);
         break;
       case "source":
       case "platform":
-        if (filter.operator === "eq") query = query.eq("platform", filter.value);
-        if (filter.operator === "neq") query = query.neq("platform", filter.value);
+        if (filter.operator === "eq")
+          query = query.eq("platform", filter.value);
+        if (filter.operator === "neq")
+          query = query.neq("platform", filter.value);
         break;
       case "company":
         if (filter.operator === "eq") query = query.eq("company", filter.value);
-        if (filter.operator === "contains") query = query.ilike("company", `%${filter.value}%`);
-        if (filter.operator === "not_contains") query = query.not("company", "ilike", `%${filter.value}%`);
+        if (filter.operator === "contains")
+          query = query.ilike("company", `%${filter.value}%`);
+        if (filter.operator === "not_contains")
+          query = query.not("company", "ilike", `%${filter.value}%`);
         break;
       case "created_at":
-        if (filter.operator === "gt") query = query.gt("created_at", filter.value);
-        if (filter.operator === "lt") query = query.lt("created_at", filter.value);
+        if (filter.operator === "gt")
+          query = query.gt("created_at", filter.value);
+        if (filter.operator === "lt")
+          query = query.lt("created_at", filter.value);
         break;
       case "last_contact":
         if (filter.value === "30_days_ago") {
@@ -182,15 +201,17 @@ export async function getSegmentProspects(segmentId: string) {
           thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
           if (filter.operator === "lt") {
             query = query.or(
-              `last_message_at.lt.${thirtyDaysAgo.toISOString()},last_message_at.is.null`
+              `last_message_at.lt.${thirtyDaysAgo.toISOString()},last_message_at.is.null`,
             );
           }
           if (filter.operator === "gt") {
             query = query.gte("last_message_at", thirtyDaysAgo.toISOString());
           }
         } else {
-          if (filter.operator === "gt") query = query.gt("last_message_at", filter.value);
-          if (filter.operator === "lt") query = query.lt("last_message_at", filter.value);
+          if (filter.operator === "gt")
+            query = query.gt("last_message_at", filter.value);
+          if (filter.operator === "lt")
+            query = query.lt("last_message_at", filter.value);
         }
         break;
     }
@@ -200,9 +221,13 @@ export async function getSegmentProspects(segmentId: string) {
   let result = prospects || [];
 
   // Handle score/temperature filters (need join with prospect_scores)
-  const scoreFilters = filters.filter((f) => f.field === "score" || f.field === "temperature");
+  const scoreFilters = filters.filter(
+    (f) => f.field === "score" || f.field === "temperature",
+  );
   if (scoreFilters.length > 0 && result.length > 0) {
-    const prospectIds = result.map((p: Record<string, unknown>) => p.id as string);
+    const prospectIds = result.map(
+      (p: Record<string, unknown>) => p.id as string,
+    );
     let scoreQuery = supabase
       .from("prospect_scores")
       .select("prospect_id, total_score, temperature")
@@ -210,19 +235,30 @@ export async function getSegmentProspects(segmentId: string) {
 
     for (const sf of scoreFilters) {
       if (sf.field === "temperature") {
-        if (sf.operator === "eq") scoreQuery = scoreQuery.eq("temperature", sf.value);
-        if (sf.operator === "neq") scoreQuery = scoreQuery.neq("temperature", sf.value);
+        if (sf.operator === "eq")
+          scoreQuery = scoreQuery.eq("temperature", sf.value);
+        if (sf.operator === "neq")
+          scoreQuery = scoreQuery.neq("temperature", sf.value);
       }
       if (sf.field === "score") {
-        if (sf.operator === "gt") scoreQuery = scoreQuery.gt("total_score", parseInt(sf.value));
-        if (sf.operator === "lt") scoreQuery = scoreQuery.lt("total_score", parseInt(sf.value));
-        if (sf.operator === "eq") scoreQuery = scoreQuery.eq("total_score", parseInt(sf.value));
+        if (sf.operator === "gt")
+          scoreQuery = scoreQuery.gt("total_score", parseInt(sf.value));
+        if (sf.operator === "lt")
+          scoreQuery = scoreQuery.lt("total_score", parseInt(sf.value));
+        if (sf.operator === "eq")
+          scoreQuery = scoreQuery.eq("total_score", parseInt(sf.value));
       }
     }
 
     const { data: scores } = await scoreQuery;
-    const matchingIds = new Set((scores || []).map((s: Record<string, unknown>) => s.prospect_id as string));
-    result = result.filter((p: Record<string, unknown>) => matchingIds.has(p.id as string));
+    const matchingIds = new Set(
+      (scores || []).map(
+        (s: Record<string, unknown>) => s.prospect_id as string,
+      ),
+    );
+    result = result.filter((p: Record<string, unknown>) =>
+      matchingIds.has(p.id as string),
+    );
   }
 
   // Handle tags filter in-memory (tags might be stored as array or jsonb)
@@ -231,8 +267,14 @@ export async function getSegmentProspects(segmentId: string) {
     result = result.filter((p: Record<string, unknown>) => {
       const tags = (p.tags as string[] | null) || [];
       return tagsFilters.every((tf) => {
-        if (tf.operator === "contains") return tags.some((t) => t.toLowerCase().includes(tf.value.toLowerCase()));
-        if (tf.operator === "not_contains") return !tags.some((t) => t.toLowerCase().includes(tf.value.toLowerCase()));
+        if (tf.operator === "contains")
+          return tags.some((t) =>
+            t.toLowerCase().includes(tf.value.toLowerCase()),
+          );
+        if (tf.operator === "not_contains")
+          return !tags.some((t) =>
+            t.toLowerCase().includes(tf.value.toLowerCase()),
+          );
         return true;
       });
     });
@@ -245,8 +287,15 @@ export async function getSegmentProspects(segmentId: string) {
 
 export async function getSegmentStats() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { totalSegments: 0, totalProspects: 0, counts: {} as Record<string, number> };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user)
+    return {
+      totalSegments: 0,
+      totalProspects: 0,
+      counts: {} as Record<string, number>,
+    };
 
   const segments = await getSegments();
   const counts: Record<string, number> = {};
@@ -257,13 +306,53 @@ export async function getSegmentStats() {
     counts[segment.id] = prospects.length;
   }
 
-  const { data: allProspects } = await supabase
-    .from("prospects")
-    .select("id");
+  const { data: allProspects } = await supabase.from("prospects").select("id");
 
   return {
     totalSegments: segments.length,
     totalProspects: allProspects?.length || 0,
     counts,
   };
+}
+
+// ─── sendMessageToSegment ────────────────────────────────────────────
+
+export async function sendMessageToSegment(
+  segmentId: string,
+  message: string,
+  channel: string,
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Get segment prospects
+  const prospects = await getSegmentProspects(segmentId);
+  if (!prospects || prospects.length === 0) {
+    throw new Error("Aucun prospect dans ce segment");
+  }
+
+  let sent = 0;
+  for (const prospect of prospects) {
+    try {
+      const p = prospect as Record<string, unknown>;
+      // Create a message record
+      await supabase.from("prospect_messages").insert({
+        prospect_id: p.id as string,
+        sender_id: user.id,
+        content: message,
+        channel: channel || "app",
+        status: "sent",
+        sent_at: new Date().toISOString(),
+      });
+      sent++;
+    } catch {
+      // Continue on individual errors
+    }
+  }
+
+  revalidatePath("/prospecting");
+  return { sent, total: prospects.length };
 }

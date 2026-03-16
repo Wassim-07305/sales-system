@@ -23,13 +23,7 @@ import {
 } from "@/lib/actions/automation";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {
-  Users,
-  Plus,
-  Trash2,
-  Play,
-  ArrowRightLeft,
-} from "lucide-react";
+import { Users, Plus, Trash2, Play, ArrowRightLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -70,9 +64,11 @@ export function PlacementView({ rules, executions }: Props) {
     startTransition(async () => {
       try {
         const result = await runPlacementWorkflow();
-        toast.success(`Placement terminé : ${result.matched} match(es) créé(s)`);
+        toast.success(
+          `Placement terminé : ${result.matched} match(es) créé(s)`,
+        );
         router.refresh();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         toast.error(err?.message || "Erreur lors du placement");
       }
@@ -166,7 +162,9 @@ export function PlacementView({ rules, executions }: Props) {
                   />
                 </div>
                 <div className="rounded-lg border p-4 bg-muted/50">
-                  <p className="text-sm font-medium mb-2">Critères de matching</p>
+                  <p className="text-sm font-medium mb-2">
+                    Critères de matching
+                  </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>- Setter avec onboarding complété</li>
                     <li>- Entrepreneur avec listing actif</li>
@@ -175,7 +173,9 @@ export function PlacementView({ rules, executions }: Props) {
                   </ul>
                 </div>
                 <div className="rounded-lg border p-4 bg-muted/50">
-                  <p className="text-sm font-medium mb-2">Actions automatiques</p>
+                  <p className="text-sm font-medium mb-2">
+                    Actions automatiques
+                  </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>- Matching automatique</li>
                     <li>- Notification aux deux parties</li>
@@ -196,7 +196,9 @@ export function PlacementView({ rules, executions }: Props) {
 
       {/* Rules */}
       <div className="space-y-4 mb-8">
-        <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Règles de placement</h3>
+        <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+          Règles de placement
+        </h3>
         {rules.map((rule) => (
           <Card key={rule.id} className="border-border/50">
             <CardContent className="p-5">
@@ -208,7 +210,11 @@ export function PlacementView({ rules, executions }: Props) {
                   <div>
                     <p className="font-medium">{rule.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Créée {formatDistanceToNow(new Date(rule.created_at), { addSuffix: true, locale: fr })}
+                      Créée{" "}
+                      {formatDistanceToNow(new Date(rule.created_at), {
+                        addSuffix: true,
+                        locale: fr,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -219,7 +225,9 @@ export function PlacementView({ rules, executions }: Props) {
                     </span>
                     <Switch
                       checked={rule.is_active}
-                      onCheckedChange={() => handleToggle(rule.id, rule.is_active)}
+                      onCheckedChange={() =>
+                        handleToggle(rule.id, rule.is_active)
+                      }
                       disabled={isPending}
                     />
                   </div>
@@ -243,7 +251,9 @@ export function PlacementView({ rules, executions }: Props) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                 <Users className="h-6 w-6 text-muted-foreground/50" />
               </div>
-              <p className="text-sm">Aucune règle de placement. Créez-en une pour lancer le matching.</p>
+              <p className="text-sm">
+                Aucune règle de placement. Créez-en une pour lancer le matching.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -271,13 +281,17 @@ export function PlacementView({ rules, executions }: Props) {
                         {exec.target_user?.full_name || "Setter"}{" "}
                         {exec.result?.matched_entrepreneur_id ? (
                           <span className="text-muted-foreground font-normal">
-                            {" "}match avec entrepreneur
+                            {" "}
+                            match avec entrepreneur
                           </span>
                         ) : null}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {exec.executed_at
-                          ? formatDistanceToNow(new Date(exec.executed_at), { addSuffix: true, locale: fr })
+                          ? formatDistanceToNow(new Date(exec.executed_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })
                           : "En attente"}
                       </p>
                     </div>
@@ -288,15 +302,15 @@ export function PlacementView({ rules, executions }: Props) {
                       exec.status === "completed"
                         ? "bg-green-500/10 text-green-600 border-green-500/20"
                         : exec.status === "failed"
-                        ? "bg-red-500/10 text-red-600 border-red-500/20"
-                        : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                          ? "bg-red-500/10 text-red-600 border-red-500/20"
+                          : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                     }
                   >
                     {exec.status === "completed"
                       ? "Placé"
                       : exec.status === "failed"
-                      ? "Échoué"
-                      : "En attente"}
+                        ? "Échoué"
+                        : "En attente"}
                   </Badge>
                 </div>
               ))}
@@ -306,7 +320,10 @@ export function PlacementView({ rules, executions }: Props) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                 <Users className="h-6 w-6 text-muted-foreground/50" />
               </div>
-              <p className="text-sm">Aucun placement récent. Lancez le workflow pour matcher les setters.</p>
+              <p className="text-sm">
+                Aucun placement récent. Lancez le workflow pour matcher les
+                setters.
+              </p>
             </div>
           )}
         </CardContent>

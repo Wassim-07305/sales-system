@@ -5,7 +5,9 @@ import { SpectateView } from "./spectate-view";
 
 export default async function SpectatePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const sessions = await getUserSessions(); // no userId = all sessions

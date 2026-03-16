@@ -33,7 +33,8 @@ export default function AuthLayout({
             Sales<span className="text-brand">System</span>
           </h1>
           <p className="text-white/60 text-lg leading-relaxed max-w-sm mx-auto">
-            La plateforme tout-en-un pour structurer et scaler votre acquisition commerciale.
+            La plateforme tout-en-un pour structurer et scaler votre acquisition
+            commerciale.
           </p>
           <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-4 text-left">
             {[
@@ -44,9 +45,14 @@ export default function AuthLayout({
               "Chat temps r\u00e9el",
               "Gamification",
             ].map((feature) => (
-              <div key={feature} className="flex items-center gap-3 text-white/70 text-sm group">
+              <div
+                key={feature}
+                className="flex items-center gap-3 text-white/70 text-sm group"
+              >
                 <div className="h-2 w-2 rounded-full bg-brand shrink-0 group-hover:shadow-[0_0_8px_rgba(122,241,122,0.6)] transition-shadow duration-300" />
-                <span className="group-hover:text-white/90 transition-colors duration-200">{feature}</span>
+                <span className="group-hover:text-white/90 transition-colors duration-200">
+                  {feature}
+                </span>
               </div>
             ))}
           </div>

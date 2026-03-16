@@ -40,12 +40,14 @@ export default async function CoursePage({
 
     for (const lessonId of lessonIdsWithQuiz) {
       const attempts = (allAttempts || []).filter(
-        (a) => a.lesson_id === lessonId
+        (a) => a.lesson_id === lessonId,
       );
       const todayAttempts = attempts.filter(
-        (a) => a.attempted_at >= `${today}T00:00:00.000Z`
+        (a) => a.attempted_at >= `${today}T00:00:00.000Z`,
       );
-      const quiz = result.quizMap[lessonId] as { max_attempts_per_day?: number };
+      const quiz = result.quizMap[lessonId] as {
+        max_attempts_per_day?: number;
+      };
 
       quizAttempts[lessonId] = {
         todayAttempts: todayAttempts.length,

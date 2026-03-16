@@ -9,7 +9,10 @@ export interface CallReviewScoreBreakdown {
 
 export interface CallReviewAIAnalysis {
   scoreBreakdown: CallReviewScoreBreakdown;
-  sentimentTimeline: { time: string; sentiment: "positif" | "neutre" | "négatif" }[];
+  sentimentTimeline: {
+    time: string;
+    sentiment: "positif" | "neutre" | "négatif";
+  }[];
   objections: string[];
   recommendations: string[];
   talkRatio: { vendeur: number; prospect: number };

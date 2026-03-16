@@ -73,8 +73,12 @@ export function CalendarSyncPanel({
 
   // Unipile state
   const [connectingUnipile, setConnectingUnipile] = useState(false);
-  const [unipileConnected, setUnipileConnected] = useState(unipileCalendar?.connected ?? false);
-  const [unipileName, setUnipileName] = useState(unipileCalendar?.accountName ?? "");
+  const [unipileConnected, setUnipileConnected] = useState(
+    unipileCalendar?.connected ?? false,
+  );
+  const [unipileName, setUnipileName] = useState(
+    unipileCalendar?.accountName ?? "",
+  );
   const [refreshingUnipile, setRefreshingUnipile] = useState(false);
 
   async function handleConnectUnipile() {
@@ -84,8 +88,14 @@ export function CalendarSyncPanel({
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-        toast.info("Connectez votre Google Calendar dans la fenêtre, puis cliquez Rafraîchir");
+        window.open(
+          result.url,
+          "_blank",
+          "width=600,height=700,scrollbars=yes",
+        );
+        toast.info(
+          "Connectez votre Google Calendar dans la fenêtre, puis cliquez Rafraîchir",
+        );
       }
     } catch {
       toast.error("Erreur lors de la génération du lien");
@@ -98,11 +108,15 @@ export function CalendarSyncPanel({
     try {
       const result = await getUnipileStatus();
       const googleAccount = result.accounts.find(
-        (a) => a.provider.toUpperCase() === "GOOGLE"
+        (a) => a.provider.toUpperCase() === "GOOGLE",
       );
       setUnipileConnected(!!googleAccount);
       setUnipileName(googleAccount?.name ?? "");
-      toast.success(googleAccount ? "Google Calendar connecté via Unipile" : "Aucun compte Google détecté");
+      toast.success(
+        googleAccount
+          ? "Google Calendar connecté via Unipile"
+          : "Aucun compte Google détecté",
+      );
     } catch {
       toast.error("Erreur lors du rafraîchissement");
     }
@@ -135,13 +149,15 @@ export function CalendarSyncPanel({
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) {
       setShowSetupGuide(true);
-      toast.error("Configuration Google Calendar requise. Suivez le guide ci-dessous.");
+      toast.error(
+        "Configuration Google Calendar requise. Suivez le guide ci-dessous.",
+      );
       return;
     }
 
     const redirectUri = `${window.location.origin}/api/auth/callback/google`;
     const scope = encodeURIComponent(
-      "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email"
+      "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email",
     );
     const authUrl =
       `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -204,7 +220,9 @@ export function CalendarSyncPanel({
               <Unplug className="h-5 w-5" />
               Google Calendar via Unipile
             </CardTitle>
-            <Badge className="bg-brand/15 text-brand border-brand/20 text-[10px]">Recommandé</Badge>
+            <Badge className="bg-brand/15 text-brand border-brand/20 text-[10px]">
+              Recommandé
+            </Badge>
           </div>
           <CardDescription>
             Connexion en un clic — pas besoin de configurer OAuth manuellement
@@ -215,13 +233,18 @@ export function CalendarSyncPanel({
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-brand" />
               <div>
-                <p className="text-sm font-medium text-brand">Connecté via Unipile</p>
-                {unipileName && <p className="text-xs text-muted-foreground">{unipileName}</p>}
+                <p className="text-sm font-medium text-brand">
+                  Connecté via Unipile
+                </p>
+                {unipileName && (
+                  <p className="text-xs text-muted-foreground">{unipileName}</p>
+                )}
               </div>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Connectez votre Google Calendar directement via Unipile pour synchroniser vos rendez-vous.
+              Connectez votre Google Calendar directement via Unipile pour
+              synchroniser vos rendez-vous.
             </p>
           )}
         </CardContent>
@@ -242,7 +265,9 @@ export function CalendarSyncPanel({
             onClick={handleRefreshUnipile}
             disabled={refreshingUnipile}
           >
-            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshingUnipile ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 mr-1.5 ${refreshingUnipile ? "animate-spin" : ""}`}
+            />
             Rafraîchir
           </Button>
         </CardFooter>
@@ -256,7 +281,8 @@ export function CalendarSyncPanel({
             Google OAuth (avancé)
           </CardTitle>
           <CardDescription>
-            Connexion manuelle via OAuth — nécessite un projet Google Cloud configuré
+            Connexion manuelle via OAuth — nécessite un projet Google Cloud
+            configuré
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -335,7 +361,9 @@ export function CalendarSyncPanel({
                     console.cloud.google.com
                   </span>
                 </li>
-                <li>Creez un nouveau projet ou selectionnez un projet existant</li>
+                <li>
+                  Creez un nouveau projet ou selectionnez un projet existant
+                </li>
                 <li>
                   Activez l&apos;API Google Calendar dans{" "}
                   <span className="font-mono text-xs bg-background px-1 py-0.5 rounded">
@@ -383,7 +411,7 @@ export function CalendarSyncPanel({
                       copyToClipboard(
                         typeof window !== "undefined"
                           ? `${window.location.origin}/api/auth/callback/google`
-                          : ""
+                          : "",
                       )
                     }
                   >
@@ -434,9 +462,7 @@ export function CalendarSyncPanel({
                     variant="ghost"
                     size="sm"
                     className="h-6 w-6 p-0"
-                    onClick={() =>
-                      copyToClipboard("GOOGLE_CLIENT_SECRET=")
-                    }
+                    onClick={() => copyToClipboard("GOOGLE_CLIENT_SECRET=")}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -449,8 +475,8 @@ export function CalendarSyncPanel({
                 Etape 4 : Redemarrer l&apos;application
               </h4>
               <p className="text-sm text-muted-foreground">
-                Apres avoir ajoute les variables d&apos;environnement, redemarrez
-                le serveur de developpement avec{" "}
+                Apres avoir ajoute les variables d&apos;environnement,
+                redemarrez le serveur de developpement avec{" "}
                 <span className="font-mono text-xs bg-background px-1.5 py-0.5 rounded border">
                   npm run dev
                 </span>{" "}
@@ -461,9 +487,9 @@ export function CalendarSyncPanel({
             <div className="flex items-start gap-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-3">
               <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                Une fois les identifiants configures, le bouton &laquo; Connecter
-                Google Calendar &raquo; lancera le flux OAuth pour autoriser
-                l&apos;acces a votre calendrier.
+                Une fois les identifiants configures, le bouton &laquo;
+                Connecter Google Calendar &raquo; lancera le flux OAuth pour
+                autoriser l&apos;acces a votre calendrier.
               </p>
             </div>
           </CardContent>
@@ -601,9 +627,7 @@ export function CalendarSyncPanel({
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-xl border border-border/50 p-4 text-center">
-              <p className="text-2xl font-bold">
-                {status.syncedEventsCount}
-              </p>
+              <p className="text-2xl font-bold">{status.syncedEventsCount}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Evenements synchronises
               </p>

@@ -18,12 +18,17 @@ export default async function InstagramPage() {
   ]);
 
   const igAccount = unipileStatus.accounts.find(
-    (a) => a.provider.toUpperCase() === "INSTAGRAM"
+    (a) => a.provider.toUpperCase() === "INSTAGRAM",
   );
   const unipileInstagram = unipileStatus.configured
     ? { connected: !!igAccount, accountName: igAccount?.name }
     : null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <InstagramView prospects={prospects as any} unipileInstagram={unipileInstagram} />;
+  return (
+    <InstagramView
+      prospects={prospects as any}
+      unipileInstagram={unipileInstagram}
+    />
+  );
 }

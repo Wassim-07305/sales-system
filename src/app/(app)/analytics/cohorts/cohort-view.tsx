@@ -79,7 +79,9 @@ export function CohortView({ data }: { data: CohortData[] }) {
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">{totalCreated}</p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total Deals</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Total Deals
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
@@ -90,7 +92,9 @@ export function CohortView({ data }: { data: CohortData[] }) {
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">{totalSigned}</p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Deals Signes</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Deals Signes
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
@@ -103,7 +107,9 @@ export function CohortView({ data }: { data: CohortData[] }) {
             <p className="text-2xl font-bold tracking-tight">
               {totalValue.toLocaleString("fr-FR")} &euro;
             </p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">CA Total</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              CA Total
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
@@ -113,8 +119,12 @@ export function CohortView({ data }: { data: CohortData[] }) {
                 <Calendar className="h-4 w-4 text-blue-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{avgConversion}%</p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Taux Moyen</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {avgConversion}%
+            </p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Taux Moyen
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -122,7 +132,9 @@ export function CohortView({ data }: { data: CohortData[] }) {
       {/* Cohort Table */}
       <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Cohortes par mois</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Cohortes par mois
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {data.length === 0 ? (

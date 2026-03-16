@@ -15,7 +15,13 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { sendBookingConfirmation } from "@/lib/actions/email";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, Calendar, Clock, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  Calendar,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 
 interface BookingFormProps {
   slug: string;
@@ -24,8 +30,17 @@ interface BookingFormProps {
 type Step = "qualify" | "schedule" | "confirmed" | "disqualified";
 
 const DEFAULT_TIMES = [
-  "09:00", "09:30", "10:00", "10:30", "11:00",
-  "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -71,7 +86,9 @@ export function BookingForm({ slug }: BookingFormProps) {
           let current = startH * 60 + startM;
           const end = endH * 60 + endM;
           while (current + duration <= end) {
-            const h = Math.floor(current / 60).toString().padStart(2, "0");
+            const h = Math.floor(current / 60)
+              .toString()
+              .padStart(2, "0");
             const m = (current % 60).toString().padStart(2, "0");
             times.push(`${h}:${m}`);
             current += duration;
@@ -92,8 +109,7 @@ export function BookingForm({ slug }: BookingFormProps) {
   function handleQualify(e: React.FormEvent) {
     e.preventDefault();
 
-    const isQualified =
-      revenue !== "less_1k" && urgency !== "not_urgent";
+    const isQualified = revenue !== "less_1k" && urgency !== "not_urgent";
 
     if (isQualified) {
       setStep("schedule");
@@ -183,16 +199,12 @@ export function BookingForm({ slug }: BookingFormProps) {
   if (step === "disqualified") {
     return (
       <div className="text-center py-8">
-        <h2 className="text-xl font-bold mb-2">
-          Merci pour votre intérêt !
-        </h2>
+        <h2 className="text-xl font-bold mb-2">Merci pour votre intérêt !</h2>
         <p className="text-muted-foreground mb-4">
-          Pour le moment, nos accompagnements ne semblent pas correspondre à votre situation.
-          Voici des ressources gratuites pour vous aider :
+          Pour le moment, nos accompagnements ne semblent pas correspondre à
+          votre situation. Voici des ressources gratuites pour vous aider :
         </p>
-        <Button variant="outline">
-          Accéder aux ressources gratuites
-        </Button>
+        <Button variant="outline">Accéder aux ressources gratuites</Button>
       </div>
     );
   }
@@ -206,7 +218,9 @@ export function BookingForm({ slug }: BookingFormProps) {
         </p>
 
         <div className="space-y-2">
-          <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Date</Label>
+          <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            Date
+          </Label>
           <Input
             type="date"
             value={selectedDate}
@@ -217,7 +231,9 @@ export function BookingForm({ slug }: BookingFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Horaire</Label>
+          <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            Horaire
+          </Label>
           <div className="grid grid-cols-3 gap-2">
             {availableTimes.map((time) => (
               <Button

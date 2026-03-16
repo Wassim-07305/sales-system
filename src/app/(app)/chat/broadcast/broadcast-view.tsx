@@ -10,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Megaphone, Send, Users, Clock, Mail } from "lucide-react";
 import { sendBroadcast } from "@/lib/actions/communication";
 import { toast } from "sonner";
@@ -77,7 +83,7 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
 
   function toggleRole(role: string) {
     setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
     );
   }
 
@@ -235,7 +241,11 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
                         </h3>
                       )}
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {format(new Date(broadcast.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                        {format(
+                          new Date(broadcast.created_at),
+                          "d MMMM yyyy 'à' HH:mm",
+                          { locale: fr },
+                        )}
                         {" — "}
                         {formatDistanceToNow(new Date(broadcast.created_at), {
                           addSuffix: true,

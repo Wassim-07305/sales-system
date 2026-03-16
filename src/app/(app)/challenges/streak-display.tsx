@@ -89,7 +89,9 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
             disabled={isPending}
             title="Actualiser le streak"
           >
-            <RefreshCw className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`}
+            />
           </Button>
         </div>
 
@@ -106,11 +108,7 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
                       : "bg-muted/50 text-muted-foreground"
                   }`}
                 >
-                  {isFilled ? (
-                    <CalendarCheck className="h-4 w-4" />
-                  ) : (
-                    day
-                  )}
+                  {isFilled ? <CalendarCheck className="h-4 w-4" /> : day}
                 </div>
                 <span className="text-[10px] text-muted-foreground">{day}</span>
               </div>
@@ -121,7 +119,8 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
         {currentStreak >= 7 && (
           <div className="mt-3 text-center">
             <span className="text-xs text-brand font-medium">
-              + {Math.floor(currentStreak / 7)} semaine{Math.floor(currentStreak / 7) > 1 ? "s" : ""} de streak !
+              + {Math.floor(currentStreak / 7)} semaine
+              {Math.floor(currentStreak / 7) > 1 ? "s" : ""} de streak !
             </span>
           </div>
         )}

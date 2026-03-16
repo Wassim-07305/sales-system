@@ -26,7 +26,13 @@ export interface DevelopmentPlan {
   id?: string;
   userId: string;
   skills: { name: string; level: number; target: number }[];
-  actions: { id: string; title: string; description: string; priority: "high" | "medium" | "low"; done: boolean }[];
+  actions: {
+    id: string;
+    title: string;
+    description: string;
+    priority: "high" | "medium" | "low";
+    done: boolean;
+  }[];
   resources: { title: string; url: string; type: string }[];
 }
 
@@ -57,7 +63,7 @@ function computeStatus(
   currentValue: number,
   targetValue: number,
   targetDate: string,
-  existingStatus?: string
+  existingStatus?: string,
 ): CoachingObjective["status"] {
   if (existingStatus === "completed") return "completed";
   if (currentValue >= targetValue) return "completed";
@@ -68,11 +74,14 @@ function computeStatus(
   if (now > target) return "overdue";
 
   // Calculate progress percentage
-  const progressPercent = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
+  const progressPercent =
+    targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
 
   // Calculate time percentage elapsed
-  const totalTime = target.getTime() - (now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const timeElapsed = now.getTime() - (now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const totalTime =
+    target.getTime() - (now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const timeElapsed =
+    now.getTime() - (now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const timePercent = totalTime > 0 ? (timeElapsed / totalTime) * 100 : 100;
 
   // If progress is significantly behind schedule, mark as at_risk
@@ -82,20 +91,26 @@ function computeStatus(
 }
 
 // ─── GET OBJECTIVES ──────────────────────────────────────────────
-export async function getObjectives(userId?: string): Promise<CoachingObjective[]> {
+export async function getObjectives(
+  userId?: string,
+): Promise<CoachingObjective[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const targetId = userId || user.id;
 
   const { data, error } = await supabase
     .from("coaching_objectives")
-    .select(`
+    .select(
+      `
       *,
       assignee:profiles!coaching_objectives_assignee_id_fkey(id, full_name),
       creator:profiles!coaching_objectives_created_by_fkey(id, full_name)
-    `)
+    `,
+    )
     .eq("assignee_id", targetId)
     .order("created_at", { ascending: false });
 
@@ -107,7 +122,9 @@ export async function getObjectives(userId?: string): Promise<CoachingObjective[
   if (!data) return [];
 
   return data.map((row) => {
-    const assignee = Array.isArray(row.assignee) ? row.assignee[0] : row.assignee;
+    const assignee = Array.isArray(row.assignee)
+      ? row.assignee[0]
+      : row.assignee;
     const creator = Array.isArray(row.creator) ? row.creator[0] : row.creator;
 
     return {
@@ -122,7 +139,7 @@ export async function getObjectives(userId?: string): Promise<CoachingObjective[
         row.current_value,
         row.target_value,
         row.target_date,
-        row.status
+        row.status,
       ),
       assigneeId: row.assignee_id,
       assigneeName: assignee?.full_name || null,
@@ -138,7 +155,9 @@ export async function getObjectives(userId?: string): Promise<CoachingObjective[
 // ─── GET ALL OBJECTIVES (FOR MANAGERS) ──────────────────────────
 export async function getAllObjectives(): Promise<CoachingObjective[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Check role
@@ -154,11 +173,13 @@ export async function getAllObjectives(): Promise<CoachingObjective[]> {
 
   const { data, error } = await supabase
     .from("coaching_objectives")
-    .select(`
+    .select(
+      `
       *,
       assignee:profiles!coaching_objectives_assignee_id_fkey(id, full_name),
       creator:profiles!coaching_objectives_created_by_fkey(id, full_name)
-    `)
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -169,7 +190,9 @@ export async function getAllObjectives(): Promise<CoachingObjective[]> {
   if (!data) return [];
 
   return data.map((row) => {
-    const assignee = Array.isArray(row.assignee) ? row.assignee[0] : row.assignee;
+    const assignee = Array.isArray(row.assignee)
+      ? row.assignee[0]
+      : row.assignee;
     const creator = Array.isArray(row.creator) ? row.creator[0] : row.creator;
 
     return {
@@ -184,7 +207,7 @@ export async function getAllObjectives(): Promise<CoachingObjective[]> {
         row.current_value,
         row.target_value,
         row.target_date,
-        row.status
+        row.status,
       ),
       assigneeId: row.assignee_id,
       assigneeName: assignee?.full_name || null,
@@ -207,7 +230,9 @@ export async function createObjective(data: {
   assigneeId?: string;
 }): Promise<CoachingObjective> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Check role — only admin/manager can create for others
@@ -274,10 +299,12 @@ export async function updateObjective(
     category: "calls" | "deals" | "revenue" | "skills" | "other";
     targetValue: number;
     targetDate: string;
-  }>
+  }>,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const updateData: Record<string, unknown> = {
@@ -285,10 +312,13 @@ export async function updateObjective(
   };
 
   if (updates.title !== undefined) updateData.title = updates.title;
-  if (updates.description !== undefined) updateData.description = updates.description;
+  if (updates.description !== undefined)
+    updateData.description = updates.description;
   if (updates.category !== undefined) updateData.category = updates.category;
-  if (updates.targetValue !== undefined) updateData.target_value = updates.targetValue;
-  if (updates.targetDate !== undefined) updateData.target_date = updates.targetDate;
+  if (updates.targetValue !== undefined)
+    updateData.target_value = updates.targetValue;
+  if (updates.targetDate !== undefined)
+    updateData.target_date = updates.targetDate;
 
   const { error } = await supabase
     .from("coaching_objectives")
@@ -308,10 +338,12 @@ export async function updateObjective(
 export async function updateObjectiveProgress(
   id: string,
   currentValue: number,
-  note?: string
+  note?: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Get current objective to merge notes and compute status
@@ -333,7 +365,7 @@ export async function updateObjectiveProgress(
   const newStatus = computeStatus(
     currentValue,
     existing.target_value,
-    existing.target_date
+    existing.target_date,
   );
 
   const { error } = await supabase
@@ -358,7 +390,9 @@ export async function updateObjectiveProgress(
 // ─── COMPLETE OBJECTIVE ──────────────────────────────────────────
 export async function completeObjective(id: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Get target value to set current value equal
@@ -369,7 +403,9 @@ export async function completeObjective(id: string): Promise<void> {
     .single();
 
   const notes = existing?.notes || [];
-  notes.push(`[${new Date().toISOString().slice(0, 10)}] Objectif marque comme complete`);
+  notes.push(
+    `[${new Date().toISOString().slice(0, 10)}] Objectif marque comme complete`,
+  );
 
   const { error } = await supabase
     .from("coaching_objectives")
@@ -393,7 +429,9 @@ export async function completeObjective(id: string): Promise<void> {
 // ─── DELETE OBJECTIVE ────────────────────────────────────────────
 export async function deleteObjective(id: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase
@@ -411,9 +449,13 @@ export async function deleteObjective(id: string): Promise<void> {
 }
 
 // ─── DEVELOPMENT PLAN ────────────────────────────────────────────
-export async function getDevelopmentPlan(userId?: string): Promise<DevelopmentPlan | null> {
+export async function getDevelopmentPlan(
+  userId?: string,
+): Promise<DevelopmentPlan | null> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const targetId = userId || user.id;
@@ -447,10 +489,12 @@ export async function getDevelopmentPlan(userId?: string): Promise<DevelopmentPl
 // ─── CREATE OR UPDATE DEVELOPMENT PLAN ──────────────────────────
 export async function saveDevelopmentPlan(
   plan: Partial<DevelopmentPlan>,
-  targetUserId?: string
+  targetUserId?: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const userId = targetUserId || user.id;
@@ -469,15 +513,16 @@ export async function saveDevelopmentPlan(
   }
 
   // Upsert the development plan
-  const { error } = await supabase
-    .from("development_plans")
-    .upsert({
+  const { error } = await supabase.from("development_plans").upsert(
+    {
       user_id: userId,
       skills: plan.skills || [],
       actions: plan.actions || [],
       resources: plan.resources || [],
       updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    },
+    { onConflict: "user_id" },
+  );
 
   if (error) {
     console.error("Error saving development plan:", error);
@@ -492,10 +537,12 @@ export async function saveDevelopmentPlan(
 export async function togglePlanAction(
   actionId: string,
   done: boolean,
-  targetUserId?: string
+  targetUserId?: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const userId = targetUserId || user.id;
@@ -513,7 +560,7 @@ export async function togglePlanAction(
 
   const actions = (plan.actions as DevelopmentPlan["actions"]) || [];
   const updatedActions = actions.map((action) =>
-    action.id === actionId ? { ...action, done } : action
+    action.id === actionId ? { ...action, done } : action,
   );
 
   const { error } = await supabase
@@ -534,15 +581,21 @@ export async function togglePlanAction(
 }
 
 // ─── COACHING NOTES ──────────────────────────────────────────────
-export async function getCoachingNotes(userId: string): Promise<CoachingNote[]> {
+export async function getCoachingNotes(
+  userId: string,
+): Promise<CoachingNote[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Use existing feedback_sessions table with type = "coaching"
   const { data, error } = await supabase
     .from("feedback_sessions")
-    .select("*, manager:profiles!feedback_sessions_manager_id_fkey(id, full_name, avatar_url)")
+    .select(
+      "*, manager:profiles!feedback_sessions_manager_id_fkey(id, full_name, avatar_url)",
+    )
     .eq("member_id", userId)
     .eq("type", "coaching")
     .order("created_at", { ascending: false });
@@ -578,7 +631,9 @@ export async function createCoachingNote(data: {
   title?: string;
 }): Promise<CoachingNote> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: profile } = await supabase
@@ -629,7 +684,9 @@ export async function createCoachingNote(data: {
 // ─── DELETE COACHING NOTE ────────────────────────────────────────
 export async function deleteCoachingNote(noteId: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase
@@ -647,9 +704,13 @@ export async function deleteCoachingNote(noteId: string): Promise<void> {
 }
 
 // ─── GET COACHING STATS ──────────────────────────────────────────
-export async function getCoachingStats(userId?: string): Promise<CoachingStats> {
+export async function getCoachingStats(
+  userId?: string,
+): Promise<CoachingStats> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const targetId = userId || user.id;
@@ -661,13 +722,15 @@ export async function getCoachingStats(userId?: string): Promise<CoachingStats> 
     .eq("assignee_id", targetId);
 
   const total = objectives?.length || 0;
-  const completed = objectives?.filter((o) => o.status === "completed").length || 0;
+  const completed =
+    objectives?.filter((o) => o.status === "completed").length || 0;
   const overdue = objectives?.filter((o) => o.status === "overdue").length || 0;
 
   let averageProgress = 0;
   if (objectives && objectives.length > 0) {
     const totalProgress = objectives.reduce((sum, o) => {
-      const progress = o.target_value > 0 ? (o.current_value / o.target_value) * 100 : 0;
+      const progress =
+        o.target_value > 0 ? (o.current_value / o.target_value) * 100 : 0;
       return sum + Math.min(progress, 100);
     }, 0);
     averageProgress = totalProgress / objectives.length;
@@ -722,7 +785,9 @@ export async function getTeamCoachingOverview(): Promise<{
   };
 }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Check role
@@ -796,7 +861,8 @@ export async function getTeamCoachingOverview(): Promise<{
     let avgProgress = 0;
     if (objectives.length > 0) {
       const progress = objectives.reduce((sum, o) => {
-        const p = o.target_value > 0 ? (o.current_value / o.target_value) * 100 : 0;
+        const p =
+          o.target_value > 0 ? (o.current_value / o.target_value) * 100 : 0;
         return sum + Math.min(p, 100);
       }, 0);
       avgProgress = progress / objectives.length;
@@ -827,7 +893,8 @@ export async function getTeamCoachingOverview(): Promise<{
       totalObjectives,
       completedObjectives: totalCompleted,
       overdueObjectives: totalOverdue,
-      averageTeamProgress: members.length > 0 ? Math.round(totalProgress / members.length) : 0,
+      averageTeamProgress:
+        members.length > 0 ? Math.round(totalProgress / members.length) : 0,
     },
   };
 }

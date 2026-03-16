@@ -6,7 +6,10 @@ import { aiChat, aiJSON, type AIMessage } from "@/lib/ai/client";
 
 export async function getRoleplayProfiles() {
   const supabase = await createClient();
-  const { data } = await supabase.from("roleplay_prospect_profiles").select("*").order("name");
+  const { data } = await supabase
+    .from("roleplay_prospect_profiles")
+    .select("*")
+    .order("name");
   return (data || []).map((p: Record<string, unknown>) => ({
     ...p,
     objections: p.objection_types || [],
@@ -40,7 +43,10 @@ export async function createRoleplayProfile(profile: {
 
 export async function deleteRoleplayProfile(id: string) {
   const supabase = createAdminClient();
-  const { error } = await supabase.from("roleplay_prospect_profiles").delete().eq("id", id);
+  const { error } = await supabase
+    .from("roleplay_prospect_profiles")
+    .delete()
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/roleplay");
   revalidatePath("/roleplay/profiles");
@@ -48,16 +54,22 @@ export async function deleteRoleplayProfile(id: string) {
 
 export async function startSession(profileId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const admin = createAdminClient();
-  const { data, error } = await admin.from("roleplay_sessions").insert({
-    user_id: user.id,
-    prospect_profile_id: profileId,
-    status: "active",
-    conversation: [],
-  }).select().single();
+  const { data, error } = await admin
+    .from("roleplay_sessions")
+    .insert({
+      user_id: user.id,
+      prospect_profile_id: profileId,
+      status: "active",
+      conversation: [],
+    })
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
   return data;
@@ -81,10 +93,14 @@ export async function sendRoleplayMessage(sessionId: string, content: string) {
     .single();
 
   const profile = fullSession?.profile
-    ? (Array.isArray(fullSession.profile) ? fullSession.profile[0] : fullSession.profile)
+    ? Array.isArray(fullSession.profile)
+      ? fullSession.profile[0]
+      : fullSession.profile
     : null;
 
-  const messages = Array.isArray(session.conversation) ? session.conversation : [];
+  const messages = Array.isArray(session.conversation)
+    ? session.conversation
+    : [];
   messages.push({ role: "user", content, timestamp: new Date().toISOString() });
 
   // Build AI conversation with prospect persona
@@ -105,22 +121,21 @@ RÈGLES :
 - Tu réagis naturellement aux messages du setter
 - Tu utilises tes objections favorites au bon moment
 - Niveau de difficulté ${profile?.difficulty || "moyen"} : ${
-    profile?.difficulty === "facile" ? "Tu es plutôt réceptif, tu poses des questions mais tu es ouvert"
-    : profile?.difficulty === "difficile" ? "Tu es très sceptique, tu as beaucoup d'objections, tu ne te laisses pas convaincre facilement"
-    : "Tu es neutre, tu écoutes mais tu as besoin d'être convaincu"
+    profile?.difficulty === "facile"
+      ? "Tu es plutôt réceptif, tu poses des questions mais tu es ouvert"
+      : profile?.difficulty === "difficile"
+        ? "Tu es très sceptique, tu as beaucoup d'objections, tu ne te laisses pas convaincre facilement"
+        : "Tu es neutre, tu écoutes mais tu as besoin d'être convaincu"
   }
 - Réponds en français, de manière concise (1 à 3 phrases max), comme dans un vrai DM ${profile?.network || "Instagram"}
 - NE METS PAS de guillemets autour de ta réponse`;
 
-  const aiMessages: AIMessage[] = [
-    { role: "system", content: systemPrompt },
-  ];
+  const aiMessages: AIMessage[] = [{ role: "system", content: systemPrompt }];
 
   // Add conversation history (pruned to last 20 messages to avoid context overflow)
   const MAX_HISTORY = 20;
-  const recentMessages = messages.length > MAX_HISTORY
-    ? messages.slice(-MAX_HISTORY)
-    : messages;
+  const recentMessages =
+    messages.length > MAX_HISTORY ? messages.slice(-MAX_HISTORY) : messages;
 
   for (const msg of recentMessages) {
     aiMessages.push({
@@ -129,11 +144,21 @@ RÈGLES :
     });
   }
 
-  const aiMessage = await aiChat(aiMessages, { temperature: 0.85, maxTokens: 256 });
+  const aiMessage = await aiChat(aiMessages, {
+    temperature: 0.85,
+    maxTokens: 256,
+  });
 
-  messages.push({ role: "assistant", content: aiMessage, timestamp: new Date().toISOString() });
+  messages.push({
+    role: "assistant",
+    content: aiMessage,
+    timestamp: new Date().toISOString(),
+  });
 
-  await supabase.from("roleplay_sessions").update({ conversation: messages }).eq("id", sessionId);
+  await supabase
+    .from("roleplay_sessions")
+    .update({ conversation: messages })
+    .eq("id", sessionId);
   return { aiMessage };
 }
 
@@ -148,10 +173,13 @@ export async function endSession(sessionId: string) {
   if (!session) throw new Error("Session non trouvée");
 
   // Build conversation transcript for AI analysis
-  const conversation = Array.isArray(session.conversation) ? session.conversation : [];
+  const conversation = Array.isArray(session.conversation)
+    ? session.conversation
+    : [];
   const transcript = conversation
-    .map((m: { role: string; content: string }) =>
-      `${m.role === "user" ? "SETTER" : "PROSPECT"}: ${m.content}`
+    .map(
+      (m: { role: string; content: string }) =>
+        `${m.role === "user" ? "SETTER" : "PROSPECT"}: ${m.content}`,
     )
     .join("\n");
 
@@ -188,13 +216,18 @@ Critères d'évaluation :
 - closing_technique : efficacité pour amener vers un appel/CTA
 - strengths : 3 points forts concrets observés dans la conversation
 - improvements : 3 axes d'amélioration concrets et actionnables`,
-      { system: "Tu es un coach expert en vente et setting. Analyse uniquement en français." }
+      {
+        system:
+          "Tu es un coach expert en vente et setting. Analyse uniquement en français.",
+      },
     );
   } catch {
     feedback = {
       score: 0,
       strengths: [],
-      improvements: ["Analyse IA indisponible — réessayez dans quelques instants."],
+      improvements: [
+        "Analyse IA indisponible — réessayez dans quelques instants.",
+      ],
       objection_handling: 0,
       rapport_building: 0,
       closing_technique: 0,
@@ -203,12 +236,17 @@ Critères d'évaluation :
 
   const score = feedback.score;
 
-  await supabase.from("roleplay_sessions").update({
-    status: "completed",
-    score,
-    ai_feedback: feedback,
-    duration_seconds: Math.floor((Date.now() - new Date(session.created_at).getTime()) / 1000),
-  }).eq("id", sessionId);
+  await supabase
+    .from("roleplay_sessions")
+    .update({
+      status: "completed",
+      score,
+      ai_feedback: feedback,
+      duration_seconds: Math.floor(
+        (Date.now() - new Date(session.created_at).getTime()) / 1000,
+      ),
+    })
+    .eq("id", sessionId);
 
   revalidatePath("/roleplay");
   return feedback;
@@ -216,7 +254,7 @@ Critères d'évaluation :
 
 export async function getRoleplayFeedback(
   sessionId: string,
-  conversation: { role: string; content: string }[]
+  conversation: { role: string; content: string }[],
 ) {
   const transcript = conversation
     .map((m) => `${m.role === "user" ? "SETTER" : "PROSPECT"}: ${m.content}`)
@@ -249,16 +287,22 @@ Criteres d'evaluation :
 - strengths : 3 points forts concrets observes dans la conversation
 - improvements : 3 axes d'amelioration concrets et actionnables
 - tips : 3 conseils pratiques que le vendeur peut appliquer immediatement`,
-      { system: "Tu es un coach expert en vente et setting. Analyse uniquement en francais." }
+      {
+        system:
+          "Tu es un coach expert en vente et setting. Analyse uniquement en francais.",
+      },
     );
 
     // Also update the session in DB with this feedback
     const supabase = await createClient();
-    await supabase.from("roleplay_sessions").update({
-      status: "completed",
-      score: feedback.score,
-      ai_feedback: feedback,
-    }).eq("id", sessionId);
+    await supabase
+      .from("roleplay_sessions")
+      .update({
+        status: "completed",
+        score: feedback.score,
+        ai_feedback: feedback,
+      })
+      .eq("id", sessionId);
 
     revalidatePath("/roleplay");
     return feedback;
@@ -266,7 +310,9 @@ Criteres d'evaluation :
     return {
       score: 0,
       strengths: [],
-      improvements: ["Analyse IA indisponible — réessayez dans quelques instants."],
+      improvements: [
+        "Analyse IA indisponible — réessayez dans quelques instants.",
+      ],
       tips: ["Vérifiez la configuration de l'API IA dans les paramètres."],
     };
   }
@@ -276,7 +322,9 @@ export async function getUserSessions(userId?: string) {
   const supabase = await createClient();
   let query = supabase
     .from("roleplay_sessions")
-    .select("*, profile:roleplay_prospect_profiles(name, niche, difficulty), user:profiles(full_name, avatar_url)")
+    .select(
+      "*, profile:roleplay_prospect_profiles(name, niche, difficulty), user:profiles(full_name, avatar_url)",
+    )
     .order("created_at", { ascending: false });
 
   if (userId) query = query.eq("user_id", userId);
@@ -294,7 +342,9 @@ export async function getSession(sessionId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("roleplay_sessions")
-    .select("*, profile:roleplay_prospect_profiles(*), user:profiles(full_name)")
+    .select(
+      "*, profile:roleplay_prospect_profiles(*), user:profiles(full_name)",
+    )
     .eq("id", sessionId)
     .single();
 

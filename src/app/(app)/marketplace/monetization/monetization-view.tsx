@@ -143,7 +143,8 @@ export function MonetizationView({
         toast.success(result.message);
         setPayoutAmount("");
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Erreur lors de la demande";
+        const message =
+          err instanceof Error ? err.message : "Erreur lors de la demande";
         toast.error(message);
       }
     });
@@ -171,17 +172,26 @@ export function MonetizationView({
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat) => (
-          <Card key={stat.title} className="border-border/50 hover:shadow-md transition-all">
+          <Card
+            key={stat.title}
+            className="border-border/50 hover:shadow-md transition-all"
+          >
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    {stat.title}
+                  </p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
                   {stat.subtitle && (
-                    <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stat.subtitle}
+                    </p>
                   )}
                 </div>
-                <div className={`h-9 w-9 rounded-lg ring-1 ${stat.ringColor} ${stat.bgColor} flex items-center justify-center`}>
+                <div
+                  className={`h-9 w-9 rounded-lg ring-1 ${stat.ringColor} ${stat.bgColor} flex items-center justify-center`}
+                >
                   <stat.icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </div>
@@ -193,10 +203,30 @@ export function MonetizationView({
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Vue d&apos;ensemble</TabsTrigger>
-          <TabsTrigger value="pricing" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Tarification</TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Historique</TabsTrigger>
-          <TabsTrigger value="commissions" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Commissions</TabsTrigger>
+          <TabsTrigger
+            value="overview"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
+            Vue d&apos;ensemble
+          </TabsTrigger>
+          <TabsTrigger
+            value="pricing"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
+            Tarification
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
+            Historique
+          </TabsTrigger>
+          <TabsTrigger
+            value="commissions"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
+            Commissions
+          </TabsTrigger>
         </TabsList>
 
         {/* Vue d'ensemble */}
@@ -211,7 +241,11 @@ export function MonetizationView({
                   <AreaChart data={overview.revenueByMonth}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                     <XAxis dataKey="month" stroke="#888" fontSize={12} />
-                    <YAxis stroke="#888" fontSize={12} tickFormatter={(v: number) => `${v} €`} />
+                    <YAxis
+                      stroke="#888"
+                      fontSize={12}
+                      tickFormatter={(v: number) => `${v} €`}
+                    />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "#14080e",
@@ -220,7 +254,12 @@ export function MonetizationView({
                         color: "#fff",
                       }}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      formatter={((value: number) => [`${value.toLocaleString("fr-FR")} €`, "Revenu"]) as any}
+                      formatter={
+                        ((value: number) => [
+                          `${value.toLocaleString("fr-FR")} €`,
+                          "Revenu",
+                        ]) as any
+                      }
                     />
                     <Area
                       type="monotone"
@@ -238,7 +277,9 @@ export function MonetizationView({
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Top extensions par revenu</CardTitle>
+              <CardTitle className="text-lg">
+                Top extensions par revenu
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -253,22 +294,31 @@ export function MonetizationView({
                 <TableBody>
                   {overview.topExtensions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                      <TableCell
+                        colSpan={4}
+                        className="text-center text-muted-foreground py-6"
+                      >
                         Aucune extension pour le moment
                       </TableCell>
                     </TableRow>
                   ) : (
                     overview.topExtensions.map((ext) => (
                       <TableRow key={ext.name}>
-                        <TableCell className="font-medium">{ext.name}</TableCell>
-                        <TableCell className="text-right">{ext.installs}</TableCell>
+                        <TableCell className="font-medium">
+                          {ext.name}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {ext.installs}
+                        </TableCell>
                         <TableCell className="text-right">
                           {ext.revenue.toLocaleString("fr-FR")} €
                         </TableCell>
                         <TableCell className="text-right">
                           <span
                             className={`inline-flex items-center gap-1 ${
-                              ext.growth >= 0 ? "text-green-400" : "text-red-400"
+                              ext.growth >= 0
+                                ? "text-green-400"
+                                : "text-red-400"
                             }`}
                           >
                             {ext.growth >= 0 ? (
@@ -294,7 +344,9 @@ export function MonetizationView({
             <Card key={ext.id}>
               <CardHeader>
                 <CardTitle className="text-lg">{ext.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{ext.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {ext.description}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -320,13 +372,19 @@ export function MonetizationView({
                           "Gratuit"
                         ) : (
                           <>
-                            {tier.price} €<span className="text-sm font-normal text-muted-foreground">/mois</span>
+                            {tier.price} €
+                            <span className="text-sm font-normal text-muted-foreground">
+                              /mois
+                            </span>
                           </>
                         )}
                       </p>
                       <ul className="space-y-2">
                         {tier.features.map((feature) => (
-                          <li key={feature} className="flex items-center gap-2 text-sm">
+                          <li
+                            key={feature}
+                            className="flex items-center gap-2 text-sm"
+                          >
                             <Check className="h-3.5 w-3.5 text-[#7af17a] shrink-0" />
                             {feature}
                           </li>
@@ -344,7 +402,9 @@ export function MonetizationView({
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Historique des versements</CardTitle>
+              <CardTitle className="text-lg">
+                Historique des versements
+              </CardTitle>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -375,7 +435,10 @@ export function MonetizationView({
                 <TableBody>
                   {payouts.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                      <TableCell
+                        colSpan={4}
+                        className="text-center text-muted-foreground py-6"
+                      >
                         Aucun paiement enregistré
                       </TableCell>
                     </TableRow>
@@ -418,7 +481,9 @@ export function MonetizationView({
         <TabsContent value="commissions" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Structure des commissions</CardTitle>
+              <CardTitle className="text-lg">
+                Structure des commissions
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -439,7 +504,9 @@ export function MonetizationView({
                           {c.rate}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{c.description}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {c.description}
+                      </TableCell>
                       <TableCell className="text-sm">{c.example}</TableCell>
                     </TableRow>
                   ))}
@@ -476,27 +543,42 @@ export function MonetizationView({
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Commissions installations</p>
+                        <p className="text-sm text-muted-foreground">
+                          Commissions installations
+                        </p>
                         <p className="text-xl font-bold text-green-400">
-                          {estimatedEarnings.installations.toLocaleString("fr-FR")} €
+                          {estimatedEarnings.installations.toLocaleString(
+                            "fr-FR",
+                          )}{" "}
+                          €
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {estimatedInstalls} x 2,00 €
                         </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Abonnements Pro (30% conv.)</p>
+                        <p className="text-sm text-muted-foreground">
+                          Abonnements Pro (30% conv.)
+                        </p>
                         <p className="text-xl font-bold text-blue-400">
-                          {estimatedEarnings.subscriptionsPro.toLocaleString("fr-FR")} €
+                          {estimatedEarnings.subscriptionsPro.toLocaleString(
+                            "fr-FR",
+                          )}{" "}
+                          €
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {Math.round(estimatedInstalls * 0.3)} abonnés x 15%
                         </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Bonus conversions</p>
+                        <p className="text-sm text-muted-foreground">
+                          Bonus conversions
+                        </p>
                         <p className="text-xl font-bold text-purple-400">
-                          {estimatedEarnings.conversions.toLocaleString("fr-FR")} €
+                          {estimatedEarnings.conversions.toLocaleString(
+                            "fr-FR",
+                          )}{" "}
+                          €
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {Math.round(estimatedInstalls * 0.3)} x 5,00 €

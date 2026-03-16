@@ -32,22 +32,53 @@ const EVENT_CONFIG: Record<
   }
 > = {
   signup: { icon: UserPlus, color: "text-brand", bg: "bg-brand/20" },
-  onboarding: { icon: ClipboardCheck, color: "text-blue-400", bg: "bg-blue-400/20" },
-  lesson_completed: { icon: BookOpen, color: "text-green-400", bg: "bg-green-400/20" },
-  quiz_passed: { icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/20" },
+  onboarding: {
+    icon: ClipboardCheck,
+    color: "text-blue-400",
+    bg: "bg-blue-400/20",
+  },
+  lesson_completed: {
+    icon: BookOpen,
+    color: "text-green-400",
+    bg: "bg-green-400/20",
+  },
+  quiz_passed: {
+    icon: CheckCircle2,
+    color: "text-green-500",
+    bg: "bg-green-500/20",
+  },
   quiz_failed: { icon: XCircle, color: "text-red-400", bg: "bg-red-400/20" },
-  roleplay_completed: { icon: Swords, color: "text-purple-400", bg: "bg-purple-400/20" },
+  roleplay_completed: {
+    icon: Swords,
+    color: "text-purple-400",
+    bg: "bg-purple-400/20",
+  },
   booking: { icon: Calendar, color: "text-yellow-400", bg: "bg-yellow-400/20" },
   journal: { icon: PenSquare, color: "text-pink-400", bg: "bg-pink-400/20" },
-  message_sent: { icon: MessageSquare, color: "text-sky-400", bg: "bg-sky-400/20" },
-  deal_activity: { icon: Briefcase, color: "text-orange-400", bg: "bg-orange-400/20" },
+  message_sent: {
+    icon: MessageSquare,
+    color: "text-sky-400",
+    bg: "bg-sky-400/20",
+  },
+  deal_activity: {
+    icon: Briefcase,
+    color: "text-orange-400",
+    bg: "bg-orange-400/20",
+  },
   placement_ready: { icon: Trophy, color: "text-brand", bg: "bg-brand/20" },
-  challenge_completed: { icon: Trophy, color: "text-amber-400", bg: "bg-amber-400/20" },
+  challenge_completed: {
+    icon: Trophy,
+    color: "text-amber-400",
+    bg: "bg-amber-400/20",
+  },
 };
 
 const FILTER_OPTIONS: { label: string; types: TimelineEventType[] }[] = [
   { label: "Tout", types: [] },
-  { label: "Formation", types: ["lesson_completed", "quiz_passed", "quiz_failed"] },
+  {
+    label: "Formation",
+    types: ["lesson_completed", "quiz_passed", "quiz_failed"],
+  },
   { label: "Roleplay", types: ["roleplay_completed"] },
   { label: "RDV", types: ["booking"] },
   { label: "Ventes", types: ["deal_activity"] },
@@ -118,7 +149,9 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-px flex-1 bg-border" />
                   <span className="text-xs font-medium text-muted-foreground px-2">
-                    {format(new Date(dateKey), "EEEE d MMMM yyyy", { locale: fr })}
+                    {format(new Date(dateKey), "EEEE d MMMM yyyy", {
+                      locale: fr,
+                    })}
                   </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
@@ -129,7 +162,8 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
                   <div className="absolute left-4 top-2 bottom-2 w-px bg-border" />
 
                   {grouped[dateKey].map((event) => {
-                    const config = EVENT_CONFIG[event.type] || EVENT_CONFIG.signup;
+                    const config =
+                      EVENT_CONFIG[event.type] || EVENT_CONFIG.signup;
                     const Icon = config.icon;
 
                     return (
@@ -158,7 +192,10 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
                             {event.description}
                           </p>
                           {event.metadata?.score !== undefined && (
-                            <Badge variant="outline" className="text-[10px] mt-1">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] mt-1"
+                            >
                               Score : {String(event.metadata.score)}%
                             </Badge>
                           )}

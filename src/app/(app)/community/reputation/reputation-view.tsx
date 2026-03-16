@@ -132,7 +132,10 @@ export function ReputationView({
             <div className="flex items-center gap-4">
               <div
                 className="flex items-center justify-center w-16 h-16 rounded-full"
-                style={{ backgroundColor: `${currentRank.color}20`, color: currentRank.color }}
+                style={{
+                  backgroundColor: `${currentRank.color}20`,
+                  color: currentRank.color,
+                }}
               >
                 <RankIcon rank={currentRank.rank} size={32} />
               </div>
@@ -141,7 +144,10 @@ export function ReputationView({
                   <h2 className="text-xl font-bold">{currentRank.name}</h2>
                   <Badge
                     variant="outline"
-                    style={{ borderColor: currentRank.color, color: currentRank.color }}
+                    style={{
+                      borderColor: currentRank.color,
+                      color: currentRank.color,
+                    }}
                   >
                     {userReputation.points} pts
                   </Badge>
@@ -158,7 +164,10 @@ export function ReputationView({
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Prochain rang : <span className="font-medium text-foreground">{nextRank.name}</span>
+                      Prochain rang :{" "}
+                      <span className="font-medium text-foreground">
+                        {nextRank.name}
+                      </span>
                     </span>
                     <span className="text-muted-foreground">
                       {userReputation.points} / {nextRank.minPoints} pts
@@ -166,7 +175,8 @@ export function ReputationView({
                   </div>
                   <Progress value={progressPercent} className="h-3" />
                   <p className="text-xs text-muted-foreground">
-                    Plus que {nextRank.minPoints - userReputation.points} points pour atteindre le rang {nextRank.name}
+                    Plus que {nextRank.minPoints - userReputation.points} points
+                    pour atteindre le rang {nextRank.name}
                   </p>
                 </div>
               ) : (
@@ -185,8 +195,12 @@ export function ReputationView({
                 <FileText size={18} className="text-[#7af17a]" />
               </div>
               <div>
-                <p className="text-lg font-bold">{userReputation.breakdown.posts}</p>
-                <p className="text-xs text-muted-foreground">Posts ({userReputation.breakdown.posts * 10} pts)</p>
+                <p className="text-lg font-bold">
+                  {userReputation.breakdown.posts}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Posts ({userReputation.breakdown.posts * 10} pts)
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -194,8 +208,12 @@ export function ReputationView({
                 <Reply size={18} className="text-blue-500" />
               </div>
               <div>
-                <p className="text-lg font-bold">{userReputation.breakdown.replies}</p>
-                <p className="text-xs text-muted-foreground">Réponses ({userReputation.breakdown.replies * 5} pts)</p>
+                <p className="text-lg font-bold">
+                  {userReputation.breakdown.replies}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Réponses ({userReputation.breakdown.replies * 5} pts)
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -203,8 +221,12 @@ export function ReputationView({
                 <ThumbsUp size={18} className="text-purple-500" />
               </div>
               <div>
-                <p className="text-lg font-bold">{userReputation.breakdown.likes}</p>
-                <p className="text-xs text-muted-foreground">Likes ({userReputation.breakdown.likes * 2} pts)</p>
+                <p className="text-lg font-bold">
+                  {userReputation.breakdown.likes}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Likes ({userReputation.breakdown.likes * 2} pts)
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -212,8 +234,13 @@ export function ReputationView({
                 <Trophy size={18} className="text-amber-500" />
               </div>
               <div>
-                <p className="text-lg font-bold">{userReputation.breakdown.bestAnswers}</p>
-                <p className="text-xs text-muted-foreground">Meilleures rép. ({userReputation.breakdown.bestAnswers * 50} pts)</p>
+                <p className="text-lg font-bold">
+                  {userReputation.breakdown.bestAnswers}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Meilleures rép. ({userReputation.breakdown.bestAnswers * 50}{" "}
+                  pts)
+                </p>
               </div>
             </div>
           </div>
@@ -237,8 +264,12 @@ export function ReputationView({
                     <TableHead className="w-12">#</TableHead>
                     <TableHead>Membre</TableHead>
                     <TableHead className="text-right">Points</TableHead>
-                    <TableHead className="text-center hidden sm:table-cell">Rang</TableHead>
-                    <TableHead className="text-right hidden md:table-cell">Posts</TableHead>
+                    <TableHead className="text-center hidden sm:table-cell">
+                      Rang
+                    </TableHead>
+                    <TableHead className="text-right hidden md:table-cell">
+                      Posts
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -255,14 +286,14 @@ export function ReputationView({
                                   entry.position === 1
                                     ? "#fbbf2430"
                                     : entry.position === 2
-                                    ? "#94a3b830"
-                                    : "#cd7f3230",
+                                      ? "#94a3b830"
+                                      : "#cd7f3230",
                                 color:
                                   entry.position === 1
                                     ? "#fbbf24"
                                     : entry.position === 2
-                                    ? "#94a3b8"
-                                    : "#cd7f32",
+                                      ? "#94a3b8"
+                                      : "#cd7f32",
                               }}
                             >
                               {entry.position}
@@ -281,7 +312,9 @@ export function ReputationView({
                                 {getInitials(entry.fullName)}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-medium text-sm">{entry.fullName}</span>
+                            <span className="font-medium text-sm">
+                              {entry.fullName}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-bold">
@@ -291,7 +324,10 @@ export function ReputationView({
                           <Badge
                             variant="outline"
                             className="gap-1"
-                            style={{ borderColor: rank.color, color: rank.color }}
+                            style={{
+                              borderColor: rank.color,
+                              color: rank.color,
+                            }}
                           >
                             <RankIcon rank={rank.rank} size={12} />
                             {rank.name}
@@ -327,7 +363,10 @@ export function ReputationView({
               ) : (
                 <div className="space-y-3">
                   {activity.map((event, i) => (
-                    <div key={i} className="flex items-start justify-between gap-2">
+                    <div
+                      key={i}
+                      className="flex items-start justify-between gap-2"
+                    >
                       <div className="flex-1 min-w-0">
                         <p className="text-sm truncate">{event.label}</p>
                         <p className="text-xs text-muted-foreground">

@@ -23,7 +23,10 @@ export default function HelpLoading() {
           <Skeleton className="h-5 w-36" />
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 border rounded-lg">
+              <div
+                key={i}
+                className="flex items-start gap-3 p-3 border rounded-lg"
+              >
                 <Skeleton className="h-8 w-8 rounded" />
                 <div className="flex-1 space-y-1">
                   <Skeleton className="h-4 w-3/4" />

@@ -38,7 +38,11 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 import { submitTranscript } from "@/lib/actions/call-review";
-import type { CallReview, CallReviewStats, CallReviewAIAnalysis } from "@/lib/call-review-types";
+import type {
+  CallReview,
+  CallReviewStats,
+  CallReviewAIAnalysis,
+} from "@/lib/call-review-types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,13 +65,29 @@ function scoreBg(score: number): string {
 function sentimentBadge(sentiment: string) {
   switch (sentiment) {
     case "positif":
-      return <Badge className="bg-brand/10 text-brand border-brand/20">Positif</Badge>;
+      return (
+        <Badge className="bg-brand/10 text-brand border-brand/20">
+          Positif
+        </Badge>
+      );
     case "négatif":
-      return <Badge className="bg-foreground/10 text-foreground border-border">Négatif</Badge>;
+      return (
+        <Badge className="bg-foreground/10 text-foreground border-border">
+          Négatif
+        </Badge>
+      );
     case "mixte":
-      return <Badge className="bg-muted/60 text-muted-foreground border-border">Mixte</Badge>;
+      return (
+        <Badge className="bg-muted/60 text-muted-foreground border-border">
+          Mixte
+        </Badge>
+      );
     default:
-      return <Badge className="bg-muted/40 text-muted-foreground/60 border-border">Neutre</Badge>;
+      return (
+        <Badge className="bg-muted/40 text-muted-foreground/60 border-border">
+          Neutre
+        </Badge>
+      );
   }
 }
 
@@ -86,7 +106,11 @@ function sentimentColor(sentiment: string): string {
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function ScoreBreakdownCard({ breakdown }: { breakdown: CallReviewAIAnalysis["scoreBreakdown"] }) {
+function ScoreBreakdownCard({
+  breakdown,
+}: {
+  breakdown: CallReviewAIAnalysis["scoreBreakdown"];
+}) {
   const items = [
     { label: "Ouverture", value: breakdown.ouverture },
     { label: "Découverte", value: breakdown.decouverte },
@@ -113,7 +137,11 @@ function ScoreBreakdownCard({ breakdown }: { breakdown: CallReviewAIAnalysis["sc
   );
 }
 
-function TalkRatioBar({ ratio }: { ratio: { vendeur: number; prospect: number } }) {
+function TalkRatioBar({
+  ratio,
+}: {
+  ratio: { vendeur: number; prospect: number };
+}) {
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-semibold text-white flex items-center gap-2">
@@ -163,13 +191,15 @@ function SentimentTimeline({
                   point.sentiment === "positif"
                     ? "100%"
                     : point.sentiment === "neutre"
-                    ? "60%"
-                    : "30%",
+                      ? "60%"
+                      : "30%",
                 backgroundColor: sentimentColor(point.sentiment),
                 opacity: 0.7,
               }}
             />
-            <span className="text-[10px] text-muted-foreground">{point.time}</span>
+            <span className="text-[10px] text-muted-foreground">
+              {point.time}
+            </span>
           </div>
         ))}
       </div>
@@ -194,29 +224,35 @@ function ReviewDetail({ review }: { review: CallReview }) {
             const isVendeur = line.startsWith("Vendeur:");
             const isProspect = line.startsWith("Prospect:");
             return (
-              <div key={i} className={`mb-2 ${isVendeur ? "text-foreground" : isProspect ? "text-muted-foreground" : ""}`}>
-                {review.keywords.reduce(
-                  (acc, keyword) => {
-                    if (typeof acc === "string" && acc.toLowerCase().includes(keyword.toLowerCase())) {
-                      const parts = acc.split(new RegExp(`(${keyword})`, "gi"));
-                      return (
-                        <>
-                          {parts.map((part, j) =>
-                            part.toLowerCase() === keyword.toLowerCase() ? (
-                              <span key={j} className="bg-[#7af17a]/20 text-[#7af17a] px-0.5 rounded font-medium">
-                                {part}
-                              </span>
-                            ) : (
-                              part
-                            )
-                          )}
-                        </>
-                      );
-                    }
-                    return acc;
-                  },
-                  line as React.ReactNode
-                )}
+              <div
+                key={i}
+                className={`mb-2 ${isVendeur ? "text-foreground" : isProspect ? "text-muted-foreground" : ""}`}
+              >
+                {review.keywords.reduce((acc, keyword) => {
+                  if (
+                    typeof acc === "string" &&
+                    acc.toLowerCase().includes(keyword.toLowerCase())
+                  ) {
+                    const parts = acc.split(new RegExp(`(${keyword})`, "gi"));
+                    return (
+                      <>
+                        {parts.map((part, j) =>
+                          part.toLowerCase() === keyword.toLowerCase() ? (
+                            <span
+                              key={j}
+                              className="bg-[#7af17a]/20 text-[#7af17a] px-0.5 rounded font-medium"
+                            >
+                              {part}
+                            </span>
+                          ) : (
+                            part
+                          ),
+                        )}
+                      </>
+                    );
+                  }
+                  return acc;
+                }, line as React.ReactNode)}
               </div>
             );
           })}
@@ -241,7 +277,11 @@ function ReviewDetail({ review }: { review: CallReview }) {
           </h4>
           <div className="flex flex-wrap gap-2">
             {review.keywords.map((kw) => (
-              <Badge key={kw} variant="outline" className="border-[#7af17a]/30 text-[#7af17a]">
+              <Badge
+                key={kw}
+                variant="outline"
+                className="border-[#7af17a]/30 text-[#7af17a]"
+              >
                 {kw}
               </Badge>
             ))}
@@ -258,7 +298,10 @@ function ReviewDetail({ review }: { review: CallReview }) {
           </h4>
           <ul className="space-y-1">
             {analysis.objections.map((obj, i) => (
-              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+              <li
+                key={i}
+                className="text-sm text-muted-foreground flex items-start gap-2"
+              >
                 <span className="text-muted-foreground mt-1">•</span>
                 {obj}
               </li>
@@ -275,7 +318,10 @@ function ReviewDetail({ review }: { review: CallReview }) {
         </h4>
         <ul className="space-y-1">
           {analysis.keyMoments.map((moment, i) => (
-            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+            <li
+              key={i}
+              className="text-sm text-muted-foreground flex items-start gap-2"
+            >
               <span className="text-[#7af17a] mt-1">•</span>
               {moment}
             </li>
@@ -292,7 +338,10 @@ function ReviewDetail({ review }: { review: CallReview }) {
           </h4>
           <ul className="space-y-1">
             {review.strengths.map((s, i) => (
-              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+              <li
+                key={i}
+                className="text-sm text-muted-foreground flex items-start gap-2"
+              >
                 <span className="text-brand mt-1">+</span>
                 {s}
               </li>
@@ -306,7 +355,10 @@ function ReviewDetail({ review }: { review: CallReview }) {
           </h4>
           <ul className="space-y-1">
             {review.improvements.map((imp, i) => (
-              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+              <li
+                key={i}
+                className="text-sm text-muted-foreground flex items-start gap-2"
+              >
                 <span className="text-muted-foreground mt-1">-</span>
                 {imp}
               </li>
@@ -323,7 +375,10 @@ function ReviewDetail({ review }: { review: CallReview }) {
         </h4>
         <ul className="space-y-1">
           {analysis.recommendations.map((rec, i) => (
-            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+            <li
+              key={i}
+              className="text-sm text-muted-foreground flex items-start gap-2"
+            >
               <span className="text-[#7af17a] mt-1">{i + 1}.</span>
               {rec}
             </li>
@@ -403,7 +458,9 @@ export function ReviewsView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Score moyen</p>
-                <p className={`text-2xl font-bold ${scoreColor(stats.averageScore)}`}>
+                <p
+                  className={`text-2xl font-bold ${scoreColor(stats.averageScore)}`}
+                >
                   {stats.averageScore}/10
                 </p>
               </div>
@@ -418,7 +475,9 @@ export function ReviewsView({
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Mot-clé fréquent</p>
+                <p className="text-sm text-muted-foreground">
+                  Mot-clé fréquent
+                </p>
                 <p className="text-2xl font-bold text-[#7af17a]">
                   {stats.commonKeywords[0]?.keyword || "-"}
                 </p>
@@ -435,7 +494,9 @@ export function ReviewsView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Tendance</p>
-                <p className={`text-2xl font-bold ${trendValue >= 0 ? "text-brand" : "text-foreground"}`}>
+                <p
+                  className={`text-2xl font-bold ${trendValue >= 0 ? "text-brand" : "text-foreground"}`}
+                >
                   {trendValue >= 0 ? "+" : ""}
                   {trendValue.toFixed(1)}
                 </p>
@@ -449,7 +510,11 @@ export function ReviewsView({
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList>
           <TabsTrigger value="analyses">Analyses</TabsTrigger>
           <TabsTrigger value="nouveau">Nouveau transcript</TabsTrigger>
@@ -464,9 +529,12 @@ export function ReviewsView({
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <Mic className="h-6 w-6 text-muted-foreground/40" />
                 </div>
-                <p className="font-medium text-sm">Aucun appel analysé pour le moment</p>
+                <p className="font-medium text-sm">
+                  Aucun appel analysé pour le moment
+                </p>
                 <p className="text-xs mt-1">
-                  Collez un transcript dans l&apos;onglet &quot;Nouveau transcript&quot; pour commencer.
+                  Collez un transcript dans l&apos;onglet &quot;Nouveau
+                  transcript&quot; pour commencer.
                 </p>
               </CardContent>
             </Card>
@@ -478,7 +546,9 @@ export function ReviewsView({
                   <CardContent className="pt-6">
                     <button
                       className="w-full text-left"
-                      onClick={() => setExpandedId(isExpanded ? null : review.id)}
+                      onClick={() =>
+                        setExpandedId(isExpanded ? null : review.id)
+                      }
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -500,11 +570,14 @@ export function ReviewsView({
                                 {review.duration} min
                               </span>
                               <span>
-                                {new Date(review.createdAt).toLocaleDateString("fr-FR", {
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                })}
+                                {new Date(review.createdAt).toLocaleDateString(
+                                  "fr-FR",
+                                  {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  },
+                                )}
                               </span>
                             </div>
                           </div>
@@ -612,7 +685,9 @@ export function ReviewsView({
 
                 {/* Score breakdown */}
                 {analysisResult.aiAnalysis?.scoreBreakdown && (
-                  <ScoreBreakdownCard breakdown={analysisResult.aiAnalysis.scoreBreakdown} />
+                  <ScoreBreakdownCard
+                    breakdown={analysisResult.aiAnalysis.scoreBreakdown}
+                  />
                 )}
 
                 {/* Talk ratio */}
@@ -622,7 +697,9 @@ export function ReviewsView({
 
                 {/* Keywords */}
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-white">Mots-clés</h4>
+                  <h4 className="text-sm font-semibold text-white">
+                    Mots-clés
+                  </h4>
                   <div className="flex flex-wrap gap-2">
                     {analysisResult.keywords?.map((kw: string) => (
                       <Badge
@@ -644,15 +721,19 @@ export function ReviewsView({
                       Objections
                     </h4>
                     <ul className="space-y-1">
-                      {analysisResult.aiAnalysis.objections.map((obj: string, i: number) => (
-                        <li
-                          key={i}
-                          className="text-sm text-muted-foreground flex items-start gap-2"
-                        >
-                          <span className="text-muted-foreground mt-1">•</span>
-                          {obj}
-                        </li>
-                      ))}
+                      {analysisResult.aiAnalysis.objections.map(
+                        (obj: string, i: number) => (
+                          <li
+                            key={i}
+                            className="text-sm text-muted-foreground flex items-start gap-2"
+                          >
+                            <span className="text-muted-foreground mt-1">
+                              •
+                            </span>
+                            {obj}
+                          </li>
+                        ),
+                      )}
                     </ul>
                   </div>
                 )}
@@ -660,7 +741,9 @@ export function ReviewsView({
                 {/* Strengths & improvements */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-brand">Points forts</h4>
+                    <h4 className="text-sm font-semibold text-brand">
+                      Points forts
+                    </h4>
                     <ul className="space-y-1">
                       {analysisResult.strengths?.map((s: string, i: number) => (
                         <li
@@ -678,15 +761,19 @@ export function ReviewsView({
                       Axes d&apos;amélioration
                     </h4>
                     <ul className="space-y-1">
-                      {analysisResult.improvements?.map((imp: string, i: number) => (
-                        <li
-                          key={i}
-                          className="text-sm text-muted-foreground flex items-start gap-2"
-                        >
-                          <span className="text-muted-foreground mt-1">-</span>
-                          {imp}
-                        </li>
-                      ))}
+                      {analysisResult.improvements?.map(
+                        (imp: string, i: number) => (
+                          <li
+                            key={i}
+                            className="text-sm text-muted-foreground flex items-start gap-2"
+                          >
+                            <span className="text-muted-foreground mt-1">
+                              -
+                            </span>
+                            {imp}
+                          </li>
+                        ),
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -705,10 +792,12 @@ export function ReviewsView({
                             key={i}
                             className="text-sm text-muted-foreground flex items-start gap-2"
                           >
-                            <span className="text-[#7af17a] mt-1">{i + 1}.</span>
+                            <span className="text-[#7af17a] mt-1">
+                              {i + 1}.
+                            </span>
                             {rec}
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
@@ -742,7 +831,9 @@ export function ReviewsView({
                         borderRadius: "8px",
                       }}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      formatter={((value: number) => [`${value}/10`, "Score"]) as any}
+                      formatter={
+                        ((value: number) => [`${value}/10`, "Score"]) as any
+                      }
                     />
                     <Line
                       type="monotone"
@@ -790,9 +881,15 @@ export function ReviewsView({
                           borderRadius: "8px",
                         }}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        formatter={((value: number) => [value, "Occurrences"]) as any}
+                        formatter={
+                          ((value: number) => [value, "Occurrences"]) as any
+                        }
                       />
-                      <Bar dataKey="count" fill="hsl(var(--foreground))" radius={[0, 4, 4, 0]} />
+                      <Bar
+                        dataKey="count"
+                        fill="hsl(var(--foreground))"
+                        radius={[0, 4, 4, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -821,9 +918,15 @@ export function ReviewsView({
                           borderRadius: "8px",
                         }}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        formatter={((value: number) => [value, "Appels"]) as any}
+                        formatter={
+                          ((value: number) => [value, "Appels"]) as any
+                        }
                       />
-                      <Bar dataKey="count" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="count"
+                        fill="hsl(var(--muted-foreground))"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -851,7 +954,9 @@ export function ReviewsView({
                     </div>
                     <Progress
                       value={
-                        (trend.count / (stats.improvementTrends[0]?.count || 1)) * 100
+                        (trend.count /
+                          (stats.improvementTrends[0]?.count || 1)) *
+                        100
                       }
                       className="h-2"
                     />

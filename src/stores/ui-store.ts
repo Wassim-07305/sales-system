@@ -37,7 +37,8 @@ export const useUIStore = create<UIState>()(
       toggleMobileSidebar: () =>
         set((state) => ({ sidebarMobileOpen: !state.sidebarMobileOpen })),
       setMobileSidebarOpen: (open) => set({ sidebarMobileOpen: open }),
-      setNotificationsPanelOpen: (open) => set({ notificationsPanelOpen: open }),
+      setNotificationsPanelOpen: (open) =>
+        set({ notificationsPanelOpen: open }),
       setSearchOpen: (open) => set({ searchOpen: open }),
       setQuickNoteOpen: (open) => set({ quickNoteOpen: open }),
       setTheme: (theme) => set({ theme }),
@@ -48,6 +49,6 @@ export const useUIStore = create<UIState>()(
         sidebarCollapsed: state.sidebarCollapsed,
         theme: state.theme,
       }),
-    }
-  )
+    },
+  ),
 );

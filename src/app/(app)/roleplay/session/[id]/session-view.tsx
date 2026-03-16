@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { sendRoleplayMessage, endSession, getRoleplayFeedback } from "@/lib/actions/roleplay";
+import {
+  sendRoleplayMessage,
+  endSession,
+  getRoleplayFeedback,
+} from "@/lib/actions/roleplay";
 import { cn } from "@/lib/utils";
 import {
   Send,
@@ -70,7 +74,7 @@ const difficultyColors: Record<string, string> = {
 export function SessionView({ session }: Props) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(
-    Array.isArray(session.conversation) ? session.conversation : []
+    Array.isArray(session.conversation) ? session.conversation : [],
   );
   const [input, setInput] = useState("");
   const [isSending, startSending] = useTransition();
@@ -273,8 +277,8 @@ export function SessionView({ session }: Props) {
                 </div>
                 <p className="font-medium">La session a commencé !</p>
                 <p className="text-sm mt-1">
-                  Envoyez votre premier message pour démarrer la conversation avec{" "}
-                  {session.profile?.name || "le prospect"}.
+                  Envoyez votre premier message pour démarrer la conversation
+                  avec {session.profile?.name || "le prospect"}.
                 </p>
               </div>
             )}
@@ -291,7 +295,7 @@ export function SessionView({ session }: Props) {
                       "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
                       isUser
                         ? "bg-brand/10 text-brand"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     {isUser ? (
@@ -306,7 +310,7 @@ export function SessionView({ session }: Props) {
                         "inline-block rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                         isUser
                           ? "bg-brand-dark text-white rounded-br-md"
-                          : "bg-muted rounded-bl-md"
+                          : "bg-muted rounded-bl-md",
                       )}
                     >
                       {msg.content}
@@ -385,7 +389,7 @@ export function SessionView({ session }: Props) {
                     ? "text-brand border-brand/20 bg-brand/10"
                     : feedback.score >= 60
                       ? "text-muted-foreground border-border bg-muted/60"
-                      : "text-foreground border-border bg-foreground/10"
+                      : "text-foreground border-border bg-foreground/10",
                 )}
               >
                 <span className="text-xl font-bold">{feedback.score}</span>

@@ -5,7 +5,9 @@ import { AiModesView } from "./ai-modes-view";
 
 export default async function AiModesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase

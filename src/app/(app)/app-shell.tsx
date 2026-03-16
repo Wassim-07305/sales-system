@@ -13,8 +13,11 @@ import dynamic from "next/dynamic";
 import type { UserRole } from "@/lib/types/database";
 
 const AiCoachWidget = dynamic(
-  () => import("@/components/ai-coach-widget").then((m) => ({ default: m.AiCoachWidget })),
-  { ssr: false }
+  () =>
+    import("@/components/ai-coach-widget").then((m) => ({
+      default: m.AiCoachWidget,
+    })),
+  { ssr: false },
 );
 
 export interface WhiteLabelConfig {
@@ -73,7 +76,12 @@ export function AppShell({
       )}
       <div className="flex h-dvh overflow-hidden bg-background">
         {/* Sidebar */}
-        <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} whiteLabelConfig={wl} />
+        <Sidebar
+          role={role}
+          userName={userName}
+          avatarUrl={avatarUrl}
+          whiteLabelConfig={wl}
+        />
 
         {/* Main area */}
         <div className="flex min-w-0 flex-1 flex-col">

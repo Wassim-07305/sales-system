@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   if (!dsn || !apiKey) {
     return NextResponse.json(
       { error: "Unipile non configuré" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: "Corps de requête invalide" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -43,16 +43,13 @@ export async function POST(req: NextRequest) {
   if (!chatId || !text || !text.trim()) {
     return NextResponse.json(
       { error: "chatId et text requis" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   // Sanitize chatId — only allow alphanumeric, hyphens, underscores
   if (!/^[\w-]+$/.test(chatId)) {
-    return NextResponse.json(
-      { error: "chatId invalide" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "chatId invalide" }, { status: 400 });
   }
 
   const controller = new AbortController();
@@ -75,7 +72,7 @@ export async function POST(req: NextRequest) {
       const errorText = await res.text().catch(() => "Unknown error");
       return NextResponse.json(
         { error: `Erreur envoi: ${errorText}` },
-        { status: res.status }
+        { status: res.status },
       );
     }
 
@@ -86,12 +83,12 @@ export async function POST(req: NextRequest) {
     if ((err as Error).name === "AbortError") {
       return NextResponse.json(
         { error: "Timeout — le service de messagerie ne répond pas" },
-        { status: 504 }
+        { status: 504 },
       );
     }
     return NextResponse.json(
       { error: "Erreur de connexion au service de messagerie" },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }

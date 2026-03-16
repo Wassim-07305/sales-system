@@ -13,6 +13,7 @@
 ### Task 1: Creer la structure de dossiers
 
 **Files:**
+
 - Create: `briques/skool/` (directory structure)
 
 **Step 1: Creer l'arborescence**
@@ -38,6 +39,7 @@ git commit -m "chore: init brique skool — structure dossiers"
 ### Task 2: Migration SQL autonome
 
 **Files:**
+
 - Create: `briques/skool/migration.sql`
 
 **Step 1: Ecrire la migration**
@@ -194,6 +196,7 @@ git commit -m "feat(skool): migration SQL autonome — tables + RLS + storage"
 ### Task 3: Types TypeScript
 
 **Files:**
+
 - Create: `briques/skool/types.ts`
 
 **Step 1: Extraire les types academy**
@@ -262,6 +265,7 @@ git commit -m "feat(skool): types TypeScript — Course, Module, Lesson, Progres
 ### Task 4: Server actions — Admin CRUD
 
 **Files:**
+
 - Create: `briques/skool/actions/academy-admin.ts`
 
 **Step 1: Copier tel quel**
@@ -280,11 +284,13 @@ git commit -m "feat(skool): server actions admin CRUD — courses, modules, leco
 ### Task 5: Server actions — Student (nettoyage)
 
 **Files:**
+
 - Create: `briques/skool/actions/academy.ts`
 
 **Step 1: Copier et nettoyer**
 
 Copier `src/lib/actions/academy.ts` en retirant les fonctions :
+
 - `getCourseWithPrerequisites()` — prerequis, exclu
 - `submitQuizAttempt()` — quiz, exclu
 - `getQuizAttempts()` — quiz, exclu
@@ -293,17 +299,20 @@ Copier `src/lib/actions/academy.ts` en retirant les fonctions :
 - `aiCorrectExercise()` — AI stub, exclu
 
 Garder uniquement :
+
 - `getCoursesWithModules()` — grille formations
 - `getCourseDetail()` — detail cours (RETIRER quizMap et prerequisites du retour)
 - `markLessonComplete()` — progression manuelle
 - `trackVideoProgress()` — auto-completion 80%
 
 Pour `getCourseDetail()`, simplifier en retirant :
+
 - Le fetch des quizzes
 - Le fetch des prerequisites
 - Les champs `quizMap`, `prerequisites`, `allPrereqsMet` du retour
 
 Le retour simplifie de `getCourseDetail()` :
+
 ```typescript
 return {
   course: { ...course, modules },
@@ -323,6 +332,7 @@ git commit -m "feat(skool): server actions student — cours, progression, video
 ### Task 6: Composant FileUpload
 
 **Files:**
+
 - Create: `briques/skool/components/file-upload.tsx`
 
 **Step 1: Copier tel quel**
@@ -341,6 +351,7 @@ git commit -m "feat(skool): composant FileUpload — drag-drop Supabase Storage"
 ### Task 7: Pages Student — Grille des formations
 
 **Files:**
+
 - Create: `briques/skool/app/page.tsx`
 - Create: `briques/skool/app/course-grid.tsx`
 
@@ -353,6 +364,7 @@ Copier `src/app/(app)/academy/page.tsx` tel quel. Pas de dependance quiz/library
 Copier `src/app/(app)/academy/course-grid.tsx` tel quel. Ajouter le composant `PageHeader` inline dans le fichier (3 lignes) pour eviter une dependance externe :
 
 Ajouter en haut du fichier (apres les imports) :
+
 ```typescript
 // Inline PageHeader — adaptez selon votre layout
 function PageHeader({ title, description, children }: {
@@ -384,17 +396,20 @@ git commit -m "feat(skool): pages student — grille formations avec filtres"
 ### Task 8: Pages Student — Lecteur de cours
 
 **Files:**
+
 - Create: `briques/skool/app/[courseId]/page.tsx`
 - Create: `briques/skool/app/[courseId]/course-view.tsx`
 
 **Step 1: Copier et nettoyer page.tsx**
 
 Copier `src/app/(app)/academy/[courseId]/page.tsx` en retirant TOUT le code quiz :
+
 - Supprimer `lessonIdsWithQuiz`, `quizAttempts`, le if-block qui fetch `quiz_attempts`
 - Retirer les props `quizMap`, `prerequisites`, `allPrereqsMet`, `quizAttempts` du JSX CourseView
 - Adapter au nouveau retour de `getCourseDetail()` qui ne renvoie plus `quizMap`/`prerequisites`/`allPrereqsMet`
 
 Le page.tsx simplifie :
+
 ```tsx
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
@@ -408,7 +423,9 @@ export default async function CoursePage({
 }) {
   const { courseId } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const result = await getCourseDetail(courseId);
@@ -427,6 +444,7 @@ export default async function CoursePage({
 **Step 2: Copier et nettoyer course-view.tsx**
 
 Copier `src/app/(app)/academy/[courseId]/course-view.tsx` en retirant :
+
 - Les imports `submitQuizAttempt`
 - L'interface `PrerequisiteInfo` et `QuizAttemptInfo`
 - Les props `quizMap`, `prerequisites`, `allPrereqsMet`, `quizAttempts` de `CourseViewProps`
@@ -452,6 +470,7 @@ git commit -m "feat(skool): pages student — lecteur de cours (video, sidebar, 
 ### Task 9: Pages Admin — Liste des formations
 
 **Files:**
+
 - Create: `briques/skool/app/admin/page.tsx`
 - Create: `briques/skool/app/admin/course-list.tsx`
 - Create: `briques/skool/app/admin/course-form-dialog.tsx`
@@ -474,6 +493,7 @@ git commit -m "feat(skool): pages admin — liste formations, CRUD, publish togg
 ### Task 10: Pages Admin — Editeur de cours
 
 **Files:**
+
 - Create: `briques/skool/app/admin/[courseId]/page.tsx`
 - Create: `briques/skool/app/admin/[courseId]/course-editor.tsx`
 - Create: `briques/skool/app/admin/[courseId]/module-form-dialog.tsx`
@@ -495,11 +515,13 @@ git commit -m "feat(skool): pages admin — editeur cours, DnD modules/lecons"
 ### Task 11: README d'installation
 
 **Files:**
+
 - Create: `briques/skool/README.md`
 
 **Step 1: Ecrire le README**
 
 Le README doit expliquer :
+
 1. Ce que fait la brique
 2. Les prerequis (stack, packages, table profiles)
 3. Les 3 etapes d'installation (SQL, copie fichiers, verif imports)
@@ -522,6 +544,7 @@ git commit -m "docs(skool): README installation — guide 3 etapes"
 Run: `find briques/skool -type f | sort`
 
 Expected: 15 fichiers au total :
+
 ```
 briques/skool/README.md
 briques/skool/migration.sql
@@ -553,6 +576,7 @@ Expected: aucun resultat (0 fichiers)
 Run: `grep -r "from \"@/" briques/skool/ --include="*.ts" --include="*.tsx" -n`
 
 Les imports autorises :
+
 - `@/lib/supabase/server` et `@/lib/supabase/client`
 - `@/lib/actions/academy` et `@/lib/actions/academy-admin`
 - `@/lib/types/database` (uniquement dans admin/[courseId]/page.tsx et course-editor.tsx)

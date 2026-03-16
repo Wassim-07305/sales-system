@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     try {
       const userInfoResponse = await fetch(
         "https://www.googleapis.com/oauth2/v2/userinfo",
-        { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+        { headers: { Authorization: `Bearer ${tokens.access_token}` } },
       );
       if (userInfoResponse.ok) {
         const userInfo = await userInfoResponse.json();
@@ -66,7 +66,9 @@ export async function GET(request: NextRequest) {
 
     // Stocker les tokens dans user_settings
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       redirectUrl.searchParams.set("error", "not_authenticated");
@@ -85,7 +87,7 @@ export async function GET(request: NextRequest) {
         },
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "user_id,key" }
+      { onConflict: "user_id,key" },
     );
 
     redirectUrl.searchParams.set("connected", "true");

@@ -150,11 +150,11 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
 
   // Competitors state
   const [competitors, setCompetitors] = useState(initialCompetitors);
-  const [analyses, setAnalyses] = useState<
-    Record<string, CompetitorAnalysis>
-  >({});
+  const [analyses, setAnalyses] = useState<Record<string, CompetitorAnalysis>>(
+    {},
+  );
   const [expandedCompetitor, setExpandedCompetitor] = useState<string | null>(
-    null
+    null,
   );
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -326,7 +326,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                               <span className="text-brand mt-0.5">•</span>
                               {c}
                             </li>
-                          )
+                          ),
                         )}
                       </ul>
                     </div>
@@ -370,7 +370,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                               <span className="text-brand mt-0.5">•</span>
                               {c}
                             </li>
-                          )
+                          ),
                         )}
                       </ul>
                     </div>
@@ -564,14 +564,18 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                   Aucun concurrent ajouté
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Cliquez sur &quot;Ajouter un concurrent&quot; pour commencer votre veille concurrentielle.
+                  Cliquez sur &quot;Ajouter un concurrent&quot; pour commencer
+                  votre veille concurrentielle.
                 </p>
               </CardContent>
             </Card>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {competitors.map((comp) => (
-              <Card key={comp.id} className="flex flex-col shadow-sm rounded-2xl">
+              <Card
+                key={comp.id}
+                className="flex flex-col shadow-sm rounded-2xl"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
@@ -635,7 +639,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                         variant="ghost"
                         onClick={() =>
                           setExpandedCompetitor(
-                            expandedCompetitor === comp.id ? null : comp.id
+                            expandedCompetitor === comp.id ? null : comp.id,
                           )
                         }
                       >
@@ -739,9 +743,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
           {/* Comparison table */}
           <Card className="shadow-sm rounded-2xl overflow-hidden">
             <CardHeader>
-              <CardTitle className="text-base">
-                Tableau comparatif
-              </CardTitle>
+              <CardTitle className="text-base">Tableau comparatif</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -755,10 +757,11 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                 </TableHeader>
                 <TableBody>
                   {competitors.map((comp) => (
-                    <TableRow key={comp.id} className="hover:bg-secondary/50 transition-colors">
-                      <TableCell className="font-medium">
-                        {comp.name}
-                      </TableCell>
+                    <TableRow
+                      key={comp.id}
+                      className="hover:bg-secondary/50 transition-colors"
+                    >
+                      <TableCell className="font-medium">{comp.name}</TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-[200px]">
                         {comp.strengths}
                       </TableCell>
@@ -787,9 +790,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                   <TrendingUp className="size-8 text-brand" />
                 </div>
                 <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold">
-                    Insights Marché
-                  </h3>
+                  <h3 className="text-lg font-semibold">Insights Marché</h3>
                   <p className="text-muted-foreground text-sm max-w-md">
                     L&apos;IA analyse vos données de deals pour identifier les
                     tendances du marché, les opportunités et les risques.

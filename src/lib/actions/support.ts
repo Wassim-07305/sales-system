@@ -5,11 +5,13 @@ import { revalidatePath } from "next/cache";
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
-function isTableMissing(error: { message?: string; code?: string } | null): boolean {
+function isTableMissing(
+  error: { message?: string; code?: string } | null,
+): boolean {
   if (!error) return false;
   const msg = (error.message || "").toLowerCase();
   return (
-    msg.includes("relation") && msg.includes("does not exist") ||
+    (msg.includes("relation") && msg.includes("does not exist")) ||
     error.code === "42P01"
   );
 }
@@ -158,10 +160,7 @@ export async function addTicketReply(ticketId: string, message: string) {
   return { success: true };
 }
 
-export async function updateTicketStatus(
-  ticketId: string,
-  status: string
-) {
+export async function updateTicketStatus(ticketId: string, status: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -235,7 +234,7 @@ export async function getSlaStatus(ticket: {
 
   // Find first support response time
   const firstSupportMsg = (ticket.messages || []).find(
-    (m) => m.sender_type === "support"
+    (m) => m.sender_type === "support",
   );
   const firstResponseAt = firstSupportMsg
     ? new Date(firstSupportMsg.created_at)
@@ -243,7 +242,7 @@ export async function getSlaStatus(ticket: {
 
   // Response SLA
   const responseDeadline = new Date(
-    createdAt.getTime() + config.firstResponse * 60 * 60 * 1000
+    createdAt.getTime() + config.firstResponse * 60 * 60 * 1000,
   );
   let responseStatus: "ok" | "warning" | "breached";
   let responseTimeLeft: string;
@@ -276,7 +275,7 @@ export async function getSlaStatus(ticket: {
 
   // Resolution SLA
   const resolutionDeadline = new Date(
-    createdAt.getTime() + config.resolution * 60 * 60 * 1000
+    createdAt.getTime() + config.resolution * 60 * 60 * 1000,
   );
   let resolutionStatus: "ok" | "warning" | "breached";
   let resolutionTimeLeft: string;
@@ -316,7 +315,8 @@ function formatDuration(ms: number): string {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
-  if (hours > 0 && minutes > 0) return `${hours}h${String(minutes).padStart(2, "0")}`;
+  if (hours > 0 && minutes > 0)
+    return `${hours}h${String(minutes).padStart(2, "0")}`;
   if (hours > 0) return `${hours}h`;
   return `${minutes}min`;
 }
@@ -357,10 +357,18 @@ export async function getSlaMetrics() {
   const ticketsWithMessages = data.map((t: Record<string, unknown>) => ({
     ...t,
     priority: t.priority as "low" | "medium" | "high" | "urgent",
-    status: t.status as "open" | "in_progress" | "waiting" | "resolved" | "closed",
+    status: t.status as
+      | "open"
+      | "in_progress"
+      | "waiting"
+      | "resolved"
+      | "closed",
     created_at: t.created_at as string,
     updated_at: t.updated_at as string,
-    messages: (t.support_ticket_messages || []) as { sender_type: string; created_at: string }[],
+    messages: (t.support_ticket_messages || []) as {
+      sender_type: string;
+      created_at: string;
+    }[],
   }));
 
   const slaConfig = await getSlaConfig();
@@ -374,14 +382,14 @@ export async function getSlaMetrics() {
     const config = slaConfig[ticket.priority];
     const createdAt = new Date(ticket.created_at);
     const responseDeadline = new Date(
-      createdAt.getTime() + config.firstResponse * 60 * 60 * 1000
+      createdAt.getTime() + config.firstResponse * 60 * 60 * 1000,
     );
     const resolutionDeadline = new Date(
-      createdAt.getTime() + config.resolution * 60 * 60 * 1000
+      createdAt.getTime() + config.resolution * 60 * 60 * 1000,
     );
 
     const firstSupportMsg = (ticket.messages || []).find(
-      (m) => m.sender_type === "support"
+      (m) => m.sender_type === "support",
     );
 
     // Check response breach
@@ -414,14 +422,12 @@ export async function getSlaMetrics() {
       ? Math.round(
           ((ticketsWithMessages.length - breachedCount) /
             ticketsWithMessages.length) *
-            100
+            100,
         )
       : 100;
 
   const avgResponseTime =
-    responseCount > 0
-      ? formatDuration(totalResponseMs / responseCount)
-      : "—";
+    responseCount > 0 ? formatDuration(totalResponseMs / responseCount) : "—";
 
   const avgResolutionTime =
     resolutionCount > 0
@@ -445,7 +451,12 @@ export async function getTicketStats() {
     return { open: 0, in_progress: 0, resolved: 0, avg_resolution_hours: 0 };
   }
 
-  const emptyStats = { open: 0, in_progress: 0, resolved: 0, avg_resolution_hours: 0 };
+  const emptyStats = {
+    open: 0,
+    in_progress: 0,
+    resolved: 0,
+    avg_resolution_hours: 0,
+  };
 
   const { data, error } = await supabase
     .from("support_tickets")
@@ -462,11 +473,11 @@ export async function getTicketStats() {
   const open = data.filter((t) => t.status === "open").length;
   const in_progress = data.filter((t) => t.status === "in_progress").length;
   const resolved = data.filter(
-    (t) => t.status === "resolved" || t.status === "closed"
+    (t) => t.status === "resolved" || t.status === "closed",
   ).length;
 
   const resolvedTickets = data.filter(
-    (t) => t.status === "resolved" || t.status === "closed"
+    (t) => t.status === "resolved" || t.status === "closed",
   );
   const totalHours = resolvedTickets.reduce((sum, t) => {
     const diff =

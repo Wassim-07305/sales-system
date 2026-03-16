@@ -6,7 +6,13 @@ export interface Achievement {
   icon: string;
   /** Hex colour for the icon */
   color: string;
-  category: "deals" | "appels" | "prospection" | "streaks" | "social" | "hidden";
+  category:
+    | "deals"
+    | "appels"
+    | "prospection"
+    | "streaks"
+    | "social"
+    | "hidden";
   tier: "bronze" | "silver" | "gold" | "platinum";
   /** Human-readable requirement description */
   requirement: string;

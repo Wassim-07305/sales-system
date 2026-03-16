@@ -138,7 +138,9 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
   const [segments] = useState<Segment[]>(initialSegments);
   const [stats] = useState<SegmentStats>(initialStats);
   const [expandedSegment, setExpandedSegment] = useState<string | null>(null);
-  const [segmentProspects, setSegmentProspects] = useState<Record<string, Prospect[]>>({});
+  const [segmentProspects, setSegmentProspects] = useState<
+    Record<string, Prospect[]>
+  >({});
   const [loadingProspects, setLoadingProspects] = useState<string | null>(null);
 
   // Dialog state
@@ -175,14 +177,17 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
     setFormFilters(
       segment.filters.length > 0
         ? segment.filters
-        : [{ field: "status", operator: "eq", value: "" }]
+        : [{ field: "status", operator: "eq", value: "" }],
     );
     setFormColor(segment.color);
     setDialogOpen(true);
   }
 
   function addFilterRow() {
-    setFormFilters([...formFilters, { field: "status", operator: "eq", value: "" }]);
+    setFormFilters([
+      ...formFilters,
+      { field: "status", operator: "eq", value: "" },
+    ]);
   }
 
   function removeFilterRow(index: number) {
@@ -228,7 +233,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
         router.refresh();
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Erreur lors de la sauvegarde"
+          err instanceof Error ? err.message : "Erreur lors de la sauvegarde",
         );
       }
     });
@@ -242,7 +247,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
         router.refresh();
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : "Erreur lors de la suppression"
+          err instanceof Error ? err.message : "Erreur lors de la suppression",
         );
       }
     });
@@ -295,7 +300,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
       >
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate} className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium">
+            <Button
+              onClick={openCreate}
+              className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nouveau segment
             </Button>
@@ -306,7 +314,8 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                 {editingSegment ? "Modifier le segment" : "Creer un segment"}
               </DialogTitle>
               <DialogDescription>
-                Definissez les criteres pour regrouper automatiquement vos prospects.
+                Definissez les criteres pour regrouper automatiquement vos
+                prospects.
               </DialogDescription>
             </DialogHeader>
 
@@ -376,7 +385,9 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                     <div key={index} className="flex gap-2 items-center">
                       <Select
                         value={filter.field}
-                        onValueChange={(val) => updateFilter(index, "field", val)}
+                        onValueChange={(val) =>
+                          updateFilter(index, "field", val)
+                        }
                       >
                         <SelectTrigger className="w-[140px] h-11 rounded-xl">
                           <SelectValue />
@@ -392,7 +403,9 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
 
                       <Select
                         value={filter.operator}
-                        onValueChange={(val) => updateFilter(index, "operator", val)}
+                        onValueChange={(val) =>
+                          updateFilter(index, "operator", val)
+                        }
                       >
                         <SelectTrigger className="w-[140px] h-11 rounded-xl">
                           <SelectValue />
@@ -410,7 +423,9 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                         className="flex-1 h-11 rounded-xl"
                         placeholder="Valeur..."
                         value={filter.value}
-                        onChange={(e) => updateFilter(index, "value", e.target.value)}
+                        onChange={(e) =>
+                          updateFilter(index, "value", e.target.value)
+                        }
                       />
 
                       {formFilters.length > 1 && (
@@ -511,7 +526,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
           const isLoading = loadingProspects === segment.id;
 
           return (
-            <Card key={segment.id} className="overflow-hidden shadow-sm rounded-2xl">
+            <Card
+              key={segment.id}
+              className="overflow-hidden shadow-sm rounded-2xl"
+            >
               {/* Color indicator bar */}
               <div className="h-1" style={{ backgroundColor: segment.color }} />
 
@@ -569,12 +587,12 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                 {segment.filters.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {segment.filters.map((f, i) => {
-                      const fieldLabel = FILTER_FIELDS.find(
-                        (ff) => ff.value === f.field
-                      )?.label || f.field;
-                      const opLabel = FILTER_OPERATORS.find(
-                        (o) => o.value === f.operator
-                      )?.label || f.operator;
+                      const fieldLabel =
+                        FILTER_FIELDS.find((ff) => ff.value === f.field)
+                          ?.label || f.field;
+                      const opLabel =
+                        FILTER_OPERATORS.find((o) => o.value === f.operator)
+                          ?.label || f.operator;
                       return (
                         <Badge
                           key={i}
@@ -631,7 +649,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                               {prospect.company ? ` - ${prospect.company}` : ""}
                             </p>
                           </div>
-                          <Badge variant="outline" className="text-[10px] ml-2 flex-shrink-0">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] ml-2 flex-shrink-0"
+                          >
                             {STATUS_LABELS[prospect.status] || prospect.status}
                           </Badge>
                         </div>
@@ -656,11 +677,10 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
               <Filter className="h-7 w-7 text-muted-foreground/50" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">
-              Aucun segment créé
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">Aucun segment créé</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Créez votre premier segment pour organiser vos prospects en groupes ciblés.
+              Créez votre premier segment pour organiser vos prospects en
+              groupes ciblés.
             </p>
             <Button
               onClick={openCreate}

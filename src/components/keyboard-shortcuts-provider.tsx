@@ -130,7 +130,13 @@ export function KeyboardShortcutsProvider({
         }
       }
     },
-    [router, setSearchOpen, setQuickNoteOpen, toggleSidebar, setNotificationsPanelOpen]
+    [
+      router,
+      setSearchOpen,
+      setQuickNoteOpen,
+      toggleSidebar,
+      setNotificationsPanelOpen,
+    ],
   );
 
   useEffect(() => {
@@ -141,10 +147,7 @@ export function KeyboardShortcutsProvider({
   return (
     <>
       {children}
-      <QuickNoteModal
-        open={quickNoteOpen}
-        onOpenChange={setQuickNoteOpen}
-      />
+      <QuickNoteModal open={quickNoteOpen} onOpenChange={setQuickNoteOpen} />
     </>
   );
 }

@@ -23,7 +23,11 @@ interface ModuleFormDialogProps {
   onOpenChange: (open: boolean) => void;
   courseId: string;
   module?: { id: string; title: string; description: string | null } | null;
-  onSaved: (module: { id: string; title: string; description: string | null }) => void;
+  onSaved: (module: {
+    id: string;
+    title: string;
+    description: string | null;
+  }) => void;
 }
 
 export function ModuleFormDialog({
@@ -88,7 +92,7 @@ export function ModuleFormDialog({
       toast.error(
         isEditing
           ? "Erreur lors de la mise a jour du module"
-          : "Erreur lors de la creation du module"
+          : "Erreur lors de la creation du module",
       );
     } finally {
       setSaving(false);

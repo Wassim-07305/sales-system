@@ -51,7 +51,12 @@ interface Props {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function ThreadView({ post, comments, userId, reputations = {} }: Props) {
+export function ThreadView({
+  post,
+  comments,
+  userId,
+  reputations = {},
+}: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [liked, setLiked] = useState(false);
@@ -102,9 +107,10 @@ export function ThreadView({ post, comments, userId, reputations = {} }: Props) 
                 <p className="font-medium">
                   {post.author?.full_name || "Anonyme"}
                 </p>
-                {post.author?.id && reputations[post.author.id] !== undefined && (
-                  <ReputationBadge score={reputations[post.author.id]} />
-                )}
+                {post.author?.id &&
+                  reputations[post.author.id] !== undefined && (
+                    <ReputationBadge score={reputations[post.author.id]} />
+                  )}
               </div>
               <p className="text-xs text-muted-foreground">
                 {format(new Date(post.created_at), "d MMMM yyyy 'à' HH:mm", {
@@ -132,12 +138,12 @@ export function ThreadView({ post, comments, userId, reputations = {} }: Props) 
             <button
               onClick={handleLike}
               className={`flex items-center gap-1.5 text-sm transition-colors ${
-                liked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+                liked
+                  ? "text-red-500"
+                  : "text-muted-foreground hover:text-red-500"
               }`}
             >
-              <Heart
-                className={`h-4 w-4 ${liked ? "fill-red-500" : ""}`}
-              />
+              <Heart className={`h-4 w-4 ${liked ? "fill-red-500" : ""}`} />
               {post.likes_count + (liked ? 1 : 0)}
             </button>
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">

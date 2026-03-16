@@ -19,10 +19,12 @@ async function getUnipileInstagramAccountId(): Promise<string | null> {
     const client = getUnipileClient();
     if (!client) return null;
     const response = await client.account.getAll();
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
-    const instaAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
-      (a) => (a.type || a.provider || "").toUpperCase() === "INSTAGRAM"
-    );
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
+    const instaAccount = (
+      items as Array<{ id: string; type?: string; provider?: string }>
+    ).find((a) => (a.type || a.provider || "").toUpperCase() === "INSTAGRAM");
     return instaAccount?.id || null;
   } catch {
     return null;
@@ -30,7 +32,10 @@ async function getUnipileInstagramAccountId(): Promise<string | null> {
 }
 
 /** Resolve the Instagram access token: env var → user_settings row → null */
-async function resolveToken(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
+async function resolveToken(
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createClient>>,
+) {
   // 1. Org-level / env-level token (shared / app-wide)
   const envToken = await getApiKey("INSTAGRAM_ACCESS_TOKEN");
   if (envToken) return envToken;
@@ -62,7 +67,9 @@ export async function connectInstagramAccount(accessToken: string) {
 
   // Validate token against the Graph API
   try {
-    const res = await fetch(`${GRAPH_API_BASE}/me?fields=id,username&access_token=${accessToken}`);
+    const res = await fetch(
+      `${GRAPH_API_BASE}/me?fields=id,username&access_token=${accessToken}`,
+    );
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       return {
@@ -148,12 +155,25 @@ export async function getInstagramProfile(username: string) {
           account_id: unipileAccountId,
           identifier: username,
         });
-        const p = response as { id?: string; first_name?: string; last_name?: string; username?: string; biography?: string; followers_count?: number; following_count?: number; media_count?: number; profile_picture_url?: string };
+        const p = response as {
+          id?: string;
+          first_name?: string;
+          last_name?: string;
+          username?: string;
+          biography?: string;
+          followers_count?: number;
+          following_count?: number;
+          media_count?: number;
+          profile_picture_url?: string;
+        };
         if (p.username || p.first_name) {
           return {
             data: {
               username: p.username || username,
-              name: [p.first_name, p.last_name].filter(Boolean).join(" ") || p.username || username,
+              name:
+                [p.first_name, p.last_name].filter(Boolean).join(" ") ||
+                p.username ||
+                username,
               biography: p.biography || null,
               followers_count: p.followers_count ?? null,
               follows_count: p.following_count ?? null,
@@ -174,12 +194,14 @@ export async function getInstagramProfile(username: string) {
     try {
       // The Instagram Graph API requires the user's IG User ID for business discovery.
       const res = await fetch(
-        `${GRAPH_API_BASE}/me?fields=business_discovery.fields(username,name,biography,follows_count,followers_count,media_count,profile_picture_url).username(${encodeURIComponent(username)})&access_token=${token}`
+        `${GRAPH_API_BASE}/me?fields=business_discovery.fields(username,name,biography,follows_count,followers_count,media_count,profile_picture_url).username(${encodeURIComponent(username)})&access_token=${token}`,
       );
 
       if (res.ok) {
         const json = (await res.json()) as Record<string, unknown>;
-        const discovery = json.business_discovery as Record<string, unknown> | undefined;
+        const discovery = json.business_discovery as
+          | Record<string, unknown>
+          | undefined;
         if (discovery) {
           return {
             data: {
@@ -218,7 +240,7 @@ export async function getInstagramProfile(username: string) {
 
     const apifyResults = await callApifyActor<ApifyInstagramProfile>(
       "apify/instagram-profile-scraper",
-      { usernames: [username] }
+      { usernames: [username] },
     );
 
     if (apifyResults && apifyResults.length > 0) {
@@ -269,7 +291,8 @@ export async function getInstagramProfile(username: string) {
 
   return {
     data: null,
-    error: "Profil Instagram introuvable. Configurez l'API Instagram dans Paramètres ou vérifiez le nom d'utilisateur.",
+    error:
+      "Profil Instagram introuvable. Configurez l'API Instagram dans Paramètres ou vérifiez le nom d'utilisateur.",
   };
 }
 
@@ -330,7 +353,7 @@ export async function sendInstagramDM(recipientId: string, message: string) {
             messaging_type: "MESSAGE_TAG",
             tag: "HUMAN_AGENT",
           }),
-        }
+        },
       );
 
       if (res.ok) {
@@ -409,24 +432,41 @@ export async function getInstagramConversations() {
           account_id: unipileAccountId,
           limit: 50,
         });
-        const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
-        const conversations = (items as Array<{
-          id: string;
-          attendees?: Array<{ display_name?: string; id?: string }>;
-          last_message?: { text?: string; timestamp?: string };
-          unread_count?: number;
-        }>).map((chat) => ({
+        const items = Array.isArray(response)
+          ? response
+          : (response as { items?: unknown[] }).items || [];
+        const conversations = (
+          items as Array<{
+            id: string;
+            attendees?: Array<{ display_name?: string; id?: string }>;
+            last_message?: { text?: string; timestamp?: string };
+            unread_count?: number;
+          }>
+        ).map((chat) => ({
           id: chat.id,
-          participants: (chat.attendees || []).map((a) => ({ id: a.id || "", name: a.display_name || "" })),
+          participants: (chat.attendees || []).map((a) => ({
+            id: a.id || "",
+            name: a.display_name || "",
+          })),
           messages: chat.last_message
-            ? [{ id: chat.id, message: chat.last_message.text || "", from: { id: "", name: "" }, created_time: chat.last_message.timestamp || "" }]
+            ? [
+                {
+                  id: chat.id,
+                  message: chat.last_message.text || "",
+                  from: { id: "", name: "" },
+                  created_time: chat.last_message.timestamp || "",
+                },
+              ]
             : [],
           source: "unipile" as const,
         }));
         return { data: conversations };
       }
     } catch (err) {
-      console.error("Unipile Instagram conversations error, falling back:", err);
+      console.error(
+        "Unipile Instagram conversations error, falling back:",
+        err,
+      );
     }
   }
 
@@ -434,7 +474,7 @@ export async function getInstagramConversations() {
   if (token && pageId) {
     try {
       const res = await fetch(
-        `https://graph.facebook.com/v21.0/${pageId}/conversations?platform=instagram&fields=participants,messages{message,from,created_time}&access_token=${token}`
+        `https://graph.facebook.com/v21.0/${pageId}/conversations?platform=instagram&fields=participants,messages{message,from,created_time}&access_token=${token}`,
       );
 
       if (res.ok) {
@@ -442,7 +482,14 @@ export async function getInstagramConversations() {
           data: Array<{
             id: string;
             participants: { data: Array<{ id: string; name: string }> };
-            messages: { data: Array<{ id: string; message: string; from: { id: string; name: string }; created_time: string }> };
+            messages: {
+              data: Array<{
+                id: string;
+                message: string;
+                from: { id: string; name: string };
+                created_time: string;
+              }>;
+            };
           }>;
         };
 
@@ -517,7 +564,7 @@ export async function getInstagramConversations() {
   const conversations = Object.values(grouped).sort(
     (a, b) =>
       new Date(b.last_message_at).getTime() -
-      new Date(a.last_message_at).getTime()
+      new Date(a.last_message_at).getTime(),
   );
 
   return {

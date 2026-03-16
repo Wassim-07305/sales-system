@@ -74,7 +74,9 @@ const DEFAULT_SETTINGS: ModerationSettings = {
 
 export async function getModerationSettings(): Promise<ModerationSettings> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Get auto_moderation settings
@@ -104,10 +106,12 @@ export async function getModerationSettings(): Promise<ModerationSettings> {
 }
 
 export async function updateModerationSettings(
-  settings: ModerationSettings
+  settings: ModerationSettings,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const settingValue = {
@@ -119,21 +123,28 @@ export async function updateModerationSettings(
     spam_filter: true,
   };
 
-  const { error } = await supabase
-    .from("moderation_settings")
-    .upsert({
+  const { error } = await supabase.from("moderation_settings").upsert(
+    {
       setting_key: "auto_moderation",
       setting_value: settingValue,
       updated_by: user.id,
       updated_at: new Date().toISOString(),
-    }, { onConflict: "setting_key" });
+    },
+    { onConflict: "setting_key" },
+  );
 
   if (error) {
     console.error("Error updating moderation settings:", error);
     throw new Error("Erreur lors de la mise a jour des parametres");
   }
 
-  await logModerationAction(user.id, "settings_update", "report", "settings", "Parametres de moderation mis a jour");
+  await logModerationAction(
+    user.id,
+    "settings_update",
+    "report",
+    "settings",
+    "Parametres de moderation mis a jour",
+  );
   revalidatePath("/chat/moderation");
 }
 
@@ -143,12 +154,15 @@ export async function updateModerationSettings(
 
 export async function getReportedMessages(): Promise<ReportedMessage[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
     .from("reported_messages")
-    .select(`
+    .select(
+      `
       id,
       message_id,
       channel_id,
@@ -160,7 +174,8 @@ export async function getReportedMessages(): Promise<ReportedMessage[]> {
       author_id,
       author_name,
       reporter_id
-    `)
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -171,31 +186,37 @@ export async function getReportedMessages(): Promise<ReportedMessage[]> {
   if (!data) return [];
 
   // Fetch reporter names
-  const reporterIds = [...new Set(data.map(r => r.reporter_id).filter(Boolean))];
+  const reporterIds = [
+    ...new Set(data.map((r) => r.reporter_id).filter(Boolean)),
+  ];
   const { data: reporters } = await supabase
     .from("profiles")
     .select("id, full_name")
     .in("id", reporterIds);
 
-  const reporterMap = new Map((reporters || []).map(r => [r.id, r.full_name]));
+  const reporterMap = new Map(
+    (reporters || []).map((r) => [r.id, r.full_name]),
+  );
 
   // Fetch channel names
-  const channelIds = [...new Set(data.map(r => r.channel_id).filter(Boolean))];
+  const channelIds = [
+    ...new Set(data.map((r) => r.channel_id).filter(Boolean)),
+  ];
   const { data: channels } = await supabase
     .from("channels")
     .select("id, name")
     .in("id", channelIds);
 
-  const channelMap = new Map((channels || []).map(c => [c.id, c.name]));
+  const channelMap = new Map((channels || []).map((c) => [c.id, c.name]));
 
   // Fetch author emails
-  const authorIds = [...new Set(data.map(r => r.author_id).filter(Boolean))];
+  const authorIds = [...new Set(data.map((r) => r.author_id).filter(Boolean))];
   const { data: authors } = await supabase
     .from("profiles")
     .select("id, email")
     .in("id", authorIds);
 
-  const authorEmailMap = new Map((authors || []).map(a => [a.id, a.email]));
+  const authorEmailMap = new Map((authors || []).map((a) => [a.id, a.email]));
 
   return data.map((r) => ({
     id: r.id,
@@ -226,24 +247,24 @@ export async function reportMessage(data: {
   description?: string;
 }): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  const { error } = await supabase
-    .from("reported_messages")
-    .insert({
-      message_id: data.messageId,
-      channel_id: data.channelId || null,
-      thread_id: data.threadId || null,
-      reporter_id: user.id,
-      author_id: data.authorId || null,
-      author_name: data.authorName || null,
-      content: data.content,
-      reason: data.reason,
-      description: data.description || null,
-      status: "pending",
-      priority: data.reason === "harassment" ? "high" : "medium",
-    });
+  const { error } = await supabase.from("reported_messages").insert({
+    message_id: data.messageId,
+    channel_id: data.channelId || null,
+    thread_id: data.threadId || null,
+    reporter_id: user.id,
+    author_id: data.authorId || null,
+    author_name: data.authorName || null,
+    content: data.content,
+    reason: data.reason,
+    description: data.description || null,
+    status: "pending",
+    priority: data.reason === "harassment" ? "high" : "medium",
+  });
 
   if (error) {
     console.error("Error reporting message:", error);
@@ -256,10 +277,12 @@ export async function reportMessage(data: {
 export async function moderateMessage(
   reportId: string,
   action: "resolve" | "dismiss" | "review",
-  resolution?: string
+  resolution?: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const statusMap = {
@@ -309,7 +332,7 @@ export async function moderateMessage(
     action,
     "report",
     reportId,
-    actionLabels[action]
+    actionLabels[action],
   );
   revalidatePath("/chat/moderation");
 }
@@ -320,7 +343,9 @@ export async function moderateMessage(
 
 export async function getModeratedUsers(): Promise<ModeratedUser[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Fetch all non-admin profiles
@@ -338,13 +363,13 @@ export async function getModeratedUsers(): Promise<ModeratedUser[]> {
   if (!profiles) return [];
 
   // Fetch moderation status for all users
-  const userIds = profiles.map(p => p.id);
+  const userIds = profiles.map((p) => p.id);
   const { data: statuses } = await supabase
     .from("user_moderation_status")
     .select("*")
     .in("user_id", userIds);
 
-  const statusMap = new Map((statuses || []).map(s => [s.user_id, s]));
+  const statusMap = new Map((statuses || []).map((s) => [s.user_id, s]));
 
   // Fetch active ban reasons
   const { data: banActions } = await supabase
@@ -354,16 +379,24 @@ export async function getModeratedUsers(): Promise<ModeratedUser[]> {
     .eq("is_active", true)
     .in("user_id", userIds);
 
-  const banReasonMap = new Map((banActions || []).map(b => [b.user_id, b.reason]));
+  const banReasonMap = new Map(
+    (banActions || []).map((b) => [b.user_id, b.reason]),
+  );
 
   return profiles.map((p) => {
     const status = statusMap.get(p.id);
     let userStatus: ModeratedUser["status"] = "actif";
 
     if (status) {
-      if (status.is_banned && (!status.banned_until || new Date(status.banned_until) > new Date())) {
+      if (
+        status.is_banned &&
+        (!status.banned_until || new Date(status.banned_until) > new Date())
+      ) {
         userStatus = "banni";
-      } else if (status.is_muted && (!status.muted_until || new Date(status.muted_until) > new Date())) {
+      } else if (
+        status.is_muted &&
+        (!status.muted_until || new Date(status.muted_until) > new Date())
+      ) {
         userStatus = "mute";
       } else if (status.is_restricted) {
         userStatus = "restreint";
@@ -379,7 +412,8 @@ export async function getModeratedUsers(): Promise<ModeratedUser[]> {
       status: userStatus,
       muted_until: status?.muted_until || null,
       banned_until: status?.banned_until || null,
-      ban_reason: userStatus === "banni" ? (banReasonMap.get(p.id) || null) : null,
+      ban_reason:
+        userStatus === "banni" ? banReasonMap.get(p.id) || null : null,
       restriction_level: status?.restriction_level || null,
       warning_count: status?.warning_count || 0,
     };
@@ -389,23 +423,30 @@ export async function getModeratedUsers(): Promise<ModeratedUser[]> {
 export async function muteUser(
   userId: string,
   durationHours: number,
-  reason: string
+  reason: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  const mutedUntil = new Date(Date.now() + durationHours * 3600_000).toISOString();
+  const mutedUntil = new Date(
+    Date.now() + durationHours * 3600_000,
+  ).toISOString();
 
   // Update or create moderation status
   const { error: statusError } = await supabase
     .from("user_moderation_status")
-    .upsert({
-      user_id: userId,
-      is_muted: true,
-      muted_until: mutedUntil,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    .upsert(
+      {
+        user_id: userId,
+        is_muted: true,
+        muted_until: mutedUntil,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
 
   if (statusError) {
     console.error("Error updating moderation status:", statusError);
@@ -434,14 +475,16 @@ export async function muteUser(
     "mute",
     "user",
     userId,
-    `Utilisateur mute pour ${durationHours}h: ${reason}`
+    `Utilisateur mute pour ${durationHours}h: ${reason}`,
   );
   revalidatePath("/chat/moderation");
 }
 
 export async function unmuteUser(userId: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Update moderation status
@@ -462,33 +505,43 @@ export async function unmuteUser(userId: string): Promise<void> {
   // Deactivate mute actions
   await supabase
     .from("moderation_actions")
-    .update({ is_active: false, revoked_at: new Date().toISOString(), revoked_by: user.id })
+    .update({
+      is_active: false,
+      revoked_at: new Date().toISOString(),
+      revoked_by: user.id,
+    })
     .eq("user_id", userId)
     .eq("action_type", "mute")
     .eq("is_active", true);
 
   // Record unmute action
-  await supabase
-    .from("moderation_actions")
-    .insert({
-      user_id: userId,
-      action_type: "unmute",
-      reason: "Demute manuel",
-      is_active: false,
-      created_by: user.id,
-    });
+  await supabase.from("moderation_actions").insert({
+    user_id: userId,
+    action_type: "unmute",
+    reason: "Demute manuel",
+    is_active: false,
+    created_by: user.id,
+  });
 
-  await logModerationAction(user.id, "unmute", "user", userId, "Utilisateur demute");
+  await logModerationAction(
+    user.id,
+    "unmute",
+    "user",
+    userId,
+    "Utilisateur demute",
+  );
   revalidatePath("/chat/moderation");
 }
 
 export async function banUser(
   userId: string,
   reason: string,
-  durationHours?: number
+  durationHours?: number,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const bannedUntil = durationHours
@@ -498,14 +551,17 @@ export async function banUser(
   // Update moderation status
   const { error: statusError } = await supabase
     .from("user_moderation_status")
-    .upsert({
-      user_id: userId,
-      is_banned: true,
-      banned_until: bannedUntil,
-      is_muted: false,
-      muted_until: null,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    .upsert(
+      {
+        user_id: userId,
+        is_banned: true,
+        banned_until: bannedUntil,
+        is_muted: false,
+        muted_until: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
 
   if (statusError) {
     console.error("Error updating moderation status:", statusError);
@@ -529,20 +585,24 @@ export async function banUser(
     console.error("Error recording moderation action:", actionError);
   }
 
-  const durationText = durationHours ? `pour ${durationHours}h` : "definitivement";
+  const durationText = durationHours
+    ? `pour ${durationHours}h`
+    : "definitivement";
   await logModerationAction(
     user.id,
     "ban",
     "user",
     userId,
-    `Utilisateur banni ${durationText}: ${reason}`
+    `Utilisateur banni ${durationText}: ${reason}`,
   );
   revalidatePath("/chat/moderation");
 }
 
 export async function unbanUser(userId: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Update moderation status
@@ -563,29 +623,39 @@ export async function unbanUser(userId: string): Promise<void> {
   // Deactivate ban actions
   await supabase
     .from("moderation_actions")
-    .update({ is_active: false, revoked_at: new Date().toISOString(), revoked_by: user.id })
+    .update({
+      is_active: false,
+      revoked_at: new Date().toISOString(),
+      revoked_by: user.id,
+    })
     .eq("user_id", userId)
     .eq("action_type", "ban")
     .eq("is_active", true);
 
   // Record unban action
-  await supabase
-    .from("moderation_actions")
-    .insert({
-      user_id: userId,
-      action_type: "unban",
-      reason: "Deban manuel",
-      is_active: false,
-      created_by: user.id,
-    });
+  await supabase.from("moderation_actions").insert({
+    user_id: userId,
+    action_type: "unban",
+    reason: "Deban manuel",
+    is_active: false,
+    created_by: user.id,
+  });
 
-  await logModerationAction(user.id, "unban", "user", userId, "Utilisateur debanni");
+  await logModerationAction(
+    user.id,
+    "unban",
+    "user",
+    userId,
+    "Utilisateur debanni",
+  );
   revalidatePath("/chat/moderation");
 }
 
 export async function warnUser(userId: string, reason: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Increment warning count
@@ -599,12 +669,15 @@ export async function warnUser(userId: string, reason: string): Promise<void> {
 
   const { error: statusError } = await supabase
     .from("user_moderation_status")
-    .upsert({
-      user_id: userId,
-      warning_count: newWarningCount,
-      last_warning_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    .upsert(
+      {
+        user_id: userId,
+        warning_count: newWarningCount,
+        last_warning_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
 
   if (statusError) {
     console.error("Error updating warning count:", statusError);
@@ -612,22 +685,20 @@ export async function warnUser(userId: string, reason: string): Promise<void> {
   }
 
   // Record action
-  await supabase
-    .from("moderation_actions")
-    .insert({
-      user_id: userId,
-      action_type: "warn",
-      reason: reason,
-      is_active: false,
-      created_by: user.id,
-    });
+  await supabase.from("moderation_actions").insert({
+    user_id: userId,
+    action_type: "warn",
+    reason: reason,
+    is_active: false,
+    created_by: user.id,
+  });
 
   await logModerationAction(
     user.id,
     "warn",
     "user",
     userId,
-    `Avertissement #${newWarningCount}: ${reason}`
+    `Avertissement #${newWarningCount}: ${reason}`,
   );
   revalidatePath("/chat/moderation");
 }
@@ -635,35 +706,38 @@ export async function warnUser(userId: string, reason: string): Promise<void> {
 export async function restrictUser(
   userId: string,
   level: "limited" | "read_only",
-  reason: string
+  reason: string,
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error: statusError } = await supabase
     .from("user_moderation_status")
-    .upsert({
-      user_id: userId,
-      is_restricted: true,
-      restriction_level: level,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    .upsert(
+      {
+        user_id: userId,
+        is_restricted: true,
+        restriction_level: level,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
 
   if (statusError) {
     console.error("Error restricting user:", statusError);
     throw new Error("Erreur lors de la restriction");
   }
 
-  await supabase
-    .from("moderation_actions")
-    .insert({
-      user_id: userId,
-      action_type: "restrict",
-      reason: reason,
-      is_active: true,
-      created_by: user.id,
-    });
+  await supabase.from("moderation_actions").insert({
+    user_id: userId,
+    action_type: "restrict",
+    reason: reason,
+    is_active: true,
+    created_by: user.id,
+  });
 
   const levelText = level === "read_only" ? "lecture seule" : "limite";
   await logModerationAction(
@@ -671,7 +745,7 @@ export async function restrictUser(
     "restrict",
     "user",
     userId,
-    `Utilisateur restreint (${levelText}): ${reason}`
+    `Utilisateur restreint (${levelText}): ${reason}`,
   );
   revalidatePath("/chat/moderation");
 }
@@ -685,19 +759,17 @@ async function logModerationAction(
   actionType: string,
   targetType: "user" | "message" | "thread" | "channel" | "report",
   targetId: string,
-  details: string
+  details: string,
 ): Promise<void> {
   const supabase = await createClient();
 
-  const { error } = await supabase
-    .from("moderation_log")
-    .insert({
-      action_type: actionType,
-      target_type: targetType,
-      target_id: targetId,
-      details: { description: details },
-      performed_by: performedBy,
-    });
+  const { error } = await supabase.from("moderation_log").insert({
+    action_type: actionType,
+    target_type: targetType,
+    target_id: targetId,
+    details: { description: details },
+    performed_by: performedBy,
+  });
 
   if (error) {
     console.error("Error logging moderation action:", error);
@@ -706,7 +778,9 @@ async function logModerationAction(
 
 export async function getModerationLog(): Promise<ModerationAction[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -723,25 +797,31 @@ export async function getModerationLog(): Promise<ModerationAction[]> {
   if (!data) return [];
 
   // Fetch performer names
-  const performerIds = [...new Set(data.map(d => d.performed_by).filter(Boolean))];
+  const performerIds = [
+    ...new Set(data.map((d) => d.performed_by).filter(Boolean)),
+  ];
   const { data: performers } = await supabase
     .from("profiles")
     .select("id, full_name")
     .in("id", performerIds);
 
-  const performerMap = new Map((performers || []).map(p => [p.id, p.full_name]));
+  const performerMap = new Map(
+    (performers || []).map((p) => [p.id, p.full_name]),
+  );
 
   // Fetch target user names where applicable
   const targetUserIds = data
-    .filter(d => d.target_type === "user")
-    .map(d => d.target_id);
+    .filter((d) => d.target_type === "user")
+    .map((d) => d.target_id);
 
   const { data: targetUsers } = await supabase
     .from("profiles")
     .select("id, full_name")
     .in("id", targetUserIds);
 
-  const targetUserMap = new Map((targetUsers || []).map(t => [t.id, t.full_name]));
+  const targetUserMap = new Map(
+    (targetUsers || []).map((t) => [t.id, t.full_name]),
+  );
 
   return data.map((row) => {
     const details = row.details as Record<string, unknown> | null;
@@ -750,7 +830,10 @@ export async function getModerationLog(): Promise<ModerationAction[]> {
       moderator_id: row.performed_by,
       moderator_name: performerMap.get(row.performed_by) || "Systeme",
       target_user_id: row.target_type === "user" ? row.target_id : null,
-      target_user_name: row.target_type === "user" ? (targetUserMap.get(row.target_id) || null) : null,
+      target_user_name:
+        row.target_type === "user"
+          ? targetUserMap.get(row.target_id) || null
+          : null,
       action_type: row.action_type,
       details: (details?.description as string) || "",
       created_at: row.created_at,
@@ -762,9 +845,13 @@ export async function getModerationLog(): Promise<ModerationAction[]> {
 // Banned Words
 // ---------------------------------------------------------------------------
 
-export async function getBannedWords(): Promise<Array<{ id: string; word: string; severity: string }>> {
+export async function getBannedWords(): Promise<
+  Array<{ id: string; word: string; severity: string }>
+> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -783,19 +870,19 @@ export async function getBannedWords(): Promise<Array<{ id: string; word: string
 
 export async function addBannedWord(
   word: string,
-  severity: "low" | "medium" | "high" = "medium"
+  severity: "low" | "medium" | "high" = "medium",
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  const { error } = await supabase
-    .from("banned_words")
-    .insert({
-      word: word.toLowerCase().trim(),
-      severity,
-      created_by: user.id,
-    });
+  const { error } = await supabase.from("banned_words").insert({
+    word: word.toLowerCase().trim(),
+    severity,
+    created_by: user.id,
+  });
 
   if (error) {
     console.error("Error adding banned word:", error);
@@ -807,7 +894,9 @@ export async function addBannedWord(
 
 export async function removeBannedWord(wordId: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase

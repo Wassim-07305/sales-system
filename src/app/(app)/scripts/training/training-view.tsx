@@ -48,8 +48,13 @@ function getDifficulty(nodeCount: number): {
   label: string;
   color: string;
 } {
-  if (nodeCount <= 3) return { label: "Facile", color: "bg-brand/20 text-brand" };
-  if (nodeCount <= 6) return { label: "Moyen", color: "bg-muted-foreground/20 text-muted-foreground" };
+  if (nodeCount <= 3)
+    return { label: "Facile", color: "bg-brand/20 text-brand" };
+  if (nodeCount <= 6)
+    return {
+      label: "Moyen",
+      color: "bg-muted-foreground/20 text-muted-foreground",
+    };
   return { label: "Difficile", color: "bg-foreground/20 text-foreground" };
 }
 
@@ -78,7 +83,7 @@ export function TrainingView({
 
   // Filter scripts that have enough nodes for training (at least 2)
   const trainableScripts = scripts.filter(
-    (s) => Array.isArray(s.nodes) && s.nodes.length >= 2
+    (s) => Array.isArray(s.nodes) && s.nodes.length >= 2,
   );
 
   return (
@@ -104,7 +109,9 @@ export function TrainingView({
                 <Target className="h-5 w-5 text-[#7af17a]" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Sessions complétées</p>
+                <p className="text-sm text-muted-foreground">
+                  Sessions complétées
+                </p>
                 <p className="text-2xl font-bold">{totalSessions}</p>
               </div>
             </div>
@@ -160,7 +167,9 @@ export function TrainingView({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {trainableScripts.map((script) => {
-            const nodeCount = Array.isArray(script.nodes) ? script.nodes.length : 0;
+            const nodeCount = Array.isArray(script.nodes)
+              ? script.nodes.length
+              : 0;
             const difficulty = getDifficulty(nodeCount);
             const best = bestByScript.get(script.id);
 
@@ -172,7 +181,9 @@ export function TrainingView({
                       <CardTitle className="text-base font-medium line-clamp-1">
                         {script.title}
                       </CardTitle>
-                      <Badge className={`${difficulty.color} border-0 text-xs shrink-0 ml-2`}>
+                      <Badge
+                        className={`${difficulty.color} border-0 text-xs shrink-0 ml-2`}
+                      >
                         {difficulty.label}
                       </Badge>
                     </div>
@@ -189,7 +200,10 @@ export function TrainingView({
                         {nodeCount} noeuds
                       </span>
                       {script.category && (
-                        <Badge variant="outline" className="text-xs border-border">
+                        <Badge
+                          variant="outline"
+                          className="text-xs border-border"
+                        >
                           {script.category}
                         </Badge>
                       )}
@@ -197,7 +211,9 @@ export function TrainingView({
                     {best !== undefined && (
                       <div className="mt-3 flex items-center gap-1 text-xs">
                         <CheckCircle className="h-3 w-3 text-[#7af17a]" />
-                        <span className="text-[#7af17a]">Meilleur : {best}%</span>
+                        <span className="text-[#7af17a]">
+                          Meilleur : {best}%
+                        </span>
                       </div>
                     )}
                   </CardContent>
@@ -222,8 +238,8 @@ export function TrainingView({
                         result.score >= 80
                           ? "bg-brand/10"
                           : result.score >= 50
-                          ? "bg-muted/60"
-                          : "bg-muted/40"
+                            ? "bg-muted/60"
+                            : "bg-muted/40"
                       }`}
                     >
                       <Target
@@ -231,8 +247,8 @@ export function TrainingView({
                           result.score >= 80
                             ? "text-brand"
                             : result.score >= 50
-                            ? "text-muted-foreground"
-                            : "text-muted-foreground/60"
+                              ? "text-muted-foreground"
+                              : "text-muted-foreground/60"
                         }`}
                       />
                     </div>
@@ -241,12 +257,15 @@ export function TrainingView({
                         {result.script_flowcharts?.title || "Script supprimé"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(result.created_at).toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(result.created_at).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -254,7 +273,8 @@ export function TrainingView({
                     <div className="flex items-center gap-1 text-sm">
                       <Timer className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-muted-foreground">
-                        {Math.floor(result.duration / 60)}:{String(result.duration % 60).padStart(2, "0")}
+                        {Math.floor(result.duration / 60)}:
+                        {String(result.duration % 60).padStart(2, "0")}
                       </span>
                     </div>
                     <Badge
@@ -262,8 +282,8 @@ export function TrainingView({
                         result.score >= 80
                           ? "bg-brand/20 text-brand"
                           : result.score >= 50
-                          ? "bg-muted-foreground/20 text-muted-foreground"
-                          : "bg-foreground/20 text-foreground"
+                            ? "bg-muted-foreground/20 text-muted-foreground"
+                            : "bg-foreground/20 text-foreground"
                       } border-0`}
                     >
                       {result.score}%

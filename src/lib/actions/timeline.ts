@@ -32,7 +32,7 @@ export interface TimelineEvent {
  */
 export async function getClientTimeline(
   userId: string,
-  limit = 50
+  limit = 50,
 ): Promise<TimelineEvent[]> {
   const supabase = await createClient();
   const events: TimelineEvent[] = [];
@@ -74,7 +74,8 @@ export async function getClientTimeline(
       id: `onboarding-${step.step_id}`,
       type: "onboarding",
       title: "Etape d'onboarding terminee",
-      description: (stepInfo as { title: string } | null)?.title || "Etape completee",
+      description:
+        (stepInfo as { title: string } | null)?.title || "Etape completee",
       date: step.completed_at,
     });
   }
@@ -92,9 +93,14 @@ export async function getClientTimeline(
 
   for (const lp of lessonProgress || []) {
     const lesson = Array.isArray(lp.lessons) ? lp.lessons[0] : lp.lessons;
-    const lessonData = lesson as { title: string; courses: { title: string } | { title: string }[] | null } | null;
+    const lessonData = lesson as {
+      title: string;
+      courses: { title: string } | { title: string }[] | null;
+    } | null;
     const courseTitle = lessonData?.courses
-      ? (Array.isArray(lessonData.courses) ? lessonData.courses[0]?.title : lessonData.courses.title)
+      ? Array.isArray(lessonData.courses)
+        ? lessonData.courses[0]?.title
+        : lessonData.courses.title
       : null;
 
     events.push({
@@ -134,7 +140,9 @@ export async function getClientTimeline(
   // ------------------------------------------------------------------
   const { data: roleplaySessions } = await supabase
     .from("roleplay_sessions")
-    .select("id, score, ended_at, prospect_profile_id, roleplay_prospect_profiles(name)")
+    .select(
+      "id, score, ended_at, prospect_profile_id, roleplay_prospect_profiles(name)",
+    )
     .eq("user_id", userId)
     .eq("status", "completed")
     .order("ended_at", { ascending: false })
@@ -222,7 +230,9 @@ export async function getClientTimeline(
   // ------------------------------------------------------------------
   // Sort all events by date (most recent first) and limit
   // ------------------------------------------------------------------
-  events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  events.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
 
   return events.slice(0, limit);
 }

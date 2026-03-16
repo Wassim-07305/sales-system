@@ -43,9 +43,18 @@ function extractDomain(email: string, company: string): string | null {
     const domain = email.split("@")[1];
     // Ignorer les domaines génériques
     const genericDomains = [
-      "gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
-      "live.com", "orange.fr", "free.fr", "sfr.fr", "laposte.net",
-      "icloud.com", "protonmail.com", "mail.com",
+      "gmail.com",
+      "yahoo.com",
+      "hotmail.com",
+      "outlook.com",
+      "live.com",
+      "orange.fr",
+      "free.fr",
+      "sfr.fr",
+      "laposte.net",
+      "icloud.com",
+      "protonmail.com",
+      "mail.com",
     ];
     if (!genericDomains.includes(domain.toLowerCase())) {
       return domain;
@@ -55,7 +64,7 @@ function extractDomain(email: string, company: string): string | null {
   // Depuis le champ company s'il ressemble à un domaine/URL
   if (company) {
     const urlMatch = company.match(
-      /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/
+      /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/,
     );
     if (urlMatch) return urlMatch[1];
   }
@@ -101,8 +110,16 @@ function mapApifyToEnrichment(data: ApifyCompanyEnrichment) {
     profil_linkedin_probable: data.socials?.linkedin || "",
     profil_twitter_probable: data.socials?.twitter || "",
     site_web_probable: data.domain ? `https://${data.domain}` : "",
-    points_cles: pointsCles.length > 0 ? pointsCles : ["Données vérifiées via Apify"],
-    confiance: Math.min(100, 40 + pointsCles.length * 10 + (data.industry ? 10 : 0) + (data.domain ? 10 : 0) + (data.socials?.linkedin ? 10 : 0)),
+    points_cles:
+      pointsCles.length > 0 ? pointsCles : ["Données vérifiées via Apify"],
+    confiance: Math.min(
+      100,
+      40 +
+        pointsCles.length * 10 +
+        (data.industry ? 10 : 0) +
+        (data.domain ? 10 : 0) +
+        (data.socials?.linkedin ? 10 : 0),
+    ),
   };
 }
 
@@ -151,7 +168,7 @@ export async function enrichProspect(prospectId: string) {
     try {
       const apifyResults = await callApifyActor<ApifyCompanyEnrichment>(
         "george.the.developer/company-enrichment-api",
-        { domain }
+        { domain },
       );
 
       if (apifyResults && apifyResults.length > 0) {
@@ -198,12 +215,16 @@ Génère un JSON avec ces champs:
       });
     } catch (aiError) {
       console.error("[enrichProspect] Erreur IA:", aiError);
-      throw new Error("L'enrichissement a échoué. Veuillez réessayer plus tard.");
+      throw new Error(
+        "L'enrichissement a échoué. Veuillez réessayer plus tard.",
+      );
     }
   }
 
   if (!enrichmentData) {
-    throw new Error("L'enrichissement a échoué. Aucune source n'a retourné de données.");
+    throw new Error(
+      "L'enrichissement a échoué. Aucune source n'a retourné de données.",
+    );
   }
 
   const disclaimer =
@@ -277,7 +298,10 @@ export async function enrichBatch(prospectIds: string[]) {
   if (!prospects || prospects.length === 0) return { success: 0, failed: 0 };
 
   // 2. Extraire les domaines de chaque prospect
-  const prospectDomainMap = new Map<string, { prospectId: string; domain: string }>();
+  const prospectDomainMap = new Map<
+    string,
+    { prospectId: string; domain: string }
+  >();
   const prospectsWithoutDomain: string[] = [];
 
   for (const p of prospects) {
@@ -304,7 +328,7 @@ export async function enrichBatch(prospectIds: string[]) {
       const batchResults = await callApifyActor<ApifyCompanyEnrichment>(
         "george.the.developer/company-enrichment-api",
         { domains },
-        120 // Timeout 120s pour le batch
+        120, // Timeout 120s pour le batch
       );
 
       if (batchResults && batchResults.length > 0) {
@@ -316,7 +340,10 @@ export async function enrichBatch(prospectIds: string[]) {
         }
       }
     } catch (apifyErr) {
-      console.error("[enrichBatch] Erreur Apify batch, fallback individuel:", apifyErr);
+      console.error(
+        "[enrichBatch] Erreur Apify batch, fallback individuel:",
+        apifyErr,
+      );
     }
   }
 
@@ -324,7 +351,10 @@ export async function enrichBatch(prospectIds: string[]) {
   for (const [domain, { prospectId }] of prospectDomainMap) {
     const apifyData = apifyBatchResults.get(domain.toLowerCase());
 
-    if (apifyData && (apifyData.industry || apifyData.employees || apifyData.tech)) {
+    if (
+      apifyData &&
+      (apifyData.industry || apifyData.employees || apifyData.tech)
+    ) {
       // Données Apify disponibles — sauvegarder directement
       try {
         const enrichmentData = mapApifyToEnrichment(apifyData);
@@ -339,7 +369,8 @@ export async function enrichBatch(prospectIds: string[]) {
           enrichment: {
             ...enrichmentData,
             source: "apify_verified" as const,
-            disclaimer: "Données vérifiées via Apify (batch company-enrichment-api).",
+            disclaimer:
+              "Données vérifiées via Apify (batch company-enrichment-api).",
             enriched_at: new Date().toISOString(),
             enriched_by: user.id,
           },
@@ -458,11 +489,14 @@ Génère un JSON avec ces champs:
     return {
       ...insights,
       source: "ai_estimation" as const,
-      disclaimer: "Données estimées par IA, non vérifiées. Aucune source externe n'a été consultée.",
+      disclaimer:
+        "Données estimées par IA, non vérifiées. Aucune source externe n'a été consultée.",
     };
   } catch (aiError) {
     console.error("[generateCompanyInsights] Erreur IA:", aiError);
-    throw new Error("L'analyse IA de l'entreprise a échoué. Veuillez réessayer plus tard.");
+    throw new Error(
+      "L'analyse IA de l'entreprise a échoué. Veuillez réessayer plus tard.",
+    );
   }
 }
 
@@ -484,12 +518,15 @@ export async function getProspectsForEnrichment() {
       typeof p.metadata === "object" && p.metadata !== null
         ? (p.metadata as Record<string, unknown>)
         : {};
-    const enrichment = metadata.enrichment as Record<string, unknown> | undefined;
+    const enrichment = metadata.enrichment as
+      | Record<string, unknown>
+      | undefined;
 
     // Count missing data fields
     const fields = ["email", "company", "notes", "profile_url"];
     const missingCount = fields.filter(
-      (f) => !p[f] || (typeof p[f] === "string" && (p[f] as string).trim() === "")
+      (f) =>
+        !p[f] || (typeof p[f] === "string" && (p[f] as string).trim() === ""),
     ).length;
 
     return {
@@ -509,15 +546,20 @@ export async function getProspectsForEnrichment() {
             taille_entreprise: (enrichment.taille_entreprise as string) || "",
             poste_probable: (enrichment.poste_probable as string) || "",
             budget_estime: (enrichment.budget_estime as string) || "",
-            meilleur_moment_contact: (enrichment.meilleur_moment_contact as string) || "",
-            profil_linkedin_probable: (enrichment.profil_linkedin_probable as string) || "",
-            profil_twitter_probable: (enrichment.profil_twitter_probable as string) || "",
+            meilleur_moment_contact:
+              (enrichment.meilleur_moment_contact as string) || "",
+            profil_linkedin_probable:
+              (enrichment.profil_linkedin_probable as string) || "",
+            profil_twitter_probable:
+              (enrichment.profil_twitter_probable as string) || "",
             site_web_probable: (enrichment.site_web_probable as string) || "",
             points_cles: (enrichment.points_cles as string[]) || [],
             confiance: (enrichment.confiance as number) || 0,
             enriched_at: (enrichment.enriched_at as string) || "",
             source: (enrichment.source as string) || "ai_estimation",
-            disclaimer: (enrichment.disclaimer as string) || "Données estimées par IA, non vérifiées",
+            disclaimer:
+              (enrichment.disclaimer as string) ||
+              "Données estimées par IA, non vérifiées",
           }
         : null,
     };

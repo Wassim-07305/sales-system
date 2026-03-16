@@ -77,11 +77,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
     toast.success("Groupe ignoré");
   }
 
-  function selectField(
-    groupId: string,
-    fieldKey: string,
-    contactId: string
-  ) {
+  function selectField(groupId: string, fieldKey: string, contactId: string) {
     setFieldSelections((prev) => ({
       ...prev,
       [groupId]: {
@@ -93,7 +89,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
 
   function getSelectedValue(
     groupId: string,
-    fieldKey: string
+    fieldKey: string,
   ): string | undefined {
     return fieldSelections[groupId]?.[fieldKey];
   }
@@ -102,9 +98,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
     const selections = fieldSelections[group.id] || {};
     // Default primary is the first (oldest) contact
     const primaryId = group.contacts[0].id;
-    const secondaryIds = group.contacts
-      .slice(1)
-      .map((c) => c.id);
+    const secondaryIds = group.contacts.slice(1).map((c) => c.id);
 
     startTransition(async () => {
       const result = await mergeContacts(primaryId, secondaryIds, selections);
@@ -175,9 +169,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
             <div className="flex flex-col items-center gap-3 py-8 text-center">
               <CheckCircle2 className="h-12 w-12 text-[#7af17a]" />
               <div>
-                <p className="font-semibold text-lg">
-                  Aucun doublon détecté
-                </p>
+                <p className="font-semibold text-lg">Aucun doublon détecté</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Votre base de contacts est propre.
                 </p>
@@ -213,18 +205,10 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                   <div className="flex items-center gap-2">
                     <span className="font-medium">
                       {group.contacts
-                        .map(
-                          (c) =>
-                            c.full_name || c.email || "Sans nom"
-                        )
+                        .map((c) => c.full_name || c.email || "Sans nom")
                         .join(" / ")}
                     </span>
-                    <Badge
-                      className={cn(
-                        "text-xs border gap-1",
-                        config.color
-                      )}
-                    >
+                    <Badge className={cn("text-xs border gap-1", config.color)}>
                       {config.icon}
                       {config.label}
                     </Badge>
@@ -273,24 +257,19 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                         {MERGE_FIELDS.map((field) => {
                           const values = group.contacts.map(
                             (c) =>
-                              (
-                                c as unknown as Record<
-                                  string,
-                                  string | null
-                                >
-                              )[field.key] || ""
+                              (c as unknown as Record<string, string | null>)[
+                                field.key
+                              ] || "",
                           );
                           const hasConflict =
-                            new Set(
-                              values.filter((v) => v !== "")
-                            ).size > 1;
+                            new Set(values.filter((v) => v !== "")).size > 1;
 
                           return (
                             <tr
                               key={field.key}
                               className={cn(
                                 "border-b last:border-0",
-                                hasConflict && "bg-amber-500/5"
+                                hasConflict && "bg-amber-500/5",
                               )}
                             >
                               <td className="py-2 pr-4 text-muted-foreground">
@@ -305,21 +284,15 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                                     >
                                   )[field.key] || "";
                                 const isSelected =
-                                  getSelectedValue(
-                                    group.id,
-                                    field.key
-                                  ) === contact.id;
-                                const nothingSelected =
-                                  !getSelectedValue(
-                                    group.id,
-                                    field.key
-                                  );
+                                  getSelectedValue(group.id, field.key) ===
+                                  contact.id;
+                                const nothingSelected = !getSelectedValue(
+                                  group.id,
+                                  field.key,
+                                );
 
                                 return (
-                                  <td
-                                    key={contact.id}
-                                    className="py-2 px-2"
-                                  >
+                                  <td key={contact.id} className="py-2 px-2">
                                     {val ? (
                                       <label className="flex items-center gap-2 cursor-pointer group">
                                         <input
@@ -329,15 +302,13 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                                             isSelected ||
                                             (nothingSelected &&
                                               contact.id ===
-                                                group
-                                                  .contacts[0]
-                                                  .id)
+                                                group.contacts[0].id)
                                           }
                                           onChange={() =>
                                             selectField(
                                               group.id,
                                               field.key,
-                                              contact.id
+                                              contact.id,
                                             )
                                           }
                                           className="accent-[#7af17a]"
@@ -348,11 +319,9 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                                             isSelected ||
                                               (nothingSelected &&
                                                 contact.id ===
-                                                  group
-                                                    .contacts[0]
-                                                    .id)
+                                                  group.contacts[0].id)
                                               ? "text-foreground"
-                                              : "text-muted-foreground"
+                                              : "text-muted-foreground",
                                           )}
                                         >
                                           {val}

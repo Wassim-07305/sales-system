@@ -19,10 +19,6 @@ export default async function CampaignsPage() {
   ]);
 
   return (
-    <CampaignsView
-      campaigns={campaigns}
-      lists={lists}
-      templates={templates}
-    />
+    <CampaignsView campaigns={campaigns} lists={lists} templates={templates} />
   );
 }

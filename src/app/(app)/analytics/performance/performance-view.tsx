@@ -53,7 +53,12 @@ interface ObjectiveProgress {
 interface PersonalPerformanceReport {
   period: string;
   metrics: PerformanceMetric[];
-  weeklyData: Array<{ week: string; revenue: number; deals: number; bookings: number }>;
+  weeklyData: Array<{
+    week: string;
+    revenue: number;
+    deals: number;
+    bookings: number;
+  }>;
   objectivesProgress: ObjectiveProgress[];
   ranking: {
     position: number;
@@ -62,7 +67,10 @@ interface PersonalPerformanceReport {
   };
 }
 
-const STATUS_CONFIG: Record<string, { color: string; icon: typeof CheckCircle }> = {
+const STATUS_CONFIG: Record<
+  string,
+  { color: string; icon: typeof CheckCircle }
+> = {
   in_progress: {
     color: "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30",
     icon: TrendingUp,
@@ -129,7 +137,9 @@ export function PerformanceView({
                 <Medal className="h-7 w-7 text-white" />
               </div>
               <div>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Classement equipe</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Classement equipe
+                </p>
                 <p className="text-3xl font-bold text-foreground">
                   #{report.ranking.position}
                   <span className="text-lg text-muted-foreground font-normal">
@@ -140,7 +150,9 @@ export function PerformanceView({
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Base sur</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Base sur
+              </p>
               <p className="text-lg font-medium text-foreground">
                 {report.ranking.metric}
               </p>
@@ -156,17 +168,25 @@ export function PerformanceView({
             <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
               <BarChart3 className="h-7 w-7 text-muted-foreground/50" />
             </div>
-            <p className="text-muted-foreground font-medium">Aucune metrique disponible pour cette periode.</p>
+            <p className="text-muted-foreground font-medium">
+              Aucune metrique disponible pour cette periode.
+            </p>
           </CardContent>
         </Card>
       )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {report.metrics.map((metric) => {
-          const progressPct = Math.min(100, Math.round((metric.current / metric.target) * 100));
+          const progressPct = Math.min(
+            100,
+            Math.round((metric.current / metric.target) * 100),
+          );
           const isPositiveTrend = (metric.trend ?? 0) >= 0;
 
           return (
-            <Card key={metric.label} className="border-border/50 hover:shadow-md transition-all">
+            <Card
+              key={metric.label}
+              className="border-border/50 hover:shadow-md transition-all"
+            >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
@@ -197,23 +217,25 @@ export function PerformanceView({
                     : `${metric.current}${metric.unit}`}
                 </p>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                  <span>Objectif: {metric.unit === "€" ? formatCurrency(metric.target) : `${metric.target}${metric.unit}`}</span>
+                  <span>
+                    Objectif:{" "}
+                    {metric.unit === "€"
+                      ? formatCurrency(metric.target)
+                      : `${metric.target}${metric.unit}`}
+                  </span>
                   <span
                     className={
                       progressPct >= 100
                         ? "text-emerald-500"
                         : progressPct >= 70
-                        ? "text-[#7af17a]"
-                        : "text-orange-400"
+                          ? "text-[#7af17a]"
+                          : "text-orange-400"
                     }
                   >
                     {progressPct}%
                   </span>
                 </div>
-                <Progress
-                  value={progressPct}
-                  className="h-2"
-                />
+                <Progress value={progressPct} className="h-2" />
                 <p className="text-xs text-muted-foreground mt-2">
                   Mois dernier:{" "}
                   {metric.unit === "€"
@@ -250,9 +272,7 @@ export function PerformanceView({
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "8px",
                       }}
-                      formatter={(value) =>
-                        formatCurrency(Number(value) || 0)
-                      }
+                      formatter={(value) => formatCurrency(Number(value) || 0)}
                     />
                     <Bar
                       dataKey="revenue"
@@ -362,7 +382,8 @@ export function PerformanceView({
           ) : (
             <div className="space-y-4">
               {report.objectivesProgress.map((obj) => {
-                const statusCfg = STATUS_CONFIG[obj.status] || STATUS_CONFIG.in_progress;
+                const statusCfg =
+                  STATUS_CONFIG[obj.status] || STATUS_CONFIG.in_progress;
                 const StatusIcon = statusCfg.icon;
 
                 return (
@@ -382,8 +403,8 @@ export function PerformanceView({
                             {obj.status === "in_progress"
                               ? "En cours"
                               : obj.status === "at_risk"
-                              ? "A risque"
-                              : "En retard"}
+                                ? "A risque"
+                                : "En retard"}
                           </Badge>
                         </div>
                       </div>
@@ -405,8 +426,8 @@ export function PerformanceView({
                           obj.progress >= 100
                             ? "text-emerald-500"
                             : obj.progress >= 70
-                            ? "text-[#7af17a]"
-                            : "text-orange-400"
+                              ? "text-[#7af17a]"
+                              : "text-orange-400"
                         }`}
                       >
                         {obj.progress}%

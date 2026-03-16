@@ -59,7 +59,9 @@ export async function scrapeCompanyLinkedIn(linkedinUrl: string) {
   return {
     name: company.name as string | undefined,
     industry: company.industry as string | undefined,
-    employeeCount: (company.employeeCount || company.staffCount) as number | undefined,
+    employeeCount: (company.employeeCount || company.staffCount) as
+      | number
+      | undefined,
     headquarters: company.headquarters as string | undefined,
     website: company.website as string | undefined,
     description: company.description as string | undefined,
@@ -70,23 +72,33 @@ export async function scrapeCompanyLinkedIn(linkedinUrl: string) {
   };
 }
 
-export async function searchCompanyDeciders(companyLinkedInUrl: string, jobTitles?: string[]) {
-  const results = await callApifyActor("harvestapi/linkedin-company-employees", {
-    companies: [companyLinkedInUrl],
-    maxItems: 10,
-    profileScraperMode: "Full + email search ($12 per 1k)",
-    seniorityLevelIds: ["300", "310", "320"],
-    jobTitles: jobTitles || [],
-  });
-  return (results as Record<string, unknown>[])?.map((p) => ({
-    name: (p.fullName as string) || `${p.firstName || ""} ${p.lastName || ""}`.trim(),
-    title: (p.headline as string) || (p.currentJobTitle as string),
-    email: p.email as string | undefined,
-    phone: p.phone as string | undefined,
-    linkedinUrl: (p.linkedinUrl as string) || (p.profileUrl as string),
-    company: p.currentCompany as string | undefined,
-    source: "linkedin_employees_apify" as const,
-  })) || [];
+export async function searchCompanyDeciders(
+  companyLinkedInUrl: string,
+  jobTitles?: string[],
+) {
+  const results = await callApifyActor(
+    "harvestapi/linkedin-company-employees",
+    {
+      companies: [companyLinkedInUrl],
+      maxItems: 10,
+      profileScraperMode: "Full + email search ($12 per 1k)",
+      seniorityLevelIds: ["300", "310", "320"],
+      jobTitles: jobTitles || [],
+    },
+  );
+  return (
+    (results as Record<string, unknown>[])?.map((p) => ({
+      name:
+        (p.fullName as string) ||
+        `${p.firstName || ""} ${p.lastName || ""}`.trim(),
+      title: (p.headline as string) || (p.currentJobTitle as string),
+      email: p.email as string | undefined,
+      phone: p.phone as string | undefined,
+      linkedinUrl: (p.linkedinUrl as string) || (p.profileUrl as string),
+      company: p.currentCompany as string | undefined,
+      source: "linkedin_employees_apify" as const,
+    })) || []
+  );
 }
 
 // ─── Competitors ────────────────────────────────────────────────────
@@ -179,7 +191,10 @@ export async function addCompetitor(data: {
   return newCompetitor;
 }
 
-export async function analyzeCompetitor(competitorName: string, linkedinUrl?: string) {
+export async function analyzeCompetitor(
+  competitorName: string,
+  linkedinUrl?: string,
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -205,7 +220,7 @@ export async function analyzeCompetitor(competitorName: string, linkedinUrl?: st
         languageCode: "fr",
         countryCode: "fr",
       },
-      120
+      120,
     );
 
     if (searchResults && searchResults.length > 0) {
@@ -264,7 +279,7 @@ Réponds en JSON avec :
 - pricingComparison: comparaison tarifaire (2-3 phrases)
 - keyDifferentiators: liste de 3-4 différenciateurs clés de notre solution
 - recommendation: recommandation stratégique (2-3 phrases)`,
-    { model: SMART_MODEL, maxTokens: 2048 }
+    { model: SMART_MODEL, maxTokens: 2048 },
   );
 
   return result;
@@ -293,8 +308,16 @@ export async function getMarketInsights() {
 
   const result = await aiJSON<{
     overview: string;
-    trends: { title: string; description: string; impact: "positif" | "neutre" | "negatif" }[];
-    opportunities: { title: string; description: string; priority: "haute" | "moyenne" | "basse" }[];
+    trends: {
+      title: string;
+      description: string;
+      impact: "positif" | "neutre" | "negatif";
+    }[];
+    opportunities: {
+      title: string;
+      description: string;
+      priority: "haute" | "moyenne" | "basse";
+    }[];
     risks: { title: string; description: string }[];
   }>(
     `Tu es un analyste marché spécialisé dans les ventes B2B en France. Analyse les données de deals suivantes et génère des insights marché.
@@ -306,7 +329,7 @@ Réponds en JSON avec :
 - trends: tableau de 4-5 tendances avec title, description, impact ("positif"|"neutre"|"negatif")
 - opportunities: tableau de 3-4 opportunités avec title, description, priority ("haute"|"moyenne"|"basse")
 - risks: tableau de 2-3 risques avec title et description`,
-    { model: SMART_MODEL, maxTokens: 2048 }
+    { model: SMART_MODEL, maxTokens: 2048 },
   );
 
   return result;
@@ -373,7 +396,7 @@ Réponds en JSON avec :
 - idealProfile: { description (3-4 phrases), characteristics (4-5 traits), sectors (3-4 secteurs), companySize, budget, decisionCriteria (3-4 critères) }
 - huntingStrategies: tableau de 3-4 stratégies avec channel, approach, expectedConversion
 - intentSignals: tableau de 5-6 signaux d'intention avec signal, source, relevance ("forte"|"moyenne"|"faible")`,
-    { model: SMART_MODEL, maxTokens: 2048 }
+    { model: SMART_MODEL, maxTokens: 2048 },
   );
 
   return result;

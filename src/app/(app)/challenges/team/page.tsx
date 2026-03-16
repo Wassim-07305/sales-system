@@ -22,7 +22,14 @@ export default async function TeamChallengesPage() {
 
   const progressMap: Record<
     string,
-    { total: number; contributions: Array<{ user_id: string; full_name: string | null; value: number }> }
+    {
+      total: number;
+      contributions: Array<{
+        user_id: string;
+        full_name: string | null;
+        value: number;
+      }>;
+    }
   > = {};
 
   if (challengeIds.length > 0) {

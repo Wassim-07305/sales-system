@@ -130,12 +130,14 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
   const totalRules = rules.length;
   const activeRules = rules.filter((r) => r.is_active).length;
   const totalExecutions = executions.length;
-  const todayCount = todayExecutions?.length ?? executions.filter((e) => {
-    if (!e.created_at) return false;
-    const d = new Date(e.created_at);
-    const today = new Date();
-    return d.toDateString() === today.toDateString();
-  }).length;
+  const todayCount =
+    todayExecutions?.length ??
+    executions.filter((e) => {
+      if (!e.created_at) return false;
+      const d = new Date(e.created_at);
+      const today = new Date();
+      return d.toDateString() === today.toDateString();
+    }).length;
 
   const recentExecutions = executions.slice(0, 10);
 
@@ -203,7 +205,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
       try {
         const result = await runAutomationCheck();
         toast.success(
-          `Vérification terminée : ${result.checked} règle(s) analysée(s), ${result.triggered} action(s) déclenchée(s)`
+          `Vérification terminée : ${result.checked} règle(s) analysée(s), ${result.triggered} action(s) déclenchée(s)`,
         );
         router.refresh();
       } catch {
@@ -214,10 +216,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
 
   return (
     <div>
-      <PageHeader
-        title="Automation"
-        description="Workflows automatisés"
-      >
+      <PageHeader title="Automation" description="Workflows automatisés">
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -329,7 +328,9 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             </div>
             <div>
               <p className="text-2xl font-bold">{totalRules}</p>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Règles totales</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Règles totales
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -340,7 +341,9 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             </div>
             <div>
               <p className="text-2xl font-bold">{activeRules}</p>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Règles actives</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Règles actives
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -351,7 +354,9 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             </div>
             <div>
               <p className="text-2xl font-bold">{todayCount}</p>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Exécutions aujourd&apos;hui</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Exécutions aujourd&apos;hui
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -362,7 +367,9 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             </div>
             <div>
               <p className="text-2xl font-bold">{totalExecutions}</p>
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Actions déclenchées</p>
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Actions déclenchées
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -427,39 +434,61 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             <div className="space-y-3">
               {rules.map((rule) => {
                 const Icon = typeIcons[rule.type] || Zap;
-                const colorClass = typeColors[rule.type] || "bg-gray-500/10 text-gray-600 border-gray-500/20";
+                const colorClass =
+                  typeColors[rule.type] ||
+                  "bg-gray-500/10 text-gray-600 border-gray-500/20";
                 return (
                   <div
                     key={rule.id}
                     className="flex items-center justify-between p-4 rounded-lg border"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                        rule.type === "nurturing" ? "bg-pink-500/10" :
-                        rule.type === "upsell" ? "bg-purple-500/10" :
-                        rule.type === "placement" ? "bg-blue-500/10" :
-                        "bg-gray-500/10"
-                      }`}>
-                        <Icon className={`h-5 w-5 ${
-                          rule.type === "nurturing" ? "text-pink-600" :
-                          rule.type === "upsell" ? "text-purple-600" :
-                          rule.type === "placement" ? "text-blue-600" :
-                          "text-gray-600"
-                        }`} />
+                      <div
+                        className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                          rule.type === "nurturing"
+                            ? "bg-pink-500/10"
+                            : rule.type === "upsell"
+                              ? "bg-purple-500/10"
+                              : rule.type === "placement"
+                                ? "bg-blue-500/10"
+                                : "bg-gray-500/10"
+                        }`}
+                      >
+                        <Icon
+                          className={`h-5 w-5 ${
+                            rule.type === "nurturing"
+                              ? "text-pink-600"
+                              : rule.type === "upsell"
+                                ? "text-purple-600"
+                                : rule.type === "placement"
+                                  ? "text-blue-600"
+                                  : "text-gray-600"
+                          }`}
+                        />
                       </div>
                       <div>
                         <p className="font-medium text-sm">{rule.name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className={`text-xs ${colorClass}`}>
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${colorClass}`}
+                          >
                             {typeLabels[rule.type] || rule.type}
                           </Badge>
                           {rule.trigger_conditions?.event ? (
                             <span className="text-xs text-muted-foreground">
-                              {triggerOptions.find((o) => o.value === String(rule.trigger_conditions.event))?.label || String(rule.trigger_conditions.event)}
+                              {triggerOptions.find(
+                                (o) =>
+                                  o.value ===
+                                  String(rule.trigger_conditions.event),
+                              )?.label || String(rule.trigger_conditions.event)}
                             </span>
                           ) : null}
                           <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(rule.created_at), { addSuffix: true, locale: fr })}
+                            {formatDistanceToNow(new Date(rule.created_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })}
                           </span>
                         </div>
                       </div>
@@ -471,7 +500,9 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                         </span>
                         <Switch
                           checked={rule.is_active}
-                          onCheckedChange={() => handleToggle(rule.id, rule.is_active)}
+                          onCheckedChange={() =>
+                            handleToggle(rule.id, rule.is_active)
+                          }
                           disabled={isPending}
                         />
                       </div>
@@ -494,7 +525,10 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                 <Zap className="h-6 w-6 text-muted-foreground/50" />
               </div>
-              <p className="text-sm">Aucune règle d&apos;automation. Cliquez sur &quot;Nouvelle règle&quot; pour commencer.</p>
+              <p className="text-sm">
+                Aucune règle d&apos;automation. Cliquez sur &quot;Nouvelle
+                règle&quot; pour commencer.
+              </p>
             </div>
           )}
         </CardContent>
@@ -524,14 +558,22 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                       <p className="text-xs text-muted-foreground">
                         {exec.target_user?.full_name || "Utilisateur"} —{" "}
                         {exec.executed_at
-                          ? formatDistanceToNow(new Date(exec.executed_at), { addSuffix: true, locale: fr })
+                          ? formatDistanceToNow(new Date(exec.executed_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })
                           : "En attente"}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={typeColors[exec.rule?.type || ""] || ""}>
-                      {typeLabels[exec.rule?.type || ""] || exec.rule?.type || "—"}
+                    <Badge
+                      variant="outline"
+                      className={typeColors[exec.rule?.type || ""] || ""}
+                    >
+                      {typeLabels[exec.rule?.type || ""] ||
+                        exec.rule?.type ||
+                        "—"}
                     </Badge>
                     <Badge
                       variant="outline"
@@ -539,15 +581,15 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                         exec.status === "completed"
                           ? "bg-green-500/10 text-green-600 border-green-500/20"
                           : exec.status === "failed"
-                          ? "bg-red-500/10 text-red-600 border-red-500/20"
-                          : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                            ? "bg-red-500/10 text-red-600 border-red-500/20"
+                            : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
                       }
                     >
                       {exec.status === "completed"
                         ? "Terminé"
                         : exec.status === "failed"
-                        ? "Échoué"
-                        : "En cours"}
+                          ? "Échoué"
+                          : "En cours"}
                     </Badge>
                   </div>
                 </div>

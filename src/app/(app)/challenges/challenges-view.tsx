@@ -7,7 +7,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Flame, Target, Clock, Medal, Star, Zap, CheckCircle2, BarChart3, Gift } from "lucide-react";
+import {
+  Trophy,
+  Flame,
+  Target,
+  Clock,
+  Medal,
+  Star,
+  Zap,
+  CheckCircle2,
+  BarChart3,
+  Gift,
+} from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { LevelUpModal } from "./level-up-modal";
@@ -60,17 +71,34 @@ const LEVELS = [
   { level: 5, name: "Setter Légende", minPoints: 1000, maxPoints: 99999 },
 ];
 
-export function ChallengesView({ gamProfile, challenges, progressMap, leaderboard, currentUserId, allBadges }: Props) {
+export function ChallengesView({
+  gamProfile,
+  challenges,
+  progressMap,
+  leaderboard,
+  currentUserId,
+  allBadges,
+}: Props) {
   const [showLevelUp] = useState(false);
 
-  const currentLevel = LEVELS.find((l) => l.level === (gamProfile?.level || 1)) || LEVELS[0];
+  const currentLevel =
+    LEVELS.find((l) => l.level === (gamProfile?.level || 1)) || LEVELS[0];
   const nextLevel = LEVELS.find((l) => l.level === currentLevel.level + 1);
-  const pointsInLevel = (gamProfile?.total_points || 0) - currentLevel.minPoints;
-  const pointsNeeded = nextLevel ? nextLevel.minPoints - currentLevel.minPoints : 1;
-  const levelProgress = nextLevel ? Math.round((pointsInLevel / pointsNeeded) * 100) : 100;
+  const pointsInLevel =
+    (gamProfile?.total_points || 0) - currentLevel.minPoints;
+  const pointsNeeded = nextLevel
+    ? nextLevel.minPoints - currentLevel.minPoints
+    : 1;
+  const levelProgress = nextLevel
+    ? Math.round((pointsInLevel / pointsNeeded) * 100)
+    : 100;
 
-  const activeChallenges = challenges.filter((c) => !progressMap[c.id]?.completed);
-  const completedChallenges = challenges.filter((c) => progressMap[c.id]?.completed);
+  const activeChallenges = challenges.filter(
+    (c) => !progressMap[c.id]?.completed,
+  );
+  const completedChallenges = challenges.filter(
+    (c) => progressMap[c.id]?.completed,
+  );
 
   return (
     <div>
@@ -101,8 +129,12 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
             </div>
             <div className="flex-1 min-w-[200px]">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold">{gamProfile?.level_name || "Setter Débutant"}</h2>
-                <Badge className="bg-brand text-brand-dark">Niv. {gamProfile?.level || 1}</Badge>
+                <h2 className="text-xl font-bold">
+                  {gamProfile?.level_name || "Setter Débutant"}
+                </h2>
+                <Badge className="bg-brand text-brand-dark">
+                  Niv. {gamProfile?.level || 1}
+                </Badge>
               </div>
               <p className="text-white/60 text-sm mb-2">
                 {gamProfile?.total_points || 0} points au total
@@ -113,7 +145,10 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                     <span>{gamProfile?.total_points || 0} pts</span>
                     <span>{nextLevel.minPoints} pts</span>
                   </div>
-                  <Progress value={levelProgress} className="h-2 [&>div]:bg-brand" />
+                  <Progress
+                    value={levelProgress}
+                    className="h-2 [&>div]:bg-brand"
+                  />
                 </div>
               )}
             </div>
@@ -121,14 +156,18 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
               <div>
                 <div className="flex items-center justify-center gap-1 text-brand mb-1">
                   <Flame className="h-5 w-5" />
-                  <span className="text-2xl font-bold">{gamProfile?.current_streak || 0}</span>
+                  <span className="text-2xl font-bold">
+                    {gamProfile?.current_streak || 0}
+                  </span>
                 </div>
                 <p className="text-xs text-white/50">Jours streak</p>
               </div>
               <div>
                 <div className="flex items-center justify-center gap-1 text-brand mb-1">
                   <Trophy className="h-5 w-5" />
-                  <span className="text-2xl font-bold">{completedChallenges.length}</span>
+                  <span className="text-2xl font-bold">
+                    {completedChallenges.length}
+                  </span>
                 </div>
                 <p className="text-xs text-white/50">Défis gagnés</p>
               </div>
@@ -164,14 +203,22 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
           {activeChallenges.map((challenge) => {
             const prog = progressMap[challenge.id];
             const current = prog?.current_value || 0;
-            const percent = challenge.target_value > 0 ? Math.round((current / challenge.target_value) * 100) : 0;
+            const percent =
+              challenge.target_value > 0
+                ? Math.round((current / challenge.target_value) * 100)
+                : 0;
             return (
-              <Card key={challenge.id} className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+              <Card
+                key={challenge.id}
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+              >
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold mb-1">{challenge.title}</h3>
-                      <p className="text-sm text-muted-foreground">{challenge.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {challenge.description}
+                      </p>
                     </div>
                     <Badge className="bg-brand/10 text-brand border-brand/20 shrink-0 ml-4">
                       <Zap className="h-3 w-3 mr-1" />
@@ -179,15 +226,22 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="font-medium">{current}/{challenge.target_value}</span>
+                    <span className="font-medium">
+                      {current}/{challenge.target_value}
+                    </span>
                     {challenge.end_date && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {format(new Date(challenge.end_date), "d MMM", { locale: fr })}
+                        {format(new Date(challenge.end_date), "d MMM", {
+                          locale: fr,
+                        })}
                       </span>
                     )}
                   </div>
-                  <Progress value={percent} className="h-2.5 [&>div]:bg-brand" />
+                  <Progress
+                    value={percent}
+                    className="h-2.5 [&>div]:bg-brand"
+                  />
                 </CardContent>
               </Card>
             );
@@ -200,7 +254,9 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                   <Target className="h-7 w-7 text-muted-foreground/40" />
                 </div>
                 <p className="font-medium">Aucun défi en cours</p>
-                <p className="text-sm mt-1 text-muted-foreground/60">De nouveaux défis arrivent bientôt !</p>
+                <p className="text-sm mt-1 text-muted-foreground/60">
+                  De nouveaux défis arrivent bientôt !
+                </p>
               </CardContent>
             </Card>
           )}
@@ -212,7 +268,10 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                 Défis complétés ({completedChallenges.length})
               </h2>
               {completedChallenges.map((challenge) => (
-                <Card key={challenge.id} className="rounded-2xl border-border/30 opacity-70">
+                <Card
+                  key={challenge.id}
+                  className="rounded-2xl border-border/30 opacity-70"
+                >
                   <CardContent className="p-4 flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-brand shrink-0" />
                     <div className="flex-1">
@@ -245,15 +304,22 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                   <div
                     key={player.user_id}
                     className={`flex items-center gap-3 p-3 rounded-lg ${
-                      isMe ? "bg-brand/10 ring-1 ring-brand/30" : rank <= 3 ? "bg-muted/50" : ""
+                      isMe
+                        ? "bg-brand/10 ring-1 ring-brand/30"
+                        : rank <= 3
+                          ? "bg-muted/50"
+                          : ""
                     }`}
                   >
                     <span
                       className={`text-lg font-bold w-6 text-center ${
-                        rank === 1 ? "text-yellow-500" :
-                        rank === 2 ? "text-gray-400" :
-                        rank === 3 ? "text-orange-400" :
-                        "text-muted-foreground"
+                        rank === 1
+                          ? "text-yellow-500"
+                          : rank === 2
+                            ? "text-gray-400"
+                            : rank === 3
+                              ? "text-orange-400"
+                              : "text-muted-foreground"
                       }`}
                     >
                       {rank}
@@ -265,9 +331,13 @@ export function ChallengesView({ gamProfile, challenges, progressMap, leaderboar
                       <p className="text-sm font-medium truncate">
                         {player.user?.full_name || "Anonyme"} {isMe && "(vous)"}
                       </p>
-                      <p className="text-xs text-muted-foreground">{player.level_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {player.level_name}
+                      </p>
                     </div>
-                    <span className="text-sm font-semibold">{player.total_points} pts</span>
+                    <span className="text-sm font-semibold">
+                      {player.total_points} pts
+                    </span>
                   </div>
                 );
               })}

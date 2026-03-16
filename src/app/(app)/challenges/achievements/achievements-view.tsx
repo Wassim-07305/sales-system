@@ -247,7 +247,9 @@ export function AchievementsView({ achievements, totalPoints }: Props) {
             <Trophy className="h-8 w-8 text-muted-foreground/40" />
           </div>
           <p className="font-medium">Aucun achievement dans cette categorie</p>
-          <p className="text-sm mt-1 text-muted-foreground/60">Continuez a jouer pour debloquer des achievements</p>
+          <p className="text-sm mt-1 text-muted-foreground/60">
+            Continuez a jouer pour debloquer des achievements
+          </p>
         </div>
       )}
     </div>

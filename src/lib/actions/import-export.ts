@@ -77,7 +77,7 @@ function toCSV(headers: string[], rows: string[][]): string {
 // ---------------------------------------------------------------------------
 
 export async function importContactsCSV(
-  csvText: string
+  csvText: string,
 ): Promise<{ imported: number; errors: string[] }> {
   const supabase = await createClient();
   const {
@@ -112,7 +112,8 @@ export async function importContactsCSV(
       continue;
     }
 
-    const role = row.role && validRoles.includes(row.role) ? row.role : "client_b2b";
+    const role =
+      row.role && validRoles.includes(row.role) ? row.role : "client_b2b";
 
     const { error } = await supabase.from("profiles").upsert(
       {
@@ -123,7 +124,7 @@ export async function importContactsCSV(
         role,
         niche: row.niche || null,
       },
-      { onConflict: "email" }
+      { onConflict: "email" },
     );
 
     if (error) {
@@ -142,7 +143,7 @@ export async function importContactsCSV(
 // ---------------------------------------------------------------------------
 
 export async function importDealsCSV(
-  csvText: string
+  csvText: string,
 ): Promise<{ imported: number; errors: string[] }> {
   const supabase = await createClient();
   const {
@@ -190,7 +191,7 @@ export async function importDealsCSV(
         contactId = contact.id;
       } else {
         errors.push(
-          `Ligne ${lineNum}: contact "${row.contact_email}" non trouvé`
+          `Ligne ${lineNum}: contact "${row.contact_email}" non trouvé`,
         );
       }
     }
@@ -234,7 +235,9 @@ export async function exportContactsCSV(): Promise<string> {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("full_name, email, phone, company, role, niche, health_score, created_at")
+    .select(
+      "full_name, email, phone, company, role, niche, health_score, created_at",
+    )
     .order("created_at", { ascending: false });
 
   if (!profiles || profiles.length === 0) return "";
@@ -277,7 +280,9 @@ export async function exportDealsCSV(): Promise<string> {
 
   const { data: deals } = await supabase
     .from("deals")
-    .select("title, value, source, temperature, created_at, stage:pipeline_stages(name), contact:profiles!contact_id(full_name)")
+    .select(
+      "title, value, source, temperature, created_at, stage:pipeline_stages(name), contact:profiles!contact_id(full_name)",
+    )
     .order("created_at", { ascending: false });
 
   if (!deals || deals.length === 0) return "";

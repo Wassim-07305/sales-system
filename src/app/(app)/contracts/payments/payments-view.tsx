@@ -44,7 +44,12 @@ interface Installment {
   stripe_payment_id: string | null;
   paid_at: string | null;
   created_at: string;
-  contract?: { id: string; client_id: string; amount: number; status: string } | null;
+  contract?: {
+    id: string;
+    client_id: string;
+    amount: number;
+    status: string;
+  } | null;
 }
 
 interface Props {
@@ -101,7 +106,10 @@ export function PaymentsView({ installments, overdue }: Props) {
     startTransition(async () => {
       try {
         const result = await recordPayment(installmentId);
-        if (result.error) { toast.error(result.error); return; }
+        if (result.error) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Paiement enregistré avec succès");
         router.refresh();
       } catch {
@@ -175,7 +183,10 @@ export function PaymentsView({ installments, overdue }: Props) {
                     <span className="text-sm font-medium">
                       Contrat #{item.contract_id.slice(0, 8)}
                     </span>
-                    <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+                    <Badge
+                      variant="outline"
+                      className="bg-red-500/10 text-red-600 border-red-500/20"
+                    >
                       En retard
                     </Badge>
                   </div>
@@ -183,7 +194,10 @@ export function PaymentsView({ installments, overdue }: Props) {
                     {item.amount.toLocaleString("fr-FR")} &euro;
                   </p>
                   <p className="text-xs text-red-600">
-                    Échéance : {format(new Date(item.due_date), "d MMM yyyy", { locale: fr })}
+                    Échéance :{" "}
+                    {format(new Date(item.due_date), "d MMM yyyy", {
+                      locale: fr,
+                    })}
                   </p>
                   <div className="mt-3 flex gap-2">
                     <Button
@@ -192,7 +206,11 @@ export function PaymentsView({ installments, overdue }: Props) {
                       onClick={() => handlePayOnline(item.id)}
                       disabled={isPending}
                     >
-                      {isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <CreditCard className="h-3 w-3 mr-1" />}
+                      {isPending ? (
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      ) : (
+                        <CreditCard className="h-3 w-3 mr-1" />
+                      )}
                       Payer en ligne
                     </Button>
                     <Button
@@ -233,17 +251,32 @@ export function PaymentsView({ installments, overdue }: Props) {
           <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Contrat</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Montant</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Échéance</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Payé le</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-right">Action</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Contrat
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Montant
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Échéance
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Statut
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Payé le
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-right">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((installment) => (
-                <TableRow key={installment.id} className="hover:bg-secondary/50 transition-colors">
+                <TableRow
+                  key={installment.id}
+                  className="hover:bg-secondary/50 transition-colors"
+                >
                   <TableCell className="font-medium">
                     Contrat #{installment.contract_id.slice(0, 8)}
                   </TableCell>
@@ -254,7 +287,9 @@ export function PaymentsView({ installments, overdue }: Props) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {format(new Date(installment.due_date), "d MMM yyyy", { locale: fr })}
+                    {format(new Date(installment.due_date), "d MMM yyyy", {
+                      locale: fr,
+                    })}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -266,7 +301,9 @@ export function PaymentsView({ installments, overdue }: Props) {
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {installment.paid_at
-                      ? format(new Date(installment.paid_at), "d MMM yyyy", { locale: fr })
+                      ? format(new Date(installment.paid_at), "d MMM yyyy", {
+                          locale: fr,
+                        })
                       : "—"}
                   </TableCell>
                   <TableCell className="text-right">
@@ -278,7 +315,11 @@ export function PaymentsView({ installments, overdue }: Props) {
                           disabled={isPending}
                           className="bg-brand text-brand-dark hover:bg-brand/90"
                         >
-                          {isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <CreditCard className="h-3 w-3 mr-1" />}
+                          {isPending ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <CreditCard className="h-3 w-3 mr-1" />
+                          )}
                           Payer
                         </Button>
                         <Button
@@ -297,12 +338,17 @@ export function PaymentsView({ installments, overdue }: Props) {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-12 text-muted-foreground"
+                  >
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                       <Clock className="h-6 w-6 text-muted-foreground/40" />
                     </div>
                     <p className="font-medium text-sm">Aucun paiement trouvé</p>
-                    <p className="text-xs mt-1">Les paiements apparaîtront ici</p>
+                    <p className="text-xs mt-1">
+                      Les paiements apparaîtront ici
+                    </p>
                   </TableCell>
                 </TableRow>
               )}

@@ -7,12 +7,14 @@ Extraire la fonctionnalite Academy (Formation) du projet Sales System en une bri
 ## Scope
 
 ### Inclus
+
 - **Student** : grille formations (filtres, recherche, progression), lecteur de cours (sidebar modules collapsibles, video YouTube/Vimeo/upload, ressources, progression auto 80% + manuelle, navigation prev/next)
 - **Admin** : CRUD complet (cours, modules, lecons), drag-drop reordering (@dnd-kit), upload miniatures/videos/ressources via Supabase Storage
 - **SQL** : 5 tables autonomes (courses, course_modules, lessons, lesson_progress, lesson_attachments) + RLS + storage bucket
 - **Upload** : composant file-upload.tsx reutilisable (drag-drop, preview, progress bar)
 
 ### Exclu
+
 - Quiz / quiz_attempts (specifique Sales System)
 - Library / bibliotheque de ressources
 - Revision / flashcards
@@ -68,21 +70,21 @@ Copier-coller direct (Approche A). Pas de fichier de config, pas d'abstraction. 
 
 ## Fichiers source (Sales System)
 
-| Fichier source | Destination brique | Action |
-|---|---|---|
-| src/app/(app)/academy/page.tsx | app/page.tsx | Nettoyer (retirer quiz) |
-| src/app/(app)/academy/course-grid.tsx | app/course-grid.tsx | Copier tel quel |
-| src/app/(app)/academy/[courseId]/page.tsx | app/[courseId]/page.tsx | Nettoyer (retirer quiz) |
-| src/app/(app)/academy/[courseId]/course-view.tsx | app/[courseId]/course-view.tsx | Nettoyer (retirer quiz, prerequis) |
-| src/app/(app)/academy/admin/page.tsx | app/admin/page.tsx | Copier tel quel |
-| src/app/(app)/academy/admin/course-list.tsx | app/admin/course-list.tsx | Copier tel quel |
-| src/app/(app)/academy/admin/course-form-dialog.tsx | app/admin/course-form-dialog.tsx | Copier tel quel |
-| src/app/(app)/academy/admin/[courseId]/page.tsx | app/admin/[courseId]/page.tsx | Copier tel quel |
-| src/app/(app)/academy/admin/[courseId]/course-editor.tsx | app/admin/[courseId]/course-editor.tsx | Copier tel quel |
-| src/app/(app)/academy/admin/[courseId]/module-form-dialog.tsx | app/admin/[courseId]/module-form-dialog.tsx | Copier tel quel |
-| src/app/(app)/academy/admin/[courseId]/lesson-form-dialog.tsx | app/admin/[courseId]/lesson-form-dialog.tsx | Copier tel quel |
-| src/lib/actions/academy.ts | actions/academy.ts | Nettoyer (retirer quiz, library, revision) |
-| src/lib/actions/academy-admin.ts | actions/academy-admin.ts | Copier tel quel |
-| src/components/ui/file-upload.tsx | components/file-upload.tsx | Copier tel quel |
-| src/lib/types/database.ts | types.ts | Extraire types academy uniquement |
-| supabase/migration-academy-modules.sql | migration.sql | Rendre autonome (CREATE TABLE complet) |
+| Fichier source                                                | Destination brique                          | Action                                     |
+| ------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------ |
+| src/app/(app)/academy/page.tsx                                | app/page.tsx                                | Nettoyer (retirer quiz)                    |
+| src/app/(app)/academy/course-grid.tsx                         | app/course-grid.tsx                         | Copier tel quel                            |
+| src/app/(app)/academy/[courseId]/page.tsx                     | app/[courseId]/page.tsx                     | Nettoyer (retirer quiz)                    |
+| src/app/(app)/academy/[courseId]/course-view.tsx              | app/[courseId]/course-view.tsx              | Nettoyer (retirer quiz, prerequis)         |
+| src/app/(app)/academy/admin/page.tsx                          | app/admin/page.tsx                          | Copier tel quel                            |
+| src/app/(app)/academy/admin/course-list.tsx                   | app/admin/course-list.tsx                   | Copier tel quel                            |
+| src/app/(app)/academy/admin/course-form-dialog.tsx            | app/admin/course-form-dialog.tsx            | Copier tel quel                            |
+| src/app/(app)/academy/admin/[courseId]/page.tsx               | app/admin/[courseId]/page.tsx               | Copier tel quel                            |
+| src/app/(app)/academy/admin/[courseId]/course-editor.tsx      | app/admin/[courseId]/course-editor.tsx      | Copier tel quel                            |
+| src/app/(app)/academy/admin/[courseId]/module-form-dialog.tsx | app/admin/[courseId]/module-form-dialog.tsx | Copier tel quel                            |
+| src/app/(app)/academy/admin/[courseId]/lesson-form-dialog.tsx | app/admin/[courseId]/lesson-form-dialog.tsx | Copier tel quel                            |
+| src/lib/actions/academy.ts                                    | actions/academy.ts                          | Nettoyer (retirer quiz, library, revision) |
+| src/lib/actions/academy-admin.ts                              | actions/academy-admin.ts                    | Copier tel quel                            |
+| src/components/ui/file-upload.tsx                             | components/file-upload.tsx                  | Copier tel quel                            |
+| src/lib/types/database.ts                                     | types.ts                                    | Extraire types academy uniquement          |
+| supabase/migration-academy-modules.sql                        | migration.sql                               | Rendre autonome (CREATE TABLE complet)     |

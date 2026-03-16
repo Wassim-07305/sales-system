@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 
 export async function getResources() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   // Récupérer le profil pour filtrer par rôle
@@ -38,7 +40,9 @@ export async function getResourceCategories() {
     .select("category")
     .not("category", "is", null);
 
-  const categories = [...new Set((data || []).map((r) => r.category).filter(Boolean))];
+  const categories = [
+    ...new Set((data || []).map((r) => r.category).filter(Boolean)),
+  ];
   return categories as string[];
 }
 
@@ -52,7 +56,9 @@ export async function createResource(formData: {
   target_roles?: string[];
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase.from("resource_items").insert({

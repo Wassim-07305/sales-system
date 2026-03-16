@@ -20,7 +20,10 @@ export default function InboxLoading() {
           </div>
           <div className="space-y-0">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="p-3 border-b flex items-center gap-3 hover:bg-secondary/50 transition-colors">
+              <div
+                key={i}
+                className="p-3 border-b flex items-center gap-3 hover:bg-secondary/50 transition-colors"
+              >
                 <Skeleton className="h-9 w-9 rounded-full shrink-0" />
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">

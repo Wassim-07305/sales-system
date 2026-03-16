@@ -13,12 +13,12 @@ self.addEventListener("activate", function (event) {
         return Promise.all(
           keys.map(function (k) {
             return caches.delete(k);
-          })
+          }),
         );
       })
       .then(function () {
         return self.clients.claim();
-      })
+      }),
   );
 });
 
@@ -81,6 +81,6 @@ self.addEventListener("notificationclick", function (event) {
         if (self.clients.openWindow) {
           return self.clients.openWindow(targetUrl);
         }
-      })
+      }),
   );
 });

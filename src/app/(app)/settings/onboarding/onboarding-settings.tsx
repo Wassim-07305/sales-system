@@ -20,10 +20,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { saveOnboardingStep, deleteOnboardingStep } from "@/lib/actions/onboarding";
+import {
+  saveOnboardingStep,
+  deleteOnboardingStep,
+} from "@/lib/actions/onboarding";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, GripVertical, ArrowLeft, ListChecks } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  GripVertical,
+  ArrowLeft,
+  ListChecks,
+} from "lucide-react";
 import Link from "next/link";
 
 interface Step {
@@ -112,7 +122,11 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
               Retour
             </Button>
           </Link>
-          <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90" onClick={openNew}>
+          <Button
+            size="sm"
+            className="bg-brand text-brand-dark hover:bg-brand/90"
+            onClick={openNew}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Ajouter
           </Button>
@@ -121,7 +135,10 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
 
       <div className="space-y-3">
         {steps.map((step) => (
-          <Card key={step.id} className="border-border/50 hover:shadow-md transition-all">
+          <Card
+            key={step.id}
+            className="border-border/50 hover:shadow-md transition-all"
+          >
             <CardContent className="p-4 flex items-center gap-4">
               <GripVertical className="h-5 w-5 text-muted-foreground/40 shrink-0 cursor-grab" />
               <div className="flex-1 min-w-0">
@@ -132,15 +149,37 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
                   <h4 className="font-medium text-sm truncate">{step.title}</h4>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20">{step.step_type}</Badge>
-                  {step.is_required && <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">Obligatoire</Badge>}
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20"
+                  >
+                    {step.step_type}
+                  </Badge>
+                  {step.is_required && (
+                    <Badge
+                      variant="outline"
+                      className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20"
+                    >
+                      Obligatoire
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="icon" className="hover:bg-muted/50" onClick={() => openEdit(step)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-muted/50"
+                  onClick={() => openEdit(step)}
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="hover:bg-red-500/10" onClick={() => handleDelete(step.id)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-red-500/10"
+                  onClick={() => handleDelete(step.id)}
+                >
                   <Trash2 className="h-4 w-4 text-red-400" />
                 </Button>
               </div>
@@ -154,8 +193,12 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
                 <ListChecks className="h-7 w-7 text-muted-foreground/60" />
               </div>
-              <p className="font-medium text-sm text-foreground mb-1">Aucune étape configurée</p>
-              <p className="text-xs text-muted-foreground">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
+              <p className="font-medium text-sm text-foreground mb-1">
+                Aucune étape configurée
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Cliquez sur &quot;Ajouter&quot; pour commencer.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -164,19 +207,35 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingStep ? "Modifier l'étape" : "Nouvelle étape"}</DialogTitle>
+            <DialogTitle>
+              {editingStep ? "Modifier l'étape" : "Nouvelle étape"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Titre</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="ex: Bienvenue" />
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Titre
+              </Label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="ex: Bienvenue"
+              />
             </div>
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Description</Label>
-              <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description de l'étape" />
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Description
+              </Label>
+              <Input
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Description de l'étape"
+              />
             </div>
             <div>
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Type</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Type
+              </Label>
               <Select value={stepType} onValueChange={setStepType}>
                 <SelectTrigger>
                   <SelectValue />
@@ -199,7 +258,10 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
               />
               <Label htmlFor="required">Étape obligatoire</Label>
             </div>
-            <Button className="w-full bg-brand text-brand-dark hover:bg-brand/90" onClick={handleSave}>
+            <Button
+              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              onClick={handleSave}
+            >
               {editingStep ? "Modifier" : "Ajouter"}
             </Button>
           </div>

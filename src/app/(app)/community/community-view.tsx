@@ -9,14 +9,46 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
-  Heart, MessageCircle, Trophy, Plus, Send, Users, Settings2, Calendar, ImagePlus, X, Loader2,
-  HelpCircle, PartyPopper, MessagesSquare, ShieldCheck, Hash, Sparkles,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Heart,
+  MessageCircle,
+  Trophy,
+  Plus,
+  Send,
+  Users,
+  Settings2,
+  Calendar,
+  ImagePlus,
+  X,
+  Loader2,
+  HelpCircle,
+  PartyPopper,
+  MessagesSquare,
+  ShieldCheck,
+  Hash,
+  Sparkles,
 } from "lucide-react";
-import { createCommunityPost, toggleLike, getComments, addComment } from "@/lib/actions/community";
+import {
+  createCommunityPost,
+  toggleLike,
+  getComments,
+  addComment,
+} from "@/lib/actions/community";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -24,7 +56,10 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { ReputationBadge } from "@/components/community/reputation-badge";
-import { LeaderboardCard, type LeaderboardEntry } from "@/components/community/leaderboard-card";
+import {
+  LeaderboardCard,
+  type LeaderboardEntry,
+} from "@/components/community/leaderboard-card";
 
 interface Post {
   id: string;
@@ -36,14 +71,24 @@ interface Post {
   likes_count: number;
   channel: string | null;
   created_at: string;
-  author: { id: string; full_name: string | null; avatar_url: string | null; niche: string | null; role?: string } | null;
+  author: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    niche: string | null;
+    role?: string;
+  } | null;
 }
 
 interface Comment {
   id: string;
   content: string;
   created_at: string;
-  author: { id: string; full_name: string | null; avatar_url: string | null } | null;
+  author: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 // ─── Channel definitions ───
@@ -53,10 +98,10 @@ interface ChannelDef {
   label: string;
   description: string;
   icon: React.ReactNode;
-  color: string;          // Tailwind text color
-  bgColor: string;        // Tailwind bg color for icon container
-  borderColor: string;    // Active border accent
-  activeBg: string;       // Active item background
+  color: string; // Tailwind text color
+  bgColor: string; // Tailwind bg color for icon container
+  borderColor: string; // Active border accent
+  activeBg: string; // Active item background
   private?: boolean;
   allowedRoles?: string[];
 }
@@ -122,7 +167,11 @@ const typeColors: Record<string, string> = {
   discussion: "bg-muted/50 text-muted-foreground border-border",
 };
 
-const typeLabels: Record<string, string> = { win: "Win", question: "Question", discussion: "Discussion" };
+const typeLabels: Record<string, string> = {
+  win: "Win",
+  question: "Question",
+  discussion: "Discussion",
+};
 
 export function CommunityView({
   posts,
@@ -166,20 +215,29 @@ export function CommunityView({
   });
 
   // Filter posts: by channel, then by type tab
-  const channelFiltered = activeChannel === "all"
-    ? posts.filter((p) => {
-        // Hide team_interne posts from users who don't have access
-        if (p.channel === "team_interne") {
-          const teamChannel = CHANNELS.find((c) => c.id === "team_interne");
-          if (teamChannel?.allowedRoles && !teamChannel.allowedRoles.includes(userRole)) return false;
-        }
-        return true;
-      })
-    : posts.filter((p) => (p.channel || "general") === activeChannel);
+  const channelFiltered =
+    activeChannel === "all"
+      ? posts.filter((p) => {
+          // Hide team_interne posts from users who don't have access
+          if (p.channel === "team_interne") {
+            const teamChannel = CHANNELS.find((c) => c.id === "team_interne");
+            if (
+              teamChannel?.allowedRoles &&
+              !teamChannel.allowedRoles.includes(userRole)
+            )
+              return false;
+          }
+          return true;
+        })
+      : posts.filter((p) => (p.channel || "general") === activeChannel);
 
-  const filtered = activeTab === "all" ? channelFiltered : channelFiltered.filter((p) => p.type === activeTab);
+  const filtered =
+    activeTab === "all"
+      ? channelFiltered
+      : channelFiltered.filter((p) => p.type === activeTab);
 
-  const activeChannelDef = CHANNELS.find((ch) => ch.id === activeChannel) || CHANNELS[0];
+  const activeChannelDef =
+    CHANNELS.find((ch) => ch.id === activeChannel) || CHANNELS[0];
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -193,7 +251,9 @@ export function CommunityView({
       const supabase = createClient();
       const ext = file.name.split(".").pop();
       const path = `posts/${userId}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("community").upload(path, file, { upsert: true });
+      const { error } = await supabase.storage
+        .from("community")
+        .upload(path, file, { upsert: true });
       if (error) throw new Error(error.message);
       const { data } = supabase.storage.from("community").getPublicUrl(path);
       setNewImageUrl(data.publicUrl);
@@ -227,7 +287,9 @@ export function CommunityView({
       setNewImagePreview("");
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur lors de la publication");
+      toast.error(
+        err instanceof Error ? err.message : "Erreur lors de la publication",
+      );
     } finally {
       setIsPosting(false);
     }
@@ -263,9 +325,13 @@ export function CommunityView({
   }
 
   function PostCard({ post, isWinGrid }: { post: Post; isWinGrid?: boolean }) {
-    const postChannel = CHANNELS.find((c) => c.id === (post.channel || "general"));
+    const postChannel = CHANNELS.find(
+      (c) => c.id === (post.channel || "general"),
+    );
     return (
-      <Card className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}>
+      <Card
+        className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}
+      >
         <CardContent className="px-5 py-5 sm:px-6 sm:py-6">
           {/* Author row */}
           <div className="flex items-center gap-3 mb-4">
@@ -274,23 +340,39 @@ export function CommunityView({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-semibold truncate">{post.author?.full_name || "Anonyme"}</p>
-                {post.author?.id && reputations[post.author.id] !== undefined && (
-                  <ReputationBadge score={reputations[post.author.id]} />
-                )}
+                <p className="text-sm font-semibold truncate">
+                  {post.author?.full_name || "Anonyme"}
+                </p>
+                {post.author?.id &&
+                  reputations[post.author.id] !== undefined && (
+                    <ReputationBadge score={reputations[post.author.id]} />
+                  )}
               </div>
               <p className="text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}
+                {formatDistanceToNow(new Date(post.created_at), {
+                  addSuffix: true,
+                  locale: fr,
+                })}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {activeChannel === "all" && postChannel && postChannel.id !== "all" && (
-                <Badge variant="outline" className={`text-[11px] ${postChannel.color} ${postChannel.bgColor} border-current/15`}>
-                  {postChannel.private && <ShieldCheck className="h-3 w-3 mr-0.5" />}
-                  {postChannel.label}
-                </Badge>
-              )}
-              <Badge variant="outline" className={`text-[11px] ${typeColors[post.type]}`}>
+              {activeChannel === "all" &&
+                postChannel &&
+                postChannel.id !== "all" && (
+                  <Badge
+                    variant="outline"
+                    className={`text-[11px] ${postChannel.color} ${postChannel.bgColor} border-current/15`}
+                  >
+                    {postChannel.private && (
+                      <ShieldCheck className="h-3 w-3 mr-0.5" />
+                    )}
+                    {postChannel.label}
+                  </Badge>
+                )}
+              <Badge
+                variant="outline"
+                className={`text-[11px] ${typeColors[post.type]}`}
+              >
                 {post.type === "win" && <Trophy className="h-3 w-3 mr-0.5" />}
                 {typeLabels[post.type]}
               </Badge>
@@ -298,10 +380,23 @@ export function CommunityView({
           </div>
 
           {/* Post body */}
-          {post.title && <h3 className="font-semibold text-[15px] mb-2 leading-snug">{post.title}</h3>}
-          <p className="text-sm text-foreground/80 leading-relaxed mb-5 whitespace-pre-wrap">{post.content}</p>
+          {post.title && (
+            <h3 className="font-semibold text-[15px] mb-2 leading-snug">
+              {post.title}
+            </h3>
+          )}
+          <p className="text-sm text-foreground/80 leading-relaxed mb-5 whitespace-pre-wrap">
+            {post.content}
+          </p>
           {post.image_url && (
-            <Image src={post.image_url} alt="" width={800} height={400} className="rounded-xl mb-5 max-h-72 object-cover w-full" loading="lazy" />
+            <Image
+              src={post.image_url}
+              alt=""
+              width={800}
+              height={400}
+              className="rounded-xl mb-5 max-h-72 object-cover w-full"
+              loading="lazy"
+            />
           )}
 
           {/* Actions */}
@@ -314,8 +409,12 @@ export function CommunityView({
                   : "text-muted-foreground hover:text-red-500 hover:bg-red-500/5"
               }`}
             >
-              <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? "fill-red-500" : ""}`} />
-              <span className="font-medium">{post.likes_count + (likedPosts.has(post.id) ? 1 : 0)}</span>
+              <Heart
+                className={`h-4 w-4 ${likedPosts.has(post.id) ? "fill-red-500" : ""}`}
+              />
+              <span className="font-medium">
+                {post.likes_count + (likedPosts.has(post.id) ? 1 : 0)}
+              </span>
             </button>
             <button
               onClick={() => handleExpandComments(post.id)}
@@ -330,7 +429,9 @@ export function CommunityView({
           {expandedComments === post.id && (
             <div className="mt-4 pt-4 border-t space-y-3">
               {comments.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-2">Aucun commentaire pour le moment</p>
+                <p className="text-xs text-muted-foreground text-center py-2">
+                  Aucun commentaire pour le moment
+                </p>
               )}
               {comments.map((c) => (
                 <div key={c.id} className="flex gap-3 group">
@@ -339,12 +440,19 @@ export function CommunityView({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-xs font-semibold">{c.author?.full_name || "Anonyme"}</p>
+                      <p className="text-xs font-semibold">
+                        {c.author?.full_name || "Anonyme"}
+                      </p>
                       <p className="text-[10px] text-muted-foreground">
-                        {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: fr })}
+                        {formatDistanceToNow(new Date(c.created_at), {
+                          addSuffix: true,
+                          locale: fr,
+                        })}
                       </p>
                     </div>
-                    <p className="text-sm text-foreground/80 mt-0.5">{c.content}</p>
+                    <p className="text-sm text-foreground/80 mt-0.5">
+                      {c.content}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -353,10 +461,17 @@ export function CommunityView({
                   placeholder="Ajouter un commentaire..."
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddComment(post.id)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && handleAddComment(post.id)
+                  }
                   className="flex-1 h-9 text-sm"
                 />
-                <Button size="sm" variant="outline" className="h-9 px-3 hover:bg-brand/10 hover:text-brand hover:border-brand/30" onClick={() => handleAddComment(post.id)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-3 hover:bg-brand/10 hover:text-brand hover:border-brand/30"
+                  onClick={() => handleAddComment(post.id)}
+                >
                   <Send className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -369,20 +484,40 @@ export function CommunityView({
 
   return (
     <div>
-      <PageHeader title="Communaut\u00e9" description="\u00c9changez avec les autres membres">
+      <PageHeader
+        title="Communaut\u00e9"
+        description="\u00c9changez avec les autres membres"
+      >
         <div className="flex gap-2">
           <Link href="/community/events">
-            <Button variant="outline" size="sm"><Calendar className="h-4 w-4 mr-2" />\u00c9v\u00e9nements</Button>
+            <Button variant="outline" size="sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              \u00c9v\u00e9nements
+            </Button>
           </Link>
           <Link href="/community/members">
-            <Button variant="outline" size="sm"><Users className="h-4 w-4 mr-2" />Membres</Button>
+            <Button variant="outline" size="sm">
+              <Users className="h-4 w-4 mr-2" />
+              Membres
+            </Button>
           </Link>
           {isAdmin && (
             <Link href="/community/manage">
-              <Button variant="outline" size="sm"><Settings2 className="h-4 w-4 mr-2" />Mod\u00e9ration</Button>
+              <Button variant="outline" size="sm">
+                <Settings2 className="h-4 w-4 mr-2" />
+                Mod\u00e9ration
+              </Button>
             </Link>
           )}
-          <Button onClick={() => { setNewChannel(activeChannel === "all" ? "general" : activeChannel); setDialogOpen(true); }} className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold">
+          <Button
+            onClick={() => {
+              setNewChannel(
+                activeChannel === "all" ? "general" : activeChannel,
+              );
+              setDialogOpen(true);
+            }}
+            className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau post
           </Button>
@@ -397,7 +532,10 @@ export function CommunityView({
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
               {visibleChannels.map((ch) => {
                 const isActive = activeChannel === ch.id;
-                const count = ch.id === "all" ? channelCounts.all || 0 : channelCounts[ch.id] || 0;
+                const count =
+                  ch.id === "all"
+                    ? channelCounts.all || 0
+                    : channelCounts[ch.id] || 0;
                 return (
                   <button
                     key={ch.id}
@@ -408,7 +546,9 @@ export function CommunityView({
                         : "bg-card text-muted-foreground hover:bg-accent/30 border border-border"
                     }`}
                   >
-                    <span className={`flex h-5 w-5 items-center justify-center ${ch.color}`}>
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center ${ch.color}`}
+                    >
                       {ch.icon}
                     </span>
                     {ch.label}
@@ -426,13 +566,16 @@ export function CommunityView({
           {/* Desktop: vertical sidebar */}
           <div className="hidden lg:block sticky top-20">
             <div className="rounded-2xl border border-border/40 bg-card p-3">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-2">Canaux</h3>
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-2">
+                Canaux
+              </h3>
               <nav className="space-y-1">
                 {visibleChannels.map((ch) => {
                   const isActive = activeChannel === ch.id;
-                  const count = ch.id === "all"
-                    ? channelCounts.all || 0
-                    : channelCounts[ch.id] || 0;
+                  const count =
+                    ch.id === "all"
+                      ? channelCounts.all || 0
+                      : channelCounts[ch.id] || 0;
 
                   return (
                     <button
@@ -444,24 +587,36 @@ export function CommunityView({
                           : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                        isActive ? `${ch.bgColor} ${ch.color}` : `bg-muted/80 ${ch.color} group-hover:${ch.bgColor}`
-                      }`}>
+                      <span
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                          isActive
+                            ? `${ch.bgColor} ${ch.color}`
+                            : `bg-muted/80 ${ch.color} group-hover:${ch.bgColor}`
+                        }`}
+                      >
                         {ch.icon}
                       </span>
                       <span className="flex-1 min-w-0">
-                        <span className="block leading-tight truncate">{ch.label}</span>
+                        <span className="block leading-tight truncate">
+                          {ch.label}
+                        </span>
                         {ch.private && (
                           <span className="flex items-center gap-1 mt-0.5">
                             <ShieldCheck className="h-2.5 w-2.5 text-purple-400" />
-                            <span className="text-[10px] text-purple-400 font-medium">Priv\u00e9</span>
+                            <span className="text-[10px] text-purple-400 font-medium">
+                              Priv\u00e9
+                            </span>
                           </span>
                         )}
                       </span>
                       {count > 0 && (
-                        <span className={`text-[11px] font-semibold rounded-full px-2 py-0.5 min-w-[24px] text-center ${
-                          isActive ? `${ch.bgColor} ${ch.color}` : "bg-muted text-muted-foreground"
-                        }`}>
+                        <span
+                          className={`text-[11px] font-semibold rounded-full px-2 py-0.5 min-w-[24px] text-center ${
+                            isActive
+                              ? `${ch.bgColor} ${ch.color}`
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
                           {count}
                         </span>
                       )}
@@ -477,26 +632,38 @@ export function CommunityView({
         <div className="flex-1 min-w-0">
           {/* Active channel header banner */}
           {activeChannel !== "all" && (
-            <div className={`relative flex items-center gap-4 mb-6 p-5 rounded-xl border overflow-hidden ${activeChannelDef.bgColor}`}>
+            <div
+              className={`relative flex items-center gap-4 mb-6 p-5 rounded-xl border overflow-hidden ${activeChannelDef.bgColor}`}
+            >
               {/* Subtle gradient overlay for depth */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background/40 pointer-events-none" />
-              <span className={`relative flex h-11 w-11 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border/50 ${activeChannelDef.color}`}>
+              <span
+                className={`relative flex h-11 w-11 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border/50 ${activeChannelDef.color}`}
+              >
                 {activeChannelDef.icon}
               </span>
               <div className="relative flex-1">
                 <h2 className="font-semibold text-base flex items-center gap-2">
                   {activeChannelDef.label}
                   {activeChannelDef.private && (
-                    <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-500 bg-purple-500/5">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] border-purple-500/30 text-purple-500 bg-purple-500/5"
+                    >
                       <ShieldCheck className="h-3 w-3 mr-0.5" /> Priv\u00e9
                     </Badge>
                   )}
                 </h2>
-                <p className="text-sm text-muted-foreground mt-0.5">{activeChannelDef.description}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {activeChannelDef.description}
+                </p>
               </div>
               <Button
                 size="sm"
-                onClick={() => { setNewChannel(activeChannel); setDialogOpen(true); }}
+                onClick={() => {
+                  setNewChannel(activeChannel);
+                  setDialogOpen(true);
+                }}
                 className="relative bg-brand text-brand-dark hover:bg-brand/90 font-semibold hidden sm:flex"
               >
                 <Plus className="h-4 w-4 mr-1.5" />
@@ -508,32 +675,43 @@ export function CommunityView({
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="all">Tout</TabsTrigger>
-              <TabsTrigger value="win"><Trophy className="h-4 w-4 mr-1" />Wins</TabsTrigger>
+              <TabsTrigger value="win">
+                <Trophy className="h-4 w-4 mr-1" />
+                Wins
+              </TabsTrigger>
               <TabsTrigger value="question">Questions</TabsTrigger>
               <TabsTrigger value="discussion">Discussions</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all">
               <div className="space-y-4">
-                {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+                {filtered.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
               </div>
             </TabsContent>
 
             <TabsContent value="win">
               <div className="grid md:grid-cols-2 gap-4">
-                {filtered.map((post) => <PostCard key={post.id} post={post} isWinGrid />)}
+                {filtered.map((post) => (
+                  <PostCard key={post.id} post={post} isWinGrid />
+                ))}
               </div>
             </TabsContent>
 
             <TabsContent value="question">
               <div className="space-y-4">
-                {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+                {filtered.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
               </div>
             </TabsContent>
 
             <TabsContent value="discussion">
               <div className="space-y-4">
-                {filtered.map((post) => <PostCard key={post.id} post={post} />)}
+                {filtered.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
               </div>
             </TabsContent>
           </Tabs>
@@ -545,10 +723,19 @@ export function CommunityView({
                 <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="h-8 w-8 text-brand" />
                 </div>
-                <p className="font-semibold text-base mb-1">Aucun post dans ce canal</p>
-                <p className="text-sm text-muted-foreground mb-5">Soyez le premier \u00e0 lancer la discussion !</p>
+                <p className="font-semibold text-base mb-1">
+                  Aucun post dans ce canal
+                </p>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Soyez le premier \u00e0 lancer la discussion !
+                </p>
                 <Button
-                  onClick={() => { setNewChannel(activeChannel === "all" ? "general" : activeChannel); setDialogOpen(true); }}
+                  onClick={() => {
+                    setNewChannel(
+                      activeChannel === "all" ? "general" : activeChannel,
+                    );
+                    setDialogOpen(true);
+                  }}
                   className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -582,31 +769,45 @@ export function CommunityView({
             {/* Channel & Type row */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Canal</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Canal
+                </Label>
                 <Select
                   value={newChannel}
                   onValueChange={(v) => setNewChannel(v)}
                 >
-                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {visibleChannels.filter((ch) => ch.id !== "all").map((ch) => (
-                      <SelectItem key={ch.id} value={ch.id}>
-                        <span className="flex items-center gap-2">
-                          <span className={`flex h-5 w-5 items-center justify-center rounded ${ch.bgColor} ${ch.color}`}>
-                            {ch.icon}
+                    {visibleChannels
+                      .filter((ch) => ch.id !== "all")
+                      .map((ch) => (
+                        <SelectItem key={ch.id} value={ch.id}>
+                          <span className="flex items-center gap-2">
+                            <span
+                              className={`flex h-5 w-5 items-center justify-center rounded ${ch.bgColor} ${ch.color}`}
+                            >
+                              {ch.icon}
+                            </span>
+                            {ch.label}
+                            {ch.private && (
+                              <ShieldCheck className="h-3 w-3 text-purple-500" />
+                            )}
                           </span>
-                          {ch.label}
-                          {ch.private && <ShieldCheck className="h-3 w-3 text-purple-500" />}
-                        </span>
-                      </SelectItem>
-                    ))}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Type
+                </Label>
                 <Select value={newType} onValueChange={setNewType}>
-                  <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="discussion">Discussion</SelectItem>
                     <SelectItem value="win">Win</SelectItem>
@@ -617,24 +818,50 @@ export function CommunityView({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Titre <span className="normal-case font-normal">(optionnel)</span></Label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Donnez un titre \u00e0 votre post..." className="h-10" />
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Titre{" "}
+                <span className="normal-case font-normal">(optionnel)</span>
+              </Label>
+              <Input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Donnez un titre \u00e0 votre post..."
+                className="h-10"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contenu</Label>
-              <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} rows={5} placeholder="Que souhaitez-vous partager ?" className="resize-none" />
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Contenu
+              </Label>
+              <Textarea
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+                rows={5}
+                placeholder="Que souhaitez-vous partager ?"
+                className="resize-none"
+              />
             </div>
 
             {/* Image upload */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Image <span className="normal-case font-normal">(optionnel)</span></Label>
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Image{" "}
+                <span className="normal-case font-normal">(optionnel)</span>
+              </Label>
               {newImagePreview ? (
                 <div className="relative mt-1">
-                  <img src={newImagePreview} alt="Aper\u00e7u" className="w-full rounded-xl max-h-48 object-cover ring-1 ring-border" />
+                  <img
+                    src={newImagePreview}
+                    alt="Aper\u00e7u"
+                    className="w-full rounded-xl max-h-48 object-cover ring-1 ring-border"
+                  />
                   <button
                     type="button"
-                    onClick={() => { setNewImageUrl(""); setNewImagePreview(""); }}
+                    onClick={() => {
+                      setNewImageUrl("");
+                      setNewImagePreview("");
+                    }}
                     className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -655,11 +882,25 @@ export function CommunityView({
                   {uploadingImage ? "Upload en cours..." : "Ajouter une image"}
                 </button>
               )}
-              <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
             </div>
 
-            <Button onClick={handleCreate} disabled={isPosting || !newContent.trim()} className="w-full h-11 bg-brand text-brand-dark hover:bg-brand/90 font-semibold text-sm">
-              {isPosting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+            <Button
+              onClick={handleCreate}
+              disabled={isPosting || !newContent.trim()}
+              className="w-full h-11 bg-brand text-brand-dark hover:bg-brand/90 font-semibold text-sm"
+            >
+              {isPosting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
               Publier
             </Button>
           </div>

@@ -4,9 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify, notifyMany } from "@/lib/actions/notifications";
 
-export async function submitNpsScore(surveyId: string, score: number, comment?: string) {
+export async function submitNpsScore(
+  surveyId: string,
+  score: number,
+  comment?: string,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   await supabase
@@ -21,7 +27,12 @@ export async function submitNpsScore(surveyId: string, score: number, comment?: 
 
   // If score >= 8, trigger testimonial request
   if (score >= 8) {
-    await notify(user.id, "Partagez votre expérience !", "Vous kiffez le Sales System ? Partagez un témoignage pour inspirer la communauté !", { type: "testimonial_request", link: "/profile?tab=testimonial" });
+    await notify(
+      user.id,
+      "Partagez votre expérience !",
+      "Vous kiffez le Sales System ? Partagez un témoignage pour inspirer la communauté !",
+      { type: "testimonial_request", link: "/profile?tab=testimonial" },
+    );
   }
 
   revalidatePath("/");
@@ -29,7 +40,9 @@ export async function submitNpsScore(surveyId: string, score: number, comment?: 
 
 export async function submitTestimonial(content: string, videoUrl?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   await supabase.from("testimonials").insert({
@@ -46,13 +59,21 @@ export async function submitTestimonial(content: string, videoUrl?: string) {
     .in("role", ["admin", "manager"]);
 
   if (admins && admins.length > 0) {
-    await notifyMany(admins.map((a) => a.id), "Nouveau témoignage", "Un client a soumis un nouveau témoignage à valider.", { type: "testimonial", link: "/customers?tab=testimonials" });
+    await notifyMany(
+      admins.map((a) => a.id),
+      "Nouveau témoignage",
+      "Un client a soumis un nouveau témoignage à valider.",
+      { type: "testimonial", link: "/customers?tab=testimonials" },
+    );
   }
 
   revalidatePath("/customers");
 }
 
-export async function updateTestimonialStatus(testimonialId: string, status: "approved" | "published" | "rejected") {
+export async function updateTestimonialStatus(
+  testimonialId: string,
+  status: "approved" | "published" | "rejected",
+) {
   const supabase = await createClient();
   await supabase
     .from("testimonials")
@@ -82,7 +103,12 @@ export async function triggerPostClosingNps(dealId: string, clientId: string) {
     sent_at: new Date().toISOString(),
   });
 
-  await notify(clientId, "Comment s'est passé votre closing ?", "Votre deal vient d'être signé ! Donnez-nous votre avis en 30 secondes.", { type: "nps", link: "/kpis" });
+  await notify(
+    clientId,
+    "Comment s'est passé votre closing ?",
+    "Votre deal vient d'être signé ! Donnez-nous votre avis en 30 secondes.",
+    { type: "nps", link: "/kpis" },
+  );
 }
 
 // ---------- NPS Analytics Dashboard ----------
@@ -114,11 +140,15 @@ export async function getNpsAnalytics(): Promise<NpsAnalyticsResult> {
   // All responded surveys
   const { data: surveys } = await supabase
     .from("nps_surveys")
-    .select("id, client_id, score, comment, trigger_day, responded_at, sent_at, created_at")
+    .select(
+      "id, client_id, score, comment, trigger_day, responded_at, sent_at, created_at",
+    )
     .order("responded_at", { ascending: false });
 
   const allSurveys = surveys || [];
-  const responded = allSurveys.filter((s) => s.score !== null && s.responded_at);
+  const responded = allSurveys.filter(
+    (s) => s.score !== null && s.responded_at,
+  );
   const pending = allSurveys.filter((s) => s.score === null);
 
   // Score distribution (0-10)
@@ -128,30 +158,55 @@ export async function getNpsAnalytics(): Promise<NpsAnalyticsResult> {
   }));
 
   // NPS categories
-  const promoters = responded.filter((s) => s.score !== null && s.score >= 9).length;
-  const passives = responded.filter((s) => s.score !== null && s.score >= 7 && s.score <= 8).length;
-  const detractors = responded.filter((s) => s.score !== null && s.score <= 6).length;
+  const promoters = responded.filter(
+    (s) => s.score !== null && s.score >= 9,
+  ).length;
+  const passives = responded.filter(
+    (s) => s.score !== null && s.score >= 7 && s.score <= 8,
+  ).length;
+  const detractors = responded.filter(
+    (s) => s.score !== null && s.score <= 6,
+  ).length;
   const totalResponses = responded.length;
 
-  const npsScore = totalResponses > 0
-    ? Math.round(((promoters - detractors) / totalResponses) * 100)
-    : 0;
+  const npsScore =
+    totalResponses > 0
+      ? Math.round(((promoters - detractors) / totalResponses) * 100)
+      : 0;
 
-  const avgScore = totalResponses > 0
-    ? Math.round((responded.reduce((sum, s) => sum + (s.score || 0), 0) / totalResponses) * 10) / 10
-    : 0;
+  const avgScore =
+    totalResponses > 0
+      ? Math.round(
+          (responded.reduce((sum, s) => sum + (s.score || 0), 0) /
+            totalResponses) *
+            10,
+        ) / 10
+      : 0;
 
   // CSAT: % of respondents with score >= 7
-  const satisfied = responded.filter((s) => s.score !== null && s.score >= 7).length;
-  const csatScore = totalResponses > 0 ? Math.round((satisfied / totalResponses) * 100) : 0;
+  const satisfied = responded.filter(
+    (s) => s.score !== null && s.score >= 7,
+  ).length;
+  const csatScore =
+    totalResponses > 0 ? Math.round((satisfied / totalResponses) * 100) : 0;
 
   // Monthly trend (last 6 months)
   const now = new Date();
   const trend: NpsAnalyticsResult["trend"] = [];
   for (let i = 5; i >= 0; i--) {
     const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
-    const monthLabel = start.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" });
+    const end = new Date(
+      now.getFullYear(),
+      now.getMonth() - i + 1,
+      0,
+      23,
+      59,
+      59,
+    );
+    const monthLabel = start.toLocaleDateString("fr-FR", {
+      month: "short",
+      year: "2-digit",
+    });
 
     const monthSurveys = responded.filter((s) => {
       const d = new Date(s.responded_at!);
@@ -161,16 +216,31 @@ export async function getNpsAnalytics(): Promise<NpsAnalyticsResult> {
     const monthPromoters = monthSurveys.filter((s) => s.score! >= 9).length;
     const monthDetractors = monthSurveys.filter((s) => s.score! <= 6).length;
     const monthTotal = monthSurveys.length;
-    const monthNps = monthTotal > 0 ? Math.round(((monthPromoters - monthDetractors) / monthTotal) * 100) : 0;
-    const monthAvg = monthTotal > 0
-      ? Math.round((monthSurveys.reduce((sum, s) => sum + (s.score || 0), 0) / monthTotal) * 10) / 10
-      : 0;
+    const monthNps =
+      monthTotal > 0
+        ? Math.round(((monthPromoters - monthDetractors) / monthTotal) * 100)
+        : 0;
+    const monthAvg =
+      monthTotal > 0
+        ? Math.round(
+            (monthSurveys.reduce((sum, s) => sum + (s.score || 0), 0) /
+              monthTotal) *
+              10,
+          ) / 10
+        : 0;
 
-    trend.push({ month: monthLabel, nps: monthNps, responses: monthTotal, avg: monthAvg });
+    trend.push({
+      month: monthLabel,
+      nps: monthNps,
+      responses: monthTotal,
+      avg: monthAvg,
+    });
   }
 
   // Get client names for recent feedback
-  const clientIds = [...new Set(responded.slice(0, 10).map((s) => s.client_id))];
+  const clientIds = [
+    ...new Set(responded.slice(0, 10).map((s) => s.client_id)),
+  ];
   const { data: profiles } = await supabase
     .from("profiles")
     .select("id, full_name")
@@ -219,7 +289,9 @@ export async function checkAndCreateNpsSurveys() {
   for (const client of clients) {
     const createdAt = new Date(client.created_at);
     const now = new Date();
-    const daysSinceCreation = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+    const daysSinceCreation = Math.floor(
+      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     for (const day of triggerDays) {
       if (daysSinceCreation >= day) {
@@ -238,7 +310,12 @@ export async function checkAndCreateNpsSurveys() {
             sent_at: new Date().toISOString(),
           });
 
-          await notify(client.id, "Donnez votre avis !", `Ça fait ${day} jours que vous êtes avec nous. Comment évaluez-vous votre expérience ?`, { type: "nps", link: "/kpis" });
+          await notify(
+            client.id,
+            "Donnez votre avis !",
+            `Ça fait ${day} jours que vous êtes avec nous. Comment évaluez-vous votre expérience ?`,
+            { type: "nps", link: "/kpis" },
+          );
         }
       }
     }

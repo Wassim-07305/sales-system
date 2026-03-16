@@ -67,11 +67,7 @@ const WIDGET_TYPES = [
   },
 ];
 
-export function BuilderView({
-  initialWidgets,
-}: {
-  initialWidgets: Widget[];
-}) {
+export function BuilderView({ initialWidgets }: { initialWidgets: Widget[] }) {
   const initialTypes = new Set(initialWidgets.map((w) => w.type));
   const [enabledTypes, setEnabledTypes] = useState<Set<string>>(initialTypes);
   const [isPending, startTransition] = useTransition();
@@ -94,7 +90,7 @@ export function BuilderView({
         type: w.type,
         position: index,
         config: {},
-      })
+      }),
     );
 
     startTransition(async () => {
@@ -105,7 +101,7 @@ export function BuilderView({
         toast.error(
           error instanceof Error
             ? error.message
-            : "Erreur lors de la sauvegarde"
+            : "Erreur lors de la sauvegarde",
         );
       }
     });
@@ -207,7 +203,7 @@ export function BuilderView({
                       </div>
                     </div>
                   );
-                }
+                },
               )}
             </div>
           )}

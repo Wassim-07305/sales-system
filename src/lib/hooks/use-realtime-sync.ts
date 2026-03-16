@@ -6,11 +6,21 @@ import type { Node, Edge } from "@xyflow/react";
 interface RealtimeSyncOptions {
   scriptId: string | null;
   userId: string;
-  onRemoteUpdate: (data: { nodes: Node[]; edges: Edge[]; fromUser: string }) => void;
+  onRemoteUpdate: (data: {
+    nodes: Node[];
+    edges: Edge[];
+    fromUser: string;
+  }) => void;
 }
 
-export function useRealtimeSync({ scriptId, userId, onRemoteUpdate }: RealtimeSyncOptions) {
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+export function useRealtimeSync({
+  scriptId,
+  userId,
+  onRemoteUpdate,
+}: RealtimeSyncOptions) {
+  const channelRef = useRef<ReturnType<
+    ReturnType<typeof createClient>["channel"]
+  > | null>(null);
   const lastBroadcastRef = useRef<number>(0);
 
   useEffect(() => {
@@ -19,7 +29,11 @@ export function useRealtimeSync({ scriptId, userId, onRemoteUpdate }: RealtimeSy
     const channel = supabase.channel(`script-sync:${scriptId}`);
 
     channel.on("broadcast", { event: "sync" }, (payload) => {
-      const data = payload.payload as { nodes: Node[]; edges: Edge[]; fromUser: string };
+      const data = payload.payload as {
+        nodes: Node[];
+        edges: Edge[];
+        fromUser: string;
+      };
       if (data.fromUser !== userId) {
         onRemoteUpdate(data);
       }
@@ -48,7 +62,7 @@ export function useRealtimeSync({ scriptId, userId, onRemoteUpdate }: RealtimeSy
         });
       }
     },
-    [userId]
+    [userId],
   );
 
   return { broadcastChanges };

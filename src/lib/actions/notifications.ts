@@ -12,12 +12,14 @@ export async function notify(
   userId: string,
   title: string,
   body: string,
-  opts?: { link?: string; type?: string }
+  opts?: { link?: string; type?: string },
 ) {
   try {
     const supabase = await createClient();
     // Verify caller is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     // 1. Insert notification in DB
     await supabase.from("notifications").insert({
@@ -43,11 +45,13 @@ export async function notifyMany(
   userIds: string[],
   title: string,
   body: string,
-  opts?: { link?: string; type?: string }
+  opts?: { link?: string; type?: string },
 ) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     const notifications = userIds.map((id) => ({
       user_id: id,
@@ -87,7 +91,7 @@ export async function sendPushNotification(
   title: string,
   body: string,
   link?: string,
-  type?: string
+  type?: string,
 ) {
   const supabase = await createClient();
 
@@ -174,7 +178,7 @@ export async function sendTestNotification() {
     "Notification de test",
     "Ceci est une notification de test envoyée depuis les paramètres.",
     "/settings/notifications",
-    "push"
+    "push",
   );
 }
 
@@ -232,14 +236,14 @@ export async function updateNotificationPreferences(prefs: {
     .from("notification_preferences")
     .upsert(
       { user_id: user.id, ...prefs, updated_at: new Date().toISOString() },
-      { onConflict: "user_id" }
+      { onConflict: "user_id" },
     );
 
   if (error) {
     // If the table doesn't exist yet, log and continue gracefully
     console.warn(
       "[Notification Preferences] Erreur sauvegarde (la table notification_preferences n'existe peut-être pas encore):",
-      error.message
+      error.message,
     );
     return { success: false, error: error.message };
   }
@@ -250,7 +254,9 @@ export async function updateNotificationPreferences(prefs: {
 
 export async function markNotificationRead(notificationId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   await supabase
@@ -264,7 +270,9 @@ export async function markNotificationRead(notificationId: string) {
 
 export async function markAllNotificationsRead() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   await supabase

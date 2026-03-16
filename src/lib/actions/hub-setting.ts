@@ -1216,7 +1216,11 @@ export async function runAutoSettingCampaign(profileUrls: string[]) {
         });
       }
 
-      results.push({ url, status: "queued", message: message.slice(0, 80) + "..." });
+      results.push({
+        url,
+        status: "queued",
+        message: message.slice(0, 80) + "...",
+      });
     } catch (err) {
       results.push({
         url,

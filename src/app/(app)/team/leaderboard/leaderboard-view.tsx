@@ -14,7 +14,11 @@ interface LeaderboardEntry {
   level_name: string;
   total_points: number;
   current_streak: number;
-  user: { full_name: string | null; avatar_url: string | null; role: string } | null;
+  user: {
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string;
+  } | null;
 }
 
 interface Props {
@@ -23,19 +27,47 @@ interface Props {
 }
 
 const PODIUM_CONFIG = [
-  { ring: "ring-amber-400/50", bg: "bg-gradient-to-br from-amber-400 to-amber-600", textColor: "text-amber-500", size: "h-20 w-20", icon: Crown, iconSize: "h-8 w-8" },
-  { ring: "ring-slate-300/50", bg: "bg-gradient-to-br from-slate-300 to-slate-500", textColor: "text-slate-400", size: "h-16 w-16", icon: Medal, iconSize: "h-7 w-7" },
-  { ring: "ring-orange-400/50", bg: "bg-gradient-to-br from-orange-300 to-orange-500", textColor: "text-orange-400", size: "h-16 w-16", icon: Medal, iconSize: "h-6 w-6" },
+  {
+    ring: "ring-amber-400/50",
+    bg: "bg-gradient-to-br from-amber-400 to-amber-600",
+    textColor: "text-amber-500",
+    size: "h-20 w-20",
+    icon: Crown,
+    iconSize: "h-8 w-8",
+  },
+  {
+    ring: "ring-slate-300/50",
+    bg: "bg-gradient-to-br from-slate-300 to-slate-500",
+    textColor: "text-slate-400",
+    size: "h-16 w-16",
+    icon: Medal,
+    iconSize: "h-7 w-7",
+  },
+  {
+    ring: "ring-orange-400/50",
+    bg: "bg-gradient-to-br from-orange-300 to-orange-500",
+    textColor: "text-orange-400",
+    size: "h-16 w-16",
+    icon: Medal,
+    iconSize: "h-6 w-6",
+  },
 ];
 
 const AVATAR_COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600",
-  "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600",
+  "bg-blue-600",
+  "bg-emerald-600",
+  "bg-amber-600",
+  "bg-purple-600",
+  "bg-pink-600",
+  "bg-cyan-600",
+  "bg-rose-600",
+  "bg-indigo-600",
 ];
 
 function getAvatarColor(str: string) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < str.length; i++)
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -65,7 +97,8 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
             </div>
             <p className="font-semibold text-lg">Aucun classement disponible</p>
             <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
-              Le leaderboard se remplira automatiquement lorsque les membres accumuleront des points.
+              Le leaderboard se remplira automatiquement lorsque les membres
+              accumuleront des points.
             </p>
           </CardContent>
         </Card>
@@ -92,29 +125,57 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
               >
                 <CardContent className="p-6 pt-5">
                   <div className="flex justify-center mb-3">
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", `${cfg.bg}`)}>
+                    <div
+                      className={cn(
+                        "h-10 w-10 rounded-xl flex items-center justify-center",
+                        `${cfg.bg}`,
+                      )}
+                    >
                       <Icon className={cn(cfg.iconSize, "text-white")} />
                     </div>
                   </div>
-                  <div className={cn(
-                    "rounded-2xl mx-auto mb-3 flex items-center justify-center text-white font-bold ring-4 ring-background",
-                    cfg.size,
-                    getAvatarColor(player.user_id),
-                  )}>
+                  <div
+                    className={cn(
+                      "rounded-2xl mx-auto mb-3 flex items-center justify-center text-white font-bold ring-4 ring-background",
+                      cfg.size,
+                      getAvatarColor(player.user_id),
+                    )}
+                  >
                     <span className={rank === 1 ? "text-2xl" : "text-xl"}>
-                      {player.user?.full_name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?"}
+                      {player.user?.full_name
+                        ?.split(" ")
+                        .map((w) => w[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase() || "?"}
                     </span>
                   </div>
                   <p className="font-semibold text-sm truncate">
                     {player.user?.full_name || "Anonyme"}
                   </p>
-                  <Badge variant="outline" className="text-[10px] mt-1.5 mb-3 font-medium">{player.level_name}</Badge>
-                  <p className={cn("text-3xl font-bold tracking-tight", cfg.textColor)}>{player.total_points.toLocaleString("fr-FR")}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">points</p>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] mt-1.5 mb-3 font-medium"
+                  >
+                    {player.level_name}
+                  </Badge>
+                  <p
+                    className={cn(
+                      "text-3xl font-bold tracking-tight",
+                      cfg.textColor,
+                    )}
+                  >
+                    {player.total_points.toLocaleString("fr-FR")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    points
+                  </p>
                   {player.current_streak > 0 && (
                     <div className="flex items-center justify-center gap-1 mt-2">
                       <Flame className="h-3 w-3 text-orange-400" />
-                      <span className="text-[11px] font-semibold text-orange-400">{player.current_streak}j</span>
+                      <span className="text-[11px] font-semibold text-orange-400">
+                        {player.current_streak}j
+                      </span>
                     </div>
                   )}
                 </CardContent>
@@ -139,37 +200,59 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
                     isMe && "bg-brand/5",
                   )}
                 >
-                  <span className={cn(
-                    "text-sm font-bold w-8 text-center tabular-nums",
-                    rank === 1 ? "text-amber-500" :
-                    rank === 2 ? "text-slate-400" :
-                    rank === 3 ? "text-orange-400" :
-                    "text-muted-foreground/50",
-                  )}>
+                  <span
+                    className={cn(
+                      "text-sm font-bold w-8 text-center tabular-nums",
+                      rank === 1
+                        ? "text-amber-500"
+                        : rank === 2
+                          ? "text-slate-400"
+                          : rank === 3
+                            ? "text-orange-400"
+                            : "text-muted-foreground/50",
+                    )}
+                  >
                     #{rank}
                   </span>
-                  <div className={cn(
-                    "h-9 w-9 rounded-lg flex items-center justify-center text-white text-[11px] font-bold shrink-0",
-                    getAvatarColor(player.user_id),
-                  )}>
-                    {player.user?.full_name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?"}
+                  <div
+                    className={cn(
+                      "h-9 w-9 rounded-lg flex items-center justify-center text-white text-[11px] font-bold shrink-0",
+                      getAvatarColor(player.user_id),
+                    )}
+                  >
+                    {player.user?.full_name
+                      ?.split(" ")
+                      .map((w) => w[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase() || "?"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {player.user?.full_name || "Anonyme"}
-                      {isMe && <span className="text-brand ml-1.5 text-xs">(vous)</span>}
+                      {isMe && (
+                        <span className="text-brand ml-1.5 text-xs">
+                          (vous)
+                        </span>
+                      )}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">{player.level_name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {player.level_name}
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     {player.current_streak > 0 && (
                       <div className="flex items-center gap-1">
                         <Zap className="h-3 w-3 text-orange-400" />
-                        <span className="text-[11px] font-semibold text-orange-400 tabular-nums">{player.current_streak}j</span>
+                        <span className="text-[11px] font-semibold text-orange-400 tabular-nums">
+                          {player.current_streak}j
+                        </span>
                       </div>
                     )}
                     <div className="text-right min-w-[70px]">
-                      <p className="text-sm font-bold tabular-nums">{player.total_points.toLocaleString("fr-FR")}</p>
+                      <p className="text-sm font-bold tabular-nums">
+                        {player.total_points.toLocaleString("fr-FR")}
+                      </p>
                       <p className="text-[10px] text-muted-foreground">pts</p>
                     </div>
                   </div>

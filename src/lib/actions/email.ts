@@ -153,7 +153,7 @@ export async function sendNotificationDigest(userId: string) {
         <p style="margin:0;font-weight:600">${n.title}</p>
         <p style="margin:4px 0 0;color:#666;font-size:14px">${n.body}</p>
       </div>
-    `
+    `,
     )
     .join("");
 

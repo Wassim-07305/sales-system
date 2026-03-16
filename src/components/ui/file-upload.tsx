@@ -78,7 +78,7 @@ export function FileUpload({
         setUploading(false);
       }
     },
-    [bucket, path, maxSize, onUpload]
+    [bucket, path, maxSize, onUpload],
   );
 
   const handleDrop = useCallback(
@@ -88,7 +88,7 @@ export function FileUpload({
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const handleChange = useCallback(
@@ -96,7 +96,7 @@ export function FileUpload({
       const file = e.target.files?.[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const isImage = currentUrl && /\.(jpg|jpeg|png|gif|webp)/i.test(currentUrl);
@@ -119,7 +119,9 @@ export function FileUpload({
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">Fichier uploadé</p>
-              <p className="text-xs text-muted-foreground truncate">{currentUrl.split("/").pop()}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {currentUrl.split("/").pop()}
+              </p>
             </div>
             {onRemove && (
               <button
@@ -145,7 +147,7 @@ export function FileUpload({
             dragActive
               ? "border-brand bg-brand/5"
               : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30",
-            uploading && "pointer-events-none opacity-60"
+            uploading && "pointer-events-none opacity-60",
           )}
         >
           <input
@@ -158,7 +160,9 @@ export function FileUpload({
           {uploading ? (
             <>
               <Loader2 className="h-8 w-8 animate-spin text-brand mb-2" />
-              <p className="text-sm text-muted-foreground">Upload en cours...</p>
+              <p className="text-sm text-muted-foreground">
+                Upload en cours...
+              </p>
               <div className="mt-2 h-1.5 w-32 rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full bg-brand transition-all duration-300 rounded-full"
@@ -169,7 +173,9 @@ export function FileUpload({
           ) : (
             <>
               <Upload className="h-8 w-8 text-muted-foreground/50 mb-2" />
-              <p className="text-sm text-muted-foreground text-center">{label}</p>
+              <p className="text-sm text-muted-foreground text-center">
+                {label}
+              </p>
               <p className="text-xs text-muted-foreground/60 mt-1">
                 Max {maxSize} Mo
               </p>
@@ -178,9 +184,7 @@ export function FileUpload({
         </div>
       )}
 
-      {error && (
-        <p className="text-xs text-destructive">{error}</p>
-      )}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

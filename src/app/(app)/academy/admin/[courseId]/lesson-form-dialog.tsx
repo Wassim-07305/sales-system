@@ -104,7 +104,9 @@ export function LessonFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lesson-description">Description (optionnelle)</Label>
+            <Label htmlFor="lesson-description">
+              Description (optionnelle)
+            </Label>
             <Textarea
               id="lesson-description"
               value={description}
@@ -115,8 +117,8 @@ export function LessonFormDialog({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            La video et les pieces jointes peuvent etre ajoutees apres la creation
-            depuis le panneau d&apos;edition.
+            La video et les pieces jointes peuvent etre ajoutees apres la
+            creation depuis le panneau d&apos;edition.
           </p>
 
           <DialogFooter>

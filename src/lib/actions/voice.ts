@@ -10,7 +10,9 @@ const ELEVENLABS_BASE_URL = "https://api.elevenlabs.io/v1";
 
 export async function getVoiceProfile() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data } = await supabase
@@ -24,7 +26,9 @@ export async function getVoiceProfile() {
 
 export async function createOrUpdateVoiceProfile(sampleUrl: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   const { data: existing } = await supabase
@@ -34,9 +38,14 @@ export async function createOrUpdateVoiceProfile(sampleUrl: string) {
     .single();
 
   if (existing) {
-    await supabase.from("voice_profiles").update({ sample_url: sampleUrl, status: "pending" }).eq("id", existing.id);
+    await supabase
+      .from("voice_profiles")
+      .update({ sample_url: sampleUrl, status: "pending" })
+      .eq("id", existing.id);
   } else {
-    await supabase.from("voice_profiles").insert({ user_id: user.id, sample_url: sampleUrl, status: "pending" });
+    await supabase
+      .from("voice_profiles")
+      .insert({ user_id: user.id, sample_url: sampleUrl, status: "pending" });
   }
 
   revalidatePath("/settings/voice");
@@ -44,7 +53,9 @@ export async function createOrUpdateVoiceProfile(sampleUrl: string) {
 
 export async function deleteVoiceProfile() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Non authentifié" };
 
   const { data: profile } = await supabase
@@ -78,7 +89,9 @@ export async function deleteVoiceProfile() {
 
 export async function cloneVoice(sampleUrl: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Non authentifié" };
 
   // Ensure voice profile exists
@@ -87,7 +100,8 @@ export async function cloneVoice(sampleUrl: string) {
     await createOrUpdateVoiceProfile(sampleUrl);
     profile = await getVoiceProfile();
   }
-  if (!profile) return { success: false, error: "Impossible de créer le profil" };
+  if (!profile)
+    return { success: false, error: "Impossible de créer le profil" };
 
   const ELEVENLABS_API_KEY = await getApiKey("ELEVENLABS_API_KEY");
 
@@ -99,7 +113,8 @@ export async function cloneVoice(sampleUrl: string) {
     revalidatePath("/settings/voice");
     return {
       success: false,
-      error: "Clé API ElevenLabs non configurée. Ajoutez-la dans Paramètres > API pour activer le clonage vocal.",
+      error:
+        "Clé API ElevenLabs non configurée. Ajoutez-la dans Paramètres > API pour activer le clonage vocal.",
     };
   }
 
@@ -113,7 +128,8 @@ export async function cloneVoice(sampleUrl: string) {
   try {
     // Download the audio sample
     const audioResponse = await fetch(sampleUrl);
-    if (!audioResponse.ok) throw new Error("Impossible de télécharger l'échantillon audio");
+    if (!audioResponse.ok)
+      throw new Error("Impossible de télécharger l'échantillon audio");
     const audioBlob = await audioResponse.blob();
 
     // Call ElevenLabs voice clone API
@@ -130,7 +146,10 @@ export async function cloneVoice(sampleUrl: string) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData?.detail?.message || `ElevenLabs API error: ${response.status}`);
+      throw new Error(
+        errorData?.detail?.message ||
+          `ElevenLabs API error: ${response.status}`,
+      );
     }
 
     const data = await response.json();
@@ -157,9 +176,14 @@ export async function cloneVoice(sampleUrl: string) {
 
 // ─── Text-to-Speech (ElevenLabs) ──────────────────────────────
 
-export async function generateVoiceMessage(text: string, prospectName?: string) {
+export async function generateVoiceMessage(
+  text: string,
+  prospectName?: string,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Non authentifié" };
 
   const profile = await getVoiceProfile();
@@ -176,44 +200,54 @@ export async function generateVoiceMessage(text: string, prospectName?: string) 
     revalidatePath("/settings/voice");
     return {
       success: false,
-      error: "Clé API ElevenLabs non configurée. Ajoutez-la dans Paramètres > API pour générer des messages vocaux.",
+      error:
+        "Clé API ElevenLabs non configurée. Ajoutez-la dans Paramètres > API pour générer des messages vocaux.",
     };
   }
 
   if (!profile?.voice_id || profile.status !== "ready") {
     return {
       success: false,
-      error: "Votre profil vocal n'est pas encore prêt. Veuillez d'abord cloner votre voix.",
+      error:
+        "Votre profil vocal n'est pas encore prêt. Veuillez d'abord cloner votre voix.",
     };
   }
 
   try {
     const finalText = prospectName
-      ? text.replace(/\{nom\}/gi, prospectName).replace(/\{name\}/gi, prospectName)
+      ? text
+          .replace(/\{nom\}/gi, prospectName)
+          .replace(/\{name\}/gi, prospectName)
       : text;
 
-    const response = await fetch(`${ELEVENLABS_BASE_URL}/text-to-speech/${profile.voice_id}`, {
-      method: "POST",
-      headers: {
-        "xi-api-key": ELEVENLABS_API_KEY,
-        "Content-Type": "application/json",
-        "Accept": "audio/mpeg",
-      },
-      body: JSON.stringify({
-        text: finalText,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.0,
-          use_speaker_boost: true,
+    const response = await fetch(
+      `${ELEVENLABS_BASE_URL}/text-to-speech/${profile.voice_id}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVENLABS_API_KEY,
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg",
         },
-      }),
-    });
+        body: JSON.stringify({
+          text: finalText,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.0,
+            use_speaker_boost: true,
+          },
+        }),
+      },
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData?.detail?.message || `ElevenLabs TTS error: ${response.status}`);
+      throw new Error(
+        errorData?.detail?.message ||
+          `ElevenLabs TTS error: ${response.status}`,
+      );
     }
 
     // Upload generated audio to Supabase storage
@@ -225,7 +259,9 @@ export async function generateVoiceMessage(text: string, prospectName?: string) 
 
     if (uploadError) throw new Error("Erreur lors de la sauvegarde de l'audio");
 
-    const { data: { publicUrl } } = supabase.storage.from("uploads").getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("uploads").getPublicUrl(fileName);
 
     // Save voice message record
     await supabase.from("voice_messages").insert({
@@ -265,7 +301,9 @@ export async function createVoiceMessage(formData: {
   target_prospect_id?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   // Get voice profile

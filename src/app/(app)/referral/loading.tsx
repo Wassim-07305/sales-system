@@ -63,7 +63,10 @@ export default function ReferralLoading() {
         </div>
         <div className="p-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="grid grid-cols-4 gap-4 py-3 border-b last:border-b-0">
+            <div
+              key={i}
+              className="grid grid-cols-4 gap-4 py-3 border-b last:border-b-0"
+            >
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-6 w-20 rounded-full" />

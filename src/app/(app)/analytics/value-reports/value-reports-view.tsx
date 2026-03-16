@@ -64,17 +64,24 @@ function getDistributionColor(range: string): string {
 export function ValueReportsView({ data }: { data: ValueReportResult }) {
   // ROI = (Revenue - CPA * clients) / (CPA * clients) * 100
   const totalInvestment = data.estimatedCPA * data.totalClients;
-  const roi = totalInvestment > 0
-    ? Math.round(((data.totalRevenue - totalInvestment) / totalInvestment) * 100)
-    : 0;
+  const roi =
+    totalInvestment > 0
+      ? Math.round(
+          ((data.totalRevenue - totalInvestment) / totalInvestment) * 100,
+        )
+      : 0;
 
-  const ltvCacRatio = data.estimatedCPA > 0
-    ? (data.estimatedLTV / data.estimatedCPA).toFixed(1)
-    : "N/A";
+  const ltvCacRatio =
+    data.estimatedCPA > 0
+      ? (data.estimatedLTV / data.estimatedCPA).toFixed(1)
+      : "N/A";
 
   // Top 10 clients for chart
   const topClients = data.clients.slice(0, 10).map((c) => ({
-    name: c.clientName.length > 15 ? c.clientName.substring(0, 15) + "..." : c.clientName,
+    name:
+      c.clientName.length > 15
+        ? c.clientName.substring(0, 15) + "..."
+        : c.clientName,
     revenue: c.revenue,
     healthScore: c.healthScore,
   }));
@@ -129,28 +136,42 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.title} className="border-border/50 hover:shadow-md transition-all">
+            <Card
+              key={kpi.title}
+              className="border-border/50 hover:shadow-md transition-all"
+            >
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={cn(
-                    "h-9 w-9 rounded-lg ring-1 flex items-center justify-center",
-                    kpi.color === "emerald" && "ring-emerald-500/20 bg-emerald-500/10",
-                    kpi.color === "blue" && "ring-blue-500/20 bg-blue-500/10",
-                    kpi.color === "purple" && "ring-purple-500/20 bg-purple-500/10",
-                    kpi.color === "amber" && "ring-amber-500/20 bg-amber-500/10",
-                  )}>
-                    <Icon className={cn(
-                      "h-5 w-5",
-                      kpi.color === "emerald" && "text-emerald-500",
-                      kpi.color === "blue" && "text-blue-500",
-                      kpi.color === "purple" && "text-purple-500",
-                      kpi.color === "amber" && "text-amber-500",
-                    )} />
+                  <div
+                    className={cn(
+                      "h-9 w-9 rounded-lg ring-1 flex items-center justify-center",
+                      kpi.color === "emerald" &&
+                        "ring-emerald-500/20 bg-emerald-500/10",
+                      kpi.color === "blue" && "ring-blue-500/20 bg-blue-500/10",
+                      kpi.color === "purple" &&
+                        "ring-purple-500/20 bg-purple-500/10",
+                      kpi.color === "amber" &&
+                        "ring-amber-500/20 bg-amber-500/10",
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "h-5 w-5",
+                        kpi.color === "emerald" && "text-emerald-500",
+                        kpi.color === "blue" && "text-blue-500",
+                        kpi.color === "purple" && "text-purple-500",
+                        kpi.color === "amber" && "text-amber-500",
+                      )}
+                    />
                   </div>
                 </div>
                 <p className="text-2xl font-bold">{kpi.value}</p>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-1">{kpi.title}</p>
-                <p className="text-xs text-muted-foreground/70">{kpi.description}</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-1">
+                  {kpi.title}
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  {kpi.description}
+                </p>
               </CardContent>
             </Card>
           );
@@ -161,24 +182,32 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 text-center">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">ROI global</p>
-            <p className={cn(
-              "text-3xl font-bold",
-              roi >= 0 ? "text-emerald-600" : "text-red-500"
-            )}>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+              ROI global
+            </p>
+            <p
+              className={cn(
+                "text-3xl font-bold",
+                roi >= 0 ? "text-emerald-600" : "text-red-500",
+              )}
+            >
               {roi}%
             </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 text-center">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Ratio LTV / CAC</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+              Ratio LTV / CAC
+            </p>
             <p className="text-3xl font-bold text-brand">{ltvCacRatio}x</p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardContent className="p-5 text-center">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Clients totaux</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+              Clients totaux
+            </p>
             <div className="flex items-center justify-center gap-2">
               <Users className="h-5 w-5 text-brand" />
               <p className="text-3xl font-bold">{data.totalClients}</p>
@@ -199,7 +228,10 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
               {topClients.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topClients} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.06)"
+                    />
                     <XAxis
                       type="number"
                       tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
@@ -255,7 +287,10 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
               {data.healthDistribution.some((d) => d.count > 0) ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.healthDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.06)"
+                    />
                     <XAxis dataKey="range" stroke="#888" />
                     <YAxis allowDecimals={false} stroke="#888" />
                     <Tooltip
@@ -301,17 +336,28 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Revenue</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Health Score</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Client
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Revenue
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Health Score
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Statut
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.clients
                     .filter((c) => c.revenue > 0)
                     .map((client) => (
-                      <tr key={client.clientId} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                      <tr
+                        key={client.clientId}
+                        className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                      >
                         <td className="p-4 font-medium">{client.clientName}</td>
                         <td className="p-4 text-right">
                           {client.revenue.toLocaleString("fr-FR")} &euro;
@@ -323,7 +369,9 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                                 className="h-full rounded-full transition-all"
                                 style={{
                                   width: `${client.healthScore}%`,
-                                  backgroundColor: getHealthColor(client.healthScore),
+                                  backgroundColor: getHealthColor(
+                                    client.healthScore,
+                                  ),
                                 }}
                               />
                             </div>
@@ -340,7 +388,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
                                 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                 : client.healthScore >= 40
                                   ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                  : "bg-red-500/10 text-red-600 border-red-500/20"
+                                  : "bg-red-500/10 text-red-600 border-red-500/20",
                             )}
                           >
                             {client.healthScore >= 70

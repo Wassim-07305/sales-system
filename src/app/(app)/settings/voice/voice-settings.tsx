@@ -46,15 +46,44 @@ interface VoiceMessage {
   created_at: string;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  pending: { label: "En attente", color: "bg-amber-500/10 text-amber-600 border-amber-500/20", icon: <Clock className="h-3 w-3" /> },
-  processing: { label: "Clonage en cours", color: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: <Loader2 className="h-3 w-3 animate-spin" /> },
-  ready: { label: "Prêt", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: <CheckCircle2 className="h-3 w-3" /> },
-  failed: { label: "Erreur", color: "bg-red-500/10 text-red-600 border-red-500/20", icon: <AlertCircle className="h-3 w-3" /> },
-  error: { label: "Erreur", color: "bg-red-500/10 text-red-600 border-red-500/20", icon: <AlertCircle className="h-3 w-3" /> },
+const statusConfig: Record<
+  string,
+  { label: string; color: string; icon: React.ReactNode }
+> = {
+  pending: {
+    label: "En attente",
+    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    icon: <Clock className="h-3 w-3" />,
+  },
+  processing: {
+    label: "Clonage en cours",
+    color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    icon: <Loader2 className="h-3 w-3 animate-spin" />,
+  },
+  ready: {
+    label: "Prêt",
+    color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  failed: {
+    label: "Erreur",
+    color: "bg-red-500/10 text-red-600 border-red-500/20",
+    icon: <AlertCircle className="h-3 w-3" />,
+  },
+  error: {
+    label: "Erreur",
+    color: "bg-red-500/10 text-red-600 border-red-500/20",
+    icon: <AlertCircle className="h-3 w-3" />,
+  },
 };
 
-export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: VoiceProfile | null; voiceMessages: VoiceMessage[] }) {
+export function VoiceSettings({
+  voiceProfile,
+  voiceMessages,
+}: {
+  voiceProfile: VoiceProfile | null;
+  voiceMessages: VoiceMessage[];
+}) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -62,7 +91,9 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
   const [deleting, setDeleting] = useState(false);
   const [testText, setTestText] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
+  const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(
+    null,
+  );
   const audioRef = useRef<HTMLAudioElement>(null);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -77,7 +108,9 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
 
     // Validate minimum size (~30s audio is typically > 100KB)
     if (file.size < 50_000) {
-      toast.error("L'échantillon est trop court. Minimum 30 secondes recommandé.");
+      toast.error(
+        "L'échantillon est trop court. Minimum 30 secondes recommandé.",
+      );
       return;
     }
 
@@ -85,10 +118,14 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
     try {
       const supabase = createClient();
       const fileName = `voice-samples/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from("uploads").upload(fileName, file);
+      const { error: uploadError } = await supabase.storage
+        .from("uploads")
+        .upload(fileName, file);
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from("uploads").getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("uploads").getPublicUrl(fileName);
       await createOrUpdateVoiceProfile(publicUrl);
       toast.success("Echantillon vocal uploade avec succes !");
       router.refresh();
@@ -148,7 +185,11 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
   }
 
   async function handleDeleteVoice() {
-    if (!confirm("Etes-vous sur de vouloir supprimer votre profil vocal ? Cette action est irreversible.")) {
+    if (
+      !confirm(
+        "Etes-vous sur de vouloir supprimer votre profil vocal ? Cette action est irreversible.",
+      )
+    ) {
       return;
     }
 
@@ -170,13 +211,17 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
     }
   }
 
-  const status = statusConfig[voiceProfile?.status || "pending"] || statusConfig.pending;
+  const status =
+    statusConfig[voiceProfile?.status || "pending"] || statusConfig.pending;
   const isReady = voiceProfile?.status === "ready";
   const hasSample = !!voiceProfile?.sample_url;
 
   return (
     <div>
-      <PageHeader title="Voice Cloning IA" description="Clonez votre voix avec ElevenLabs pour generer des messages vocaux personnalises" />
+      <PageHeader
+        title="Voice Cloning IA"
+        description="Clonez votre voix avec ElevenLabs pour generer des messages vocaux personnalises"
+      />
 
       {/* Voice Profile & Upload */}
       <Card className="mb-6 border-border/50">
@@ -216,7 +261,9 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
             {/* Audio player for existing sample */}
             {hasSample && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Votre echantillon :</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Votre echantillon :
+                </p>
                 <audio controls className="w-full">
                   <source src={voiceProfile!.sample_url!} />
                 </audio>
@@ -224,27 +271,53 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
             )}
 
             {/* Upload button */}
-            <input type="file" accept="audio/*" ref={fileInputRef} onChange={handleUpload} className="hidden" />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading || cloning} variant="outline" className="w-full">
+            <input
+              type="file"
+              accept="audio/*"
+              ref={fileInputRef}
+              onChange={handleUpload}
+              className="hidden"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || cloning}
+              variant="outline"
+              className="w-full"
+            >
               <Upload className="h-4 w-4 mr-2" />
-              {uploading ? "Upload en cours..." : hasSample ? "Remplacer l'echantillon" : "Uploader un echantillon audio"}
+              {uploading
+                ? "Upload en cours..."
+                : hasSample
+                  ? "Remplacer l'echantillon"
+                  : "Uploader un echantillon audio"}
             </Button>
 
             {/* Clone button */}
             {hasSample && !isReady && voiceProfile?.status !== "processing" && (
-              <Button onClick={handleCloneVoice} disabled={cloning} className="w-full">
+              <Button
+                onClick={handleCloneVoice}
+                disabled={cloning}
+                className="w-full"
+              >
                 {cloning ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Wand2 className="h-4 w-4 mr-2" />
                 )}
-                {cloning ? "Clonage en cours..." : "Lancer le clonage ElevenLabs"}
+                {cloning
+                  ? "Clonage en cours..."
+                  : "Lancer le clonage ElevenLabs"}
               </Button>
             )}
 
             {/* Delete button */}
             {voiceProfile && (
-              <Button onClick={handleDeleteVoice} disabled={deleting} variant="destructive" className="w-full">
+              <Button
+                onClick={handleDeleteVoice}
+                disabled={deleting}
+                variant="destructive"
+                className="w-full"
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {deleting ? "Suppression..." : "Supprimer le profil vocal"}
               </Button>
@@ -254,14 +327,20 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
             <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
               <p className="font-medium mb-1">Comment ca marche</p>
               <ol className="list-decimal list-inside space-y-1">
-                <li>Uploadez un echantillon audio de votre voix (minimum 30 secondes)</li>
-                <li>Lancez le clonage via ElevenLabs pour creer votre clone vocal</li>
+                <li>
+                  Uploadez un echantillon audio de votre voix (minimum 30
+                  secondes)
+                </li>
+                <li>
+                  Lancez le clonage via ElevenLabs pour creer votre clone vocal
+                </li>
                 <li>Testez votre voix clonee avec du texte personnalise</li>
                 <li>Utilisez votre voix dans les messages de prospection</li>
               </ol>
               {!isReady && (
                 <p className="mt-2 text-xs italic">
-                  Note : une cle API ElevenLabs (variable ELEVENLABS_API_KEY) est necessaire pour le clonage et la synthese vocale.
+                  Note : une cle API ElevenLabs (variable ELEVENLABS_API_KEY)
+                  est necessaire pour le clonage et la synthese vocale.
                 </p>
               )}
             </div>
@@ -290,7 +369,8 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
                 className="resize-none"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Utilisez {"{nom}"} pour inserer le nom du prospect dans le message.
+                Utilisez {"{nom}"} pour inserer le nom du prospect dans le
+                message.
               </p>
             </div>
 
@@ -340,15 +420,26 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
           {voiceMessages.length > 0 ? (
             <div className="space-y-3">
               {voiceMessages.map((vm) => {
-                const vmStatus = statusConfig[vm.status] || statusConfig.pending;
+                const vmStatus =
+                  statusConfig[vm.status] || statusConfig.pending;
                 return (
-                  <div key={vm.id} className="flex items-center justify-between p-3 rounded-lg border">
+                  <div
+                    key={vm.id}
+                    className="flex items-center justify-between p-3 rounded-lg border"
+                  >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{vm.input_text || "\u2014"}</p>
+                      <p className="text-sm font-medium truncate">
+                        {vm.input_text || "\u2014"}
+                      </p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         {vm.prospect && <span>Pour: {vm.prospect.name}</span>}
                         {vm.scheduled_send_at && (
-                          <span>Programme: {new Date(vm.scheduled_send_at).toLocaleString("fr-FR")}</span>
+                          <span>
+                            Programme:{" "}
+                            {new Date(vm.scheduled_send_at).toLocaleString(
+                              "fr-FR",
+                            )}
+                          </span>
                         )}
                       </div>
                       {vm.audio_url && (
@@ -357,7 +448,10 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
                         </audio>
                       )}
                     </div>
-                    <Badge variant="outline" className={`gap-1 ml-3 shrink-0 ${vmStatus.color}`}>
+                    <Badge
+                      variant="outline"
+                      className={`gap-1 ml-3 shrink-0 ${vmStatus.color}`}
+                    >
                       {vmStatus.icon}
                       {vmStatus.label}
                     </Badge>
@@ -371,7 +465,10 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
                 <Mic className="h-7 w-7 text-muted-foreground" />
               </div>
               <p className="font-medium">Aucun vocal programme</p>
-              <p className="text-sm">Utilisez le bouton de test ci-dessus ou l&apos;IA dans l&apos;inbox pour generer des vocaux.</p>
+              <p className="text-sm">
+                Utilisez le bouton de test ci-dessus ou l&apos;IA dans
+                l&apos;inbox pour generer des vocaux.
+              </p>
             </div>
           )}
         </CardContent>

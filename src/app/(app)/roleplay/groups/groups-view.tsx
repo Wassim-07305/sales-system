@@ -74,7 +74,12 @@ interface TeamMember {
 
 interface GroupMember {
   user_id: string;
-  profile: { id: string; full_name: string; avatar_url: string | null; role: string };
+  profile: {
+    id: string;
+    full_name: string;
+    avatar_url: string | null;
+    role: string;
+  };
   sessions_attended: number;
   avg_score: number;
   progress: number;
@@ -115,14 +120,23 @@ const nicheColors: Record<string, string> = {
   Closing: "bg-foreground/10 text-foreground border-border",
   Setting: "bg-muted/40 text-muted-foreground/60 border-border",
   Prospection: "bg-muted/60 text-muted-foreground border-border",
-  "Négociation": "bg-foreground/10 text-foreground border-border",
+  Négociation: "bg-foreground/10 text-foreground border-border",
   "Objection handling": "bg-muted/60 text-muted-foreground border-border",
 };
 
 const sessionTypeLabels: Record<string, { label: string; color: string }> = {
-  roleplay: { label: "Role-Play", color: "bg-brand/10 text-brand border-brand/20" },
-  workshop: { label: "Workshop", color: "bg-muted/40 text-muted-foreground/60 border-border" },
-  debrief: { label: "Debrief", color: "bg-muted/60 text-muted-foreground border-border" },
+  roleplay: {
+    label: "Role-Play",
+    color: "bg-brand/10 text-brand border-brand/20",
+  },
+  workshop: {
+    label: "Workshop",
+    color: "bg-muted/40 text-muted-foreground/60 border-border",
+  },
+  debrief: {
+    label: "Debrief",
+    color: "bg-muted/60 text-muted-foreground border-border",
+  },
 };
 
 const emptyGroupForm = {
@@ -194,7 +208,10 @@ export function GroupsView({ groups, teamMembers }: Props) {
       return;
     }
     setLoadingDetail(true);
-    Promise.all([getGroupDetails(selectedGroupId), getGroupLeaderboard(selectedGroupId)])
+    Promise.all([
+      getGroupDetails(selectedGroupId),
+      getGroupLeaderboard(selectedGroupId),
+    ])
       .then(([detail, lb]) => {
         setGroupDetail(detail as GroupDetail | null);
         setLeaderboard(lb as LeaderboardEntry[]);
@@ -348,25 +365,34 @@ export function GroupsView({ groups, teamMembers }: Props) {
                 <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="font-medium">Aucun groupe d&apos;entraînement</p>
                 <p className="text-sm mt-1">
-                  Créez votre premier groupe pour organiser les sessions de formation.
+                  Créez votre premier groupe pour organiser les sessions de
+                  formation.
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <div className={`grid gap-4 ${selectedGroupId ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"}`}>
+            <div
+              className={`grid gap-4 ${selectedGroupId ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"}`}
+            >
               {groups.map((group) => (
                 <Card
                   key={group.id}
                   className={`cursor-pointer transition-all hover:border-brand/50 ${
-                    selectedGroupId === group.id ? "border-brand ring-1 ring-brand/30" : ""
+                    selectedGroupId === group.id
+                      ? "border-brand ring-1 ring-brand/30"
+                      : ""
                   }`}
                   onClick={() =>
-                    setSelectedGroupId(selectedGroupId === group.id ? null : group.id)
+                    setSelectedGroupId(
+                      selectedGroupId === group.id ? null : group.id,
+                    )
                   }
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-sm leading-tight">{group.name}</h3>
+                      <h3 className="font-semibold text-sm leading-tight">
+                        {group.name}
+                      </h3>
                       <ChevronRight
                         className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform ${
                           selectedGroupId === group.id ? "rotate-90" : ""
@@ -386,18 +412,30 @@ export function GroupsView({ groups, teamMembers }: Props) {
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
-                        <p className="text-sm font-bold">{group.member_count}</p>
-                        <p className="text-[10px] text-muted-foreground">Membres</p>
+                        <p className="text-sm font-bold">
+                          {group.member_count}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Membres
+                        </p>
                       </div>
                       <div>
-                        <p className="text-sm font-bold">{group.sessions_count}</p>
-                        <p className="text-[10px] text-muted-foreground">Sessions</p>
+                        <p className="text-sm font-bold">
+                          {group.sessions_count}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Sessions
+                        </p>
                       </div>
                       <div>
-                        <p className={`text-sm font-bold ${getScoreColor(group.avg_score)}`}>
+                        <p
+                          className={`text-sm font-bold ${getScoreColor(group.avg_score)}`}
+                        >
                           {group.avg_score}%
                         </p>
-                        <p className="text-[10px] text-muted-foreground">Score</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Score
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -424,7 +462,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <h2 className="text-lg font-bold">{groupDetail.name}</h2>
+                          <h2 className="text-lg font-bold">
+                            {groupDetail.name}
+                          </h2>
                           <Badge
                             variant="outline"
                             className={`text-[10px] ${nicheColors[groupDetail.niche] || ""}`}
@@ -432,7 +472,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
                             {groupDetail.niche}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{groupDetail.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {groupDetail.description}
+                        </p>
                       </div>
                       <Button
                         variant="ghost"
@@ -445,10 +487,14 @@ export function GroupsView({ groups, teamMembers }: Props) {
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center gap-1.5 text-sm">
                         <Target className="h-4 w-4 text-brand" />
-                        <span className={`font-semibold ${getScoreColor(groupDetail.avg_score)}`}>
+                        <span
+                          className={`font-semibold ${getScoreColor(groupDetail.avg_score)}`}
+                        >
                           {groupDetail.avg_score}%
                         </span>
-                        <span className="text-muted-foreground">score moyen</span>
+                        <span className="text-muted-foreground">
+                          score moyen
+                        </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-sm text-brand">
                         <TrendingUp className="h-4 w-4" />
@@ -472,9 +518,13 @@ export function GroupsView({ groups, teamMembers }: Props) {
                         <TableRow>
                           <TableHead className="w-12">#</TableHead>
                           <TableHead>Nom</TableHead>
-                          <TableHead className="text-center">Sessions</TableHead>
+                          <TableHead className="text-center">
+                            Sessions
+                          </TableHead>
                           <TableHead className="text-center">Score</TableHead>
-                          <TableHead className="text-right">Progression</TableHead>
+                          <TableHead className="text-right">
+                            Progression
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -491,7 +541,11 @@ export function GroupsView({ groups, teamMembers }: Props) {
                                         : "text-muted-foreground/60"
                                   }
                                 >
-                                  {entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : "🥉"}
+                                  {entry.rank === 1
+                                    ? "🥇"
+                                    : entry.rank === 2
+                                      ? "🥈"
+                                      : "🥉"}
                                 </span>
                               ) : (
                                 entry.rank
@@ -502,17 +556,25 @@ export function GroupsView({ groups, teamMembers }: Props) {
                                 <div className="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[10px] font-bold">
                                   {getInitials(entry.name)}
                                 </div>
-                                <span className="font-medium text-sm">{entry.name}</span>
+                                <span className="font-medium text-sm">
+                                  {entry.name}
+                                </span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-center text-sm">{entry.sessions}</TableCell>
+                            <TableCell className="text-center text-sm">
+                              {entry.sessions}
+                            </TableCell>
                             <TableCell className="text-center">
-                              <span className={`text-sm font-semibold ${getScoreColor(entry.avg_score)}`}>
+                              <span
+                                className={`text-sm font-semibold ${getScoreColor(entry.avg_score)}`}
+                              >
                                 {entry.avg_score}%
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
-                              <span className={`text-sm ${entry.progress >= 0 ? "text-brand" : "text-foreground"}`}>
+                              <span
+                                className={`text-sm ${entry.progress >= 0 ? "text-brand" : "text-foreground"}`}
+                              >
                                 {entry.progress >= 0 ? "+" : ""}
                                 {entry.progress}%
                               </span>
@@ -538,9 +600,13 @@ export function GroupsView({ groups, teamMembers }: Props) {
                         <TableRow>
                           <TableHead>Membre</TableHead>
                           <TableHead>Rôle</TableHead>
-                          <TableHead className="text-center">Sessions</TableHead>
+                          <TableHead className="text-center">
+                            Sessions
+                          </TableHead>
                           <TableHead className="text-center">Score</TableHead>
-                          <TableHead className="text-right">Progression</TableHead>
+                          <TableHead className="text-right">
+                            Progression
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -549,7 +615,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[10px] font-bold">
-                                  {getInitials(member.profile?.full_name || "?")}
+                                  {getInitials(
+                                    member.profile?.full_name || "?",
+                                  )}
                                 </div>
                                 <span className="font-medium text-sm">
                                   {member.profile?.full_name || "Membre"}
@@ -557,7 +625,10 @@ export function GroupsView({ groups, teamMembers }: Props) {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="text-[10px] capitalize">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] capitalize"
+                              >
                                 {member.profile?.role || "—"}
                               </Badge>
                             </TableCell>
@@ -565,12 +636,16 @@ export function GroupsView({ groups, teamMembers }: Props) {
                               {member.sessions_attended}
                             </TableCell>
                             <TableCell className="text-center">
-                              <span className={`text-sm font-semibold ${getScoreColor(member.avg_score)}`}>
+                              <span
+                                className={`text-sm font-semibold ${getScoreColor(member.avg_score)}`}
+                              >
                                 {member.avg_score}%
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
-                              <span className={`text-sm ${member.progress >= 0 ? "text-brand" : "text-foreground"}`}>
+                              <span
+                                className={`text-sm ${member.progress >= 0 ? "text-brand" : "text-foreground"}`}
+                              >
                                 {member.progress >= 0 ? "+" : ""}
                                 {member.progress}%
                               </span>
@@ -610,19 +685,26 @@ export function GroupsView({ groups, teamMembers }: Props) {
                           <TableHead>Titre</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Type</TableHead>
-                          <TableHead className="text-right">Participants</TableHead>
+                          <TableHead className="text-right">
+                            Participants
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {groupDetail.sessions.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
+                            <TableCell
+                              colSpan={4}
+                              className="text-center text-muted-foreground py-6"
+                            >
                               Aucune session pour ce groupe
                             </TableCell>
                           </TableRow>
                         ) : (
                           groupDetail.sessions.map((session) => {
-                            const typeInfo = sessionTypeLabels[session.type] || {
+                            const typeInfo = sessionTypeLabels[
+                              session.type
+                            ] || {
                               label: session.type,
                               color: "",
                             };
@@ -673,7 +755,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
               <Label>Nom du groupe</Label>
               <Input
                 value={groupForm.name}
-                onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
+                onChange={(e) =>
+                  setGroupForm({ ...groupForm, name: e.target.value })
+                }
                 placeholder="Ex: Closers débutants"
               />
             </div>
@@ -681,7 +765,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
               <Label>Description</Label>
               <Textarea
                 value={groupForm.description}
-                onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
+                onChange={(e) =>
+                  setGroupForm({ ...groupForm, description: e.target.value })
+                }
                 rows={3}
                 placeholder="Décrivez les objectifs du groupe..."
               />
@@ -700,14 +786,18 @@ export function GroupsView({ groups, teamMembers }: Props) {
                   <SelectItem value="Setting">Setting</SelectItem>
                   <SelectItem value="Prospection">Prospection</SelectItem>
                   <SelectItem value="Négociation">Négociation</SelectItem>
-                  <SelectItem value="Objection handling">Objection handling</SelectItem>
+                  <SelectItem value="Objection handling">
+                    Objection handling
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label className="mb-2 block">Membres</Label>
               {teamMembers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aucun membre disponible</p>
+                <p className="text-sm text-muted-foreground">
+                  Aucun membre disponible
+                </p>
               ) : (
                 <div className="border rounded-lg divide-y max-h-48 overflow-y-auto">
                   {teamMembers.map((member) => (
@@ -723,9 +813,14 @@ export function GroupsView({ groups, teamMembers }: Props) {
                         <div className="w-6 h-6 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[9px] font-bold">
                           {getInitials(member.full_name || "?")}
                         </div>
-                        <span className="text-sm font-medium">{member.full_name}</span>
+                        <span className="text-sm font-medium">
+                          {member.full_name}
+                        </span>
                       </div>
-                      <Badge variant="outline" className="text-[10px] capitalize">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] capitalize"
+                      >
                         {member.role}
                       </Badge>
                     </label>
@@ -734,7 +829,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
               )}
               {groupForm.memberIds.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  {groupForm.memberIds.length} membre{groupForm.memberIds.length > 1 ? "s" : ""} sélectionné{groupForm.memberIds.length > 1 ? "s" : ""}
+                  {groupForm.memberIds.length} membre
+                  {groupForm.memberIds.length > 1 ? "s" : ""} sélectionné
+                  {groupForm.memberIds.length > 1 ? "s" : ""}
                 </p>
               )}
             </div>
@@ -763,7 +860,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
               <Label>Titre de la session</Label>
               <Input
                 value={sessionForm.title}
-                onChange={(e) => setSessionForm({ ...sessionForm, title: e.target.value })}
+                onChange={(e) =>
+                  setSessionForm({ ...sessionForm, title: e.target.value })
+                }
                 placeholder="Ex: Gestion des objections prix"
               />
             </div>
@@ -772,7 +871,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
               <Input
                 type="datetime-local"
                 value={sessionForm.date}
-                onChange={(e) => setSessionForm({ ...sessionForm, date: e.target.value })}
+                onChange={(e) =>
+                  setSessionForm({ ...sessionForm, date: e.target.value })
+                }
               />
             </div>
             <div>
@@ -780,7 +881,10 @@ export function GroupsView({ groups, teamMembers }: Props) {
               <Select
                 value={sessionForm.type}
                 onValueChange={(v) =>
-                  setSessionForm({ ...sessionForm, type: v as "roleplay" | "workshop" | "debrief" })
+                  setSessionForm({
+                    ...sessionForm,
+                    type: v as "roleplay" | "workshop" | "debrief",
+                  })
                 }
               >
                 <SelectTrigger>

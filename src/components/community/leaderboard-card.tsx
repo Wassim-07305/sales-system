@@ -12,9 +12,9 @@ export interface LeaderboardEntry {
 }
 
 const podiumColors = [
-  "text-amber-500 bg-amber-500/10 ring-amber-500/20",    // 1st
-  "text-gray-400 bg-gray-400/10 ring-gray-400/20",        // 2nd
-  "text-amber-700 bg-amber-700/10 ring-amber-700/20",     // 3rd
+  "text-amber-500 bg-amber-500/10 ring-amber-500/20", // 1st
+  "text-gray-400 bg-gray-400/10 ring-gray-400/20", // 2nd
+  "text-amber-700 bg-amber-700/10 ring-amber-700/20", // 3rd
 ];
 
 export function LeaderboardCard({ entries }: { entries: LeaderboardEntry[] }) {
@@ -37,16 +37,22 @@ export function LeaderboardCard({ entries }: { entries: LeaderboardEntry[] }) {
                 idx < 3 ? "bg-muted/40" : "hover:bg-muted/30"
               }`}
             >
-              <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ring-1 shrink-0 ${
-                idx < 3 ? podiumColors[idx] : "text-muted-foreground bg-transparent ring-border"
-              }`}>
+              <span
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ring-1 shrink-0 ${
+                  idx < 3
+                    ? podiumColors[idx]
+                    : "text-muted-foreground bg-transparent ring-border"
+                }`}
+              >
                 {idx + 1}
               </span>
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center text-brand text-xs font-bold shrink-0 ring-1 ring-brand/15">
                 {entry.full_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{entry.full_name || "Anonyme"}</p>
+                <p className="text-sm font-medium truncate">
+                  {entry.full_name || "Anonyme"}
+                </p>
               </div>
               <ReputationBadge score={entry.score} showScore />
             </div>

@@ -5,12 +5,12 @@ import { revalidatePath } from "next/cache";
 
 export interface SimulatorInputs {
   dailyConversations: number;
-  conversionRate: number;       // % of conversations → booked call
-  showUpRate: number;            // % of booked calls that show up
-  closingRate: number;           // % of show-ups that close
-  averageDealValue: number;      // Average deal value in €
-  workingDaysPerMonth: number;   // Typically 20-22
-  commissionRate: number;        // Setter commission % (e.g., 10-20%)
+  conversionRate: number; // % of conversations → booked call
+  showUpRate: number; // % of booked calls that show up
+  closingRate: number; // % of show-ups that close
+  averageDealValue: number; // Average deal value in €
+  workingDaysPerMonth: number; // Typically 20-22
+  commissionRate: number; // Setter commission % (e.g., 10-20%)
 }
 
 export interface SimulatorResults {
@@ -29,13 +29,24 @@ export interface SimulatorResults {
   }>;
 }
 
-export async function calculateRevenue(inputs: SimulatorInputs): Promise<SimulatorResults> {
-  const monthlyConversations = inputs.dailyConversations * inputs.workingDaysPerMonth;
-  const monthlyBookedCalls = Math.round(monthlyConversations * (inputs.conversionRate / 100));
-  const monthlyShowUps = Math.round(monthlyBookedCalls * (inputs.showUpRate / 100));
-  const monthlyClosedDeals = Math.round(monthlyShowUps * (inputs.closingRate / 100));
+export async function calculateRevenue(
+  inputs: SimulatorInputs,
+): Promise<SimulatorResults> {
+  const monthlyConversations =
+    inputs.dailyConversations * inputs.workingDaysPerMonth;
+  const monthlyBookedCalls = Math.round(
+    monthlyConversations * (inputs.conversionRate / 100),
+  );
+  const monthlyShowUps = Math.round(
+    monthlyBookedCalls * (inputs.showUpRate / 100),
+  );
+  const monthlyClosedDeals = Math.round(
+    monthlyShowUps * (inputs.closingRate / 100),
+  );
   const monthlyGrossRevenue = monthlyClosedDeals * inputs.averageDealValue;
-  const monthlySetterCommission = Math.round(monthlyGrossRevenue * (inputs.commissionRate / 100));
+  const monthlySetterCommission = Math.round(
+    monthlyGrossRevenue * (inputs.commissionRate / 100),
+  );
   const yearlySetterCommission = monthlySetterCommission * 12;
 
   const funnel = [
@@ -43,17 +54,26 @@ export async function calculateRevenue(inputs: SimulatorInputs): Promise<Simulat
     {
       label: "Appels bookes",
       value: monthlyBookedCalls,
-      percent: monthlyConversations > 0 ? Math.round((monthlyBookedCalls / monthlyConversations) * 100) : 0,
+      percent:
+        monthlyConversations > 0
+          ? Math.round((monthlyBookedCalls / monthlyConversations) * 100)
+          : 0,
     },
     {
       label: "Show-ups",
       value: monthlyShowUps,
-      percent: monthlyConversations > 0 ? Math.round((monthlyShowUps / monthlyConversations) * 100) : 0,
+      percent:
+        monthlyConversations > 0
+          ? Math.round((monthlyShowUps / monthlyConversations) * 100)
+          : 0,
     },
     {
       label: "Deals closes",
       value: monthlyClosedDeals,
-      percent: monthlyConversations > 0 ? Math.round((monthlyClosedDeals / monthlyConversations) * 100) : 0,
+      percent:
+        monthlyConversations > 0
+          ? Math.round((monthlyClosedDeals / monthlyConversations) * 100)
+          : 0,
     },
   ];
 
@@ -74,7 +94,9 @@ export async function calculateRevenue(inputs: SimulatorInputs): Promise<Simulat
  */
 export async function saveSimulatorInputs(inputs: SimulatorInputs) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Store in profiles.goals as JSON
@@ -100,7 +122,9 @@ export async function saveSimulatorInputs(inputs: SimulatorInputs) {
  */
 export async function getSimulatorInputs(): Promise<SimulatorInputs | null> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data: profile } = await supabase

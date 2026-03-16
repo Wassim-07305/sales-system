@@ -11,10 +11,11 @@ export default async function AcademyPage() {
   if (!user) redirect("/login");
 
   // Fetch profile + courses in parallel
-  const [{ data: profile }, { courses, progressMap, moduleUnlockCounts }] = await Promise.all([
-    supabase.from("profiles").select("role").eq("id", user.id).single(),
-    getCoursesWithModules(),
-  ]);
+  const [{ data: profile }, { courses, progressMap, moduleUnlockCounts }] =
+    await Promise.all([
+      supabase.from("profiles").select("role").eq("id", user.id).single(),
+      getCoursesWithModules(),
+    ]);
   const isAdmin = profile?.role === "admin" || profile?.role === "manager";
 
   return (

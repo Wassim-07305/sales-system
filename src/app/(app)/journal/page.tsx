@@ -5,7 +5,9 @@ import { JournalView } from "./journal-view";
 
 export default async function JournalPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -14,7 +16,10 @@ export default async function JournalPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
+  if (
+    !profile ||
+    !["admin", "manager", "setter", "closer"].includes(profile.role)
+  ) {
     redirect("/dashboard");
   }
 

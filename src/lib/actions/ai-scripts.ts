@@ -100,7 +100,7 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
   ],
   "cta": "Call-to-action final pour proposer un rendez-vous"
 }`,
-      { maxTokens: 1500 }
+      { maxTokens: 1500 },
     );
     script = { ...parsed, generated_at: new Date().toISOString() };
   } catch {
@@ -177,7 +177,7 @@ Réponds UNIQUEMENT en JSON valide avec cette structure exacte:
       key: "generated_script",
       value: JSON.stringify(script),
     },
-    { onConflict: "user_id,key" }
+    { onConflict: "user_id,key" },
   );
 
   revalidatePath("/ai-scripts");

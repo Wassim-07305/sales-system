@@ -39,13 +39,13 @@ export async function GET(request: Request) {
   if (!serviceRoleKey) {
     return NextResponse.json(
       { error: "Service role key not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey
+    serviceRoleKey,
   );
 
   const results = {
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     if (clientsError) {
       return NextResponse.json(
         { error: `Erreur lecture clients B2B: ${clientsError.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
         if (settersError) {
           results.errors++;
           results.details.push(
-            `Erreur lecture setters pour ${client.full_name || client.id}: ${settersError.message}`
+            `Erreur lecture setters pour ${client.full_name || client.id}: ${settersError.message}`,
           );
           continue;
         }
@@ -144,11 +144,15 @@ export async function GET(request: Request) {
         // Calculer les taux agrégés
         aggregated.replyRate =
           aggregated.totalDmsSent > 0
-            ? Math.round((aggregated.totalReplies / aggregated.totalDmsSent) * 100)
+            ? Math.round(
+                (aggregated.totalReplies / aggregated.totalDmsSent) * 100,
+              )
             : 0;
         aggregated.showUpRate =
           aggregated.totalBookings > 0
-            ? Math.round((aggregated.completedBookings / aggregated.totalBookings) * 100)
+            ? Math.round(
+                (aggregated.completedBookings / aggregated.totalBookings) * 100,
+              )
             : 0;
 
         // --- 5. Construire le message de notification ---
@@ -178,13 +182,15 @@ export async function GET(request: Request) {
           bodyLines.push("", "Detail par setter :");
           for (const report of setterReports) {
             bodyLines.push(
-              `  ${report.setterName} : ${report.metrics.dealsCreated} deals, ${report.metrics.totalDmsSent} DMs, ${report.metrics.totalBookings} RDV`
+              `  ${report.setterName} : ${report.metrics.dealsCreated} deals, ${report.metrics.totalDmsSent} DMs, ${report.metrics.totalBookings} RDV`,
             );
           }
         }
 
         // --- 6. Vérifier qu'on n'a pas déjà envoyé cette semaine ---
-        const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const weekStart = new Date(
+          now.getTime() - 7 * 24 * 60 * 60 * 1000,
+        ).toISOString();
         const { data: existingReport } = await supabase
           .from("notifications")
           .select("id")
@@ -195,7 +201,7 @@ export async function GET(request: Request) {
 
         if (existingReport && existingReport.length > 0) {
           results.details.push(
-            `Rapport déjà envoyé cette semaine pour ${client.full_name || client.id}`
+            `Rapport déjà envoyé cette semaine pour ${client.full_name || client.id}`,
           );
           continue;
         }
@@ -214,7 +220,7 @@ export async function GET(request: Request) {
         if (notifError) {
           results.errors++;
           results.details.push(
-            `Erreur notification pour ${client.full_name || client.id}: ${notifError.message}`
+            `Erreur notification pour ${client.full_name || client.id}: ${notifError.message}`,
           );
           continue;
         }
@@ -225,14 +231,14 @@ export async function GET(request: Request) {
           client.id,
           "Rapport hebdomadaire de votre equipe",
           bodyLines.slice(0, 3).join("\n"),
-          "/analytics"
+          "/analytics",
         );
 
         results.reports_sent++;
       } catch (clientErr) {
         results.errors++;
         results.details.push(
-          `Erreur client ${client.full_name || client.id}: ${clientErr instanceof Error ? clientErr.message : "Erreur inconnue"}`
+          `Erreur client ${client.full_name || client.id}: ${clientErr instanceof Error ? clientErr.message : "Erreur inconnue"}`,
         );
       }
     }
@@ -241,7 +247,7 @@ export async function GET(request: Request) {
       {
         error: `Erreur globale: ${globalErr instanceof Error ? globalErr.message : "Erreur inconnue"}`,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -262,10 +268,12 @@ export async function GET(request: Request) {
  */
 async function generateSetterReport(
   supabase: AnySupabaseClient,
-  setterId: string
+  setterId: string,
 ): Promise<WeeklyMetrics> {
   const now = new Date();
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const weekAgo = new Date(
+    now.getTime() - 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   // Deals cette semaine
   const { data: weekDeals } = await supabase
@@ -289,10 +297,21 @@ async function generateSetterReport(
     .eq("user_id", setterId)
     .gte("date", weekAgo.split("T")[0]);
 
-  const totalDms = (weekQuotas || []).reduce((s: number, q: { dms_sent: number }) => s + q.dms_sent, 0);
-  const totalReplies = (weekQuotas || []).reduce((s: number, q: { replies_received: number }) => s + q.replies_received, 0);
-  const totalBookingsFromDms = (weekQuotas || []).reduce((s: number, q: { bookings_from_dms: number }) => s + q.bookings_from_dms, 0);
-  const completedBookings = (weekBookings || []).filter((b: { status: string }) => b.status === "completed").length;
+  const totalDms = (weekQuotas || []).reduce(
+    (s: number, q: { dms_sent: number }) => s + q.dms_sent,
+    0,
+  );
+  const totalReplies = (weekQuotas || []).reduce(
+    (s: number, q: { replies_received: number }) => s + q.replies_received,
+    0,
+  );
+  const totalBookingsFromDms = (weekQuotas || []).reduce(
+    (s: number, q: { bookings_from_dms: number }) => s + q.bookings_from_dms,
+    0,
+  );
+  const completedBookings = (weekBookings || []).filter(
+    (b: { status: string }) => b.status === "completed",
+  ).length;
   const showUpRate =
     weekBookings && weekBookings.length > 0
       ? Math.round((completedBookings / weekBookings.length) * 100)
@@ -300,7 +319,10 @@ async function generateSetterReport(
 
   return {
     dealsCreated: (weekDeals || []).length,
-    totalPipelineValue: (weekDeals || []).reduce((s: number, d: { value: number | null }) => s + (d.value || 0), 0),
+    totalPipelineValue: (weekDeals || []).reduce(
+      (s: number, d: { value: number | null }) => s + (d.value || 0),
+      0,
+    ),
     totalDmsSent: totalDms,
     totalReplies,
     replyRate: totalDms > 0 ? Math.round((totalReplies / totalDms) * 100) : 0,
@@ -320,7 +342,7 @@ async function sendPushToUser(
   userId: string,
   title: string,
   body: string,
-  _url?: string
+  _url?: string,
 ) {
   try {
     const { data: subscriptions } = await supabase
@@ -343,17 +365,18 @@ async function sendPushToUser(
     webpush.setVapidDetails(
       "mailto:contact@lecloser.app",
       VAPID_PUBLIC_KEY,
-      VAPID_PRIVATE_KEY
+      VAPID_PRIVATE_KEY,
     );
 
     const payload = JSON.stringify({ title, body });
 
     for (const sub of subscriptions) {
       try {
-        const keys = typeof sub.keys === "string" ? JSON.parse(sub.keys) : sub.keys;
+        const keys =
+          typeof sub.keys === "string" ? JSON.parse(sub.keys) : sub.keys;
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys },
-          payload
+          payload,
         );
       } catch {
         // Subscription expirée ou invalide — on continue

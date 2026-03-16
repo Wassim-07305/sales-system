@@ -47,7 +47,11 @@ interface MarketplaceListing {
   requirements: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
-  entrepreneur?: { id: string; full_name: string | null; company: string | null } | null;
+  entrepreneur?: {
+    id: string;
+    full_name: string | null;
+    company: string | null;
+  } | null;
 }
 
 interface Application {
@@ -89,25 +93,30 @@ export function MarketplaceView({ listings, myApplications }: Props) {
   const [search, setSearch] = useState("");
   const [nicheFilter, setNicheFilter] = useState("all");
   const [applyDialogOpen, setApplyDialogOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
+  const [selectedListing, setSelectedListing] =
+    useState<MarketplaceListing | null>(null);
   const [message, setMessage] = useState("");
 
   // Build niche list from listings
   const niches = Array.from(
-    new Set(listings.map((l) => l.niche).filter(Boolean))
+    new Set(listings.map((l) => l.niche).filter(Boolean)),
   ) as string[];
 
   // Map of listing IDs to applications
   const applicationMap = new Map(
-    myApplications.map((app) => [app.listing_id, app])
+    myApplications.map((app) => [app.listing_id, app]),
   );
 
   const filtered = listings.filter((l) => {
     const matchSearch =
       l.title.toLowerCase().includes(search.toLowerCase()) ||
       (l.description || "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.entrepreneur?.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.entrepreneur?.company || "").toLowerCase().includes(search.toLowerCase());
+      (l.entrepreneur?.full_name || "")
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      (l.entrepreneur?.company || "")
+        .toLowerCase()
+        .includes(search.toLowerCase());
 
     const matchNiche = nicheFilter === "all" || l.niche === nicheFilter;
 
@@ -135,7 +144,8 @@ export function MarketplaceView({ listings, myApplications }: Props) {
         setMessage("");
         router.refresh();
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Erreur lors de l'envoi";
+        const message =
+          err instanceof Error ? err.message : "Erreur lors de l'envoi";
         toast.error(message);
       }
     });
@@ -197,17 +207,25 @@ export function MarketplaceView({ listings, myApplications }: Props) {
           const existingApp = applicationMap.get(listing.id);
           const commission = formatCommission(listing);
           const requirements = formatRequirements(listing.requirements);
-          const StatusIcon = existingApp ? appStatusIcons[existingApp.status] || Clock : null;
+          const StatusIcon = existingApp
+            ? appStatusIcons[existingApp.status] || Clock
+            : null;
 
           return (
-            <Card key={listing.id} className="flex flex-col border-border/50 hover:shadow-md transition-all">
+            <Card
+              key={listing.id}
+              className="flex flex-col border-border/50 hover:shadow-md transition-all"
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-base leading-tight">
                     {listing.title}
                   </CardTitle>
                   {listing.niche && (
-                    <Badge variant="outline" className="bg-brand/10 text-brand shrink-0 ml-2">
+                    <Badge
+                      variant="outline"
+                      className="bg-brand/10 text-brand shrink-0 ml-2"
+                    >
                       <Tag className="h-3 w-3 mr-1" />
                       {listing.niche}
                     </Badge>
@@ -222,7 +240,8 @@ export function MarketplaceView({ listings, myApplications }: Props) {
                     {listing.entrepreneur?.full_name || "Entrepreneur"}
                     {listing.entrepreneur?.company && (
                       <span className="text-muted-foreground">
-                        {" "}({listing.entrepreneur.company})
+                        {" "}
+                        ({listing.entrepreneur.company})
                       </span>
                     )}
                   </span>
@@ -241,7 +260,9 @@ export function MarketplaceView({ listings, myApplications }: Props) {
                     <DollarSign className="h-4 w-4 text-brand" />
                     <span className="text-sm font-medium">
                       Commission : {commission}
-                      {listing.commission_type === "percentage" ? " par vente" : " fixe"}
+                      {listing.commission_type === "percentage"
+                        ? " par vente"
+                        : " fixe"}
                     </span>
                   </div>
                 )}
@@ -257,14 +278,13 @@ export function MarketplaceView({ listings, myApplications }: Props) {
                 <div className="mt-auto pt-3">
                   {existingApp ? (
                     <div className="flex items-center gap-2">
-                      {StatusIcon && (
-                        <StatusIcon className="h-4 w-4" />
-                      )}
+                      {StatusIcon && <StatusIcon className="h-4 w-4" />}
                       <Badge
                         variant="outline"
                         className={appStatusColors[existingApp.status] || ""}
                       >
-                        {appStatusLabels[existingApp.status] || existingApp.status}
+                        {appStatusLabels[existingApp.status] ||
+                          existingApp.status}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         Candidature envoyée
@@ -294,7 +314,9 @@ export function MarketplaceView({ listings, myApplications }: Props) {
               <Store className="h-7 w-7 opacity-50" />
             </div>
             <p className="font-medium">Aucune offre trouvée</p>
-            <p className="text-sm mt-1">Essayez de modifier vos filtres de recherche</p>
+            <p className="text-sm mt-1">
+              Essayez de modifier vos filtres de recherche
+            </p>
           </CardContent>
         </Card>
       )}
@@ -303,16 +325,15 @@ export function MarketplaceView({ listings, myApplications }: Props) {
       <Dialog open={applyDialogOpen} onOpenChange={setApplyDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              Postuler : {selectedListing?.title}
-            </DialogTitle>
+            <DialogTitle>Postuler : {selectedListing?.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             {selectedListing?.entrepreneur && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Building2 className="h-4 w-4" />
                 {selectedListing.entrepreneur.full_name}
-                {selectedListing.entrepreneur.company && ` (${selectedListing.entrepreneur.company})`}
+                {selectedListing.entrepreneur.company &&
+                  ` (${selectedListing.entrepreneur.company})`}
               </div>
             )}
             <div className="space-y-2">

@@ -5,6 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       { userAgent: "*", allow: "/", disallow: ["/api/", "/onboarding/"] },
     ],
-    sitemap: "https://sales-system-ahmanewassim6-2668s-projects.vercel.app/sitemap.xml",
+    sitemap:
+      "https://sales-system-ahmanewassim6-2668s-projects.vercel.app/sitemap.xml",
   };
 }

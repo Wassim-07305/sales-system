@@ -10,7 +10,9 @@ import { fr } from "date-fns/locale";
 
 export default async function CallsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -29,10 +31,10 @@ export default async function CallsPage() {
     .order("scheduled_at", { ascending: false });
 
   const upcomingCalls = (calls || []).filter(
-    (c) => new Date(c.scheduled_at) >= new Date()
+    (c) => new Date(c.scheduled_at) >= new Date(),
   );
   const pastCalls = (calls || []).filter(
-    (c) => new Date(c.scheduled_at) < new Date()
+    (c) => new Date(c.scheduled_at) < new Date(),
   );
 
   return (
@@ -47,7 +49,10 @@ export default async function CallsPage() {
           <h2 className="text-lg font-semibold mb-4">Prochains calls</h2>
           <div className="space-y-3 mb-8">
             {upcomingCalls.map((call) => (
-              <Card key={call.id} className="rounded-xl border-border/50 shadow-sm">
+              <Card
+                key={call.id}
+                className="rounded-xl border-border/50 shadow-sm"
+              >
                 <CardContent className="p-5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center">
@@ -71,8 +76,16 @@ export default async function CallsPage() {
                     </div>
                   </div>
                   {call.meeting_link && (
-                    <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90" asChild>
-                      <a href={call.meeting_link} target="_blank" rel="noopener noreferrer">
+                    <Button
+                      size="sm"
+                      className="bg-brand text-brand-dark hover:bg-brand/90"
+                      asChild
+                    >
+                      <a
+                        href={call.meeting_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <ExternalLink className="h-4 w-4 mr-1" />
                         Rejoindre
                       </a>
@@ -105,7 +118,11 @@ export default async function CallsPage() {
               </div>
               {call.replay_url ? (
                 <Button variant="outline" size="sm" asChild>
-                  <a href={call.replay_url} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={call.replay_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Video className="h-4 w-4 mr-1" />
                     Voir le replay
                   </a>

@@ -25,7 +25,11 @@ function getProgressColor(score: number): string {
   return "bg-red-400";
 }
 
-export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown }) {
+export function ReadinessGauge({
+  readiness,
+}: {
+  readiness: ReadinessBreakdown;
+}) {
   const criteria = [
     {
       label: "Modules termines",
@@ -79,7 +83,9 @@ export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown })
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Progression globale</span>
-            <span className={`text-2xl font-bold ${getScoreColor(readiness.overall)}`}>
+            <span
+              className={`text-2xl font-bold ${getScoreColor(readiness.overall)}`}
+            >
               {readiness.overall}%
             </span>
           </div>
@@ -96,7 +102,9 @@ export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown })
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-[10px] text-muted-foreground">0%</span>
-            <span className="text-[10px] text-muted-foreground">Seuil: 80%</span>
+            <span className="text-[10px] text-muted-foreground">
+              Seuil: 80%
+            </span>
             <span className="text-[10px] text-muted-foreground">100%</span>
           </div>
         </div>
@@ -111,14 +119,20 @@ export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown })
                   <div className="flex items-center gap-2">
                     <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs font-medium">{c.label}</span>
-                    <span className="text-[10px] text-muted-foreground">({c.weight})</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      ({c.weight})
+                    </span>
                   </div>
-                  <span className={`text-xs font-semibold ${getScoreColor(c.score)}`}>
+                  <span
+                    className={`text-xs font-semibold ${getScoreColor(c.score)}`}
+                  >
                     {c.score}%
                   </span>
                 </div>
                 <Progress value={c.score} className="h-1.5" />
-                <p className="text-[10px] text-muted-foreground mt-0.5">{c.detail}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  {c.detail}
+                </p>
               </div>
             );
           })}
@@ -127,15 +141,17 @@ export function ReadinessGauge({ readiness }: { readiness: ReadinessBreakdown })
         {/* Next step hint */}
         {!readiness.isReady && (
           <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-xs font-medium mb-1">Prochaine etape recommandee</p>
+            <p className="text-xs font-medium mb-1">
+              Prochaine etape recommandee
+            </p>
             <p className="text-xs text-muted-foreground">
               {readiness.courseCompletion < 60
                 ? "Continue les modules de formation pour progresser rapidement."
                 : readiness.quizPerformance < 60
-                ? "Valide plus de quiz pour prouver ta maitrise des concepts."
-                : readiness.roleplayScore < 60
-                ? "Fais des sessions de roleplay IA pour t'entrainer."
-                : "Tu y es presque ! Termine les dernieres etapes."}
+                  ? "Valide plus de quiz pour prouver ta maitrise des concepts."
+                  : readiness.roleplayScore < 60
+                    ? "Fais des sessions de roleplay IA pour t'entrainer."
+                    : "Tu y es presque ! Termine les dernieres etapes."}
             </p>
           </div>
         )}

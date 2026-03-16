@@ -1,11 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getProspects, getDailyQuota, getProspectLists, getProspectSegmentStats } from "@/lib/actions/prospecting";
+import {
+  getProspects,
+  getDailyQuota,
+  getProspectLists,
+  getProspectSegmentStats,
+} from "@/lib/actions/prospecting";
 import { ProspectingView } from "./prospecting-view";
 
 export default async function ProspectingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -14,7 +21,10 @@ export default async function ProspectingPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
+  if (
+    !profile ||
+    !["admin", "manager", "setter", "closer"].includes(profile.role)
+  ) {
     redirect("/dashboard");
   }
 
@@ -24,13 +34,18 @@ export default async function ProspectingPage() {
   const segmentStats = await getProspectSegmentStats();
 
   // Fetch scores for all prospects
-  const prospectIds = prospects.map((p: Record<string, unknown>) => p.id as string);
+  const prospectIds = prospects.map(
+    (p: Record<string, unknown>) => p.id as string,
+  );
   const { data: scores } = await supabase
     .from("prospect_scores")
     .select("prospect_id, total_score, temperature")
     .in("prospect_id", prospectIds.length > 0 ? prospectIds : ["__none__"]);
 
-  const scoresMap: Record<string, { total_score: number; temperature: string }> = {};
+  const scoresMap: Record<
+    string,
+    { total_score: number; temperature: string }
+  > = {};
   for (const s of scores || []) {
     scoresMap[s.prospect_id as string] = {
       total_score: (s.total_score as number) ?? 0,
@@ -66,5 +81,12 @@ export default async function ProspectingPage() {
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <ProspectingView prospects={prospectsWithScores as any} quota={quota} lists={lists} segmentStats={segmentStats} />;
+  return (
+    <ProspectingView
+      prospects={prospectsWithScores as any}
+      quota={quota}
+      lists={lists}
+      segmentStats={segmentStats}
+    />
+  );
 }

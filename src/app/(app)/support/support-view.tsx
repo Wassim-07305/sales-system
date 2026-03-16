@@ -149,7 +149,6 @@ const CATEGORIES = [
   "Autre",
 ];
 
-
 // ─── Component ───────────────────────────────────────────────────────
 
 export function SupportView({
@@ -176,7 +175,9 @@ export function SupportView({
   const [allTicketsLoaded, setAllTicketsLoaded] = useState(false);
 
   // SLA state
-  const [slaStatuses, setSlaStatuses] = useState<Record<string, SlaStatusInfo>>({});
+  const [slaStatuses, setSlaStatuses] = useState<Record<string, SlaStatusInfo>>(
+    {},
+  );
   const [, setSlaMetricsData] = useState<SlaMetricsInfo | null>(null);
   const [, setSlaConfigData] = useState<SlaConfigInfo | null>(null);
 
@@ -207,10 +208,16 @@ export function SupportView({
     const slaA = slaStatuses[a.id];
     const slaB = slaStatuses[b.id];
     const scoreA = slaA
-      ? (slaA.responseStatus === "breached" || slaA.resolutionStatus === "breached" ? 0 : 1)
+      ? slaA.responseStatus === "breached" ||
+        slaA.resolutionStatus === "breached"
+        ? 0
+        : 1
       : 1;
     const scoreB = slaB
-      ? (slaB.responseStatus === "breached" || slaB.resolutionStatus === "breached" ? 0 : 1)
+      ? slaB.responseStatus === "breached" ||
+        slaB.resolutionStatus === "breached"
+        ? 0
+        : 1
       : 1;
     return scoreA - scoreB;
   }
@@ -251,7 +258,12 @@ export function SupportView({
   }
 
   function handleSubmitTicket() {
-    if (!newSubject.trim() || !newCategory || !newPriority || !newDescription.trim()) {
+    if (
+      !newSubject.trim() ||
+      !newCategory ||
+      !newPriority ||
+      !newDescription.trim()
+    ) {
       toast.error("Veuillez remplir tous les champs", {
         style: { background: "#14080e", borderColor: "#333" },
       });
@@ -349,18 +361,26 @@ export function SupportView({
       setTickets((prev) =>
         prev.map((t) =>
           t.id === ticketId
-            ? { ...t, status: newStatus as Ticket["status"], updated_at: new Date().toISOString() }
-            : t
-        )
+            ? {
+                ...t,
+                status: newStatus as Ticket["status"],
+                updated_at: new Date().toISOString(),
+              }
+            : t,
+        ),
       );
 
       if (allTickets) {
         setAllTickets((prev) =>
           (prev || []).map((t) =>
             t.id === ticketId
-              ? { ...t, status: newStatus as Ticket["status"], updated_at: new Date().toISOString() }
-              : t
-          )
+              ? {
+                  ...t,
+                  status: newStatus as Ticket["status"],
+                  updated_at: new Date().toISOString(),
+                }
+              : t,
+          ),
         );
       }
 
@@ -469,10 +489,7 @@ export function SupportView({
                     (expandedTicket?.messages || []).map((msg) => {
                       if (msg.sender_type === "system") {
                         return (
-                          <div
-                            key={msg.id}
-                            className="flex justify-center"
-                          >
+                          <div key={msg.id} className="flex justify-center">
                             <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
                               {msg.content} - {formatDate(msg.created_at)}
                             </span>
@@ -648,8 +665,16 @@ export function SupportView({
       {/* Tabs */}
       <Tabs defaultValue="my-tickets">
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
-          <TabsTrigger value="my-tickets" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Mes tickets</TabsTrigger>
-          <TabsTrigger value="new-ticket" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="my-tickets"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
+            Mes tickets
+          </TabsTrigger>
+          <TabsTrigger
+            value="new-ticket"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
             <Plus className="size-4 mr-1" />
             Nouveau ticket
           </TabsTrigger>
@@ -702,7 +727,7 @@ export function SupportView({
                   </TableHeader>
                   <TableBody>
                     {filteredTickets.map((ticket) =>
-                      renderTicketRow(ticket, true)
+                      renderTicketRow(ticket, true),
                     )}
                   </TableBody>
                 </Table>
@@ -719,7 +744,9 @@ export function SupportView({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Sujet</label>
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Sujet
+                </label>
                 <Input
                   placeholder="Décrivez brièvement votre problème"
                   value={newSubject}
@@ -729,7 +756,9 @@ export function SupportView({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Catégorie</label>
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Catégorie
+                  </label>
                   <Select value={newCategory} onValueChange={setNewCategory}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une catégorie" />
@@ -745,7 +774,9 @@ export function SupportView({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Priorité</label>
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Priorité
+                  </label>
                   <Select value={newPriority} onValueChange={setNewPriority}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner la priorité" />
@@ -777,7 +808,9 @@ export function SupportView({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Description</label>
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Description
+                </label>
                 <Textarea
                   placeholder="Décrivez votre problème en détail..."
                   value={newDescription}
@@ -845,7 +878,7 @@ export function SupportView({
                     </TableHeader>
                     <TableBody>
                       {filteredAllTickets.map((ticket) =>
-                        renderTicketRow(ticket, true)
+                        renderTicketRow(ticket, true),
                       )}
                     </TableBody>
                   </Table>

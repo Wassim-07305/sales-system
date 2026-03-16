@@ -26,7 +26,10 @@ import {
   ThumbsUp,
   ThumbsDown,
 } from "lucide-react";
-import { getTeamJournals, getMissingEodSetters } from "@/lib/actions/gamification";
+import {
+  getTeamJournals,
+  getMissingEodSetters,
+} from "@/lib/actions/gamification";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -65,12 +68,35 @@ interface Props {
   missingSetters: MissingSetter[];
 }
 
-const MOOD_MAP: Record<string, { label: string; icon: typeof Trophy; color: string }> = {
-  great: { label: "Excellent", icon: Trophy, color: "text-green-500 border-green-500 bg-green-500/10" },
-  good: { label: "Bien", icon: ThumbsUp, color: "text-blue-500 border-blue-500 bg-blue-500/10" },
-  neutral: { label: "Neutre", icon: Meh, color: "text-yellow-500 border-yellow-500 bg-yellow-500/10" },
-  tough: { label: "Difficile", icon: Frown, color: "text-orange-500 border-orange-500 bg-orange-500/10" },
-  bad: { label: "Mauvais", icon: ThumbsDown, color: "text-red-500 border-red-500 bg-red-500/10" },
+const MOOD_MAP: Record<
+  string,
+  { label: string; icon: typeof Trophy; color: string }
+> = {
+  great: {
+    label: "Excellent",
+    icon: Trophy,
+    color: "text-green-500 border-green-500 bg-green-500/10",
+  },
+  good: {
+    label: "Bien",
+    icon: ThumbsUp,
+    color: "text-blue-500 border-blue-500 bg-blue-500/10",
+  },
+  neutral: {
+    label: "Neutre",
+    icon: Meh,
+    color: "text-yellow-500 border-yellow-500 bg-yellow-500/10",
+  },
+  tough: {
+    label: "Difficile",
+    icon: Frown,
+    color: "text-orange-500 border-orange-500 bg-orange-500/10",
+  },
+  bad: {
+    label: "Mauvais",
+    icon: ThumbsDown,
+    color: "text-red-500 border-red-500 bg-red-500/10",
+  },
 };
 
 function getMoodInfo(mood: string) {
@@ -80,7 +106,7 @@ function getMoodInfo(mood: string) {
 export function TeamJournalView({ journals, missingSetters }: Props) {
   const [isPending, startTransition] = useTransition();
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [currentJournals, setCurrentJournals] = useState(journals);
   const [currentMissing, setCurrentMissing] = useState(missingSetters);
@@ -109,13 +135,25 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
 
   // Aggregate stats
   const totalDms = currentJournals.reduce((s, j) => s + (j.dms_sent || 0), 0);
-  const totalCalls = currentJournals.reduce((s, j) => s + (j.calls_booked || 0), 0);
-  const totalDeals = currentJournals.reduce((s, j) => s + (j.deals_closed || 0), 0);
-  const totalRevenue = currentJournals.reduce((s, j) => s + (j.revenue_generated || 0), 0);
+  const totalCalls = currentJournals.reduce(
+    (s, j) => s + (j.calls_booked || 0),
+    0,
+  );
+  const totalDeals = currentJournals.reduce(
+    (s, j) => s + (j.deals_closed || 0),
+    0,
+  );
+  const totalRevenue = currentJournals.reduce(
+    (s, j) => s + (j.revenue_generated || 0),
+    0,
+  );
 
   return (
     <div>
-      <PageHeader title="Journal d'équipe" description="Vue d'ensemble des EOD de votre équipe">
+      <PageHeader
+        title="Journal d'équipe"
+        description="Vue d'ensemble des EOD de votre équipe"
+      >
         <Link href="/team">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -130,12 +168,18 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="h-5 w-5 text-orange-500" />
             <span className="font-semibold text-orange-500">
-              {currentMissing.length} setter{currentMissing.length > 1 ? "s" : ""} n{"'"}ont pas soumis leur EOD aujourd{"'"}hui
+              {currentMissing.length} setter
+              {currentMissing.length > 1 ? "s" : ""} n{"'"}ont pas soumis leur
+              EOD aujourd{"'"}hui
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
             {currentMissing.map((setter) => (
-              <Badge key={setter.id} variant="outline" className="border-orange-500/50 text-orange-400">
+              <Badge
+                key={setter.id}
+                variant="outline"
+                className="border-orange-500/50 text-orange-400"
+              >
                 {setter.full_name || "Sans nom"}
               </Badge>
             ))}
@@ -153,7 +197,9 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
             onChange={(e) => handleDateChange(e.target.value)}
             className="w-auto"
           />
-          {isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          {isPending && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
         </div>
         <div className="flex items-center gap-4 text-sm">
           <span className="flex items-center gap-1 text-muted-foreground">
@@ -195,12 +241,17 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
             const isExpanded = expandedIds.has(journal.id);
 
             return (
-              <Card key={journal.id} className="border-border/50 hover:shadow-md transition-all duration-200">
+              <Card
+                key={journal.id}
+                className="border-border/50 hover:shadow-md transition-all duration-200"
+              >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-sm font-bold text-brand ring-1 ring-brand/20">
-                        {(journal.profile?.full_name || "?").charAt(0).toUpperCase()}
+                        {(journal.profile?.full_name || "?")
+                          .charAt(0)
+                          .toUpperCase()}
                       </div>
                       <div>
                         <CardTitle className="text-sm font-semibold">
@@ -211,7 +262,10 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
                         </span>
                       </div>
                     </div>
-                    <Badge variant="outline" className={cn("text-xs", moodInfo.color)}>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs", moodInfo.color)}
+                    >
                       <MoodIcon className="h-3 w-3 mr-1" />
                       {moodInfo.label}
                     </Badge>
@@ -221,16 +275,28 @@ export function TeamJournalView({ journals, missingSetters }: Props) {
                   {/* KPIs compact */}
                   <div className="grid grid-cols-3 gap-2 text-center my-3">
                     <div className="bg-muted/30 rounded-xl p-2.5 ring-1 ring-border/50">
-                      <div className="text-base font-bold">{journal.dms_sent}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">DMs</div>
+                      <div className="text-base font-bold">
+                        {journal.dms_sent}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        DMs
+                      </div>
                     </div>
                     <div className="bg-muted/30 rounded-xl p-2.5 ring-1 ring-border/50">
-                      <div className="text-base font-bold">{journal.calls_booked}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Appels</div>
+                      <div className="text-base font-bold">
+                        {journal.calls_booked}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        Appels
+                      </div>
                     </div>
                     <div className="bg-muted/30 rounded-xl p-2.5 ring-1 ring-border/50">
-                      <div className="text-base font-bold">{journal.deals_closed}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Deals</div>
+                      <div className="text-base font-bold">
+                        {journal.deals_closed}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        Deals
+                      </div>
                     </div>
                   </div>
 

@@ -40,7 +40,9 @@ export function RegisterForm() {
       });
 
       if (error) {
-        toast.error("Une erreur est survenue lors de l\u2019inscription. Veuillez r\u00e9essayer.");
+        toast.error(
+          "Une erreur est survenue lors de l\u2019inscription. Veuillez r\u00e9essayer.",
+        );
         setLoading(false);
         return;
       }
@@ -48,7 +50,9 @@ export function RegisterForm() {
       setLoading(false);
       setSuccess(true);
     } catch {
-      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      toast.error(
+        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+      );
       setLoading(false);
     }
   }
@@ -60,11 +64,15 @@ export function RegisterForm() {
           <CheckCircle2 className="h-9 w-9 text-brand" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-brand-dark">{"Compte cr\u00e9\u00e9 avec succ\u00e8s"}</h3>
+          <h3 className="text-xl font-bold text-brand-dark">
+            {"Compte cr\u00e9\u00e9 avec succ\u00e8s"}
+          </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {"Un email de confirmation a \u00e9t\u00e9 envoy\u00e9 \u00e0"}{" "}
             <strong className="text-foreground">{email}</strong>.
-            {" V\u00e9rifiez votre bo\u00eete de r\u00e9ception pour activer votre compte."}
+            {
+              " V\u00e9rifiez votre bo\u00eete de r\u00e9ception pour activer votre compte."
+            }
           </p>
         </div>
         <div className="pt-2">
@@ -83,7 +91,9 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleRegister} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="fullName" className="text-sm font-medium">Nom complet</Label>
+        <Label htmlFor="fullName" className="text-sm font-medium">
+          Nom complet
+        </Label>
         <Input
           id="fullName"
           type="text"
@@ -96,7 +106,9 @@ export function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+        <Label htmlFor="email" className="text-sm font-medium">
+          Email
+        </Label>
         <Input
           id="email"
           type="email"
@@ -109,7 +121,9 @@ export function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+        <Label htmlFor="password" className="text-sm font-medium">
+          Mot de passe
+        </Label>
         <div className="relative">
           <Input
             id="password"
@@ -127,7 +141,11 @@ export function RegisterForm() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
-            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-label={
+              showPassword
+                ? "Masquer le mot de passe"
+                : "Afficher le mot de passe"
+            }
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -153,19 +171,21 @@ export function RegisterForm() {
                           : passwordStrength.level <= 3
                             ? "bg-brand"
                             : "bg-brand"
-                      : "bg-border/40"
+                      : "bg-border/40",
                   )}
                 />
               ))}
             </div>
-            <p className={cn(
-              "text-xs font-medium transition-colors",
-              passwordStrength.level <= 1
-                ? "text-destructive"
-                : passwordStrength.level <= 2
-                  ? "text-amber-500"
-                  : "text-brand"
-            )}>
+            <p
+              className={cn(
+                "text-xs font-medium transition-colors",
+                passwordStrength.level <= 1
+                  ? "text-destructive"
+                  : passwordStrength.level <= 2
+                    ? "text-amber-500"
+                    : "text-brand",
+              )}
+            >
               {passwordStrength.label}
             </p>
           </div>
@@ -201,7 +221,10 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         {"D\u00e9j\u00e0 un compte ?\u00a0"}
-        <Link href="/login" className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
+        >
           Se connecter
         </Link>
       </p>
@@ -209,7 +232,10 @@ export function RegisterForm() {
   );
 }
 
-function getPasswordStrength(password: string): { level: number; label: string } {
+function getPasswordStrength(password: string): {
+  level: number;
+  label: string;
+} {
   if (password.length === 0) return { level: 0, label: "" };
   if (password.length < 8) return { level: 1, label: "Trop court" };
 

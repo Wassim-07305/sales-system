@@ -67,13 +67,10 @@ export function CustomFieldsForm({
     };
   }, [entity, entityId]);
 
-  const updateValue = useCallback(
-    (name: string, value: unknown) => {
-      setValues((prev) => ({ ...prev, [name]: value }));
-      setDirty(true);
-    },
-    []
-  );
+  const updateValue = useCallback((name: string, value: unknown) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+    setDirty(true);
+  }, []);
 
   const doSave = useCallback(async () => {
     setSaving(true);
@@ -144,7 +141,7 @@ export function CustomFieldsForm({
                 onChange={(e) =>
                   updateValue(
                     field.name,
-                    e.target.value === "" ? null : Number(e.target.value)
+                    e.target.value === "" ? null : Number(e.target.value),
                   )
                 }
                 onBlur={handleBlur}

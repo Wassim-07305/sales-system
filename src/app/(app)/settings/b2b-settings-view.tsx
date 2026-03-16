@@ -26,7 +26,10 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-import { changePassword, saveNotificationPreferences } from "@/lib/actions/settings";
+import {
+  changePassword,
+  saveNotificationPreferences,
+} from "@/lib/actions/settings";
 
 interface B2BSettingsViewProps {
   userEmail: string;
@@ -190,9 +193,7 @@ export function B2BSettingsView({ userEmail }: B2BSettingsViewProps) {
             </div>
             Mon abonnement
           </CardTitle>
-          <CardDescription>
-            Informations sur votre plan actuel
-          </CardDescription>
+          <CardDescription>Informations sur votre plan actuel</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between rounded-lg border border-border/50 p-4">
@@ -202,7 +203,12 @@ export function B2BSettingsView({ userEmail }: B2BSettingsViewProps) {
                 Accès complet à la plateforme entreprise
               </p>
             </div>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Actif</Badge>
+            <Badge
+              variant="outline"
+              className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+            >
+              Actif
+            </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
             Pour toute question sur votre abonnement, contactez le support.
@@ -241,8 +247,8 @@ export function B2BSettingsView({ userEmail }: B2BSettingsViewProps) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Accédez à la configuration avancée des fonctionnalités IA disponibles
-            sur votre plan.
+            Accédez à la configuration avancée des fonctionnalités IA
+            disponibles sur votre plan.
           </p>
         </CardContent>
       </Card>

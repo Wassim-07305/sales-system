@@ -18,7 +18,13 @@ import {
   Mail,
   type LucideIcon,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,7 +76,7 @@ export function HelpView({
       result = result.filter(
         (a) =>
           a.title.toLowerCase().includes(q) ||
-          a.excerpt.toLowerCase().includes(q)
+          a.excerpt.toLowerCase().includes(q),
       );
     }
 
@@ -142,8 +148,13 @@ export function HelpView({
                       <BookOpen className="size-5 text-[#7af17a] mt-0.5 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium truncate">{article.title}</h3>
-                          <Badge variant="secondary" className="shrink-0 text-xs">
+                          <h3 className="font-medium truncate">
+                            {article.title}
+                          </h3>
+                          <Badge
+                            variant="secondary"
+                            className="shrink-0 text-xs"
+                          >
                             {article.categoryName}
                           </Badge>
                         </div>
@@ -211,7 +222,9 @@ export function HelpView({
                           <Icon className="size-5 text-[#7af17a]" />
                         </div>
                         <div>
-                          <CardTitle className="text-sm">{category.name}</CardTitle>
+                          <CardTitle className="text-sm">
+                            {category.name}
+                          </CardTitle>
                           <CardDescription className="text-xs">
                             {category.articleCount} articles
                           </CardDescription>
@@ -264,8 +277,9 @@ export function HelpView({
                   Vous ne trouvez pas de réponse ?
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Notre équipe support est disponible pour vous aider. Envoyez-nous un
-                  message et nous vous répondrons sous 24 heures.
+                  Notre équipe support est disponible pour vous aider.
+                  Envoyez-nous un message et nous vous répondrons sous 24
+                  heures.
                 </p>
               </div>
               <Button className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90">

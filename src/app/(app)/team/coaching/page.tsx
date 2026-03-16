@@ -1,11 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
-import { getObjectives, getDevelopmentPlan, getCoachingNotes } from "@/lib/actions/coaching";
+import {
+  getObjectives,
+  getDevelopmentPlan,
+  getCoachingNotes,
+} from "@/lib/actions/coaching";
 import { getTeamMembersForFeedback } from "@/lib/actions/feedback";
 import { CoachingView } from "./coaching-view";
 
 export default async function CoachingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")

@@ -3,7 +3,10 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { markNotificationRead, markAllNotificationsRead } from "@/lib/actions/notifications";
+import {
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "@/lib/actions/notifications";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -36,7 +39,11 @@ const typeIcons: Record<string, string> = {
   formation: "📚",
 };
 
-export function NotificationsView({ notifications }: { notifications: Notification[] }) {
+export function NotificationsView({
+  notifications,
+}: {
+  notifications: Notification[];
+}) {
   const router = useRouter();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -64,7 +71,12 @@ export function NotificationsView({ notifications }: { notifications: Notificati
         description={`${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`}
       >
         {unreadCount > 0 && (
-          <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="h-8 gap-1.5 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleMarkAllRead}
+            className="h-8 gap-1.5 text-xs"
+          >
             <Check className="h-3.5 w-3.5" />
             Tout marquer comme lu
           </Button>
@@ -89,13 +101,20 @@ export function NotificationsView({ notifications }: { notifications: Notificati
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <p className={cn("text-sm", !notif.read && "font-semibold")}>{notif.title}</p>
+                  <p className={cn("text-sm", !notif.read && "font-semibold")}>
+                    {notif.title}
+                  </p>
                   <span className="text-[11px] text-muted-foreground shrink-0 tabular-nums">
-                    {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: fr })}
+                    {formatDistanceToNow(new Date(notif.created_at), {
+                      addSuffix: true,
+                      locale: fr,
+                    })}
                   </span>
                 </div>
                 {notif.body && (
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.body}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                    {notif.body}
+                  </p>
                 )}
                 {notif.link && (
                   <p className="text-[11px] text-brand mt-1.5 flex items-center gap-1 font-medium">

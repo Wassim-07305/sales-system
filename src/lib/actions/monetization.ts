@@ -53,9 +53,33 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
     name: "CRM Avance",
     description: "Pipeline avance avec automatisations et scoring IA",
     tiers: [
-      { name: "Gratuit", price: 0, features: ["Pipeline basique", "5 contacts", "1 utilisateur"] },
-      { name: "Pro", price: 29, features: ["Pipeline illimite", "Contacts illimites", "Scoring IA", "5 utilisateurs", "Automatisations"] },
-      { name: "Enterprise", price: 79, features: ["Tout Pro", "Utilisateurs illimites", "API avancee", "Support prioritaire", "White-label"] },
+      {
+        name: "Gratuit",
+        price: 0,
+        features: ["Pipeline basique", "5 contacts", "1 utilisateur"],
+      },
+      {
+        name: "Pro",
+        price: 29,
+        features: [
+          "Pipeline illimite",
+          "Contacts illimites",
+          "Scoring IA",
+          "5 utilisateurs",
+          "Automatisations",
+        ],
+      },
+      {
+        name: "Enterprise",
+        price: 79,
+        features: [
+          "Tout Pro",
+          "Utilisateurs illimites",
+          "API avancee",
+          "Support prioritaire",
+          "White-label",
+        ],
+      },
     ],
   },
   {
@@ -63,9 +87,37 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
     name: "Auto-Prospection IA",
     description: "Prospection automatisee avec intelligence artificielle",
     tiers: [
-      { name: "Gratuit", price: 0, features: ["10 prospects/mois", "Templates basiques", "Email uniquement"] },
-      { name: "Pro", price: 39, features: ["200 prospects/mois", "Templates IA", "Multi-canal", "Sequences auto", "Analytics"] },
-      { name: "Enterprise", price: 99, features: ["Tout Pro", "Prospects illimites", "IA personnalisee", "Integrations CRM", "Accompagnement"] },
+      {
+        name: "Gratuit",
+        price: 0,
+        features: [
+          "10 prospects/mois",
+          "Templates basiques",
+          "Email uniquement",
+        ],
+      },
+      {
+        name: "Pro",
+        price: 39,
+        features: [
+          "200 prospects/mois",
+          "Templates IA",
+          "Multi-canal",
+          "Sequences auto",
+          "Analytics",
+        ],
+      },
+      {
+        name: "Enterprise",
+        price: 99,
+        features: [
+          "Tout Pro",
+          "Prospects illimites",
+          "IA personnalisee",
+          "Integrations CRM",
+          "Accompagnement",
+        ],
+      },
     ],
   },
   {
@@ -73,9 +125,33 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
     name: "WhatsApp Business+",
     description: "Integration WhatsApp complete avec chatbot IA",
     tiers: [
-      { name: "Gratuit", price: 0, features: ["100 messages/mois", "1 numero", "Reponses manuelles"] },
-      { name: "Pro", price: 25, features: ["5 000 messages/mois", "3 numeros", "Chatbot IA", "Templates", "Analytics"] },
-      { name: "Enterprise", price: 69, features: ["Tout Pro", "Messages illimites", "Numeros illimites", "API webhooks", "SLA garanti"] },
+      {
+        name: "Gratuit",
+        price: 0,
+        features: ["100 messages/mois", "1 numero", "Reponses manuelles"],
+      },
+      {
+        name: "Pro",
+        price: 25,
+        features: [
+          "5 000 messages/mois",
+          "3 numeros",
+          "Chatbot IA",
+          "Templates",
+          "Analytics",
+        ],
+      },
+      {
+        name: "Enterprise",
+        price: 69,
+        features: [
+          "Tout Pro",
+          "Messages illimites",
+          "Numeros illimites",
+          "API webhooks",
+          "SLA garanti",
+        ],
+      },
     ],
   },
   {
@@ -83,9 +159,33 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
     name: "Analytics Pro",
     description: "Tableaux de bord avances et predictions IA",
     tiers: [
-      { name: "Gratuit", price: 0, features: ["Metriques basiques", "1 dashboard", "Export CSV"] },
-      { name: "Pro", price: 19, features: ["Metriques avancees", "5 dashboards", "Predictions IA", "Export PDF", "Alertes"] },
-      { name: "Enterprise", price: 49, features: ["Tout Pro", "Dashboards illimites", "IA predictive", "API donnees", "Data warehouse"] },
+      {
+        name: "Gratuit",
+        price: 0,
+        features: ["Metriques basiques", "1 dashboard", "Export CSV"],
+      },
+      {
+        name: "Pro",
+        price: 19,
+        features: [
+          "Metriques avancees",
+          "5 dashboards",
+          "Predictions IA",
+          "Export PDF",
+          "Alertes",
+        ],
+      },
+      {
+        name: "Enterprise",
+        price: 49,
+        features: [
+          "Tout Pro",
+          "Dashboards illimites",
+          "IA predictive",
+          "API donnees",
+          "Data warehouse",
+        ],
+      },
     ],
   },
   {
@@ -93,9 +193,33 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
     name: "Signature Electronique",
     description: "Signature de contrats legalement valide",
     tiers: [
-      { name: "Gratuit", price: 0, features: ["3 signatures/mois", "1 modele", "Signature simple"] },
-      { name: "Pro", price: 15, features: ["50 signatures/mois", "Modeles illimites", "Signature avancee", "Rappels auto", "Audit trail"] },
-      { name: "Enterprise", price: 39, features: ["Tout Pro", "Signatures illimitees", "eIDAS qualifie", "API complete", "Cachet serveur"] },
+      {
+        name: "Gratuit",
+        price: 0,
+        features: ["3 signatures/mois", "1 modele", "Signature simple"],
+      },
+      {
+        name: "Pro",
+        price: 15,
+        features: [
+          "50 signatures/mois",
+          "Modeles illimites",
+          "Signature avancee",
+          "Rappels auto",
+          "Audit trail",
+        ],
+      },
+      {
+        name: "Enterprise",
+        price: 39,
+        features: [
+          "Tout Pro",
+          "Signatures illimitees",
+          "eIDAS qualifie",
+          "API complete",
+          "Cachet serveur",
+        ],
+      },
     ],
   },
   {
@@ -103,9 +227,33 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
     name: "Calendrier Sync",
     description: "Synchronisation multi-calendriers et reservation en ligne",
     tiers: [
-      { name: "Gratuit", price: 0, features: ["1 calendrier", "Reservation basique", "Rappels email"] },
-      { name: "Pro", price: 12, features: ["5 calendriers", "Page de reservation", "Rappels SMS", "Integration Zoom", "Buffer times"] },
-      { name: "Enterprise", price: 35, features: ["Tout Pro", "Calendriers illimites", "Round-robin", "API calendrier", "Branding custom"] },
+      {
+        name: "Gratuit",
+        price: 0,
+        features: ["1 calendrier", "Reservation basique", "Rappels email"],
+      },
+      {
+        name: "Pro",
+        price: 12,
+        features: [
+          "5 calendriers",
+          "Page de reservation",
+          "Rappels SMS",
+          "Integration Zoom",
+          "Buffer times",
+        ],
+      },
+      {
+        name: "Enterprise",
+        price: 35,
+        features: [
+          "Tout Pro",
+          "Calendriers illimites",
+          "Round-robin",
+          "API calendrier",
+          "Branding custom",
+        ],
+      },
     ],
   },
 ];
@@ -113,12 +261,22 @@ const DEFAULT_EXTENSIONS: ExtensionPricing[] = [
 // ─── GET MONETIZATION OVERVIEW ───────────────────────────────────
 export async function getMonetizationOverview(): Promise<MonetizationOverview> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+  const sixMonthsAgo = new Date(
+    now.getFullYear(),
+    now.getMonth() - 5,
+    1,
+  ).toISOString();
 
   // Get active subscriptions
   const { data: subscriptions, count: activeSubscriptions } = await supabase
@@ -129,7 +287,7 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
   // Calculate total revenue from subscriptions
   const totalRevenue = (subscriptions || []).reduce(
     (sum, s) => sum + (s.price || 0),
-    0
+    0,
   );
 
   // Get this month's commissions from partner referrals
@@ -141,7 +299,7 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
 
   const commissionsThisMonth = (monthReferrals || []).reduce(
     (sum, r) => sum + (r.commission_amount || 0),
-    0
+    0,
   );
 
   // Get pending payout
@@ -172,18 +330,34 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
     const date = new Date(sub.created_at);
     const monthKey = date.toLocaleDateString("fr-FR", { month: "short" });
     if (monthlyMap.has(monthKey)) {
-      monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + (sub.price || 0));
+      monthlyMap.set(
+        monthKey,
+        (monthlyMap.get(monthKey) || 0) + (sub.price || 0),
+      );
     }
   });
 
-  const revenueByMonth = Array.from(monthlyMap.entries()).map(([month, revenue]) => ({
-    month,
-    revenue,
-  }));
+  const revenueByMonth = Array.from(monthlyMap.entries()).map(
+    ([month, revenue]) => ({
+      month,
+      revenue,
+    }),
+  );
 
   // Calculate top extensions with real growth
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+  const startOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+  ).toISOString();
+  const endOfLastMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   // Get last month's installs for growth calculation
   const { data: lastMonthInstalls } = await supabase
@@ -201,15 +375,26 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
 
   // Count installs per extension this month
   const thisMonthInstallsMap = new Map<string, number>();
-  (installs || []).filter((install) => {
-    const date = new Date(install.installed_at);
-    return date >= new Date(startOfMonth);
-  }).forEach((install) => {
-    const count = thisMonthInstallsMap.get(install.extension_id) || 0;
-    thisMonthInstallsMap.set(install.extension_id, count + 1);
-  });
+  (installs || [])
+    .filter((install) => {
+      const date = new Date(install.installed_at);
+      return date >= new Date(startOfMonth);
+    })
+    .forEach((install) => {
+      const count = thisMonthInstallsMap.get(install.extension_id) || 0;
+      thisMonthInstallsMap.set(install.extension_id, count + 1);
+    });
 
-  const extensionMap = new Map<string, { name: string; installs: number; revenue: number; thisMonth: number; lastMonth: number }>();
+  const extensionMap = new Map<
+    string,
+    {
+      name: string;
+      installs: number;
+      revenue: number;
+      thisMonth: number;
+      lastMonth: number;
+    }
+  >();
 
   (installs || []).forEach((install) => {
     const key = install.extension_id;
@@ -265,7 +450,9 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
     commissionsThisMonth,
     activeSubscriptions: activeSubscriptions || 0,
     nextPayout: pendingPayout?.amount || 0,
-    nextPayoutDate: pendingPayout ? new Date(pendingPayout.created_at).toISOString().split("T")[0] : null,
+    nextPayoutDate: pendingPayout
+      ? new Date(pendingPayout.created_at).toISOString().split("T")[0]
+      : null,
     revenueByMonth,
     topExtensions,
   };
@@ -274,7 +461,9 @@ export async function getMonetizationOverview(): Promise<MonetizationOverview> {
 // ─── GET EXTENSION PRICING ───────────────────────────────────────
 export async function getExtensionPricing(): Promise<ExtensionPricing[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Return default extensions (could be stored in DB for customization)
@@ -284,7 +473,9 @@ export async function getExtensionPricing(): Promise<ExtensionPricing[]> {
 // ─── GET PAYOUT HISTORY ──────────────────────────────────────────
 export async function getPayoutHistory(): Promise<PayoutRecord[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -310,7 +501,9 @@ export async function getPayoutHistory(): Promise<PayoutRecord[]> {
 // ─── GET COMMISSION RATES ────────────────────────────────────────
 export async function getCommissionRates(): Promise<CommissionRate[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -323,28 +516,49 @@ export async function getCommissionRates(): Promise<CommissionRate[]> {
     console.error("Error fetching commission rates:", error);
     // Return defaults if table doesn't exist
     return [
-      { type: "Par installation", rate: "2,00 EUR", description: "Commission fixe par nouvelle installation", example: "100 installations = 200 EUR" },
-      { type: "Abonnement mensuel", rate: "15%", description: "Pourcentage recurrent sur chaque abonnement actif", example: "Client a 29 EUR/mois = 4,35 EUR/mois" },
-      { type: "Abonnement annuel", rate: "20%", description: "Bonus pour les engagements annuels", example: "Client a 290 EUR/an = 58 EUR/an" },
+      {
+        type: "Par installation",
+        rate: "2,00 EUR",
+        description: "Commission fixe par nouvelle installation",
+        example: "100 installations = 200 EUR",
+      },
+      {
+        type: "Abonnement mensuel",
+        rate: "15%",
+        description: "Pourcentage recurrent sur chaque abonnement actif",
+        example: "Client a 29 EUR/mois = 4,35 EUR/mois",
+      },
+      {
+        type: "Abonnement annuel",
+        rate: "20%",
+        description: "Bonus pour les engagements annuels",
+        example: "Client a 290 EUR/an = 58 EUR/an",
+      },
     ];
   }
 
   return (data || []).map((r) => ({
     type: r.type,
-    rate: r.rate_type === "percentage" ? `${r.rate}%` : `${r.rate.toFixed(2)} EUR`,
+    rate:
+      r.rate_type === "percentage" ? `${r.rate}%` : `${r.rate.toFixed(2)} EUR`,
     description: r.description || "",
     example: r.example || "",
   }));
 }
 
 // ─── REQUEST PAYOUT ──────────────────────────────────────────────
-export async function requestPayout(amount: number): Promise<{ success: boolean; message: string }> {
+export async function requestPayout(
+  amount: number,
+): Promise<{ success: boolean; message: string }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   if (amount <= 0) throw new Error("Le montant doit etre positif");
-  if (amount > 10000) throw new Error("Le montant maximum par versement est de 10 000 EUR");
+  if (amount > 10000)
+    throw new Error("Le montant maximum par versement est de 10 000 EUR");
 
   // Check for pending payouts
   const { data: pending } = await supabase
@@ -361,17 +575,18 @@ export async function requestPayout(amount: number): Promise<{ success: boolean;
   // Create payout request
   const nextMonth = new Date();
   nextMonth.setMonth(nextMonth.getMonth() + 1);
-  const period = nextMonth.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const period = nextMonth.toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
 
-  const { error } = await supabase
-    .from("developer_payouts")
-    .insert({
-      developer_id: user.id,
-      amount,
-      period,
-      status: "pending",
-      payment_method: "Virement bancaire",
-    });
+  const { error } = await supabase.from("developer_payouts").insert({
+    developer_id: user.id,
+    amount,
+    period,
+    status: "pending",
+    payment_method: "Virement bancaire",
+  });
 
   if (error) {
     console.error("Error creating payout:", error);
@@ -392,10 +607,12 @@ export async function subscribeToExtension(
   extensionName: string,
   tier: "free" | "pro" | "enterprise",
   price: number,
-  billingPeriod: "monthly" | "yearly" = "monthly"
+  billingPeriod: "monthly" | "yearly" = "monthly",
 ): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Check if already subscribed
@@ -419,18 +636,16 @@ export async function subscribeToExtension(
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
   }
 
-  const { error } = await supabase
-    .from("extension_subscriptions")
-    .insert({
-      user_id: user.id,
-      extension_id: extensionId,
-      extension_name: extensionName,
-      tier,
-      price,
-      billing_period: billingPeriod,
-      status: tier === "free" ? "active" : "trial",
-      expires_at: expiresAt.toISOString(),
-    });
+  const { error } = await supabase.from("extension_subscriptions").insert({
+    user_id: user.id,
+    extension_id: extensionId,
+    extension_name: extensionName,
+    tier,
+    price,
+    billing_period: billingPeriod,
+    status: tier === "free" ? "active" : "trial",
+    expires_at: expiresAt.toISOString(),
+  });
 
   if (error) {
     console.error("Error creating subscription:", error);
@@ -448,9 +663,13 @@ export async function subscribeToExtension(
 }
 
 // ─── CANCEL SUBSCRIPTION ─────────────────────────────────────────
-export async function cancelSubscription(subscriptionId: string): Promise<void> {
+export async function cancelSubscription(
+  subscriptionId: string,
+): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase
@@ -473,7 +692,9 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
 // ─── GET MY SUBSCRIPTIONS ────────────────────────────────────────
 export async function getMySubscriptions() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase

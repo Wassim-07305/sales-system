@@ -5,14 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  Users,
-  Trophy,
-  Clock,
-  Zap,
-  ArrowLeft,
-  Medal,
-} from "lucide-react";
+import { Users, Trophy, Clock, Zap, ArrowLeft, Medal } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
@@ -86,7 +79,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
               const teamTotal = prog?.total || 0;
               const percent = Math.min(
                 Math.round((teamTotal / challenge.target_value) * 100),
-                100
+                100,
               );
               const isCompleted = teamTotal >= challenge.target_value;
 
@@ -95,7 +88,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                   key={challenge.id}
                   className={cn(
                     "rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300",
-                    isCompleted && "border-emerald-500/20 bg-emerald-500/10"
+                    isCompleted && "border-emerald-500/20 bg-emerald-500/10",
                   )}
                 >
                   <CardContent className="p-6">
@@ -115,12 +108,18 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-4">
                         {isCompleted && (
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                          <Badge
+                            variant="outline"
+                            className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                          >
                             <Trophy className="h-3 w-3 mr-1" />
                             Complété
                           </Badge>
                         )}
-                        <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-500/20">
+                        <Badge
+                          variant="outline"
+                          className="bg-violet-500/10 text-violet-600 border-violet-500/20"
+                        >
                           <Zap className="h-3 w-3 mr-1" />
                           {challenge.points_reward} pts
                         </Badge>
@@ -261,7 +260,9 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                         key={userId}
                         className={cn(
                           "flex items-center gap-3 p-3 rounded-lg transition-all",
-                          rank <= 3 ? "bg-muted/50 border border-border/50" : ""
+                          rank <= 3
+                            ? "bg-muted/50 border border-border/50"
+                            : "",
                         )}
                       >
                         <span
@@ -273,7 +274,7 @@ export function TeamChallengesView({ challenges, progressMap }: Props) {
                                 ? "text-gray-400"
                                 : rank === 3
                                   ? "text-orange-400"
-                                  : "text-muted-foreground"
+                                  : "text-muted-foreground",
                           )}
                         >
                           {rank}

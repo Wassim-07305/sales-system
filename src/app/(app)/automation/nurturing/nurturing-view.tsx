@@ -30,14 +30,7 @@ import {
 } from "@/lib/actions/automation";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {
-  Heart,
-  Plus,
-  Trash2,
-  Zap,
-  Mail,
-  MessageSquare,
-} from "lucide-react";
+import { Heart, Plus, Trash2, Zap, Mail, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -150,7 +143,7 @@ export function NurturingView({ rules, executions }: Props) {
     setSelectedActions((prev) =>
       prev.includes(actionValue)
         ? prev.filter((a) => a !== actionValue)
-        : [...prev, actionValue]
+        : [...prev, actionValue],
     );
   }
 
@@ -225,11 +218,15 @@ export function NurturingView({ rules, executions }: Props) {
                       <div
                         key={action.value}
                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                          isSelected ? "border-brand bg-brand/5" : "hover:bg-muted/50"
+                          isSelected
+                            ? "border-brand bg-brand/5"
+                            : "hover:bg-muted/50"
                         }`}
                         onClick={() => toggleAction(action.value)}
                       >
-                        <Icon className={`h-4 w-4 ${isSelected ? "text-brand" : "text-muted-foreground"}`} />
+                        <Icon
+                          className={`h-4 w-4 ${isSelected ? "text-brand" : "text-muted-foreground"}`}
+                        />
                         <span className="text-sm">{action.label}</span>
                       </div>
                     );
@@ -262,17 +259,25 @@ export function NurturingView({ rules, executions }: Props) {
                   <div>
                     <p className="font-medium">{rule.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="bg-pink-500/10 text-pink-600 border-pink-500/20 text-xs">
+                      <Badge
+                        variant="outline"
+                        className="bg-pink-500/10 text-pink-600 border-pink-500/20 text-xs"
+                      >
                         Nurturing
                       </Badge>
                       {rule.trigger_conditions?.event ? (
                         <span className="text-xs text-muted-foreground">
-                          Trigger: {triggerEvents.find((e) => e.value === String(rule.trigger_conditions.event))?.label || String(rule.trigger_conditions.event)}
+                          Trigger:{" "}
+                          {triggerEvents.find(
+                            (e) =>
+                              e.value === String(rule.trigger_conditions.event),
+                          )?.label || String(rule.trigger_conditions.event)}
                         </span>
                       ) : null}
                       {rule.trigger_conditions?.delay_hours ? (
                         <span className="text-xs text-muted-foreground">
-                          | Délai: {String(rule.trigger_conditions.delay_hours)}h
+                          | Délai: {String(rule.trigger_conditions.delay_hours)}
+                          h
                         </span>
                       ) : null}
                     </div>
@@ -285,7 +290,9 @@ export function NurturingView({ rules, executions }: Props) {
                     </span>
                     <Switch
                       checked={rule.is_active}
-                      onCheckedChange={() => handleToggle(rule.id, rule.is_active)}
+                      onCheckedChange={() =>
+                        handleToggle(rule.id, rule.is_active)
+                      }
                       disabled={isPending}
                     />
                   </div>
@@ -309,7 +316,9 @@ export function NurturingView({ rules, executions }: Props) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                 <Heart className="h-6 w-6 text-muted-foreground/50" />
               </div>
-              <p className="text-sm">Aucune règle de nurturing. Créez-en une pour commencer.</p>
+              <p className="text-sm">
+                Aucune règle de nurturing. Créez-en une pour commencer.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -331,11 +340,16 @@ export function NurturingView({ rules, executions }: Props) {
                   <div className="flex items-center gap-3">
                     <Zap className="h-4 w-4 text-brand" />
                     <div>
-                      <p className="text-sm font-medium">{exec.rule?.name || "Règle"}</p>
+                      <p className="text-sm font-medium">
+                        {exec.rule?.name || "Règle"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {exec.target_user?.full_name || "Utilisateur"} —{" "}
                         {exec.executed_at
-                          ? formatDistanceToNow(new Date(exec.executed_at), { addSuffix: true, locale: fr })
+                          ? formatDistanceToNow(new Date(exec.executed_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })
                           : "En attente"}
                       </p>
                     </div>

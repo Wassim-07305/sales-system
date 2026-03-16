@@ -185,9 +185,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
 
   function addStep() {
     const lastOffset =
-      seqSteps.length > 0
-        ? seqSteps[seqSteps.length - 1].day_offset
-        : 0;
+      seqSteps.length > 0 ? seqSteps[seqSteps.length - 1].day_offset : 0;
     setSeqSteps([
       ...seqSteps,
       { day_offset: lastOffset + 2, action: "dm", message_template: "" },
@@ -201,10 +199,10 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
   function updateStep(
     index: number,
     field: keyof (typeof seqSteps)[0],
-    value: string | number
+    value: string | number,
   ) {
     setSeqSteps(
-      seqSteps.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+      seqSteps.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
     );
   }
 
@@ -218,7 +216,8 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
 
   function getScheduleColor(dateStr: string) {
     const date = new Date(dateStr);
-    if (isPast(date) && !isToday(date)) return "bg-foreground/10 text-foreground border-foreground/20";
+    if (isPast(date) && !isToday(date))
+      return "bg-foreground/10 text-foreground border-foreground/20";
     if (isToday(date)) return "bg-brand/20 text-brand-dark border-brand/30";
     return "bg-muted/50 text-muted-foreground border-border/50";
   }
@@ -232,7 +231,11 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
         <div className="flex gap-2">
           <Dialog open={showAssign} onOpenChange={setShowAssign}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="rounded-xl font-medium">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl font-medium"
+              >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Assigner séquence
               </Button>
@@ -300,7 +303,10 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
 
           <Dialog open={showCreateSeq} onOpenChange={setShowCreateSeq}>
             <DialogTrigger asChild>
-              <Button className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium" size="sm">
+              <Button
+                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                size="sm"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle séquence
               </Button>
@@ -358,7 +364,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                                     updateStep(
                                       index,
                                       "day_offset",
-                                      parseInt(e.target.value) || 0
+                                      parseInt(e.target.value) || 0,
                                     )
                                   }
                                 />
@@ -381,9 +387,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                                     <SelectItem value="comment">
                                       Commenter
                                     </SelectItem>
-                                    <SelectItem value="like">
-                                      Liker
-                                    </SelectItem>
+                                    <SelectItem value="like">Liker</SelectItem>
                                     <SelectItem value="story_reply">
                                       Répondre story
                                     </SelectItem>
@@ -405,7 +409,7 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                                   updateStep(
                                     index,
                                     "message_template",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 rows={2}
@@ -558,7 +562,9 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                       <CheckCircle2 className="h-6 w-6 text-muted-foreground/40" />
                     </div>
-                    <p className="font-medium text-sm">Aucune tâche pour aujourd&apos;hui</p>
+                    <p className="font-medium text-sm">
+                      Aucune tâche pour aujourd&apos;hui
+                    </p>
                     <p className="text-xs mt-1">Bravo, tout est à jour !</p>
                   </div>
                 )}
@@ -582,7 +588,8 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                       >
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-bold">
-                            {task.prospect?.name?.charAt(0)?.toUpperCase() || "?"}
+                            {task.prospect?.name?.charAt(0)?.toUpperCase() ||
+                              "?"}
                           </div>
                           <div>
                             <p className="text-sm font-medium">
@@ -631,7 +638,8 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{seq.name}</CardTitle>
                       <Badge variant="outline">
-                        {seq.steps.length} étape{seq.steps.length > 1 ? "s" : ""}
+                        {seq.steps.length} étape
+                        {seq.steps.length > 1 ? "s" : ""}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -640,7 +648,10 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
                       {(seq.steps as SequenceStep[])
                         .sort((a, b) => a.step_order - b.step_order)
                         .map((step, i) => (
-                          <div key={step.id} className="flex items-center gap-2">
+                          <div
+                            key={step.id}
+                            className="flex items-center gap-2"
+                          >
                             <div className="border rounded-xl px-3 py-2 text-sm">
                               <div className="flex items-center gap-1">
                                 <Badge

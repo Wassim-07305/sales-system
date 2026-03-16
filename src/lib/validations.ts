@@ -66,7 +66,14 @@ export const dealFiltersSchema = z.object({
 
 export const createDealActivitySchema = z.object({
   deal_id: uuidSchema,
-  type: z.enum(["call", "message", "email", "note", "meeting", "status_change"]),
+  type: z.enum([
+    "call",
+    "message",
+    "email",
+    "note",
+    "meeting",
+    "status_change",
+  ]),
   content: z.string().max(5000).optional(),
   metadata: z.record(z.string(), z.unknown()).default({}),
 });
@@ -119,14 +126,8 @@ export const signContractSchema = z.object({
 
 export const saveSignatureSchema = z.object({
   contractId: uuidSchema,
-  signatureData: z
-    .string()
-    .min(1, "La signature est requise")
-    .max(500_000),
-  signerName: z
-    .string()
-    .min(1, "Le nom du signataire est requis")
-    .max(200),
+  signatureData: z.string().min(1, "La signature est requise").max(500_000),
+  signerName: z.string().min(1, "Le nom du signataire est requis").max(200),
 });
 
 export const savePdfUrlSchema = z.object({
@@ -162,10 +163,7 @@ export const generateInvoiceSchema = z.object({
 // ============================================================
 
 export const createBookingSchema = z.object({
-  prospect_name: z
-    .string()
-    .min(1, "Le nom est requis")
-    .max(200),
+  prospect_name: z.string().min(1, "Le nom est requis").max(200),
   prospect_email: emailSchema,
   prospect_phone: phoneSchema,
   assigned_to: uuidSchema.optional(),
@@ -257,12 +255,15 @@ export type CreateContactInput = z.infer<typeof createContactSchema>;
 export type UpdateContactInput = z.infer<typeof updateContactSchema>;
 export type CreateContractInput = z.infer<typeof createContractSchema>;
 export type SignContractInput = z.infer<typeof signContractSchema>;
-export type CreateInstallmentPlanInput = z.infer<typeof createInstallmentPlanSchema>;
+export type CreateInstallmentPlanInput = z.infer<
+  typeof createInstallmentPlanSchema
+>;
 export type GenerateInvoiceInput = z.infer<typeof generateInvoiceSchema>;
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 export type UpdateBookingInput = z.infer<typeof updateBookingSchema>;
 export type CreateProspectInput = z.infer<typeof createProspectSchema>;
 export type UpdateProspectInput = z.infer<typeof updateProspectSchema>;
-export type CreateCommunityPostInput = z.infer<typeof createCommunityPostSchema>;
+export type CreateCommunityPostInput = z.infer<
+  typeof createCommunityPostSchema
+>;
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
-

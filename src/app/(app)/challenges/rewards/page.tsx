@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getRewardsCatalog, getRedemptionHistory } from "@/lib/actions/gamification";
+import {
+  getRewardsCatalog,
+  getRedemptionHistory,
+} from "@/lib/actions/gamification";
 import { RewardsView } from "./rewards-view";
 
 export default async function RewardsPage() {

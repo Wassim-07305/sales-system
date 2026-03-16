@@ -35,7 +35,9 @@ const statusLabels: Record<string, string> = {
 
 export default async function ContractsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -91,7 +93,10 @@ export default async function ContractsPage() {
             </TableHeader>
             <TableBody>
               {(contracts || []).map((contract) => (
-                <TableRow key={contract.id} className="hover:bg-secondary/50 transition-colors">
+                <TableRow
+                  key={contract.id}
+                  className="hover:bg-secondary/50 transition-colors"
+                >
                   <TableCell>
                     <Link
                       href={`/contracts/${contract.id}`}
@@ -101,9 +106,7 @@ export default async function ContractsPage() {
                       Contrat #{contract.id.slice(0, 8)}
                     </Link>
                   </TableCell>
-                  <TableCell>
-                    {contract.client?.full_name || "—"}
-                  </TableCell>
+                  <TableCell>{contract.client?.full_name || "—"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-3.5 w-3.5 text-brand" />
@@ -130,13 +133,18 @@ export default async function ContractsPage() {
               ))}
               {(!contracts || contracts.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-12 text-muted-foreground"
+                  >
                     <div className="flex flex-col items-center">
                       <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
                         <FileText className="h-7 w-7 opacity-50" />
                       </div>
                       <p className="font-medium">Aucun contrat</p>
-                      <p className="text-sm mt-1">Créez votre premier contrat pour commencer.</p>
+                      <p className="text-sm mt-1">
+                        Créez votre premier contrat pour commencer.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>

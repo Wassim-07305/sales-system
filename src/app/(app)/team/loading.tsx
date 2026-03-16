@@ -37,7 +37,10 @@ export default function TeamLoading() {
             <Skeleton className="h-4 w-12" />
           </div>
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 py-3 border-b last:border-b-0">
+            <div
+              key={i}
+              className="flex items-center gap-4 py-3 border-b last:border-b-0"
+            >
               <Skeleton className="h-8 w-8 rounded-full" />
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-6 w-16 rounded-full" />

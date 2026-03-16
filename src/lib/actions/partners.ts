@@ -66,7 +66,9 @@ export interface PartnerStats {
 // ─── GET ALL PARTNERS ────────────────────────────────────────────
 export async function getPartners(): Promise<Partner[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -83,9 +85,13 @@ export async function getPartners(): Promise<Partner[]> {
 }
 
 // ─── GET PARTNER DETAILS ─────────────────────────────────────────
-export async function getPartnerDetails(partnerId: string): Promise<Partner | null> {
+export async function getPartnerDetails(
+  partnerId: string,
+): Promise<Partner | null> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -114,7 +120,9 @@ export async function createPartner(data: {
   notes?: string;
 }): Promise<Partner> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Check if email already exists
@@ -171,10 +179,12 @@ export async function updatePartner(
     website: string | null;
     notes: string | null;
     rating: number;
-  }>
+  }>,
 ): Promise<Partner> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -196,13 +206,12 @@ export async function updatePartner(
 // ─── DELETE PARTNER ──────────────────────────────────────────────
 export async function deletePartner(id: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
-  const { error } = await supabase
-    .from("partners")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("partners").delete().eq("id", id);
 
   if (error) {
     console.error("Error deleting partner:", error);
@@ -215,7 +224,9 @@ export async function deletePartner(id: string): Promise<void> {
 // ─── APPROVE PARTNER ─────────────────────────────────────────────
 export async function approvePartner(id: string): Promise<Partner> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -241,7 +252,9 @@ export async function approvePartner(id: string): Promise<Partner> {
 // ─── DEACTIVATE PARTNER ──────────────────────────────────────────
 export async function deactivatePartner(id: string): Promise<Partner> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -263,7 +276,9 @@ export async function deactivatePartner(id: string): Promise<Partner> {
 // ─── GET PARTNER STATS ───────────────────────────────────────────
 export async function getPartnerStats(): Promise<PartnerStats> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Get partners counts
@@ -275,10 +290,14 @@ export async function getPartnerStats(): Promise<PartnerStats> {
   const activePartners = allPartners.filter((p) => p.status === "active");
   const pendingPartners = allPartners.filter((p) => p.status === "pending");
 
-  const totalRevenue = allPartners.reduce((sum, p) => sum + (p.revenue_generated || 0), 0);
+  const totalRevenue = allPartners.reduce(
+    (sum, p) => sum + (p.revenue_generated || 0),
+    0,
+  );
   const totalCommissions = allPartners.reduce(
-    (sum, p) => sum + ((p.revenue_generated || 0) * (p.commission_rate || 0) / 100),
-    0
+    (sum, p) =>
+      sum + ((p.revenue_generated || 0) * (p.commission_rate || 0)) / 100,
+    0,
   );
 
   // Get monthly data from referrals
@@ -292,18 +311,31 @@ export async function getPartnerStats(): Promise<PartnerStats> {
     .eq("status", "converted");
 
   // Group by month
-  const monthlyMap = new Map<string, { revenue: number; commission: number; partners: Set<string> }>();
+  const monthlyMap = new Map<
+    string,
+    { revenue: number; commission: number; partners: Set<string> }
+  >();
 
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const monthKey = date.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
-    monthlyMap.set(monthKey, { revenue: 0, commission: 0, partners: new Set() });
+    const monthKey = date.toLocaleDateString("fr-FR", {
+      month: "short",
+      year: "numeric",
+    });
+    monthlyMap.set(monthKey, {
+      revenue: 0,
+      commission: 0,
+      partners: new Set(),
+    });
   }
 
   (referrals || []).forEach((ref) => {
     if (ref.converted_at) {
       const date = new Date(ref.converted_at);
-      const monthKey = date.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+      const monthKey = date.toLocaleDateString("fr-FR", {
+        month: "short",
+        year: "numeric",
+      });
       const entry = monthlyMap.get(monthKey);
       if (entry) {
         entry.revenue += ref.deal_value || 0;
@@ -331,9 +363,13 @@ export async function getPartnerStats(): Promise<PartnerStats> {
 }
 
 // ─── GET PARTNER PAYOUTS ─────────────────────────────────────────
-export async function getPartnerPayouts(partnerId?: string): Promise<PartnerPayout[]> {
+export async function getPartnerPayouts(
+  partnerId?: string,
+): Promise<PartnerPayout[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   let query = supabase
@@ -367,7 +403,9 @@ export async function createPayout(data: {
   notes?: string;
 }): Promise<PartnerPayout> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: payout, error } = await supabase
@@ -396,10 +434,12 @@ export async function createPayout(data: {
 export async function processPayout(
   payoutId: string,
   status: "processing" | "paid" | "failed",
-  paymentReference?: string
+  paymentReference?: string,
 ): Promise<PartnerPayout> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const updates: Record<string, unknown> = {
@@ -432,9 +472,13 @@ export async function processPayout(
 }
 
 // ─── GET PARTNER REFERRALS ───────────────────────────────────────
-export async function getPartnerReferrals(partnerId: string): Promise<PartnerReferral[]> {
+export async function getPartnerReferrals(
+  partnerId: string,
+): Promise<PartnerReferral[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data, error } = await supabase
@@ -458,7 +502,9 @@ export async function recordReferral(data: {
   referredName: string;
 }): Promise<PartnerReferral> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: referral, error } = await supabase
@@ -485,10 +531,12 @@ export async function recordReferral(data: {
 export async function convertReferral(
   referralId: string,
   dealId: string,
-  dealValue: number
+  dealValue: number,
 ): Promise<PartnerReferral> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   // Get partner commission rate

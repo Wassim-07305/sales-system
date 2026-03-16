@@ -6,14 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Play,
-  Search,
-  Clock,
-  Calendar,
-  Users,
-  Video,
-} from "lucide-react";
+import { Play, Search, Clock, Calendar, Users, Video } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -48,7 +41,7 @@ export function ReplaysListView({ replays }: { replays: Replay[] }) {
     (r) =>
       !search ||
       r.title.toLowerCase().includes(search.toLowerCase()) ||
-      r.host?.full_name?.toLowerCase().includes(search.toLowerCase())
+      r.host?.full_name?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -84,7 +77,10 @@ export function ReplaysListView({ replays }: { replays: Replay[] }) {
         ) : (
           <div className="space-y-3">
             {filtered.map((replay) => (
-              <Card key={replay.id} className="border-border/50 hover:shadow-md transition-all">
+              <Card
+                key={replay.id}
+                className="border-border/50 hover:shadow-md transition-all"
+              >
                 <CardContent className="p-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="h-9 w-9 rounded-lg ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center shrink-0">

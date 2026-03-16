@@ -17,15 +17,24 @@ export async function GET(request: Request) {
 
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
-    return NextResponse.json({ error: "Service role key not configured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Service role key not configured" },
+      { status: 500 },
+    );
   }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey
+    serviceRoleKey,
   );
 
-  const results = { digests: 0, reminders: 0, callReminders: 0, sequenceMessages: 0, errors: 0 };
+  const results = {
+    digests: 0,
+    reminders: 0,
+    callReminders: 0,
+    sequenceMessages: 0,
+    errors: 0,
+  };
 
   // --- 0. Video Call Reminders (today's scheduled calls) ---
   try {
@@ -45,7 +54,9 @@ export async function GET(request: Request) {
       .eq("read", false)
       .limit(500);
 
-    const uniqueUserIds = [...new Set((usersWithUnread || []).map((n) => n.user_id))];
+    const uniqueUserIds = [
+      ...new Set((usersWithUnread || []).map((n) => n.user_id)),
+    ];
 
     for (const userId of uniqueUserIds) {
       try {
@@ -98,7 +109,9 @@ export async function GET(request: Request) {
 
     const { data: upcomingBookings } = await supabase
       .from("bookings")
-      .select("id, prospect_name, prospect_email, scheduled_at, slot_type, user_id")
+      .select(
+        "id, prospect_name, prospect_email, scheduled_at, slot_type, user_id",
+      )
       .gte("scheduled_at", now.toISOString())
       .lte("scheduled_at", tomorrow.toISOString())
       .eq("status", "confirmed");
@@ -148,7 +161,10 @@ export async function GET(request: Request) {
     for (const task of pendingTasks || []) {
       try {
         if (!task.message_content || !task.prospect_id) {
-          await supabase.from("follow_up_tasks").update({ completed: true, completed_at: now.toISOString() }).eq("id", task.id);
+          await supabase
+            .from("follow_up_tasks")
+            .update({ completed: true, completed_at: now.toISOString() })
+            .eq("id", task.id);
           continue;
         }
 
@@ -178,7 +194,10 @@ export async function GET(request: Request) {
           }
         }
 
-        await supabase.from("follow_up_tasks").update({ completed: true, completed_at: now.toISOString() }).eq("id", task.id);
+        await supabase
+          .from("follow_up_tasks")
+          .update({ completed: true, completed_at: now.toISOString() })
+          .eq("id", task.id);
         results.sequenceMessages++;
       } catch {
         results.errors++;

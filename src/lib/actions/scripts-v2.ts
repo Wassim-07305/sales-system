@@ -123,7 +123,7 @@ export async function updateFlowchart(
     nodes?: unknown[];
     edges?: unknown[];
     category?: string;
-  }
+  },
 ) {
   const supabase = await createClient();
   const updateData: Record<string, unknown> = {};
@@ -257,7 +257,7 @@ export async function updateMindMap(
     nodes?: unknown[];
     edges?: unknown[];
     category?: string;
-  }
+  },
 ) {
   const supabase = await createClient();
   const updateData: Record<string, unknown> = {};
@@ -279,10 +279,7 @@ export async function updateMindMap(
 
 export async function deleteMindMap(id: string) {
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("mind_maps")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("mind_maps").delete().eq("id", id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/scripts");
@@ -391,16 +388,26 @@ export async function generateScriptFromMindMap(mindMapId: string) {
 
   if (!mindMap) throw new Error("Mind map non trouvee");
 
-  const nodes = (mindMap.nodes || []) as Array<{ id: string; data: { label: string; type?: string } }>;
-  const edges = (mindMap.edges || []) as Array<{ source: string; target: string }>;
+  const nodes = (mindMap.nodes || []) as Array<{
+    id: string;
+    data: { label: string; type?: string };
+  }>;
+  const edges = (mindMap.edges || []) as Array<{
+    source: string;
+    target: string;
+  }>;
 
   // Build a tree-like structure from nodes
-  const nodeLabels = nodes.map((n) => `- ${n.data?.type || "node"}: ${n.data?.label || "Sans titre"}`).join("\n");
-  const connections = edges.map((e) => {
-    const source = nodes.find((n) => n.id === e.source);
-    const target = nodes.find((n) => n.id === e.target);
-    return `  ${source?.data?.label || "?"} → ${target?.data?.label || "?"}`;
-  }).join("\n");
+  const nodeLabels = nodes
+    .map((n) => `- ${n.data?.type || "node"}: ${n.data?.label || "Sans titre"}`)
+    .join("\n");
+  const connections = edges
+    .map((e) => {
+      const source = nodes.find((n) => n.id === e.source);
+      const target = nodes.find((n) => n.id === e.target);
+      return `  ${source?.data?.label || "?"} → ${target?.data?.label || "?"}`;
+    })
+    .join("\n");
 
   try {
     const script = await aiComplete(
@@ -425,10 +432,11 @@ Genere un script complet avec :
 Format : texte structure avec titres clairs (## Section).
 En francais, tutoiement.`,
       {
-        system: "Tu es un expert en scripts de vente/setting. Tu transformes des mind maps conceptuelles en scripts operationnels prets a l'emploi.",
+        system:
+          "Tu es un expert en scripts de vente/setting. Tu transformes des mind maps conceptuelles en scripts operationnels prets a l'emploi.",
         maxTokens: 2000,
         temperature: 0.7,
-      }
+      },
     );
 
     return { content: script, title: mindMap.title };
@@ -465,7 +473,8 @@ export async function shareScript(params: {
 
   if (!targetUser) throw new Error("Utilisateur introuvable avec cet email");
 
-  if (targetUser.id === user.id) throw new Error("Vous ne pouvez pas partager avec vous-meme");
+  if (targetUser.id === user.id)
+    throw new Error("Vous ne pouvez pas partager avec vous-meme");
 
   // Check if share already exists
   const { data: existing } = await supabase
@@ -495,8 +504,12 @@ export async function shareScript(params: {
   }
 
   // Set is_shared flag on the script
-  const table = params.scriptType === "flowchart" ? "script_flowcharts" : "mind_maps";
-  await supabase.from(table).update({ is_shared: true }).eq("id", params.scriptId);
+  const table =
+    params.scriptType === "flowchart" ? "script_flowcharts" : "mind_maps";
+  await supabase
+    .from(table)
+    .update({ is_shared: true })
+    .eq("id", params.scriptId);
 
   revalidatePath("/scripts");
 }
@@ -523,7 +536,10 @@ export async function getScriptShares(scriptId: string) {
     .in("id", userIds);
 
   const profileMap = new Map(
-    (profiles || []).map((p) => [p.id, { name: p.full_name || "Inconnu", email: p.email || "" }])
+    (profiles || []).map((p) => [
+      p.id,
+      { name: p.full_name || "Inconnu", email: p.email || "" },
+    ]),
   );
 
   return data.map((share) => ({
@@ -567,8 +583,12 @@ export async function getSharedWithMe() {
 
   if (!shares || shares.length === 0) return { flowcharts: [], mindmaps: [] };
 
-  const flowchartIds = shares.filter((s) => s.script_type === "flowchart").map((s) => s.script_id);
-  const mindmapIds = shares.filter((s) => s.script_type === "mindmap").map((s) => s.script_id);
+  const flowchartIds = shares
+    .filter((s) => s.script_type === "flowchart")
+    .map((s) => s.script_id);
+  const mindmapIds = shares
+    .filter((s) => s.script_type === "mindmap")
+    .map((s) => s.script_id);
 
   let flowcharts: unknown[] = [];
   let mindmaps: unknown[] = [];
@@ -606,7 +626,9 @@ export async function getScriptAnalytics() {
   // Fetch all user's flowcharts
   const { data: flowcharts } = await supabase
     .from("script_flowcharts")
-    .select("id, title, description, nodes, edges, is_shared, created_at, updated_at, is_template")
+    .select(
+      "id, title, description, nodes, edges, is_shared, created_at, updated_at, is_template",
+    )
     .eq("created_by", user.id)
     .order("updated_at", { ascending: false });
 
@@ -643,10 +665,21 @@ export async function getScriptAnalytics() {
 
   // Scripts created per month (last 6 months)
   const now = new Date();
-  const monthlyData: { month: string; flowcharts: number; mindmaps: number }[] = [];
+  const monthlyData: { month: string; flowcharts: number; mindmaps: number }[] =
+    [];
   const monthNames = [
-    "Jan", "Fév", "Mar", "Avr", "Mai", "Juin",
-    "Juil", "Août", "Sep", "Oct", "Nov", "Déc",
+    "Jan",
+    "Fév",
+    "Mar",
+    "Avr",
+    "Mai",
+    "Juin",
+    "Juil",
+    "Août",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Déc",
   ];
 
   for (let i = 5; i >= 0; i--) {
@@ -717,7 +750,10 @@ export async function getScriptAnalytics() {
 
   // Recently updated (last 5)
   const recentlyUpdated = allScriptsList
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
     .slice(0, 5);
 
   return {
@@ -750,16 +786,19 @@ Le script doit inclure :
 
 Utilise [Prénom] comme placeholder pour le nom du prospect.
 Adapte le ton au réseau ${network} (${
-      network === "LinkedIn" ? "professionnel et structuré"
-      : network === "Instagram" ? "décontracté et direct, émojis modérés"
-      : "conversationnel et personnel"
-    }).
+        network === "LinkedIn"
+          ? "professionnel et structuré"
+          : network === "Instagram"
+            ? "décontracté et direct, émojis modérés"
+            : "conversationnel et personnel"
+      }).
 Écris en français. Sépare chaque section avec un titre clair.`,
       {
-        system: "Tu es un expert en copywriting et setting/vente par DM. Tu crées des scripts de prospection ultra-efficaces pour des entrepreneurs francophones. Tes scripts sont naturels, jamais robotiques, et optimisés pour maximiser le taux de réponse et de booking d'appel.",
+        system:
+          "Tu es un expert en copywriting et setting/vente par DM. Tu crées des scripts de prospection ultra-efficaces pour des entrepreneurs francophones. Tes scripts sont naturels, jamais robotiques, et optimisés pour maximiser le taux de réponse et de booking d'appel.",
         maxTokens: 1500,
         temperature: 0.7,
-      }
+      },
     );
 
     return { content, niche, network };
@@ -785,7 +824,9 @@ export async function getScriptForTraining(scriptId: string) {
 
   const { data: flowchart } = await supabase
     .from("script_flowcharts")
-    .select("id, title, description, category, nodes, edges, created_at, updated_at")
+    .select(
+      "id, title, description, category, nodes, edges, created_at, updated_at",
+    )
     .eq("id", scriptId)
     .single();
 
@@ -804,7 +845,9 @@ export async function getScriptsForTraining() {
   // Own flowcharts
   const { data: ownFlowcharts } = await supabase
     .from("script_flowcharts")
-    .select("id, title, description, category, nodes, edges, created_at, updated_at")
+    .select(
+      "id, title, description, category, nodes, edges, created_at, updated_at",
+    )
     .eq("created_by", user.id)
     .order("updated_at", { ascending: false });
 
@@ -820,7 +863,9 @@ export async function getScriptsForTraining() {
     const sharedIds = shares.map((s) => s.script_id);
     const { data } = await supabase
       .from("script_flowcharts")
-      .select("id, title, description, category, nodes, edges, created_at, updated_at")
+      .select(
+        "id, title, description, category, nodes, edges, created_at, updated_at",
+      )
       .in("id", sharedIds)
       .order("updated_at", { ascending: false });
     sharedFlowcharts = data || [];
@@ -842,7 +887,7 @@ export async function saveTrainingResult(
     duration: number;
     missedNodes: string[];
     feedback: string;
-  }
+  },
 ) {
   const supabase = await createClient();
   const {

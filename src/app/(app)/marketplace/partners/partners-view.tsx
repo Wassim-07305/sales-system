@@ -84,15 +84,33 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  active: { label: "Actif", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  pending: { label: "En attente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  inactive: { label: "Inactif", className: "bg-gray-500/10 text-gray-600 border-gray-500/20" },
+  active: {
+    label: "Actif",
+    className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  },
+  pending: {
+    label: "En attente",
+    className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  },
+  inactive: {
+    label: "Inactif",
+    className: "bg-gray-500/10 text-gray-600 border-gray-500/20",
+  },
 };
 
 const PAYOUT_STATUS: Record<string, { label: string; className: string }> = {
-  paid: { label: "Payé", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  pending: { label: "En attente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  processing: { label: "En cours", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
+  paid: {
+    label: "Payé",
+    className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  },
+  pending: {
+    label: "En attente",
+    className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  },
+  processing: {
+    label: "En cours",
+    className: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  },
 };
 
 export function PartnersView({ partners, revenueData }: PartnersViewProps) {
@@ -108,17 +126,27 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formCompany, setFormCompany] = useState("");
-  const [formType, setFormType] = useState<"technology" | "consulting" | "referral">("technology");
+  const [formType, setFormType] = useState<
+    "technology" | "consulting" | "referral"
+  >("technology");
   const [formCommission, setFormCommission] = useState("15");
 
   const activePartners = partners.filter((p) => p.status === "active");
   const pendingPartners = partners.filter((p) => p.status === "pending");
 
-  const totalRevenue = activePartners.reduce((sum, p) => sum + p.revenue_generated, 0);
-  const totalInstallations = activePartners.reduce((sum, p) => sum + p.installations, 0);
-  const avgRating = activePartners.length > 0
-    ? activePartners.reduce((sum, p) => sum + p.rating, 0) / activePartners.length
-    : 0;
+  const totalRevenue = activePartners.reduce(
+    (sum, p) => sum + p.revenue_generated,
+    0,
+  );
+  const totalInstallations = activePartners.reduce(
+    (sum, p) => sum + p.installations,
+    0,
+  );
+  const avgRating =
+    activePartners.length > 0
+      ? activePartners.reduce((sum, p) => sum + p.rating, 0) /
+        activePartners.length
+      : 0;
 
   const stats = [
     {
@@ -174,7 +202,9 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         resetForm();
         router.refresh();
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors de la création");
+        toast.error(
+          err instanceof Error ? err.message : "Erreur lors de la création",
+        );
       }
     });
   }
@@ -186,7 +216,9 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         toast.success("Partenaire approuvé");
         router.refresh();
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors de l'approbation");
+        toast.error(
+          err instanceof Error ? err.message : "Erreur lors de l'approbation",
+        );
       }
     });
   }
@@ -198,7 +230,9 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         toast.success("Candidature rejetée");
         router.refresh();
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors du rejet");
+        toast.error(
+          err instanceof Error ? err.message : "Erreur lors du rejet",
+        );
       }
     });
   }
@@ -210,7 +244,11 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         toast.success("Partenaire désactivé");
         router.refresh();
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors de la désactivation");
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : "Erreur lors de la désactivation",
+        );
       }
     });
   }
@@ -242,7 +280,9 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         resetForm();
         router.refresh();
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour");
+        toast.error(
+          err instanceof Error ? err.message : "Erreur lors de la mise à jour",
+        );
       }
     });
   }
@@ -253,7 +293,12 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         title="Gestion des partenaires"
         description="Gérez vos partenaires, candidatures et revenus partagés"
       >
-        <Button onClick={() => { resetForm(); setShowCreateDialog(true); }}>
+        <Button
+          onClick={() => {
+            resetForm();
+            setShowCreateDialog(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Nouveau partenaire
         </Button>
@@ -262,13 +307,20 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="border-border/50 hover:shadow-md transition-all">
+          <Card
+            key={stat.label}
+            className="border-border/50 hover:shadow-md transition-all"
+          >
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    {stat.label}
+                  </p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stat.description}
+                  </p>
                 </div>
                 <div className="h-9 w-9 rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
                   <stat.icon className="h-5 w-5 text-emerald-500" />
@@ -282,19 +334,35 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
-          <TabsTrigger value="active" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="active"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
             Partenaires actifs
-            <Badge variant="secondary" className="ml-2 text-xs">{activePartners.length}</Badge>
+            <Badge variant="secondary" className="ml-2 text-xs">
+              {activePartners.length}
+            </Badge>
           </TabsTrigger>
-          <TabsTrigger value="applications" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="applications"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
             Candidatures
             {pendingPartners.length > 0 && (
-              <Badge variant="outline" className="ml-2 text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
+              <Badge
+                variant="outline"
+                className="ml-2 text-xs bg-amber-500/10 text-amber-600 border-amber-500/20"
+              >
                 {pendingPartners.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="revenue" className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">Revenus</TabsTrigger>
+          <TabsTrigger
+            value="revenue"
+            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
+            Revenus
+          </TabsTrigger>
         </TabsList>
 
         {/* Active partners tab */}
@@ -318,7 +386,10 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                 <TableBody>
                   {activePartners.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={9}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         Aucun partenaire actif
                       </TableCell>
                     </TableRow>
@@ -328,7 +399,11 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                       <TableRow
                         key={partner.id}
                         className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => setExpandedId(expandedId === partner.id ? null : partner.id)}
+                        onClick={() =>
+                          setExpandedId(
+                            expandedId === partner.id ? null : partner.id,
+                          )
+                        }
                       >
                         <TableCell>
                           {expandedId === partner.id ? (
@@ -337,25 +412,41 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           )}
                         </TableCell>
-                        <TableCell className="font-medium">{partner.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {partner.name}
+                        </TableCell>
                         <TableCell>{partner.company}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={TYPE_COLORS[partner.type]}>
+                          <Badge
+                            variant="outline"
+                            className={TYPE_COLORS[partner.type]}
+                          >
                             {TYPE_LABELS[partner.type]}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">{partner.commission_rate}%</TableCell>
-                        <TableCell className="text-right">{partner.installations}</TableCell>
                         <TableCell className="text-right">
-                          {partner.revenue_generated.toLocaleString("fr-FR")} &euro;
+                          {partner.commission_rate}%
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {partner.installations}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {partner.revenue_generated.toLocaleString("fr-FR")}{" "}
+                          &euro;
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={STATUS_CONFIG[partner.status]?.className}>
+                          <Badge
+                            variant="outline"
+                            className={STATUS_CONFIG[partner.status]?.className}
+                          >
                             {STATUS_CONFIG[partner.status]?.label}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          <div
+                            className="flex items-center justify-end gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               variant="ghost"
                               size="icon"
@@ -378,23 +469,38 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                       </TableRow>
                       {expandedId === partner.id && (
                         <TableRow key={`${partner.id}-details`}>
-                          <TableCell colSpan={9} className="bg-muted/30 px-8 py-4">
+                          <TableCell
+                            colSpan={9}
+                            className="bg-muted/30 px-8 py-4"
+                          >
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div>
-                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Email</p>
-                                <p className="text-sm font-medium">{partner.email}</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                                  Email
+                                </p>
+                                <p className="text-sm font-medium">
+                                  {partner.email}
+                                </p>
                               </div>
                               <div>
-                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Note</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                                  Note
+                                </p>
                                 <div className="flex items-center gap-1">
                                   <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                  <span className="text-sm font-medium">{partner.rating.toFixed(1)}/5</span>
+                                  <span className="text-sm font-medium">
+                                    {partner.rating.toFixed(1)}/5
+                                  </span>
                                 </div>
                               </div>
                               <div>
-                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Membre depuis</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                                  Membre depuis
+                                </p>
                                 <p className="text-sm font-medium">
-                                  {new Date(partner.created_at).toLocaleDateString("fr-FR", {
+                                  {new Date(
+                                    partner.created_at,
+                                  ).toLocaleDateString("fr-FR", {
                                     day: "numeric",
                                     month: "long",
                                     year: "numeric",
@@ -403,9 +509,13 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                               </div>
                               {partner.approved_at && (
                                 <div>
-                                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Approuvé le</p>
+                                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                                    Approuvé le
+                                  </p>
                                   <p className="text-sm font-medium">
-                                    {new Date(partner.approved_at).toLocaleDateString("fr-FR", {
+                                    {new Date(
+                                      partner.approved_at,
+                                    ).toLocaleDateString("fr-FR", {
                                       day: "numeric",
                                       month: "long",
                                       year: "numeric",
@@ -414,9 +524,16 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                                 </div>
                               )}
                               <div>
-                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Commission effective</p>
+                                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                                  Commission effective
+                                </p>
                                 <p className="text-sm font-medium">
-                                  {(partner.revenue_generated * partner.commission_rate / 100).toLocaleString("fr-FR")} &euro;
+                                  {(
+                                    (partner.revenue_generated *
+                                      partner.commission_rate) /
+                                    100
+                                  ).toLocaleString("fr-FR")}{" "}
+                                  &euro;
                                 </p>
                               </div>
                             </div>
@@ -445,7 +562,9 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                     <TableHead>Entreprise</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Commission demandée</TableHead>
+                    <TableHead className="text-right">
+                      Commission demandée
+                    </TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -453,24 +572,38 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                 <TableBody>
                   {pendingPartners.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={7}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         Aucune candidature en attente
                       </TableCell>
                     </TableRow>
                   )}
                   {pendingPartners.map((partner) => (
                     <TableRow key={partner.id}>
-                      <TableCell className="font-medium">{partner.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {partner.name}
+                      </TableCell>
                       <TableCell>{partner.company}</TableCell>
-                      <TableCell className="text-muted-foreground">{partner.email}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {partner.email}
+                      </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={TYPE_COLORS[partner.type]}>
+                        <Badge
+                          variant="outline"
+                          className={TYPE_COLORS[partner.type]}
+                        >
                           {TYPE_LABELS[partner.type]}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">{partner.commission_rate}%</TableCell>
+                      <TableCell className="text-right">
+                        {partner.commission_rate}%
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {new Date(partner.created_at).toLocaleDateString("fr-FR")}
+                        {new Date(partner.created_at).toLocaleDateString(
+                          "fr-FR",
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -508,19 +641,30 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
           {/* Revenue chart */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Revenus partagés par mois</CardTitle>
+              <CardTitle className="text-lg">
+                Revenus partagés par mois
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueData.monthly}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                    />
                     <XAxis
                       dataKey="month"
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                      tick={{
+                        fill: "hsl(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
                     />
                     <YAxis
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                      tick={{
+                        fill: "hsl(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
                       tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                     />
                     <Tooltip
@@ -531,7 +675,12 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                         color: "white",
                       }}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      formatter={((value: any) => [`${Number(value || 0).toLocaleString("fr-FR")} \u20ac`, undefined]) as any}
+                      formatter={
+                        ((value: any) => [
+                          `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
+                          undefined,
+                        ]) as any
+                      }
                       labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                     />
                     <Legend />
@@ -572,20 +721,30 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                 <TableBody>
                   {revenueData.payouts.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         Aucun versement
                       </TableCell>
                     </TableRow>
                   )}
                   {revenueData.payouts.map((payout) => (
                     <TableRow key={payout.id}>
-                      <TableCell className="font-medium">{payout.partner_name}</TableCell>
-                      <TableCell className="text-muted-foreground">{payout.period}</TableCell>
+                      <TableCell className="font-medium">
+                        {payout.partner_name}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {payout.period}
+                      </TableCell>
                       <TableCell className="text-right font-medium">
                         {payout.amount.toLocaleString("fr-FR")} &euro;
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={PAYOUT_STATUS[payout.status]?.className}>
+                        <Badge
+                          variant="outline"
+                          className={PAYOUT_STATUS[payout.status]?.className}
+                        >
                           {PAYOUT_STATUS[payout.status]?.label}
                         </Badge>
                       </TableCell>
@@ -640,7 +799,10 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
             </div>
             <div className="space-y-2">
               <Label>Type de partenariat</Label>
-              <Select value={formType} onValueChange={(v) => setFormType(v as typeof formType)}>
+              <Select
+                value={formType}
+                onValueChange={(v) => setFormType(v as typeof formType)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -663,7 +825,10 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
                 Annuler
               </Button>
               <Button onClick={handleCreate} disabled={isPending}>
@@ -708,7 +873,10 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
             </div>
             <div className="space-y-2">
               <Label>Type de partenariat</Label>
-              <Select value={formType} onValueChange={(v) => setFormType(v as typeof formType)}>
+              <Select
+                value={formType}
+                onValueChange={(v) => setFormType(v as typeof formType)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -731,7 +899,10 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+              >
                 Annuler
               </Button>
               <Button onClick={handleEdit} disabled={isPending}>

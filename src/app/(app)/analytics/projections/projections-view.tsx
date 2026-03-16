@@ -31,7 +31,10 @@ import {
   ComposedChart,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import type { RevenueProjectionResult, AIForecastResult } from "@/lib/actions/analytics-v2";
+import type {
+  RevenueProjectionResult,
+  AIForecastResult,
+} from "@/lib/actions/analytics-v2";
 
 interface ProjectionsViewProps {
   data: RevenueProjectionResult;
@@ -158,9 +161,15 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="rgba(255,255,255,0.06)"
+                />
                 <XAxis dataKey="month" stroke="#888" />
-                <YAxis tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} stroke="#888" />
+                <YAxis
+                  tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                  stroke="#888"
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
@@ -168,20 +177,22 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                     borderRadius: "8px",
                   }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  formatter={((value: any, name: any) => {
-                    const labels: Record<string, string> = {
-                      actual: "CA réel",
-                      projected: "CA projeté",
-                      trend: "Tendance",
-                      optimistic: "Scénario optimiste",
-                      pessimistic: "Scénario pessimiste",
-                    };
-                    return [
-                      `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
-                      labels[String(name)] || String(name),
-                    ];
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  }) as any}
+                  formatter={
+                    ((value: any, name: any) => {
+                      const labels: Record<string, string> = {
+                        actual: "CA réel",
+                        projected: "CA projeté",
+                        trend: "Tendance",
+                        optimistic: "Scénario optimiste",
+                        pessimistic: "Scénario pessimiste",
+                      };
+                      return [
+                        `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
+                        labels[String(name)] || String(name),
+                      ];
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    }) as any
+                  }
                 />
                 <Legend
                   formatter={(value: string) => {
@@ -290,11 +301,15 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                   <div>
                     <div className="flex items-center gap-1.5 mb-2">
                       <ShieldAlert className="h-4 w-4 text-red-500" />
-                      <span className="text-[11px] font-medium text-red-600 uppercase tracking-wider">Risques</span>
+                      <span className="text-[11px] font-medium text-red-600 uppercase tracking-wider">
+                        Risques
+                      </span>
                     </div>
                     <ul className="space-y-1">
                       {aiData.globalInsights.topRisks.map((r, i) => (
-                        <li key={i} className="text-xs text-muted-foreground">{r}</li>
+                        <li key={i} className="text-xs text-muted-foreground">
+                          {r}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -303,11 +318,15 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                   <div>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Lightbulb className="h-4 w-4 text-amber-500" />
-                      <span className="text-[11px] font-medium text-amber-600 uppercase tracking-wider">Opportunités</span>
+                      <span className="text-[11px] font-medium text-amber-600 uppercase tracking-wider">
+                        Opportunités
+                      </span>
                     </div>
                     <ul className="space-y-1">
                       {aiData.globalInsights.opportunities.map((o, i) => (
-                        <li key={i} className="text-xs text-muted-foreground">{o}</li>
+                        <li key={i} className="text-xs text-muted-foreground">
+                          {o}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -316,11 +335,15 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                   <div>
                     <div className="flex items-center gap-1.5 mb-2">
                       <Sparkles className="h-4 w-4 text-brand" />
-                      <span className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider">Actions</span>
+                      <span className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider">
+                        Actions
+                      </span>
                     </div>
                     <ul className="space-y-1">
                       {aiData.globalInsights.recommendedActions.map((a, i) => (
-                        <li key={i} className="text-xs text-muted-foreground">{a}</li>
+                        <li key={i} className="text-xs text-muted-foreground">
+                          {a}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -340,27 +363,47 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
             <CardContent>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <p className="text-xs text-muted-foreground mb-1">Conversion +10%</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Conversion +10%
+                  </p>
                   <p className="text-lg font-bold text-emerald-600">
-                    {aiData.whatIfScenarios.conversionUp10.toLocaleString("fr-FR")} &euro;
+                    {aiData.whatIfScenarios.conversionUp10.toLocaleString(
+                      "fr-FR",
+                    )}{" "}
+                    &euro;
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <p className="text-xs text-muted-foreground mb-1">Conversion +20%</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Conversion +20%
+                  </p>
                   <p className="text-lg font-bold text-emerald-600">
-                    {aiData.whatIfScenarios.conversionUp20.toLocaleString("fr-FR")} &euro;
+                    {aiData.whatIfScenarios.conversionUp20.toLocaleString(
+                      "fr-FR",
+                    )}{" "}
+                    &euro;
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-xs text-muted-foreground mb-1">Conversion -10%</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Conversion -10%
+                  </p>
                   <p className="text-lg font-bold text-red-600">
-                    {aiData.whatIfScenarios.conversionDown10.toLocaleString("fr-FR")} &euro;
+                    {aiData.whatIfScenarios.conversionDown10.toLocaleString(
+                      "fr-FR",
+                    )}{" "}
+                    &euro;
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-xs text-muted-foreground mb-1">Panier moyen +15%</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Panier moyen +15%
+                  </p>
                   <p className="text-lg font-bold text-blue-600">
-                    {aiData.whatIfScenarios.avgDealValueUp15.toLocaleString("fr-FR")} &euro;
+                    {aiData.whatIfScenarios.avgDealValueUp15.toLocaleString(
+                      "fr-FR",
+                    )}{" "}
+                    &euro;
                   </p>
                 </div>
               </div>
@@ -381,16 +424,29 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b bg-muted/30">
-                        <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deal</th>
-                        <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Valeur</th>
-                        <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Risque churn</th>
-                        <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Action recommandée</th>
-                        <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Anomalie</th>
+                        <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                          Deal
+                        </th>
+                        <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                          Valeur
+                        </th>
+                        <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                          Risque churn
+                        </th>
+                        <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                          Action recommandée
+                        </th>
+                        <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                          Anomalie
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {aiData.dealInsights.map((deal, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                        <tr
+                          key={i}
+                          className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                        >
                           <td className="p-4 font-medium">{deal.dealTitle}</td>
                           <td className="p-4 text-right">
                             {deal.dealValue.toLocaleString("fr-FR")} &euro;
@@ -403,11 +459,15 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                                   ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                   : deal.churnRisk === "medium"
                                     ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                    : "bg-red-500/10 text-red-600 border-red-500/20"
+                                    : "bg-red-500/10 text-red-600 border-red-500/20",
                               )}
                             >
-                              {deal.churnRisk === "low" ? "Faible" : deal.churnRisk === "medium" ? "Moyen" : "Élevé"}
-                              {" "}{deal.churnRiskScore}%
+                              {deal.churnRisk === "low"
+                                ? "Faible"
+                                : deal.churnRisk === "medium"
+                                  ? "Moyen"
+                                  : "Élevé"}{" "}
+                              {deal.churnRiskScore}%
                             </span>
                           </td>
                           <td className="p-4 text-sm text-muted-foreground max-w-[250px]">
@@ -415,12 +475,17 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                           </td>
                           <td className="p-4 text-center">
                             {deal.isAnomaly ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20" title={deal.anomalyReason || ""}>
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                                title={deal.anomalyReason || ""}
+                              >
                                 <AlertTriangle className="h-3 w-3" />
                                 Oui
                               </span>
                             ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                              <span className="text-xs text-muted-foreground">
+                                —
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -445,8 +510,12 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Mois</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA réalisé</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Mois
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      CA réalisé
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -484,8 +553,12 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Mois</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA projeté</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Mois
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      CA projeté
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -533,15 +606,26 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deal</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Valeur</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Probabilité</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Valeur pondérée</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Deal
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Valeur
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Probabilité
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Valeur pondérée
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {pipelineDeals.map((deal, i) => (
-                    <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr
+                      key={i}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
                       <td className="p-4 font-medium">{deal.title}</td>
                       <td className="p-4 text-right">
                         {deal.value.toLocaleString("fr-FR")} &euro;
@@ -554,7 +638,7 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                               ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : deal.probability >= 40
                                 ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                : "bg-red-500/10 text-red-600 border-red-500/20"
+                                : "bg-red-500/10 text-red-600 border-red-500/20",
                           )}
                         >
                           {deal.probability}%

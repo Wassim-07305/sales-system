@@ -6,7 +6,9 @@ import { InboxView } from "./inbox-view";
 
 export default async function InboxPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -15,7 +17,10 @@ export default async function InboxPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager", "setter", "closer"].includes(profile.role)) {
+  if (
+    !profile ||
+    !["admin", "manager", "setter", "closer"].includes(profile.role)
+  ) {
     redirect("/dashboard");
   }
 
@@ -23,5 +28,10 @@ export default async function InboxPage() {
   const prospects = await getProspects();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <InboxView conversations={conversations as any} prospects={prospects as any} />;
+  return (
+    <InboxView
+      conversations={conversations as any}
+      prospects={prospects as any}
+    />
+  );
 }

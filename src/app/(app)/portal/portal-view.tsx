@@ -108,18 +108,24 @@ export function PortalView({ data }: { data: PortalData | null }) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Setters actifs</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Setters actifs
+              </span>
               <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <Users className="h-4 w-4 text-brand" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{metrics.activeSetters}</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {metrics.activeSetters}
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA total</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                CA total
+              </span>
               <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
                 <DollarSign className="h-4 w-4 text-emerald-500" />
               </div>
@@ -132,23 +138,31 @@ export function PortalView({ data }: { data: PortalData | null }) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deals en cours</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Deals en cours
+              </span>
               <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
                 <TrendingUp className="h-4 w-4 text-blue-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{metrics.activeDeals}</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {metrics.activeDeals}
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Satisfaction</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Satisfaction
+              </span>
               <div className="h-9 w-9 rounded-xl bg-rose-500/10 flex items-center justify-center ring-1 ring-rose-500/20">
                 <Heart className="h-4 w-4 text-rose-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{metrics.avgHealthScore}%</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {metrics.avgHealthScore}%
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -244,7 +258,10 @@ export function PortalView({ data }: { data: PortalData | null }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-3 ml-4">
-                    <Badge variant="outline" className="text-xs whitespace-nowrap">
+                    <Badge
+                      variant="outline"
+                      className="text-xs whitespace-nowrap"
+                    >
                       {stageLabels[deal.stage_id || ""] || deal.stage_id || "—"}
                     </Badge>
                     <span className="text-sm font-medium whitespace-nowrap">

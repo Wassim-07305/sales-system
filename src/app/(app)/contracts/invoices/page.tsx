@@ -5,7 +5,9 @@ import { InvoicesView } from "./invoices-view";
 
 export default async function InvoicesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const invoices = await getInvoices();

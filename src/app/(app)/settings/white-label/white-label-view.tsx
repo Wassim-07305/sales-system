@@ -31,7 +31,10 @@ import {
   ToggleRight,
 } from "lucide-react";
 import { toast } from "sonner";
-import { updateWhiteLabelConfig, updateFeatureToggles } from "@/lib/actions/white-label";
+import {
+  updateWhiteLabelConfig,
+  updateFeatureToggles,
+} from "@/lib/actions/white-label";
 import Link from "next/link";
 
 interface WhiteLabelConfig {
@@ -137,17 +140,15 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
   const [appName, setAppName] = useState(config?.app_name || "");
   const [logoUrl, setLogoUrl] = useState(config?.logo_url || "");
   const [primaryColor, setPrimaryColor] = useState(
-    config?.primary_color || "#7af17a"
+    config?.primary_color || "#7af17a",
   );
   const [secondaryColor, setSecondaryColor] = useState(
-    config?.secondary_color || "#14080e"
+    config?.secondary_color || "#14080e",
   );
-  const [customDomain, setCustomDomain] = useState(
-    config?.custom_domain || ""
-  );
+  const [customDomain, setCustomDomain] = useState(config?.custom_domain || "");
   const [isActive, setIsActive] = useState(config?.is_active || false);
   const [enabledModules, setEnabledModules] = useState<string[]>(
-    config?.enabled_modules || MODULES.map((m) => m.key)
+    config?.enabled_modules || MODULES.map((m) => m.key),
   );
 
   function handleSave() {
@@ -271,7 +272,8 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
               type="url"
             />
             <p className="text-xs text-muted-foreground">
-              Utilisez une URL publique pour votre logo (PNG ou SVG recommande, 200x200px minimum)
+              Utilisez une URL publique pour votre logo (PNG ou SVG recommande,
+              200x200px minimum)
             </p>
           </div>
 
@@ -327,7 +329,8 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
               placeholder="app.votremarque.com"
             />
             <p className="text-xs text-muted-foreground">
-              Configurez un CNAME vers notre serveur pour activer votre domaine personnalise
+              Configurez un CNAME vers notre serveur pour activer votre domaine
+              personnalise
             </p>
           </div>
         </CardContent>
@@ -343,7 +346,8 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
             Fonctionnalites actives
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Choisissez les modules visibles pour les utilisateurs de ce workspace
+            Choisissez les modules visibles pour les utilisateurs de ce
+            workspace
           </p>
         </CardHeader>
         <CardContent>
@@ -354,7 +358,9 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
                 className="flex items-center justify-between gap-2 rounded-xl border border-border/50 p-3 hover:bg-muted/30 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-muted-foreground shrink-0">{mod.icon}</span>
+                  <span className="text-muted-foreground shrink-0">
+                    {mod.icon}
+                  </span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{mod.name}</p>
                     <p className="text-xs text-muted-foreground truncate">
@@ -371,8 +377,9 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
           </div>
           <div className="flex items-center justify-between mt-4">
             <p className="text-sm text-muted-foreground">
-              {enabledModules.length} module{enabledModules.length > 1 ? "s" : ""}{" "}
-              active{enabledModules.length > 1 ? "s" : ""}
+              {enabledModules.length} module
+              {enabledModules.length > 1 ? "s" : ""} active
+              {enabledModules.length > 1 ? "s" : ""}
             </p>
             <Button
               variant="outline"
@@ -425,14 +432,15 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <span className="text-white font-semibold">
-                  {displayName}
-                </span>
+                <span className="text-white font-semibold">{displayName}</span>
               </div>
               {customDomain && (
                 <span
                   className="text-xs px-2 py-1 rounded"
-                  style={{ color: primaryColor, backgroundColor: `${primaryColor}15` }}
+                  style={{
+                    color: primaryColor,
+                    backgroundColor: `${primaryColor}15`,
+                  }}
                 >
                   {customDomain}
                 </span>
@@ -481,7 +489,10 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
               </div>
 
               {enabledModules.length === 0 && (
-                <p className="text-xs text-center py-4" style={{ color: `${primaryColor}60` }}>
+                <p
+                  className="text-xs text-center py-4"
+                  style={{ color: `${primaryColor}60` }}
+                >
                   Aucun module active
                 </p>
               )}

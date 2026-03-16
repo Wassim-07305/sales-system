@@ -19,7 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import type { Deal, PipelineStage, DealTemperature } from "@/lib/types/database";
+import type {
+  Deal,
+  PipelineStage,
+  DealTemperature,
+} from "@/lib/types/database";
 import { Plus, Loader2 } from "lucide-react";
 import { createDeal } from "@/lib/actions/crm";
 

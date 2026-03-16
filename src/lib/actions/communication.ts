@@ -11,12 +11,16 @@ import { notifyMany } from "@/lib/actions/notifications";
 
 export async function getVideoRooms() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data } = await supabase
     .from("video_rooms")
-    .select("*, host:profiles!video_rooms_host_id_fkey(id, email, full_name, avatar_url, role)")
+    .select(
+      "*, host:profiles!video_rooms_host_id_fkey(id, email, full_name, avatar_url, role)",
+    )
     .order("scheduled_at", { ascending: false });
 
   return (data || []).map((r: Record<string, unknown>) => ({
@@ -74,12 +78,10 @@ export async function createVideoRoom(data: {
         ? `Un appel vidéo "${data.title}" vient de démarrer. Rejoignez-le !`
         : `Un appel vidéo "${data.title}" est prévu le ${scheduledLabel}.`;
 
-      await notifyMany(
-        userIds,
-        "Nouvel appel vidéo",
-        notifBody,
-        { link: `/chat/video/${room.id}`, type: "video_call" }
-      );
+      await notifyMany(userIds, "Nouvel appel vidéo", notifBody, {
+        link: `/chat/video/${room.id}`,
+        type: "video_call",
+      });
     }
   } catch {
     // Ne pas bloquer la création de la room si les notifications échouent
@@ -118,7 +120,9 @@ export async function joinRoom(roomId: string) {
 
 export async function startRoom(roomId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase
@@ -136,7 +140,9 @@ export async function startRoom(roomId: string) {
 
 export async function endRoom(roomId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase
@@ -162,12 +168,16 @@ export async function endRoom(roomId: string) {
 
 export async function getVideoRoom(roomId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data: room } = await supabase
     .from("video_rooms")
-    .select("*, host:profiles!video_rooms_host_id_fkey(id, email, full_name, avatar_url, role)")
+    .select(
+      "*, host:profiles!video_rooms_host_id_fkey(id, email, full_name, avatar_url, role)",
+    )
     .eq("id", roomId)
     .single();
 
@@ -175,7 +185,9 @@ export async function getVideoRoom(roomId: string) {
 
   const { data: participants } = await supabase
     .from("video_room_participants")
-    .select("*, user:profiles!video_room_participants_user_id_fkey(id, email, full_name, avatar_url, role)")
+    .select(
+      "*, user:profiles!video_room_participants_user_id_fkey(id, email, full_name, avatar_url, role)",
+    )
     .eq("room_id", roomId)
     .order("joined_at", { ascending: true });
 
@@ -192,7 +204,9 @@ export async function getVideoRoom(roomId: string) {
 export async function getRecording(roomId: string) {
   // Récupérer l'enregistrement depuis la base — transcription externe si configurée
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data: room } = await supabase
@@ -234,10 +248,13 @@ export async function sendBroadcast(data: {
     const { checkCriticalAction } = await import("@/lib/actions/ai-modes");
     const aiCheck = await checkCriticalAction("Envoi de message initial");
     if (aiCheck.requiresValidation) {
-      throw new Error("Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)");
+      throw new Error(
+        "Action bloquée : cette action nécessite une validation manuelle (mode IA critique activé)",
+      );
     }
   } catch (err) {
-    if (err instanceof Error && err.message.startsWith("Action bloquée")) throw err;
+    if (err instanceof Error && err.message.startsWith("Action bloquée"))
+      throw err;
   }
 
   // Only admin/manager can send broadcasts
@@ -276,7 +293,12 @@ export async function sendBroadcast(data: {
   // Create notifications for each target user
   if (targetUsers.length > 0) {
     const userIds = targetUsers.map((t: { id: string }) => t.id);
-    await notifyMany(userIds, data.subject || "Nouvelle diffusion", data.content.substring(0, 200), { type: "broadcast" });
+    await notifyMany(
+      userIds,
+      data.subject || "Nouvelle diffusion",
+      data.content.substring(0, 200),
+      { type: "broadcast" },
+    );
   }
 
   revalidatePath("/chat/broadcast");
@@ -285,12 +307,16 @@ export async function sendBroadcast(data: {
 
 export async function getBroadcasts() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data } = await supabase
     .from("broadcast_messages")
-    .select("*, sender:profiles!broadcast_messages_sender_id_fkey(id, email, full_name, avatar_url, role)")
+    .select(
+      "*, sender:profiles!broadcast_messages_sender_id_fkey(id, email, full_name, avatar_url, role)",
+    )
     .order("created_at", { ascending: false });
 
   return (data || []).map((b: Record<string, unknown>) => ({
@@ -335,7 +361,9 @@ export async function createPoll(data: {
 
 export async function votePoll(pollId: string, optionIndex: number) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // Get current poll
@@ -365,7 +393,9 @@ export async function votePoll(pollId: string, optionIndex: number) {
 
 export async function getRoomPolls(roomId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data } = await supabase
@@ -383,7 +413,9 @@ export async function getRoomPolls(roomId: string) {
 
 export async function submitQuestion(roomId: string, question: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { error } = await supabase.from("live_questions").insert({
@@ -400,7 +432,9 @@ export async function submitQuestion(roomId: string, question: string) {
 
 export async function upvoteQuestion(questionId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data: q } = await supabase
@@ -421,7 +455,9 @@ export async function upvoteQuestion(questionId: string) {
 
 export async function markQuestionAnswered(questionId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   await supabase
@@ -433,12 +469,16 @@ export async function markQuestionAnswered(questionId: string) {
 
 export async function getRoomQuestions(roomId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data } = await supabase
     .from("live_questions")
-    .select("*, user:profiles!live_questions_user_id_fkey(full_name, avatar_url)")
+    .select(
+      "*, user:profiles!live_questions_user_id_fkey(full_name, avatar_url)",
+    )
     .eq("room_id", roomId)
     .order("upvotes", { ascending: false });
 
@@ -476,9 +516,7 @@ export async function getUnreadCounts(): Promise<Record<string, number>> {
   }
 
   // Fetch all channels
-  const { data: channels } = await supabase
-    .from("channels")
-    .select("id");
+  const { data: channels } = await supabase.from("channels").select("id");
 
   if (!channels || channels.length === 0) return {};
 
@@ -553,22 +591,26 @@ export async function markChannelAsRead(channelId: string) {
 
 export async function generateAiReply(context: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   try {
     const suggestion = await aiComplete(
       `Contexte de la conversation :\n${context}\n\nGénère une réponse professionnelle et naturelle en français, adaptée au contexte. 2-3 phrases maximum. Sois direct et utile.`,
       {
-        system: "Tu es un assistant pour un coach en vente/setting chez S Academy. Tu rédiges des réponses aux messages de clients. Ton ton est professionnel, chaleureux et orienté action. Réponds uniquement avec le texte du message, sans guillemets ni préfixe.",
+        system:
+          "Tu es un assistant pour un coach en vente/setting chez S Academy. Tu rédiges des réponses aux messages de clients. Ton ton est professionnel, chaleureux et orienté action. Réponds uniquement avec le texte du message, sans guillemets ni préfixe.",
         maxTokens: 256,
-      }
+      },
     );
 
     return { suggestion, context };
   } catch {
     return {
-      suggestion: "Merci pour votre message ! Je reviens vers vous rapidement avec une réponse détaillée.",
+      suggestion:
+        "Merci pour votre message ! Je reviens vers vous rapidement avec une réponse détaillée.",
       context,
     };
   }
@@ -576,7 +618,9 @@ export async function generateAiReply(context: string) {
 
 export async function generatePostCallSummary(roomId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // Fetch room details for context
@@ -599,9 +643,10 @@ export async function generatePostCallSummary(roomId: string) {
     })
     .join(", ");
 
-  const durationMs = room?.started_at && room?.ended_at
-    ? new Date(room.ended_at).getTime() - new Date(room.started_at).getTime()
-    : 0;
+  const durationMs =
+    room?.started_at && room?.ended_at
+      ? new Date(room.ended_at).getTime() - new Date(room.started_at).getTime()
+      : 0;
   const durationMin = Math.round(durationMs / 60000);
 
   try {
@@ -624,7 +669,10 @@ Réponds en JSON :
   "sentiment": "<positif|neutre|négatif>",
   "keyTopics": ["<topic 1>", "<topic 2>", "<topic 3>"]
 }`,
-      { system: "Tu es un assistant de productivité pour S Academy, une école de vente/setting. Réponds en français." }
+      {
+        system:
+          "Tu es un assistant de productivité pour S Academy, une école de vente/setting. Réponds en français.",
+      },
     );
 
     // Save summary to the room
@@ -641,7 +689,8 @@ Réponds en JSON :
   } catch {
     return {
       roomId,
-      summary: "Résumé automatique indisponible. Veuillez réécouter l'enregistrement.",
+      summary:
+        "Résumé automatique indisponible. Veuillez réécouter l'enregistrement.",
       sentiment: "neutre",
       duration: `${durationMin} minutes`,
       keyTopics: [room?.title || "Appel"],
@@ -809,7 +858,9 @@ export async function saveRecordingMetadata(data: {
   durationSeconds?: number | null;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   // Build the update payload
@@ -835,7 +886,7 @@ export async function saveRecordingMetadata(data: {
   // If we have duration and no ended_at, compute ended_at from started_at + duration
   if (data.durationSeconds && room.started_at && !room.ended_at) {
     const endTime = new Date(
-      new Date(room.started_at).getTime() + data.durationSeconds * 1000
+      new Date(room.started_at).getTime() + data.durationSeconds * 1000,
     ).toISOString();
     updatePayload.ended_at = endTime;
   }
@@ -849,7 +900,8 @@ export async function saveRecordingMetadata(data: {
 
   // Also try to save to group_calls table if it exists (graceful fallback)
   try {
-    const title = room.title || `Appel du ${new Date().toLocaleDateString("fr-FR")}`;
+    const title =
+      room.title || `Appel du ${new Date().toLocaleDateString("fr-FR")}`;
     await supabase.from("group_calls").insert({
       room_id: data.roomId,
       title,
@@ -877,12 +929,16 @@ export async function saveRecordingMetadata(data: {
  * Uses admin client (service role) — no auth required.
  */
 export async function notifyUpcomingCalls() {
-  const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+  const { createClient: createServiceClient } =
+    await import("@supabase/supabase-js");
 
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!serviceRoleKey || !supabaseUrl) {
-    return { sent: 0, error: "Service role key ou Supabase URL non configurés" };
+    return {
+      sent: 0,
+      error: "Service role key ou Supabase URL non configurés",
+    };
   }
 
   const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
@@ -907,9 +963,7 @@ export async function notifyUpcomingCalls() {
 
   for (const room of upcomingRooms) {
     // Fetch all team members to notify
-    const { data: allUsers } = await supabase
-      .from("profiles")
-      .select("id");
+    const { data: allUsers } = await supabase.from("profiles").select("id");
 
     if (!allUsers || allUsers.length === 0) continue;
 
@@ -928,7 +982,9 @@ export async function notifyUpcomingCalls() {
       link: `/chat/video/${room.id}`,
     }));
 
-    const { error } = await supabase.from("notifications").insert(notifications);
+    const { error } = await supabase
+      .from("notifications")
+      .insert(notifications);
     if (!error) totalSent += userIds.length;
 
     // Send web push via push_subscriptions (fire-and-forget)
@@ -943,7 +999,8 @@ export async function notifyUpcomingCalls() {
         const { getApiKey } = await import("@/lib/api-keys");
         const publicKey = await getApiKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
         const privateKey = await getApiKey("VAPID_PRIVATE_KEY");
-        const email = (await getApiKey("VAPID_EMAIL")) || "mailto:admin@salessystem.com";
+        const email =
+          (await getApiKey("VAPID_EMAIL")) || "mailto:admin@salessystem.com";
 
         if (publicKey && privateKey) {
           webPush.setVapidDetails(email, publicKey, privateKey);
@@ -959,7 +1016,7 @@ export async function notifyUpcomingCalls() {
                   body: `"${room.title}" prévu à ${scheduledTime}`,
                   icon: "/icons/icon-192x192.png",
                   data: { url: `/chat/video/${room.id}` },
-                })
+                }),
               );
             } catch {
               // Ignore individual push failures

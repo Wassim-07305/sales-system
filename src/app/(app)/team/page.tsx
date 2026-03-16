@@ -23,27 +23,33 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function TrendBadge({ delta, suffix = "" }: { delta: number; suffix?: string }) {
+function TrendBadge({
+  delta,
+  suffix = "",
+}: {
+  delta: number;
+  suffix?: string;
+}) {
   if (delta === 0) {
     return (
       <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
-        <Minus className="h-3 w-3" />
-        0{suffix}
+        <Minus className="h-3 w-3" />0{suffix}
       </span>
     );
   }
   if (delta > 0) {
     return (
       <span className="inline-flex items-center gap-0.5 text-xs text-emerald-500">
-        <ArrowUp className="h-3 w-3" />
-        +{delta}{suffix}
+        <ArrowUp className="h-3 w-3" />+{delta}
+        {suffix}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-0.5 text-xs text-red-500">
       <ArrowDown className="h-3 w-3" />
-      {delta}{suffix}
+      {delta}
+      {suffix}
     </span>
   );
 }
@@ -110,7 +116,10 @@ export default async function TeamPage() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.name} className="border-border/50 hover:shadow-md transition-all duration-200">
+            <Card
+              key={stat.name}
+              className="border-border/50 hover:shadow-md transition-all duration-200"
+            >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
@@ -120,10 +129,16 @@ export default async function TeamPage() {
                     <Icon className="h-4 w-4 text-brand" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                <p className="text-2xl font-bold tracking-tight">
+                  {stat.value}
+                </p>
                 <div className="mt-1.5 flex items-center">
                   <TrendBadge
-                    delta={stat.name === "CA généré total" ? Math.round(stat.trend) : stat.trend}
+                    delta={
+                      stat.name === "CA généré total"
+                        ? Math.round(stat.trend)
+                        : stat.trend
+                    }
                     suffix={stat.suffix}
                   />
                   <span className="text-[10px] text-muted-foreground ml-1.5">
@@ -153,8 +168,12 @@ export default async function TeamPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/50 bg-muted/10">
-                    <th className="text-left py-3.5 pl-6 pr-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Membre</th>
-                    <th className="text-left py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Rôle</th>
+                    <th className="text-left py-3.5 pl-6 pr-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Membre
+                    </th>
+                    <th className="text-left py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Rôle
+                    </th>
                     <th className="text-right py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Bookings
                     </th>
@@ -167,7 +186,9 @@ export default async function TeamPage() {
                     <th className="text-right py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                       Deals
                     </th>
-                    <th className="text-right py-3.5 pr-6 pl-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">CA</th>
+                    <th className="text-right py-3.5 pr-6 pl-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      CA
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
@@ -177,7 +198,10 @@ export default async function TeamPage() {
                       className="hover:bg-muted/30 transition-colors duration-150"
                     >
                       <td className="py-3.5 pl-6 pr-4">
-                        <Link href={`/contacts/${member.id}`} className="flex items-center gap-3 group">
+                        <Link
+                          href={`/contacts/${member.id}`}
+                          className="flex items-center gap-3 group"
+                        >
                           <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-xs ring-1 ring-brand/20 group-hover:ring-brand/40 transition-all">
                             {member.fullName?.charAt(0) || "?"}
                           </div>
@@ -187,7 +211,10 @@ export default async function TeamPage() {
                         </Link>
                       </td>
                       <td className="py-3.5 px-4">
-                        <Badge variant="outline" className="capitalize text-[11px] font-medium">
+                        <Badge
+                          variant="outline"
+                          className="capitalize text-[11px] font-medium"
+                        >
                           {member.role}
                         </Badge>
                       </td>

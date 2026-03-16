@@ -3,7 +3,9 @@ import { getSession } from "@/lib/actions/roleplay";
 import { createClient } from "@/lib/supabase/server";
 import { DebriefView } from "./debrief-view";
 
-interface Props { params: Promise<{ id: string }> }
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
 export default async function DebriefPage({ params }: Props) {
   const { id } = await params;

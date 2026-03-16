@@ -5,7 +5,9 @@ import { FunnelView } from "./funnel-view";
 
 export default async function FunnelPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const funnelData = await getFunnelData();

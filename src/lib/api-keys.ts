@@ -25,7 +25,9 @@ export async function getApiKey(key: string): Promise<string | null> {
 }
 
 // Get multiple keys at once
-export async function getApiKeys(keys: string[]): Promise<Record<string, string | null>> {
+export async function getApiKeys(
+  keys: string[],
+): Promise<Record<string, string | null>> {
   const result: Record<string, string | null> = {};
   for (const key of keys) {
     result[key] = await getApiKey(key);
@@ -34,9 +36,14 @@ export async function getApiKeys(keys: string[]): Promise<Record<string, string 
 }
 
 // Save an API key to org_settings (admin only)
-export async function saveApiKey(key: string, value: string): Promise<{ success: boolean; error?: string }> {
+export async function saveApiKey(
+  key: string,
+  value: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Non authentifié" };
 
   const { data: profile } = await supabase
@@ -51,7 +58,10 @@ export async function saveApiKey(key: string, value: string): Promise<{ success:
 
   const { error } = await supabase
     .from("org_settings")
-    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    .upsert(
+      { key, value, updated_at: new Date().toISOString() },
+      { onConflict: "key" },
+    );
 
   if (error) return { success: false, error: error.message };
   return { success: true };
@@ -60,7 +70,9 @@ export async function saveApiKey(key: string, value: string): Promise<{ success:
 // Delete an API key
 export async function deleteApiKey(key: string): Promise<{ success: boolean }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false };
 
   const { data: profile } = await supabase

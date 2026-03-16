@@ -75,6 +75,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
   {
+    label: "Agenda",
+    href: "/calendar",
+    icon: CalendarDays,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+  {
     label: "Contrats",
     href: "/contracts",
     icon: FileText,
@@ -359,7 +365,13 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Prospection",
     items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/prospecting/discovery", "/roleplay", "/scripts", "/automation"].includes(i.href),
+      [
+        "/prospecting",
+        "/prospecting/discovery",
+        "/roleplay",
+        "/scripts",
+        "/automation",
+      ].includes(i.href),
     ),
   },
   {

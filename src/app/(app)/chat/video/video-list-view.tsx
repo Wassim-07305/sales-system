@@ -52,21 +52,30 @@ function getStatusBadge(status: string) {
   switch (status) {
     case "live":
       return (
-        <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
+        <Badge
+          variant="outline"
+          className="bg-brand/10 text-brand border-brand/20"
+        >
           <Radio className="h-3 w-3 mr-1 animate-pulse" />
           En direct
         </Badge>
       );
     case "scheduled":
       return (
-        <Badge variant="outline" className="bg-muted/60 text-muted-foreground border-border/50">
+        <Badge
+          variant="outline"
+          className="bg-muted/60 text-muted-foreground border-border/50"
+        >
           <Clock className="h-3 w-3 mr-1" />
           Planifiée
         </Badge>
       );
     case "ended":
       return (
-        <Badge variant="outline" className="bg-muted/50 text-muted-foreground border-border/50">
+        <Badge
+          variant="outline"
+          className="bg-muted/50 text-muted-foreground border-border/50"
+        >
           Terminée
         </Badge>
       );
@@ -229,9 +238,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             {room.status === "ended" && (
               <>
                 <Button size="sm" variant="outline" asChild>
-                  <Link href={`/chat/video/${room.id}`}>
-                    Détails
-                  </Link>
+                  <Link href={`/chat/video/${room.id}`}>Détails</Link>
                 </Button>
                 <Button size="sm" variant="outline" asChild>
                   <Link href={`/chat/replays/${room.id}`}>
@@ -316,28 +323,46 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
 
       <Tabs defaultValue="scheduled" className="space-y-4">
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
-          <TabsTrigger value="live" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="live"
+            className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
             <Radio className="h-3.5 w-3.5" />
             En cours
             {live.length > 0 && (
-              <Badge variant="outline" className="ml-1 h-5 w-5 p-0 justify-center bg-brand/10 text-brand border-brand/20 text-[10px]">
+              <Badge
+                variant="outline"
+                className="ml-1 h-5 w-5 p-0 justify-center bg-brand/10 text-brand border-brand/20 text-[10px]"
+              >
                 {live.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="scheduled" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="scheduled"
+            className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
             <Clock className="h-3.5 w-3.5" />
             Planifiées
             {scheduled.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center text-[10px]">
+              <Badge
+                variant="secondary"
+                className="ml-1 h-5 w-5 p-0 justify-center text-[10px]"
+              >
                 {scheduled.length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="ended" className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="ended"
+            className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+          >
             Terminées
             {ended.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center text-[10px]">
+              <Badge
+                variant="secondary"
+                className="ml-1 h-5 w-5 p-0 justify-center text-[10px]"
+              >
                 {ended.length}
               </Badge>
             )}
@@ -352,7 +377,9 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                   <Video className="h-7 w-7 opacity-40" />
                 </div>
                 <p className="font-medium">Aucune visio en cours</p>
-                <p className="text-sm mt-1">Les sessions en direct apparaîtront ici</p>
+                <p className="text-sm mt-1">
+                  Les sessions en direct apparaîtront ici
+                </p>
               </CardContent>
             </Card>
           ) : (

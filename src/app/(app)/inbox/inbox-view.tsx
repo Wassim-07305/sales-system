@@ -8,11 +8,41 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Send, Mic, MicOff, Instagram, MessageSquare, Upload, Bot, Plus, X, Sparkles, Loader2, AlertTriangle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Search,
+  Send,
+  Mic,
+  MicOff,
+  Instagram,
+  MessageSquare,
+  Upload,
+  Bot,
+  Plus,
+  X,
+  Sparkles,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { sendMessage, createConversation, importConversation, generateQuickReplies } from "@/lib/actions/inbox";
+import {
+  sendMessage,
+  createConversation,
+  importConversation,
+  generateQuickReplies,
+} from "@/lib/actions/inbox";
 import { escalateToHuman } from "@/lib/actions/automation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -34,7 +64,12 @@ interface Conversation {
   platform: string;
   messages: DmMessage[];
   last_message_at: string | null;
-  prospect: { id: string; name: string; platform: string | null; status: string } | null;
+  prospect: {
+    id: string;
+    name: string;
+    platform: string | null;
+    status: string;
+  } | null;
 }
 
 interface Prospect {
@@ -44,12 +79,21 @@ interface Prospect {
   status: string;
 }
 
-export function InboxView({ conversations: initialConversations, prospects }: { conversations: Conversation[]; prospects: Prospect[] }) {
+export function InboxView({
+  conversations: initialConversations,
+  prospects,
+}: {
+  conversations: Conversation[];
+  prospects: Prospect[];
+}) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
+  const [conversations, setConversations] =
+    useState<Conversation[]>(initialConversations);
   const [search, setSearch] = useState("");
-  const [selectedConv, setSelectedConv] = useState<Conversation | null>(initialConversations[0] || null);
+  const [selectedConv, setSelectedConv] = useState<Conversation | null>(
+    initialConversations[0] || null,
+  );
   const [messageText, setMessageText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -66,7 +110,10 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
   }, []);
 
   useEffect(() => {
@@ -109,13 +156,14 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                 ? {
                     ...c,
                     messages: updated.messages || c.messages,
-                    last_message_at: updated.last_message_at ?? c.last_message_at,
+                    last_message_at:
+                      updated.last_message_at ?? c.last_message_at,
                   }
-                : c
-            )
+                : c,
+            ),
           );
           setTimeout(scrollToBottom, 100);
-        }
+        },
       )
       .subscribe();
 
@@ -138,7 +186,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
         () => {
           // A new conversation was created — refresh to get full data with prospect join
           router.refresh();
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -159,12 +207,13 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                 ? {
                     ...c,
                     messages: updated.messages || c.messages,
-                    last_message_at: updated.last_message_at ?? c.last_message_at,
+                    last_message_at:
+                      updated.last_message_at ?? c.last_message_at,
                   }
-                : c
-            )
+                : c,
+            ),
           );
-        }
+        },
       )
       .subscribe();
 
@@ -173,8 +222,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
     };
   }, [supabase, router]);
 
-  const filteredConvs = conversations.filter((c) =>
-    !search || c.prospect?.name.toLowerCase().includes(search.toLowerCase())
+  const filteredConvs = conversations.filter(
+    (c) =>
+      !search || c.prospect?.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   async function handleSend() {
@@ -220,7 +270,11 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   async function handleImport() {
     if (!importProspectId || !importText.trim()) return;
     const prospect = prospects.find((p) => p.id === importProspectId);
-    await importConversation(importProspectId, prospect?.platform || "instagram", importText);
+    await importConversation(
+      importProspectId,
+      prospect?.platform || "instagram",
+      importText,
+    );
     toast.success("Conversation importée");
     setImportDialogOpen(false);
     setImportText("");
@@ -230,7 +284,10 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   async function handleNewConversation() {
     if (!newConvProspectId) return;
     const prospect = prospects.find((p) => p.id === newConvProspectId);
-    await createConversation(newConvProspectId, prospect?.platform || "instagram");
+    await createConversation(
+      newConvProspectId,
+      prospect?.platform || "instagram",
+    );
     toast.success("Conversation créée");
     setNewConvDialogOpen(false);
     router.refresh();
@@ -242,7 +299,10 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
     setSuggestions([]);
     try {
       const msgs = selectedConv.messages || [];
-      const lastMessages = msgs.slice(-3).map((m) => `${m.sender}: ${m.content}`).join("\n");
+      const lastMessages = msgs
+        .slice(-3)
+        .map((m) => `${m.sender}: ${m.content}`)
+        .join("\n");
       const prospectName = selectedConv.prospect?.name || "le prospect";
       const result = await generateQuickReplies(lastMessages, prospectName);
       setSuggestions(result.suggestions);
@@ -254,7 +314,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   }
 
   async function handleVoiceAi() {
-    toast.info("Fonctionnalité Vocal IA en cours de développement — intégration ElevenLabs à venir.");
+    toast.info(
+      "Fonctionnalité Vocal IA en cours de développement — intégration ElevenLabs à venir.",
+    );
     setVoiceAiDialogOpen(false);
     setVoiceAiText("");
   }
@@ -262,9 +324,14 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   async function handleEscalate() {
     if (!selectedConv) return;
     try {
-      const result = await escalateToHuman(selectedConv.id, "Reponse complexe — intervention humaine requise");
+      const result = await escalateToHuman(
+        selectedConv.id,
+        "Reponse complexe — intervention humaine requise",
+      );
       if (result.success) {
-        toast.success("Conversation escaladee — notification envoyee au setter/manager");
+        toast.success(
+          "Conversation escaladee — notification envoyee au setter/manager",
+        );
       } else {
         toast.error(result.error || "Erreur d'escalade");
       }
@@ -277,11 +344,19 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
     <div className="space-y-6">
       <PageHeader title="Inbox" description="Conversations avec vos prospects">
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="rounded-xl font-medium" onClick={() => setImportDialogOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl font-medium"
+            onClick={() => setImportDialogOpen(true)}
+          >
             <Upload className="h-4 w-4 mr-2" />
             Importer
           </Button>
-          <Button onClick={() => setNewConvDialogOpen(true)} className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">
+          <Button
+            onClick={() => setNewConvDialogOpen(true)}
+            className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle conversation
           </Button>
@@ -290,11 +365,21 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
 
       <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-220px)] md:h-[calc(100dvh-200px)]">
         {/* Conversation list */}
-        <Card className={cn("flex flex-col overflow-hidden shadow-sm rounded-2xl border-border/50", selectedConv ? "hidden md:flex" : "flex")}>
+        <Card
+          className={cn(
+            "flex flex-col overflow-hidden shadow-sm rounded-2xl border-border/50",
+            selectedConv ? "hidden md:flex" : "flex",
+          )}
+        >
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Rechercher..." className="pl-9 h-9 rounded-xl" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input
+                placeholder="Rechercher..."
+                className="pl-9 h-9 rounded-xl"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -312,8 +397,13 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm truncate">{conv.prospect?.name || "Inconnu"}</span>
-                        <Badge variant="outline" className="text-[10px] shrink-0 ml-1">
+                        <span className="font-medium text-sm truncate">
+                          {conv.prospect?.name || "Inconnu"}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] shrink-0 ml-1"
+                        >
                           <Instagram className="h-2.5 w-2.5 mr-0.5" />
                           {conv.platform}
                         </Badge>
@@ -323,7 +413,10 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                       </p>
                       {conv.last_message_at && (
                         <p className="text-[10px] text-muted-foreground">
-                          {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true, locale: fr })}
+                          {formatDistanceToNow(new Date(conv.last_message_at), {
+                            addSuffix: true,
+                            locale: fr,
+                          })}
                         </p>
                       )}
                     </div>
@@ -343,7 +436,12 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
         </Card>
 
         {/* Messages area */}
-        <Card className={cn("flex flex-col overflow-hidden shadow-sm rounded-2xl border-border/50", !selectedConv && "hidden md:flex")}>
+        <Card
+          className={cn(
+            "flex flex-col overflow-hidden shadow-sm rounded-2xl border-border/50",
+            !selectedConv && "hidden md:flex",
+          )}
+        >
           {selectedConv ? (
             <>
               {/* Header */}
@@ -359,8 +457,12 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                     {selectedConv.prospect?.name?.charAt(0) || "?"}
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{selectedConv.prospect?.name || "Inconnu"}</p>
-                    <Badge variant="outline" className="text-[10px]">{selectedConv.platform}</Badge>
+                    <p className="font-medium text-sm">
+                      {selectedConv.prospect?.name || "Inconnu"}
+                    </p>
+                    <Badge variant="outline" className="text-[10px]">
+                      {selectedConv.platform}
+                    </Badge>
                   </div>
                 </div>
                 <Button
@@ -378,21 +480,34 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {(selectedConv.messages || []).map((msg, i) => {
-                  const isAiSent = msg.metadata?.source === "ai_auto_send" || msg.metadata?.source === "auto_relance";
+                  const isAiSent =
+                    msg.metadata?.source === "ai_auto_send" ||
+                    msg.metadata?.source === "auto_relance";
                   return (
-                    <div key={i} className={`flex ${msg.sender === "damien" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      key={i}
+                      className={`flex ${msg.sender === "damien" ? "justify-end" : "justify-start"}`}
+                    >
                       <div className="flex flex-col items-end gap-0.5">
                         {isAiSent && msg.sender === "damien" && (
-                          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 gap-0.5 text-[9px] px-1.5 py-0">
+                          <Badge
+                            variant="outline"
+                            className="bg-brand/10 text-brand border-brand/20 gap-0.5 text-[9px] px-1.5 py-0"
+                          >
                             <Bot className="h-2.5 w-2.5" />
-                            IA{msg.metadata?.step ? ` (${msg.metadata.step.toUpperCase()})` : ""}
+                            IA
+                            {msg.metadata?.step
+                              ? ` (${msg.metadata.step.toUpperCase()})`
+                              : ""}
                           </Badge>
                         )}
-                        <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                          msg.sender === "damien"
-                            ? "bg-brand text-brand-dark rounded-br-md"
-                            : "bg-muted rounded-bl-md"
-                        }`}>
+                        <div
+                          className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
+                            msg.sender === "damien"
+                              ? "bg-brand text-brand-dark rounded-br-md"
+                              : "bg-muted rounded-bl-md"
+                          }`}
+                        >
                           {msg.type === "voice" ? (
                             <div className="flex items-center gap-2">
                               <Mic className="h-4 w-4" />
@@ -401,8 +516,13 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                           ) : (
                             msg.content
                           )}
-                          <p className={`text-[10px] mt-1 ${msg.sender === "damien" ? "text-brand-dark/60" : "text-muted-foreground"}`}>
-                            {new Date(msg.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          <p
+                            className={`text-[10px] mt-1 ${msg.sender === "damien" ? "text-brand-dark/60" : "text-muted-foreground"}`}
+                          >
+                            {new Date(msg.timestamp).toLocaleTimeString(
+                              "fr-FR",
+                              { hour: "2-digit", minute: "2-digit" },
+                            )}
                           </p>
                         </div>
                       </div>
@@ -418,7 +538,10 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                   {suggestions.map((s, i) => (
                     <button
                       key={i}
-                      onClick={() => { setMessageText(s); setSuggestions([]); }}
+                      onClick={() => {
+                        setMessageText(s);
+                        setSuggestions([]);
+                      }}
                       className="text-xs bg-brand/10 text-brand-dark hover:bg-brand/20 rounded-full px-3 py-1.5 text-left max-w-[300px] truncate transition-colors"
                     >
                       {s}
@@ -434,7 +557,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                   className="flex-1"
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && !e.shiftKey && handleSend()
+                  }
                 />
                 <Button
                   size="sm"
@@ -443,26 +568,42 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                   disabled={loadingSuggestions}
                   title="Suggestions IA"
                 >
-                  {loadingSuggestions ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {loadingSuggestions ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={isRecording ? handleStopRecording : handleStartRecording}
+                  onClick={
+                    isRecording ? handleStopRecording : handleStartRecording
+                  }
                   className={isRecording ? "text-brand border-brand" : ""}
                 >
-                  {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  {isRecording ? (
+                    <MicOff className="h-4 w-4" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => toast.info("Vocal IA — intégration ElevenLabs à venir.")}
+                  onClick={() =>
+                    toast.info("Vocal IA — intégration ElevenLabs à venir.")
+                  }
                   title="Vocal IA (bientôt disponible)"
                   disabled
                 >
                   <Bot className="h-4 w-4" />
                 </Button>
-                <Button size="sm" onClick={handleSend} className="bg-brand text-brand-dark hover:bg-brand/90">
+                <Button
+                  size="sm"
+                  onClick={handleSend}
+                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
@@ -490,20 +631,40 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
           <div className="space-y-4">
             <div>
               <Label>Prospect</Label>
-              <Select value={importProspectId} onValueChange={setImportProspectId}>
-                <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Sélectionner un prospect" /></SelectTrigger>
+              <Select
+                value={importProspectId}
+                onValueChange={setImportProspectId}
+              >
+                <SelectTrigger className="h-11 rounded-xl">
+                  <SelectValue placeholder="Sélectionner un prospect" />
+                </SelectTrigger>
                 <SelectContent>
                   {prospects.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>Collez la conversation (alternance prospect/Damien par ligne)</Label>
-              <Textarea value={importText} onChange={(e) => setImportText(e.target.value)} rows={8} className="rounded-xl" placeholder="Salut, j'ai vu ton profil...&#10;Merci ! Oui je suis intéressé...&#10;..." />
+              <Label>
+                Collez la conversation (alternance prospect/Damien par ligne)
+              </Label>
+              <Textarea
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                rows={8}
+                className="rounded-xl"
+                placeholder="Salut, j'ai vu ton profil...&#10;Merci ! Oui je suis intéressé...&#10;..."
+              />
             </div>
-            <Button onClick={handleImport} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Importer</Button>
+            <Button
+              onClick={handleImport}
+              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+            >
+              Importer
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -517,16 +678,28 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
           <div className="space-y-4">
             <div>
               <Label>Prospect</Label>
-              <Select value={newConvProspectId} onValueChange={setNewConvProspectId}>
-                <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Sélectionner un prospect" /></SelectTrigger>
+              <Select
+                value={newConvProspectId}
+                onValueChange={setNewConvProspectId}
+              >
+                <SelectTrigger className="h-11 rounded-xl">
+                  <SelectValue placeholder="Sélectionner un prospect" />
+                </SelectTrigger>
                 <SelectContent>
                   {prospects.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name} ({p.platform})</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} ({p.platform})
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleNewConversation} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Créer</Button>
+            <Button
+              onClick={handleNewConversation}
+              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+            >
+              Créer
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -543,13 +716,29 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
             </p>
             <div>
               <Label>Message</Label>
-              <Textarea value={voiceAiText} onChange={(e) => setVoiceAiText(e.target.value)} rows={4} className="rounded-xl" placeholder="Salut ! Je voulais te proposer..." />
+              <Textarea
+                value={voiceAiText}
+                onChange={(e) => setVoiceAiText(e.target.value)}
+                rows={4}
+                className="rounded-xl"
+                placeholder="Salut ! Je voulais te proposer..."
+              />
             </div>
             <div>
               <Label>Heure d&apos;envoi programmé</Label>
-              <Input type="datetime-local" value={voiceAiSchedule} onChange={(e) => setVoiceAiSchedule(e.target.value)} className="h-11 rounded-xl" />
+              <Input
+                type="datetime-local"
+                value={voiceAiSchedule}
+                onChange={(e) => setVoiceAiSchedule(e.target.value)}
+                className="h-11 rounded-xl"
+              />
             </div>
-            <Button onClick={handleVoiceAi} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Programmer le vocal</Button>
+            <Button
+              onClick={handleVoiceAi}
+              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+            >
+              Programmer le vocal
+            </Button>
             <p className="text-xs text-muted-foreground text-center">
               L&apos;intégration ElevenLabs sera activée prochainement.
             </p>

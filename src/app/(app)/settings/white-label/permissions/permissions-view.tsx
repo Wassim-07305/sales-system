@@ -105,19 +105,15 @@ const MODULES: ModuleInfo[] = [
   },
 ];
 
-export function PermissionsView({
-  permissions,
-}: {
-  permissions: string[];
-}) {
+export function PermissionsView({ permissions }: { permissions: string[] }) {
   const [isPending, startTransition] = useTransition();
   const [enabledModules, setEnabledModules] = useState<string[]>(
-    permissions || []
+    permissions || [],
   );
 
   function toggleModule(key: string) {
     setEnabledModules((prev) =>
-      prev.includes(key) ? prev.filter((m) => m !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((m) => m !== key) : [...prev, key],
     );
   }
 

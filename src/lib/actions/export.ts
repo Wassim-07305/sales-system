@@ -106,7 +106,7 @@ export async function getExportColumns(type: string): Promise<ExportColumn[]> {
 
 export async function getExportableData(
   type: ExportType,
-  filters?: ExportFilters
+  filters?: ExportFilters,
 ): Promise<Record<string, unknown>[]> {
   const supabase = await createClient();
   const {

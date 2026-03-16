@@ -73,9 +73,7 @@ function buildQuiz(nodes: ScriptNode[], edges: ScriptEdge[]): QuizQuestion[] {
   const orderedNodes = orderNodesByFlow(nodes, edges);
 
   // Build questions from each node
-  const allLabels = orderedNodes.map(
-    (n) => n.data?.label || "Sans titre"
-  );
+  const allLabels = orderedNodes.map((n) => n.data?.label || "Sans titre");
 
   return orderedNodes.map((node, idx) => {
     const label = node.data?.label || "Sans titre";
@@ -110,7 +108,10 @@ function buildQuiz(nodes: ScriptNode[], edges: ScriptEdge[]): QuizQuestion[] {
   });
 }
 
-function orderNodesByFlow(nodes: ScriptNode[], edges: ScriptEdge[]): ScriptNode[] {
+function orderNodesByFlow(
+  nodes: ScriptNode[],
+  edges: ScriptEdge[],
+): ScriptNode[] {
   if (nodes.length === 0) return [];
 
   // Build adjacency map
@@ -193,7 +194,8 @@ export function TrainingSession({
   const nodes = (script.nodes || []) as ScriptNode[];
   const edges = (script.edges || []) as ScriptEdge[];
 
-  const bestScore = history.length > 0 ? Math.max(...history.map((h) => h.score)) : null;
+  const bestScore =
+    history.length > 0 ? Math.max(...history.map((h) => h.score)) : null;
 
   // Timer
   useEffect(() => {
@@ -223,7 +225,7 @@ export function TrainingSession({
       setAnswers((prev) => new Map(prev).set(currentIndex, option));
       setShowFeedback(true);
     },
-    [currentIndex, showFeedback]
+    [currentIndex, showFeedback],
   );
 
   const handleNext = useCallback(() => {
@@ -239,10 +241,11 @@ export function TrainingSession({
 
   // Compute results
   const correctCount = Array.from(answers.entries()).filter(
-    ([idx, answer]) => questions[idx]?.correctAnswer === answer
+    ([idx, answer]) => questions[idx]?.correctAnswer === answer,
   ).length;
   const totalQuestions = questions.length;
-  const scorePercent = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+  const scorePercent =
+    totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const missedNodes = Array.from(answers.entries())
     .filter(([idx, answer]) => questions[idx]?.correctAnswer !== answer)
     .map(([idx]) => questions[idx]?.nodeId)
@@ -267,12 +270,18 @@ export function TrainingSession({
         feedback,
       });
       toast.success("Résultat sauvegardé", {
-        style: { background: "#14080e", border: "1px solid rgba(255,255,255,0.1)" },
+        style: {
+          background: "#14080e",
+          border: "1px solid rgba(255,255,255,0.1)",
+        },
       });
       router.refresh();
     } catch {
       toast.error("Erreur lors de la sauvegarde", {
-        style: { background: "#14080e", border: "1px solid rgba(255,255,255,0.1)" },
+        style: {
+          background: "#14080e",
+          border: "1px solid rgba(255,255,255,0.1)",
+        },
       });
     } finally {
       setSaving(false);
@@ -306,7 +315,9 @@ export function TrainingSession({
               <div className="mx-auto h-14 w-14 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mb-2">
                 <Brain className="h-7 w-7 text-brand" />
               </div>
-              <CardTitle className="text-xl">Prêt pour l&apos;entraînement ?</CardTitle>
+              <CardTitle className="text-xl">
+                Prêt pour l&apos;entraînement ?
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {script.description && (
@@ -331,8 +342,8 @@ export function TrainingSession({
                 )}
               </div>
               <p className="text-xs text-muted-foreground text-center">
-                Parcourez le script noeud par noeud. Pour chaque étape, choisissez la bonne
-                réponse parmi les options proposées.
+                Parcourez le script noeud par noeud. Pour chaque étape,
+                choisissez la bonne réponse parmi les options proposées.
               </p>
               <div className="flex justify-center pt-2">
                 <Button
@@ -356,7 +367,8 @@ export function TrainingSession({
     const question = questions[currentIndex];
     const selectedAnswer = answers.get(currentIndex);
     const isCorrect = selectedAnswer === question.correctAnswer;
-    const progressPercent = ((currentIndex + (showFeedback ? 1 : 0)) / totalQuestions) * 100;
+    const progressPercent =
+      ((currentIndex + (showFeedback ? 1 : 0)) / totalQuestions) * 100;
 
     return (
       <div>
@@ -366,7 +378,10 @@ export function TrainingSession({
               <Timer className="h-4 w-4" />
               {formatTime(elapsedSeconds)}
             </div>
-            <Badge variant="outline" className="border-border/50 text-[11px] font-medium uppercase tracking-wider">
+            <Badge
+              variant="outline"
+              className="border-border/50 text-[11px] font-medium uppercase tracking-wider"
+            >
               {currentIndex + 1} / {totalQuestions}
             </Badge>
           </div>
@@ -394,8 +409,7 @@ export function TrainingSession({
 
                 if (showFeedback) {
                   if (option === question.correctAnswer) {
-                    optionStyle =
-                      "border-brand/60 bg-brand/10 cursor-default";
+                    optionStyle = "border-brand/60 bg-brand/10 cursor-default";
                   } else if (option === selectedAnswer && !isCorrect) {
                     optionStyle =
                       "border-foreground/40 bg-foreground/5 cursor-default";
@@ -473,8 +487,8 @@ export function TrainingSession({
                 scorePercent >= 80
                   ? "bg-brand/10 ring-brand/20"
                   : scorePercent >= 50
-                  ? "bg-muted/60 ring-muted-foreground/20"
-                  : "bg-muted/40 ring-muted-foreground/20"
+                    ? "bg-muted/60 ring-muted-foreground/20"
+                    : "bg-muted/40 ring-muted-foreground/20"
               }`}
             >
               {scorePercent >= 80 ? (
@@ -506,7 +520,9 @@ export function TrainingSession({
         {/* Detailed Answers */}
         <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
           <CardHeader>
-            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Détail des réponses</CardTitle>
+            <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Détail des réponses
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {questions.map((q, idx) => {

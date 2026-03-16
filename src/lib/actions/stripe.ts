@@ -11,7 +11,9 @@ import { getApiKey } from "@/lib/api-keys";
  */
 export async function createCheckoutSession(planId: PlanId) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const plan = PLANS[planId];
@@ -65,7 +67,9 @@ export async function createCheckoutSession(planId: PlanId) {
  */
 export async function createPortalSession() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: profile } = await supabase
@@ -94,7 +98,9 @@ export async function createPortalSession() {
  */
 export async function createPaymentCheckout(installmentId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
   const { data: installment } = await supabase
@@ -242,30 +248,60 @@ export async function getStripeRevenueSummary(): Promise<StripeRevenueSummary> {
         limit: "100",
       });
 
-      const revenueThisMonth = (chargesThisMonth?.data || []).reduce(
-        (sum: number, c: { amount: number }) => sum + c.amount,
-        0
-      ) / 100;
+      const revenueThisMonth =
+        (chargesThisMonth?.data || []).reduce(
+          (sum: number, c: { amount: number }) => sum + c.amount,
+          0,
+        ) / 100;
 
-      const revenueLastMonth = (chargesLastMonth?.data || []).reduce(
-        (sum: number, c: { amount: number }) => sum + c.amount,
-        0
-      ) / 100;
+      const revenueLastMonth =
+        (chargesLastMonth?.data || []).reduce(
+          (sum: number, c: { amount: number }) => sum + c.amount,
+          0,
+        ) / 100;
 
       // MRR = sum of all active subscription monthly amounts
       const mrr = (subscriptions?.data || []).reduce(
-        (sum: number, sub: { items: { data: { price: { unit_amount: number; recurring: { interval: string; interval_count: number } } }[] } }) => {
+        (
+          sum: number,
+          sub: {
+            items: {
+              data: {
+                price: {
+                  unit_amount: number;
+                  recurring: { interval: string; interval_count: number };
+                };
+              }[];
+            };
+          },
+        ) => {
           const items = sub.items?.data || [];
-          return sum + items.reduce((s: number, item: { price: { unit_amount: number; recurring: { interval: string; interval_count: number } } }) => {
-            const amount = (item.price?.unit_amount || 0) / 100;
-            const interval = item.price?.recurring?.interval;
-            const intervalCount = item.price?.recurring?.interval_count || 1;
-            if (interval === "year") return s + amount / (12 * intervalCount);
-            if (interval === "month") return s + amount / intervalCount;
-            return s + amount;
-          }, 0);
+          return (
+            sum +
+            items.reduce(
+              (
+                s: number,
+                item: {
+                  price: {
+                    unit_amount: number;
+                    recurring: { interval: string; interval_count: number };
+                  };
+                },
+              ) => {
+                const amount = (item.price?.unit_amount || 0) / 100;
+                const interval = item.price?.recurring?.interval;
+                const intervalCount =
+                  item.price?.recurring?.interval_count || 1;
+                if (interval === "year")
+                  return s + amount / (12 * intervalCount);
+                if (interval === "month") return s + amount / intervalCount;
+                return s + amount;
+              },
+              0,
+            )
+          );
         },
-        0
+        0,
       );
 
       const growthRate =
@@ -287,9 +323,17 @@ export async function getStripeRevenueSummary(): Promise<StripeRevenueSummary> {
 
   // Fallback: use Supabase deals data
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    return { mrr: 0, revenueThisMonth: 0, revenueLastMonth: 0, growthRate: 0, source: "local" };
+    return {
+      mrr: 0,
+      revenueThisMonth: 0,
+      revenueLastMonth: 0,
+      growthRate: 0,
+      source: "local",
+    };
   }
 
   const { data: stages } = await supabase
@@ -304,7 +348,9 @@ export async function getStripeRevenueSummary(): Promise<StripeRevenueSummary> {
     .select("value, created_at, stage_id");
 
   const allDeals = deals || [];
-  const signedDeals = allDeals.filter((d) => signedStageIds.includes(d.stage_id));
+  const signedDeals = allDeals.filter((d) =>
+    signedStageIds.includes(d.stage_id),
+  );
 
   const thisMonthISO = startOfThisMonth.toISOString();
   const lastMonthISO = startOfLastMonth.toISOString();
@@ -350,7 +396,7 @@ export interface StripeRecentPayment {
  * Falls back to local invoices/installments data.
  */
 export async function getStripeRecentPayments(
-  limit = 10
+  limit = 10,
 ): Promise<StripeRecentPayment[]> {
   const key = await getStripeKey();
   if (key) {
@@ -361,14 +407,16 @@ export async function getStripeRecentPayments(
       });
 
       if (data?.data) {
-        return (data.data as {
-          id: string;
-          amount: number;
-          currency: string;
-          description: string | null;
-          created: number;
-          billing_details?: { email?: string };
-        }[]).map((charge) => ({
+        return (
+          data.data as {
+            id: string;
+            amount: number;
+            currency: string;
+            description: string | null;
+            created: number;
+            billing_details?: { email?: string };
+          }[]
+        ).map((charge) => ({
           id: charge.id,
           amount: charge.amount / 100,
           currency: charge.currency || "eur",
@@ -385,12 +433,16 @@ export async function getStripeRecentPayments(
 
   // Fallback: recent paid installments
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data: installments } = await supabase
     .from("payment_installments")
-    .select("id, amount, due_date, contract:contracts(id, client:profiles(email))")
+    .select(
+      "id, amount, due_date, contract:contracts(id, client:profiles(email))",
+    )
     .eq("status", "paid")
     .order("due_date", { ascending: false })
     .limit(limit);
@@ -451,7 +503,9 @@ export async function getStripeSubscriptionStats(): Promise<StripeSubscriptionSt
       });
 
       return {
-        activeCount: active?.data ? (active.total_count ?? active.data.length) : 0,
+        activeCount: active?.data
+          ? (active.total_count ?? active.data.length)
+          : 0,
         newThisMonth: newSubs?.data?.length || 0,
         churnedThisMonth: canceled?.data?.length || 0,
         source: "stripe",
@@ -463,9 +517,16 @@ export async function getStripeSubscriptionStats(): Promise<StripeSubscriptionSt
 
   // Fallback: use contracts table
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    return { activeCount: 0, newThisMonth: 0, churnedThisMonth: 0, source: "local" };
+    return {
+      activeCount: 0,
+      newThisMonth: 0,
+      churnedThisMonth: 0,
+      source: "local",
+    };
   }
 
   const { data: contracts } = await supabase
@@ -475,12 +536,16 @@ export async function getStripeSubscriptionStats(): Promise<StripeSubscriptionSt
   const all = contracts || [];
   const monthISO = startOfMonth.toISOString();
 
-  const activeCount = all.filter((c) => c.status === "signed" || c.status === "active").length;
+  const activeCount = all.filter(
+    (c) => c.status === "signed" || c.status === "active",
+  ).length;
   const newThisMonth = all.filter(
-    (c) => (c.status === "signed" || c.status === "active") && c.created_at >= monthISO
+    (c) =>
+      (c.status === "signed" || c.status === "active") &&
+      c.created_at >= monthISO,
   ).length;
   const churnedThisMonth = all.filter(
-    (c) => c.status === "cancelled" && c.created_at >= monthISO
+    (c) => c.status === "cancelled" && c.created_at >= monthISO,
   ).length;
 
   return { activeCount, newThisMonth, churnedThisMonth, source: "local" };
@@ -498,7 +563,9 @@ export async function isStripeConfigured(): Promise<boolean> {
  */
 export async function getSubscriptionStatus() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data: profile } = await supabase
@@ -517,14 +584,20 @@ export async function getSubscriptionStatus() {
   }
 
   try {
-    const subscription = await stripe.subscriptions.retrieve(
-      profile.stripe_subscription_id
-    ) as unknown as { status: string; current_period_end: number; cancel_at_period_end: boolean };
+    const subscription = (await stripe.subscriptions.retrieve(
+      profile.stripe_subscription_id,
+    )) as unknown as {
+      status: string;
+      current_period_end: number;
+      cancel_at_period_end: boolean;
+    };
 
     return {
       tier: profile.subscription_tier || "free",
       status: subscription.status,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+      currentPeriodEnd: new Date(
+        subscription.current_period_end * 1000,
+      ).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     };
   } catch {

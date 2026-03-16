@@ -5,7 +5,9 @@ import { ResourcesView } from "./resources-view";
 
 export default async function ResourcesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const [resources, categories] = await Promise.all([

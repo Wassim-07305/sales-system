@@ -29,11 +29,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import {
-  addQuickNote,
-  getRecentDeals,
-  searchDeals,
-} from "@/lib/actions/crm";
+import { addQuickNote, getRecentDeals, searchDeals } from "@/lib/actions/crm";
 
 type NoteType = "note" | "call" | "email" | "meeting" | "task";
 
@@ -52,7 +48,11 @@ function getContactName(contact: Deal["contact"]): string | null {
   return contact.full_name;
 }
 
-const NOTE_TYPES: { value: NoteType; label: string; icon: typeof StickyNote }[] = [
+const NOTE_TYPES: {
+  value: NoteType;
+  label: string;
+  icon: typeof StickyNote;
+}[] = [
   { value: "note", label: "Note", icon: StickyNote },
   { value: "call", label: "Appel", icon: Phone },
   { value: "email", label: "Email", icon: Mail },
@@ -75,11 +75,18 @@ export function QuickNoteModal({
 }: QuickNoteModalProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [step, setStep] = useState<"select" | "write">(defaultDealId ? "write" : "select");
+  const [step, setStep] = useState<"select" | "write">(
+    defaultDealId ? "write" : "select",
+  );
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(
     defaultDealId && defaultDealTitle
-      ? { id: defaultDealId, title: defaultDealTitle, value: null, contact: null }
-      : null
+      ? {
+          id: defaultDealId,
+          title: defaultDealTitle,
+          value: null,
+          contact: null,
+        }
+      : null,
   );
   const [deals, setDeals] = useState<Deal[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,8 +148,13 @@ export function QuickNoteModal({
     setStep(defaultDealId ? "write" : "select");
     setSelectedDeal(
       defaultDealId && defaultDealTitle
-        ? { id: defaultDealId, title: defaultDealTitle, value: null, contact: null }
-        : null
+        ? {
+            id: defaultDealId,
+            title: defaultDealTitle,
+            value: null,
+            contact: null,
+          }
+        : null,
     );
     setSearchQuery("");
     setNoteType("note");
@@ -164,7 +176,9 @@ export function QuickNoteModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon className="h-5 w-5 text-brand" />
-            {step === "select" ? "Selectionner un deal" : "Ajouter une note rapide"}
+            {step === "select"
+              ? "Selectionner un deal"
+              : "Ajouter une note rapide"}
           </DialogTitle>
         </DialogHeader>
 
@@ -219,7 +233,9 @@ export function QuickNoteModal({
               <div>
                 <p className="font-medium">{selectedDeal?.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {(selectedDeal?.contact ? getContactName(selectedDeal.contact) : null) || "Deal selectionne"}
+                  {(selectedDeal?.contact
+                    ? getContactName(selectedDeal.contact)
+                    : null) || "Deal selectionne"}
                 </p>
               </div>
               {!defaultDealId && (
@@ -243,7 +259,9 @@ export function QuickNoteModal({
                     variant={noteType === type.value ? "default" : "outline"}
                     size="sm"
                     onClick={() => setNoteType(type.value)}
-                    className={noteType === type.value ? "bg-brand text-brand-dark" : ""}
+                    className={
+                      noteType === type.value ? "bg-brand text-brand-dark" : ""
+                    }
                   >
                     <TypeIcon className="h-3.5 w-3.5 mr-1.5" />
                     {type.label}

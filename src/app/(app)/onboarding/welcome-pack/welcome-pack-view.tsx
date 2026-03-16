@@ -49,7 +49,10 @@ interface Props {
   data: WelcomePackData;
 }
 
-const colorCodeConfig: Record<string, { label: string; className: string; bgGradient: string }> = {
+const colorCodeConfig: Record<
+  string,
+  { label: string; className: string; bgGradient: string }
+> = {
   green: {
     label: "Excellent",
     className: "bg-green-500 text-white",
@@ -97,7 +100,7 @@ export function WelcomePackView({ data }: Props) {
         className={cn(
           "relative rounded-2xl p-8 md:p-10 mb-8 overflow-hidden bg-gradient-to-br",
           colorConfig.bgGradient,
-          "border border-brand/20 shadow-sm"
+          "border border-brand/20 shadow-sm",
         )}
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-brand/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
@@ -109,25 +112,34 @@ export function WelcomePackView({ data }: Props) {
             <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-brand/15">
               <Sparkles className="h-4 w-4 text-brand" />
             </div>
-            <span className="text-sm font-semibold text-brand tracking-wide">Welcome Pack</span>
+            <span className="text-sm font-semibold text-brand tracking-wide">
+              Welcome Pack
+            </span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
             Bienvenue, {firstName} !
           </h1>
           <p className="text-muted-foreground mb-5 max-w-lg leading-relaxed">
-            Votre espace personnalis&eacute; est pr&ecirc;t. D&eacute;couvrez vos ressources,
-            conseils et prochaines &eacute;tapes pour r&eacute;ussir.
+            Votre espace personnalis&eacute; est pr&ecirc;t. D&eacute;couvrez
+            vos ressources, conseils et prochaines &eacute;tapes pour
+            r&eacute;ussir.
           </p>
 
           <div className="flex items-center gap-3 flex-wrap">
             {profile?.role && (
-              <Badge variant="outline" className="text-xs px-3 py-1 rounded-lg border-brand/30 bg-white/50 backdrop-blur-sm">
+              <Badge
+                variant="outline"
+                className="text-xs px-3 py-1 rounded-lg border-brand/30 bg-white/50 backdrop-blur-sm"
+              >
                 {roleLabels[profile.role] || profile.role}
               </Badge>
             )}
             {profile?.company && (
-              <Badge variant="outline" className="text-xs px-3 py-1 rounded-lg border-brand/30 bg-white/50 backdrop-blur-sm">
+              <Badge
+                variant="outline"
+                className="text-xs px-3 py-1 rounded-lg border-brand/30 bg-white/50 backdrop-blur-sm"
+              >
                 {profile.company}
               </Badge>
             )}
@@ -145,15 +157,25 @@ export function WelcomePackView({ data }: Props) {
                   <Trophy className="h-7 w-7 text-brand" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-brand-dark">R&eacute;sultat de votre quiz</h3>
+                  <h3 className="font-semibold text-brand-dark">
+                    R&eacute;sultat de votre quiz
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Votre niveau initial a &eacute;t&eacute; &eacute;valu&eacute;
+                    Votre niveau initial a &eacute;t&eacute;
+                    &eacute;valu&eacute;
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-brand-dark">{quizResult.score}%</span>
-                <Badge className={cn("text-sm px-3 py-1 rounded-lg", colorConfig.className)}>
+                <span className="text-3xl font-bold text-brand-dark">
+                  {quizResult.score}%
+                </span>
+                <Badge
+                  className={cn(
+                    "text-sm px-3 py-1 rounded-lg",
+                    colorConfig.className,
+                  )}
+                >
                   {colorConfig.label}
                 </Badge>
               </div>
@@ -169,11 +191,16 @@ export function WelcomePackView({ data }: Props) {
             <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-brand/10">
               <Lightbulb className="h-5 w-5 text-brand" />
             </div>
-            <h3 className="font-semibold text-brand-dark">Conseils personnalis&eacute;s</h3>
+            <h3 className="font-semibold text-brand-dark">
+              Conseils personnalis&eacute;s
+            </h3>
           </div>
           <div className="space-y-3.5">
             {personalizedTips.map((tip, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-brand/5 hover:bg-brand/8 transition-colors duration-200">
+              <div
+                key={i}
+                className="flex items-start gap-3 p-3 rounded-xl bg-brand/5 hover:bg-brand/8 transition-colors duration-200"
+              >
                 <CheckCircle2 className="h-5 w-5 text-brand shrink-0 mt-0.5" />
                 <p className="text-sm leading-relaxed">{tip}</p>
               </div>
@@ -186,9 +213,13 @@ export function WelcomePackView({ data }: Props) {
       {pack && (
         <Card className="mb-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-brand-dark mb-1">{pack.title || "Ressources"}</h3>
+            <h3 className="font-semibold text-brand-dark mb-1">
+              {pack.title || "Ressources"}
+            </h3>
             {pack.description && (
-              <p className="text-sm text-muted-foreground mb-5">{pack.description}</p>
+              <p className="text-sm text-muted-foreground mb-5">
+                {pack.description}
+              </p>
             )}
 
             {pack.resources && pack.resources.length > 0 ? (
@@ -202,10 +233,14 @@ export function WelcomePackView({ data }: Props) {
                     className="flex items-center gap-4 p-4 rounded-xl border border-border/60 hover:border-brand/50 hover:bg-brand/5 hover:shadow-sm transition-all duration-200 group"
                   >
                     <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-brand/10 shrink-0 group-hover:bg-brand/15 transition-colors duration-200">
-                      {resourceIcons[resource.type] || <FileText className="h-4 w-4 text-brand" />}
+                      {resourceIcons[resource.type] || (
+                        <FileText className="h-4 w-4 text-brand" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{resource.title}</p>
+                      <p className="text-sm font-medium truncate">
+                        {resource.title}
+                      </p>
                       {resource.description && (
                         <p className="text-xs text-muted-foreground truncate mt-0.5">
                           {resource.description}
@@ -236,10 +271,12 @@ export function WelcomePackView({ data }: Props) {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand/10 mb-4">
                 <BookOpen className="h-7 w-7 text-brand" />
               </div>
-              <h3 className="font-semibold text-brand-dark mb-2">Ressources en pr&eacute;paration</h3>
+              <h3 className="font-semibold text-brand-dark mb-2">
+                Ressources en pr&eacute;paration
+              </h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                Votre pack de bienvenue est en cours de pr&eacute;paration.
-                En attendant, explorez les actions ci-dessous.
+                Votre pack de bienvenue est en cours de pr&eacute;paration. En
+                attendant, explorez les actions ci-dessous.
               </p>
             </div>
           </CardContent>
@@ -266,7 +303,9 @@ export function WelcomePackView({ data }: Props) {
           <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-brand/10">
             <Users className="h-5 w-5 text-brand" />
           </div>
-          <span className="text-sm font-semibold">Explorer la communaut&eacute;</span>
+          <span className="text-sm font-semibold">
+            Explorer la communaut&eacute;
+          </span>
         </Button>
 
         <Button

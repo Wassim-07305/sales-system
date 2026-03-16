@@ -88,12 +88,19 @@ export function ReportsView({
         showUpRate: acc.showUpRate + s.showUpRate,
         closingContribution: acc.closingContribution + s.closingContribution,
       }),
-      { dmsSent: 0, responses: 0, bookings: 0, showUpRate: 0, closingContribution: 0 }
+      {
+        dmsSent: 0,
+        responses: 0,
+        bookings: 0,
+        showUpRate: 0,
+        closingContribution: 0,
+      },
     );
     const count = filtered.length || 1;
     return {
       ...total,
-      responseRate: total.dmsSent > 0 ? (total.responses / total.dmsSent) * 100 : 0,
+      responseRate:
+        total.dmsSent > 0 ? (total.responses / total.dmsSent) * 100 : 0,
       avgShowUpRate: total.showUpRate / count,
     };
   }, [filtered]);
@@ -110,9 +117,15 @@ export function ReportsView({
       return [
         { axis: "DMs", value: Math.round((s.dmsSent / maxDMs) * 100) },
         { axis: "Taux réponse", value: Math.round(s.responseRate) },
-        { axis: "Bookings", value: Math.round((s.bookings / maxBookings) * 100) },
+        {
+          axis: "Bookings",
+          value: Math.round((s.bookings / maxBookings) * 100),
+        },
         { axis: "Show-up", value: Math.round(s.showUpRate) },
-        { axis: "Contribution CA", value: Math.round((s.closingContribution / maxContrib) * 100) },
+        {
+          axis: "Contribution CA",
+          value: Math.round((s.closingContribution / maxContrib) * 100),
+        },
       ];
     }
     // For "all", use average normalized
@@ -128,7 +141,10 @@ export function ReportsView({
       { axis: "Taux réponse", value: Math.round(avg.resp) },
       { axis: "Bookings", value: Math.round((avg.book / maxBookings) * 100) },
       { axis: "Show-up", value: Math.round(avg.show) },
-      { axis: "Contribution CA", value: Math.round((avg.contrib / maxContrib) * 100) },
+      {
+        axis: "Contribution CA",
+        value: Math.round((avg.contrib / maxContrib) * 100),
+      },
     ];
   }, [data, filtered, totals]);
 
@@ -201,15 +217,22 @@ export function ReportsView({
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+            <Card
+              key={stat.title}
+              className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
+            >
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
                     <Icon className="h-5 w-5 text-brand" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
-                <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">{stat.title}</p>
+                <p className="text-2xl font-bold tracking-tight">
+                  {stat.value}
+                </p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                  {stat.title}
+                </p>
               </CardContent>
             </Card>
           );
@@ -221,7 +244,9 @@ export function ReportsView({
         {/* Radar Chart */}
         <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Forces du setter</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              Forces du setter
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -251,14 +276,19 @@ export function ReportsView({
         {/* Weekly Comparison */}
         <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Comparaison hebdomadaire (Bookings)</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              Comparaison hebdomadaire (Bookings)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {weeklyComparison.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyComparison}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                    />
                     <XAxis dataKey="name" />
                     <YAxis allowDecimals={false} />
                     <Tooltip />
@@ -288,7 +318,9 @@ export function ReportsView({
       {/* Details Table */}
       <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Détails par setter</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Détails par setter
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {filtered.length === 0 ? (
@@ -297,28 +329,51 @@ export function ReportsView({
                 <Users className="h-7 w-7 opacity-40" />
               </div>
               <p className="font-medium">Aucun setter trouvé</p>
-              <p className="text-sm mt-1">Les rapports setter apparaîtront ici.</p>
+              <p className="text-sm mt-1">
+                Les rapports setter apparaîtront ici.
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Setter</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">DMs</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Réponses</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Taux rép.</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Bookings</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Show-up</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA contribué</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Setter
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      DMs
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Réponses
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Taux rép.
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Bookings
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Show-up
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      CA contribué
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((setter) => (
-                    <tr key={setter.setterId} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr
+                      key={setter.setterId}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
                       <td className="p-4 font-medium">{setter.setterName}</td>
-                      <td className="p-4 text-right">{setter.dmsSent.toLocaleString("fr-FR")}</td>
-                      <td className="p-4 text-right">{setter.responses.toLocaleString("fr-FR")}</td>
+                      <td className="p-4 text-right">
+                        {setter.dmsSent.toLocaleString("fr-FR")}
+                      </td>
+                      <td className="p-4 text-right">
+                        {setter.responses.toLocaleString("fr-FR")}
+                      </td>
                       <td className="p-4 text-right">
                         <span
                           className={cn(
@@ -327,16 +382,19 @@ export function ReportsView({
                               ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : setter.responseRate >= 10
                                 ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                : "bg-red-500/10 text-red-600 border-red-500/20"
+                                : "bg-red-500/10 text-red-600 border-red-500/20",
                           )}
                         >
                           {setter.responseRate.toFixed(1)}%
                         </span>
                       </td>
                       <td className="p-4 text-right">{setter.bookings}</td>
-                      <td className="p-4 text-right">{setter.showUpRate.toFixed(0)}%</td>
+                      <td className="p-4 text-right">
+                        {setter.showUpRate.toFixed(0)}%
+                      </td>
                       <td className="p-4 text-right font-medium">
-                        {setter.closingContribution.toLocaleString("fr-FR")} &euro;
+                        {setter.closingContribution.toLocaleString("fr-FR")}{" "}
+                        &euro;
                       </td>
                     </tr>
                   ))}

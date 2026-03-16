@@ -31,7 +31,10 @@ export default function BookingsLoading() {
         {Array.from({ length: 5 }).map((_, week) => (
           <div key={week} className="grid grid-cols-7 border-b last:border-b-0">
             {Array.from({ length: 7 }).map((_, day) => (
-              <div key={day} className="p-2 min-h-[100px] border-r last:border-r-0">
+              <div
+                key={day}
+                className="p-2 min-h-[100px] border-r last:border-r-0"
+              >
                 <Skeleton className="h-4 w-6 mb-2 rounded-lg" />
                 {Math.random() > 0.7 && (
                   <Skeleton className="h-8 w-full rounded-lg" />

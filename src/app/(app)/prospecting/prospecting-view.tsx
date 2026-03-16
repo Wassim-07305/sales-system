@@ -7,18 +7,59 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
-  Plus, Search, Send, MessageCircle, Target, Linkedin, Instagram,
-  RefreshCw, Loader2, SlidersHorizontal, ChevronDown, ChevronUp,
-  X, Flame, Thermometer, Snowflake, Users, TrendingUp, ExternalLink, Eye,
-  Bot, Clock3, CheckCircle2, XCircle, RotateCcw,
+  Plus,
+  Search,
+  Send,
+  MessageCircle,
+  Target,
+  Linkedin,
+  Instagram,
+  RefreshCw,
+  Loader2,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Flame,
+  Thermometer,
+  Snowflake,
+  Users,
+  TrendingUp,
+  ExternalLink,
+  Eye,
+  Bot,
+  Clock3,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
 } from "lucide-react";
-import { addProspect, updateProspectStatus, incrementDmsSent } from "@/lib/actions/prospecting";
+import {
+  addProspect,
+  updateProspectStatus,
+  incrementDmsSent,
+} from "@/lib/actions/prospecting";
 import { recalculateAllScores } from "@/lib/actions/hub-setting";
-import { sendAIMessage, createRelanceWorkflow, cancelRelance } from "@/lib/actions/automation";
+import {
+  sendAIMessage,
+  createRelanceWorkflow,
+  cancelRelance,
+} from "@/lib/actions/automation";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -81,10 +122,25 @@ const statusLabels: Record<string, string> = {
   not_interested: "Pas intéressé",
 };
 
-const temperatureConfig: Record<string, { label: string; color: string; icon: typeof Flame }> = {
-  hot: { label: "Chaud", color: "bg-foreground/10 text-foreground border-foreground/20", icon: Flame },
-  warm: { label: "Tiède", color: "bg-muted/60 text-muted-foreground border-border/50", icon: Thermometer },
-  cold: { label: "Froid", color: "bg-muted/40 text-muted-foreground/60 border-border/30", icon: Snowflake },
+const temperatureConfig: Record<
+  string,
+  { label: string; color: string; icon: typeof Flame }
+> = {
+  hot: {
+    label: "Chaud",
+    color: "bg-foreground/10 text-foreground border-foreground/20",
+    icon: Flame,
+  },
+  warm: {
+    label: "Tiède",
+    color: "bg-muted/60 text-muted-foreground border-border/50",
+    icon: Thermometer,
+  },
+  cold: {
+    label: "Froid",
+    color: "bg-muted/40 text-muted-foreground/60 border-border/30",
+    icon: Snowflake,
+  },
 };
 
 export function ProspectingView({
@@ -116,7 +172,8 @@ export function ProspectingView({
 
   function getScoreBadgeStyle(score: number) {
     if (score >= 75) return "bg-brand/10 text-brand border-brand/20";
-    if (score >= 45) return "bg-foreground/10 text-foreground border-foreground/20";
+    if (score >= 45)
+      return "bg-foreground/10 text-foreground border-foreground/20";
     return "bg-muted/40 text-muted-foreground/60 border-border/30";
   }
 
@@ -139,7 +196,8 @@ export function ProspectingView({
 
   // Client-side filtering
   const filtered = prospects.filter((p) => {
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase()))
+      return false;
     if (filterPlatform !== "all" && p.platform !== filterPlatform) return false;
     if (filterStatus !== "all" && p.status !== filterStatus) return false;
 
@@ -154,8 +212,10 @@ export function ProspectingView({
     const maxScore = scoreMax !== "" ? Number(scoreMax) : null;
     if (minScore !== null || maxScore !== null) {
       if (!p.computed_score) return false;
-      if (minScore !== null && p.computed_score.total_score < minScore) return false;
-      if (maxScore !== null && p.computed_score.total_score > maxScore) return false;
+      if (minScore !== null && p.computed_score.total_score < minScore)
+        return false;
+      if (maxScore !== null && p.computed_score.total_score > maxScore)
+        return false;
     }
 
     // Recency filter
@@ -198,7 +258,11 @@ export function ProspectingView({
   async function handleAdd() {
     if (!newName.trim()) return;
     try {
-      await addProspect({ name: newName, platform: newPlatform, profile_url: newUrl || undefined });
+      await addProspect({
+        name: newName,
+        platform: newPlatform,
+        profile_url: newUrl || undefined,
+      });
       toast.success("Prospect ajouté");
       setDialogOpen(false);
       setNewName("");
@@ -253,8 +317,10 @@ export function ProspectingView({
       await createRelanceWorkflow({
         prospect_id: prospectId,
         platform: platform || "instagram",
-        message_j2: "Bonjour, je me permets de vous relancer suite a mon message precedent. Avez-vous eu le temps d'y jeter un oeil ?",
-        message_j3: "Bonjour, je comprends que vous etes sans doute tres occupe(e). Je reste disponible si vous souhaitez en discuter. Belle journee !",
+        message_j2:
+          "Bonjour, je me permets de vous relancer suite a mon message precedent. Avez-vous eu le temps d'y jeter un oeil ?",
+        message_j3:
+          "Bonjour, je comprends que vous etes sans doute tres occupe(e). Je reste disponible si vous souhaitez en discuter. Belle journee !",
       });
       toast.success("Relance automatique programmee (J+2 et J+3)");
       router.refresh();
@@ -275,7 +341,10 @@ export function ProspectingView({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Prospection" description="Tracker de prospection et quotas journaliers">
+      <PageHeader
+        title="Prospection"
+        description="Tracker de prospection et quotas journaliers"
+      >
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -292,7 +361,13 @@ export function ProspectingView({
             Recalculer les scores
           </Button>
           <Link href="/prospecting/templates">
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">Templates DM</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+            >
+              Templates DM
+            </Button>
           </Link>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -308,12 +383,19 @@ export function ProspectingView({
               <div className="space-y-4">
                 <div>
                   <Label>Nom</Label>
-                  <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Jean Dupont" className="h-11 rounded-xl" />
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Jean Dupont"
+                    className="h-11 rounded-xl"
+                  />
                 </div>
                 <div>
                   <Label>Plateforme</Label>
                   <Select value={newPlatform} onValueChange={setNewPlatform}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="linkedin">LinkedIn</SelectItem>
                       <SelectItem value="instagram">Instagram</SelectItem>
@@ -322,9 +404,19 @@ export function ProspectingView({
                 </div>
                 <div>
                   <Label>URL du profil (optionnel)</Label>
-                  <Input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://..." className="h-11 rounded-xl" />
+                  <Input
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="h-11 rounded-xl"
+                  />
                 </div>
-                <Button onClick={handleAdd} className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">Ajouter</Button>
+                <Button
+                  onClick={handleAdd}
+                  className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+                >
+                  Ajouter
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -336,33 +428,46 @@ export function ProspectingView({
         <Card
           className={cn(
             "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "all" && !hasActiveSegmentFilters && "ring-2 ring-brand/50"
+            filterTemperature === "all" &&
+              !hasActiveSegmentFilters &&
+              "ring-2 ring-brand/50",
           )}
-          onClick={() => { setFilterTemperature("all"); setFiltersOpen(false); }}
+          onClick={() => {
+            setFilterTemperature("all");
+            setFiltersOpen(false);
+          }}
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Users className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none">{segmentStats.total}</p>
-              <p className="text-xs text-muted-foreground mt-1">Total prospects</p>
+              <p className="text-2xl font-bold leading-none">
+                {segmentStats.total}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Total prospects
+              </p>
             </div>
           </CardContent>
         </Card>
         <Card
           className={cn(
             "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "hot" && "ring-2 ring-brand/50"
+            filterTemperature === "hot" && "ring-2 ring-brand/50",
           )}
-          onClick={() => setFilterTemperature(filterTemperature === "hot" ? "all" : "hot")}
+          onClick={() =>
+            setFilterTemperature(filterTemperature === "hot" ? "all" : "hot")
+          }
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Flame className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none">{segmentStats.hot}</p>
+              <p className="text-2xl font-bold leading-none">
+                {segmentStats.hot}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">Chauds</p>
             </div>
           </CardContent>
@@ -370,16 +475,20 @@ export function ProspectingView({
         <Card
           className={cn(
             "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "warm" && "ring-2 ring-brand/50"
+            filterTemperature === "warm" && "ring-2 ring-brand/50",
           )}
-          onClick={() => setFilterTemperature(filterTemperature === "warm" ? "all" : "warm")}
+          onClick={() =>
+            setFilterTemperature(filterTemperature === "warm" ? "all" : "warm")
+          }
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Thermometer className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none">{segmentStats.warm}</p>
+              <p className="text-2xl font-bold leading-none">
+                {segmentStats.warm}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">Tièdes</p>
             </div>
           </CardContent>
@@ -387,16 +496,20 @@ export function ProspectingView({
         <Card
           className={cn(
             "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "cold" && "ring-2 ring-brand/50"
+            filterTemperature === "cold" && "ring-2 ring-brand/50",
           )}
-          onClick={() => setFilterTemperature(filterTemperature === "cold" ? "all" : "cold")}
+          onClick={() =>
+            setFilterTemperature(filterTemperature === "cold" ? "all" : "cold")
+          }
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
               <Snowflake className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none">{segmentStats.cold}</p>
+              <p className="text-2xl font-bold leading-none">
+                {segmentStats.cold}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">Froids</p>
             </div>
           </CardContent>
@@ -407,7 +520,9 @@ export function ProspectingView({
               <TrendingUp className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <p className="text-2xl font-bold leading-none">{segmentStats.avgScore}</p>
+              <p className="text-2xl font-bold leading-none">
+                {segmentStats.avgScore}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">Score moyen</p>
             </div>
           </CardContent>
@@ -424,15 +539,29 @@ export function ProspectingView({
               </div>
               <div>
                 <h3 className="font-semibold">Quota journalier</h3>
-                <p className="text-sm text-muted-foreground">{dmsSent}/{dmsTarget} DMs envoyés aujourd&apos;hui</p>
+                <p className="text-sm text-muted-foreground">
+                  {dmsSent}/{dmsTarget} DMs envoyés aujourd&apos;hui
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-bold">{dmsTarget > 0 ? Math.round((dmsSent / dmsTarget) * 100) : 0}%</span>
-              <Button size="sm" variant="outline" className="rounded-xl font-medium" onClick={handleDmIncrement}>+1 DM</Button>
+              <span className="text-2xl font-bold">
+                {dmsTarget > 0 ? Math.round((dmsSent / dmsTarget) * 100) : 0}%
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl font-medium"
+                onClick={handleDmIncrement}
+              >
+                +1 DM
+              </Button>
             </div>
           </div>
-          <Progress value={dmsTarget > 0 ? (dmsSent / dmsTarget) * 100 : 0} className="h-3" />
+          <Progress
+            value={dmsTarget > 0 ? (dmsSent / dmsTarget) * 100 : 0}
+            className="h-3"
+          />
         </CardContent>
       </Card>
 
@@ -465,10 +594,17 @@ export function ProspectingView({
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Rechercher un prospect..." className="pl-9 h-11 rounded-xl" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Rechercher un prospect..."
+            className="pl-9 h-11 rounded-xl"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <Select value={filterPlatform} onValueChange={setFilterPlatform}>
-          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs"><SelectValue placeholder="Plateforme" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs">
+            <SelectValue placeholder="Plateforme" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes</SelectItem>
             <SelectItem value="linkedin">LinkedIn</SelectItem>
@@ -476,11 +612,15 @@ export function ProspectingView({
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs"><SelectValue placeholder="Statut" /></SelectTrigger>
+          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs">
+            <SelectValue placeholder="Statut" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>
             {Object.entries(statusLabels).map(([v, l]) => (
-              <SelectItem key={v} value={v}>{l}</SelectItem>
+              <SelectItem key={v} value={v}>
+                {l}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -510,7 +650,12 @@ export function ProspectingView({
           </Button>
 
           {hasActiveSegmentFilters && (
-            <Button variant="ghost" size="sm" onClick={resetSegmentFilters} className="gap-1 text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetSegmentFilters}
+              className="gap-1 text-muted-foreground"
+            >
               <X className="h-4 w-4" />
               Réinitialiser
             </Button>
@@ -524,7 +669,10 @@ export function ProspectingView({
               <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Température
               </Label>
-              <Select value={filterTemperature} onValueChange={setFilterTemperature}>
+              <Select
+                value={filterTemperature}
+                onValueChange={setFilterTemperature}
+              >
                 <SelectTrigger className="text-sm h-11 rounded-xl">
                   <SelectValue placeholder="Toutes" />
                 </SelectTrigger>
@@ -579,7 +727,9 @@ export function ProspectingView({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous</SelectItem>
-                  <SelectItem value="recent">Actifs récemment (7 jours)</SelectItem>
+                  <SelectItem value="recent">
+                    Actifs récemment (7 jours)
+                  </SelectItem>
                   <SelectItem value="inactive">Inactifs (30+ jours)</SelectItem>
                 </SelectContent>
               </Select>
@@ -589,12 +739,20 @@ export function ProspectingView({
       </div>
 
       {/* Active filter badges */}
-      {(filterTemperature !== "all" || filterPlatform !== "all" || filterStatus !== "all" || filterRecency !== "all" || scoreMin || scoreMax) && (
+      {(filterTemperature !== "all" ||
+        filterPlatform !== "all" ||
+        filterStatus !== "all" ||
+        filterRecency !== "all" ||
+        scoreMin ||
+        scoreMax) && (
         <div className="flex flex-wrap gap-2">
           {filterTemperature !== "all" && (
             <Badge
               variant="outline"
-              className={cn("gap-1 cursor-pointer", temperatureConfig[filterTemperature]?.color)}
+              className={cn(
+                "gap-1 cursor-pointer",
+                temperatureConfig[filterTemperature]?.color,
+              )}
               onClick={() => setFilterTemperature("all")}
             >
               {temperatureConfig[filterTemperature]?.label}
@@ -602,25 +760,44 @@ export function ProspectingView({
             </Badge>
           )}
           {filterPlatform !== "all" && (
-            <Badge variant="outline" className="gap-1 cursor-pointer" onClick={() => setFilterPlatform("all")}>
+            <Badge
+              variant="outline"
+              className="gap-1 cursor-pointer"
+              onClick={() => setFilterPlatform("all")}
+            >
               {filterPlatform === "linkedin" ? "LinkedIn" : "Instagram"}
               <X className="h-3 w-3" />
             </Badge>
           )}
           {filterStatus !== "all" && (
-            <Badge variant="outline" className={cn("gap-1 cursor-pointer", statusColors[filterStatus])} onClick={() => setFilterStatus("all")}>
+            <Badge
+              variant="outline"
+              className={cn("gap-1 cursor-pointer", statusColors[filterStatus])}
+              onClick={() => setFilterStatus("all")}
+            >
               {statusLabels[filterStatus] || filterStatus}
               <X className="h-3 w-3" />
             </Badge>
           )}
           {filterRecency !== "all" && (
-            <Badge variant="outline" className="gap-1 cursor-pointer" onClick={() => setFilterRecency("all")}>
+            <Badge
+              variant="outline"
+              className="gap-1 cursor-pointer"
+              onClick={() => setFilterRecency("all")}
+            >
               {filterRecency === "recent" ? "Actifs récemment" : "Inactifs"}
               <X className="h-3 w-3" />
             </Badge>
           )}
           {(scoreMin || scoreMax) && (
-            <Badge variant="outline" className="gap-1 cursor-pointer" onClick={() => { setScoreMin(""); setScoreMax(""); }}>
+            <Badge
+              variant="outline"
+              className="gap-1 cursor-pointer"
+              onClick={() => {
+                setScoreMin("");
+                setScoreMax("");
+              }}
+            >
               Score: {scoreMin || "0"} - {scoreMax || "100"}
               <X className="h-3 w-3" />
             </Badge>
@@ -638,14 +815,30 @@ export function ProspectingView({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30">
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Température</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Score</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Plateforme</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Dernier msg</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Relance</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Nom
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Température
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Score
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Plateforme
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Dernier msg
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Relance
+                  </th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -655,20 +848,31 @@ export function ProspectingView({
                   const TempIcon = tempConf?.icon;
 
                   return (
-                    <tr key={prospect.id} className="border-b last:border-0 hover:bg-secondary/50 transition-colors">
+                    <tr
+                      key={prospect.id}
+                      className="border-b last:border-0 hover:bg-secondary/50 transition-colors"
+                    >
                       <td className="p-4 font-medium">
-                        <Link href={`/prospecting/${prospect.id}`} className="hover:text-brand hover:underline">
+                        <Link
+                          href={`/prospecting/${prospect.id}`}
+                          className="hover:text-brand hover:underline"
+                        >
                           {prospect.name}
                         </Link>
                       </td>
                       <td className="p-4">
                         {tempConf && TempIcon ? (
-                          <Badge variant="outline" className={cn("gap-1", tempConf.color)}>
+                          <Badge
+                            variant="outline"
+                            className={cn("gap-1", tempConf.color)}
+                          >
                             <TempIcon className="h-3 w-3" />
                             {tempConf.label}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-muted-foreground">--</span>
+                          <span className="text-xs text-muted-foreground">
+                            --
+                          </span>
                         )}
                       </td>
                       <td className="p-4">
@@ -681,49 +885,82 @@ export function ProspectingView({
                                   prospect.computed_score.total_score >= 75
                                     ? "bg-brand"
                                     : prospect.computed_score.total_score >= 45
-                                    ? "bg-muted-foreground"
-                                    : "bg-muted-foreground/40"
+                                      ? "bg-muted-foreground"
+                                      : "bg-muted-foreground/40",
                                 )}
-                                style={{ width: `${prospect.computed_score.total_score}%` }}
+                                style={{
+                                  width: `${prospect.computed_score.total_score}%`,
+                                }}
                               />
                             </div>
-                            <Badge className={cn("text-xs min-w-[3rem] justify-center", getScoreBadgeStyle(prospect.computed_score.total_score))}>
+                            <Badge
+                              className={cn(
+                                "text-xs min-w-[3rem] justify-center",
+                                getScoreBadgeStyle(
+                                  prospect.computed_score.total_score,
+                                ),
+                              )}
+                            >
                               {prospect.computed_score.total_score}
                             </Badge>
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground">--</span>
+                          <span className="text-xs text-muted-foreground">
+                            --
+                          </span>
                         )}
                       </td>
                       <td className="p-4">
                         <Badge variant="outline" className="gap-1">
-                          {prospect.platform === "linkedin" ? <Linkedin className="h-3 w-3" /> : <Instagram className="h-3 w-3" />}
+                          {prospect.platform === "linkedin" ? (
+                            <Linkedin className="h-3 w-3" />
+                          ) : (
+                            <Instagram className="h-3 w-3" />
+                          )}
                           {prospect.platform || "—"}
                         </Badge>
                       </td>
                       <td className="p-4">
-                        <Select value={prospect.status} onValueChange={(v) => handleStatusChange(prospect.id, v)}>
+                        <Select
+                          value={prospect.status}
+                          onValueChange={(v) =>
+                            handleStatusChange(prospect.id, v)
+                          }
+                        >
                           <SelectTrigger className="w-[140px] h-8">
-                            <Badge variant="outline" className={statusColors[prospect.status]}>
+                            <Badge
+                              variant="outline"
+                              className={statusColors[prospect.status]}
+                            >
                               {statusLabels[prospect.status] || prospect.status}
                             </Badge>
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.entries(statusLabels).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>{label}</SelectItem>
-                            ))}
+                            {Object.entries(statusLabels).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                       </td>
                       <td className="p-4 text-muted-foreground">
                         {prospect.last_message_at
-                          ? formatDistanceToNow(new Date(prospect.last_message_at), { addSuffix: true, locale: fr })
+                          ? formatDistanceToNow(
+                              new Date(prospect.last_message_at),
+                              { addSuffix: true, locale: fr },
+                            )
                           : "\u2014"}
                       </td>
                       <td className="p-4">
                         {prospect.relance_status === "pending" && (
                           <div className="flex items-center gap-1.5">
-                            <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1">
+                            <Badge
+                              variant="outline"
+                              className="bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1"
+                            >
                               <Clock3 className="h-3 w-3" />
                               En cours
                             </Badge>
@@ -739,25 +976,36 @@ export function ProspectingView({
                           </div>
                         )}
                         {prospect.relance_status === "sent" && (
-                          <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1">
+                          <Badge
+                            variant="outline"
+                            className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1"
+                          >
                             <CheckCircle2 className="h-3 w-3" />
                             Envoyee
                           </Badge>
                         )}
                         {prospect.relance_status === "responded" && (
-                          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20 gap-1">
+                          <Badge
+                            variant="outline"
+                            className="bg-brand/10 text-brand border-brand/20 gap-1"
+                          >
                             <MessageCircle className="h-3 w-3" />
                             Repondu
                           </Badge>
                         )}
                         {prospect.relance_status === "cancelled" && (
-                          <Badge variant="outline" className="bg-muted/40 text-muted-foreground/60 border-border/30 gap-1">
+                          <Badge
+                            variant="outline"
+                            className="bg-muted/40 text-muted-foreground/60 border-border/30 gap-1"
+                          >
                             <XCircle className="h-3 w-3" />
                             Annulee
                           </Badge>
                         )}
                         {!prospect.relance_status && (
-                          <span className="text-xs text-muted-foreground">\u2014</span>
+                          <span className="text-xs text-muted-foreground">
+                            \u2014
+                          </span>
                         )}
                       </td>
                       <td className="p-4">
@@ -771,27 +1019,42 @@ export function ProspectingView({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleAISend(prospect.id, prospect.platform || "instagram")}
+                              onClick={() =>
+                                handleAISend(
+                                  prospect.id,
+                                  prospect.platform || "instagram",
+                                )
+                              }
                               title="Envoyer un message IA"
                               className="text-brand hover:text-brand/80"
                             >
                               <Bot className="h-4 w-4" />
                             </Button>
                           )}
-                          {prospect.status === "contacted" && !prospect.relance_status && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCreateRelance(prospect.id, prospect.platform || "instagram")}
-                              title="Programmer une relance automatique"
-                              className="text-amber-600 hover:text-amber-700"
-                            >
-                              <RotateCcw className="h-4 w-4" />
-                            </Button>
-                          )}
+                          {prospect.status === "contacted" &&
+                            !prospect.relance_status && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleCreateRelance(
+                                    prospect.id,
+                                    prospect.platform || "instagram",
+                                  )
+                                }
+                                title="Programmer une relance automatique"
+                                className="text-amber-600 hover:text-amber-700"
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            )}
                           {prospect.profile_url && (
                             <Button variant="ghost" size="sm" asChild>
-                              <a href={prospect.profile_url} target="_blank" rel="noopener noreferrer">
+                              <a
+                                href={prospect.profile_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
                                 <ExternalLink className="h-4 w-4" />
                               </a>
                             </Button>
@@ -811,7 +1074,10 @@ export function ProspectingView({
               </div>
               <p className="font-medium text-sm">Aucun prospect</p>
               <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-                {hasActiveSegmentFilters || filterPlatform !== "all" || filterStatus !== "all" || search
+                {hasActiveSegmentFilters ||
+                filterPlatform !== "all" ||
+                filterStatus !== "all" ||
+                search
                   ? "Aucun prospect ne correspond aux filtres sélectionnés."
                   : "Ajoutez votre premier prospect pour commencer."}
               </p>

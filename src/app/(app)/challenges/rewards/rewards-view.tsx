@@ -117,7 +117,9 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
             </div>
             <div>
               <p className="text-white/60 text-sm">Votre solde actuel</p>
-              <p className="text-3xl font-bold">{points.toLocaleString("fr-FR")} points</p>
+              <p className="text-3xl font-bold">
+                {points.toLocaleString("fr-FR")} points
+              </p>
             </div>
           </div>
         </CardContent>
@@ -141,13 +143,17 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
                 <div className="flex items-start gap-3 mb-3">
                   <div
                     className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      canAfford ? "bg-brand/10 text-brand" : "bg-muted text-muted-foreground"
+                      canAfford
+                        ? "bg-brand/10 text-brand"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     <IconComponent className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm mb-0.5">{reward.name}</h3>
+                    <h3 className="font-semibold text-sm mb-0.5">
+                      {reward.name}
+                    </h3>
                     <p className="text-xs text-muted-foreground line-clamp-2">
                       {reward.description}
                     </p>
@@ -185,7 +191,8 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
         <CardContent>
           {redemptions.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-6">
-              Aucun \u00e9change pour le moment. \u00c9changez vos points contre des r\u00e9compenses !
+              Aucun \u00e9change pour le moment. \u00c9changez vos points contre
+              des r\u00e9compenses !
             </p>
           ) : (
             <Table>
@@ -193,14 +200,18 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>R\u00e9compense</TableHead>
-                  <TableHead className="text-right">Points d\u00e9pens\u00e9s</TableHead>
+                  <TableHead className="text-right">
+                    Points d\u00e9pens\u00e9s
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {redemptions.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="text-sm">
-                      {format(new Date(entry.createdAt), "d MMM yyyy", { locale: fr })}
+                      {format(new Date(entry.createdAt), "d MMM yyyy", {
+                        locale: fr,
+                      })}
                     </TableCell>
                     <TableCell className="text-sm font-medium">
                       {entry.rewardName}
@@ -217,13 +228,19 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
       </Card>
 
       {/* Confirmation dialog */}
-      <Dialog open={!!confirmReward} onOpenChange={(open) => !open && setConfirmReward(null)}>
+      <Dialog
+        open={!!confirmReward}
+        onOpenChange={(open) => !open && setConfirmReward(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmer l&apos;\u00e9change</DialogTitle>
             <DialogDescription>
               Vous \u00eates sur le point d&apos;\u00e9changer{" "}
-              <strong>{confirmReward?.pointsCost.toLocaleString("fr-FR")} points</strong> contre :
+              <strong>
+                {confirmReward?.pointsCost.toLocaleString("fr-FR")} points
+              </strong>{" "}
+              contre :
             </DialogDescription>
           </DialogHeader>
           {confirmReward && (
@@ -234,16 +251,28 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
               })()}
               <div>
                 <p className="font-semibold">{confirmReward.name}</p>
-                <p className="text-sm text-muted-foreground">{confirmReward.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {confirmReward.description}
+                </p>
               </div>
             </div>
           )}
           <p className="text-sm text-muted-foreground">
             Apr\u00e8s l&apos;\u00e9change, il vous restera{" "}
-            <strong>{(points - (confirmReward?.pointsCost ?? 0)).toLocaleString("fr-FR")} points</strong>.
+            <strong>
+              {(points - (confirmReward?.pointsCost ?? 0)).toLocaleString(
+                "fr-FR",
+              )}{" "}
+              points
+            </strong>
+            .
           </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmReward(null)} disabled={isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmReward(null)}
+              disabled={isPending}
+            >
               Annuler
             </Button>
             <Button onClick={handleRedeem} disabled={isPending}>

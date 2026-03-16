@@ -4,7 +4,7 @@ function getResendClient() {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     throw new Error(
-      "RESEND_API_KEY manquant. Ajoutez-le dans .env.local pour activer les emails."
+      "RESEND_API_KEY manquant. Ajoutez-le dans .env.local pour activer les emails.",
     );
   }
   return new Resend(key);
@@ -22,5 +22,6 @@ export const resend = new Proxy({} as Resend, {
   },
 });
 
-export const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@example.com";
+export const FROM_EMAIL =
+  process.env.RESEND_FROM_EMAIL || "noreply@example.com";
 export const FROM_NAME = process.env.RESEND_FROM_NAME || "Sales System";

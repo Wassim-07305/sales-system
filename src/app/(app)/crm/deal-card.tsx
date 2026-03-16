@@ -5,7 +5,14 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Deal } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
-import { User, DollarSign, Clock, Flame, Thermometer, Snowflake } from "lucide-react";
+import {
+  User,
+  DollarSign,
+  Clock,
+  Flame,
+  Thermometer,
+  Snowflake,
+} from "lucide-react";
 
 interface DealCardProps {
   deal: Deal;
@@ -38,13 +45,20 @@ const TEMP_CONFIG = {
 };
 
 const AVATAR_COLORS = [
-  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
-  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
 ];
 
 function getAvatarColor(str: string) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < str.length; i++)
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -76,7 +90,8 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
       className={cn(
         "cursor-grab active:cursor-grabbing transition-all duration-200 border-border/50 rounded-xl",
         "hover:shadow-md hover:border-border/80 hover:-translate-y-0.5",
-        dragging && "opacity-60 shadow-xl rotate-1 scale-105 border-brand/30 ring-1 ring-brand/10"
+        dragging &&
+          "opacity-60 shadow-xl rotate-1 scale-105 border-brand/30 ring-1 ring-brand/10",
       )}
       onClick={onClick}
     >
@@ -89,7 +104,9 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
           <span
             className={cn(
               "flex items-center gap-0.5 text-[10px] font-semibold shrink-0 px-1.5 py-0.5 rounded-md border",
-              temp.color, temp.bg, temp.border,
+              temp.color,
+              temp.bg,
+              temp.border,
             )}
           >
             <TempIcon className="h-2.5 w-2.5" />
@@ -100,13 +117,17 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
         {/* Contact */}
         {deal.contact?.full_name && (
           <div className="flex items-center gap-2 mb-2.5">
-            <div className={cn(
-              "h-5 w-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0",
-              getAvatarColor(deal.contact.id || deal.contact.full_name),
-            )}>
+            <div
+              className={cn(
+                "h-5 w-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0",
+                getAvatarColor(deal.contact.id || deal.contact.full_name),
+              )}
+            >
               {deal.contact.full_name.charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs text-muted-foreground truncate">{deal.contact.full_name}</span>
+            <span className="text-xs text-muted-foreground truncate">
+              {deal.contact.full_name}
+            </span>
           </div>
         )}
 
@@ -125,10 +146,14 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
               </span>
             )}
             {deal.assigned_user?.full_name && (
-              <div className={cn(
-                "h-6 w-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-background",
-                getAvatarColor(deal.assigned_user.id || deal.assigned_user.full_name),
-              )}>
+              <div
+                className={cn(
+                  "h-6 w-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-background",
+                  getAvatarColor(
+                    deal.assigned_user.id || deal.assigned_user.full_name,
+                  ),
+                )}
+              >
                 {deal.assigned_user.full_name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -140,7 +165,9 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
           <div className="mt-2.5 pt-2 border-t border-border/50">
             <div className="flex items-center gap-1.5">
               <Clock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-              <p className="text-[11px] text-muted-foreground truncate">{deal.next_action}</p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {deal.next_action}
+              </p>
             </div>
           </div>
         )}

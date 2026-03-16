@@ -106,7 +106,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
     setSteps(
       seq.steps && seq.steps.length > 0
         ? seq.steps.map((s) => ({ ...s }))
-        : [{ ...emptyStep }]
+        : [{ ...emptyStep }],
     );
     setDialogOpen(true);
   }
@@ -123,7 +123,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
   function updateStep(
     index: number,
     field: keyof SequenceStep,
-    value: string | number
+    value: string | number,
   ) {
     const updated = [...steps];
     updated[index] = { ...updated[index], [field]: value };
@@ -205,7 +205,11 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
       >
         <div className="flex gap-2">
           <Link href="/whatsapp">
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
@@ -236,7 +240,10 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
       ) : (
         <div className="grid gap-4">
           {sequences.map((seq) => (
-            <Card key={seq.id} className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
+            <Card
+              key={seq.id}
+              className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all"
+            >
               <CardContent className="py-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -245,12 +252,9 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                       {seq.funnel_type && (
                         <Badge
                           variant="outline"
-                          className={
-                            funnelTypeColors[seq.funnel_type] || ""
-                          }
+                          className={funnelTypeColors[seq.funnel_type] || ""}
                         >
-                          {funnelTypeLabels[seq.funnel_type] ||
-                            seq.funnel_type}
+                          {funnelTypeLabels[seq.funnel_type] || seq.funnel_type}
                         </Badge>
                       )}
                       <Badge
@@ -280,7 +284,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                           Durée totale :{" "}
                           {seq.steps.reduce(
                             (acc, s) => acc + (s.delay_minutes || 0),
-                            0
+                            0,
                           )}{" "}
                           min
                         </span>
@@ -330,9 +334,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingSequence
-                ? "Modifier la séquence"
-                : "Nouvelle séquence"}
+              {editingSequence ? "Modifier la séquence" : "Nouvelle séquence"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -404,9 +406,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                         </div>
                         <div className="flex-1 space-y-3">
                           <div>
-                            <Label className="text-xs">
-                              Délai (minutes)
-                            </Label>
+                            <Label className="text-xs">Délai (minutes)</Label>
                             <Input
                               type="number"
                               min={0}
@@ -415,7 +415,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                                 updateStep(
                                   index,
                                   "delay_minutes",
-                                  parseInt(e.target.value) || 0
+                                  parseInt(e.target.value) || 0,
                                 )
                               }
                               placeholder="0"
@@ -440,11 +440,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
                             <Input
                               value={step.media_url || ""}
                               onChange={(e) =>
-                                updateStep(
-                                  index,
-                                  "media_url",
-                                  e.target.value
-                                )
+                                updateStep(index, "media_url", e.target.value)
                               }
                               placeholder="https://..."
                               className="h-8"

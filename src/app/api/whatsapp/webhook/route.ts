@@ -4,12 +4,11 @@ import { createClient } from "@supabase/supabase-js";
 function getSupabaseAdmin() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for webhook processing");
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for webhook processing",
+    );
   }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey
-  );
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
 }
 
 // Vérification du webhook (challenge Meta)
@@ -36,7 +35,10 @@ export async function POST(request: NextRequest) {
   const appSecret = process.env.META_APP_SECRET;
   if (!appSecret) {
     console.error("META_APP_SECRET not configured — rejecting webhook");
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Webhook not configured" },
+      { status: 500 },
+    );
   }
 
   const signature = request.headers.get("x-hub-signature-256");
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
 
 async function processWebhookPayload(
   supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ) {
   const entries = (payload.entry as Array<Record<string, unknown>>) || [];
 
@@ -72,10 +74,8 @@ async function processWebhookPayload(
       if (change.field !== "messages") continue;
 
       const value = change.value as Record<string, unknown>;
-      const messages =
-        (value.messages as Array<Record<string, unknown>>) || [];
-      const contacts =
-        (value.contacts as Array<Record<string, unknown>>) || [];
+      const messages = (value.messages as Array<Record<string, unknown>>) || [];
+      const contacts = (value.contacts as Array<Record<string, unknown>>) || [];
       const metadata = value.metadata as Record<string, unknown>;
       const phoneNumberId = metadata?.phone_number_id as string;
 
@@ -102,7 +102,11 @@ async function processWebhookPayload(
         if (msgType === "text") {
           const text = message.text as Record<string, unknown>;
           content = (text?.body as string) || "";
-        } else if (msgType === "image" || msgType === "video" || msgType === "audio") {
+        } else if (
+          msgType === "image" ||
+          msgType === "video" ||
+          msgType === "audio"
+        ) {
           content = `[${msgType}]`;
         } else if (msgType === "document") {
           const doc = message.document as Record<string, unknown>;
@@ -112,11 +116,10 @@ async function processWebhookPayload(
         }
 
         // Trouver le contact (nom)
-        const contact = contacts.find(
-          (c) => (c.wa_id as string) === from
-        );
+        const contact = contacts.find((c) => (c.wa_id as string) === from);
         const contactName = contact
-          ? ((contact.profile as Record<string, unknown>)?.name as string) || from
+          ? ((contact.profile as Record<string, unknown>)?.name as string) ||
+            from
           : from;
 
         // Chercher un prospect existant ou en créer un
@@ -164,7 +167,8 @@ async function processWebhookPayload(
         await supabaseAdmin.from("notifications").insert({
           user_id: connection.user_id,
           title: `Message WhatsApp de ${contactName}`,
-          body: content.length > 100 ? content.substring(0, 100) + "..." : content,
+          body:
+            content.length > 100 ? content.substring(0, 100) + "..." : content,
           type: "whatsapp",
           link: "/whatsapp",
           read: false,
@@ -172,8 +176,7 @@ async function processWebhookPayload(
       }
 
       // Traiter les statuts de messages (delivered, read, etc.)
-      const statuses =
-        (value.statuses as Array<Record<string, unknown>>) || [];
+      const statuses = (value.statuses as Array<Record<string, unknown>>) || [];
       for (const status of statuses) {
         const waMessageId = status.id as string;
         const statusValue = status.status as string;

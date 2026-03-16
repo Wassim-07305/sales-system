@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/actions/roleplay";
 import { SessionView } from "./session-view";
 
-interface Props { params: Promise<{ id: string }> }
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
 export default async function RoleplaySessionPage({ params }: Props) {
   const { id } = await params;

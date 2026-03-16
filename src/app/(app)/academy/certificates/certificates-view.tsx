@@ -140,7 +140,10 @@ export function CertificatesView({
                 >
                   {({ loading, error }) => {
                     if (error && !readyMap[cert.courseId]) {
-                      setReadyMap((prev) => ({ ...prev, [cert.courseId]: true }));
+                      setReadyMap((prev) => ({
+                        ...prev,
+                        [cert.courseId]: true,
+                      }));
                       toast.error("Erreur lors de la génération du PDF");
                     }
                     return (

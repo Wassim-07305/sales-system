@@ -47,7 +47,9 @@ export function isPushSupported(): boolean {
 /**
  * Get the current push permission status.
  */
-export function getPushPermissionStatus(): NotificationPermission | "unsupported" {
+export function getPushPermissionStatus():
+  | NotificationPermission
+  | "unsupported" {
   if (!isPushSupported()) return "unsupported";
   return Notification.permission;
 }
@@ -113,7 +115,9 @@ export async function requestPushPermission(): Promise<{
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+        applicationServerKey: urlBase64ToUint8Array(
+          VAPID_PUBLIC_KEY,
+        ) as BufferSource,
       });
     }
 

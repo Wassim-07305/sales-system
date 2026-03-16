@@ -136,7 +136,7 @@ function ReportedMessagesTab({ messages }: { messages: ReportedMessage[] }) {
   function handleAction(
     reportId: string,
     action: "resolve" | "dismiss" | "review",
-    resolution?: string
+    resolution?: string,
   ) {
     startTransition(async () => {
       try {
@@ -214,7 +214,11 @@ function ReportedMessageCard({
   resolved,
 }: {
   message: ReportedMessage;
-  onAction: (id: string, action: "resolve" | "dismiss" | "review", resolution?: string) => void;
+  onAction: (
+    id: string,
+    action: "resolve" | "dismiss" | "review",
+    resolution?: string,
+  ) => void;
   isPending: boolean;
   resolved?: boolean;
 }) {
@@ -262,9 +266,7 @@ function ReportedMessageCard({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-sm">
-                {message.author_name}
-              </span>
+              <span className="font-medium text-sm">{message.author_name}</span>
               <span className="text-muted-foreground text-xs">
                 dans #{message.channel_name}
               </span>
@@ -346,7 +348,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
   const filteredUsers = users.filter(
     (u) =>
       (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
+      u.email.toLowerCase().includes(search.toLowerCase()),
   );
 
   function handleMute(userId: string) {
@@ -354,7 +356,11 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
       try {
         // Convert minutes to hours for the new API
         const durationHours = parseInt(muteDuration) / 60;
-        await muteUser(userId, durationHours, "Mute manuel depuis le panneau de moderation");
+        await muteUser(
+          userId,
+          durationHours,
+          "Mute manuel depuis le panneau de moderation",
+        );
         toast.success(`Utilisateur muté pour ${muteDuration} minutes`);
         router.refresh();
       } catch {
@@ -409,13 +415,19 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
     switch (status) {
       case "actif":
         return (
-          <Badge variant="outline" className="text-green-500 border-green-500/30">
+          <Badge
+            variant="outline"
+            className="text-green-500 border-green-500/30"
+          >
             Actif
           </Badge>
         );
       case "mute":
         return (
-          <Badge variant="outline" className="text-amber-500 border-amber-500/30">
+          <Badge
+            variant="outline"
+            className="text-amber-500 border-amber-500/30"
+          >
             Muté
           </Badge>
         );
@@ -427,7 +439,10 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
         );
       case "restreint":
         return (
-          <Badge variant="outline" className="text-muted-foreground border-border/50">
+          <Badge
+            variant="outline"
+            className="text-muted-foreground border-border/50"
+          >
             Restreint
           </Badge>
         );
@@ -460,7 +475,10 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
           className="max-w-sm"
         />
         <div className="flex items-center gap-2 ml-auto">
-          <Label htmlFor="mute-duration" className="text-sm text-muted-foreground whitespace-nowrap">
+          <Label
+            htmlFor="mute-duration"
+            className="text-sm text-muted-foreground whitespace-nowrap"
+          >
             Durée du mute :
           </Label>
           <Select value={muteDuration} onValueChange={setMuteDuration}>
@@ -625,14 +643,14 @@ function SettingsTab({ settings }: { settings: ModerationSettings }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [blockedWords, setBlockedWords] = useState(
-    settings.blocked_words.join("\n")
+    settings.blocked_words.join("\n"),
   );
   const [floodLimit, setFloodLimit] = useState(settings.flood_limit);
   const [autoDeleteLinks, setAutoDeleteLinks] = useState(
-    settings.auto_delete_links
+    settings.auto_delete_links,
   );
   const [profanityFilter, setProfanityFilter] = useState(
-    settings.profanity_filter
+    settings.profanity_filter,
   );
 
   function handleSave() {
@@ -666,9 +684,7 @@ function SettingsTab({ settings }: { settings: ModerationSettings }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Label htmlFor="blocked-words">
-            Mots bloqués (un par ligne)
-          </Label>
+          <Label htmlFor="blocked-words">Mots bloqués (un par ligne)</Label>
           <Textarea
             id="blocked-words"
             rows={8}

@@ -18,7 +18,10 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { createCheckoutSession, createPortalSession } from "@/lib/actions/stripe";
+import {
+  createCheckoutSession,
+  createPortalSession,
+} from "@/lib/actions/stripe";
 import type { PlanId } from "@/lib/stripe/client";
 
 interface Props {
@@ -86,10 +89,20 @@ const PLANS = [
 const COMPARISON_FEATURES = [
   { name: "CRM & Pipeline", free: true, pro: true, enterprise: true },
   { name: "Gestion des contacts", free: true, pro: true, enterprise: true },
-  { name: "Scripts de vente", free: "5", pro: "Illimité", enterprise: "Illimité" },
+  {
+    name: "Scripts de vente",
+    free: "5",
+    pro: "Illimité",
+    enterprise: "Illimité",
+  },
   { name: "Communauté", free: true, pro: true, enterprise: true },
   { name: "Roleplay IA", free: "Basique", pro: "Avancé", enterprise: "Avancé" },
-  { name: "Analytics", free: "Basiques", pro: "Détaillées", enterprise: "Détaillées" },
+  {
+    name: "Analytics",
+    free: "Basiques",
+    pro: "Détaillées",
+    enterprise: "Détaillées",
+  },
   { name: "Automatisations", free: false, pro: true, enterprise: true },
   { name: "Intégration WhatsApp", free: false, pro: true, enterprise: true },
   { name: "White label", free: false, pro: false, enterprise: true },
@@ -199,7 +212,7 @@ export function SubscriptionView({ currentTier }: Props) {
               className={cn(
                 "relative",
                 plan.popular && "border-brand ring-2 ring-brand/20",
-                isCurrent && "bg-muted/30"
+                isCurrent && "bg-muted/30",
               )}
             >
               {plan.popular && (
@@ -232,7 +245,10 @@ export function SubscriptionView({ currentTier }: Props) {
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2 text-sm"
+                    >
                       <Check className="h-4 w-4 text-brand shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
@@ -247,7 +263,7 @@ export function SubscriptionView({ currentTier }: Props) {
                       ? "bg-muted text-muted-foreground"
                       : plan.popular
                         ? "bg-brand text-brand-dark hover:bg-brand/90"
-                        : ""
+                        : "",
                   )}
                   variant={isCurrent || plan.popular ? "default" : "outline"}
                 >
@@ -275,8 +291,12 @@ export function SubscriptionView({ currentTier }: Props) {
                   <th className="text-left py-3.5 pl-6 pr-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Fonctionnalité
                   </th>
-                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Free</th>
-                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Pro</th>
+                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Free
+                  </th>
+                  <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Pro
+                  </th>
                   <th className="text-center py-3.5 px-4 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                     Enterprise
                   </th>
@@ -284,7 +304,10 @@ export function SubscriptionView({ currentTier }: Props) {
               </thead>
               <tbody className="divide-y divide-border/30">
                 {COMPARISON_FEATURES.map((feature) => (
-                  <tr key={feature.name} className="hover:bg-muted/30 transition-colors">
+                  <tr
+                    key={feature.name}
+                    className="hover:bg-muted/30 transition-colors"
+                  >
                     <td className="py-3.5 pl-6 pr-4">{feature.name}</td>
                     {["free", "pro", "enterprise"].map((tier) => {
                       const val = feature[tier as keyof typeof feature];
@@ -293,7 +316,9 @@ export function SubscriptionView({ currentTier }: Props) {
                           {val === true ? (
                             <Check className="h-4 w-4 text-brand mx-auto" />
                           ) : val === false ? (
-                            <span className="text-muted-foreground">&mdash;</span>
+                            <span className="text-muted-foreground">
+                              &mdash;
+                            </span>
                           ) : (
                             <span className="text-xs">{val}</span>
                           )}

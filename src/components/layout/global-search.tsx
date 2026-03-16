@@ -65,7 +65,7 @@ export function GlobalSearch() {
         setSearchOpen(!searchOpen);
       }
     },
-    [searchOpen, setSearchOpen]
+    [searchOpen, setSearchOpen],
   );
 
   useEffect(() => {
@@ -108,11 +108,14 @@ export function GlobalSearch() {
   }
 
   // Group results by type
-  const groupedResults = results.reduce<Record<string, SearchResult[]>>((acc, r) => {
-    if (!acc[r.type]) acc[r.type] = [];
-    acc[r.type].push(r);
-    return acc;
-  }, {});
+  const groupedResults = results.reduce<Record<string, SearchResult[]>>(
+    (acc, r) => {
+      if (!acc[r.type]) acc[r.type] = [];
+      acc[r.type].push(r);
+      return acc;
+    },
+    {},
+  );
 
   return (
     <CommandDialog
@@ -153,7 +156,9 @@ export function GlobalSearch() {
                   <div className="flex flex-col">
                     <span>{item.title}</span>
                     {item.subtitle && (
-                      <span className="text-xs text-muted-foreground">{item.subtitle}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.subtitle}
+                      </span>
                     )}
                   </div>
                 </CommandItem>

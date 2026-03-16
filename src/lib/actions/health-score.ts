@@ -16,7 +16,8 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
   let connectionScore = 20;
   if (profile?.updated_at) {
     const daysSince = Math.floor(
-      (Date.now() - new Date(profile.updated_at).getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - new Date(profile.updated_at).getTime()) /
+        (1000 * 60 * 60 * 24),
     );
     connectionScore = daysSince < 3 ? 100 : daysSince < 7 ? 60 : 20;
   }
@@ -25,7 +26,10 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
   const { data: calls } = await supabase
     .from("group_calls")
     .select("id")
-    .gte("scheduled_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    .gte(
+      "scheduled_at",
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    );
 
   let attendanceScore = 20;
   if (calls && calls.length > 0) {
@@ -34,16 +38,17 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
       .select("*", { count: "exact", head: true })
       .eq("user_id", clientId)
       .eq("status", "attended")
-      .in("call_id", calls.map((c) => c.id));
+      .in(
+        "call_id",
+        calls.map((c) => c.id),
+      );
 
     const rate = ((count || 0) / calls.length) * 100;
     attendanceScore = rate > 80 ? 100 : rate > 50 ? 60 : 20;
   }
 
   // 3. Training progress (25%)
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("id");
+  const { data: lessons } = await supabase.from("lessons").select("id");
 
   let trainingScore = 20;
   if (lessons && lessons.length > 0) {
@@ -68,16 +73,17 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
   let responsivenessScore = 20;
   if (recentMessages && recentMessages.length > 0) {
     const hoursSince = Math.floor(
-      (Date.now() - new Date(recentMessages[0].created_at).getTime()) / (1000 * 60 * 60)
+      (Date.now() - new Date(recentMessages[0].created_at).getTime()) /
+        (1000 * 60 * 60),
     );
     responsivenessScore = hoursSince < 24 ? 100 : hoursSince < 48 ? 60 : 20;
   }
 
   const healthScore = Math.round(
-    (connectionScore * 0.25) +
-    (attendanceScore * 0.25) +
-    (trainingScore * 0.25) +
-    (responsivenessScore * 0.25)
+    connectionScore * 0.25 +
+      attendanceScore * 0.25 +
+      trainingScore * 0.25 +
+      responsivenessScore * 0.25,
   );
 
   // Update profile
@@ -108,11 +114,19 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
           .eq("user_id", admin.id)
           .eq("type", "health_alert")
           .ilike("body", `%${clientId}%`)
-          .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .gte(
+            "created_at",
+            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          )
           .limit(1);
 
         if (!existing || existing.length === 0) {
-          await notify(admin.id, "Client en zone rouge", `${profile?.full_name || "Un client"} a un health score de ${healthScore}. ${clientId}`, { type: "health_alert", link: "/customers" });
+          await notify(
+            admin.id,
+            "Client en zone rouge",
+            `${profile?.full_name || "Un client"} a un health score de ${healthScore}. ${clientId}`,
+            { type: "health_alert", link: "/customers" },
+          );
         }
       }
     }

@@ -180,11 +180,12 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-        <h2 className="text-white/70 text-sm font-medium">
-          {flowchart.title}
-        </h2>
+        <h2 className="text-white/70 text-sm font-medium">{flowchart.title}</h2>
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-muted/30 border-border/50 text-[11px] font-medium uppercase tracking-wider">
+          <Badge
+            variant="outline"
+            className="bg-muted/30 border-border/50 text-[11px] font-medium uppercase tracking-wider"
+          >
             {currentStep + 1} / {totalSteps}
           </Badge>
           <Link href={`/scripts/flowchart/${flowchart.id}`}>

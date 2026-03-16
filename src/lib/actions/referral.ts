@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 function generateCode(name: string): string {
-  const clean = (name || "USER").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 8);
+  const clean = (name || "USER")
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 8);
   const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${clean}-${rand}`;
 }
@@ -13,7 +16,9 @@ function generateCode(name: string): string {
 export async function getOrCreateAffiliate() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return null;
 
     const { data: existing, error: fetchErr } = await supabase
@@ -85,8 +90,18 @@ export async function getReferrals(affiliateId: string) {
 export async function getReferralStats() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { total: 0, converted: 0, pending: 0, expired: 0, totalRewards: 0, conversionRate: 0 };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return {
+        total: 0,
+        converted: 0,
+        pending: 0,
+        expired: 0,
+        totalRewards: 0,
+        conversionRate: 0,
+      };
 
     const { data: affiliate } = await supabase
       .from("affiliates")
@@ -94,7 +109,15 @@ export async function getReferralStats() {
       .eq("user_id", user.id)
       .single();
 
-    if (!affiliate) return { total: 0, converted: 0, pending: 0, expired: 0, totalRewards: 0, conversionRate: 0 };
+    if (!affiliate)
+      return {
+        total: 0,
+        converted: 0,
+        pending: 0,
+        expired: 0,
+        totalRewards: 0,
+        conversionRate: 0,
+      };
 
     const { data: referrals } = await supabase
       .from("referrals")
@@ -116,7 +139,14 @@ export async function getReferralStats() {
       conversionRate: total > 0 ? Math.round((converted / total) * 100) : 0,
     };
   } catch {
-    return { total: 0, converted: 0, pending: 0, expired: 0, totalRewards: 0, conversionRate: 0 };
+    return {
+      total: 0,
+      converted: 0,
+      pending: 0,
+      expired: 0,
+      totalRewards: 0,
+      conversionRate: 0,
+    };
   }
 }
 
@@ -124,7 +154,9 @@ export async function getReferralStats() {
 export async function getReferralHistory() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return [];
 
     const { data: affiliate } = await supabase
@@ -152,7 +184,11 @@ export async function getReferralHistory() {
 }
 
 // ── Track a new referral (inbound) ───────────────────────────────────
-export async function trackReferral(referralCode: string, prospectEmail: string, prospectName?: string) {
+export async function trackReferral(
+  referralCode: string,
+  prospectEmail: string,
+  prospectName?: string,
+) {
   try {
     const supabase = await createClient();
 
@@ -213,10 +249,13 @@ export async function trackReferralConversion(referralCode: string) {
 
     if (!pendingRef) return;
 
-    await supabase.from("referrals").update({
-      status: "converted",
-      commission: Number(affiliate.commission_rate || 10),
-    }).eq("id", pendingRef.id);
+    await supabase
+      .from("referrals")
+      .update({
+        status: "converted",
+        commission: Number(affiliate.commission_rate || 10),
+      })
+      .eq("id", pendingRef.id);
 
     // Recalculate affiliate totals
     const { count: converted } = await supabase
@@ -231,12 +270,18 @@ export async function trackReferralConversion(referralCode: string) {
       .eq("affiliate_id", affiliate.id)
       .eq("status", "converted");
 
-    const totalCommission = (allRefs || []).reduce((sum, r) => sum + Number(r.commission || 0), 0);
+    const totalCommission = (allRefs || []).reduce(
+      (sum, r) => sum + Number(r.commission || 0),
+      0,
+    );
 
-    await supabase.from("affiliates").update({
-      total_converted: converted || 0,
-      total_commission: totalCommission,
-    }).eq("id", affiliate.id);
+    await supabase
+      .from("affiliates")
+      .update({
+        total_converted: converted || 0,
+        total_commission: totalCommission,
+      })
+      .eq("id", affiliate.id);
 
     revalidatePath("/referral");
   } catch (err) {
@@ -245,18 +290,29 @@ export async function trackReferralConversion(referralCode: string) {
 }
 
 // ── Convert a specific referral (admin / deal-linked) ────────────────
-export async function convertReferral(referralId: string, dealId: string, commission: number) {
+export async function convertReferral(
+  referralId: string,
+  dealId: string,
+  commission: number,
+) {
   try {
     const supabase = await createClient();
 
-    await supabase.from("referrals").update({
-      status: "converted",
-      deal_id: dealId,
-      commission,
-    }).eq("id", referralId);
+    await supabase
+      .from("referrals")
+      .update({
+        status: "converted",
+        deal_id: dealId,
+        commission,
+      })
+      .eq("id", referralId);
 
     // Update affiliate totals
-    const { data: referral } = await supabase.from("referrals").select("affiliate_id").eq("id", referralId).single();
+    const { data: referral } = await supabase
+      .from("referrals")
+      .select("affiliate_id")
+      .eq("id", referralId)
+      .single();
     if (referral) {
       const { count: converted } = await supabase
         .from("referrals")
@@ -270,12 +326,18 @@ export async function convertReferral(referralId: string, dealId: string, commis
         .eq("affiliate_id", referral.affiliate_id)
         .eq("status", "converted");
 
-      const totalCommission = (allRefs || []).reduce((sum, r) => sum + Number(r.commission || 0), 0);
+      const totalCommission = (allRefs || []).reduce(
+        (sum, r) => sum + Number(r.commission || 0),
+        0,
+      );
 
-      await supabase.from("affiliates").update({
-        total_converted: converted || 0,
-        total_commission: totalCommission,
-      }).eq("id", referral.affiliate_id);
+      await supabase
+        .from("affiliates")
+        .update({
+          total_converted: converted || 0,
+          total_commission: totalCommission,
+        })
+        .eq("id", referral.affiliate_id);
     }
 
     revalidatePath("/referral");
@@ -288,7 +350,9 @@ export async function convertReferral(referralId: string, dealId: string, commis
 export async function sendReferralInvite(email: string, name?: string) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return { error: "Non authentifié" };
 
     const { data: affiliate } = await supabase
@@ -322,9 +386,12 @@ export async function sendReferralInvite(email: string, name?: string) {
       .select("id", { count: "exact", head: true })
       .eq("affiliate_id", affiliate.id);
 
-    await supabase.from("affiliates").update({
-      total_referrals: count || 0,
-    }).eq("id", affiliate.id);
+    await supabase
+      .from("affiliates")
+      .update({
+        total_referrals: count || 0,
+      })
+      .eq("id", affiliate.id);
 
     revalidatePath("/referral");
     return { success: true };

@@ -400,8 +400,7 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
               </Text>
             );
           if (line === "---") return <View key={i} style={styles.hr} />;
-          if (line.trim() === "")
-            return <View key={i} style={styles.spacer} />;
+          if (line.trim() === "") return <View key={i} style={styles.spacer} />;
           return (
             <Text key={i} style={styles.text}>
               {line}
@@ -411,9 +410,7 @@ function ContractDocument({ contract }: { contract: ContractPdfData }) {
 
         {/* ── Conditions générales ── */}
         <View style={styles.termsBox}>
-          <Text style={styles.termsTitle}>
-            Conditions générales
-          </Text>
+          <Text style={styles.termsTitle}>Conditions générales</Text>
           {defaultTerms.map((term, i) => (
             <Text key={i} style={styles.termsText}>
               {term}
@@ -489,9 +486,7 @@ export function ContractPdf({ contract, onClose }: Props) {
   async function handleDownload() {
     setGenerating(true);
     try {
-      const blob = await pdf(
-        <ContractDocument contract={contract} />
-      ).toBlob();
+      const blob = await pdf(<ContractDocument contract={contract} />).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -507,16 +502,14 @@ export function ContractPdf({ contract, onClose }: Props) {
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-background rounded-xl p-6 max-w-md w-full space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-base">
-            Télécharger le contrat
-          </h3>
+          <h3 className="font-semibold text-base">Télécharger le contrat</h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Le PDF sera généré avec l&apos;en-tête Sales
-          System, le détail du contrat, les conditions générales
+          Le PDF sera généré avec l&apos;en-tête Sales System, le détail du
+          contrat, les conditions générales
           {contract.signature_data
             ? " et la signature du client"
             : " et un espace de signature"}
@@ -552,9 +545,7 @@ export function ContractPdf({ contract, onClose }: Props) {
           ) : (
             <Download className="h-4 w-4 mr-2" />
           )}
-          {generating
-            ? "Génération en cours\u2026"
-            : "Télécharger PDF"}
+          {generating ? "Génération en cours\u2026" : "Télécharger PDF"}
         </Button>
       </div>
     </div>

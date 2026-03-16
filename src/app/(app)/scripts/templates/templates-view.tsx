@@ -42,7 +42,8 @@ const categoryLabels: Record<string, string> = {
 const categoryColors: Record<string, string> = {
   prospection: "bg-foreground/10 text-foreground border-foreground/20",
   closing: "bg-brand/10 text-brand border-brand/20",
-  objection: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
+  objection:
+    "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   relance: "bg-foreground/8 text-foreground/80 border-foreground/15",
   discovery: "bg-muted/60 text-muted-foreground border-border/50",
 };
@@ -73,13 +74,13 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
 
   // Extract unique values for filters
   const uniqueNiches = Array.from(
-    new Set(templates.map((t) => t.niche).filter(Boolean))
+    new Set(templates.map((t) => t.niche).filter(Boolean)),
   ) as string[];
   const uniqueNetworks = Array.from(
-    new Set(templates.map((t) => t.network).filter(Boolean))
+    new Set(templates.map((t) => t.network).filter(Boolean)),
   ) as string[];
   const uniqueCategories = Array.from(
-    new Set(templates.map((t) => t.category).filter(Boolean))
+    new Set(templates.map((t) => t.category).filter(Boolean)),
   ) as string[];
 
   const filtered = templates.filter((t) => {
@@ -105,7 +106,7 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
       router.push(`/scripts/flowchart/${flowchart.id}`);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Erreur lors de la création"
+        error instanceof Error ? error.message : "Erreur lors de la création",
       );
     } finally {
       setIsCreating(null);
@@ -240,7 +241,9 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
                 ) : (
                   <Copy className="h-3.5 w-3.5 mr-2" />
                 )}
-                {isCreating === template.id ? "Création..." : "Utiliser ce template"}
+                {isCreating === template.id
+                  ? "Création..."
+                  : "Utiliser ce template"}
               </Button>
             </CardContent>
           </Card>
@@ -254,7 +257,10 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
                 </div>
                 <p className="font-medium">Aucun template trouvé</p>
                 <p className="text-sm mt-1">
-                  {search || filterCategory !== "all" || filterNiche !== "all" || filterNetwork !== "all"
+                  {search ||
+                  filterCategory !== "all" ||
+                  filterNiche !== "all" ||
+                  filterNetwork !== "all"
                     ? "Essayez de modifier vos filtres."
                     : "Aucun template disponible pour le moment."}
                 </p>

@@ -44,24 +44,23 @@ export async function sendMessageToContact(params: {
         });
         result = { success: true };
       } catch (err) {
-        result = { error: err instanceof Error ? err.message : "Échec envoi WhatsApp" };
+        result = {
+          error: err instanceof Error ? err.message : "Échec envoi WhatsApp",
+        };
       }
       break;
     }
     case "linkedin": {
-      const { sendLinkedInMessage } = await import("@/lib/actions/linkedin-api");
+      const { sendLinkedInMessage } =
+        await import("@/lib/actions/linkedin-api");
       const liResult = await sendLinkedInMessage(contactId, message);
-      result = liResult.error
-        ? { error: liResult.error }
-        : { success: true };
+      result = liResult.error ? { error: liResult.error } : { success: true };
       break;
     }
     case "instagram": {
       const { sendInstagramDM } = await import("@/lib/actions/instagram-api");
       const igResult = await sendInstagramDM(contactId, message);
-      result = igResult.error
-        ? { error: igResult.error }
-        : { success: true };
+      result = igResult.error ? { error: igResult.error } : { success: true };
       break;
     }
     default:
@@ -117,9 +116,12 @@ export async function generateFollowUpMessage(params: {
     const { aiComplete } = await import("@/lib/ai/client");
 
     const channelInstructions: Record<MessageChannel, string> = {
-      email: "Format email professionnel avec objet et corps. Commence par 'Objet: ...' sur la première ligne, puis saute une ligne pour le corps.",
-      whatsapp: "Message court et direct, adapté à WhatsApp. Pas de formalités excessives. 2-3 phrases max.",
-      linkedin: "Message professionnel adapté à LinkedIn. Courtois mais concis. 3-4 phrases.",
+      email:
+        "Format email professionnel avec objet et corps. Commence par 'Objet: ...' sur la première ligne, puis saute une ligne pour le corps.",
+      whatsapp:
+        "Message court et direct, adapté à WhatsApp. Pas de formalités excessives. 2-3 phrases max.",
+      linkedin:
+        "Message professionnel adapté à LinkedIn. Courtois mais concis. 3-4 phrases.",
       instagram: "Message court et amical adapté à Instagram DM. 1-2 phrases.",
     };
 
@@ -135,7 +137,8 @@ ${channelInstructions[params.channel]}
 Écris UNIQUEMENT le message, rien d'autre. En français.`;
 
     const message = await aiComplete(prompt, {
-      system: "Tu es un assistant commercial. Tu écris des messages de relance naturels et efficaces en français. Sois direct, professionnel et empathique.",
+      system:
+        "Tu es un assistant commercial. Tu écris des messages de relance naturels et efficaces en français. Sois direct, professionnel et empathique.",
       maxTokens: 300,
       temperature: 0.7,
     });

@@ -22,7 +22,7 @@ export default async function CalendarSyncPage() {
   ]);
 
   const googleAccount = unipileStatus.accounts.find(
-    (a) => a.provider.toUpperCase() === "GOOGLE"
+    (a) => a.provider.toUpperCase() === "GOOGLE",
   );
   const unipileCalendar = unipileStatus.configured
     ? { connected: !!googleAccount, accountName: googleAccount?.name }
@@ -34,7 +34,11 @@ export default async function CalendarSyncPage() {
         title="Synchronisation Google Calendar"
         description="Connectez votre Google Calendar pour synchroniser vos rendez-vous"
       />
-      <CalendarSyncPanel initialStatus={syncStatus} initialSettings={settings} unipileCalendar={unipileCalendar} />
+      <CalendarSyncPanel
+        initialStatus={syncStatus}
+        initialSettings={settings}
+        unipileCalendar={unipileCalendar}
+      />
     </div>
   );
 }

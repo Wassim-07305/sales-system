@@ -12,13 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Send,
-  MessageCircle,
-  TrendingUp,
-  Zap,
-  ArrowLeft,
-} from "lucide-react";
+import { Send, MessageCircle, TrendingUp, Zap, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import {
   BarChart,
@@ -69,7 +63,11 @@ export function WhatsAppAnalyticsView({
           description="Statistiques de vos campagnes WhatsApp"
         >
           <Link href="/whatsapp">
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
@@ -107,7 +105,11 @@ export function WhatsAppAnalyticsView({
         description="Statistiques de vos campagnes WhatsApp"
       >
         <Link href="/whatsapp">
-          <Button variant="outline" size="sm" className="rounded-xl font-medium">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl font-medium"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -192,10 +194,7 @@ export function WhatsAppAnalyticsView({
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={messagesPerDay}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  className="stroke-muted"
-                />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 11 }}
@@ -217,9 +216,7 @@ export function WhatsAppAnalyticsView({
                   }}
                   labelFormatter={(label) => `Date : ${label}`}
                 />
-                <Legend
-                  wrapperStyle={{ fontSize: "12px" }}
-                />
+                <Legend wrapperStyle={{ fontSize: "12px" }} />
                 <Bar
                   dataKey="sent"
                   name="Envoyés"
@@ -269,7 +266,10 @@ export function WhatsAppAnalyticsView({
               </TableHeader>
               <TableBody>
                 {sequenceStats.map((seq) => (
-                  <TableRow key={seq.id} className="hover:bg-secondary/50 transition-colors">
+                  <TableRow
+                    key={seq.id}
+                    className="hover:bg-secondary/50 transition-colors"
+                  >
                     <TableCell className="font-medium">{seq.name}</TableCell>
                     <TableCell className="text-center">
                       {seq.steps_count}
@@ -286,8 +286,8 @@ export function WhatsAppAnalyticsView({
                           seq.response_rate >= 50
                             ? "text-brand font-semibold"
                             : seq.response_rate >= 25
-                            ? "text-amber-500 font-semibold"
-                            : "text-muted-foreground"
+                              ? "text-amber-500 font-semibold"
+                              : "text-muted-foreground"
                         }
                       >
                         {seq.response_rate}%

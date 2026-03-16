@@ -18,9 +18,24 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  Bot, ShieldCheck, Clock, User, Save, Linkedin, Instagram,
-  MessageCircle, Mail, Send, Sparkles, Eye, Heart, Check,
-  Network, AlertTriangle, Loader2, Zap,
+  Bot,
+  ShieldCheck,
+  Clock,
+  User,
+  Save,
+  Linkedin,
+  Instagram,
+  MessageCircle,
+  Mail,
+  Send,
+  Sparkles,
+  Eye,
+  Heart,
+  Check,
+  Network,
+  AlertTriangle,
+  Loader2,
+  Zap,
 } from "lucide-react";
 import { updateAiModeConfig } from "@/lib/actions/ai-modes";
 import { generatePersonalizedMessage } from "@/lib/actions/automation";
@@ -48,7 +63,8 @@ const AI_MODES: {
   {
     value: "critical_validation",
     label: "Validation critique",
-    description: "L'IA agit, mais demande validation pour les actions critiques",
+    description:
+      "L'IA agit, mais demande validation pour les actions critiques",
     icon: <ShieldCheck className="h-6 w-6" />,
     color: "text-amber-500",
   },
@@ -69,18 +85,51 @@ const AI_MODES: {
 ];
 
 const NETWORKS = [
-  { key: "linkedin", label: "LinkedIn", icon: <Linkedin className="h-4 w-4" />, color: "text-[#0A66C2]", bg: "bg-[#0A66C2]/10" },
-  { key: "instagram", label: "Instagram", icon: <Instagram className="h-4 w-4" />, color: "text-[#E4405F]", bg: "bg-[#E4405F]/10" },
-  { key: "whatsapp", label: "WhatsApp", icon: <MessageCircle className="h-4 w-4" />, color: "text-[#25D366]", bg: "bg-[#25D366]/10" },
-  { key: "email", label: "Email", icon: <Mail className="h-4 w-4" />, color: "text-blue-500", bg: "bg-blue-500/10" },
+  {
+    key: "linkedin",
+    label: "LinkedIn",
+    icon: <Linkedin className="h-4 w-4" />,
+    color: "text-[#0A66C2]",
+    bg: "bg-[#0A66C2]/10",
+  },
+  {
+    key: "instagram",
+    label: "Instagram",
+    icon: <Instagram className="h-4 w-4" />,
+    color: "text-[#E4405F]",
+    bg: "bg-[#E4405F]/10",
+  },
+  {
+    key: "whatsapp",
+    label: "WhatsApp",
+    icon: <MessageCircle className="h-4 w-4" />,
+    color: "text-[#25D366]",
+    bg: "bg-[#25D366]/10",
+  },
+  {
+    key: "email",
+    label: "Email",
+    icon: <Mail className="h-4 w-4" />,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+  },
 ];
 
 const CRITICAL_ACTIONS = [
-  { label: "Envoi de message initial", description: "Premier contact avec un prospect" },
+  {
+    label: "Envoi de message initial",
+    description: "Premier contact avec un prospect",
+  },
   { label: "Relance automatique", description: "Messages de suivi programmes" },
   { label: "Booking automatique", description: "Planification de rendez-vous" },
-  { label: "Modification de prix", description: "Changement de tarifs ou remises" },
-  { label: "Envoi de contrat", description: "Documents contractuels officiels" },
+  {
+    label: "Modification de prix",
+    description: "Changement de tarifs ou remises",
+  },
+  {
+    label: "Envoi de contrat",
+    description: "Documents contractuels officiels",
+  },
 ];
 
 const STORY_EMOJIS = [
@@ -93,8 +142,22 @@ const STORY_EMOJIS = [
 ];
 
 const AUTO_SEND_PLATFORMS = [
-  { key: "instagram", label: "Instagram", icon: <Instagram className="h-5 w-5" />, color: "text-[#E4405F]", bg: "bg-[#E4405F]/10", borderActive: "border-[#E4405F]/50" },
-  { key: "linkedin", label: "LinkedIn", icon: <Linkedin className="h-5 w-5" />, color: "text-[#0A66C2]", bg: "bg-[#0A66C2]/10", borderActive: "border-[#0A66C2]/50" },
+  {
+    key: "instagram",
+    label: "Instagram",
+    icon: <Instagram className="h-5 w-5" />,
+    color: "text-[#E4405F]",
+    bg: "bg-[#E4405F]/10",
+    borderActive: "border-[#E4405F]/50",
+  },
+  {
+    key: "linkedin",
+    label: "LinkedIn",
+    icon: <Linkedin className="h-5 w-5" />,
+    color: "text-[#0A66C2]",
+    bg: "bg-[#0A66C2]/10",
+    borderActive: "border-[#0A66C2]/50",
+  },
 ];
 
 const TEMPLATE_MAX_LENGTH = 500;
@@ -102,28 +165,35 @@ const TEMPLATE_MAX_LENGTH = 500;
 export function AiModesView({ config }: AiModesViewProps) {
   const [isPending, startTransition] = useTransition();
   const [globalMode, setGlobalMode] = useState<AiMode>(config.global_mode);
-  const [networkOverrides, setNetworkOverrides] = useState<Record<string, AiMode>>(
-    config.network_overrides || {}
-  );
+  const [networkOverrides, setNetworkOverrides] = useState<
+    Record<string, AiMode>
+  >(config.network_overrides || {});
   const [criticalActions, setCriticalActions] = useState<string[]>(
-    config.critical_actions || []
+    config.critical_actions || [],
   );
 
   // Auto-send state
-  const [autoSendEnabled, setAutoSendEnabled] = useState(config.auto_send_enabled ?? false);
+  const [autoSendEnabled, setAutoSendEnabled] = useState(
+    config.auto_send_enabled ?? false,
+  );
   const [autoSendPlatforms, setAutoSendPlatforms] = useState<string[]>(
-    config.auto_send_platforms || []
+    config.auto_send_platforms || [],
   );
   const [autoSendTemplate, setAutoSendTemplate] = useState(
-    config.auto_send_template || "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !"
+    config.auto_send_template ||
+      "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !",
   );
   const [autoSendMode, setAutoSendMode] = useState<AiMode>(
-    config.auto_send_mode || "critical_validation"
+    config.auto_send_mode || "critical_validation",
   );
 
   // Story reaction state
-  const [storyReactionEnabled, setStoryReactionEnabled] = useState(config.story_reaction_enabled ?? false);
-  const [storyReactionEmoji, setStoryReactionEmoji] = useState(config.story_reaction_emoji || "\u{1F525}");
+  const [storyReactionEnabled, setStoryReactionEnabled] = useState(
+    config.story_reaction_enabled ?? false,
+  );
+  const [storyReactionEmoji, setStoryReactionEmoji] = useState(
+    config.story_reaction_emoji || "\u{1F525}",
+  );
 
   // Preview state
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
@@ -133,7 +203,7 @@ export function AiModesView({ config }: AiModesViewProps) {
     setCriticalActions((prev) =>
       prev.includes(action)
         ? prev.filter((a) => a !== action)
-        : [...prev, action]
+        : [...prev, action],
     );
   }
 
@@ -153,7 +223,7 @@ export function AiModesView({ config }: AiModesViewProps) {
     setAutoSendPlatforms((prev) =>
       prev.includes(platform)
         ? prev.filter((p) => p !== platform)
-        : [...prev, platform]
+        : [...prev, platform],
     );
   }
 
@@ -167,7 +237,7 @@ export function AiModesView({ config }: AiModesViewProps) {
           recent_post: "votre video sur la gestion du stress",
           notes: null,
         },
-        autoSendTemplate
+        autoSendTemplate,
       );
       setPreviewMessage(message);
     });
@@ -226,7 +296,8 @@ export function AiModesView({ config }: AiModesViewProps) {
             <div>
               <CardTitle>Mode global</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                Definissez le comportement par defaut de l&apos;IA sur toutes les plateformes
+                Definissez le comportement par defaut de l&apos;IA sur toutes
+                les plateformes
               </p>
             </div>
           </div>
@@ -259,12 +330,18 @@ export function AiModesView({ config }: AiModesViewProps) {
                         : "bg-muted group-hover:bg-muted/80"
                     }`}
                   >
-                    <div className={isSelected ? mode.color : "text-muted-foreground"}>
+                    <div
+                      className={
+                        isSelected ? mode.color : "text-muted-foreground"
+                      }
+                    >
                       {mode.icon}
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <p className={`font-semibold text-sm ${isSelected ? "text-foreground" : "text-foreground/80"}`}>
+                    <p
+                      className={`font-semibold text-sm ${isSelected ? "text-foreground" : "text-foreground/80"}`}
+                    >
                       {mode.label}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
@@ -321,14 +398,22 @@ export function AiModesView({ config }: AiModesViewProps) {
                           : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
                       }`}
                     >
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-                        isActive ? p.bg : "bg-muted"
-                      }`}>
-                        <div className={isActive ? p.color : "text-muted-foreground"}>
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                          isActive ? p.bg : "bg-muted"
+                        }`}
+                      >
+                        <div
+                          className={
+                            isActive ? p.color : "text-muted-foreground"
+                          }
+                        >
                           {p.icon}
                         </div>
                       </div>
-                      <span className={`text-sm font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                      <span
+                        className={`text-sm font-medium ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+                      >
                         {p.label}
                       </span>
                       {isActive && (
@@ -346,8 +431,13 @@ export function AiModesView({ config }: AiModesViewProps) {
 
             {/* AI Mode for auto-send */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Mode IA pour l&apos;envoi</Label>
-              <Select value={autoSendMode} onValueChange={(v) => setAutoSendMode(v as AiMode)}>
+              <Label className="text-sm font-medium">
+                Mode IA pour l&apos;envoi
+              </Label>
+              <Select
+                value={autoSendMode}
+                onValueChange={(v) => setAutoSendMode(v as AiMode)}
+              >
                 <SelectTrigger className="w-full max-w-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -373,9 +463,12 @@ export function AiModesView({ config }: AiModesViewProps) {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                {autoSendMode === "full_ai" && "L'IA envoie les messages directement sans votre validation."}
-                {autoSendMode === "critical_validation" && "L'IA genere le message et attend votre validation avant envoi."}
-                {autoSendMode === "full_human" && "L'IA genere une suggestion de message mais ne l'envoie jamais."}
+                {autoSendMode === "full_ai" &&
+                  "L'IA envoie les messages directement sans votre validation."}
+                {autoSendMode === "critical_validation" &&
+                  "L'IA genere le message et attend votre validation avant envoi."}
+                {autoSendMode === "full_human" &&
+                  "L'IA genere une suggestion de message mais ne l'envoie jamais."}
               </p>
             </div>
 
@@ -384,19 +477,32 @@ export function AiModesView({ config }: AiModesViewProps) {
             {/* Message template editor */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Template de message</Label>
+                <Label className="text-sm font-medium">
+                  Template de message
+                </Label>
                 <div className="flex gap-1.5">
                   {[
-                    { var: "{nom}", tooltip: "Remplace par le nom du prospect" },
-                    { var: "{activite}", tooltip: "Remplace par l'activite du prospect" },
-                    { var: "{dernier_post}", tooltip: "Remplace par le dernier post du prospect" },
+                    {
+                      var: "{nom}",
+                      tooltip: "Remplace par le nom du prospect",
+                    },
+                    {
+                      var: "{activite}",
+                      tooltip: "Remplace par l'activite du prospect",
+                    },
+                    {
+                      var: "{dernier_post}",
+                      tooltip: "Remplace par le dernier post du prospect",
+                    },
                   ].map((v) => (
                     <Badge
                       key={v.var}
                       variant="secondary"
                       className="text-[10px] cursor-pointer font-mono px-2 py-0.5 hover:bg-brand/10 hover:text-brand transition-colors"
                       title={v.tooltip}
-                      onClick={() => setAutoSendTemplate((prev) => prev + " " + v.var)}
+                      onClick={() =>
+                        setAutoSendTemplate((prev) => prev + " " + v.var)
+                      }
                     >
                       {v.var}
                     </Badge>
@@ -415,17 +521,20 @@ export function AiModesView({ config }: AiModesViewProps) {
                   rows={4}
                   className="resize-none pr-16"
                 />
-                <span className={`absolute bottom-2.5 right-3 text-[10px] tabular-nums ${
-                  autoSendTemplate.length > TEMPLATE_MAX_LENGTH * 0.9
-                    ? "text-destructive"
-                    : "text-muted-foreground/60"
-                }`}>
+                <span
+                  className={`absolute bottom-2.5 right-3 text-[10px] tabular-nums ${
+                    autoSendTemplate.length > TEMPLATE_MAX_LENGTH * 0.9
+                      ? "text-destructive"
+                      : "text-muted-foreground/60"
+                  }`}
+                >
                   {autoSendTemplate.length}/{TEMPLATE_MAX_LENGTH}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                L&apos;IA utilisera ce template comme base et le personnalisera pour chaque prospect.
-                Cliquez sur une variable pour l&apos;inserer.
+                L&apos;IA utilisera ce template comme base et le personnalisera
+                pour chaque prospect. Cliquez sur une variable pour
+                l&apos;inserer.
               </p>
             </div>
 
@@ -434,7 +543,9 @@ export function AiModesView({ config }: AiModesViewProps) {
             {/* Preview section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Apercu du message genere</Label>
+                <Label className="text-sm font-medium">
+                  Apercu du message genere
+                </Label>
                 <Button
                   variant="outline"
                   size="sm"
@@ -461,7 +572,9 @@ export function AiModesView({ config }: AiModesViewProps) {
                       Exemple pour : Marie Dupont (Instagram)
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed pl-0.5">{previewMessage}</p>
+                  <p className="text-sm leading-relaxed pl-0.5">
+                    {previewMessage}
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
@@ -469,10 +582,12 @@ export function AiModesView({ config }: AiModesViewProps) {
                     <Sparkles className="h-5 w-5 text-muted-foreground/50" />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Cliquez sur &quot;Generer un apercu&quot; pour voir un exemple
+                    Cliquez sur &quot;Generer un apercu&quot; pour voir un
+                    exemple
                   </p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
-                    Le message sera personnalise avec les donnees d&apos;un prospect fictif
+                    Le message sera personnalise avec les donnees d&apos;un
+                    prospect fictif
                   </p>
                 </div>
               )}
@@ -522,7 +637,9 @@ export function AiModesView({ config }: AiModesViewProps) {
                     }`}
                   >
                     <span className="text-2xl leading-none">{e.value}</span>
-                    <span className="text-[10px] text-muted-foreground font-medium">{e.label}</span>
+                    <span className="text-[10px] text-muted-foreground font-medium">
+                      {e.label}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -533,7 +650,8 @@ export function AiModesView({ config }: AiModesViewProps) {
             <div className="space-y-2">
               <Label className="text-sm font-medium">Emoji personnalise</Label>
               <p className="text-xs text-muted-foreground">
-                Collez un emoji de votre choix pour remplacer la selection ci-dessus
+                Collez un emoji de votre choix pour remplacer la selection
+                ci-dessus
               </p>
               <Input
                 value={storyReactionEmoji}
@@ -558,7 +676,8 @@ export function AiModesView({ config }: AiModesViewProps) {
             <div>
               <CardTitle>Surcharges par reseau</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                Definissez un mode IA specifique pour chaque reseau, ou laissez le mode global s&apos;appliquer
+                Definissez un mode IA specifique pour chaque reseau, ou laissez
+                le mode global s&apos;appliquer
               </p>
             </div>
           </div>
@@ -571,14 +690,20 @@ export function AiModesView({ config }: AiModesViewProps) {
                 className="flex items-center justify-between gap-4 rounded-xl border px-4 py-3 transition-colors hover:bg-muted/30"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${network.bg}`}>
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${network.bg}`}
+                  >
                     <div className={network.color}>{network.icon}</div>
                   </div>
                   <div>
-                    <Label className="font-medium text-sm">{network.label}</Label>
+                    <Label className="font-medium text-sm">
+                      {network.label}
+                    </Label>
                     <p className="text-[10px] text-muted-foreground">
                       {networkOverrides[network.key]
-                        ? AI_MODES.find((m) => m.value === networkOverrides[network.key])?.label
+                        ? AI_MODES.find(
+                            (m) => m.value === networkOverrides[network.key],
+                          )?.label
                         : "Utilise le mode global"}
                     </p>
                   </div>
@@ -594,7 +719,8 @@ export function AiModesView({ config }: AiModesViewProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="global">
-                      Mode global ({AI_MODES.find((m) => m.value === globalMode)?.label})
+                      Mode global (
+                      {AI_MODES.find((m) => m.value === globalMode)?.label})
                     </SelectItem>
                     <Separator className="my-1" />
                     {AI_MODES.map((mode) => (
@@ -622,7 +748,8 @@ export function AiModesView({ config }: AiModesViewProps) {
             <div>
               <CardTitle>Actions critiques</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                En mode &quot;Validation critique&quot;, ces actions necessiteront votre approbation
+                En mode &quot;Validation critique&quot;, ces actions
+                necessiteront votre approbation
               </p>
             </div>
           </div>
@@ -632,8 +759,12 @@ export function AiModesView({ config }: AiModesViewProps) {
             <div className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 flex items-start gap-3">
               <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Les actions critiques ne s&apos;appliquent qu&apos;en mode &quot;Validation critique&quot;.
-                Le mode actuel est : <span className="font-medium text-foreground">{AI_MODES.find((m) => m.value === globalMode)?.label}</span>.
+                Les actions critiques ne s&apos;appliquent qu&apos;en mode
+                &quot;Validation critique&quot;. Le mode actuel est :{" "}
+                <span className="font-medium text-foreground">
+                  {AI_MODES.find((m) => m.value === globalMode)?.label}
+                </span>
+                .
               </p>
             </div>
           )}
@@ -642,7 +773,9 @@ export function AiModesView({ config }: AiModesViewProps) {
               <div
                 key={action.label}
                 className={`flex items-center justify-between rounded-xl border px-4 py-3.5 transition-colors ${
-                  criticalActions.includes(action.label) ? "bg-muted/20 border-border" : "border-border/50"
+                  criticalActions.includes(action.label)
+                    ? "bg-muted/20 border-border"
+                    : "border-border/50"
                 }`}
               >
                 <div className="space-y-0.5">
@@ -652,12 +785,16 @@ export function AiModesView({ config }: AiModesViewProps) {
                   >
                     {action.label}
                   </Label>
-                  <p className="text-[11px] text-muted-foreground">{action.description}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {action.description}
+                  </p>
                 </div>
                 <Switch
                   id={`action-${action.label}`}
                   checked={criticalActions.includes(action.label)}
-                  onCheckedChange={() => handleToggleCriticalAction(action.label)}
+                  onCheckedChange={() =>
+                    handleToggleCriticalAction(action.label)
+                  }
                 />
               </div>
             ))}
@@ -667,11 +804,7 @@ export function AiModesView({ config }: AiModesViewProps) {
 
       {/* Sticky save bar for mobile */}
       <div className="sticky bottom-0 sm:hidden -mx-4 border-t bg-background/95 backdrop-blur-sm px-4 py-3">
-        <Button
-          onClick={handleSave}
-          disabled={isPending}
-          className="w-full"
-        >
+        <Button onClick={handleSave} disabled={isPending} className="w-full">
           {isPending ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (

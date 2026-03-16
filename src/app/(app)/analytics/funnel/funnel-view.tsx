@@ -32,7 +32,10 @@ export function FunnelView({ data }: { data: FunnelStage[] }) {
 
   return (
     <div>
-      <PageHeader title="Analyse du Funnel" description="Taux de conversion par étape du pipeline">
+      <PageHeader
+        title="Analyse du Funnel"
+        description="Taux de conversion par étape du pipeline"
+      >
         <Link href="/analytics">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -43,18 +46,24 @@ export function FunnelView({ data }: { data: FunnelStage[] }) {
 
       <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Funnel de conversion</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Funnel de conversion
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center gap-3 py-6">
             {sorted.map((stage, i) => {
-              const widthPercent = maxValue > 0 ? (stage.value / maxValue) * 100 : 0;
+              const widthPercent =
+                maxValue > 0 ? (stage.value / maxValue) * 100 : 0;
               const minWidth = 20;
               const barWidth = Math.max(widthPercent, minWidth);
               const isBottleneck = i === worstDropIndex;
 
               return (
-                <div key={stage.stage} className="w-full flex flex-col items-center">
+                <div
+                  key={stage.stage}
+                  className="w-full flex flex-col items-center"
+                >
                   <div
                     className={`relative rounded-xl py-4 px-6 text-center transition-all duration-300 hover:shadow-md ${isBottleneck ? "ring-2 ring-red-500/60 ring-offset-2 ring-offset-background" : ""}`}
                     style={{
@@ -65,7 +74,9 @@ export function FunnelView({ data }: { data: FunnelStage[] }) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-sm">{stage.stage}</span>
-                      <span className="text-xl font-bold tracking-tight">{stage.value}</span>
+                      <span className="text-xl font-bold tracking-tight">
+                        {stage.value}
+                      </span>
                     </div>
                     {isBottleneck && (
                       <span className="absolute -right-2 -top-2 bg-red-500 text-white text-[10px] px-2.5 py-0.5 rounded-full font-semibold shadow-sm">
@@ -75,10 +86,18 @@ export function FunnelView({ data }: { data: FunnelStage[] }) {
                   </div>
                   {i < sorted.length - 1 && (
                     <div className="flex items-center gap-2 py-1.5">
-                      <ArrowDown className={`h-4 w-4 ${i + 1 === worstDropIndex ? "text-red-500" : "text-muted-foreground/50"}`} />
+                      <ArrowDown
+                        className={`h-4 w-4 ${i + 1 === worstDropIndex ? "text-red-500" : "text-muted-foreground/50"}`}
+                      />
                       {sorted[i].value > 0 && (
-                        <span className={`text-xs font-medium ${i + 1 === worstDropIndex ? "text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full" : "text-muted-foreground"}`}>
-                          {((sorted[i + 1].value / sorted[i].value) * 100).toFixed(0)}% passent à l&apos;étape suivante
+                        <span
+                          className={`text-xs font-medium ${i + 1 === worstDropIndex ? "text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full" : "text-muted-foreground"}`}
+                        >
+                          {(
+                            (sorted[i + 1].value / sorted[i].value) *
+                            100
+                          ).toFixed(0)}
+                          % passent à l&apos;étape suivante
                         </span>
                       )}
                     </div>
@@ -94,7 +113,9 @@ export function FunnelView({ data }: { data: FunnelStage[] }) {
                 <ArrowDown className="h-7 w-7 opacity-40" />
               </div>
               <p className="font-medium">Aucun deal dans le pipeline</p>
-              <p className="text-sm mt-1">Les données du funnel apparaîtront ici.</p>
+              <p className="text-sm mt-1">
+                Les données du funnel apparaîtront ici.
+              </p>
             </div>
           )}
         </CardContent>

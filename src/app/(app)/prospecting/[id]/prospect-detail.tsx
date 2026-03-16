@@ -39,7 +39,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import type { Prospect, ProspectScore, ProspectList, PipelineStage } from "@/lib/types/database";
+import type {
+  Prospect,
+  ProspectScore,
+  ProspectList,
+  PipelineStage,
+} from "@/lib/types/database";
 import {
   ArrowLeft,
   User,
@@ -65,20 +70,43 @@ import {
 interface ProspectDetailProps {
   prospect: Prospect & {
     list?: ProspectList | null;
-    assigned_setter?: { id: string; full_name: string | null; avatar_url: string | null } | null;
+    assigned_setter?: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
   };
   score: ProspectScore | null;
   lists: ProspectList[];
-  setters: Array<{ id: string; full_name: string | null; avatar_url: string | null }>;
+  setters: Array<{
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  }>;
   stages: PipelineStage[];
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  new: { label: "Nouveau", color: "bg-muted/40 text-muted-foreground/60 border-border/30" },
-  contacted: { label: "Contacté", color: "bg-muted/60 text-muted-foreground border-border/50" },
-  replied: { label: "A répondu", color: "bg-brand/10 text-brand border-brand/20" },
-  booked: { label: "RDV pris", color: "bg-foreground/10 text-foreground border-foreground/20" },
-  not_interested: { label: "Pas intéressé", color: "bg-muted/50 text-muted-foreground border-border/50" },
+  new: {
+    label: "Nouveau",
+    color: "bg-muted/40 text-muted-foreground/60 border-border/30",
+  },
+  contacted: {
+    label: "Contacté",
+    color: "bg-muted/60 text-muted-foreground border-border/50",
+  },
+  replied: {
+    label: "A répondu",
+    color: "bg-brand/10 text-brand border-brand/20",
+  },
+  booked: {
+    label: "RDV pris",
+    color: "bg-foreground/10 text-foreground border-foreground/20",
+  },
+  not_interested: {
+    label: "Pas intéressé",
+    color: "bg-muted/50 text-muted-foreground border-border/50",
+  },
 };
 
 const tempColors: Record<string, string> = {
@@ -92,7 +120,13 @@ const platformIcons: Record<string, typeof Linkedin> = {
   instagram: Instagram,
 };
 
-export function ProspectDetail({ prospect, score, lists, setters, stages }: ProspectDetailProps) {
+export function ProspectDetail({
+  prospect,
+  score,
+  lists,
+  setters,
+  stages,
+}: ProspectDetailProps) {
   const router = useRouter();
   const [currentProspect, setCurrentProspect] = useState(prospect);
   const [notes, setNotes] = useState(prospect.notes || "");
@@ -122,14 +156,19 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
   const statusInfo = statusConfig[currentProspect.status] || statusConfig.new;
   const PlatformIcon = platformIcons[currentProspect.platform || ""] || User;
-  const conversationHistory = Array.isArray(currentProspect.conversation_history)
+  const conversationHistory = Array.isArray(
+    currentProspect.conversation_history,
+  )
     ? currentProspect.conversation_history
     : [];
 
   async function handleStatusChange(status: string) {
     try {
       await updateProspectStatus(currentProspect.id, status);
-      setCurrentProspect({ ...currentProspect, status: status as Prospect["status"] });
+      setCurrentProspect({
+        ...currentProspect,
+        status: status as Prospect["status"],
+      });
       toast.success("Statut mis a jour");
     } catch {
       toast.error("Erreur lors de la mise a jour");
@@ -168,7 +207,11 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
     if (!newMessage.trim()) return;
     setSendingMessage(true);
 
-    const result = await addProspectMessage(currentProspect.id, newMessage, "sent");
+    const result = await addProspectMessage(
+      currentProspect.id,
+      newMessage,
+      "sent",
+    );
 
     if (result.error) {
       toast.error("Erreur");
@@ -228,7 +271,12 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
         description={`Prospect ${currentProspect.platform || "inconnu"} - ajoute ${formatDistanceToNow(new Date(currentProspect.created_at), { addSuffix: true, locale: fr })}`}
       >
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="rounded-xl font-medium" asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl font-medium"
+            asChild
+          >
             <Link href="/prospecting">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Retour
@@ -237,7 +285,10 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
           <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium">
+              <Button
+                size="sm"
+                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+              >
                 <ArrowRightCircle className="h-4 w-4 mr-1" />
                 Convertir en deal
               </Button>
@@ -251,7 +302,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <label className="text-sm font-medium">Titre du deal</label>
                   <Input
                     value={dealForm.title}
-                    onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
+                    onChange={(e) =>
+                      setDealForm({ ...dealForm, title: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -259,14 +312,21 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <Input
                     type="number"
                     value={dealForm.value}
-                    onChange={(e) => setDealForm({ ...dealForm, value: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setDealForm({
+                        ...dealForm,
+                        value: Number(e.target.value),
+                      })
+                    }
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Stage initial</label>
                   <Select
                     value={dealForm.stage_id}
-                    onValueChange={(v) => setDealForm({ ...dealForm, stage_id: v })}
+                    onValueChange={(v) =>
+                      setDealForm({ ...dealForm, stage_id: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selectionner un stage" />
@@ -306,14 +366,18 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <label className="text-sm font-medium">Nom</label>
                   <Input
                     value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, name: e.target.value })
+                    }
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium">URL du profil</label>
                   <Input
                     value={editForm.profile_url}
-                    onChange={(e) => setEditForm({ ...editForm, profile_url: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, profile_url: e.target.value })
+                    }
                     placeholder="https://..."
                   />
                 </div>
@@ -321,7 +385,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <label className="text-sm font-medium">Plateforme</label>
                   <Select
                     value={editForm.platform}
-                    onValueChange={(v) => setEditForm({ ...editForm, platform: v })}
+                    onValueChange={(v) =>
+                      setEditForm({ ...editForm, platform: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -339,7 +405,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <label className="text-sm font-medium">Liste</label>
                   <Select
                     value={editForm.list_id}
-                    onValueChange={(v) => setEditForm({ ...editForm, list_id: v })}
+                    onValueChange={(v) =>
+                      setEditForm({ ...editForm, list_id: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Aucune liste" />
@@ -358,7 +426,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <label className="text-sm font-medium">Assigne a</label>
                   <Select
                     value={editForm.assigned_setter_id}
-                    onValueChange={(v) => setEditForm({ ...editForm, assigned_setter_id: v })}
+                    onValueChange={(v) =>
+                      setEditForm({ ...editForm, assigned_setter_id: v })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Non assigne" />
@@ -374,10 +444,14 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   </Select>
                 </div>
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Relance automatique</label>
+                  <label className="text-sm font-medium">
+                    Relance automatique
+                  </label>
                   <Switch
                     checked={editForm.auto_follow_up}
-                    onCheckedChange={(c) => setEditForm({ ...editForm, auto_follow_up: c })}
+                    onCheckedChange={(c) =>
+                      setEditForm({ ...editForm, auto_follow_up: c })
+                    }
                   />
                 </div>
                 <Button
@@ -392,7 +466,11 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -400,7 +478,8 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer ce prospect ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Cette action est irreversible. L&apos;historique des conversations sera perdu.
+                  Cette action est irreversible. L&apos;historique des
+                  conversations sera perdu.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -439,11 +518,19 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   Temperature
                 </div>
                 {score ? (
-                  <Badge className={tempColors[score.temperature] || tempColors.cold}>
-                    {score.temperature === "hot" ? "Hot" : score.temperature === "warm" ? "Warm" : "Cold"}
+                  <Badge
+                    className={tempColors[score.temperature] || tempColors.cold}
+                  >
+                    {score.temperature === "hot"
+                      ? "Hot"
+                      : score.temperature === "warm"
+                        ? "Warm"
+                        : "Cold"}
                   </Badge>
                 ) : (
-                  <span className="text-sm text-muted-foreground">Non calcule</span>
+                  <span className="text-sm text-muted-foreground">
+                    Non calcule
+                  </span>
                 )}
               </CardContent>
             </Card>
@@ -462,7 +549,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <MessageSquare className="h-3 w-3" />
                   Messages
                 </div>
-                <p className="text-xl font-bold">{conversationHistory.length}</p>
+                <p className="text-xl font-bold">
+                  {conversationHistory.length}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -477,7 +566,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 {Object.entries(statusConfig).map(([status, config]) => (
                   <Button
                     key={status}
-                    variant={currentProspect.status === status ? "default" : "outline"}
+                    variant={
+                      currentProspect.status === status ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => handleStatusChange(status)}
                     className={`rounded-xl font-medium ${
@@ -496,7 +587,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
           {/* Conversation history */}
           <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Historique des conversations</CardTitle>
+              <CardTitle className="text-base">
+                Historique des conversations
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {conversationHistory.length === 0 ? (
@@ -516,7 +609,11 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                     >
                       <p className="text-sm">{msg.content as string}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(msg.timestamp as string), "d MMM HH:mm", { locale: fr })}
+                        {format(
+                          new Date(msg.timestamp as string),
+                          "d MMM HH:mm",
+                          { locale: fr },
+                        )}
                       </p>
                     </div>
                   ))}
@@ -585,7 +682,9 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                   <Separator />
                   <div className="text-sm">
                     <span className="text-muted-foreground">Liste:</span>{" "}
-                    <span className="font-medium">{currentProspect.list.name}</span>
+                    <span className="font-medium">
+                      {currentProspect.list.name}
+                    </span>
                   </div>
                 </>
               )}
@@ -601,9 +700,12 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
               <CardContent>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
-                    {currentProspect.assigned_setter.full_name?.charAt(0) || "?"}
+                    {currentProspect.assigned_setter.full_name?.charAt(0) ||
+                      "?"}
                   </div>
-                  <p className="font-medium">{currentProspect.assigned_setter.full_name}</p>
+                  <p className="font-medium">
+                    {currentProspect.assigned_setter.full_name}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -622,11 +724,15 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Reactivite</span>
-                  <span className="font-medium">{score.responsiveness_score}</span>
+                  <span className="font-medium">
+                    {score.responsiveness_score}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Qualification</span>
-                  <span className="font-medium">{score.qualification_score}</span>
+                  <span className="font-medium">
+                    {score.qualification_score}
+                  </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-sm font-medium">
@@ -670,14 +776,20 @@ export function ProspectDetail({ prospect, score, lists, setters, stages }: Pros
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Cree le</span>
                 <span>
-                  {format(new Date(currentProspect.created_at), "d MMM yyyy", { locale: fr })}
+                  {format(new Date(currentProspect.created_at), "d MMM yyyy", {
+                    locale: fr,
+                  })}
                 </span>
               </div>
               {currentProspect.last_message_at && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Dernier message</span>
                   <span>
-                    {format(new Date(currentProspect.last_message_at), "d MMM yyyy", { locale: fr })}
+                    {format(
+                      new Date(currentProspect.last_message_at),
+                      "d MMM yyyy",
+                      { locale: fr },
+                    )}
                   </span>
                 </div>
               )}

@@ -24,7 +24,7 @@ export async function saveDashboardWidgets(
     type: string;
     position: number;
     config: Record<string, unknown>;
-  }>
+  }>,
 ) {
   const supabase = await createClient();
   const {
@@ -63,7 +63,7 @@ export async function getWidgetData(widgetType: string) {
   const startOfMonth = new Date(
     now.getFullYear(),
     now.getMonth(),
-    1
+    1,
   ).toISOString();
 
   switch (widgetType) {
@@ -109,7 +109,7 @@ export async function getWidgetData(widgetType: string) {
 
       const total = (deals || []).length;
       const signed = (deals || []).filter(
-        (d) => d.stage_id === signedStage?.id
+        (d) => d.stage_id === signedStage?.id,
       ).length;
       const rate = total > 0 ? Math.round((signed / total) * 100) : 0;
 

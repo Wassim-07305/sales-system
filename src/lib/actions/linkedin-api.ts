@@ -19,10 +19,12 @@ async function getUnipileLinkedInAccountId(): Promise<string | null> {
     const client = getUnipileClient();
     if (!client) return null;
     const response = await client.account.getAll();
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
-    const linkedinAccount = (items as Array<{ id: string; type?: string; provider?: string }>).find(
-      (a) => (a.type || a.provider || "").toUpperCase() === "LINKEDIN"
-    );
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
+    const linkedinAccount = (
+      items as Array<{ id: string; type?: string; provider?: string }>
+    ).find((a) => (a.type || a.provider || "").toUpperCase() === "LINKEDIN");
     return linkedinAccount?.id || null;
   } catch {
     return null;
@@ -30,7 +32,10 @@ async function getUnipileLinkedInAccountId(): Promise<string | null> {
 }
 
 /** Resolve the LinkedIn access token: env var → user_settings row → null */
-async function resolveToken(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
+async function resolveToken(
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createClient>>,
+) {
   const envToken = await getApiKey("LINKEDIN_ACCESS_TOKEN");
   if (envToken) return envToken;
 
@@ -155,12 +160,18 @@ export async function getLinkedInProfile(profileUrl: string) {
     try {
       const client = getUnipileClient();
       if (client) {
-        const vanity = profileUrl.match(/linkedin\.com\/in\/([^/?#]+)/)?.[1] || profileUrl;
+        const vanity =
+          profileUrl.match(/linkedin\.com\/in\/([^/?#]+)/)?.[1] || profileUrl;
         const response = await client.users.getProfile({
           account_id: unipileAccountId,
           identifier: vanity,
         });
-        const p = response as { id?: string; first_name?: string; last_name?: string; headline?: string };
+        const p = response as {
+          id?: string;
+          first_name?: string;
+          last_name?: string;
+          headline?: string;
+        };
         if (p.first_name || p.last_name) {
           return {
             data: {
@@ -191,7 +202,7 @@ export async function getLinkedInProfile(profileUrl: string) {
           `${LINKEDIN_API_BASE}/people/(vanityName:${encodeURIComponent(vanityName)})?projection=(id,localizedFirstName,localizedLastName,localizedHeadline,profilePicture)`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         if (res.ok) {
@@ -242,7 +253,8 @@ export async function getLinkedInProfile(profileUrl: string) {
 
     if (apifyResults && apifyResults.length > 0) {
       const p = apifyResults[0];
-      const fullName = p.fullName || [p.firstName, p.lastName].filter(Boolean).join(" ");
+      const fullName =
+        p.fullName || [p.firstName, p.lastName].filter(Boolean).join(" ");
       if (fullName) {
         return {
           data: {
@@ -269,7 +281,10 @@ export async function getLinkedInProfile(profileUrl: string) {
     .from("prospects")
     .select("id, name, profile_url, platform, status")
     .eq("platform", "linkedin")
-    .ilike("profile_url", `%${profileUrl.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//, "")}%`)
+    .ilike(
+      "profile_url",
+      `%${profileUrl.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//, "")}%`,
+    )
     .limit(1)
     .single();
 
@@ -288,9 +303,11 @@ export async function getLinkedInProfile(profileUrl: string) {
   // No data available — return error instead of fake stub
   return {
     data: null,
-    error: "Profil LinkedIn introuvable. " + (!token
-      ? "API LinkedIn non configurée — ajoutez LINKEDIN_ACCESS_TOKEN ou connectez votre compte dans Paramètres."
-      : "Le profil n'a pas pu être récupéré via l'API. Vérifiez l'URL."),
+    error:
+      "Profil LinkedIn introuvable. " +
+      (!token
+        ? "API LinkedIn non configurée — ajoutez LINKEDIN_ACCESS_TOKEN ou connectez votre compte dans Paramètres."
+        : "Le profil n'a pas pu être récupéré via l'API. Vérifiez l'URL."),
   };
 }
 
@@ -444,10 +461,18 @@ export async function searchLinkedInProfiles(query: string) {
       if (dsn && apiKey) {
         const res = await fetch(
           `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(query)}&limit=20`,
-          { headers: { "X-API-KEY": apiKey } }
+          { headers: { "X-API-KEY": apiKey } },
         );
         if (res.ok) {
-          const data = (await res.json()) as { items?: Array<{ id?: string; first_name?: string; last_name?: string; headline?: string; public_identifier?: string }> };
+          const data = (await res.json()) as {
+            items?: Array<{
+              id?: string;
+              first_name?: string;
+              last_name?: string;
+              headline?: string;
+              public_identifier?: string;
+            }>;
+          };
           const results = (data.items || []).map((p) => ({
             id: p.id || p.public_identifier || "",
             name: [p.first_name, p.last_name].filter(Boolean).join(" ") || "",
@@ -471,7 +496,7 @@ export async function searchLinkedInProfiles(query: string) {
         `${LINKEDIN_API_BASE}/search/people?q=keywords&keywords=${encodeURIComponent(query)}&count=20`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (res.ok) {

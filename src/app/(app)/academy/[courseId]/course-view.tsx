@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback, useEffect, useTransition, startTransition } from "react";
+import {
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+  useEffect,
+  useTransition,
+  startTransition,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -91,7 +99,10 @@ interface CourseViewProps {
     description: string | null;
     modules: ModuleData[];
   };
-  progressMap: Record<string, { completed: boolean; quiz_score: number | null }>;
+  progressMap: Record<
+    string,
+    { completed: boolean; quiz_score: number | null }
+  >;
   quizMap: Record<string, Record<string, unknown>>;
   prerequisites: PrerequisiteInfo[];
   allPrereqsMet: boolean;
@@ -122,13 +133,15 @@ function getVideoEmbed(url: string): {
         id = null;
       }
     }
-    if (id) return { type: "iframe", src: `https://www.youtube.com/embed/${id}` };
+    if (id)
+      return { type: "iframe", src: `https://www.youtube.com/embed/${id}` };
   }
 
   // Vimeo
   if (url.includes("vimeo.com")) {
     const id = url.split("/").pop()?.split("?")[0];
-    if (id) return { type: "iframe", src: `https://player.vimeo.com/video/${id}` };
+    if (id)
+      return { type: "iframe", src: `https://player.vimeo.com/video/${id}` };
   }
 
   // Loom
@@ -142,7 +155,11 @@ function getVideoEmbed(url: string): {
 }
 
 function getAttachmentIcon(type: string) {
-  if (type.includes("pdf") || type.includes("document") || type.includes("text"))
+  if (
+    type.includes("pdf") ||
+    type.includes("document") ||
+    type.includes("text")
+  )
     return FileText;
   if (type.includes("video")) return Video;
   if (type.includes("audio")) return Headphones;
@@ -166,7 +183,8 @@ export function CourseView({
 }: CourseViewProps) {
   // -- Flatten all lessons with module context for navigation
   const flatLessons = useMemo(() => {
-    const list: Array<LessonData & { moduleId: string; moduleTitle: string }> = [];
+    const list: Array<LessonData & { moduleId: string; moduleTitle: string }> =
+      [];
     for (const mod of course.modules) {
       for (const lesson of mod.lessons) {
         list.push({ ...lesson, moduleId: mod.id, moduleTitle: mod.title });
@@ -180,19 +198,28 @@ export function CourseView({
   const [quizAttempts, setQuizAttempts] = useState(initialQuizAttempts);
 
   const completedLessonIds = useMemo(
-    () => new Set(Object.entries(localProgress).filter(([, v]) => v.completed).map(([k]) => k)),
-    [localProgress]
+    () =>
+      new Set(
+        Object.entries(localProgress)
+          .filter(([, v]) => v.completed)
+          .map(([k]) => k),
+      ),
+    [localProgress],
   );
 
   const totalLessons = flatLessons.length;
   const completedCount = completedLessonIds.size;
-  const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const progressPercent =
+    totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   // -- Module unlock status (driven by server-side quiz score checks)
-  const [localModuleUnlock, setLocalModuleUnlock] = useState(moduleUnlockStatus);
+  const [localModuleUnlock, setLocalModuleUnlock] =
+    useState(moduleUnlockStatus);
 
   // -- Track which modules just got unlocked for celebration animation
-  const [justUnlockedModules, setJustUnlockedModules] = useState<Set<string>>(new Set());
+  const [justUnlockedModules, setJustUnlockedModules] = useState<Set<string>>(
+    new Set(),
+  );
 
   const isModuleUnlocked = useCallback(
     (moduleId: string, moduleIndex?: number): boolean => {
@@ -202,14 +229,14 @@ export function CourseView({
       if (!status) return moduleIndex === 0 || moduleIndex === undefined;
       return status.unlocked;
     },
-    [allPrereqsMet, localModuleUnlock]
+    [allPrereqsMet, localModuleUnlock],
   );
 
   const getModuleUnlockInfo = useCallback(
     (moduleId: string): ModuleUnlockInfo | null => {
       return localModuleUnlock[moduleId] || null;
     },
-    [localModuleUnlock]
+    [localModuleUnlock],
   );
 
   // -- Sequential unlock logic (now also checks module lock)
@@ -227,7 +254,7 @@ export function CourseView({
       const prevLesson = flatLessons[idx - 1];
       return completedLessonIds.has(prevLesson.id);
     },
-    [allPrereqsMet, flatLessons, completedLessonIds, isModuleUnlocked]
+    [allPrereqsMet, flatLessons, completedLessonIds, isModuleUnlocked],
   );
 
   // -- Find first incomplete lesson
@@ -240,17 +267,17 @@ export function CourseView({
 
   // -- Selected lesson
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(
-    allPrereqsMet ? firstIncompleteLessonId : null
+    allPrereqsMet ? firstIncompleteLessonId : null,
   );
 
   const selectedLesson = useMemo(
     () => flatLessons.find((l) => l.id === selectedLessonId) ?? null,
-    [flatLessons, selectedLessonId]
+    [flatLessons, selectedLessonId],
   );
 
   const selectedLessonIndex = useMemo(
     () => flatLessons.findIndex((l) => l.id === selectedLessonId),
-    [flatLessons, selectedLessonId]
+    [flatLessons, selectedLessonId],
   );
 
   // -- Expanded modules
@@ -258,8 +285,12 @@ export function CourseView({
     const initial = new Set<string>();
     // Expand modules containing incomplete lessons or completed lessons
     for (const mod of course.modules) {
-      const hasIncomplete = mod.lessons.some((l) => !completedLessonIds.has(l.id));
-      const hasCompleted = mod.lessons.some((l) => completedLessonIds.has(l.id));
+      const hasIncomplete = mod.lessons.some(
+        (l) => !completedLessonIds.has(l.id),
+      );
+      const hasCompleted = mod.lessons.some((l) =>
+        completedLessonIds.has(l.id),
+      );
       if (hasIncomplete || hasCompleted) initial.add(mod.id);
     }
     // If nothing expanded, expand first module
@@ -395,7 +426,7 @@ export function CourseView({
         selectedLessonId,
         quizAnswers,
         score,
-        passed
+        passed,
       );
 
       setQuizSubmitted(true);
@@ -425,13 +456,15 @@ export function CourseView({
             for (const [modId, info] of Object.entries(next)) {
               if (!info.unlocked && !info.previousModuleQuizPassed) {
                 // Check if the current lesson belongs to the previous module
-                const currentLessonEntry = flatLessons.find((l) => l.id === selectedLessonId);
+                const currentLessonEntry = flatLessons.find(
+                  (l) => l.id === selectedLessonId,
+                );
                 if (currentLessonEntry) {
                   const prevModuleIdx = course.modules.findIndex(
-                    (m) => m.id === currentLessonEntry.moduleId
+                    (m) => m.id === currentLessonEntry.moduleId,
                   );
                   const thisModuleIdx = course.modules.findIndex(
-                    (m) => m.id === modId
+                    (m) => m.id === modId,
                   );
                   if (thisModuleIdx === prevModuleIdx + 1) {
                     next[modId] = {
@@ -469,7 +502,7 @@ export function CourseView({
             result.attemptsLeft > 0
               ? `Il vous reste ${result.attemptsLeft} tentative(s) aujourd'hui.`
               : "Plus de tentatives aujourd'hui."
-          }`
+          }`,
         );
       }
     } catch (error) {
@@ -556,26 +589,37 @@ export function CourseView({
               const isExpanded = expandedModules.has(mod.id);
               const moduleLessonCount = mod.lessons.length;
               const moduleCompletedCount = mod.lessons.filter((l) =>
-                completedLessonIds.has(l.id)
+                completedLessonIds.has(l.id),
               ).length;
-              const moduleAllComplete = moduleLessonCount > 0 && moduleCompletedCount === moduleLessonCount;
+              const moduleAllComplete =
+                moduleLessonCount > 0 &&
+                moduleCompletedCount === moduleLessonCount;
               const modUnlocked = isModuleUnlocked(mod.id, modIdx);
               const modUnlockInfo = getModuleUnlockInfo(mod.id);
               const isJustUnlocked = justUnlockedModules.has(mod.id);
-              const moduleProgress = moduleLessonCount > 0 ? Math.round((moduleCompletedCount / moduleLessonCount) * 100) : 0;
+              const moduleProgress =
+                moduleLessonCount > 0
+                  ? Math.round((moduleCompletedCount / moduleLessonCount) * 100)
+                  : 0;
 
               return (
-                <div key={mod.id} className={cn(
-                  "transition-all duration-500",
-                  isJustUnlocked && "animate-in fade-in slide-in-from-left-2 duration-500"
-                )}>
+                <div
+                  key={mod.id}
+                  className={cn(
+                    "transition-all duration-500",
+                    isJustUnlocked &&
+                      "animate-in fade-in slide-in-from-left-2 duration-500",
+                  )}
+                >
                   {/* Module header */}
                   <button
                     onClick={() => toggleModule(mod.id)}
                     className={cn(
                       "w-full flex items-center justify-between px-5 py-3.5 transition-all duration-200 group relative",
-                      modUnlocked ? "hover:bg-muted/50" : "opacity-50 hover:opacity-60",
-                      isJustUnlocked && "bg-brand/5"
+                      modUnlocked
+                        ? "hover:bg-muted/50"
+                        : "opacity-50 hover:opacity-60",
+                      isJustUnlocked && "bg-brand/5",
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -603,13 +647,15 @@ export function CourseView({
                       )}
 
                       <div className="min-w-0 flex-1">
-                        <span className={cn(
-                          "text-xs font-semibold tracking-wider uppercase truncate block transition-colors",
-                          modUnlocked
-                            ? "text-foreground/70 group-hover:text-foreground"
-                            : "text-muted-foreground",
-                          isJustUnlocked && "text-brand"
-                        )}>
+                        <span
+                          className={cn(
+                            "text-xs font-semibold tracking-wider uppercase truncate block transition-colors",
+                            modUnlocked
+                              ? "text-foreground/70 group-hover:text-foreground"
+                              : "text-muted-foreground",
+                            isJustUnlocked && "text-brand",
+                          )}
+                        >
                           {mod.title}
                         </span>
                         {/* Mini progress bar under module title */}
@@ -618,7 +664,7 @@ export function CourseView({
                             <div
                               className={cn(
                                 "h-full rounded-full transition-all duration-700 ease-out",
-                                moduleAllComplete ? "bg-brand" : "bg-brand/60"
+                                moduleAllComplete ? "bg-brand" : "bg-brand/60",
                               )}
                               style={{ width: `${moduleProgress}%` }}
                             />
@@ -638,15 +684,22 @@ export function CourseView({
                           Debloque !
                         </Badge>
                       ) : !modUnlocked ? (
-                        <Badge variant="outline" className="text-[10px] px-2 py-0.5 text-muted-foreground border-border/50">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-2 py-0.5 text-muted-foreground border-border/50"
+                        >
                           <Lock className="h-2.5 w-2.5 mr-1" />
                           Verrouille
                         </Badge>
                       ) : null}
-                      <span className={cn(
-                        "text-[10px] tabular-nums",
-                        moduleAllComplete ? "text-brand" : "text-muted-foreground"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-[10px] tabular-nums",
+                          moduleAllComplete
+                            ? "text-brand"
+                            : "text-muted-foreground",
+                        )}
+                      >
                         {moduleCompletedCount}/{moduleLessonCount}
                       </span>
                     </div>
@@ -664,61 +717,85 @@ export function CourseView({
                             Module verrouille
                           </p>
                           <p className="text-xs text-amber-700/80 dark:text-amber-300/70 mt-1 leading-relaxed">
-                            Reussissez le quiz du module precedent avec un score minimum de 90% pour debloquer ce contenu.
+                            Reussissez le quiz du module precedent avec un score
+                            minimum de 90% pour debloquer ce contenu.
                           </p>
 
                           {/* Score progress bar */}
-                          {modUnlockInfo.previousModuleQuizBestScore !== null && modUnlockInfo.previousModuleQuizBestScore > 0 && (
-                            <div className="mt-3 space-y-1.5">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-200">
-                                  <Trophy className="h-3 w-3" />
-                                  Votre meilleur score
-                                </span>
-                                <span className={cn(
-                                  "font-bold tabular-nums",
-                                  modUnlockInfo.previousModuleQuizBestScore >= 90
-                                    ? "text-green-600 dark:text-green-400"
-                                    : modUnlockInfo.previousModuleQuizBestScore >= 50
-                                    ? "text-amber-600 dark:text-amber-400"
-                                    : "text-red-600 dark:text-red-400"
-                                )}>
-                                  {modUnlockInfo.previousModuleQuizBestScore}%
-                                </span>
+                          {modUnlockInfo.previousModuleQuizBestScore !== null &&
+                            modUnlockInfo.previousModuleQuizBestScore > 0 && (
+                              <div className="mt-3 space-y-1.5">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-200">
+                                    <Trophy className="h-3 w-3" />
+                                    Votre meilleur score
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      "font-bold tabular-nums",
+                                      modUnlockInfo.previousModuleQuizBestScore >=
+                                        90
+                                        ? "text-green-600 dark:text-green-400"
+                                        : modUnlockInfo.previousModuleQuizBestScore >=
+                                            50
+                                          ? "text-amber-600 dark:text-amber-400"
+                                          : "text-red-600 dark:text-red-400",
+                                    )}
+                                  >
+                                    {modUnlockInfo.previousModuleQuizBestScore}%
+                                  </span>
+                                </div>
+                                {/* Visual score bar with 90% threshold marker */}
+                                <div className="relative h-2 w-full rounded-full bg-amber-200/50 dark:bg-amber-900/30 overflow-hidden">
+                                  <div
+                                    className={cn(
+                                      "h-full rounded-full transition-all duration-500 ease-out",
+                                      modUnlockInfo.previousModuleQuizBestScore >=
+                                        90
+                                        ? "bg-green-500"
+                                        : modUnlockInfo.previousModuleQuizBestScore >=
+                                            50
+                                          ? "bg-amber-500"
+                                          : "bg-red-400",
+                                    )}
+                                    style={{
+                                      width: `${modUnlockInfo.previousModuleQuizBestScore}%`,
+                                    }}
+                                  />
+                                  {/* 90% threshold marker */}
+                                  <div
+                                    className="absolute top-0 bottom-0 w-px bg-amber-800/40 dark:bg-amber-300/40"
+                                    style={{ left: "90%" }}
+                                  />
+                                </div>
+                                <p className="text-[10px] text-amber-600/70 dark:text-amber-400/50 text-right">
+                                  Seuil requis : 90%
+                                </p>
                               </div>
-                              {/* Visual score bar with 90% threshold marker */}
-                              <div className="relative h-2 w-full rounded-full bg-amber-200/50 dark:bg-amber-900/30 overflow-hidden">
-                                <div
-                                  className={cn(
-                                    "h-full rounded-full transition-all duration-500 ease-out",
-                                    modUnlockInfo.previousModuleQuizBestScore >= 90
-                                      ? "bg-green-500"
-                                      : modUnlockInfo.previousModuleQuizBestScore >= 50
-                                      ? "bg-amber-500"
-                                      : "bg-red-400"
-                                  )}
-                                  style={{ width: `${modUnlockInfo.previousModuleQuizBestScore}%` }}
-                                />
-                                {/* 90% threshold marker */}
-                                <div className="absolute top-0 bottom-0 w-px bg-amber-800/40 dark:bg-amber-300/40" style={{ left: '90%' }} />
-                              </div>
-                              <p className="text-[10px] text-amber-600/70 dark:text-amber-400/50 text-right">
-                                Seuil requis : 90%
-                              </p>
-                            </div>
-                          )}
+                            )}
 
                           {/* Remaining attempts pill */}
-                          {modUnlockInfo.previousModuleQuizTodayAttempts > 0 && (
+                          {modUnlockInfo.previousModuleQuizTodayAttempts >
+                            0 && (
                             <div className="mt-2.5 flex items-center gap-2">
-                              <div className={cn(
-                                "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
-                                Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts) > 0
-                                  ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800/40"
-                                  : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
-                              )}>
+                              <div
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                                  Math.max(
+                                    0,
+                                    modUnlockInfo.previousModuleQuizMaxAttempts -
+                                      modUnlockInfo.previousModuleQuizTodayAttempts,
+                                  ) > 0
+                                    ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800/40"
+                                    : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40",
+                                )}
+                              >
                                 <Clock className="h-3 w-3" />
-                                {Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts) > 0
+                                {Math.max(
+                                  0,
+                                  modUnlockInfo.previousModuleQuizMaxAttempts -
+                                    modUnlockInfo.previousModuleQuizTodayAttempts,
+                                ) > 0
                                   ? `${Math.max(0, modUnlockInfo.previousModuleQuizMaxAttempts - modUnlockInfo.previousModuleQuizTodayAttempts)} tentative(s) restante(s)`
                                   : "Revenez demain"}
                               </div>
@@ -741,7 +818,8 @@ export function CourseView({
                             Module debloque !
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            Felicitations ! Vous pouvez maintenant acceder a ce contenu.
+                            Felicitations ! Vous pouvez maintenant acceder a ce
+                            contenu.
                           </p>
                         </div>
                       </div>
@@ -750,10 +828,12 @@ export function CourseView({
 
                   {/* Lesson items */}
                   {isExpanded && (
-                    <div className={cn(
-                      "pb-2 animate-in fade-in slide-in-from-top-1 duration-200",
-                      !modUnlocked && "relative"
-                    )}>
+                    <div
+                      className={cn(
+                        "pb-2 animate-in fade-in slide-in-from-top-1 duration-200",
+                        !modUnlocked && "relative",
+                      )}
+                    >
                       {/* Subtle overlay for locked module lessons */}
                       {!modUnlocked && (
                         <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/20 to-background/40 dark:from-background/0 dark:via-background/10 dark:to-background/30 z-[1] pointer-events-none rounded-b-lg" />
@@ -769,28 +849,37 @@ export function CourseView({
                             key={lesson.id}
                             disabled={!unlocked}
                             onClick={() => selectLesson(lesson.id)}
-                            title={isModLocked
-                              ? "Reussissez le quiz du module precedent pour debloquer"
-                              : !unlocked
-                              ? "Terminez la lecon precedente pour debloquer"
-                              : undefined
+                            title={
+                              isModLocked
+                                ? "Reussissez le quiz du module precedent pour debloquer"
+                                : !unlocked
+                                  ? "Terminez la lecon precedente pour debloquer"
+                                  : undefined
                             }
                             className={cn(
                               "w-full flex items-center gap-3 pl-7 pr-4 py-2.5 text-left transition-all duration-200 relative",
                               isActive &&
                                 "bg-brand/8 border-l-2 border-brand shadow-[inset_0_0_12px_rgba(122,241,122,0.04)]",
-                              !isActive && unlocked && "hover:bg-muted/40 hover:pl-8",
-                              isModLocked && "opacity-35 cursor-not-allowed select-none",
-                              !isModLocked && !unlocked && "opacity-45 cursor-not-allowed"
+                              !isActive &&
+                                unlocked &&
+                                "hover:bg-muted/40 hover:pl-8",
+                              isModLocked &&
+                                "opacity-35 cursor-not-allowed select-none",
+                              !isModLocked &&
+                                !unlocked &&
+                                "opacity-45 cursor-not-allowed",
                             )}
                           >
                             {/* Status icon — larger touch target with refined states */}
                             <span className="shrink-0 flex items-center justify-center w-5 h-5">
                               {completed ? (
-                                <CheckCircle2 className={cn(
-                                  "h-[18px] w-[18px] text-brand",
-                                  isJustUnlocked && "animate-in zoom-in duration-300"
-                                )} />
+                                <CheckCircle2
+                                  className={cn(
+                                    "h-[18px] w-[18px] text-brand",
+                                    isJustUnlocked &&
+                                      "animate-in zoom-in duration-300",
+                                  )}
+                                />
                               ) : isActive ? (
                                 <div className="relative">
                                   <Play className="h-4 w-4 text-brand" />
@@ -817,7 +906,7 @@ export function CourseView({
                                   !completed &&
                                     !isActive &&
                                     unlocked &&
-                                    "text-foreground/80"
+                                    "text-foreground/80",
                                 )}
                               >
                                 {lesson.title}
@@ -833,7 +922,8 @@ export function CourseView({
                             {/* Lesson number for locked lessons (gives a sense of progression) */}
                             {!unlocked && (
                               <span className="text-[10px] text-muted-foreground/40 tabular-nums shrink-0">
-                                {modIdx > 0 ? `${modIdx + 1}.` : ""}{lessonIdx + 1}
+                                {modIdx > 0 ? `${modIdx + 1}.` : ""}
+                                {lessonIdx + 1}
                               </span>
                             )}
                           </button>
@@ -909,8 +999,8 @@ export function CourseView({
                     Prerequis non remplis
                   </h3>
                   <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                    Vous devez terminer les cours suivants avant d&apos;acceder a
-                    cette formation :
+                    Vous devez terminer les cours suivants avant d&apos;acceder
+                    a cette formation :
                   </p>
                   <ul className="mt-4 space-y-2">
                     {prerequisites
@@ -980,7 +1070,9 @@ export function CourseView({
               />
 
               {/* ---- Lesson title + description ---- */}
-              <h1 className="text-2xl font-bold mt-6">{selectedLesson.title}</h1>
+              <h1 className="text-2xl font-bold mt-6">
+                {selectedLesson.title}
+              </h1>
 
               {selectedLesson.description && (
                 <p className="text-muted-foreground mt-2 leading-relaxed">
@@ -1052,7 +1144,9 @@ export function CourseView({
                         ) : (
                           <CheckCircle2 className="h-4 w-4" />
                         )}
-                        {markingComplete ? "Enregistrement..." : "Marquer comme termine"}
+                        {markingComplete
+                          ? "Enregistrement..."
+                          : "Marquer comme termine"}
                       </Button>
                     )
                   )}
@@ -1072,29 +1166,44 @@ export function CourseView({
                       {activeAttempts && (
                         <div className="flex flex-wrap items-center gap-2">
                           {/* Attempts pill */}
-                          <div className={cn(
-                            "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
-                            Math.max(0, activeAttempts.maxAttempts - activeAttempts.todayAttempts) > 0
-                              ? "bg-muted/50 text-muted-foreground border-border/50"
-                              : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
-                          )}>
+                          <div
+                            className={cn(
+                              "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                              Math.max(
+                                0,
+                                activeAttempts.maxAttempts -
+                                  activeAttempts.todayAttempts,
+                              ) > 0
+                                ? "bg-muted/50 text-muted-foreground border-border/50"
+                                : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40",
+                            )}
+                          >
                             <Clock className="h-3 w-3" />
-                            {Math.max(0, activeAttempts.maxAttempts - activeAttempts.todayAttempts)} tentative(s)
+                            {Math.max(
+                              0,
+                              activeAttempts.maxAttempts -
+                                activeAttempts.todayAttempts,
+                            )}{" "}
+                            tentative(s)
                           </div>
                           {/* Best score pill */}
                           {activeAttempts.bestScore > 0 && (
-                            <div className={cn(
-                              "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
-                              activeAttempts.bestScore >= 90
-                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800/40"
-                                : activeAttempts.bestScore >= 50
-                                ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/40"
-                                : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40"
-                            )}>
+                            <div
+                              className={cn(
+                                "inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border",
+                                activeAttempts.bestScore >= 90
+                                  ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800/40"
+                                  : activeAttempts.bestScore >= 50
+                                    ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/40"
+                                    : "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40",
+                              )}
+                            >
                               <Trophy className="h-3 w-3" />
                               {activeAttempts.bestScore}%
                               {activeAttempts.bestScore < 90 && (
-                                <span className="text-[10px] opacity-70">/90%</span>
+                                <span className="text-[10px] opacity-70">
+                                  /90%
+                                </span>
                               )}
                             </div>
                           )}
@@ -1131,7 +1240,7 @@ export function CourseView({
                       disabled={
                         selectedLessonIndex >= flatLessons.length - 1 ||
                         !isLessonUnlocked(
-                          flatLessons[selectedLessonIndex + 1]?.id ?? ""
+                          flatLessons[selectedLessonIndex + 1]?.id ?? "",
                         )
                       }
                       onClick={() => navigateLesson("next")}
@@ -1188,7 +1297,7 @@ export function CourseView({
                                 quizSubmitted &&
                                   quizAnswers[qi] === oi &&
                                   oi !== q.correct_index &&
-                                  "border-red-500 bg-red-50 dark:bg-red-950/20"
+                                  "border-red-500 bg-red-50 dark:bg-red-950/20",
                               )}
                               onClick={() =>
                                 setQuizAnswers((prev) => ({
@@ -1222,37 +1331,50 @@ export function CourseView({
                         "mt-6 rounded-xl border-2 p-5 animate-in fade-in slide-in-from-bottom-2 duration-300",
                         quizScore >= (activeQuiz.passing_score || 90)
                           ? "border-green-200 bg-gradient-to-br from-green-50/80 to-emerald-50/40 dark:border-green-900 dark:from-green-950/20 dark:to-emerald-950/10"
-                          : "border-red-200 bg-gradient-to-br from-red-50/80 to-orange-50/40 dark:border-red-900 dark:from-red-950/20 dark:to-orange-950/10"
+                          : "border-red-200 bg-gradient-to-br from-red-50/80 to-orange-50/40 dark:border-red-900 dark:from-red-950/20 dark:to-orange-950/10",
                       )}
                     >
                       <div className="flex items-center gap-5">
                         {/* Score ring */}
                         <div className="relative shrink-0 w-16 h-16">
-                          <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                          <svg
+                            className="w-16 h-16 -rotate-90"
+                            viewBox="0 0 64 64"
+                          >
                             <circle
-                              cx="32" cy="32" r="28"
+                              cx="32"
+                              cy="32"
+                              r="28"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="4"
                               className="text-muted/30"
                             />
                             <circle
-                              cx="32" cy="32" r="28"
+                              cx="32"
+                              cy="32"
+                              r="28"
                               fill="none"
                               strokeWidth="4"
                               strokeLinecap="round"
                               strokeDasharray={`${(quizScore / 100) * 175.9} 175.9`}
                               className={cn(
                                 "transition-all duration-1000 ease-out",
-                                quizScore >= (activeQuiz.passing_score || 90) ? "stroke-green-500" : "stroke-red-400"
+                                quizScore >= (activeQuiz.passing_score || 90)
+                                  ? "stroke-green-500"
+                                  : "stroke-red-400",
                               )}
                             />
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={cn(
-                              "text-lg font-bold tabular-nums leading-none",
-                              quizScore >= (activeQuiz.passing_score || 90) ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"
-                            )}>
+                            <span
+                              className={cn(
+                                "text-lg font-bold tabular-nums leading-none",
+                                quizScore >= (activeQuiz.passing_score || 90)
+                                  ? "text-green-600 dark:text-green-400"
+                                  : "text-red-500 dark:text-red-400",
+                              )}
+                            >
                               {quizScore}%
                             </span>
                           </div>
@@ -1266,7 +1388,9 @@ export function CourseView({
                               <XCircle className="h-5 w-5 text-red-500 shrink-0" />
                             )}
                             <p className="font-bold text-lg">
-                              {quizScore >= (activeQuiz.passing_score || 90) ? "Quiz reussi !" : "Quiz non valide"}
+                              {quizScore >= (activeQuiz.passing_score || 90)
+                                ? "Quiz reussi !"
+                                : "Quiz non valide"}
                             </p>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
@@ -1289,14 +1413,15 @@ export function CourseView({
                           Detail des reponses
                         </p>
                         {activeQuiz.questions.map((q, qi) => {
-                          const isCorrect =
-                            quizAnswers[qi] === q.correct_index;
+                          const isCorrect = quizAnswers[qi] === q.correct_index;
                           return (
                             <div
                               key={qi}
                               className={cn(
                                 "flex items-center gap-2.5 text-sm py-1 px-2 rounded-md -mx-1",
-                                isCorrect ? "bg-green-50/50 dark:bg-green-950/10" : "bg-red-50/50 dark:bg-red-950/10"
+                                isCorrect
+                                  ? "bg-green-50/50 dark:bg-green-950/10"
+                                  : "bg-red-50/50 dark:bg-red-950/10",
                               )}
                             >
                               {isCorrect ? (
@@ -1309,11 +1434,10 @@ export function CourseView({
                                   "truncate",
                                   isCorrect
                                     ? "text-green-700 dark:text-green-400"
-                                    : "text-red-600 dark:text-red-400"
+                                    : "text-red-600 dark:text-red-400",
                                 )}
                               >
-                                Q{qi + 1}:{" "}
-                                {q.question.slice(0, 60)}
+                                Q{qi + 1}: {q.question.slice(0, 60)}
                                 {q.question.length > 60 ? "..." : ""}
                               </span>
                             </div>
@@ -1337,9 +1461,7 @@ export function CourseView({
                             isQuizLocked(selectedLesson.id)
                           }
                         >
-                          {submitting
-                            ? "Envoi en cours..."
-                            : "Valider le quiz"}
+                          {submitting ? "Envoi en cours..." : "Valider le quiz"}
                         </Button>
                         <Button
                           variant="ghost"
@@ -1367,8 +1489,7 @@ export function CourseView({
                           Retour a la lecon
                         </Button>
                         {quizScore !== null &&
-                          quizScore <
-                            (activeQuiz.passing_score || 90) &&
+                          quizScore < (activeQuiz.passing_score || 90) &&
                           !isQuizLocked(selectedLesson.id) && (
                             <Button
                               variant="outline"
@@ -1411,7 +1532,9 @@ export function CourseView({
 
 function getStoredPosition(lessonId: string): number {
   try {
-    return parseFloat(localStorage.getItem(`video-pos:${lessonId}`) || "0") || 0;
+    return (
+      parseFloat(localStorage.getItem(`video-pos:${lessonId}`) || "0") || 0
+    );
   } catch {
     return 0;
   }
@@ -1522,13 +1645,21 @@ function VideoPlayer({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if user is typing in an input
-      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+      if (
+        (e.target as HTMLElement).tagName === "INPUT" ||
+        (e.target as HTMLElement).tagName === "TEXTAREA"
+      )
+        return;
 
       switch (e.key) {
         case " ":
         case "k":
           e.preventDefault();
-          if (video.paused) { video.play(); } else { video.pause(); }
+          if (video.paused) {
+            video.play();
+          } else {
+            video.pause();
+          }
           break;
         case "ArrowLeft":
           e.preventDefault();
@@ -1610,7 +1741,8 @@ function VideoPlayer({
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-black/80 text-white rounded-lg px-4 py-2 flex items-center gap-3 text-sm backdrop-blur-sm">
           <Clock className="h-4 w-4 text-brand" />
           <span>
-            Reprendre à {Math.floor(resumeTime / 60)}:{String(Math.floor(resumeTime % 60)).padStart(2, "0")}
+            Reprendre à {Math.floor(resumeTime / 60)}:
+            {String(Math.floor(resumeTime % 60)).padStart(2, "0")}
           </span>
           <button
             onClick={handleResume}
@@ -1672,7 +1804,7 @@ function VideoPlayer({
                     "block w-full text-left px-3 py-1.5 rounded text-xs transition-colors",
                     speed === playbackSpeed
                       ? "bg-brand/10 text-brand font-medium"
-                      : "hover:bg-muted text-foreground"
+                      : "hover:bg-muted text-foreground",
                   )}
                 >
                   {speed}x

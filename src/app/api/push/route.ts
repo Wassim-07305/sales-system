@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     if (!body.endpoint || !body.keys) {
       return NextResponse.json(
         { error: "Endpoint et clés requis" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -19,8 +19,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Erreur interne";
+    const message = error instanceof Error ? error.message : "Erreur interne";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -30,8 +29,7 @@ export async function DELETE() {
     const result = await unsubscribePush();
     return NextResponse.json(result);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Erreur interne";
+    const message = error instanceof Error ? error.message : "Erreur interne";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

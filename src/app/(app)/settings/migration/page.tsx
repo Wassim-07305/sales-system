@@ -5,7 +5,9 @@ import { MigrationView } from "./migration-view";
 
 export default async function MigrationPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase

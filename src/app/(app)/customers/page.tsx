@@ -4,7 +4,9 @@ import { CustomersView } from "./customers-view";
 
 export default async function CustomersPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -29,9 +31,6 @@ export default async function CustomersPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <CustomersView
-      clients={clients || []}
-      testimonials={testimonials || []}
-    />
+    <CustomersView clients={clients || []} testimonials={testimonials || []} />
   );
 }

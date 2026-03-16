@@ -88,16 +88,25 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 const levelColors: Record<string, string> = {
-  "Débutant": "text-red-400 bg-red-400/10 border-red-400/20",
-  "Intermédiaire": "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  "Avancé": "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  "Expert": "text-[#7af17a] bg-[#7af17a]/10 border-[#7af17a]/20",
+  Débutant: "text-red-400 bg-red-400/10 border-red-400/20",
+  Intermédiaire: "text-amber-400 bg-amber-400/10 border-amber-400/20",
+  Avancé: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  Expert: "text-[#7af17a] bg-[#7af17a]/10 border-[#7af17a]/20",
 };
 
 const priorityLabels: Record<string, { label: string; color: string }> = {
-  haute: { label: "Priorité haute", color: "bg-red-500/20 text-red-400 border-red-500/30" },
-  moyenne: { label: "Priorité moyenne", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
-  basse: { label: "Priorité basse", color: "bg-green-500/20 text-green-400 border-green-500/30" },
+  haute: {
+    label: "Priorité haute",
+    color: "bg-red-500/20 text-red-400 border-red-500/30",
+  },
+  moyenne: {
+    label: "Priorité moyenne",
+    color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  },
+  basse: {
+    label: "Priorité basse",
+    color: "bg-green-500/20 text-green-400 border-green-500/30",
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -113,15 +122,18 @@ export function DiagnosticView({
   recommendedCourses,
 }: DiagnosticViewProps) {
   const [mode, setMode] = useState<"quiz" | "results">(
-    hasCompleted ? "results" : "quiz"
+    hasCompleted ? "results" : "quiz",
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [skills, setSkills] = useState<SkillScore[]>(existingSkills);
   const [overallScore, setOverallScore] = useState(existingOverallScore);
-  const [courses, setCourses] = useState<RecommendedCourse[]>(recommendedCourses);
-  const [resultCompletedAt, setResultCompletedAt] = useState<string | null>(completedAt);
+  const [courses, setCourses] =
+    useState<RecommendedCourse[]>(recommendedCourses);
+  const [resultCompletedAt, setResultCompletedAt] = useState<string | null>(
+    completedAt,
+  );
   const [isPending, startTransition] = useTransition();
 
   const currentQuestion = questions[currentIndex];
@@ -136,7 +148,7 @@ export function DiagnosticView({
         [currentQuestion.id]: option,
       }));
     },
-    [currentQuestion]
+    [currentQuestion],
   );
 
   const handleNext = useCallback(() => {
@@ -156,10 +168,12 @@ export function DiagnosticView({
   const handleSubmit = useCallback(() => {
     startTransition(async () => {
       try {
-        const answerArray = Object.entries(answers).map(([questionId, answer]) => ({
-          questionId,
-          answer,
-        }));
+        const answerArray = Object.entries(answers).map(
+          ([questionId, answer]) => ({
+            questionId,
+            answer,
+          }),
+        );
         const result = await submitDiagnosticResults(answerArray);
         setSkills(result.skills);
         setOverallScore(result.overallScore);
@@ -241,7 +255,7 @@ export function DiagnosticView({
                       "hover:border-[#7af17a]/50 hover:bg-[#7af17a]/5",
                       isSelected
                         ? "border-[#7af17a] bg-[#7af17a]/10 text-foreground"
-                        : "border-border/50 bg-background/50 text-muted-foreground"
+                        : "border-border/50 bg-background/50 text-muted-foreground",
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -250,7 +264,7 @@ export function DiagnosticView({
                           "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium border",
                           isSelected
                             ? "bg-[#7af17a] text-[#14080e] border-[#7af17a]"
-                            : "border-border/50 text-muted-foreground"
+                            : "border-border/50 text-muted-foreground",
                         )}
                       >
                         {String.fromCharCode(65 + idx)}
@@ -316,8 +330,8 @@ export function DiagnosticView({
                 idx === currentIndex
                   ? "bg-[#7af17a] w-6"
                   : answers[q.id]
-                  ? "bg-[#7af17a]/50"
-                  : "bg-border"
+                    ? "bg-[#7af17a]/50"
+                    : "bg-border",
               )}
             />
           ))}
@@ -348,11 +362,7 @@ export function DiagnosticView({
               Academy
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRetake}
-          >
+          <Button variant="outline" size="sm" onClick={handleRetake}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Refaire le diagnostic
           </Button>
@@ -381,10 +391,10 @@ export function DiagnosticView({
                 {overallScore >= 80
                   ? "Excellent ! Vous maîtrisez les fondamentaux de la vente."
                   : overallScore >= 60
-                  ? "Bon niveau. Quelques compétences sont à renforcer."
-                  : overallScore >= 40
-                  ? "Des bases solides, mais plusieurs axes d'amélioration identifiés."
-                  : "Un parcours de formation personnalisé vous attend pour progresser rapidement."}
+                    ? "Bon niveau. Quelques compétences sont à renforcer."
+                    : overallScore >= 40
+                      ? "Des bases solides, mais plusieurs axes d'amélioration identifiés."
+                      : "Un parcours de formation personnalisé vous attend pour progresser rapidement."}
               </p>
               {resultCompletedAt && (
                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
@@ -437,7 +447,9 @@ export function DiagnosticView({
                     borderRadius: "8px",
                   }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  formatter={((value: number) => [`${value}/100`, "Score"]) as any}
+                  formatter={
+                    ((value: number) => [`${value}/100`, "Score"]) as any
+                  }
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -488,7 +500,8 @@ export function DiagnosticView({
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {courses.map((course) => {
-              const prio = priorityLabels[course.priority] || priorityLabels.basse;
+              const prio =
+                priorityLabels[course.priority] || priorityLabels.basse;
               return (
                 <Card
                   key={course.id}
@@ -521,15 +534,16 @@ export function DiagnosticView({
                         {course.estimatedMinutes} min
                       </span>
                     </div>
-                    {typeof course.progress === "number" && course.progress > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Progression</span>
-                          <span>{course.progress}%</span>
+                    {typeof course.progress === "number" &&
+                      course.progress > 0 && (
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Progression</span>
+                            <span>{course.progress}%</span>
+                          </div>
+                          <Progress value={course.progress} className="h-1.5" />
                         </div>
-                        <Progress value={course.progress} className="h-1.5" />
-                      </div>
-                    )}
+                      )}
                     <Button
                       variant="outline"
                       size="sm"

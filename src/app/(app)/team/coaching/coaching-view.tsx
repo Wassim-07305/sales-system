@@ -9,12 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -127,9 +122,18 @@ const STATUS_CONFIG: Record<
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  high: { label: "Haute", color: "bg-red-500/20 text-red-400 border-red-500/30" },
-  medium: { label: "Moyenne", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
-  low: { label: "Basse", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  high: {
+    label: "Haute",
+    color: "bg-red-500/20 text-red-400 border-red-500/30",
+  },
+  medium: {
+    label: "Moyenne",
+    color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  },
+  low: {
+    label: "Basse",
+    color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  },
 };
 
 // ─── Main Component ─────────────────────────────────────────────
@@ -156,7 +160,11 @@ export function CoachingView({
         <SummaryCard
           icon={Target}
           label="Objectifs actifs"
-          value={objectives.filter((o) => o.status === "in_progress" || o.status === "at_risk").length}
+          value={
+            objectives.filter(
+              (o) => o.status === "in_progress" || o.status === "at_risk",
+            ).length
+          }
           subLabel={`${objectives.filter((o) => o.status === "completed").length} termines`}
         />
         <SummaryCard
@@ -183,15 +191,24 @@ export function CoachingView({
       {/* Tabs */}
       <Tabs defaultValue="objectives" className="space-y-4">
         <TabsList className="bg-muted border border-border">
-          <TabsTrigger value="objectives" className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]">
+          <TabsTrigger
+            value="objectives"
+            className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]"
+          >
             <Target className="w-4 h-4 mr-2" />
             Objectifs SMART
           </TabsTrigger>
-          <TabsTrigger value="development" className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]">
+          <TabsTrigger
+            value="development"
+            className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]"
+          >
             <TrendingUp className="w-4 h-4 mr-2" />
             Plan de developpement
           </TabsTrigger>
-          <TabsTrigger value="notes" className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]">
+          <TabsTrigger
+            value="notes"
+            className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]"
+          >
             <BookOpen className="w-4 h-4 mr-2" />
             Notes de coaching
           </TabsTrigger>
@@ -290,7 +307,8 @@ function ObjectivesTab({
   // New objective form state
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [newCategory, setNewCategory] = useState<CoachingObjective["category"]>("calls");
+  const [newCategory, setNewCategory] =
+    useState<CoachingObjective["category"]>("calls");
   const [newTargetValue, setNewTargetValue] = useState("");
   const [newTargetDate, setNewTargetDate] = useState("");
   const [newAssigneeId, setNewAssigneeId] = useState("");
@@ -338,7 +356,11 @@ function ObjectivesTab({
     if (!progressValue) return;
     startTransition(async () => {
       try {
-        await updateObjectiveProgress(id, Number(progressValue), progressNote || undefined);
+        await updateObjectiveProgress(
+          id,
+          Number(progressValue),
+          progressNote || undefined,
+        );
         toast.success("Progression mise a jour");
         setEditingProgress(null);
         setProgressValue("");
@@ -422,7 +444,7 @@ function ObjectivesTab({
             const CatIcon = CATEGORY_ICONS[obj.category];
             const pct = Math.min(
               100,
-              Math.round((obj.currentValue / obj.targetValue) * 100)
+              Math.round((obj.currentValue / obj.targetValue) * 100),
             );
             const isEditing = editingProgress === obj.id;
 
@@ -471,12 +493,11 @@ function ObjectivesTab({
                         <span className="text-muted-foreground">
                           {obj.currentValue} / {obj.targetValue}
                         </span>
-                        <span className="font-medium text-foreground">{pct}%</span>
+                        <span className="font-medium text-foreground">
+                          {pct}%
+                        </span>
                       </div>
-                      <Progress
-                        value={pct}
-                        className="h-2 bg-muted"
-                      />
+                      <Progress value={pct} className="h-2 bg-muted" />
                     </div>
 
                     {/* Date + Actions */}
@@ -485,11 +506,14 @@ function ObjectivesTab({
                         <Clock className="w-3 h-3" />
                         <span>
                           Echeance :{" "}
-                          {new Date(obj.targetDate).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
+                          {new Date(obj.targetDate).toLocaleDateString(
+                            "fr-FR",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            },
+                          )}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -728,57 +752,59 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
         </CardHeader>
         <CardContent>
           {plan.skills.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Aucune competence evaluee pour le moment.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Aucune competence evaluee pour le moment.
+            </p>
           ) : (
-          <>
-          <div className="space-y-4">
-            {plan.skills.map((skill) => {
-              const levelPct = (skill.level / 10) * 100;
-              const targetPct = (skill.target / 10) * 100;
-              return (
-                <div key={skill.name} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-foreground/80">{skill.name}</span>
-                    <span className="text-muted-foreground">
-                      {skill.level}/10{" "}
-                      <span className="text-[#7af17a]">
-                        (objectif : {skill.target})
-                      </span>
-                    </span>
-                  </div>
-                  <div className="relative h-3 bg-muted rounded-full overflow-hidden">
-                    {/* Target marker */}
-                    <div
-                      className="absolute top-0 h-full border-r-2 border-dashed border-[#7af17a]/50 z-10"
-                      style={{ left: `${targetPct}%` }}
-                    />
-                    {/* Current level bar */}
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        skill.level >= skill.target
-                          ? "bg-emerald-500"
-                          : skill.level >= skill.target - 2
-                          ? "bg-[#7af17a]"
-                          : "bg-orange-400"
-                      }`}
-                      style={{ width: `${levelPct}%` }}
-                    />
-                  </div>
+            <>
+              <div className="space-y-4">
+                {plan.skills.map((skill) => {
+                  const levelPct = (skill.level / 10) * 100;
+                  const targetPct = (skill.target / 10) * 100;
+                  return (
+                    <div key={skill.name} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-foreground/80">{skill.name}</span>
+                        <span className="text-muted-foreground">
+                          {skill.level}/10{" "}
+                          <span className="text-[#7af17a]">
+                            (objectif : {skill.target})
+                          </span>
+                        </span>
+                      </div>
+                      <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                        {/* Target marker */}
+                        <div
+                          className="absolute top-0 h-full border-r-2 border-dashed border-[#7af17a]/50 z-10"
+                          style={{ left: `${targetPct}%` }}
+                        />
+                        {/* Current level bar */}
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            skill.level >= skill.target
+                              ? "bg-emerald-500"
+                              : skill.level >= skill.target - 2
+                                ? "bg-[#7af17a]"
+                                : "bg-orange-400"
+                          }`}
+                          style={{ width: `${levelPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-2 rounded bg-[#7af17a]" />
+                  <span>Niveau actuel</span>
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-2 rounded bg-[#7af17a]" />
-              <span>Niveau actuel</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-2 rounded border-r-2 border-dashed border-[#7af17a]/50" />
-              <span>Objectif</span>
-            </div>
-          </div>
-          </>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-2 rounded border-r-2 border-dashed border-[#7af17a]/50" />
+                  <span>Objectif</span>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -793,59 +819,61 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
         </CardHeader>
         <CardContent>
           {plan.actions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Aucune action recommandee pour le moment.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Aucune action recommandee pour le moment.
+            </p>
           ) : (
-          <div className="space-y-3">
-            {plan.actions.map((action) => {
-              const priorityCfg = PRIORITY_CONFIG[action.priority];
-              return (
-                <div
-                  key={action.id}
-                  className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-                    action.done
-                      ? "bg-emerald-500/5 border-emerald-500/20 opacity-60"
-                      : "bg-muted border-border"
-                  }`}
-                >
+            <div className="space-y-3">
+              {plan.actions.map((action) => {
+                const priorityCfg = PRIORITY_CONFIG[action.priority];
+                return (
                   <div
-                    className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    key={action.id}
+                    className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
                       action.done
-                        ? "border-emerald-500 bg-emerald-500"
-                        : "border-muted-foreground/30"
+                        ? "bg-emerald-500/5 border-emerald-500/20 opacity-60"
+                        : "bg-muted border-border"
                     }`}
                   >
-                    {action.done && (
-                      <CheckCircle className="w-3 h-3 text-white" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`font-medium text-sm ${
-                          action.done
-                            ? "text-muted-foreground line-through"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {action.title}
-                      </span>
-                      {priorityCfg && (
-                        <Badge
-                          variant="outline"
-                          className={`${priorityCfg.color} text-[10px] px-1.5 py-0`}
-                        >
-                          {priorityCfg.label}
-                        </Badge>
+                    <div
+                      className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        action.done
+                          ? "border-emerald-500 bg-emerald-500"
+                          : "border-muted-foreground/30"
+                      }`}
+                    >
+                      {action.done && (
+                        <CheckCircle className="w-3 h-3 text-white" />
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {action.description}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-medium text-sm ${
+                            action.done
+                              ? "text-muted-foreground line-through"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {action.title}
+                        </span>
+                        {priorityCfg && (
+                          <Badge
+                            variant="outline"
+                            className={`${priorityCfg.color} text-[10px] px-1.5 py-0`}
+                          >
+                            {priorityCfg.label}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {action.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           )}
         </CardContent>
       </Card>
@@ -1005,7 +1033,7 @@ function NotesTab({
                             day: "numeric",
                             month: "long",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </span>
                     </div>
@@ -1061,7 +1089,9 @@ function NotesTab({
               </div>
             )}
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Contenu de la note *</Label>
+              <Label className="text-muted-foreground">
+                Contenu de la note *
+              </Label>
               <Textarea
                 placeholder="Points abordes, axes d'amelioration, points positifs..."
                 value={noteContent}
@@ -1071,7 +1101,9 @@ function NotesTab({
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Evaluation de la session</Label>
+              <Label className="text-muted-foreground">
+                Evaluation de la session
+              </Label>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <button

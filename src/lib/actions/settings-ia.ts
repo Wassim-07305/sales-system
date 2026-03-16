@@ -63,10 +63,12 @@ export async function saveSettingsIA(params: {
   ];
 
   for (const entry of entries) {
-    await supabase.from("user_settings").upsert(
-      { user_id: user.id, key: entry.key, value: entry.value },
-      { onConflict: "user_id,key" }
-    );
+    await supabase
+      .from("user_settings")
+      .upsert(
+        { user_id: user.id, key: entry.key, value: entry.value },
+        { onConflict: "user_id,key" },
+      );
   }
 
   // Also update profile company/niche fields if provided
@@ -115,7 +117,7 @@ export async function triggerManualSync() {
       key: "last_linkedin_sync",
       value: new Date().toISOString(),
     },
-    { onConflict: "user_id,key" }
+    { onConflict: "user_id,key" },
   );
 
   revalidatePath("/settings-ia");

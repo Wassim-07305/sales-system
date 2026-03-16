@@ -21,5 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   // En cas d'erreur, rediriger vers la page de login
-  return NextResponse.redirect(new URL("/login?error=auth_callback_failed", request.url));
+  return NextResponse.redirect(
+    new URL("/login?error=auth_callback_failed", request.url),
+  );
 }

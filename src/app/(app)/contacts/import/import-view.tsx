@@ -84,7 +84,10 @@ function parseCSVLine(line: string, delimiter: string): string[] {
   return fields;
 }
 
-function parseCSV(text: string): { headers: string[]; rows: Record<string, string>[] } {
+function parseCSV(text: string): {
+  headers: string[];
+  rows: Record<string, string>[];
+} {
   const delimiter = detectDelimiter(text);
   const lines = text
     .split(/\r?\n/)
@@ -208,7 +211,9 @@ export function ImportView({ importHistory }: ImportViewProps) {
   const [csvRows, setCsvRows] = useState<Record<string, string>[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [validRows, setValidRows] = useState<ValidatedRow[]>([]);
-  const [validationErrors, setValidationErrors] = useState<ImportValidationError[]>([]);
+  const [validationErrors, setValidationErrors] = useState<
+    ImportValidationError[]
+  >([]);
   const [showOnlyErrors, setShowOnlyErrors] = useState(false);
   const [skipDuplicates, setSkipDuplicates] = useState(true);
   const [importing, setImporting] = useState(false);
@@ -252,7 +257,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -291,7 +296,9 @@ export function ImportView({ importHistory }: ImportViewProps) {
       setImportResult(result);
 
       if (result.imported > 0) {
-        toast.success(`${result.imported} ${importType === "contacts" ? "contacts" : "deals"} importés avec succès`);
+        toast.success(
+          `${result.imported} ${importType === "contacts" ? "contacts" : "deals"} importés avec succès`,
+        );
       }
       if (result.errors > 0) {
         toast.error(`${result.errors} erreurs pendant l'import`);
@@ -326,7 +333,9 @@ export function ImportView({ importHistory }: ImportViewProps) {
 
   // --- Rendering ---
 
-  const mappedFieldCount = Object.values(mapping).filter((v) => v !== "").length;
+  const mappedFieldCount = Object.values(mapping).filter(
+    (v) => v !== "",
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -403,7 +412,9 @@ export function ImportView({ importHistory }: ImportViewProps) {
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline">{csvHeaders.length} colonnes</Badge>
+                    <Badge variant="outline">
+                      {csvHeaders.length} colonnes
+                    </Badge>
                     <Badge variant="outline">{csvRows.length} lignes</Badge>
                   </div>
                 </div>
@@ -457,8 +468,8 @@ export function ImportView({ importHistory }: ImportViewProps) {
               Mapper les colonnes
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Associez chaque colonne CSV à un champ contact. {mappedFieldCount} sur{" "}
-              {csvHeaders.length} colonnes mappées.
+              Associez chaque colonne CSV à un champ contact. {mappedFieldCount}{" "}
+              sur {csvHeaders.length} colonnes mappées.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -624,7 +635,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                           .filter((v) => v !== "")
                           .map((field) => {
                             const opt = CONTACT_FIELD_OPTIONS.find(
-                              (f) => f.value === field
+                              (f) => f.value === field,
                             );
                             return (
                               <TableHead key={field}>
@@ -687,8 +698,8 @@ export function ImportView({ importHistory }: ImportViewProps) {
                 {/* Summary before import */}
                 <div className="p-4 rounded-xl border bg-muted/50 space-y-2">
                   <p className="text-sm">
-                    <span className="font-medium">{validRows.length}</span> lignes
-                    valides prêtes à être importées en tant que{" "}
+                    <span className="font-medium">{validRows.length}</span>{" "}
+                    lignes valides prêtes à être importées en tant que{" "}
                     <span className="font-medium">
                       {importType === "contacts" ? "contacts" : "deals"}
                     </span>
@@ -696,7 +707,8 @@ export function ImportView({ importHistory }: ImportViewProps) {
                   </p>
                   {validationErrors.length > 0 && (
                     <p className="text-sm text-amber-500">
-                      {validationErrors.length} lignes avec erreurs seront ignorées.
+                      {validationErrors.length} lignes avec erreurs seront
+                      ignorées.
                     </p>
                   )}
                 </div>

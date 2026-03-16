@@ -16,9 +16,11 @@ Sales System is a comprehensive CRM and sales management platform by Damien Reyn
 ## Architecture
 
 ### Tech Stack
+
 React 19 + TypeScript 5 + Next.js 16 (App Router) + Tailwind CSS 4 + Supabase (PostgreSQL + Auth + RLS). State: Zustand. Validation: Zod. Charts: Recharts. DnD: @dnd-kit. Flowcharts: @xyflow/react. PDF: @react-pdf/renderer. PWA: next-pwa. Deployed on Vercel.
 
 ### Directory Layout
+
 ```
 src/
   app/
@@ -91,14 +93,18 @@ src/
 **Sales scripts**: Flowchart editor using @xyflow/react. Mindmap and presentation modes. Templates library.
 
 ### Path Alias
+
 `@/*` maps to `./src/*` (configured in `tsconfig.json`). Always use `@/` imports.
 
 ### Environment Variables
+
 Defined in `.env.local`:
+
 - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anonymous key
 
 ### Supabase
+
 - Browser client in `lib/supabase/client.ts`, server client in `lib/supabase/server.ts`
 - Session management via middleware
 - Schema files: `schema.sql` (20KB), `schema-v2.sql` (42KB), multiple seed files

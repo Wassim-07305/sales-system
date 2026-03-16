@@ -3,7 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, PanelLeftClose, PanelLeft, Settings, UserCircle } from "lucide-react";
+import {
+  LogOut,
+  PanelLeftClose,
+  PanelLeft,
+  Settings,
+  UserCircle,
+} from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { NAV_SECTIONS } from "@/lib/constants";
 import type { UserRole } from "@/lib/types/database";
@@ -24,7 +30,12 @@ interface SidebarProps {
   whiteLabelConfig?: WhiteLabelConfig | null;
 }
 
-export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: SidebarProps) {
+export function Sidebar({
+  role,
+  userName,
+  avatarUrl,
+  whiteLabelConfig,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const {
@@ -65,27 +76,31 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
           sidebarMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
           "w-[75vw] max-w-64 shrink-0 md:w-64 md:max-w-none",
-          isCollapsed && "md:w-[72px]"
+          isCollapsed && "md:w-[72px]",
         )}
       >
         {/* Logo */}
         <div
           className={cn(
             "flex h-16 items-center border-b border-sidebar-border px-4",
-            isCollapsed ? "md:justify-center md:px-0" : ""
+            isCollapsed ? "md:justify-center md:px-0" : "",
           )}
         >
           <Link
             href="/dashboard"
             className={cn(
               "flex items-center gap-2.5",
-              isCollapsed && "md:justify-center"
+              isCollapsed && "md:justify-center",
             )}
             onClick={closeMobile}
           >
             <Image
               src={whiteLabelConfig?.logo_url || "/logo.png"}
-              alt={whiteLabelConfig?.brand_name || whiteLabelConfig?.app_name || "Sales System"}
+              alt={
+                whiteLabelConfig?.brand_name ||
+                whiteLabelConfig?.app_name ||
+                "Sales System"
+              }
               width={32}
               height={32}
               className="shrink-0"
@@ -93,9 +108,13 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
             {!isCollapsed && (
               <span className="font-serif text-lg font-bold text-sidebar-foreground whitespace-nowrap">
                 {whiteLabelConfig?.brand_name || whiteLabelConfig?.app_name ? (
-                  <span className="text-brand">{whiteLabelConfig.brand_name || whiteLabelConfig.app_name}</span>
+                  <span className="text-brand">
+                    {whiteLabelConfig.brand_name || whiteLabelConfig.app_name}
+                  </span>
                 ) : (
-                  <>Sales<span className="text-brand">System</span></>
+                  <>
+                    Sales<span className="text-brand">System</span>
+                  </>
                 )}
               </span>
             )}
@@ -106,7 +125,7 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           {NAV_SECTIONS.map((section, sIdx) => {
             const visibleItems = section.items.filter((item) =>
-              item.roles.includes(role)
+              item.roles.includes(role),
             );
             if (visibleItems.length === 0) return null;
 
@@ -140,7 +159,7 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
                           isActive
                             ? "bg-sidebar-accent text-sidebar-primary font-semibold"
                             : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                          isCollapsed && "md:justify-center md:px-0"
+                          isCollapsed && "md:justify-center md:px-0",
                         )}
                       >
                         {/* Active indicator bar */}
@@ -153,7 +172,7 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
                             "h-[18px] w-[18px] shrink-0 transition-all duration-200",
                             isCollapsed ? "" : "mr-3",
                             isActive &&
-                              "drop-shadow-[0_0_6px_rgba(122,241,122,0.3)]"
+                              "drop-shadow-[0_0_6px_rgba(122,241,122,0.3)]",
                           )}
                         />
                         <span className={cn(isCollapsed && "md:hidden")}>
@@ -207,7 +226,7 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
           <div
             className={cn(
               "flex items-center rounded-xl px-3 py-2.5",
-              isCollapsed && "md:justify-center md:px-0"
+              isCollapsed && "md:justify-center md:px-0",
             )}
           >
             <div className="relative">
@@ -226,10 +245,7 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
               <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-sidebar" />
             </div>
             <div
-              className={cn(
-                "ml-3 min-w-0 flex-1",
-                isCollapsed && "md:hidden"
-              )}
+              className={cn("ml-3 min-w-0 flex-1", isCollapsed && "md:hidden")}
             >
               <p className="truncate text-sm font-semibold text-sidebar-foreground">
                 {userName}
@@ -252,13 +268,13 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
                     pathname.startsWith("/settings")
                       ? "bg-sidebar-accent text-sidebar-primary font-semibold"
                       : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                    isCollapsed && "md:justify-center md:px-0"
+                    isCollapsed && "md:justify-center md:px-0",
                   )}
                 >
                   <Settings
                     className={cn(
                       "h-[18px] w-[18px] shrink-0",
-                      isCollapsed ? "" : "mr-3"
+                      isCollapsed ? "" : "mr-3",
                     )}
                   />
                   <span className={cn(isCollapsed && "md:hidden")}>
@@ -289,13 +305,13 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
                     pathname === "/profile"
                       ? "bg-sidebar-accent text-sidebar-primary font-semibold"
                       : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                    isCollapsed && "md:justify-center md:px-0"
+                    isCollapsed && "md:justify-center md:px-0",
                   )}
                 >
                   <UserCircle
                     className={cn(
                       "h-[18px] w-[18px] shrink-0",
-                      isCollapsed ? "" : "mr-3"
+                      isCollapsed ? "" : "mr-3",
                     )}
                   />
                   <span className={cn(isCollapsed && "md:hidden")}>Profil</span>
@@ -319,13 +335,13 @@ export function Sidebar({ role, userName, avatarUrl, whiteLabelConfig }: Sidebar
                 onClick={handleLogout}
                 className={cn(
                   "mt-1 flex w-full items-center rounded-xl px-3 py-2 text-sm text-sidebar-foreground/50 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400",
-                  isCollapsed && "md:justify-center md:px-0"
+                  isCollapsed && "md:justify-center md:px-0",
                 )}
               >
                 <LogOut
                   className={cn(
                     "h-[18px] w-[18px] shrink-0",
-                    isCollapsed ? "" : "mr-3"
+                    isCollapsed ? "" : "mr-3",
                   )}
                 />
                 <span className={cn(isCollapsed && "md:hidden")}>

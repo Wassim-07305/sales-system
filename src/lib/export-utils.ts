@@ -51,11 +51,11 @@ function getCellValue(row: Record<string, unknown>, key: string): string {
 export function exportToCSV(
   data: Record<string, unknown>[],
   columns: ExportColumn[],
-  filename: string
+  filename: string,
 ) {
   const header = columns.map((c) => escapeCSVValue(c.label)).join(",");
   const rows = data.map((row) =>
-    columns.map((c) => escapeCSVValue(getCellValue(row, c.key))).join(",")
+    columns.map((c) => escapeCSVValue(getCellValue(row, c.key))).join(","),
   );
   const csv = [header, ...rows].join("\n");
   const blob = new Blob(["\uFEFF" + csv], {
@@ -71,12 +71,11 @@ export function exportToCSV(
 export function exportToXLSX(
   data: Record<string, unknown>[],
   columns: ExportColumn[],
-  filename: string
+  filename: string,
 ) {
   const headerCells = columns
     .map(
-      (c) =>
-        `<Cell><Data ss:Type="String">${escapeXML(c.label)}</Data></Cell>`
+      (c) => `<Cell><Data ss:Type="String">${escapeXML(c.label)}</Data></Cell>`,
     )
     .join("");
 
@@ -118,10 +117,7 @@ export function exportToXLSX(
   const blob = new Blob([xml], {
     type: "application/vnd.ms-excel",
   });
-  downloadBlob(
-    blob,
-    filename.endsWith(".xls") ? filename : `${filename}.xls`
-  );
+  downloadBlob(blob, filename.endsWith(".xls") ? filename : `${filename}.xls`);
 }
 
 // ---------------------------------------------------------------------------
@@ -131,12 +127,12 @@ export function exportToXLSX(
 export function exportToPDF(
   data: Record<string, unknown>[],
   columns: ExportColumn[],
-  filename: string
+  filename: string,
 ) {
   const headerCells = columns
     .map(
       (c) =>
-        `<th style="background:#14080e;color:#7af17a;padding:8px 12px;text-align:left;font-size:12px;border-bottom:2px solid #7af17a;">${escapeXML(c.label)}</th>`
+        `<th style="background:#14080e;color:#7af17a;padding:8px 12px;text-align:left;font-size:12px;border-bottom:2px solid #7af17a;">${escapeXML(c.label)}</th>`,
     )
     .join("");
 
@@ -146,7 +142,7 @@ export function exportToPDF(
       const cells = columns
         .map(
           (c) =>
-            `<td style="padding:6px 12px;font-size:11px;border-bottom:1px solid #e5e5e5;background:${bg};">${escapeXML(getCellValue(row, c.key))}</td>`
+            `<td style="padding:6px 12px;font-size:11px;border-bottom:1px solid #e5e5e5;background:${bg};">${escapeXML(getCellValue(row, c.key))}</td>`,
         )
         .join("");
       return `<tr>${cells}</tr>`;

@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server";
-import { validateApiRequest, jsonResponse, errorResponse } from "@/lib/api-auth";
+import {
+  validateApiRequest,
+  jsonResponse,
+  errorResponse,
+} from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   const { error, supabase } = await validateApiRequest(request);
@@ -13,7 +17,9 @@ export async function GET(request: NextRequest) {
 
   let query = supabase!.from("deals").select("*", { count: "exact" });
   if (status) query = query.eq("status", status);
-  query = query.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+  query = query
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   const { data, count, error: dbError } = await query;
   if (dbError) return errorResponse("DB_ERROR", dbError.message, 500);
@@ -28,11 +34,19 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { name, value, status, stage, contact_id } = body;
 
-  if (!name) return errorResponse("VALIDATION", "Le champ 'name' est requis", 400);
+  if (!name)
+    return errorResponse("VALIDATION", "Le champ 'name' est requis", 400);
 
   const { data, error: dbError } = await supabase!
     .from("deals")
-    .insert({ name, value: value || 0, status: status || "open", stage: stage || "prospect", contact_id, user_id: user!.id })
+    .insert({
+      name,
+      value: value || 0,
+      status: status || "open",
+      stage: stage || "prospect",
+      contact_id,
+      user_id: user!.id,
+    })
     .select()
     .single();
 

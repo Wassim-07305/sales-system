@@ -51,7 +51,7 @@ export async function calculateSetterMaturity(setterId: string) {
 
   // 3. Consistency — based on daily journals presence
   const thirtyDaysAgo = new Date(
-    Date.now() - 30 * 24 * 60 * 60 * 1000
+    Date.now() - 30 * 24 * 60 * 60 * 1000,
   ).toISOString();
   const { count: journalCount } = await supabase
     .from("daily_journals")
@@ -59,7 +59,9 @@ export async function calculateSetterMaturity(setterId: string) {
     .eq("user_id", setterId)
     .gte("created_at", thirtyDaysAgo);
 
-  const consistency = Math.round(Math.min(((journalCount || 0) / 30) * 100, 100));
+  const consistency = Math.round(
+    Math.min(((journalCount || 0) / 30) * 100, 100),
+  );
 
   // 4. Volume — based on prospects count (via prospect_lists owned by setter)
   const { data: setterLists } = await supabase
@@ -96,7 +98,7 @@ export async function calculateSetterMaturity(setterId: string) {
   if (roleplaySessions && roleplaySessions.length >= 3) {
     const top5 = roleplaySessions.slice(0, 5);
     roleplayPerformance = Math.round(
-      top5.reduce((sum, s) => sum + (s.score || 0), 0) / top5.length
+      top5.reduce((sum, s) => sum + (s.score || 0), 0) / top5.length,
     );
   }
 
@@ -125,7 +127,7 @@ export async function calculateSetterMaturity(setterId: string) {
       consistency * WEIGHTS.consistency +
       volume * WEIGHTS.volume +
       roleplayPerformance * WEIGHTS.roleplay_performance +
-      responseRate * WEIGHTS.response_rate
+      responseRate * WEIGHTS.response_rate,
   );
 
   // Upsert into setter_maturity_scores
@@ -143,7 +145,7 @@ export async function calculateSetterMaturity(setterId: string) {
         overall_score: overallScore,
         computed_at: new Date().toISOString(),
       },
-      { onConflict: "setter_id" }
+      { onConflict: "setter_id" },
     )
     .select()
     .single();
@@ -193,7 +195,9 @@ export async function getPlacementReadiness(userId?: string) {
 
   let targetUserId = userId;
   if (!targetUserId) {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return null;
     targetUserId = user.id;
   }
@@ -209,9 +213,10 @@ export async function getPlacementReadiness(userId?: string) {
     .eq("user_id", targetUserId)
     .eq("completed", true);
 
-  const modulesScore = totalLessons && totalLessons > 0
-    ? Math.round(((completedLessons || 0) / totalLessons) * 100)
-    : 0;
+  const modulesScore =
+    totalLessons && totalLessons > 0
+      ? Math.round(((completedLessons || 0) / totalLessons) * 100)
+      : 0;
 
   // 2. Quiz scores average (weight: 25%)
   const { data: quizResults } = await supabase
@@ -222,7 +227,8 @@ export async function getPlacementReadiness(userId?: string) {
   let quizzesScore = 0;
   if (quizResults && quizResults.length > 0) {
     quizzesScore = Math.round(
-      quizResults.reduce((sum, q) => sum + (q.score || 0), 0) / quizResults.length
+      quizResults.reduce((sum, q) => sum + (q.score || 0), 0) /
+        quizResults.length,
     );
   }
 
@@ -233,7 +239,10 @@ export async function getPlacementReadiness(userId?: string) {
     .eq("user_id", targetUserId);
 
   // Target: 10 sessions = 100%
-  const roleplayScore = Math.min(Math.round(((roleplayCount || 0) / 10) * 100), 100);
+  const roleplayScore = Math.min(
+    Math.round(((roleplayCount || 0) / 10) * 100),
+    100,
+  );
 
   // 4. Daily journals submitted in last 7 days (weight: 10%)
   const sevenDaysAgo = new Date();
@@ -244,7 +253,10 @@ export async function getPlacementReadiness(userId?: string) {
     .eq("user_id", targetUserId)
     .gte("date", sevenDaysAgo.toISOString().split("T")[0]);
 
-  const journalScore = Math.min(Math.round(((journalCount || 0) / 7) * 100), 100);
+  const journalScore = Math.min(
+    Math.round(((journalCount || 0) / 7) * 100),
+    100,
+  );
 
   // 5. Community participation — posts + comments (weight: 10%)
   const { count: postsCount } = await supabase
@@ -260,16 +272,16 @@ export async function getPlacementReadiness(userId?: string) {
   // Target: 20 contributions = 100%
   const communityScore = Math.min(
     Math.round((((postsCount || 0) + (commentsCount || 0)) / 20) * 100),
-    100
+    100,
   );
 
   // Weighted score
   const score = Math.round(
     modulesScore * 0.4 +
-    quizzesScore * 0.25 +
-    roleplayScore * 0.15 +
-    journalScore * 0.1 +
-    communityScore * 0.1
+      quizzesScore * 0.25 +
+      roleplayScore * 0.15 +
+      journalScore * 0.1 +
+      communityScore * 0.1,
   );
 
   let level: "not_ready" | "almost" | "ready" | "placed";

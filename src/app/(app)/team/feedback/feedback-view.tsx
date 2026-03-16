@@ -82,7 +82,9 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
 
   // Form state
   const [memberId, setMemberId] = useState("");
-  const [type, setType] = useState<"feedback" | "coaching" | "review">("feedback");
+  const [type, setType] = useState<"feedback" | "coaching" | "review">(
+    "feedback",
+  );
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(0);
@@ -100,7 +102,11 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
             const items = await getFeedbackForMember(member.id);
             allFeedback.push(...(items as FeedbackItem[]));
           }
-          allFeedback.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          allFeedback.sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          );
           setFeedbackList(allFeedback);
         } else {
           const items = await getMyFeedback();
@@ -179,9 +185,20 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
       case "feedback":
         return <Badge variant="outline">Feedback</Badge>;
       case "coaching":
-        return <Badge variant="outline" className="border-blue-500 text-blue-500">Coaching</Badge>;
+        return (
+          <Badge variant="outline" className="border-blue-500 text-blue-500">
+            Coaching
+          </Badge>
+        );
       case "review":
-        return <Badge variant="outline" className="border-purple-500 text-purple-500">Review</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className="border-purple-500 text-purple-500"
+          >
+            Review
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{t}</Badge>;
     }
@@ -200,7 +217,10 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
 
   return (
     <div>
-      <PageHeader title="Feedback & Coaching" description="Donnez et recevez du feedback">
+      <PageHeader
+        title="Feedback & Coaching"
+        description="Donnez et recevez du feedback"
+      >
         {isManager && (
           <Button
             onClick={() => setDialogOpen(true)}
@@ -217,7 +237,9 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total feedback</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Total feedback
+              </span>
               <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <MessageCircle className="h-4 w-4 text-brand" />
               </div>
@@ -228,24 +250,32 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Note moyenne</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Note moyenne
+              </span>
               <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
                 <Star className="h-4 w-4 text-amber-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{stats.averageRating > 0 ? `${stats.averageRating}/5` : "-"}</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {stats.averageRating > 0 ? `${stats.averageRating}/5` : "-"}
+            </p>
           </CardContent>
         </Card>
         {isManager && (
           <Card className="border-border/50 hover:shadow-md transition-all duration-200">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Membres coaches</span>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Membres coaches
+                </span>
                 <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
                   <Users className="h-4 w-4 text-blue-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold tracking-tight">{stats.membersCoached}</p>
+              <p className="text-2xl font-bold tracking-tight">
+                {stats.membersCoached}
+              </p>
             </CardContent>
           </Card>
         )}
@@ -261,7 +291,10 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
         <CardContent className="pt-6">
           <div className="space-y-4">
             {feedbackList.map((item) => (
-              <div key={item.id} className="p-4 rounded-xl border border-border/50 space-y-2 hover:shadow-sm transition-all duration-150">
+              <div
+                key={item.id}
+                className="p-4 rounded-xl border border-border/50 space-y-2 hover:shadow-sm transition-all duration-150"
+              >
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold">{item.title}</h3>
@@ -282,7 +315,9 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
                 <p className="text-sm text-muted-foreground">{item.content}</p>
                 {parseActionItems(item.action_items).length > 0 && (
                   <div className="text-sm">
-                    <p className="font-medium text-xs uppercase text-muted-foreground mb-1">Actions :</p>
+                    <p className="font-medium text-xs uppercase text-muted-foreground mb-1">
+                      Actions :
+                    </p>
                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                       {parseActionItems(item.action_items).map((ai, i) => (
                         <li key={i}>{ai}</li>
@@ -292,7 +327,9 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
                 )}
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
                   <span>
-                    {isManager ? "" : `Par ${item.manager?.full_name || "Manager"} - `}
+                    {isManager
+                      ? ""
+                      : `Par ${item.manager?.full_name || "Manager"} - `}
                     {new Date(item.created_at).toLocaleDateString("fr-FR")}
                   </span>
                   {!isManager && item.status === "sent" && (
@@ -311,7 +348,9 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
             ))}
             {feedbackList.length === 0 && (
               <p className="text-center text-muted-foreground py-8">
-                {isManager ? "Aucun feedback donne pour le moment" : "Aucun feedback recu pour le moment"}
+                {isManager
+                  ? "Aucun feedback donne pour le moment"
+                  : "Aucun feedback recu pour le moment"}
               </p>
             )}
           </div>
@@ -342,7 +381,12 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
             </div>
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select value={type} onValueChange={(v) => setType(v as "feedback" | "coaching" | "review")}>
+              <Select
+                value={type}
+                onValueChange={(v) =>
+                  setType(v as "feedback" | "coaching" | "review")
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -382,7 +426,9 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
                   >
                     <Star
                       className={`h-6 w-6 cursor-pointer transition-colors ${
-                        s <= rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"
+                        s <= rating
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-muted-foreground"
                       }`}
                     />
                   </button>

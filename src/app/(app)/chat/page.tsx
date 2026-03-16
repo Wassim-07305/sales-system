@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { ChatLayout } from "./chat-layout";
 import type { UserRole } from "@/lib/types/database";
 import { getConversations as getWAConversations } from "@/lib/actions/whatsapp";
-import { getUnipileStatus, getUnipileSocialConversations } from "@/lib/actions/unipile";
+import {
+  getUnipileStatus,
+  getUnipileSocialConversations,
+} from "@/lib/actions/unipile";
 
 export default async function ChatPage() {
   const supabase = await createClient();
@@ -13,7 +16,15 @@ export default async function ChatPage() {
   if (!user) redirect("/login");
 
   // Fetch all data in parallel
-  const [channelsRes, profileRes, teamRes, waConversations, linkedinConversations, instagramConversations, unipileStatus] = await Promise.all([
+  const [
+    channelsRes,
+    profileRes,
+    teamRes,
+    waConversations,
+    linkedinConversations,
+    instagramConversations,
+    unipileStatus,
+  ] = await Promise.all([
     supabase
       .from("channels")
       .select("*")
@@ -68,14 +79,22 @@ export default async function ChatPage() {
 
   return (
     <ChatLayout
-      initialChannels={(channelsRes.data || []) as Parameters<typeof ChatLayout>[0]["initialChannels"]}
+      initialChannels={
+        (channelsRes.data || []) as Parameters<
+          typeof ChatLayout
+        >[0]["initialChannels"]
+      }
       currentUserId={user.id}
       initialUnreadCounts={unreadCounts}
       userRole={userRole}
       teamMembers={
-        ((teamRes.data || []) as Parameters<typeof ChatLayout>[0]["teamMembers"])
+        (teamRes.data || []) as Parameters<typeof ChatLayout>[0]["teamMembers"]
       }
-      initialWAConversations={waConversations as Parameters<typeof ChatLayout>[0]["initialWAConversations"]}
+      initialWAConversations={
+        waConversations as Parameters<
+          typeof ChatLayout
+        >[0]["initialWAConversations"]
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initialLinkedinConversations={linkedinConversations as any}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,24 +102,42 @@ export default async function ChatPage() {
       unipileWhatsApp={
         unipileStatus.configured
           ? {
-              connected: !!unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "WHATSAPP"),
-              accountName: unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "WHATSAPP")?.name,
+              connected: !!unipileStatus.accounts.find(
+                (a: { provider: string }) =>
+                  a.provider.toUpperCase() === "WHATSAPP",
+              ),
+              accountName: unipileStatus.accounts.find(
+                (a: { provider: string }) =>
+                  a.provider.toUpperCase() === "WHATSAPP",
+              )?.name,
             }
           : null
       }
       unipileLinkedin={
         unipileStatus.configured
           ? {
-              connected: !!unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "LINKEDIN"),
-              accountName: unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "LINKEDIN")?.name,
+              connected: !!unipileStatus.accounts.find(
+                (a: { provider: string }) =>
+                  a.provider.toUpperCase() === "LINKEDIN",
+              ),
+              accountName: unipileStatus.accounts.find(
+                (a: { provider: string }) =>
+                  a.provider.toUpperCase() === "LINKEDIN",
+              )?.name,
             }
           : null
       }
       unipileInstagram={
         unipileStatus.configured
           ? {
-              connected: !!unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "INSTAGRAM"),
-              accountName: unipileStatus.accounts.find((a: { provider: string }) => a.provider.toUpperCase() === "INSTAGRAM")?.name,
+              connected: !!unipileStatus.accounts.find(
+                (a: { provider: string }) =>
+                  a.provider.toUpperCase() === "INSTAGRAM",
+              ),
+              accountName: unipileStatus.accounts.find(
+                (a: { provider: string }) =>
+                  a.provider.toUpperCase() === "INSTAGRAM",
+              )?.name,
             }
           : null
       }

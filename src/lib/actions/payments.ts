@@ -6,7 +6,9 @@ import { getApiKey } from "@/lib/api-keys";
 
 export async function getPaymentInstallments(contractId?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié", data: [] };
 
   let query = supabase
@@ -19,7 +21,8 @@ export async function getPaymentInstallments(contractId?: string) {
   }
 
   const { data, error } = await query;
-  if (error) return { error: "Impossible de récupérer les échéances.", data: [] };
+  if (error)
+    return { error: "Impossible de récupérer les échéances.", data: [] };
   return { error: null, data: data || [] };
 }
 
@@ -29,7 +32,9 @@ export async function createInstallmentPlan(data: {
   installmentCount: number;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Vérifier que le contrat est signé avant de créer des échéances
@@ -41,10 +46,14 @@ export async function createInstallmentPlan(data: {
 
   if (!contract) return { error: "Contrat introuvable" };
   if (contract.status !== "signed") {
-    return { error: "Impossible de créer un plan de paiement pour un contrat non signé" };
+    return {
+      error:
+        "Impossible de créer un plan de paiement pour un contrat non signé",
+    };
   }
 
-  const amountPerInstallment = Math.round((data.totalAmount / data.installmentCount) * 100) / 100;
+  const amountPerInstallment =
+    Math.round((data.totalAmount / data.installmentCount) * 100) / 100;
   const now = new Date();
 
   const installments = Array.from({ length: data.installmentCount }, (_, i) => {
@@ -52,9 +61,14 @@ export async function createInstallmentPlan(data: {
     dueDate.setMonth(dueDate.getMonth() + i + 1);
     return {
       contract_id: data.contractId,
-      amount: i === data.installmentCount - 1
-        ? Math.round((data.totalAmount - amountPerInstallment * (data.installmentCount - 1)) * 100) / 100
-        : amountPerInstallment,
+      amount:
+        i === data.installmentCount - 1
+          ? Math.round(
+              (data.totalAmount -
+                amountPerInstallment * (data.installmentCount - 1)) *
+                100,
+            ) / 100
+          : amountPerInstallment,
       due_date: dueDate.toISOString().split("T")[0],
       status: "pending" as const,
     };
@@ -71,7 +85,9 @@ export async function createInstallmentPlan(data: {
 
 export async function recordPayment(installmentId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Récupérer les détails de l'échéance
@@ -146,7 +162,10 @@ export async function recordPayment(installmentId: string) {
       stripePaymentId = paymentIntent.id;
     } catch (err) {
       console.error("Stripe payment error:", err);
-      return { error: "Le paiement Stripe a échoué. Veuillez réessayer ou contacter l'administrateur." };
+      return {
+        error:
+          "Le paiement Stripe a échoué. Veuillez réessayer ou contacter l'administrateur.",
+      };
     }
   } else {
     stripePaymentId = `manual_${Date.now()}`;
@@ -168,7 +187,9 @@ export async function recordPayment(installmentId: string) {
 
 export async function generateInvoice(contractId: string, amount: number) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié", data: null };
 
   // Get client from contract
@@ -195,7 +216,10 @@ export async function generateInvoice(contractId: string, amount: number) {
 
   let nextNum = 1;
   if (lastInvoice?.invoice_number) {
-    const lastNum = parseInt(lastInvoice.invoice_number.replace(prefix, ""), 10);
+    const lastNum = parseInt(
+      lastInvoice.invoice_number.replace(prefix, ""),
+      10,
+    );
     if (!isNaN(lastNum)) nextNum = lastNum + 1;
   }
 
@@ -240,12 +264,16 @@ export async function generateInvoice(contractId: string, amount: number) {
 
 export async function getInvoices() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data } = await supabase
     .from("invoices")
-    .select("*, contract:contracts(id, amount, status), client:profiles(id, full_name, email)")
+    .select(
+      "*, contract:contracts(id, amount, status), client:profiles(id, full_name, email)",
+    )
     .order("created_at", { ascending: false });
 
   return data || [];
@@ -258,13 +286,17 @@ export async function getInvoices() {
  */
 export async function getContractsNeedingInvoice() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié", data: [] };
 
   // Get all signed contracts
   const { data: contracts, error: contractsError } = await supabase
     .from("contracts")
-    .select("id, amount, client_id, status, client:profiles(id, full_name, email)")
+    .select(
+      "id, amount, client_id, status, client:profiles(id, full_name, email)",
+    )
     .eq("status", "signed");
 
   if (contractsError) return { error: contractsError.message, data: [] };
@@ -272,8 +304,19 @@ export async function getContractsNeedingInvoice() {
 
   // Get all invoices for the current month
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+  const monthStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+  const monthEnd = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   const { data: existingInvoices } = await supabase
     .from("invoices")
@@ -282,12 +325,12 @@ export async function getContractsNeedingInvoice() {
     .lte("created_at", monthEnd);
 
   const invoicedContractIds = new Set(
-    (existingInvoices || []).map((inv) => inv.contract_id)
+    (existingInvoices || []).map((inv) => inv.contract_id),
   );
 
   // Filter contracts that don't have a current-month invoice
   const needingInvoice = contracts.filter(
-    (contract) => !invoicedContractIds.has(contract.id)
+    (contract) => !invoicedContractIds.has(contract.id),
   );
 
   return { error: null, data: needingInvoice };
@@ -299,10 +342,13 @@ export async function getContractsNeedingInvoice() {
  */
 export async function generateScheduledInvoices() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié", count: 0 };
 
-  const { error: fetchError, data: contracts } = await getContractsNeedingInvoice();
+  const { error: fetchError, data: contracts } =
+    await getContractsNeedingInvoice();
 
   if (fetchError || !contracts) return { error: fetchError, count: 0 };
   if (contracts.length === 0) return { error: null, count: 0 };
@@ -322,7 +368,9 @@ export async function generateScheduledInvoices() {
 
 export async function getOverduePayments() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const today = new Date().toISOString().split("T")[0];

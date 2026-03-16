@@ -10,7 +10,10 @@ export default function CallsLoading() {
       <Skeleton className="h-6 w-32" />
       <div className="space-y-3">
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-border/50 p-5 shadow-sm">
+          <div
+            key={i}
+            className="rounded-xl border border-border/50 p-5 shadow-sm"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Skeleton className="h-12 w-12 rounded-lg" />
@@ -30,7 +33,10 @@ export default function CallsLoading() {
       <Skeleton className="h-6 w-24 mt-4" />
       <div className="space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-border/50 p-5 shadow-sm">
+          <div
+            key={i}
+            className="rounded-xl border border-border/50 p-5 shadow-sm"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Skeleton className="h-12 w-12 rounded-lg" />

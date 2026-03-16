@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getAssignments, getUnassignedSetters } from "@/lib/actions/team-assignments";
+import {
+  getAssignments,
+  getUnassignedSetters,
+} from "@/lib/actions/team-assignments";
 import { PageHeader } from "@/components/layout/page-header";
 import { AssignmentsBoard } from "./assignments-board";
 

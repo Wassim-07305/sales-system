@@ -72,7 +72,9 @@ export function CustomersView({ clients, testimonials }: Props) {
 
   const atRisk = clients.filter((c) => c.health_score < 40);
   const healthy = clients.filter((c) => c.health_score >= 70);
-  const moderate = clients.filter((c) => c.health_score >= 40 && c.health_score < 70);
+  const moderate = clients.filter(
+    (c) => c.health_score >= 40 && c.health_score < 70,
+  );
 
   const filtered = clients.filter((c) => {
     const matchSearch =
@@ -81,7 +83,8 @@ export function CustomersView({ clients, testimonials }: Props) {
       (c.niche || "").toLowerCase().includes(search.toLowerCase());
 
     if (filter === "at_risk") return matchSearch && c.health_score < 40;
-    if (filter === "moderate") return matchSearch && c.health_score >= 40 && c.health_score < 70;
+    if (filter === "moderate")
+      return matchSearch && c.health_score >= 40 && c.health_score < 70;
     if (filter === "healthy") return matchSearch && c.health_score >= 70;
     return matchSearch;
   });
@@ -98,10 +101,19 @@ export function CustomersView({ clients, testimonials }: Props) {
     return "[&>div]:bg-red-500";
   }
 
-  async function handleTestimonialAction(id: string, status: "approved" | "published" | "rejected") {
+  async function handleTestimonialAction(
+    id: string,
+    status: "approved" | "published" | "rejected",
+  ) {
     try {
       await updateTestimonialStatus(id, status);
-      toast.success(status === "published" ? "Témoignage publié" : status === "approved" ? "Témoignage approuvé" : "Témoignage rejeté");
+      toast.success(
+        status === "published"
+          ? "Témoignage publié"
+          : status === "approved"
+            ? "Témoignage approuvé"
+            : "Témoignage rejeté",
+      );
       router.refresh();
     } catch {
       toast.error("Erreur");
@@ -204,7 +216,9 @@ export function CustomersView({ clients, testimonials }: Props) {
                         {client.full_name?.charAt(0) || "?"}
                       </div>
                       <div>
-                        <p className="font-medium">{client.full_name || "Sans nom"}</p>
+                        <p className="font-medium">
+                          {client.full_name || "Sans nom"}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {client.niche || client.company || client.email}
                         </p>
@@ -217,11 +231,16 @@ export function CustomersView({ clients, testimonials }: Props) {
                           className={`h-2 ${getScoreBarColor(client.health_score)}`}
                         />
                       </div>
-                      <span className={`text-sm font-bold w-8 ${getScoreColor(client.health_score)}`}>
+                      <span
+                        className={`text-sm font-bold w-8 ${getScoreColor(client.health_score)}`}
+                      >
                         {client.health_score}
                       </span>
                       <span className="text-xs text-muted-foreground hidden sm:block">
-                        {formatDistanceToNow(new Date(client.created_at), { addSuffix: true, locale: fr })}
+                        {formatDistanceToNow(new Date(client.created_at), {
+                          addSuffix: true,
+                          locale: fr,
+                        })}
                       </span>
                     </div>
                   </div>
@@ -246,30 +265,61 @@ export function CustomersView({ clients, testimonials }: Props) {
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="font-medium">{t.client?.full_name || "Client"}</p>
-                      <p className="text-xs text-muted-foreground">{t.client?.email}</p>
+                      <p className="font-medium">
+                        {t.client?.full_name || "Client"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {t.client?.email}
+                      </p>
                     </div>
-                    <Badge variant="outline" className={
-                      t.status === "published" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
-                      t.status === "approved" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
-                      "bg-muted text-muted-foreground border-border"
-                    }>
-                      {t.status === "published" ? "Publié" : t.status === "approved" ? "Approuvé" : "En attente"}
+                    <Badge
+                      variant="outline"
+                      className={
+                        t.status === "published"
+                          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                          : t.status === "approved"
+                            ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                            : "bg-muted text-muted-foreground border-border"
+                      }
+                    >
+                      {t.status === "published"
+                        ? "Publié"
+                        : t.status === "approved"
+                          ? "Approuvé"
+                          : "En attente"}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">{t.content}</p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {t.content}
+                  </p>
                   <div className="flex gap-2">
                     {t.status === "pending" && (
-                      <Button size="sm" variant="outline" onClick={() => handleTestimonialAction(t.id, "approved")}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleTestimonialAction(t.id, "approved")
+                        }
+                      >
                         <ThumbsUp className="h-3 w-3 mr-1" /> Approuver
                       </Button>
                     )}
                     {(t.status === "pending" || t.status === "approved") && (
-                      <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90" onClick={() => handleTestimonialAction(t.id, "published")}>
+                      <Button
+                        size="sm"
+                        className="bg-brand text-brand-dark hover:bg-brand/90"
+                        onClick={() =>
+                          handleTestimonialAction(t.id, "published")
+                        }
+                      >
                         <Eye className="h-3 w-3 mr-1" /> Publier
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => handleTestimonialAction(t.id, "rejected")}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleTestimonialAction(t.id, "rejected")}
+                    >
                       <Trash2 className="h-3 w-3 mr-1" /> Rejeter
                     </Button>
                   </div>
@@ -291,7 +341,10 @@ export function CustomersView({ clients, testimonials }: Props) {
       </Tabs>
 
       {/* Client detail panel */}
-      <Sheet open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>
+      <Sheet
+        open={!!selectedClient}
+        onOpenChange={() => setSelectedClient(null)}
+      >
         <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           {selectedClient && (
             <>
@@ -303,7 +356,9 @@ export function CustomersView({ clients, testimonials }: Props) {
                   <div className="h-16 w-16 rounded-full bg-brand/10 flex items-center justify-center text-brand text-2xl font-bold mx-auto mb-3">
                     {selectedClient.full_name?.charAt(0) || "?"}
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedClient.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedClient.email}
+                  </p>
                   {selectedClient.company && (
                     <p className="text-sm">{selectedClient.company}</p>
                   )}
@@ -319,7 +374,9 @@ export function CustomersView({ clients, testimonials }: Props) {
                         value={selectedClient.health_score}
                         className={`h-4 flex-1 ${getScoreBarColor(selectedClient.health_score)}`}
                       />
-                      <span className={`text-2xl font-bold ${getScoreColor(selectedClient.health_score)}`}>
+                      <span
+                        className={`text-2xl font-bold ${getScoreColor(selectedClient.health_score)}`}
+                      >
                         {selectedClient.health_score}
                       </span>
                     </div>
@@ -337,19 +394,35 @@ export function CustomersView({ clients, testimonials }: Props) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Rôle</span>
-                      <span className="capitalize">{selectedClient.role.replace("_", " ")}</span>
+                      <span className="capitalize">
+                        {selectedClient.role.replace("_", " ")}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Onboarding</span>
-                      <Badge variant="outline" className={
-                        selectedClient.onboarding_completed ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                      }>
-                        {selectedClient.onboarding_completed ? "Complété" : "En cours"}
+                      <Badge
+                        variant="outline"
+                        className={
+                          selectedClient.onboarding_completed
+                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                            : "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                        }
+                      >
+                        {selectedClient.onboarding_completed
+                          ? "Complété"
+                          : "En cours"}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Membre depuis</span>
-                      <span>{formatDistanceToNow(new Date(selectedClient.created_at), { addSuffix: true, locale: fr })}</span>
+                      <span className="text-muted-foreground">
+                        Membre depuis
+                      </span>
+                      <span>
+                        {formatDistanceToNow(
+                          new Date(selectedClient.created_at),
+                          { addSuffix: true, locale: fr },
+                        )}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>

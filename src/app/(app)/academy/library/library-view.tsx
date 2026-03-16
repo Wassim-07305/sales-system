@@ -25,16 +25,54 @@ interface LibraryViewProps {
 
 const TYPE_CONFIG: Record<
   string,
-  { label: string; icon: React.ElementType; color: string; bg: string; ring: string }
+  {
+    label: string;
+    icon: React.ElementType;
+    color: string;
+    bg: string;
+    ring: string;
+  }
 > = {
-  pdf: { label: "PDF", icon: FileText, color: "text-red-500", bg: "bg-red-500/10", ring: "ring-red-500/20" },
-  video: { label: "Vidéo", icon: Video, color: "text-blue-500", bg: "bg-blue-500/10", ring: "ring-blue-500/20" },
-  audio: { label: "Audio", icon: Headphones, color: "text-purple-500", bg: "bg-purple-500/10", ring: "ring-purple-500/20" },
-  script: { label: "Script", icon: Code, color: "text-amber-500", bg: "bg-amber-500/10", ring: "ring-amber-500/20" },
+  pdf: {
+    label: "PDF",
+    icon: FileText,
+    color: "text-red-500",
+    bg: "bg-red-500/10",
+    ring: "ring-red-500/20",
+  },
+  video: {
+    label: "Vidéo",
+    icon: Video,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    ring: "ring-blue-500/20",
+  },
+  audio: {
+    label: "Audio",
+    icon: Headphones,
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    ring: "ring-purple-500/20",
+  },
+  script: {
+    label: "Script",
+    icon: Code,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    ring: "ring-amber-500/20",
+  },
 };
 
 function getTypeConfig(type: string) {
-  return TYPE_CONFIG[type] || { label: type, icon: FileText, color: "text-muted-foreground", bg: "bg-muted/50", ring: "ring-border/50" };
+  return (
+    TYPE_CONFIG[type] || {
+      label: type,
+      icon: FileText,
+      color: "text-muted-foreground",
+      bg: "bg-muted/50",
+      ring: "ring-border/50",
+    }
+  );
 }
 
 const TAB_OPTIONS = [
@@ -51,7 +89,8 @@ export function LibraryView({ resources }: LibraryViewProps) {
 
   const filteredResources = useMemo(() => {
     let filtered = resources;
-    if (activeTab !== "all") filtered = filtered.filter((r) => r.resource_type === activeTab);
+    if (activeTab !== "all")
+      filtered = filtered.filter((r) => r.resource_type === activeTab);
     if (search.trim()) {
       const q = search.toLowerCase();
       filtered = filtered.filter(
@@ -59,7 +98,7 @@ export function LibraryView({ resources }: LibraryViewProps) {
           r.title.toLowerCase().includes(q) ||
           r.description?.toLowerCase().includes(q) ||
           r.category?.toLowerCase().includes(q) ||
-          r.tags?.some((t) => t.toLowerCase().includes(q))
+          r.tags?.some((t) => t.toLowerCase().includes(q)),
       );
     }
     return filtered;
@@ -117,7 +156,13 @@ export function LibraryView({ resources }: LibraryViewProps) {
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
-                      <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center ring-1 shrink-0", config.bg, config.ring)}>
+                      <div
+                        className={cn(
+                          "h-10 w-10 rounded-xl flex items-center justify-center ring-1 shrink-0",
+                          config.bg,
+                          config.ring,
+                        )}
+                      >
                         <Icon className={cn("h-5 w-5", config.color)} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -133,7 +178,14 @@ export function LibraryView({ resources }: LibraryViewProps) {
                     </div>
 
                     <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-                      <Badge variant="outline" className={cn("text-[10px] font-medium border", config.bg, config.color)}>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[10px] font-medium border",
+                          config.bg,
+                          config.color,
+                        )}
+                      >
                         {config.label}
                       </Badge>
                       {resource.category && (
@@ -162,9 +214,18 @@ export function LibraryView({ resources }: LibraryViewProps) {
                     )}
 
                     <div className="mt-4">
-                      <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        <Button size="sm" variant="outline" className="w-full gap-2 h-8 text-xs">
-                          {resource.resource_type === "video" || resource.resource_type === "audio" ? (
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-2 h-8 text-xs"
+                        >
+                          {resource.resource_type === "video" ||
+                          resource.resource_type === "audio" ? (
                             <>
                               <ExternalLink className="h-3.5 w-3.5" />
                               Ouvrir

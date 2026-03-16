@@ -35,7 +35,15 @@ function formatCurrency(amount: number) {
   return amount.toLocaleString("fr-FR") + " \u20AC";
 }
 
-const CHART_COLORS = ["#7af17a", "#60a5fa", "#f59e0b", "#a78bfa", "#f87171", "#34d399", "#fb923c"];
+const CHART_COLORS = [
+  "#7af17a",
+  "#60a5fa",
+  "#f59e0b",
+  "#a78bfa",
+  "#f87171",
+  "#34d399",
+  "#fb923c",
+];
 
 export function SourcesView({
   sources,
@@ -74,8 +82,12 @@ export function SourcesView({
                   <DollarSign className="h-5 w-5 text-[#7af17a]" />
                 </div>
               </div>
-              <p className="text-2xl font-bold tracking-tight">{formatCurrency(summary.totalRevenue)}</p>
-              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total CA</p>
+              <p className="text-2xl font-bold tracking-tight">
+                {formatCurrency(summary.totalRevenue)}
+              </p>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                Total CA
+              </p>
             </CardContent>
           </Card>
 
@@ -86,8 +98,12 @@ export function SourcesView({
                   <Hash className="h-5 w-5 text-blue-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold tracking-tight">{summary.totalDeals}</p>
-              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total Deals</p>
+              <p className="text-2xl font-bold tracking-tight">
+                {summary.totalDeals}
+              </p>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                Total Deals
+              </p>
             </CardContent>
           </Card>
 
@@ -98,8 +114,12 @@ export function SourcesView({
                   <Trophy className="h-5 w-5 text-amber-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold tracking-tight capitalize">{summary.topSource}</p>
-              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Source #1</p>
+              <p className="text-2xl font-bold tracking-tight capitalize">
+                {summary.topSource}
+              </p>
+              <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                Source #1
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -109,14 +129,23 @@ export function SourcesView({
         {/* Bar chart */}
         <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">CA par source</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              CA par source
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <BarChart
+                    data={chartData}
+                    layout="vertical"
+                    margin={{ left: 20 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.1)"
+                    />
                     <XAxis
                       type="number"
                       tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
@@ -130,7 +159,10 @@ export function SourcesView({
                       tick={{ fontSize: 12 }}
                     />
                     <Tooltip
-                      formatter={(value) => [formatCurrency(Number(value)), "CA"]}
+                      formatter={(value) => [
+                        formatCurrency(Number(value)),
+                        "CA",
+                      ]}
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
@@ -156,36 +188,58 @@ export function SourcesView({
         {/* Table */}
         <Card className="border-border/50 hover:shadow-md transition-all overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Détail par source</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              Détail par source
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Source</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deals</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA total</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CA moyen/deal</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Source
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Deals
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      CA total
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      CA moyen/deal
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {sources.map((source, i) => (
-                    <tr key={source.name} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr
+                      key={source.name}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <div
                             className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                            style={{
+                              backgroundColor:
+                                CHART_COLORS[i % CHART_COLORS.length],
+                            }}
                           />
-                          <span className="font-medium capitalize">{source.name}</span>
+                          <span className="font-medium capitalize">
+                            {source.name}
+                          </span>
                           {i === 0 && (
-                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">Top</Badge>
+                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+                              Top
+                            </Badge>
                           )}
                         </div>
                       </td>
                       <td className="p-4 text-right">{source.count}</td>
-                      <td className="p-4 text-right">{formatCurrency(source.revenue)}</td>
+                      <td className="p-4 text-right">
+                        {formatCurrency(source.revenue)}
+                      </td>
                       <td className="p-4 text-right font-medium">
                         {formatCurrency(source.avgDealValue)}
                       </td>

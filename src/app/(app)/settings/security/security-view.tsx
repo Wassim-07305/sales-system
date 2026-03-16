@@ -17,7 +17,13 @@ import {
   Trash2,
   Copy,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -109,7 +115,9 @@ export function SecurityView({
   initialActiveSessions,
 }: SecurityViewProps) {
   const [mfaStatus, setMfaStatus] = useState(initialMfaStatus);
-  const [securitySettings, setSecuritySettings] = useState(initialSecuritySettings);
+  const [securitySettings, setSecuritySettings] = useState(
+    initialSecuritySettings,
+  );
   const [isPending, startTransition] = useTransition();
 
   // MFA enrollment state
@@ -124,10 +132,10 @@ export function SecurityView({
 
   // Security settings state
   const [ipWhitelistText, setIpWhitelistText] = useState(
-    securitySettings.ipWhitelist.join("\n")
+    securitySettings.ipWhitelist.join("\n"),
   );
   const [sessionTimeout, setSessionTimeout] = useState(
-    String(securitySettings.sessionTimeout)
+    String(securitySettings.sessionTimeout),
   );
 
   // -------------------------------------------------------------------------
@@ -180,7 +188,9 @@ export function SecurityView({
   }
 
   function handleDisableMfa() {
-    const verifiedFactor = mfaStatus.factors.find((f) => f.status === "verified");
+    const verifiedFactor = mfaStatus.factors.find(
+      (f) => f.status === "verified",
+    );
     if (!verifiedFactor) return;
     startTransition(async () => {
       const result = await unenrollMfa(verifiedFactor.id);
@@ -271,7 +281,9 @@ export function SecurityView({
                 <Shield className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
-                <CardTitle className="text-lg">Authentification à deux facteurs (2FA)</CardTitle>
+                <CardTitle className="text-lg">
+                  Authentification à deux facteurs (2FA)
+                </CardTitle>
                 <CardDescription>
                   Ajoutez une couche de sécurité supplémentaire à votre compte
                 </CardDescription>
@@ -295,7 +307,8 @@ export function SecurityView({
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                 <span>
-                  La 2FA est active via une application d&apos;authentification (TOTP)
+                  La 2FA est active via une application d&apos;authentification
+                  (TOTP)
                 </span>
               </div>
               <Button
@@ -312,8 +325,8 @@ export function SecurityView({
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
                 <span>
-                  Votre compte n&apos;est pas protégé par la 2FA.
-                  Nous vous recommandons de l&apos;activer.
+                  Votre compte n&apos;est pas protégé par la 2FA. Nous vous
+                  recommandons de l&apos;activer.
                 </span>
               </div>
               <Button onClick={handleEnrollStart} disabled={isPending}>
@@ -364,7 +377,10 @@ export function SecurityView({
                       <Monitor className="h-4 w-4 text-muted-foreground" />
                       {session.device}
                       {session.current && (
-                        <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20">
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20"
+                        >
                           Session actuelle
                         </Badge>
                       )}
@@ -381,7 +397,9 @@ export function SecurityView({
                         size="sm"
                         className="text-destructive hover:text-destructive"
                         onClick={() =>
-                          toast.info("Révocation de session non disponible en démo")
+                          toast.info(
+                            "Révocation de session non disponible en démo",
+                          )
                         }
                       >
                         <Trash2 className="h-4 w-4" />
@@ -427,7 +445,9 @@ export function SecurityView({
               {initialLoginHistory.map((entry) => (
                 <TableRow key={entry.id}>
                   <TableCell>{formatDate(entry.date)}</TableCell>
-                  <TableCell className="font-mono text-sm">{entry.ip}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {entry.ip}
+                  </TableCell>
                   <TableCell>{entry.device}</TableCell>
                   <TableCell>
                     {entry.status === "success" ? (
@@ -481,7 +501,10 @@ export function SecurityView({
         <CardContent className="space-y-6">
           {/* Session timeout */}
           <div className="space-y-2">
-            <Label htmlFor="session-timeout" className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <Label
+              htmlFor="session-timeout"
+              className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider"
+            >
               <Clock className="h-4 w-4" />
               Expiration de session
             </Label>
@@ -506,7 +529,10 @@ export function SecurityView({
 
           {/* IP Whitelist */}
           <div className="space-y-2">
-            <Label htmlFor="ip-whitelist" className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <Label
+              htmlFor="ip-whitelist"
+              className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider"
+            >
               <Globe className="h-4 w-4" />
               Liste blanche d&apos;adresses IP
             </Label>
@@ -519,7 +545,8 @@ export function SecurityView({
               className="font-mono text-sm"
             />
             <p className="text-xs text-muted-foreground">
-              Une adresse IP par ligne. Laissez vide pour autoriser toutes les adresses.
+              Une adresse IP par ligne. Laissez vide pour autoriser toutes les
+              adresses.
             </p>
           </div>
 
@@ -532,13 +559,14 @@ export function SecurityView({
               Mot de passe
             </Label>
             <p className="text-sm text-muted-foreground">
-              Modifiez votre mot de passe pour renforcer la sécurité de votre compte.
+              Modifiez votre mot de passe pour renforcer la sécurité de votre
+              compte.
             </p>
             <Button
               variant="outline"
               onClick={() =>
                 toast.info(
-                  "Un e-mail de réinitialisation sera envoyé à votre adresse"
+                  "Un e-mail de réinitialisation sera envoyé à votre adresse",
                 )
               }
             >

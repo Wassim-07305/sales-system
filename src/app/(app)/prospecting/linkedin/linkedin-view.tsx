@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -34,6 +35,8 @@ import {
   Bot,
   Unplug,
   AlertTriangle,
+  Send,
+  Wand2,
 } from "lucide-react";
 import {
   analyzeProfile,
@@ -90,7 +93,9 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
 
   // Unipile state
   const [connectingUnipile, setConnectingUnipile] = useState(false);
-  const [liConnected, setLiConnected] = useState(unipileLinkedin?.connected ?? false);
+  const [liConnected, setLiConnected] = useState(
+    unipileLinkedin?.connected ?? false,
+  );
   const [liName, setLiName] = useState(unipileLinkedin?.accountName ?? "");
   const [refreshingUnipile, setRefreshingUnipile] = useState(false);
 
@@ -101,7 +106,11 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        window.open(
+          result.url,
+          "_blank",
+          "width=600,height=700,scrollbars=yes",
+        );
         toast.info("Connectez votre compte LinkedIn, puis cliquez Rafraîchir");
       }
     } catch {
@@ -115,11 +124,15 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
     try {
       const result = await getUnipileStatus();
       const liAccount = result.accounts.find(
-        (a) => a.provider.toUpperCase() === "LINKEDIN"
+        (a) => a.provider.toUpperCase() === "LINKEDIN",
       );
       setLiConnected(!!liAccount);
       setLiName(liAccount?.name ?? "");
-      toast.success(liAccount ? "LinkedIn connecté via Unipile" : "Aucun compte LinkedIn détecté");
+      toast.success(
+        liAccount
+          ? "LinkedIn connecté via Unipile"
+          : "Aucun compte LinkedIn détecté",
+      );
     } catch {
       toast.error("Erreur lors du rafraîchissement");
     }
@@ -132,12 +145,17 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
 
   // Profile analyzer
   const [profileUrl, setProfileUrl] = useState("");
-  const [profileResult, setProfileResult] = useState<Record<string, unknown> | null>(null);
+  const [profileResult, setProfileResult] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [analyzingProfile, setAnalyzingProfile] = useState(false);
 
   // Comment suggester
   const [commentUrl, setCommentUrl] = useState("");
-  const [comments, setComments] = useState<{ type: string; comment: string }[]>([]);
+  const [comments, setComments] = useState<{ type: string; comment: string }[]>(
+    [],
+  );
   const [suggestingComments, setSuggestingComments] = useState(false);
 
   // DM generator
@@ -145,6 +163,43 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
   const [dmContext, setDmContext] = useState("");
   const [generatedDm, setGeneratedDm] = useState("");
   const [generatingDm, setGeneratingDm] = useState(false);
+
+  // Analyse + message combo
+  const [comboUrl, setComboUrl] = useState("");
+  const [comboAnalyzing, setComboAnalyzing] = useState(false);
+  const [comboMessage, setComboMessage] = useState("");
+  const [comboProfile, setComboProfile] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+
+  async function handleAnalyzeAndGenerate() {
+    if (!comboUrl.trim()) {
+      toast.error("Entrez une URL de profil LinkedIn");
+      return;
+    }
+    setComboAnalyzing(true);
+    setComboMessage("");
+    setComboProfile(null);
+    try {
+      const result = await analyzeProfile(comboUrl);
+      const profileData = result as unknown as Record<string, unknown>;
+      setComboProfile(profileData);
+      // Generate message based on analysis
+      const name = (profileData.name as string) || "ce prospect";
+      const headline = (profileData.headline as string) || "";
+      const context = headline
+        ? `Profil LinkedIn: ${name}, ${headline}`
+        : `Profil LinkedIn: ${name}`;
+      const msg = await generateAiMessage(name, context, "linkedin");
+      setComboMessage(msg);
+      toast.success("Profil analysé et message généré");
+    } catch {
+      toast.error("Erreur lors de l'analyse");
+    } finally {
+      setComboAnalyzing(false);
+    }
+  }
 
   // Mode Duo IA+Humain — per-conversation auto mode
   const [autoModeIds, setAutoModeIds] = useState<Set<string>>(new Set());
@@ -239,11 +294,11 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="LinkedIn"
-        description="Prospection et outils LinkedIn"
-      >
-        <Badge variant="outline" className="bg-foreground/10 text-foreground border-foreground/20 gap-1">
+      <PageHeader title="LinkedIn" description="Prospection et outils LinkedIn">
+        <Badge
+          variant="outline"
+          className="bg-foreground/10 text-foreground border-foreground/20 gap-1"
+        >
           <Linkedin className="h-3 w-3" />
           {prospects.length} prospects
         </Badge>
@@ -255,15 +310,18 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
           <div className="flex items-center gap-2 text-amber-600">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <p className="text-sm font-medium">
-              Intégration LinkedIn non configurée. Les messages et analyses ne seront pas synchronisés automatiquement.
-              Connectez votre compte ci-dessous pour activer toutes les fonctionnalités.
+              Intégration LinkedIn non configurée. Les messages et analyses ne
+              seront pas synchronisés automatiquement. Connectez votre compte
+              ci-dessous pour activer toutes les fonctionnalités.
             </p>
           </div>
         </div>
       )}
 
       {/* Unipile LinkedIn connection status */}
-      <Card className={`shadow-sm rounded-2xl ${liConnected ? "border-brand/30" : ""}`}>
+      <Card
+        className={`shadow-sm rounded-2xl ${liConnected ? "border-brand/30" : ""}`}
+      >
         <CardContent className="flex items-center justify-between py-3 px-4">
           <div className="flex items-center gap-3">
             <Unplug className="h-5 w-5 text-muted-foreground" />
@@ -275,7 +333,9 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                     LinkedIn connecté via Unipile
                   </span>
                   {liName && (
-                    <span className="text-xs text-muted-foreground">({liName})</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({liName})
+                    </span>
                   )}
                 </>
               ) : (
@@ -310,7 +370,9 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
               onClick={handleRefreshUnipile}
               disabled={refreshingUnipile}
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${refreshingUnipile ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${refreshingUnipile ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </CardContent>
@@ -363,7 +425,9 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                   <div className="space-y-2 text-sm border-t pt-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Nom</span>
-                      <span className="font-medium">{profileResult.name as string}</span>
+                      <span className="font-medium">
+                        {profileResult.name as string}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Titre</span>
@@ -373,7 +437,11 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Abonnés</span>
-                      <span>{(profileResult.followers as number)?.toLocaleString("fr-FR")}</span>
+                      <span>
+                        {(profileResult.followers as number)?.toLocaleString(
+                          "fr-FR",
+                        )}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Engagement</span>
@@ -392,8 +460,12 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                       </Badge>
                     </div>
                     <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground mb-1">Recommandation</p>
-                      <p className="text-xs">{profileResult.recommendation as string}</p>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Recommandation
+                      </p>
+                      <p className="text-xs">
+                        {profileResult.recommendation as string}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -437,8 +509,8 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                             {c.type === "value"
                               ? "Valeur ajoutée"
                               : c.type === "question"
-                              ? "Question"
-                              : "Témoignage"}
+                                ? "Question"
+                                : "Témoignage"}
                           </Badge>
                           <p className="text-sm mb-2">{c.comment}</p>
                           <Button
@@ -519,6 +591,112 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
                       </Button>
                     </CardContent>
                   </Card>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Analyse + Message Combo */}
+            <Card className="lg:col-span-2 shadow-sm rounded-2xl border-brand/20">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Wand2 className="h-4 w-4" />
+                  Analyser profil + Générer message
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="https://linkedin.com/in/nom-du-profil"
+                    value={comboUrl}
+                    onChange={(e) => setComboUrl(e.target.value)}
+                    className="h-11 rounded-xl flex-1"
+                  />
+                  <Button
+                    onClick={handleAnalyzeAndGenerate}
+                    disabled={comboAnalyzing}
+                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  >
+                    {comboAnalyzing ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-4 w-4 mr-2" />
+                    )}
+                    Analyser + Générer
+                  </Button>
+                </div>
+
+                {comboProfile && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                    <div className="border rounded-xl p-3">
+                      <p className="text-xs text-muted-foreground">Nom</p>
+                      <p className="font-medium">
+                        {comboProfile.name as string}
+                      </p>
+                    </div>
+                    <div className="border rounded-xl p-3">
+                      <p className="text-xs text-muted-foreground">Titre</p>
+                      <p className="text-xs">
+                        {comboProfile.headline as string}
+                      </p>
+                    </div>
+                    <div className="border rounded-xl p-3">
+                      <p className="text-xs text-muted-foreground">Score</p>
+                      <Badge
+                        className={
+                          (comboProfile.score as number) >= 70
+                            ? "bg-brand/10 text-brand border border-brand/20"
+                            : "bg-muted/60 text-muted-foreground border border-border/50"
+                        }
+                      >
+                        {comboProfile.score as number}/100
+                      </Badge>
+                    </div>
+                    <div className="border rounded-xl p-3">
+                      <p className="text-xs text-muted-foreground">Abonnés</p>
+                      <p className="font-medium">
+                        {(comboProfile.followers as number)?.toLocaleString(
+                          "fr-FR",
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {comboMessage && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      Message généré (modifiable)
+                    </label>
+                    <Textarea
+                      value={comboMessage}
+                      onChange={(e) => setComboMessage(e.target.value)}
+                      className="min-h-[120px] rounded-xl"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => copyToClipboard(comboMessage)}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copier
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl"
+                        onClick={() => {
+                          copyToClipboard(comboMessage);
+                          toast.success(
+                            "Message copié ! Collez-le dans LinkedIn.",
+                          );
+                        }}
+                      >
+                        <Send className="h-3 w-3 mr-1" />
+                        Envoyer (copier)
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>

@@ -60,7 +60,10 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
   const earnedIds = new Set(earnedBadges.map((b) => b.badge_id));
 
   // Group badges by category
-  const categories: Record<string, { label: string; badges: BadgeDefinition[] }> = {
+  const categories: Record<
+    string,
+    { label: string; badges: BadgeDefinition[] }
+  > = {
     performance: { label: "Performance", badges: [] },
     streak: { label: "Streaks", badges: [] },
     social: { label: "Social", badges: [] },
@@ -79,9 +82,12 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
           style: { background: "#14080e", color: "#fff" },
         });
       } else {
-        toast.info("Aucun nouveau badge pour le moment. Continuez vos efforts !", {
-          style: { background: "#14080e", color: "#fff" },
-        });
+        toast.info(
+          "Aucun nouveau badge pour le moment. Continuez vos efforts !",
+          {
+            style: { background: "#14080e", color: "#fff" },
+          },
+        );
       }
     });
   }
@@ -116,7 +122,9 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                 <TooltipProvider>
                   {badges.map((badge) => {
                     const isEarned = earnedIds.has(badge.id);
-                    const earned = earnedBadges.find((b) => b.badge_id === badge.id);
+                    const earned = earnedBadges.find(
+                      (b) => b.badge_id === badge.id,
+                    );
                     const IconComponent = ICON_MAP[badge.icon] || Trophy;
 
                     return (
@@ -127,13 +135,13 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                               "relative flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all duration-300 w-[90px]",
                               isEarned
                                 ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5"
-                                : "border-border/50 bg-muted/30 opacity-50 grayscale"
+                                : "border-border/50 bg-muted/30 opacity-50 grayscale",
                             )}
                           >
                             <div
                               className={cn(
                                 "h-10 w-10 rounded-xl flex items-center justify-center",
-                                isEarned ? "bg-emerald-500/10" : "bg-muted/50"
+                                isEarned ? "bg-emerald-500/10" : "bg-muted/50",
                               )}
                             >
                               {isEarned ? (
@@ -158,11 +166,15 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                         <TooltipContent side="top">
                           <div className="text-center">
                             <p className="font-semibold">{badge.name}</p>
-                            <p className="text-xs opacity-80">{badge.description}</p>
+                            <p className="text-xs opacity-80">
+                              {badge.description}
+                            </p>
                             {isEarned && earned && (
                               <p className="text-xs text-brand mt-1">
                                 Obtenu le{" "}
-                                {new Date(earned.earned_at).toLocaleDateString("fr-FR")}
+                                {new Date(earned.earned_at).toLocaleDateString(
+                                  "fr-FR",
+                                )}
                               </p>
                             )}
                             {!isEarned && (

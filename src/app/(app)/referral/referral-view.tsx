@@ -57,13 +57,19 @@ interface ReferralViewProps {
   stats: ReferralStats;
 }
 
-export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps) {
+export function ReferralView({
+  affiliate,
+  referrals,
+  stats,
+}: ReferralViewProps) {
   const referralCode = affiliate?.referral_code || "---";
   const referralLink = `${typeof window !== "undefined" ? window.location.origin : ""}/register?ref=${referralCode}`;
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [filter, setFilter] = useState<"all" | "pending" | "converted" | "expired">("all");
+  const [filter, setFilter] = useState<
+    "all" | "pending" | "converted" | "expired"
+  >("all");
 
   function copyLink() {
     navigator.clipboard.writeText(referralLink);
@@ -77,11 +83,13 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
 
   function shareLink() {
     if (navigator.share) {
-      navigator.share({
-        title: "Rejoignez-moi !",
-        text: `Utilisez mon code parrain ${referralCode} pour vous inscrire.`,
-        url: referralLink,
-      }).catch(() => {});
+      navigator
+        .share({
+          title: "Rejoignez-moi !",
+          text: `Utilisez mon code parrain ${referralCode} pour vous inscrire.`,
+          url: referralLink,
+        })
+        .catch(() => {});
     } else {
       copyLink();
     }
@@ -93,7 +101,10 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
       return;
     }
     startTransition(async () => {
-      const result = await sendReferralInvite(inviteEmail.trim(), inviteName.trim() || undefined);
+      const result = await sendReferralInvite(
+        inviteEmail.trim(),
+        inviteName.trim() || undefined,
+      );
       if (result.error) {
         toast.error(result.error);
       } else {
@@ -111,14 +122,28 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
     return `${local.slice(0, 2)}***@${domain}`;
   }
 
-  const filteredReferrals = filter === "all"
-    ? referrals
-    : referrals.filter((r) => r.status === filter);
+  const filteredReferrals =
+    filter === "all" ? referrals : referrals.filter((r) => r.status === filter);
 
-  const statusConfig: Record<string, { label: string; className: string; icon: typeof Clock }> = {
-    pending: { label: "En attente", className: "bg-amber-500/10 text-amber-600 border-amber-500/20", icon: Clock },
-    converted: { label: "Converti", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: CheckCircle2 },
-    expired: { label: "Expire", className: "bg-muted text-muted-foreground border-border", icon: XCircle },
+  const statusConfig: Record<
+    string,
+    { label: string; className: string; icon: typeof Clock }
+  > = {
+    pending: {
+      label: "En attente",
+      className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+      icon: Clock,
+    },
+    converted: {
+      label: "Converti",
+      className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+      icon: CheckCircle2,
+    },
+    expired: {
+      label: "Expire",
+      className: "bg-muted text-muted-foreground border-border",
+      icon: XCircle,
+    },
   };
 
   return (
@@ -137,23 +162,41 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
             </div>
             <div>
               <h3 className="text-lg font-bold">Votre lien de parrainage</h3>
-              <p className="text-muted-foreground text-sm">Partagez ce lien et gagnez 10% de commission sur chaque vente.</p>
+              <p className="text-muted-foreground text-sm">
+                Partagez ce lien et gagnez 10% de commission sur chaque vente.
+              </p>
             </div>
           </div>
           <div className="flex gap-2 mb-3">
-            <Input value={referralLink} readOnly className="bg-muted border-border text-foreground" />
-            <Button onClick={copyLink} className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0">
+            <Input
+              value={referralLink}
+              readOnly
+              className="bg-muted border-border text-foreground"
+            />
+            <Button
+              onClick={copyLink}
+              className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0"
+            >
               <Copy className="h-4 w-4 mr-1" />
               Copier
             </Button>
-            <Button onClick={shareLink} variant="outline" className="border-border text-foreground hover:bg-muted shrink-0">
+            <Button
+              onClick={shareLink}
+              variant="outline"
+              className="border-border text-foreground hover:bg-muted shrink-0"
+            >
               <Share2 className="h-4 w-4" />
             </Button>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Code :</span>
-            <code className="bg-muted px-2 py-0.5 rounded font-mono text-foreground">{referralCode}</code>
-            <button onClick={copyCode} className="hover:text-foreground transition-colors">
+            <code className="bg-muted px-2 py-0.5 rounded font-mono text-foreground">
+              {referralCode}
+            </code>
+            <button
+              onClick={copyCode}
+              className="hover:text-foreground transition-colors"
+            >
               <Copy className="h-3 w-3" />
             </button>
           </div>
@@ -165,7 +208,9 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Invitations</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Invitations
+              </span>
               <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
                 <Send className="h-4 w-4 text-blue-500" />
               </div>
@@ -176,7 +221,9 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">En attente</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                En attente
+              </span>
               <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
                 <Clock className="h-4 w-4 text-amber-500" />
               </div>
@@ -187,13 +234,17 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Conversions</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Conversions
+              </span>
               <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold tracking-tight">{stats.converted}</p>
+              <p className="text-2xl font-bold tracking-tight">
+                {stats.converted}
+              </p>
               {stats.conversionRate > 0 && (
                 <span className="text-xs text-emerald-500 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-0.5" />
@@ -206,12 +257,16 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
         <Card className="border-border/50 hover:shadow-md transition-all duration-200">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Recompenses</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Recompenses
+              </span>
               <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <DollarSign className="h-4 w-4 text-brand" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{stats.totalRewards.toLocaleString("fr-FR")} &euro;</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {stats.totalRewards.toLocaleString("fr-FR")} &euro;
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -242,7 +297,11 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
               className="flex-1"
               onKeyDown={(e) => e.key === "Enter" && handleInvite()}
             />
-            <Button onClick={handleInvite} disabled={isPending} className="shrink-0">
+            <Button
+              onClick={handleInvite}
+              disabled={isPending}
+              className="shrink-0"
+            >
               {isPending ? (
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
               ) : (
@@ -265,17 +324,25 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
               Historique des parrainages
             </CardTitle>
             <div className="flex gap-1">
-              {(["all", "pending", "converted", "expired"] as const).map((f) => (
-                <Button
-                  key={f}
-                  variant={filter === f ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setFilter(f)}
-                  className="text-xs"
-                >
-                  {f === "all" ? "Tous" : f === "pending" ? "En attente" : f === "converted" ? "Convertis" : "Expires"}
-                </Button>
-              ))}
+              {(["all", "pending", "converted", "expired"] as const).map(
+                (f) => (
+                  <Button
+                    key={f}
+                    variant={filter === f ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilter(f)}
+                    className="text-xs"
+                  >
+                    {f === "all"
+                      ? "Tous"
+                      : f === "pending"
+                        ? "En attente"
+                        : f === "converted"
+                          ? "Convertis"
+                          : "Expires"}
+                  </Button>
+                ),
+              )}
             </div>
           </div>
         </CardHeader>
@@ -302,14 +369,22 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
                         {ref.referred_name || maskEmail(ref.referred_email)}
                       </p>
                       {ref.referred_name && ref.referred_email && (
-                        <p className="text-xs text-muted-foreground">{maskEmail(ref.referred_email)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {maskEmail(ref.referred_email)}
+                        </p>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(ref.created_at), { addSuffix: true, locale: fr })}
+                      {formatDistanceToNow(new Date(ref.created_at), {
+                        addSuffix: true,
+                        locale: fr,
+                      })}
                     </p>
                     <div>
-                      <Badge variant="outline" className={`${sc.className} gap-1`}>
+                      <Badge
+                        variant="outline"
+                        className={`${sc.className} gap-1`}
+                      >
                         <StatusIcon className="h-3 w-3" />
                         {sc.label}
                       </Badge>
@@ -329,10 +404,13 @@ export function ReferralView({ affiliate, referrals, stats }: ReferralViewProps)
                 <Gift className="h-7 w-7 opacity-50" />
               </div>
               <p className="font-medium text-base mb-1">
-                {filter === "all" ? "Aucun parrainage pour le moment" : `Aucun parrainage ${filter === "pending" ? "en attente" : filter === "converted" ? "converti" : "expire"}`}
+                {filter === "all"
+                  ? "Aucun parrainage pour le moment"
+                  : `Aucun parrainage ${filter === "pending" ? "en attente" : filter === "converted" ? "converti" : "expire"}`}
               </p>
               <p className="text-sm max-w-sm mx-auto">
-                Partagez votre lien de parrainage ou invitez directement vos contacts pour commencer a gagner des commissions.
+                Partagez votre lien de parrainage ou invitez directement vos
+                contacts pour commencer a gagner des commissions.
               </p>
             </div>
           )}

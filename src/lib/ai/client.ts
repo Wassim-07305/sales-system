@@ -15,7 +15,7 @@ async function getOpenRouterClient(): Promise<OpenAI> {
 
   if (!key) {
     throw new Error(
-      "OPENROUTER_API_KEY non configurée. Ajoutez-la dans les variables d'environnement ou dans Paramètres > Intégrations."
+      "OPENROUTER_API_KEY non configurée. Ajoutez-la dans les variables d'environnement ou dans Paramètres > Intégrations.",
     );
   }
 
@@ -51,7 +51,7 @@ export async function aiComplete(
     model?: string;
     maxTokens?: number;
     temperature?: number;
-  }
+  },
 ): Promise<string> {
   const messages: AIMessage[] = [];
 
@@ -80,7 +80,7 @@ export async function aiChat(
     model?: string;
     maxTokens?: number;
     temperature?: number;
-  }
+  },
 ): Promise<string> {
   const client = await getOpenRouterClient();
   const response = await client.chat.completions.create({
@@ -102,9 +102,10 @@ export async function aiJSON<T>(
     system?: string;
     model?: string;
     maxTokens?: number;
-  }
+  },
 ): Promise<T> {
-  const system = `${options?.system || ""}\n\nIMPORTANT: Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, sans texte avant ou après.`.trim();
+  const system =
+    `${options?.system || ""}\n\nIMPORTANT: Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, sans texte avant ou après.`.trim();
 
   const result = await aiComplete(prompt, {
     ...options,

@@ -54,11 +54,36 @@ interface Props {
 }
 
 const MOODS = [
-  { value: "great", label: "Excellent", icon: Trophy, color: "text-green-500 border-green-500 bg-green-500/10" },
-  { value: "good", label: "Bien", icon: ThumbsUp, color: "text-blue-500 border-blue-500 bg-blue-500/10" },
-  { value: "neutral", label: "Neutre", icon: Meh, color: "text-yellow-500 border-yellow-500 bg-yellow-500/10" },
-  { value: "tough", label: "Difficile", icon: Frown, color: "text-orange-500 border-orange-500 bg-orange-500/10" },
-  { value: "bad", label: "Mauvais", icon: ThumbsDown, color: "text-red-500 border-red-500 bg-red-500/10" },
+  {
+    value: "great",
+    label: "Excellent",
+    icon: Trophy,
+    color: "text-green-500 border-green-500 bg-green-500/10",
+  },
+  {
+    value: "good",
+    label: "Bien",
+    icon: ThumbsUp,
+    color: "text-blue-500 border-blue-500 bg-blue-500/10",
+  },
+  {
+    value: "neutral",
+    label: "Neutre",
+    icon: Meh,
+    color: "text-yellow-500 border-yellow-500 bg-yellow-500/10",
+  },
+  {
+    value: "tough",
+    label: "Difficile",
+    icon: Frown,
+    color: "text-orange-500 border-orange-500 bg-orange-500/10",
+  },
+  {
+    value: "bad",
+    label: "Mauvais",
+    icon: ThumbsDown,
+    color: "text-red-500 border-red-500 bg-red-500/10",
+  },
 ] as const;
 
 function getMoodInfo(mood: string) {
@@ -71,15 +96,27 @@ export function JournalView({ todayJournal, history }: Props) {
   const [isEditing, setIsEditing] = useState(!todayJournal);
 
   const [dmsSent, setDmsSent] = useState(todayJournal?.dms_sent ?? 0);
-  const [repliesReceived, setRepliesReceived] = useState(todayJournal?.replies_received ?? 0);
-  const [callsBooked, setCallsBooked] = useState(todayJournal?.calls_booked ?? 0);
-  const [callsCompleted, setCallsCompleted] = useState(todayJournal?.calls_completed ?? 0);
-  const [dealsClosed, setDealsClosed] = useState(todayJournal?.deals_closed ?? 0);
-  const [revenueGenerated, setRevenueGenerated] = useState(todayJournal?.revenue_generated ?? 0);
+  const [repliesReceived, setRepliesReceived] = useState(
+    todayJournal?.replies_received ?? 0,
+  );
+  const [callsBooked, setCallsBooked] = useState(
+    todayJournal?.calls_booked ?? 0,
+  );
+  const [callsCompleted, setCallsCompleted] = useState(
+    todayJournal?.calls_completed ?? 0,
+  );
+  const [dealsClosed, setDealsClosed] = useState(
+    todayJournal?.deals_closed ?? 0,
+  );
+  const [revenueGenerated, setRevenueGenerated] = useState(
+    todayJournal?.revenue_generated ?? 0,
+  );
   const [mood, setMood] = useState<string>(todayJournal?.mood ?? "neutral");
   const [wins, setWins] = useState(todayJournal?.wins ?? "");
   const [blockers, setBlockers] = useState(todayJournal?.blockers ?? "");
-  const [planTomorrow, setPlanTomorrow] = useState(todayJournal?.plan_tomorrow ?? "");
+  const [planTomorrow, setPlanTomorrow] = useState(
+    todayJournal?.plan_tomorrow ?? "",
+  );
 
   const handleSubmit = () => {
     startTransition(async () => {
@@ -123,13 +160,20 @@ export function JournalView({ todayJournal, history }: Props) {
             EOD du jour
           </CardTitle>
           {todayJournal && !isEditing && (
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
               <Pencil className="h-4 w-4 mr-2" />
               Modifier
             </Button>
           )}
           {todayJournal && !isEditing && (
-            <Badge variant="secondary" className="bg-green-500/10 text-green-500">
+            <Badge
+              variant="secondary"
+              className="bg-green-500/10 text-green-500"
+            >
               Soumis
             </Badge>
           )}
@@ -164,7 +208,9 @@ export function JournalView({ todayJournal, history }: Props) {
                       type="number"
                       min={0}
                       value={repliesReceived}
-                      onChange={(e) => setRepliesReceived(Number(e.target.value))}
+                      onChange={(e) =>
+                        setRepliesReceived(Number(e.target.value))
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -188,7 +234,9 @@ export function JournalView({ todayJournal, history }: Props) {
                       type="number"
                       min={0}
                       value={callsCompleted}
-                      onChange={(e) => setCallsCompleted(Number(e.target.value))}
+                      onChange={(e) =>
+                        setCallsCompleted(Number(e.target.value))
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -212,7 +260,9 @@ export function JournalView({ todayJournal, history }: Props) {
                       type="number"
                       min={0}
                       value={revenueGenerated}
-                      onChange={(e) => setRevenueGenerated(Number(e.target.value))}
+                      onChange={(e) =>
+                        setRevenueGenerated(Number(e.target.value))
+                      }
                     />
                   </div>
                 </div>
@@ -236,7 +286,7 @@ export function JournalView({ todayJournal, history }: Props) {
                           "flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all cursor-pointer",
                           isSelected
                             ? m.color
-                            : "border-transparent hover:border-muted-foreground/20 bg-muted/50"
+                            : "border-transparent hover:border-muted-foreground/20 bg-muted/50",
                         )}
                       >
                         <Icon className="h-6 w-6" />
@@ -314,16 +364,43 @@ export function JournalView({ todayJournal, history }: Props) {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {[
-                    { label: "DMs envoyés", value: todayJournal.dms_sent, icon: MessageSquare },
-                    { label: "Réponses", value: todayJournal.replies_received, icon: Smile },
-                    { label: "Appels bookés", value: todayJournal.calls_booked, icon: Phone },
-                    { label: "Appels effectués", value: todayJournal.calls_completed, icon: Phone },
-                    { label: "Deals closés", value: todayJournal.deals_closed, icon: Handshake },
-                    { label: "CA généré", value: `${todayJournal.revenue_generated} €`, icon: DollarSign },
+                    {
+                      label: "DMs envoyés",
+                      value: todayJournal.dms_sent,
+                      icon: MessageSquare,
+                    },
+                    {
+                      label: "Réponses",
+                      value: todayJournal.replies_received,
+                      icon: Smile,
+                    },
+                    {
+                      label: "Appels bookés",
+                      value: todayJournal.calls_booked,
+                      icon: Phone,
+                    },
+                    {
+                      label: "Appels effectués",
+                      value: todayJournal.calls_completed,
+                      icon: Phone,
+                    },
+                    {
+                      label: "Deals closés",
+                      value: todayJournal.deals_closed,
+                      icon: Handshake,
+                    },
+                    {
+                      label: "CA généré",
+                      value: `${todayJournal.revenue_generated} €`,
+                      icon: DollarSign,
+                    },
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
-                      <div key={item.label} className="bg-muted/50 rounded-lg p-3">
+                      <div
+                        key={item.label}
+                        className="bg-muted/50 rounded-lg p-3"
+                      >
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                           <Icon className="h-3.5 w-3.5" />
                           {item.label}
@@ -335,7 +412,9 @@ export function JournalView({ todayJournal, history }: Props) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Humeur :</span>
+                  <span className="text-sm text-muted-foreground">
+                    Humeur :
+                  </span>
                   {(() => {
                     const moodInfo = getMoodInfo(todayJournal.mood);
                     const Icon = moodInfo.icon;
@@ -384,7 +463,9 @@ export function JournalView({ todayJournal, history }: Props) {
       {/* ── Historique ────────────────────────────────── */}
       {recentHistory.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold mb-4">Historique (7 derniers jours)</h2>
+          <h2 className="text-lg font-semibold mb-4">
+            Historique (7 derniers jours)
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentHistory.map((entry) => {
               const moodInfo = getMoodInfo(entry.mood);
@@ -400,23 +481,38 @@ export function JournalView({ todayJournal, history }: Props) {
                           month: "short",
                         })}
                       </span>
-                      <Badge variant="outline" className={cn("text-xs", moodInfo.color)}>
+                      <Badge
+                        variant="outline"
+                        className={cn("text-xs", moodInfo.color)}
+                      >
                         <MoodIcon className="h-3 w-3 mr-1" />
                         {moodInfo.label}
                       </Badge>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
-                        <div className="text-lg font-bold">{entry.dms_sent}</div>
-                        <div className="text-[10px] text-muted-foreground">DMs</div>
+                        <div className="text-lg font-bold">
+                          {entry.dms_sent}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          DMs
+                        </div>
                       </div>
                       <div>
-                        <div className="text-lg font-bold">{entry.calls_booked}</div>
-                        <div className="text-[10px] text-muted-foreground">Appels</div>
+                        <div className="text-lg font-bold">
+                          {entry.calls_booked}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Appels
+                        </div>
                       </div>
                       <div>
-                        <div className="text-lg font-bold">{entry.deals_closed}</div>
-                        <div className="text-[10px] text-muted-foreground">Deals</div>
+                        <div className="text-lg font-bold">
+                          {entry.deals_closed}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Deals
+                        </div>
                       </div>
                     </div>
                     {entry.revenue_generated > 0 && (
@@ -437,7 +533,9 @@ export function JournalView({ todayJournal, history }: Props) {
           <CardContent className="p-8 text-center text-muted-foreground">
             <CalendarDays className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="font-medium">Aucun journal soumis</p>
-            <p className="text-sm mt-1">Commencez par remplir votre EOD du jour ci-dessus.</p>
+            <p className="text-sm mt-1">
+              Commencez par remplir votre EOD du jour ci-dessus.
+            </p>
           </CardContent>
         </Card>
       )}

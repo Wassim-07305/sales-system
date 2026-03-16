@@ -160,11 +160,21 @@
 
 /* Navigation progress bar */
 @keyframes nav-progress {
-  0% { width: 0; }
-  20% { width: 30%; }
-  50% { width: 60%; }
-  80% { width: 85%; }
-  100% { width: 97%; }
+  0% {
+    width: 0;
+  }
+  20% {
+    width: 30%;
+  }
+  50% {
+    width: 60%;
+  }
+  80% {
+    width: 85%;
+  }
+  100% {
+    width: 97%;
+  }
 }
 
 /* Safe area support for notched devices */

@@ -13,9 +13,6 @@ export default async function AchievementsPage() {
   const { achievements, totalPoints } = await getAchievements();
 
   return (
-    <AchievementsView
-      achievements={achievements}
-      totalPoints={totalPoints}
-    />
+    <AchievementsView achievements={achievements} totalPoints={totalPoints} />
   );
 }

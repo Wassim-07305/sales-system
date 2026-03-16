@@ -5,11 +5,13 @@ import { revalidatePath } from "next/cache";
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
-function isTableMissing(error: { message?: string; code?: string } | null): boolean {
+function isTableMissing(
+  error: { message?: string; code?: string } | null,
+): boolean {
   if (!error) return false;
   const msg = (error.message || "").toLowerCase();
   return (
-    msg.includes("relation") && msg.includes("does not exist") ||
+    (msg.includes("relation") && msg.includes("does not exist")) ||
     error.code === "42P01"
   );
 }
@@ -41,7 +43,7 @@ export async function getRoadmapItems() {
       .eq("user_id", user.id);
 
     const votedIds = new Set(
-      (votes || []).map((v: { item_id: string }) => v.item_id)
+      (votes || []).map((v: { item_id: string }) => v.item_id),
     );
 
     return (items || []).map(
@@ -63,10 +65,11 @@ export async function getRoadmapItems() {
         votes: item.votes ?? 0,
         createdAt: item.createdAt || item.created_at || "",
         votedByUser: votedIds.has(item.id),
-      })
+      }),
     );
   } catch (err) {
-    if (err instanceof Error && err.message.includes("does not exist")) return [];
+    if (err instanceof Error && err.message.includes("does not exist"))
+      return [];
     throw err;
   }
 }
@@ -97,7 +100,7 @@ export async function getCommunityS() {
       .eq("user_id", user.id);
 
     const votedIds = new Set(
-      (votes || []).map((v: { item_id: string }) => v.item_id)
+      (votes || []).map((v: { item_id: string }) => v.item_id),
     );
 
     return (suggestions || []).map(
@@ -120,10 +123,11 @@ export async function getCommunityS() {
         authorName: s.authorName || s.author_name || "",
         createdAt: s.createdAt || s.created_at || "",
         votedByUser: votedIds.has(s.id),
-      })
+      }),
     );
   } catch (err) {
-    if (err instanceof Error && err.message.includes("does not exist")) return [];
+    if (err instanceof Error && err.message.includes("does not exist"))
+      return [];
     throw err;
   }
 }
@@ -148,7 +152,8 @@ export async function getReleaseNotes() {
 
     return data || [];
   } catch (err) {
-    if (err instanceof Error && err.message.includes("does not exist")) return [];
+    if (err instanceof Error && err.message.includes("does not exist"))
+      return [];
     throw err;
   }
 }
@@ -175,10 +180,7 @@ export async function voteForFeature(featureId: string) {
 
   if (existing) {
     // Remove vote
-    await supabase
-      .from("roadmap_votes")
-      .delete()
-      .eq("id", existing.id);
+    await supabase.from("roadmap_votes").delete().eq("id", existing.id);
   } else {
     // Add vote
     const { error: insertError } = await supabase
@@ -220,7 +222,9 @@ export async function suggestFeature(data: {
 
   if (error) {
     if (isTableMissing(error)) {
-      throw new Error("La fonctionnalité de suggestions n'est pas encore configurée.");
+      throw new Error(
+        "La fonctionnalité de suggestions n'est pas encore configurée.",
+      );
     }
     throw new Error(error.message);
   }

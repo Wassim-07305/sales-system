@@ -71,7 +71,16 @@ interface Props {
   reputations?: Record<string, number>;
 }
 
-const AVATAR_COLORS = ["bg-blue-600", "bg-emerald-600", "bg-amber-600", "bg-purple-600", "bg-pink-600", "bg-cyan-600", "bg-rose-600", "bg-indigo-600"];
+const AVATAR_COLORS = [
+  "bg-blue-600",
+  "bg-emerald-600",
+  "bg-amber-600",
+  "bg-purple-600",
+  "bg-pink-600",
+  "bg-cyan-600",
+  "bg-rose-600",
+  "bg-indigo-600",
+];
 
 function getAvatarColor(name: string | null | undefined) {
   if (!name) return AVATAR_COLORS[0];
@@ -172,10 +181,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           </h2>
           <div className="space-y-2">
             {pinnedPosts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/community/forum/${post.id}`}
-              >
+              <Link key={post.id} href={`/community/forum/${post.id}`}>
                 <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
@@ -187,18 +193,26 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                       </p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                         <span>{post.author?.full_name || "Anonyme"}</span>
-                        {post.author?.id && reputations[post.author.id] !== undefined && (
-                          <ReputationBadge score={reputations[post.author.id]} />
-                        )}
+                        {post.author?.id &&
+                          reputations[post.author.id] !== undefined && (
+                            <ReputationBadge
+                              score={reputations[post.author.id]}
+                            />
+                          )}
                         <span>&middot;</span>
-                        <span>{formatDistanceToNow(new Date(post.created_at), {
-                          addSuffix: true,
-                          locale: fr,
-                        })}</span>
+                        <span>
+                          {formatDistanceToNow(new Date(post.created_at), {
+                            addSuffix: true,
+                            locale: fr,
+                          })}
+                        </span>
                       </p>
                     </div>
                     {post.module_id && (
-                      <Badge variant="outline" className="shrink-0 bg-blue-500/10 text-blue-600 border-blue-500/20">
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 bg-blue-500/10 text-blue-600 border-blue-500/20"
+                      >
                         <BookOpen className="h-3 w-3 mr-1" />
                         {getModuleName(post.module_id)}
                       </Badge>
@@ -231,14 +245,16 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
         <TabsContent value={activeTab}>
           <div className="space-y-3">
             {filtered.map((post) => (
-              <Link
-                key={post.id}
-                href={`/community/forum/${post.id}`}
-              >
+              <Link key={post.id} href={`/community/forum/${post.id}`}>
                 <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer mb-3">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
-                      <div className={cn("h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0", getAvatarColor(post.author?.full_name))}>
+                      <div
+                        className={cn(
+                          "h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0",
+                          getAvatarColor(post.author?.full_name),
+                        )}
+                      >
                         {getInitials(post.author?.full_name)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -262,9 +278,12 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1.5">
                             {post.author?.full_name || "Anonyme"}
-                            {post.author?.id && reputations[post.author.id] !== undefined && (
-                              <ReputationBadge score={reputations[post.author.id]} />
-                            )}
+                            {post.author?.id &&
+                              reputations[post.author.id] !== undefined && (
+                                <ReputationBadge
+                                  score={reputations[post.author.id]}
+                                />
+                              )}
                           </span>
                           <span>
                             {formatDistanceToNow(new Date(post.created_at), {
@@ -290,7 +309,9 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
                   <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                     <MessageSquare className="h-7 w-7 opacity-50" />
                   </div>
-                  <p className="font-medium">Aucun sujet dans cette catégorie</p>
+                  <p className="font-medium">
+                    Aucun sujet dans cette catégorie
+                  </p>
                   <p className="text-sm mt-1">
                     Créez le premier sujet de discussion !
                   </p>
@@ -309,7 +330,9 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Titre</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Titre
+              </Label>
               <Input
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
@@ -318,7 +341,9 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Module (optionnel)</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Module (optionnel)
+              </Label>
               <Select value={newModuleId} onValueChange={setNewModuleId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choisir un module" />
@@ -333,7 +358,9 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Contenu</Label>
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Contenu
+              </Label>
               <Textarea
                 value={newContent}
                 onChange={(e) => setNewContent(e.target.value)}

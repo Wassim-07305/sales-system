@@ -20,10 +20,7 @@ import {
   Tag,
   BarChart3,
 } from "lucide-react";
-import {
-  createFlowchart,
-  createMindMap,
-} from "@/lib/actions/scripts-v2";
+import { createFlowchart, createMindMap } from "@/lib/actions/scripts-v2";
 import Link from "next/link";
 
 interface Script {
@@ -58,7 +55,8 @@ interface MindMapItem {
 const categoryColors: Record<string, string> = {
   prospection: "bg-foreground/10 text-foreground border-foreground/20",
   closing: "bg-brand/10 text-brand border-brand/20",
-  objection: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
+  objection:
+    "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   relance: "bg-foreground/8 text-foreground/80 border-foreground/15",
   discovery: "bg-muted/60 text-muted-foreground border-border/50",
 };

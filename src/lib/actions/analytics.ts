@@ -7,9 +7,24 @@ export async function getAnalyticsData() {
   const supabase = await createClient();
 
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
+  const startOfPrevMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+  ).toISOString();
+  const endOfPrevMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+  ).toISOString();
 
   // Get pipeline stages
   const { data: stages } = await supabase
@@ -28,15 +43,24 @@ export async function getAnalyticsData() {
 
   // CA this month (signed deals this month)
   const signedDealsThisMonth = deals.filter(
-    (d) => d.stage_id === signedStage?.id && d.created_at >= startOfMonth
+    (d) => d.stage_id === signedStage?.id && d.created_at >= startOfMonth,
   );
-  const caThisMonth = signedDealsThisMonth.reduce((sum, d) => sum + (d.value || 0), 0);
+  const caThisMonth = signedDealsThisMonth.reduce(
+    (sum, d) => sum + (d.value || 0),
+    0,
+  );
 
   // CA previous month
   const signedDealsPrevMonth = deals.filter(
-    (d) => d.stage_id === signedStage?.id && d.created_at >= startOfPrevMonth && d.created_at <= endOfPrevMonth
+    (d) =>
+      d.stage_id === signedStage?.id &&
+      d.created_at >= startOfPrevMonth &&
+      d.created_at <= endOfPrevMonth,
   );
-  const caPrevMonth = signedDealsPrevMonth.reduce((sum, d) => sum + (d.value || 0), 0);
+  const caPrevMonth = signedDealsPrevMonth.reduce(
+    (sum, d) => sum + (d.value || 0),
+    0,
+  );
 
   // Active clients (health_score > 40)
   const { count: activeClients } = await supabase
@@ -52,13 +76,17 @@ export async function getAnalyticsData() {
 
   // Pipeline value (non-signed deals)
   const pipelineDeals = deals.filter((d) => d.stage_id !== signedStage?.id);
-  const pipelineValue = pipelineDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+  const pipelineValue = pipelineDeals.reduce(
+    (sum, d) => sum + (d.value || 0),
+    0,
+  );
 
   // Conversion rate this month
   const dealsThisMonth = deals.filter((d) => d.created_at >= startOfMonth);
-  const conversionRate = dealsThisMonth.length > 0
-    ? (signedDealsThisMonth.length / dealsThisMonth.length) * 100
-    : 0;
+  const conversionRate =
+    dealsThisMonth.length > 0
+      ? (signedDealsThisMonth.length / dealsThisMonth.length) * 100
+      : 0;
 
   // Churn rate
   const { count: churnedClients } = await supabase
@@ -67,9 +95,10 @@ export async function getAnalyticsData() {
     .in("role", ["client_b2b", "client_b2c"])
     .lt("health_score", 30);
 
-  const churnRate = (totalClients || 0) > 0
-    ? ((churnedClients || 0) / (totalClients || 0)) * 100
-    : 0;
+  const churnRate =
+    (totalClients || 0) > 0
+      ? ((churnedClients || 0) / (totalClients || 0)) * 100
+      : 0;
 
   // Revenue last 6 months
   const revenueByMonth: { month: string; value: number }[] = [];
@@ -81,7 +110,10 @@ export async function getAnalyticsData() {
     end.setMonth(end.getMonth() + 1, 0);
     end.setHours(23, 59, 59, 999);
     const monthDeals = deals.filter(
-      (deal) => deal.stage_id === signedStage?.id && deal.created_at >= d.toISOString() && deal.created_at <= end.toISOString()
+      (deal) =>
+        deal.stage_id === signedStage?.id &&
+        deal.created_at >= d.toISOString() &&
+        deal.created_at <= end.toISOString(),
     );
     revenueByMonth.push({
       month: d.toLocaleDateString("fr-FR", { month: "short" }),
@@ -99,7 +131,10 @@ export async function getAnalyticsData() {
     end.setMonth(end.getMonth() + 1, 0);
     end.setHours(23, 59, 59, 999);
     const count = deals.filter(
-      (deal) => deal.stage_id === signedStage?.id && deal.created_at >= d.toISOString() && deal.created_at <= end.toISOString()
+      (deal) =>
+        deal.stage_id === signedStage?.id &&
+        deal.created_at >= d.toISOString() &&
+        deal.created_at <= end.toISOString(),
     ).length;
     dealsByMonth.push({
       month: d.toLocaleDateString("fr-FR", { month: "short" }),
@@ -108,7 +143,8 @@ export async function getAnalyticsData() {
   }
 
   // Change vs previous month
-  const caChange = caPrevMonth > 0 ? ((caThisMonth - caPrevMonth) / caPrevMonth) * 100 : 0;
+  const caChange =
+    caPrevMonth > 0 ? ((caThisMonth - caPrevMonth) / caPrevMonth) * 100 : 0;
 
   return {
     caThisMonth,
@@ -135,7 +171,12 @@ export async function getFunnelData() {
 
   const funnelData = (stages || []).map((stage) => {
     const count = (deals || []).filter((d) => d.stage_id === stage.id).length;
-    return { stage: stage.name, value: count, color: stage.color, position: stage.position };
+    return {
+      stage: stage.name,
+      value: count,
+      color: stage.color,
+      position: stage.position,
+    };
   });
 
   return funnelData;
@@ -144,15 +185,27 @@ export async function getFunnelData() {
 export async function getSourceData() {
   const supabase = await createClient();
 
-  const { data: stages } = await supabase.from("pipeline_stages").select("id, name");
+  const { data: stages } = await supabase
+    .from("pipeline_stages")
+    .select("id, name");
   const signedStage = stages?.find((s) => s.name === "Client Signé");
 
-  const { data: deals } = await supabase.from("deals").select("id, value, source, stage_id");
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("id, value, source, stage_id");
 
-  const sourceMap = new Map<string, { total: number; value: number; signed: number; signedValue: number }>();
+  const sourceMap = new Map<
+    string,
+    { total: number; value: number; signed: number; signedValue: number }
+  >();
   (deals || []).forEach((d) => {
     const src = d.source || "Autre";
-    const entry = sourceMap.get(src) || { total: 0, value: 0, signed: 0, signedValue: 0 };
+    const entry = sourceMap.get(src) || {
+      total: 0,
+      value: 0,
+      signed: 0,
+      signedValue: 0,
+    };
     entry.total++;
     entry.value += d.value || 0;
     if (d.stage_id === signedStage?.id) {
@@ -189,9 +242,15 @@ export async function getTeamPerformance() {
   const supabase = await createClient();
 
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+  ).toISOString();
 
-  const { data: stages } = await supabase.from("pipeline_stages").select("id, name");
+  const { data: stages } = await supabase
+    .from("pipeline_stages")
+    .select("id, name");
   const signedStage = stages?.find((s) => s.name === "Client Signé");
 
   // Get team members (setters + closers)
@@ -213,17 +272,27 @@ export async function getTeamPerformance() {
     .gte("created_at", startOfMonth);
 
   const performance = (teamMembers || []).map((member) => {
-    const memberBookings = (bookings || []).filter((b) => b.assigned_to === member.id);
-    const completedBookings = memberBookings.filter((b) => b.status === "completed");
-    const showUpRate = memberBookings.length > 0
-      ? (completedBookings.length / memberBookings.length) * 100
-      : 0;
+    const memberBookings = (bookings || []).filter(
+      (b) => b.assigned_to === member.id,
+    );
+    const completedBookings = memberBookings.filter(
+      (b) => b.status === "completed",
+    );
+    const showUpRate =
+      memberBookings.length > 0
+        ? (completedBookings.length / memberBookings.length) * 100
+        : 0;
 
-    const memberDeals = (deals || []).filter((d) => d.assigned_to === member.id);
-    const closedDeals = memberDeals.filter((d) => d.stage_id === signedStage?.id);
-    const closingRate = memberDeals.length > 0
-      ? (closedDeals.length / memberDeals.length) * 100
-      : 0;
+    const memberDeals = (deals || []).filter(
+      (d) => d.assigned_to === member.id,
+    );
+    const closedDeals = memberDeals.filter(
+      (d) => d.stage_id === signedStage?.id,
+    );
+    const closingRate =
+      memberDeals.length > 0
+        ? (closedDeals.length / memberDeals.length) * 100
+        : 0;
     const revenue = closedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
 
     return {
@@ -242,7 +311,9 @@ export async function getTeamPerformance() {
 
 export async function generateWeeklySummary() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   const { data: profile } = await supabase
@@ -257,14 +328,19 @@ export async function generateWeeklySummary() {
 
   const summary = `Résumé hebdo : CA ${analytics.caThisMonth.toLocaleString("fr-FR")}€ | ${analytics.activeClients} clients actifs | Pipeline ${analytics.pipelineValue.toLocaleString("fr-FR")}€`;
 
-  await notify(user.id, "📊 Résumé hebdomadaire", summary, { type: "deal", link: "/analytics" });
+  await notify(user.id, "📊 Résumé hebdomadaire", summary, {
+    type: "deal",
+    link: "/analytics",
+  });
 }
 
 /**
  * Analyze prospect response data to find the best times to contact.
  * Returns a heatmap grid (day of week x hour) with response rates.
  */
-export async function getBenchmarkData(period: "current" | "previous" | "quarter" = "current") {
+export async function getBenchmarkData(
+  period: "current" | "previous" | "quarter" = "current",
+) {
   const supabase = await createClient();
 
   const now = new Date();
@@ -278,14 +354,35 @@ export async function getBenchmarkData(period: "current" | "previous" | "quarter
   if (period === "quarter") {
     const currentQuarter = Math.floor(now.getMonth() / 3);
     periodStart = new Date(now.getFullYear(), currentQuarter * 3, 1);
-    periodEnd = new Date(now.getFullYear(), currentQuarter * 3 + 3, 0, 23, 59, 59);
+    periodEnd = new Date(
+      now.getFullYear(),
+      currentQuarter * 3 + 3,
+      0,
+      23,
+      59,
+      59,
+    );
     prevPeriodStart = new Date(now.getFullYear(), (currentQuarter - 1) * 3, 1);
-    prevPeriodEnd = new Date(now.getFullYear(), currentQuarter * 3, 0, 23, 59, 59);
+    prevPeriodEnd = new Date(
+      now.getFullYear(),
+      currentQuarter * 3,
+      0,
+      23,
+      59,
+      59,
+    );
   } else if (period === "previous") {
     periodStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     periodEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
     prevPeriodStart = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-    prevPeriodEnd = new Date(now.getFullYear(), now.getMonth() - 1, 0, 23, 59, 59);
+    prevPeriodEnd = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      0,
+      23,
+      59,
+      59,
+    );
   } else {
     periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
     periodEnd = now;
@@ -327,17 +424,28 @@ export async function getBenchmarkData(period: "current" | "previous" | "quarter
   // Per-member stats
   const members = (teamMembers || []).map((member) => {
     const memberDeals = deals.filter((d) => d.assigned_to === member.id);
-    const closedDeals = memberDeals.filter((d) => d.stage_id === signedStage?.id);
+    const closedDeals = memberDeals.filter(
+      (d) => d.stage_id === signedStage?.id,
+    );
     const revenue = closedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
-    const avgDealValue = closedDeals.length > 0 ? revenue / closedDeals.length : 0;
-    const conversionRate = memberDeals.length > 0
-      ? (closedDeals.length / memberDeals.length) * 100
-      : 0;
+    const avgDealValue =
+      closedDeals.length > 0 ? revenue / closedDeals.length : 0;
+    const conversionRate =
+      memberDeals.length > 0
+        ? (closedDeals.length / memberDeals.length) * 100
+        : 0;
 
     // Previous period stats for this member
-    const prevMemberDeals = previousDeals.filter((d) => d.assigned_to === member.id);
-    const prevClosedDeals = prevMemberDeals.filter((d) => d.stage_id === signedStage?.id);
-    const prevRevenue = prevClosedDeals.reduce((sum, d) => sum + (d.value || 0), 0);
+    const prevMemberDeals = previousDeals.filter(
+      (d) => d.assigned_to === member.id,
+    );
+    const prevClosedDeals = prevMemberDeals.filter(
+      (d) => d.stage_id === signedStage?.id,
+    );
+    const prevRevenue = prevClosedDeals.reduce(
+      (sum, d) => sum + (d.value || 0),
+      0,
+    );
 
     return {
       id: member.id,
@@ -354,7 +462,9 @@ export async function getBenchmarkData(period: "current" | "previous" | "quarter
   });
 
   // Team averages
-  const activeMembers = members.filter((m) => m.totalDeals > 0 || m.dealsCount > 0);
+  const activeMembers = members.filter(
+    (m) => m.totalDeals > 0 || m.dealsCount > 0,
+  );
   const memberCount = activeMembers.length || 1;
   const teamAvg = {
     dealsCount: members.reduce((s, m) => s + m.dealsCount, 0) / memberCount,
@@ -374,20 +484,26 @@ export async function getBenchmarkData(period: "current" | "previous" | "quarter
   const prevTotalRevenue = previousDeals
     .filter((d) => d.stage_id === signedStage?.id)
     .reduce((s, d) => s + (d.value || 0), 0);
-  const totalClosedDeals = deals.filter((d) => d.stage_id === signedStage?.id).length;
-  const prevTotalClosedDeals = previousDeals.filter((d) => d.stage_id === signedStage?.id).length;
+  const totalClosedDeals = deals.filter(
+    (d) => d.stage_id === signedStage?.id,
+  ).length;
+  const prevTotalClosedDeals = previousDeals.filter(
+    (d) => d.stage_id === signedStage?.id,
+  ).length;
   const avgValue = totalClosedDeals > 0 ? totalRevenue / totalClosedDeals : 0;
-  const prevAvgValue = prevTotalClosedDeals > 0 ? prevTotalRevenue / prevTotalClosedDeals : 0;
+  const prevAvgValue =
+    prevTotalClosedDeals > 0 ? prevTotalRevenue / prevTotalClosedDeals : 0;
 
-  const revenueChange = prevTotalRevenue > 0
-    ? ((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100
-    : 0;
-  const dealsChange = prevTotalClosedDeals > 0
-    ? ((totalClosedDeals - prevTotalClosedDeals) / prevTotalClosedDeals) * 100
-    : 0;
-  const avgValueChange = prevAvgValue > 0
-    ? ((avgValue - prevAvgValue) / prevAvgValue) * 100
-    : 0;
+  const revenueChange =
+    prevTotalRevenue > 0
+      ? ((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100
+      : 0;
+  const dealsChange =
+    prevTotalClosedDeals > 0
+      ? ((totalClosedDeals - prevTotalClosedDeals) / prevTotalClosedDeals) * 100
+      : 0;
+  const avgValueChange =
+    prevAvgValue > 0 ? ((avgValue - prevAvgValue) / prevAvgValue) * 100 : 0;
 
   return {
     members: members.sort((a, b) => b.revenue - a.revenue),
@@ -421,8 +537,12 @@ export async function getContactHeatmap() {
     .select("scheduled_at, status, created_at");
 
   // Build heatmap: 7 days x 24 hours
-  const heatmap: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
-  const contactCount: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+  const heatmap: number[][] = Array.from({ length: 7 }, () =>
+    Array(24).fill(0),
+  );
+  const contactCount: number[][] = Array.from({ length: 7 }, () =>
+    Array(24).fill(0),
+  );
 
   // Analyze prospect contacts — count responses
   for (const p of prospects || []) {
@@ -431,7 +551,11 @@ export async function getContactHeatmap() {
       const day = date.getDay(); // 0=Sun, 6=Sat
       const hour = date.getHours();
       contactCount[day][hour]++;
-      if (p.status === "replied" || p.status === "hot" || p.status === "booked") {
+      if (
+        p.status === "replied" ||
+        p.status === "hot" ||
+        p.status === "booked"
+      ) {
         heatmap[day][hour]++;
       }
     }
@@ -452,10 +576,18 @@ export async function getContactHeatmap() {
 
   // Calculate response rates
   const dayLabels = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-  const grid: Array<{ day: string; dayIndex: number; hour: number; contacts: number; responses: number; rate: number }> = [];
+  const grid: Array<{
+    day: string;
+    dayIndex: number;
+    hour: number;
+    contacts: number;
+    responses: number;
+    rate: number;
+  }> = [];
 
   for (let d = 0; d < 7; d++) {
-    for (let h = 6; h <= 21; h++) { // Only 6am-9pm
+    for (let h = 6; h <= 21; h++) {
+      // Only 6am-9pm
       const contacts = contactCount[d][h];
       const responses = heatmap[d][h];
       const rate = contacts > 0 ? Math.round((responses / contacts) * 100) : 0;

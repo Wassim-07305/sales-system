@@ -6,7 +6,6 @@ import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
 import { REWARDS_CATALOG } from "@/lib/reward-definitions";
 import { notify } from "@/lib/actions/notifications";
 
-
 const LEVELS = [
   { level: 1, name: "Setter Débutant", minPoints: 0 },
   { level: 2, name: "Setter Confirmé", minPoints: 100 },
@@ -22,7 +21,11 @@ function getLevelForPoints(points: number) {
   return LEVELS[0];
 }
 
-export async function addPoints(userId: string, points: number, reason: string) {
+export async function addPoints(
+  userId: string,
+  points: number,
+  reason: string,
+) {
   const supabase = await createClient();
 
   // Get or create gamification profile
@@ -59,10 +62,15 @@ export async function addPoints(userId: string, points: number, reason: string) 
 
   // Level up notification (in-app + push)
   if (newLevel.level > oldLevel.level) {
-    notify(userId, `Niveau ${newLevel.level} atteint !`, `Félicitations ! Vous êtes maintenant ${newLevel.name} avec ${newTotal} points.`, {
-      type: "level_up",
-      link: "/challenges",
-    });
+    notify(
+      userId,
+      `Niveau ${newLevel.level} atteint !`,
+      `Félicitations ! Vous êtes maintenant ${newLevel.name} avec ${newTotal} points.`,
+      {
+        type: "level_up",
+        link: "/challenges",
+      },
+    );
   }
 
   // Regular points notification (in-app + push)
@@ -75,7 +83,11 @@ export async function addPoints(userId: string, points: number, reason: string) 
   revalidatePath("/team/leaderboard");
 }
 
-export async function updateChallengeProgress(userId: string, metric: string, value: number) {
+export async function updateChallengeProgress(
+  userId: string,
+  metric: string,
+  value: number,
+) {
   const supabase = await createClient();
 
   // Get active challenges for this metric
@@ -99,7 +111,11 @@ export async function updateChallengeProgress(userId: string, metric: string, va
     if (!progress) {
       const { data: newProgress } = await supabase
         .from("challenge_progress")
-        .insert({ user_id: userId, challenge_id: challenge.id, current_value: 0 })
+        .insert({
+          user_id: userId,
+          challenge_id: challenge.id,
+          current_value: 0,
+        })
         .select()
         .single();
       progress = newProgress;
@@ -107,21 +123,31 @@ export async function updateChallengeProgress(userId: string, metric: string, va
 
     if (!progress || progress.completed) continue;
 
-    const newValue = Math.min((progress.current_value || 0) + value, challenge.target_value);
-    const justCompleted = newValue >= challenge.target_value && !progress.completed;
+    const newValue = Math.min(
+      (progress.current_value || 0) + value,
+      challenge.target_value,
+    );
+    const justCompleted =
+      newValue >= challenge.target_value && !progress.completed;
 
     await supabase
       .from("challenge_progress")
       .update({
         current_value: newValue,
         completed: justCompleted || progress.completed,
-        completed_at: justCompleted ? new Date().toISOString() : progress.completed_at,
+        completed_at: justCompleted
+          ? new Date().toISOString()
+          : progress.completed_at,
       })
       .eq("id", progress.id);
 
     // Award points on completion
     if (justCompleted) {
-      await addPoints(userId, challenge.points_reward, `Défi complété : ${challenge.title}`);
+      await addPoints(
+        userId,
+        challenge.points_reward,
+        `Défi complété : ${challenge.title}`,
+      );
     }
   }
 
@@ -155,8 +181,11 @@ export async function awardBadge(userId: string, badgeId: string) {
 
   if (!profile) return { awarded: false, reason: "Profil introuvable" };
 
-  const currentBadges: Array<{ badge_id: string; name: string; earned_at: string }> =
-    Array.isArray(profile.badges) ? profile.badges : [];
+  const currentBadges: Array<{
+    badge_id: string;
+    name: string;
+    earned_at: string;
+  }> = Array.isArray(profile.badges) ? profile.badges : [];
 
   // Already earned?
   if (currentBadges.some((b) => b.badge_id === badgeId)) {
@@ -380,27 +409,36 @@ export async function getGamificationAnalytics() {
   ];
   const pointsDistribution = buckets.map((b) => ({
     range: b.label,
-    count: allProfiles.filter((p) => p.total_points >= b.min && p.total_points <= b.max).length,
+    count: allProfiles.filter(
+      (p) => p.total_points >= b.min && p.total_points <= b.max,
+    ).length,
   }));
 
   // 3. Average streak
   const avgStreak =
     totalUsers > 0
       ? Math.round(
-          (allProfiles.reduce((sum, p) => sum + (p.current_streak ?? 0), 0) / totalUsers) * 10
+          (allProfiles.reduce((sum, p) => sum + (p.current_streak ?? 0), 0) /
+            totalUsers) *
+            10,
         ) / 10
       : 0;
 
   // 4. Average points
   const avgPoints =
     totalUsers > 0
-      ? Math.round(allProfiles.reduce((sum, p) => sum + (p.total_points ?? 0), 0) / totalUsers)
+      ? Math.round(
+          allProfiles.reduce((sum, p) => sum + (p.total_points ?? 0), 0) /
+            totalUsers,
+        )
       : 0;
 
   // 5. Badge completion rates
   const badgeCompletionRates = BADGE_DEFINITIONS.map((badge) => {
     const earned = allProfiles.filter((p) => {
-      const badges: Array<{ badge_id: string }> = Array.isArray(p.badges) ? p.badges : [];
+      const badges: Array<{ badge_id: string }> = Array.isArray(p.badges)
+        ? p.badges
+        : [];
       return badges.some((b) => b.badge_id === badge.id);
     }).length;
     return {
@@ -418,7 +456,9 @@ export async function getGamificationAnalytics() {
   // Most popular badge
   const mostPopularBadge =
     badgeCompletionRates.length > 0
-      ? badgeCompletionRates.reduce((best, b) => (b.earned > best.earned ? b : best))
+      ? badgeCompletionRates.reduce((best, b) =>
+          b.earned > best.earned ? b : best,
+        )
       : null;
 
   // 6. Level distribution
@@ -438,7 +478,9 @@ export async function getGamificationAnalytics() {
     .select("challenge_id, completed");
 
   const challengeStats = (allChallenges || []).map((ch) => {
-    const participants = (allProgress || []).filter((p) => p.challenge_id === ch.id);
+    const participants = (allProgress || []).filter(
+      (p) => p.challenge_id === ch.id,
+    );
     const completed = participants.filter((p) => p.completed).length;
     return {
       id: ch.id,
@@ -446,11 +488,16 @@ export async function getGamificationAnalytics() {
       isActive: ch.is_active,
       participants: participants.length,
       completed,
-      rate: participants.length > 0 ? Math.round((completed / participants.length) * 100) : 0,
+      rate:
+        participants.length > 0
+          ? Math.round((completed / participants.length) * 100)
+          : 0,
     };
   });
 
-  const totalChallengesCompleted = (allProgress || []).filter((p) => p.completed).length;
+  const totalChallengesCompleted = (allProgress || []).filter(
+    (p) => p.completed,
+  ).length;
 
   // 8. Mood trends (last 30 days)
   const thirtyDaysAgo = new Date();
@@ -494,7 +541,10 @@ export async function getGamificationAnalytics() {
     const totalDeals = d.length;
     const totalRevenue = d.reduce((s, deal) => s + (deal.amount ?? 0), 0);
     return {
-      avgDeals: userIds.length > 0 ? Math.round((totalDeals / userIds.length) * 10) / 10 : 0,
+      avgDeals:
+        userIds.length > 0
+          ? Math.round((totalDeals / userIds.length) * 10) / 10
+          : 0,
       avgRevenue:
         userIds.length > 0 ? Math.round(totalRevenue / userIds.length) : 0,
     };
@@ -563,7 +613,8 @@ export async function redeemReward(rewardId: string) {
     .eq("user_id", user.id)
     .single();
 
-  if (!profile) return { success: false, error: "Profil gamification introuvable" };
+  if (!profile)
+    return { success: false, error: "Profil gamification introuvable" };
 
   if (profile.total_points < reward.pointsCost) {
     return { success: false, error: "Points insuffisants" };
@@ -596,10 +647,15 @@ export async function redeemReward(rewardId: string) {
   });
 
   // Send notification (in-app + push)
-  notify(user.id, `Récompense échangée : ${reward.name}`, `Vous avez échangé ${reward.pointsCost} points contre "${reward.name}". Il vous reste ${newTotal} points.`, {
-    type: "reward",
-    link: "/challenges/rewards",
-  });
+  notify(
+    user.id,
+    `Récompense échangée : ${reward.name}`,
+    `Vous avez échangé ${reward.pointsCost} points contre "${reward.name}". Il vous reste ${newTotal} points.`,
+    {
+      type: "reward",
+      link: "/challenges/rewards",
+    },
+  );
 
   revalidatePath("/challenges");
   revalidatePath("/challenges/rewards");
@@ -627,8 +683,11 @@ export async function getAchievements() {
     .single();
 
   // Extract unlocked achievements from badges JSONB array
-  const allBadges: Array<{ badge_id: string; type?: string; earned_at: string }> =
-    Array.isArray(profile?.badges) ? profile.badges : [];
+  const allBadges: Array<{
+    badge_id: string;
+    type?: string;
+    earned_at: string;
+  }> = Array.isArray(profile?.badges) ? profile.badges : [];
   const unlockedMap = new Map<string, string>();
   for (const b of allBadges) {
     if (b.type === "achievement") {
@@ -726,10 +785,16 @@ export async function checkAchievementProgress(userId: string) {
 
   if (!profile) return [];
 
-  const currentBadges: Array<{ badge_id: string; type?: string; name: string; earned_at: string }> =
-    Array.isArray(profile.badges) ? profile.badges : [];
+  const currentBadges: Array<{
+    badge_id: string;
+    type?: string;
+    name: string;
+    earned_at: string;
+  }> = Array.isArray(profile.badges) ? profile.badges : [];
   const unlockedIds = new Set(
-    currentBadges.filter((b) => b.type === "achievement").map((b) => b.badge_id)
+    currentBadges
+      .filter((b) => b.type === "achievement")
+      .map((b) => b.badge_id),
   );
 
   // Fetch counts
@@ -839,15 +904,16 @@ export async function submitDailyJournal(data: {
   plan_tomorrow: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const today = new Date().toISOString().split("T")[0];
 
   // Upsert for today
-  const { error } = await supabase
-    .from("daily_journals")
-    .upsert({
+  const { error } = await supabase.from("daily_journals").upsert(
+    {
       user_id: user.id,
       date: today,
       dms_sent: data.dms_sent,
@@ -861,15 +927,22 @@ export async function submitDailyJournal(data: {
       blockers: data.blockers,
       plan_tomorrow: data.plan_tomorrow,
       submitted_at: new Date().toISOString(),
-    }, { onConflict: "user_id,date" });
+    },
+    { onConflict: "user_id,date" },
+  );
 
   if (error) return { error: error.message };
 
   // Notify about the EOD (in-app + push)
-  notify(user.id, "EOD soumis", `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`, {
-    type: "eod_submitted",
-    link: "/team/journal",
-  });
+  notify(
+    user.id,
+    "EOD soumis",
+    `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`,
+    {
+      type: "eod_submitted",
+      link: "/team/journal",
+    },
+  );
 
   // Notify the assigned B2B entrepreneur (matched_entrepreneur_id)
   try {
@@ -881,10 +954,15 @@ export async function submitDailyJournal(data: {
 
     if (setterProfile?.matched_entrepreneur_id) {
       const setterName = setterProfile.full_name || "Setter";
-      notify(setterProfile.matched_entrepreneur_id, `EOD de ${setterName}`, `Messages envoyés: ${data.dms_sent}, Réponses: ${data.replies_received}, Appels: ${data.calls_booked}`, {
-        type: "eod_report",
-        link: "/team/journal",
-      });
+      notify(
+        setterProfile.matched_entrepreneur_id,
+        `EOD de ${setterName}`,
+        `Messages envoyés: ${data.dms_sent}, Réponses: ${data.replies_received}, Appels: ${data.calls_booked}`,
+        {
+          type: "eod_report",
+          link: "/team/journal",
+        },
+      );
     }
   } catch {
     // Don't block EOD submission if entrepreneur notification fails
@@ -904,7 +982,9 @@ export async function submitDailyJournal(data: {
 
 export async function getDailyJournal(date?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const targetDate = date || new Date().toISOString().split("T")[0];
@@ -921,7 +1001,9 @@ export async function getDailyJournal(date?: string) {
 
 export async function getJournalHistory(userId?: string, limit = 30) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const targetUserId = userId || user.id;
@@ -938,11 +1020,18 @@ export async function getJournalHistory(userId?: string, limit = 30) {
 
 export async function getTeamJournals(date?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role)) return [];
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+    return [];
 
   const targetDate = date || new Date().toISOString().split("T")[0];
 
@@ -978,16 +1067,27 @@ export async function getTeamJournals(date?: string) {
 
 export async function getMissingEodSetters(date?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role)) return [];
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+    return [];
 
   const targetDate = date || new Date().toISOString().split("T")[0];
 
   // B2B clients only see missing EODs from their assigned setters
-  let setters: { id: string; full_name: string | null; avatar_url: string | null }[] = [];
+  let setters: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  }[] = [];
 
   if (profile.role === "client_b2b") {
     const { data: assignedSetters } = await supabase
@@ -1012,8 +1112,8 @@ export async function getMissingEodSetters(date?: string) {
     .select("user_id")
     .eq("date", targetDate);
 
-  const submittedIds = new Set((submitted || []).map(s => s.user_id));
-  return setters.filter(s => !submittedIds.has(s.id));
+  const submittedIds = new Set((submitted || []).map((s) => s.user_id));
+  return setters.filter((s) => !submittedIds.has(s.id));
 }
 
 // ---------------------------------------------------------------------------
@@ -1022,7 +1122,9 @@ export async function getMissingEodSetters(date?: string) {
 
 export async function getSetterTasks() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   try {
@@ -1042,7 +1144,9 @@ export async function getSetterTasks() {
 
 export async function createSetterTask(title: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -1061,7 +1165,9 @@ export async function createSetterTask(title: string) {
 
 export async function toggleSetterTask(taskId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Get current state
@@ -1076,7 +1182,10 @@ export async function toggleSetterTask(taskId: string) {
 
   const { error } = await supabase
     .from("setter_tasks")
-    .update({ completed: !task.completed, completed_at: !task.completed ? new Date().toISOString() : null })
+    .update({
+      completed: !task.completed,
+      completed_at: !task.completed ? new Date().toISOString() : null,
+    })
     .eq("id", taskId)
     .eq("user_id", user.id);
 
@@ -1088,7 +1197,9 @@ export async function toggleSetterTask(taskId: string) {
 
 export async function deleteSetterTask(taskId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   await supabase
@@ -1118,7 +1229,10 @@ export async function getRedemptionHistory() {
   return (logs || []).map((log) => ({
     id: log.id,
     createdAt: log.created_at,
-    rewardName: (log.details as Record<string, unknown>)?.reward_name as string || "Inconnu",
-    pointsSpent: (log.details as Record<string, unknown>)?.points_spent as number || 0,
+    rewardName:
+      ((log.details as Record<string, unknown>)?.reward_name as string) ||
+      "Inconnu",
+    pointsSpent:
+      ((log.details as Record<string, unknown>)?.points_spent as number) || 0,
   }));
 }

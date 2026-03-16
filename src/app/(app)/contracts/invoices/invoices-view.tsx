@@ -29,7 +29,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { generateInvoice, generateScheduledInvoices } from "@/lib/actions/payments";
+import {
+  generateInvoice,
+  generateScheduledInvoices,
+} from "@/lib/actions/payments";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -97,8 +100,14 @@ export function InvoicesView({ invoices, contracts }: Props) {
 
     startTransition(async () => {
       try {
-        const result = await generateInvoice(selectedContractId, parseFloat(amount));
-        if (result.error) { toast.error(result.error); return; }
+        const result = await generateInvoice(
+          selectedContractId,
+          parseFloat(amount),
+        );
+        if (result.error) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Facture générée avec succès");
         setDialogOpen(false);
         setSelectedContractId("");
@@ -141,10 +150,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
 
   return (
     <div>
-      <PageHeader
-        title="Factures"
-        description="Factures auto-générées"
-      >
+      <PageHeader title="Factures" description="Factures auto-générées">
         <Button
           variant="outline"
           onClick={handleBulkGenerate}
@@ -158,7 +164,11 @@ export function InvoicesView({ invoices, contracts }: Props) {
             <Button
               className="bg-brand text-brand-dark hover:bg-brand/90"
               disabled={contracts.length === 0}
-              title={contracts.length === 0 ? "Créez d'abord un contrat signé" : undefined}
+              title={
+                contracts.length === 0
+                  ? "Créez d'abord un contrat signé"
+                  : undefined
+              }
             >
               <Plus className="h-4 w-4 mr-2" />
               Générer une facture
@@ -171,14 +181,19 @@ export function InvoicesView({ invoices, contracts }: Props) {
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label>Contrat</Label>
-                <Select value={selectedContractId} onValueChange={handleContractSelect}>
+                <Select
+                  value={selectedContractId}
+                  onValueChange={handleContractSelect}
+                >
                   <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Sélectionner un contrat" />
                   </SelectTrigger>
                   <SelectContent>
                     {contracts.map((contract) => (
                       <SelectItem key={contract.id} value={contract.id}>
-                        #{contract.id.slice(0, 8)} — {contract.client?.full_name || "Client"} ({contract.amount?.toLocaleString("fr-FR")} &euro;)
+                        #{contract.id.slice(0, 8)} —{" "}
+                        {contract.client?.full_name || "Client"} (
+                        {contract.amount?.toLocaleString("fr-FR")} &euro;)
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -211,30 +226,43 @@ export function InvoicesView({ invoices, contracts }: Props) {
           <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">N° Facture</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Contrat</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Montant</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Échéance</TableHead>
-                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-right">PDF</TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  N° Facture
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Contrat
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Client
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Montant
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Statut
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Échéance
+                </TableHead>
+                <TableHead className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-right">
+                  PDF
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {invoices.map((invoice) => (
-                <TableRow key={invoice.id} className="hover:bg-secondary/50 transition-colors">
+                <TableRow
+                  key={invoice.id}
+                  className="hover:bg-secondary/50 transition-colors"
+                >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       {invoice.invoice_number}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    #{invoice.contract_id.slice(0, 8)}
-                  </TableCell>
-                  <TableCell>
-                    {invoice.client?.full_name || "—"}
-                  </TableCell>
+                  <TableCell>#{invoice.contract_id.slice(0, 8)}</TableCell>
+                  <TableCell>{invoice.client?.full_name || "—"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-3.5 w-3.5 text-brand" />
@@ -251,7 +279,9 @@ export function InvoicesView({ invoices, contracts }: Props) {
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {invoice.due_date
-                      ? format(new Date(invoice.due_date), "d MMM yyyy", { locale: fr })
+                      ? format(new Date(invoice.due_date), "d MMM yyyy", {
+                          locale: fr,
+                        })
                       : "—"}
                   </TableCell>
                   <TableCell className="text-right">
@@ -260,7 +290,8 @@ export function InvoicesView({ invoices, contracts }: Props) {
                       variant="outline"
                       disabled={!invoice.pdf_url}
                       onClick={() => {
-                        if (invoice.pdf_url) window.open(invoice.pdf_url, "_blank");
+                        if (invoice.pdf_url)
+                          window.open(invoice.pdf_url, "_blank");
                       }}
                     >
                       <Download className="h-3 w-3 mr-1" />
@@ -271,12 +302,17 @@ export function InvoicesView({ invoices, contracts }: Props) {
               ))}
               {invoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-12 text-muted-foreground"
+                  >
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                       <FileText className="h-6 w-6 text-muted-foreground/40" />
                     </div>
                     <p className="font-medium text-sm">Aucune facture</p>
-                    <p className="text-xs mt-1">Les factures apparaîtront ici une fois générées</p>
+                    <p className="text-xs mt-1">
+                      Les factures apparaîtront ici une fois générées
+                    </p>
                   </TableCell>
                 </TableRow>
               )}

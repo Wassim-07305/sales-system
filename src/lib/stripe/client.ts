@@ -4,7 +4,7 @@ function getStripeClientSync() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
     throw new Error(
-      "STRIPE_SECRET_KEY manquant. Ajoutez-le dans .env.local ou dans les paramètres pour activer les paiements."
+      "STRIPE_SECRET_KEY manquant. Ajoutez-le dans .env.local ou dans les paramètres pour activer les paiements.",
     );
   }
   return new Stripe(key, { typescript: true });
@@ -20,7 +20,7 @@ export async function getStripeClient(): Promise<Stripe> {
   const key = await getApiKey("STRIPE_SECRET_KEY");
   if (!key) {
     throw new Error(
-      "STRIPE_SECRET_KEY manquant. Ajoutez-le dans .env.local ou dans les paramètres pour activer les paiements."
+      "STRIPE_SECRET_KEY manquant. Ajoutez-le dans .env.local ou dans les paramètres pour activer les paiements.",
     );
   }
   return new Stripe(key, { typescript: true });

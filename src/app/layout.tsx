@@ -25,9 +25,7 @@ export const metadata: Metadata = {
       { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: [
-      { url: "/icon-180.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/icon-180.png", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,
@@ -51,7 +49,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${jakarta.variable} ${playfair.variable} font-sans antialiased`}>
+      <body
+        className={`${jakarta.variable} ${playfair.variable} font-sans antialiased`}
+      >
         {/* Register service worker for push notifications */}
         <script
           dangerouslySetInnerHTML={{

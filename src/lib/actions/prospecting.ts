@@ -15,7 +15,10 @@ export interface ProspectSegmentFilters {
 
 export async function getProspects(filters?: ProspectSegmentFilters) {
   const supabase = await createClient();
-  let query = supabase.from("prospects").select("*, list:prospect_lists(id, name)").order("created_at", { ascending: false });
+  let query = supabase
+    .from("prospects")
+    .select("*, list:prospect_lists(id, name)")
+    .order("created_at", { ascending: false });
 
   if (filters?.platform) query = query.eq("platform", filters.platform);
   if (filters?.status) query = query.eq("status", filters.status);
@@ -29,7 +32,9 @@ export async function getProspects(filters?: ProspectSegmentFilters) {
   } else if (filters?.recency === "inactive") {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    query = query.or(`last_message_at.lt.${thirtyDaysAgo.toISOString()},last_message_at.is.null`);
+    query = query.or(
+      `last_message_at.lt.${thirtyDaysAgo.toISOString()},last_message_at.is.null`,
+    );
   }
 
   const { data } = await query;
@@ -39,8 +44,14 @@ export async function getProspects(filters?: ProspectSegmentFilters) {
   }));
 
   // If we need to filter by score or temperature, fetch scores and filter in-memory
-  if (filters?.temperature || filters?.scoreMin !== undefined || filters?.scoreMax !== undefined) {
-    const prospectIds = prospects.map((p: Record<string, unknown>) => p.id as string);
+  if (
+    filters?.temperature ||
+    filters?.scoreMin !== undefined ||
+    filters?.scoreMax !== undefined
+  ) {
+    const prospectIds = prospects.map(
+      (p: Record<string, unknown>) => p.id as string,
+    );
     if (prospectIds.length === 0) return prospects;
 
     let scoreQuery = supabase
@@ -59,8 +70,14 @@ export async function getProspects(filters?: ProspectSegmentFilters) {
     }
 
     const { data: scores } = await scoreQuery;
-    const matchingIds = new Set((scores || []).map((s: Record<string, unknown>) => s.prospect_id as string));
-    return prospects.filter((p: Record<string, unknown>) => matchingIds.has(p.id as string));
+    const matchingIds = new Set(
+      (scores || []).map(
+        (s: Record<string, unknown>) => s.prospect_id as string,
+      ),
+    );
+    return prospects.filter((p: Record<string, unknown>) =>
+      matchingIds.has(p.id as string),
+    );
   }
 
   return prospects;
@@ -69,9 +86,7 @@ export async function getProspects(filters?: ProspectSegmentFilters) {
 export async function getProspectSegmentStats() {
   const supabase = await createClient();
 
-  const { data: allProspects } = await supabase
-    .from("prospects")
-    .select("id");
+  const { data: allProspects } = await supabase.from("prospects").select("id");
   const totalCount = allProspects?.length || 0;
 
   const { data: scores } = await supabase
@@ -101,9 +116,16 @@ export async function getProspectSegmentStats() {
   };
 }
 
-export async function addProspect(formData: { name: string; profile_url?: string; platform: string; list_id?: string }) {
+export async function addProspect(formData: {
+  name: string;
+  profile_url?: string;
+  platform: string;
+  list_id?: string;
+}) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase.from("prospects").insert({
@@ -121,10 +143,24 @@ export async function addProspect(formData: { name: string; profile_url?: string
 
 export async function updateProspectStatus(prospectId: string, status: string) {
   const supabase = await createClient();
-  const validStatuses = ["new", "contacted", "replied", "hot", "interested", "qualified", "booked", "converted", "lost", "not_interested"];
+  const validStatuses = [
+    "new",
+    "contacted",
+    "replied",
+    "hot",
+    "interested",
+    "qualified",
+    "booked",
+    "converted",
+    "lost",
+    "not_interested",
+  ];
   if (!validStatuses.includes(status)) return { error: "Statut invalide" };
 
-  const { error } = await supabase.from("prospects").update({ status }).eq("id", prospectId);
+  const { error } = await supabase
+    .from("prospects")
+    .update({ status })
+    .eq("id", prospectId);
   if (error) return { error: "Impossible de mettre à jour le statut." };
   revalidatePath("/prospecting");
   return { success: true };
@@ -132,7 +168,9 @@ export async function updateProspectStatus(prospectId: string, status: string) {
 
 export async function getDailyQuota() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const today = new Date().toISOString().split("T")[0];
@@ -148,7 +186,14 @@ export async function getDailyQuota() {
   // Create today's quota
   const { data: newQuota } = await supabase
     .from("daily_quotas")
-    .insert({ user_id: user.id, date: today, dms_sent: 0, dms_target: 20, replies_received: 0, bookings_from_dms: 0 })
+    .insert({
+      user_id: user.id,
+      date: today,
+      dms_sent: 0,
+      dms_target: 20,
+      replies_received: 0,
+      bookings_from_dms: 0,
+    })
     .select()
     .single();
   return newQuota;
@@ -156,7 +201,9 @@ export async function getDailyQuota() {
 
 export async function incrementDmsSent() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
 
   const today = new Date().toISOString().split("T")[0];
@@ -168,10 +215,18 @@ export async function incrementDmsSent() {
     .single();
 
   if (quota) {
-    await supabase.from("daily_quotas").update({ dms_sent: quota.dms_sent + 1 }).eq("id", quota.id);
+    await supabase
+      .from("daily_quotas")
+      .update({ dms_sent: quota.dms_sent + 1 })
+      .eq("id", quota.id);
   } else {
     await supabase.from("daily_quotas").insert({
-      user_id: user.id, date: today, dms_sent: 1, dms_target: 20, replies_received: 0, bookings_from_dms: 0,
+      user_id: user.id,
+      date: today,
+      dms_sent: 1,
+      dms_target: 20,
+      replies_received: 0,
+      bookings_from_dms: 0,
     });
   }
   revalidatePath("/prospecting");
@@ -179,15 +234,30 @@ export async function incrementDmsSent() {
 
 export async function incrementReplies() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
   const today = new Date().toISOString().split("T")[0];
-  const { data: quota } = await supabase.from("daily_quotas").select("id, replies_received").eq("user_id", user.id).eq("date", today).single();
+  const { data: quota } = await supabase
+    .from("daily_quotas")
+    .select("id, replies_received")
+    .eq("user_id", user.id)
+    .eq("date", today)
+    .single();
   if (quota) {
-    await supabase.from("daily_quotas").update({ replies_received: quota.replies_received + 1 }).eq("id", quota.id);
+    await supabase
+      .from("daily_quotas")
+      .update({ replies_received: quota.replies_received + 1 })
+      .eq("id", quota.id);
   } else {
     await supabase.from("daily_quotas").insert({
-      user_id: user.id, date: today, dms_sent: 0, dms_target: 20, replies_received: 1, bookings_from_dms: 0,
+      user_id: user.id,
+      date: today,
+      dms_sent: 0,
+      dms_target: 20,
+      replies_received: 1,
+      bookings_from_dms: 0,
     });
   }
   revalidatePath("/prospecting");
@@ -195,19 +265,35 @@ export async function incrementReplies() {
 
 export async function getProspectLists() {
   const supabase = await createClient();
-  const { data } = await supabase.from("prospect_lists").select("*").order("created_at", { ascending: false });
+  const { data } = await supabase
+    .from("prospect_lists")
+    .select("*")
+    .order("created_at", { ascending: false });
   return data || [];
 }
 
 export async function getTemplates() {
   const supabase = await createClient();
-  const { data } = await supabase.from("dm_templates").select("*").order("step").order("variant");
+  const { data } = await supabase
+    .from("dm_templates")
+    .select("*")
+    .order("step")
+    .order("variant");
   return data || [];
 }
 
-export async function createTemplate(formData: { name: string; platform: string; step: string; niche?: string; content: string; variant: string }) {
+export async function createTemplate(formData: {
+  name: string;
+  platform: string;
+  step: string;
+  niche?: string;
+  content: string;
+  variant: string;
+}) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase.from("dm_templates").insert(formData);
@@ -216,12 +302,27 @@ export async function createTemplate(formData: { name: string; platform: string;
   return { success: true };
 }
 
-export async function updateTemplate(id: string, formData: { name?: string; platform?: string; step?: string; niche?: string; content?: string; variant?: string }) {
+export async function updateTemplate(
+  id: string,
+  formData: {
+    name?: string;
+    platform?: string;
+    step?: string;
+    niche?: string;
+    content?: string;
+    variant?: string;
+  },
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { error } = await supabase.from("dm_templates").update(formData).eq("id", id);
+  const { error } = await supabase
+    .from("dm_templates")
+    .update(formData)
+    .eq("id", id);
   if (error) return { error: "Impossible de mettre à jour le template." };
   revalidatePath("/prospecting/templates");
   return { success: true };
@@ -229,7 +330,9 @@ export async function updateTemplate(id: string, formData: { name?: string; plat
 
 export async function deleteTemplate(id: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase.from("dm_templates").delete().eq("id", id);
@@ -240,7 +343,9 @@ export async function deleteTemplate(id: string) {
 
 export async function deleteProspect(id: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase.from("prospects").delete().eq("id", id);
@@ -253,12 +358,16 @@ export async function deleteProspect(id: string) {
 
 export async function getProspectById(prospectId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { prospect: null, error: "Non authentifié" };
 
   const { data, error } = await supabase
     .from("prospects")
-    .select("*, list:prospect_lists(*), assigned_setter:profiles!prospects_assigned_setter_id_fkey(id, full_name, avatar_url)")
+    .select(
+      "*, list:prospect_lists(*), assigned_setter:profiles!prospects_assigned_setter_id_fkey(id, full_name, avatar_url)",
+    )
     .eq("id", prospectId)
     .single();
 
@@ -268,7 +377,9 @@ export async function getProspectById(prospectId: string) {
   const prospect = {
     ...data,
     list: Array.isArray(data.list) ? data.list[0] || null : data.list,
-    assigned_setter: Array.isArray(data.assigned_setter) ? data.assigned_setter[0] || null : data.assigned_setter,
+    assigned_setter: Array.isArray(data.assigned_setter)
+      ? data.assigned_setter[0] || null
+      : data.assigned_setter,
   };
 
   return { prospect, error: null };
@@ -284,18 +395,23 @@ export async function getProspectScore(prospectId: string) {
   return data;
 }
 
-export async function updateProspect(prospectId: string, data: {
-  name?: string;
-  profile_url?: string;
-  platform?: string;
-  status?: string;
-  notes?: string;
-  list_id?: string;
-  assigned_setter_id?: string;
-  auto_follow_up?: boolean;
-}) {
+export async function updateProspect(
+  prospectId: string,
+  data: {
+    name?: string;
+    profile_url?: string;
+    platform?: string;
+    status?: string;
+    notes?: string;
+    list_id?: string;
+    assigned_setter_id?: string;
+    auto_follow_up?: boolean;
+  },
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -310,9 +426,15 @@ export async function updateProspect(prospectId: string, data: {
   return { success: true };
 }
 
-export async function addProspectMessage(prospectId: string, message: string, direction: "sent" | "received") {
+export async function addProspectMessage(
+  prospectId: string,
+  message: string,
+  direction: "sent" | "received",
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Get current conversation history
@@ -355,13 +477,18 @@ export async function addProspectMessage(prospectId: string, message: string, di
   return { success: true };
 }
 
-export async function convertProspectToDeal(prospectId: string, dealData: {
-  title: string;
-  value: number;
-  stage_id: string;
-}) {
+export async function convertProspectToDeal(
+  prospectId: string,
+  dealData: {
+    title: string;
+    value: number;
+    stage_id: string;
+  },
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Get prospect data
@@ -400,12 +527,17 @@ export async function convertProspectToDeal(prospectId: string, dealData: {
   return { success: true, dealId: deal.id };
 }
 
-export async function qualifyProspect(prospectId: string, params: {
-  createDeal: boolean;
-  temperature: string;
-}) {
+export async function qualifyProspect(
+  prospectId: string,
+  params: {
+    createDeal: boolean;
+    temperature: string;
+  },
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Get prospect data
@@ -493,7 +625,9 @@ export async function searchGoogleMapsLeads(params: {
   return (results as Record<string, unknown>[]).map((place) => ({
     name: place.title as string,
     phone: place.phone as string | undefined,
-    email: (place.email as string) || ((place.contactEmails as string[] | undefined)?.[0]),
+    email:
+      (place.email as string) ||
+      (place.contactEmails as string[] | undefined)?.[0],
     website: place.website as string | undefined,
     address: place.address as string | undefined,
     rating: place.totalScore as number | undefined,
@@ -520,23 +654,29 @@ export async function importGoogleMapsLead(lead: {
   platform?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  const { data, error } = await supabase.from("prospects").insert({
-    user_id: user.id,
-    name: lead.name,
-    platform: lead.platform || "google_maps",
-    status: "new",
-    notes: `Source: Google Maps\nAdresse: ${lead.address || ""}\nCatégorie: ${lead.category || ""}\nURL: ${lead.googleMapsUrl || ""}`,
-    conversation_history: [],
-    metadata: {
-      phone: lead.phone,
-      email: lead.email,
-      website: lead.website,
-      source: "google_maps_discovery",
-    },
-  }).select().single();
+  const { data, error } = await supabase
+    .from("prospects")
+    .insert({
+      user_id: user.id,
+      name: lead.name,
+      platform: lead.platform || "google_maps",
+      status: "new",
+      notes: `Source: Google Maps\nAdresse: ${lead.address || ""}\nCatégorie: ${lead.category || ""}\nURL: ${lead.googleMapsUrl || ""}`,
+      conversation_history: [],
+      metadata: {
+        phone: lead.phone,
+        email: lead.email,
+        website: lead.website,
+        source: "google_maps_discovery",
+      },
+    })
+    .select()
+    .single();
 
   if (error) throw new Error(error.message);
   revalidatePath("/prospecting");

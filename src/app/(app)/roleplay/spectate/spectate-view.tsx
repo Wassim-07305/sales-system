@@ -86,9 +86,13 @@ export function SpectateView({ sessions }: Props) {
                         {session.user?.full_name || "Anonyme"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(session.started_at), "d MMM yyyy 'à' HH:mm", {
-                          locale: fr,
-                        })}
+                        {format(
+                          new Date(session.started_at),
+                          "d MMM yyyy 'à' HH:mm",
+                          {
+                            locale: fr,
+                          },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -133,7 +137,9 @@ export function SpectateView({ sessions }: Props) {
                           {session.score}/100
                         </Badge>
                       ) : (
-                        <span className="text-sm text-muted-foreground">--</span>
+                        <span className="text-sm text-muted-foreground">
+                          --
+                        </span>
                       )}
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">

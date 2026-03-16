@@ -11,12 +11,7 @@ import {
   toggleSetterTask,
   deleteSetterTask,
 } from "@/lib/actions/gamification";
-import {
-  Plus,
-  Trash2,
-  CheckCircle2,
-  ListTodo,
-} from "lucide-react";
+import { Plus, Trash2, CheckCircle2, ListTodo } from "lucide-react";
 
 interface Task {
   id: string;
@@ -67,8 +62,8 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
               completed: !t.completed,
               completed_at: !t.completed ? new Date().toISOString() : null,
             }
-          : t
-      )
+          : t,
+      ),
     );
 
     startTransition(async () => {
@@ -155,7 +150,7 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
                   "flex items-center gap-2.5 py-2 px-2.5 -mx-2.5 rounded-lg group transition-colors",
                   task.completed
                     ? "bg-muted/20 opacity-60"
-                    : "hover:bg-muted/30"
+                    : "hover:bg-muted/30",
                 )}
               >
                 <Checkbox
@@ -163,13 +158,14 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
                   onCheckedChange={() => handleToggle(task.id)}
                   className={cn(
                     "shrink-0 border-border",
-                    task.completed && "border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground"
+                    task.completed &&
+                      "border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground",
                   )}
                 />
                 <span
                   className={cn(
                     "flex-1 text-sm truncate",
-                    task.completed && "line-through text-muted-foreground"
+                    task.completed && "line-through text-muted-foreground",
                   )}
                 >
                   {task.title}

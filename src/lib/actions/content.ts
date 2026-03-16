@@ -21,7 +21,9 @@ export async function createContentPost(formData: {
   status?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { error } = await supabase.from("content_posts").insert({
@@ -38,17 +40,23 @@ export async function createContentPost(formData: {
   revalidatePath("/content");
 }
 
-export async function updateContentPost(id: string, formData: {
-  title?: string;
-  content?: string;
-  platform?: string;
-  framework?: string;
-  scheduled_at?: string;
-  status?: string;
-  metrics?: Record<string, unknown>;
-}) {
+export async function updateContentPost(
+  id: string,
+  formData: {
+    title?: string;
+    content?: string;
+    platform?: string;
+    framework?: string;
+    scheduled_at?: string;
+    status?: string;
+    metrics?: Record<string, unknown>;
+  },
+) {
   const supabase = await createClient();
-  const { error } = await supabase.from("content_posts").update(formData).eq("id", id);
+  const { error } = await supabase
+    .from("content_posts")
+    .update(formData)
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/content");
 }

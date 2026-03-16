@@ -19,18 +19,19 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 
 ## Chiffres Cles
 
-| Metrique | Valeur |
-|----------|--------|
-| Routes (pages) | 141 |
-| Server Actions | 64 fichiers |
-| Composants UI | 44 |
-| Tables Supabase | 75+ |
-| Roles utilisateur | 6 |
-| Couverture CDC | ~100% |
+| Metrique          | Valeur      |
+| ----------------- | ----------- |
+| Routes (pages)    | 141         |
+| Server Actions    | 64 fichiers |
+| Composants UI     | 44          |
+| Tables Supabase   | 75+         |
+| Roles utilisateur | 6           |
+| Couverture CDC    | ~100%       |
 
 ## Fonctionnalites
 
 ### CRM & Pipeline
+
 - Pipeline Kanban configurable avec drag & drop
 - Gestion contacts avec deduplication et fusion
 - Import massif CSV avec mapping colonnes et detection doublons
@@ -40,6 +41,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Champs personnalises (deals, contacts, contrats)
 
 ### Prospection
+
 - Hub multi-reseau (LinkedIn, Instagram)
 - Lead scoring avance (7 facteurs, 4 tiers)
 - Segmentation intelligente avec filtres sauvegardes
@@ -49,6 +51,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Templates messages personnalises
 
 ### Contrats & Facturation
+
 - Cycle de vie complet du contrat
 - Signature electronique (canvas HTML5)
 - Echelonnements & paiements (Stripe)
@@ -56,6 +59,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Cash flow & revenue recognition
 
 ### Analytics & Rapports
+
 - Funnel d'acquisition
 - Attribution multi-touch
 - Analyse de cohortes & retention
@@ -66,6 +70,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Dashboard builder personnalisable
 
 ### Academy (Formation)
+
 - Structure cours / modules / lecons
 - Apprentissage adaptatif (diagnostic quiz + parcours personnalise)
 - Micro-learning & revision espacee
@@ -73,6 +78,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Administration des contenus
 
 ### Scripts de Vente
+
 - Editeur flowchart (@xyflow/react)
 - Mode mind map & presentation
 - Mode entrainement & simulation (flashcards)
@@ -80,6 +86,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Analytics d'utilisation
 
 ### Communication
+
 - Chat channels & messaging
 - Video rooms & broadcast
 - Moderation avancee (filtres, mute, ban)
@@ -87,6 +94,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Suivi non-lus & statuts
 
 ### Communaute
+
 - Forum (posts, threads, discussions)
 - Systeme de reputation (5 rangs)
 - Evenements & discussions speciales
@@ -94,6 +102,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Gestion membres & moderation
 
 ### Gamification
+
 - 5 niveaux de progression
 - Challenges individuels & equipe
 - Systeme d'achievements (bronze/silver/gold/platinum)
@@ -102,6 +111,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Analytics gamification
 
 ### Roleplay & Training
+
 - Sessions roleplay IA
 - Debriefing & feedback
 - Groupes training personnalises
@@ -109,6 +119,7 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Mode spectateur
 
 ### WhatsApp
+
 - Parametres & connexion
 - Envoi unitaire & groupe
 - Sequences de nurturing
@@ -116,17 +127,20 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Compliance GDPR
 
 ### Equipe
+
 - Management & hierarchie
 - Leaderboards & performance
 - Coaching avec objectifs SMART
 - Feedback 360
 
 ### Marketplace
+
 - Extensions partenaires
 - Portail partenaires
 - Monetisation (commissions, tiers, payouts)
 
 ### Parametres & Administration
+
 - Branding & white-label
 - Modes IA configurables
 - Onboarding personnalise
@@ -137,20 +151,21 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Champs personnalises
 
 ### Support
+
 - Centre d'aide (24 articles, FAQ)
 - Systeme de tickets
 - Roadmap publique & feature voting
 
 ## Roles Utilisateur
 
-| Role | Description |
-|------|-------------|
-| `admin` | Acces complet, configuration plateforme |
-| `manager` | Gestion equipe, analytics, coaching |
-| `setter` | Prospection, prise de RDV, qualification |
-| `closer` | Closing, contrats, facturation |
-| `client_b2b` | Portail client entreprise |
-| `client_b2c` | Portail client particulier |
+| Role         | Description                              |
+| ------------ | ---------------------------------------- |
+| `admin`      | Acces complet, configuration plateforme  |
+| `manager`    | Gestion equipe, analytics, coaching      |
+| `setter`     | Prospection, prise de RDV, qualification |
+| `closer`     | Closing, contrats, facturation           |
+| `client_b2b` | Portail client entreprise                |
+| `client_b2c` | Portail client particulier               |
 
 ## Installation
 
@@ -242,16 +257,16 @@ src/
 
 ## Comptes Demo
 
-| Email | Mot de passe | Role |
-|-------|-------------|------|
-| thomas.martin@demo.com | demo1234 | setter |
-| sophie.durand@demo.com | demo1234 | setter |
-| lucas.bernard@demo.com | demo1234 | closer |
-| marie.leroy@demo.com | demo1234 | manager |
-| jean.dupont@demo.com | demo1234 | client_b2b |
-| emma.petit@demo.com | demo1234 | client_b2b |
-| pierre.moreau@demo.com | demo1234 | client_b2c |
-| julie.robert@demo.com | demo1234 | client_b2c |
+| Email                  | Mot de passe | Role       |
+| ---------------------- | ------------ | ---------- |
+| thomas.martin@demo.com | demo1234     | setter     |
+| sophie.durand@demo.com | demo1234     | setter     |
+| lucas.bernard@demo.com | demo1234     | closer     |
+| marie.leroy@demo.com   | demo1234     | manager    |
+| jean.dupont@demo.com   | demo1234     | client_b2b |
+| emma.petit@demo.com    | demo1234     | client_b2b |
+| pierre.moreau@demo.com | demo1234     | client_b2c |
+| julie.robert@demo.com  | demo1234     | client_b2c |
 
 ## Licence
 

@@ -41,13 +41,37 @@ interface MindMapData {
 
 const branchColors = [
   { bg: "bg-brand/10", border: "border-brand", text: "text-brand" },
-  { bg: "bg-foreground/10", border: "border-foreground/40", text: "text-foreground" },
-  { bg: "bg-muted-foreground/10", border: "border-muted-foreground/40", text: "text-muted-foreground" },
-  { bg: "bg-muted/60", border: "border-muted-foreground/30", text: "text-muted-foreground/80" },
+  {
+    bg: "bg-foreground/10",
+    border: "border-foreground/40",
+    text: "text-foreground",
+  },
+  {
+    bg: "bg-muted-foreground/10",
+    border: "border-muted-foreground/40",
+    text: "text-muted-foreground",
+  },
+  {
+    bg: "bg-muted/60",
+    border: "border-muted-foreground/30",
+    text: "text-muted-foreground/80",
+  },
   { bg: "bg-brand/8", border: "border-brand/60", text: "text-brand/80" },
-  { bg: "bg-foreground/8", border: "border-foreground/30", text: "text-foreground/80" },
-  { bg: "bg-muted-foreground/8", border: "border-muted-foreground/30", text: "text-muted-foreground/70" },
-  { bg: "bg-muted/40", border: "border-border", text: "text-muted-foreground/60" },
+  {
+    bg: "bg-foreground/8",
+    border: "border-foreground/30",
+    text: "text-foreground/80",
+  },
+  {
+    bg: "bg-muted-foreground/8",
+    border: "border-muted-foreground/30",
+    text: "text-muted-foreground/70",
+  },
+  {
+    bg: "bg-muted/40",
+    border: "border-border",
+    text: "text-muted-foreground/60",
+  },
 ];
 
 function RootNodeComponent({ data }: NodeProps) {
@@ -139,7 +163,11 @@ interface MindMapEditorProps {
   userName?: string;
 }
 
-export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps) {
+export function MindMapEditor({
+  mindMap,
+  userId,
+  userName,
+}: MindMapEditorProps) {
   const [title, setTitle] = useState(mindMap.title);
   const [isPending, startTransition] = useTransition();
   const [shareOpen, setShareOpen] = useState(false);
@@ -148,7 +176,7 @@ export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps)
   const { onlineUsers } = usePresence(
     userId ? `script:${mindMap.id}` : null,
     userId || "",
-    userName || ""
+    userName || "",
   );
 
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
@@ -156,22 +184,22 @@ export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps)
   const editInputRef = useRef<HTMLInputElement>(null);
   const branchCountRef = useRef(
     (mindMap.nodes as Node[]).filter(
-      (n) => (n.data as { type?: string }).type === "branch"
-    ).length
+      (n) => (n.data as { type?: string }).type === "branch",
+    ).length,
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    (mindMap.nodes as Node[]) || []
+    (mindMap.nodes as Node[]) || [],
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    (mindMap.edges as Edge[]) || []
+    (mindMap.edges as Edge[]) || [],
   );
 
   const onConnect: OnConnect = useCallback(
     (params) => {
       setEdges((eds) => addEdge(params, eds));
     },
-    [setEdges]
+    [setEdges],
   );
 
   // Real-time sync of nodes/edges
@@ -180,7 +208,7 @@ export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps)
       setNodes(data.nodes);
       setEdges(data.edges);
     },
-    [setNodes, setEdges]
+    [setNodes, setEdges],
   );
 
   const { broadcastChanges } = useRealtimeSync({
@@ -213,7 +241,7 @@ export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps)
     const angle = (count * (Math.PI * 2)) / 8 + Math.PI / 4;
     const radius = 250;
     const rootNode = nodes.find(
-      (n) => (n.data as { type?: string }).type === "root"
+      (n) => (n.data as { type?: string }).type === "root",
     );
     const centerX = rootNode?.position.x ?? 400;
     const centerY = rootNode?.position.y ?? 300;
@@ -251,8 +279,8 @@ export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps)
         nds.map((n) =>
           n.id === editingNodeId
             ? { ...n, data: { ...n.data, label: editingLabel.trim() } }
-            : n
-        )
+            : n,
+        ),
       );
     }
     setEditingNodeId(null);
@@ -308,7 +336,9 @@ export function MindMapEditor({ mindMap, userId, userName }: MindMapEditorProps)
               ))}
               {onlineUsers.length > 3 && (
                 <div className="h-6 w-6 rounded-full bg-muted border-2 border-background flex items-center justify-center">
-                  <span className="text-[10px] font-medium">+{onlineUsers.length - 3}</span>
+                  <span className="text-[10px] font-medium">
+                    +{onlineUsers.length - 3}
+                  </span>
                 </div>
               )}
             </div>

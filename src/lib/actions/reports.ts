@@ -34,17 +34,77 @@ export interface SavedReport {
   last_result_count?: number;
 }
 
-const ALLOWED_TABLES = ["deals", "contacts", "bookings", "contracts", "calls"] as const;
+const ALLOWED_TABLES = [
+  "deals",
+  "contacts",
+  "bookings",
+  "contracts",
+  "calls",
+] as const;
 
 const ALLOWED_COLUMNS: Record<string, string[]> = {
-  deals: ["id", "name", "value", "status", "stage", "setter_id", "closer_id", "created_at", "updated_at"],
-  contacts: ["id", "first_name", "last_name", "email", "phone", "company", "position", "source", "status", "created_at"],
-  bookings: ["id", "prospect_name", "assigned_to", "scheduled_at", "duration_minutes", "status", "created_at"],
-  contracts: ["id", "deal_id", "status", "amount", "start_date", "end_date", "created_at"],
-  calls: ["id", "contact_id", "user_id", "direction", "duration", "outcome", "notes", "created_at"],
+  deals: [
+    "id",
+    "name",
+    "value",
+    "status",
+    "stage",
+    "setter_id",
+    "closer_id",
+    "created_at",
+    "updated_at",
+  ],
+  contacts: [
+    "id",
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "company",
+    "position",
+    "source",
+    "status",
+    "created_at",
+  ],
+  bookings: [
+    "id",
+    "prospect_name",
+    "assigned_to",
+    "scheduled_at",
+    "duration_minutes",
+    "status",
+    "created_at",
+  ],
+  contracts: [
+    "id",
+    "deal_id",
+    "status",
+    "amount",
+    "start_date",
+    "end_date",
+    "created_at",
+  ],
+  calls: [
+    "id",
+    "contact_id",
+    "user_id",
+    "direction",
+    "duration",
+    "outcome",
+    "notes",
+    "created_at",
+  ],
 };
 
-const ALLOWED_OPERATORS = ["eq", "gt", "lt", "gte", "lte", "like", "neq"] as const;
+const ALLOWED_OPERATORS = [
+  "eq",
+  "gt",
+  "lt",
+  "gte",
+  "lte",
+  "like",
+  "neq",
+] as const;
 
 function validateConfig(config: QueryConfig): string | null {
   if (!ALLOWED_TABLES.includes(config.table)) {
@@ -84,7 +144,9 @@ export async function executeCustomQuery(config: QueryConfig): Promise<{
   error?: string;
 }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { data: [], totalCount: 0, error: "Non authentifie" };
 
   const validationError = validateConfig(config);
@@ -93,7 +155,9 @@ export async function executeCustomQuery(config: QueryConfig): Promise<{
   }
 
   const selectColumns = config.columns.join(", ");
-  let query = supabase.from(config.table).select(selectColumns, { count: "exact" });
+  let query = supabase
+    .from(config.table)
+    .select(selectColumns, { count: "exact" });
 
   for (const filter of config.filters) {
     const val = filter.value;
@@ -145,10 +209,12 @@ export async function executeCustomQuery(config: QueryConfig): Promise<{
 
 export async function saveReport(
   name: string,
-  config: QueryConfig
+  config: QueryConfig,
 ): Promise<{ id?: string; error?: string; useLocalStorage?: boolean }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifie" };
 
   const { data, error } = await supabase
@@ -176,7 +242,9 @@ export async function getSavedReports(): Promise<{
   useLocalStorage?: boolean;
 }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { data: [], error: "Non authentifie" };
 
   const { data, error } = await supabase
@@ -194,10 +262,12 @@ export async function getSavedReports(): Promise<{
 }
 
 export async function deleteReport(
-  id: string
+  id: string,
 ): Promise<{ error?: string; useLocalStorage?: boolean }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifie" };
 
   const { error } = await supabase
@@ -216,14 +286,23 @@ export async function deleteReport(
 
 // ─── F68: Rapport Mensuel Automatisé B2B (PDF) ─────────────────────
 
-export async function generateMonthlyB2BReport(clientId: string, month?: string) {
+export async function generateMonthlyB2BReport(
+  clientId: string,
+  month?: string,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const targetMonth = month || new Date().toISOString().slice(0, 7); // YYYY-MM
   const startDate = `${targetMonth}-01`;
-  const endDate = new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + 1)).toISOString().split("T")[0];
+  const endDate = new Date(
+    new Date(startDate).setMonth(new Date(startDate).getMonth() + 1),
+  )
+    .toISOString()
+    .split("T")[0];
 
   // Get client profile
   const { data: client } = await supabase
@@ -255,11 +334,18 @@ export async function generateMonthlyB2BReport(clientId: string, month?: string)
     .eq("prospect_id", clientId);
 
   const totalDeals = (deals || []).length;
-  const closedDeals = (deals || []).filter(d => d.closed_at).length;
-  const totalRevenue = (deals || []).filter(d => d.closed_at).reduce((s, d) => s + (d.value || 0), 0);
+  const closedDeals = (deals || []).filter((d) => d.closed_at).length;
+  const totalRevenue = (deals || [])
+    .filter((d) => d.closed_at)
+    .reduce((s, d) => s + (d.value || 0), 0);
   const totalBookings = (bookings || []).length;
-  const completedBookings = (bookings || []).filter(b => b.status === "completed").length;
-  const totalMessages = (conversations || []).reduce((s, c) => s + ((c.messages as unknown[]) || []).length, 0);
+  const completedBookings = (bookings || []).filter(
+    (b) => b.status === "completed",
+  ).length;
+  const totalMessages = (conversations || []).reduce(
+    (s, c) => s + ((c.messages as unknown[]) || []).length,
+    0,
+  );
 
   const report = {
     clientName: client?.full_name || "Client",
@@ -270,28 +356,39 @@ export async function generateMonthlyB2BReport(clientId: string, month?: string)
       totalDeals,
       closedDeals,
       totalRevenue,
-      conversionRate: totalDeals > 0 ? Math.round((closedDeals / totalDeals) * 100) : 0,
+      conversionRate:
+        totalDeals > 0 ? Math.round((closedDeals / totalDeals) * 100) : 0,
       totalBookings,
       completedBookings,
-      showUpRate: totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0,
+      showUpRate:
+        totalBookings > 0
+          ? Math.round((completedBookings / totalBookings) * 100)
+          : 0,
       totalMessages,
     },
     recommendations: [
-      totalRevenue === 0 ? "Augmenter le volume de conversations pour générer plus d'opportunités" : null,
-      completedBookings < totalBookings * 0.7 ? "Améliorer le taux de show-up avec des rappels J-1 et H-2" : null,
-      closedDeals < totalDeals * 0.3 ? "Retravailler le script de closing — le taux de conversion est inférieur à 30%" : null,
+      totalRevenue === 0
+        ? "Augmenter le volume de conversations pour générer plus d'opportunités"
+        : null,
+      completedBookings < totalBookings * 0.7
+        ? "Améliorer le taux de show-up avec des rappels J-1 et H-2"
+        : null,
+      closedDeals < totalDeals * 0.3
+        ? "Retravailler le script de closing — le taux de conversion est inférieur à 30%"
+        : null,
     ].filter(Boolean),
   };
 
   // Store the report
-  const { error } = await supabase
-    .from("monthly_reports")
-    .upsert({
+  const { error } = await supabase.from("monthly_reports").upsert(
+    {
       client_id: clientId,
       period: targetMonth,
       report_data: report,
       generated_by: user.id,
-    }, { onConflict: "client_id,period" });
+    },
+    { onConflict: "client_id,period" },
+  );
 
   if (error) return { error: error.message };
 
@@ -301,7 +398,9 @@ export async function generateMonthlyB2BReport(clientId: string, month?: string)
 
 export async function getMonthlyReports(clientId?: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   let query = supabase
@@ -322,7 +421,9 @@ export async function getMonthlyReports(clientId?: string) {
 
 export async function generateWeeklySetterReport(setterId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const now = new Date();
@@ -352,10 +453,22 @@ export async function generateWeeklySetterReport(setterId: string) {
     .gte("created_at", startDate);
 
   const totalDms = (journals || []).reduce((s, j) => s + (j.dms_sent || 0), 0);
-  const totalReplies = (journals || []).reduce((s, j) => s + (j.replies_received || 0), 0);
-  const totalCallsBooked = (journals || []).reduce((s, j) => s + (j.calls_booked || 0), 0);
-  const totalCallsDone = (journals || []).reduce((s, j) => s + (j.calls_completed || 0), 0);
-  const totalRevenue = (journals || []).reduce((s, j) => s + (j.revenue_generated || 0), 0);
+  const totalReplies = (journals || []).reduce(
+    (s, j) => s + (j.replies_received || 0),
+    0,
+  );
+  const totalCallsBooked = (journals || []).reduce(
+    (s, j) => s + (j.calls_booked || 0),
+    0,
+  );
+  const totalCallsDone = (journals || []).reduce(
+    (s, j) => s + (j.calls_completed || 0),
+    0,
+  );
+  const totalRevenue = (journals || []).reduce(
+    (s, j) => s + (j.revenue_generated || 0),
+    0,
+  );
   const eodSubmitted = (journals || []).length;
 
   return {
@@ -365,10 +478,14 @@ export async function generateWeeklySetterReport(setterId: string) {
       metrics: {
         dmsSent: totalDms,
         repliesReceived: totalReplies,
-        responseRate: totalDms > 0 ? Math.round((totalReplies / totalDms) * 100) : 0,
+        responseRate:
+          totalDms > 0 ? Math.round((totalReplies / totalDms) * 100) : 0,
         callsBooked: totalCallsBooked,
         callsCompleted: totalCallsDone,
-        showUpRate: totalCallsBooked > 0 ? Math.round((totalCallsDone / totalCallsBooked) * 100) : 0,
+        showUpRate:
+          totalCallsBooked > 0
+            ? Math.round((totalCallsDone / totalCallsBooked) * 100)
+            : 0,
         revenue: totalRevenue,
         newDeals: (deals || []).length,
         eodCompliance: `${eodSubmitted}/7`,

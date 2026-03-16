@@ -86,7 +86,7 @@ export function ShareDialog({
         setShares(updated);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Erreur lors du partage"
+          error instanceof Error ? error.message : "Erreur lors du partage",
         );
       }
     });
@@ -102,7 +102,7 @@ export function ShareDialog({
         toast.error(
           error instanceof Error
             ? error.message
-            : "Erreur lors de la suppression"
+            : "Erreur lors de la suppression",
         );
       }
     });
@@ -192,7 +192,14 @@ export function ShareDialog({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={share.permission === "edit" ? "bg-brand/10 text-brand border-brand/20" : "bg-muted/60 text-muted-foreground border-border/50"}>
+                    <Badge
+                      variant="outline"
+                      className={
+                        share.permission === "edit"
+                          ? "bg-brand/10 text-brand border-brand/20"
+                          : "bg-muted/60 text-muted-foreground border-border/50"
+                      }
+                    >
                       {share.permission === "edit" ? "Edition" : "Lecture"}
                     </Badge>
                     <Button

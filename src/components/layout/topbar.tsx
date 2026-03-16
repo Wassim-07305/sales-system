@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
-import { markNotificationRead, markAllNotificationsRead } from "@/lib/actions/notifications";
+import {
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "@/lib/actions/notifications";
 import { useUIStore } from "@/stores/ui-store";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -89,7 +92,7 @@ export function Topbar({ title, userId }: TopbarProps) {
           setNotifications((prev) => [newNotif, ...prev].slice(0, 20));
           setUnreadCount((prev) => prev + 1);
           toast(newNotif.title, { description: newNotif.body || undefined });
-        }
+        },
       )
       .subscribe();
 
@@ -101,7 +104,7 @@ export function Topbar({ title, userId }: TopbarProps) {
   async function handleMarkRead(id: string) {
     await markNotificationRead(id);
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
   }
@@ -139,7 +142,10 @@ export function Topbar({ title, userId }: TopbarProps) {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-96 max-h-[70vh] overflow-y-auto rounded-2xl">
+          <DropdownMenuContent
+            align="end"
+            className="w-96 max-h-[70vh] overflow-y-auto rounded-2xl"
+          >
             <div className="flex items-center justify-between p-3 border-b">
               <h3 className="font-semibold text-sm">Notifications</h3>
               <div className="flex gap-2">
@@ -174,14 +180,25 @@ export function Topbar({ title, userId }: TopbarProps) {
                   }}
                 >
                   <div className="flex gap-3 w-full">
-                    <span className="text-lg shrink-0">{typeIcons[notif.type || ""] || "🔔"}</span>
+                    <span className="text-lg shrink-0">
+                      {typeIcons[notif.type || ""] || "🔔"}
+                    </span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${!notif.read ? "font-semibold" : ""}`}>{notif.title}</p>
+                      <p
+                        className={`text-sm ${!notif.read ? "font-semibold" : ""}`}
+                      >
+                        {notif.title}
+                      </p>
                       {notif.body && (
-                        <p className="text-xs text-muted-foreground truncate">{notif.body}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {notif.body}
+                        </p>
                       )}
                       <p className="text-xs text-muted-foreground/60 mt-0.5">
-                        {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: fr })}
+                        {formatDistanceToNow(new Date(notif.created_at), {
+                          addSuffix: true,
+                          locale: fr,
+                        })}
                       </p>
                     </div>
                     {!notif.read && (

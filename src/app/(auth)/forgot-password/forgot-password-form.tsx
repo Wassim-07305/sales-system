@@ -20,9 +20,12 @@ export function ForgotPasswordForm() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
+        },
+      );
 
       if (error) {
         toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
@@ -33,7 +36,9 @@ export function ForgotPasswordForm() {
       setSent(true);
       setLoading(false);
     } catch {
-      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      toast.error(
+        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+      );
       setLoading(false);
     }
   }
@@ -45,16 +50,25 @@ export function ForgotPasswordForm() {
           <CheckCircle2 className="h-9 w-9 text-brand" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-brand-dark">{"Email envoy\u00e9"}</h3>
+          <h3 className="text-xl font-bold text-brand-dark">
+            {"Email envoy\u00e9"}
+          </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            {"Un email de r\u00e9initialisation a \u00e9t\u00e9 envoy\u00e9 \u00e0"}{" "}
+            {
+              "Un email de r\u00e9initialisation a \u00e9t\u00e9 envoy\u00e9 \u00e0"
+            }{" "}
             <strong className="text-foreground">{email}</strong>.
-            {" V\u00e9rifiez votre bo\u00eete de r\u00e9ception et cliquez sur le lien pour r\u00e9initialiser votre mot de passe."}
+            {
+              " V\u00e9rifiez votre bo\u00eete de r\u00e9ception et cliquez sur le lien pour r\u00e9initialiser votre mot de passe."
+            }
           </p>
         </div>
         <div className="pt-2">
           <Link href="/login">
-            <Button variant="outline" className="w-full h-12 rounded-xl border-border/60 hover:border-brand/50 hover:bg-brand/5 transition-all duration-200">
+            <Button
+              variant="outline"
+              className="w-full h-12 rounded-xl border-border/60 hover:border-brand/50 hover:bg-brand/5 transition-all duration-200"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               {"Retour \u00e0 la connexion"}
             </Button>
@@ -67,7 +81,9 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+        <Label htmlFor="email" className="text-sm font-medium">
+          Email
+        </Label>
         <Input
           id="email"
           type="email"
@@ -103,7 +119,10 @@ export function ForgotPasswordForm() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        <Link href="/login" className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
+        >
           <ArrowLeft className="h-3.5 w-3.5" />
           {"Retour \u00e0 la connexion"}
         </Link>

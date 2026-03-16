@@ -66,10 +66,10 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 const levelColors: Record<string, string> = {
-  "Débutant": "text-red-400 bg-red-400/10 border-red-400/20",
-  "Intermédiaire": "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  "Avancé": "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  "Expert": "text-[#7af17a] bg-[#7af17a]/10 border-[#7af17a]/20",
+  Débutant: "text-red-400 bg-red-400/10 border-red-400/20",
+  Intermédiaire: "text-amber-400 bg-amber-400/10 border-amber-400/20",
+  Avancé: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  Expert: "text-[#7af17a] bg-[#7af17a]/10 border-[#7af17a]/20",
 };
 
 const priorityConfig: Record<
@@ -274,8 +274,8 @@ export function PathView({
                           isCompleted
                             ? "border-[#7af17a] bg-[#7af17a]/10"
                             : isStarted
-                            ? "border-amber-400 bg-amber-400/10"
-                            : "border-border/50"
+                              ? "border-amber-400 bg-amber-400/10"
+                              : "border-border/50",
                         )}
                       >
                         {isCompleted ? (
@@ -292,7 +292,7 @@ export function PathView({
                     <Card
                       className={cn(
                         "flex-1 border-border/50 hover:border-[#7af17a]/30 transition-colors",
-                        isCompleted && "opacity-70"
+                        isCompleted && "opacity-70",
                       )}
                     >
                       <CardContent className="pt-5 pb-5 space-y-3">
@@ -315,10 +315,7 @@ export function PathView({
                           </div>
                           <Badge
                             variant="outline"
-                            className={cn(
-                              "text-xs flex-shrink-0",
-                              prio.color
-                            )}
+                            className={cn("text-xs flex-shrink-0", prio.color)}
                           >
                             {prio.label}
                           </Badge>
@@ -360,7 +357,7 @@ export function PathView({
                           className={cn(
                             "w-full sm:w-auto",
                             !isCompleted &&
-                              "hover:bg-[#7af17a]/10 hover:text-[#7af17a] hover:border-[#7af17a]/30"
+                              "hover:bg-[#7af17a]/10 hover:text-[#7af17a] hover:border-[#7af17a]/30",
                           )}
                           asChild
                         >
@@ -369,8 +366,8 @@ export function PathView({
                             {isCompleted
                               ? "Revoir"
                               : isStarted
-                              ? "Continuer"
-                              : "Commencer"}
+                                ? "Continuer"
+                                : "Commencer"}
                             <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Link>
                         </Button>
@@ -398,9 +395,7 @@ export function PathView({
       <Card className="border-border/50 bg-card/50">
         <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-center sm:text-left">
-            <h4 className="font-medium text-sm">
-              Vous avez progressé ?
-            </h4>
+            <h4 className="font-medium text-sm">Vous avez progressé ?</h4>
             <p className="text-xs text-muted-foreground mt-1">
               Refaites le diagnostic pour mettre à jour votre parcours
             </p>

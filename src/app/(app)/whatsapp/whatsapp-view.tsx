@@ -88,7 +88,7 @@ export function WhatsAppView({
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(
-    conversations[0] || null
+    conversations[0] || null,
   );
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -99,8 +99,7 @@ export function WhatsAppView({
 
   const filteredConvs = conversations.filter(
     (c) =>
-      !search ||
-      c.prospect?.name.toLowerCase().includes(search.toLowerCase())
+      !search || c.prospect?.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const status = connection?.status || "disconnected";
@@ -114,23 +113,22 @@ export function WhatsAppView({
     return (
       acc +
       c.messages.filter(
-        (m) =>
-          m.direction === "outbound" && m.created_at.startsWith(today)
+        (m) => m.direction === "outbound" && m.created_at.startsWith(today),
       ).length
     );
   }, 0);
   const totalOutbound = conversations.reduce(
-    (acc, c) => acc + c.messages.filter((m) => m.direction === "outbound").length,
-    0
+    (acc, c) =>
+      acc + c.messages.filter((m) => m.direction === "outbound").length,
+    0,
   );
   const totalInbound = conversations.reduce(
-    (acc, c) => acc + c.messages.filter((m) => m.direction === "inbound").length,
-    0
+    (acc, c) =>
+      acc + c.messages.filter((m) => m.direction === "inbound").length,
+    0,
   );
   const responseRate =
-    totalOutbound > 0
-      ? Math.round((totalInbound / totalOutbound) * 100)
-      : 0;
+    totalOutbound > 0 ? Math.round((totalInbound / totalOutbound) * 100) : 0;
 
   async function handleSend() {
     if (!messageText.trim() || !selectedConv?.prospect) return;
@@ -169,18 +167,30 @@ export function WhatsAppView({
       >
         <div className="flex gap-2">
           <Link href="/whatsapp/analytics">
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+            >
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </Button>
           </Link>
           <Link href="/whatsapp/sequences">
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+            >
               Séquences
             </Button>
           </Link>
           <Link href="/whatsapp/settings">
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+            >
               Paramètres
             </Button>
           </Link>
@@ -193,7 +203,8 @@ export function WhatsAppView({
           <div className="flex items-center gap-2 text-amber-600">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <p className="text-sm font-medium">
-              WhatsApp n&apos;est pas connecté. Les messages ne seront ni envoyés ni reçus.{" "}
+              WhatsApp n&apos;est pas connecté. Les messages ne seront ni
+              envoyés ni reçus.{" "}
               <Link href="/whatsapp/settings" className="underline">
                 Configurer la connexion
               </Link>
@@ -206,8 +217,26 @@ export function WhatsAppView({
       <Card className="shadow-sm rounded-2xl border-border/50">
         <CardContent className="py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center ring-1", status === "connected" ? "ring-emerald-500/20 bg-emerald-500/10" : status === "pending" ? "ring-amber-500/20 bg-amber-500/10" : "ring-red-500/20 bg-red-500/10")}>
-              <StatusIcon className={cn("h-4 w-4", status === "connected" ? "text-emerald-600" : status === "pending" ? "text-amber-600" : "text-red-600")} />
+            <div
+              className={cn(
+                "h-9 w-9 rounded-xl flex items-center justify-center ring-1",
+                status === "connected"
+                  ? "ring-emerald-500/20 bg-emerald-500/10"
+                  : status === "pending"
+                    ? "ring-amber-500/20 bg-amber-500/10"
+                    : "ring-red-500/20 bg-red-500/10",
+              )}
+            >
+              <StatusIcon
+                className={cn(
+                  "h-4 w-4",
+                  status === "connected"
+                    ? "text-emerald-600"
+                    : status === "pending"
+                      ? "text-amber-600"
+                      : "text-red-600",
+                )}
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -251,7 +280,9 @@ export function WhatsAppView({
         <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{totalConversations}</p>
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Conversations</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Conversations
+            </p>
           </CardContent>
         </Card>
         <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
@@ -265,7 +296,9 @@ export function WhatsAppView({
         <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-3 text-center">
             <p className="text-2xl font-bold">{responseRate}%</p>
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Taux de réponse</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Taux de réponse
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -273,7 +306,12 @@ export function WhatsAppView({
       {/* Conversations */}
       <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100dvh-420px)] md:h-[calc(100dvh-380px)]">
         {/* Left sidebar: conversation list */}
-        <Card className={cn("flex flex-col overflow-hidden border-border/50", selectedConv ? "hidden md:flex" : "flex")}>
+        <Card
+          className={cn(
+            "flex flex-col overflow-hidden border-border/50",
+            selectedConv ? "hidden md:flex" : "flex",
+          )}
+        >
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -318,10 +356,10 @@ export function WhatsAppView({
                       </p>
                       {conv.last_message_at && (
                         <p className="text-[10px] text-muted-foreground">
-                          {formatDistanceToNow(
-                            new Date(conv.last_message_at),
-                            { addSuffix: true, locale: fr }
-                          )}
+                          {formatDistanceToNow(new Date(conv.last_message_at), {
+                            addSuffix: true,
+                            locale: fr,
+                          })}
                         </p>
                       )}
                     </div>
@@ -341,7 +379,12 @@ export function WhatsAppView({
         </Card>
 
         {/* Right panel: message thread */}
-        <Card className={cn("flex flex-col overflow-hidden border-border/50", !selectedConv && "hidden md:flex")}>
+        <Card
+          className={cn(
+            "flex flex-col overflow-hidden border-border/50",
+            !selectedConv && "hidden md:flex",
+          )}
+        >
           {selectedConv ? (
             <>
               {/* Header */}

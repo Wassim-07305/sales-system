@@ -9,7 +9,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Save, Camera, User, Building2, Phone, Target, Briefcase } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  Camera,
+  User,
+  Building2,
+  Phone,
+  Target,
+  Briefcase,
+} from "lucide-react";
 import { updateProfile, updateAvatarUrl } from "@/lib/actions/settings";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types/database";
@@ -55,7 +64,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
 
       if (uploadError) throw new Error(uploadError.message);
 
-      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(path);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
       const result = await updateAvatarUrl(publicUrl);
@@ -64,7 +75,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
       setAvatarUrl(publicUrl);
       toast.success("Photo de profil mise \u00e0 jour !");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erreur lors de l'upload");
+      toast.error(
+        err instanceof Error ? err.message : "Erreur lors de l'upload",
+      );
     } finally {
       setUploadingAvatar(false);
     }
@@ -91,7 +104,10 @@ export function ProfileView({ profile }: { profile: Profile }) {
 
   return (
     <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <PageHeader title="Mon profil" description="G\u00e9rez vos informations personnelles" />
+      <PageHeader
+        title="Mon profil"
+        description="G\u00e9rez vos informations personnelles"
+      />
 
       {/* Avatar & Identity Card */}
       <Card className="rounded-2xl shadow-sm border-border/60 mb-6 overflow-hidden">
@@ -135,9 +151,14 @@ export function ProfileView({ profile }: { profile: Profile }) {
               />
             </div>
             <div className="pb-1">
-              <h2 className="text-xl font-bold text-brand-dark">{fullName || "Votre nom"}</h2>
+              <h2 className="text-xl font-bold text-brand-dark">
+                {fullName || "Votre nom"}
+              </h2>
               <p className="text-sm text-muted-foreground">{profile.email}</p>
-              <Badge variant="outline" className="mt-2 text-xs px-3 py-0.5 rounded-lg border-brand/30 bg-brand/5 text-brand-dark font-medium">
+              <Badge
+                variant="outline"
+                className="mt-2 text-xs px-3 py-0.5 rounded-lg border-brand/30 bg-brand/5 text-brand-dark font-medium"
+              >
                 {roleLabels[profile.role] || profile.role}
               </Badge>
             </div>

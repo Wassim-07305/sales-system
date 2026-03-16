@@ -15,7 +15,10 @@ export default function KpisLoading() {
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-border/50 bg-card p-5 space-y-3 shadow-sm">
+          <div
+            key={i}
+            className="rounded-2xl border border-border/50 bg-card p-5 space-y-3 shadow-sm"
+          >
             <Skeleton className="h-9 w-9 rounded-xl" />
             <Skeleton className="h-8 w-20 rounded-lg" />
             <Skeleton className="h-3 w-28 rounded" />

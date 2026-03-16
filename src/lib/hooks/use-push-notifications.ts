@@ -49,7 +49,8 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     if (!isSupported) {
       return {
         success: false,
-        error: "Les notifications push ne sont pas supportées par ce navigateur.",
+        error:
+          "Les notifications push ne sont pas supportées par ce navigateur.",
       };
     }
 
@@ -71,5 +72,11 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     return result;
   }, []);
 
-  return { isSupported, permission, isSubscribed, requestPermission, unsubscribe };
+  return {
+    isSupported,
+    permission,
+    isSubscribed,
+    requestPermission,
+    unsubscribe,
+  };
 }

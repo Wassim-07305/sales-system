@@ -2,12 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import type { Deal, PipelineStage, DealTemperature } from "@/lib/types/database";
+import type {
+  Deal,
+  PipelineStage,
+  DealTemperature,
+} from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 import {
   DollarSign,
@@ -23,7 +38,11 @@ import {
   Save,
   ArrowRight,
 } from "lucide-react";
-import { updateDealStage, updateDealTemperature, updateDealNotes } from "@/lib/actions/crm";
+import {
+  updateDealStage,
+  updateDealTemperature,
+  updateDealNotes,
+} from "@/lib/actions/crm";
 
 interface DealPanelProps {
   deal: Deal;
@@ -33,19 +52,44 @@ interface DealPanelProps {
 }
 
 const TEMP_CONFIG = {
-  hot: { icon: Flame, color: "text-foreground", bg: "bg-foreground/10", border: "border-foreground/20", label: "Hot" },
-  warm: { icon: Thermometer, color: "text-muted-foreground", bg: "bg-muted/60", border: "border-border/50", label: "Warm" },
-  cold: { icon: Snowflake, color: "text-muted-foreground/60", bg: "bg-muted/40", border: "border-border/30", label: "Cold" },
+  hot: {
+    icon: Flame,
+    color: "text-foreground",
+    bg: "bg-foreground/10",
+    border: "border-foreground/20",
+    label: "Hot",
+  },
+  warm: {
+    icon: Thermometer,
+    color: "text-muted-foreground",
+    bg: "bg-muted/60",
+    border: "border-border/50",
+    label: "Warm",
+  },
+  cold: {
+    icon: Snowflake,
+    color: "text-muted-foreground/60",
+    bg: "bg-muted/40",
+    border: "border-border/30",
+    label: "Cold",
+  },
 };
 
 const AVATAR_COLORS = [
-  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
-  "bg-zinc-600", "bg-zinc-700", "bg-zinc-600", "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
+  "bg-zinc-600",
+  "bg-zinc-700",
 ];
 
 function getAvatarColor(str: string) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < str.length; i++)
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -94,14 +138,18 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
           <SheetHeader className="p-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <SheetTitle className="text-lg font-bold truncate">{deal.title}</SheetTitle>
+                <SheetTitle className="text-lg font-bold truncate">
+                  {deal.title}
+                </SheetTitle>
                 {currentStage && (
                   <div className="flex items-center gap-2 mt-1">
                     <div
                       className="h-2 w-2 rounded-full"
                       style={{ backgroundColor: currentStage.color }}
                     />
-                    <span className="text-xs text-muted-foreground">{currentStage.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {currentStage.name}
+                    </span>
                   </div>
                 )}
               </div>
@@ -119,15 +167,28 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
           {/* Contact card */}
           {deal.contact && (
             <div className="flex items-center gap-3 p-3.5 bg-muted/30 rounded-xl border border-border/50">
-              <div className={cn(
-                "h-11 w-11 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0",
-                getAvatarColor(deal.contact.id || deal.contact.full_name || ""),
-              )}>
-                {deal.contact.full_name?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?"}
+              <div
+                className={cn(
+                  "h-11 w-11 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0",
+                  getAvatarColor(
+                    deal.contact.id || deal.contact.full_name || "",
+                  ),
+                )}
+              >
+                {deal.contact.full_name
+                  ?.split(" ")
+                  .map((w) => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase() || "?"}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{deal.contact.full_name}</p>
-                <p className="text-xs text-muted-foreground truncate">{deal.contact.email}</p>
+                <p className="text-sm font-semibold truncate">
+                  {deal.contact.full_name}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {deal.contact.email}
+                </p>
               </div>
             </div>
           )}
@@ -137,16 +198,24 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             <div className="p-3.5 rounded-xl bg-brand/5 border border-brand/10">
               <div className="flex items-center gap-1.5 mb-1">
                 <DollarSign className="h-3.5 w-3.5 text-brand" />
-                <span className="text-[11px] text-muted-foreground">Valeur</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Valeur
+                </span>
               </div>
-              <p className="text-xl font-bold tabular-nums">{deal.value?.toLocaleString("fr-FR")} €</p>
+              <p className="text-xl font-bold tabular-nums">
+                {deal.value?.toLocaleString("fr-FR")} €
+              </p>
             </div>
             <div className="p-3.5 rounded-xl bg-brand/5 border border-brand/10">
               <div className="flex items-center gap-1.5 mb-1">
                 <Percent className="h-3.5 w-3.5 text-brand" />
-                <span className="text-[11px] text-muted-foreground">Probabilité</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Probabilité
+                </span>
               </div>
-              <p className="text-xl font-bold tabular-nums">{deal.probability}%</p>
+              <p className="text-xl font-bold tabular-nums">
+                {deal.probability}%
+              </p>
               <div className="w-full bg-brand/10 rounded-full h-1 mt-2">
                 <div
                   className="bg-brand/50 h-1 rounded-full transition-all duration-300"
@@ -161,7 +230,10 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
               Stage du pipeline
             </label>
-            <Select value={deal.stage_id || ""} onValueChange={handleStageChange}>
+            <Select
+              value={deal.stage_id || ""}
+              onValueChange={handleStageChange}
+            >
               <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue placeholder="Sélectionner un stage" />
               </SelectTrigger>
@@ -248,7 +320,10 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 className="h-10 gap-1.5"
                 onClick={() => {
                   if (deal.contact?.email) {
-                    window.open(`mailto:${deal.contact.email}?subject=Re: ${deal.title}`, "_blank");
+                    window.open(
+                      `mailto:${deal.contact.email}?subject=Re: ${deal.title}`,
+                      "_blank",
+                    );
                   } else {
                     toast.error("Aucune adresse email");
                   }
@@ -276,11 +351,14 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 <div className="flex items-center gap-1.5 mt-2">
                   <Clock className="h-3 w-3 text-muted-foreground" />
                   <p className="text-xs text-muted-foreground">
-                    {new Date(deal.next_action_date).toLocaleDateString("fr-FR", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "long",
-                    })}
+                    {new Date(deal.next_action_date).toLocaleDateString(
+                      "fr-FR",
+                      {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "long",
+                      },
+                    )}
                   </p>
                 </div>
               )}

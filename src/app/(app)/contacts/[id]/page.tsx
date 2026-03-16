@@ -35,7 +35,7 @@ export default async function ContactPage({ params }: Props) {
     .select("*, user:profiles(*)")
     .in(
       "deal_id",
-      deals.map((d) => d.id).length > 0 ? deals.map((d) => d.id) : ["none"]
+      deals.map((d) => d.id).length > 0 ? deals.map((d) => d.id) : ["none"],
     )
     .order("created_at", { ascending: false })
     .limit(20);

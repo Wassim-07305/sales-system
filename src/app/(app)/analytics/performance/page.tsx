@@ -5,7 +5,9 @@ import { PerformanceView } from "./performance-view";
 
 export default async function PerformancePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -15,7 +17,10 @@ export default async function PerformancePage() {
     .single();
 
   // Allow setters, closers, managers, and admins
-  if (!profile || !["setter", "closer", "manager", "admin"].includes(profile.role)) {
+  if (
+    !profile ||
+    !["setter", "closer", "manager", "admin"].includes(profile.role)
+  ) {
     redirect("/dashboard");
   }
 

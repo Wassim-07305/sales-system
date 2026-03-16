@@ -50,8 +50,8 @@ export function AssignmentsBoard({
       prev.map((biz) =>
         biz.id === businessId
           ? { ...biz, setters: [...biz.setters, setter] }
-          : biz
-      )
+          : biz,
+      ),
     );
 
     startTransition(async () => {
@@ -64,11 +64,16 @@ export function AssignmentsBoard({
         setAssignments((prev) =>
           prev.map((biz) =>
             biz.id === businessId
-              ? { ...biz, setters: biz.setters.filter((s) => s.id !== setterId) }
-              : biz
-          )
+              ? {
+                  ...biz,
+                  setters: biz.setters.filter((s) => s.id !== setterId),
+                }
+              : biz,
+          ),
         );
-        toast.error(err instanceof Error ? err.message : "Erreur lors de l'affectation");
+        toast.error(
+          err instanceof Error ? err.message : "Erreur lors de l'affectation",
+        );
       }
     });
   }
@@ -83,8 +88,8 @@ export function AssignmentsBoard({
       prev.map((b) =>
         b.id === businessId
           ? { ...b, setters: b.setters.filter((s) => s.id !== setterId) }
-          : b
-      )
+          : b,
+      ),
     );
     setUnassigned((prev) => [...prev, setter]);
 
@@ -96,13 +101,15 @@ export function AssignmentsBoard({
         // Rollback
         setAssignments((prev) =>
           prev.map((b) =>
-            b.id === businessId
-              ? { ...b, setters: [...b.setters, setter] }
-              : b
-          )
+            b.id === businessId ? { ...b, setters: [...b.setters, setter] } : b,
+          ),
         );
         setUnassigned((prev) => prev.filter((s) => s.id !== setterId));
-        toast.error(err instanceof Error ? err.message : "Erreur lors de la désaffectation");
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : "Erreur lors de la désaffectation",
+        );
       }
     });
   }
@@ -117,7 +124,8 @@ export function AssignmentsBoard({
         </span>
         <span className="flex items-center gap-1.5">
           <Users className="h-4 w-4" />
-          {unassigned.length} setter{unassigned.length > 1 ? "s" : ""} non affecté{unassigned.length > 1 ? "s" : ""}
+          {unassigned.length} setter{unassigned.length > 1 ? "s" : ""} non
+          affecté{unassigned.length > 1 ? "s" : ""}
         </span>
       </div>
 
@@ -167,7 +175,8 @@ function BusinessCard({
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-sm shrink-0 ring-1 ring-brand/20">
-            {business.full_name?.charAt(0) || business.email.charAt(0).toUpperCase()}
+            {business.full_name?.charAt(0) ||
+              business.email.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
             <CardTitle className="text-base truncate">
@@ -240,10 +249,7 @@ function BusinessCard({
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
-              <Select
-                value={selectedSetter}
-                onValueChange={setSelectedSetter}
-              >
+              <Select value={selectedSetter} onValueChange={setSelectedSetter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un setter" />
                 </SelectTrigger>

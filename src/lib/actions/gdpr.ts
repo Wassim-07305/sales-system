@@ -64,14 +64,21 @@ export async function exportUserData(): Promise<DataExport | null> {
     supabase.from("prospects").select("*").eq("assigned_to", userId),
     supabase.from("notifications").select("*").eq("user_id", userId),
     supabase.from("contacts").select("*").eq("user_id", userId),
-    supabase.from("audit_logs").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
+    supabase
+      .from("audit_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(200),
   ]);
 
   await logAuditEvent({
     action: "gdpr_data_export",
     entity_type: "gdpr",
     entity_id: userId,
-    details: { description: "Export des donnees personnelles (RGPD Art. 15 & 20)" },
+    details: {
+      description: "Export des donnees personnelles (RGPD Art. 15 & 20)",
+    },
   });
 
   return {
@@ -90,7 +97,10 @@ export async function exportUserData(): Promise<DataExport | null> {
 // Delete / Anonymize User Data (Right to Erasure - RGPD Art. 17)
 // ---------------------------------------------------------------------------
 
-export async function deleteUserData(): Promise<{ success: boolean; error?: string }> {
+export async function deleteUserData(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -105,7 +115,10 @@ export async function deleteUserData(): Promise<{ success: boolean; error?: stri
       action: "gdpr_data_deletion",
       entity_type: "gdpr",
       entity_id: userId,
-      details: { description: "Suppression/anonymisation des donnees personnelles (RGPD Art. 17)" },
+      details: {
+        description:
+          "Suppression/anonymisation des donnees personnelles (RGPD Art. 17)",
+      },
     });
 
     // Anonymize profile instead of hard delete (preserves referential integrity)
@@ -141,7 +154,10 @@ export async function deleteUserData(): Promise<{ success: boolean; error?: stri
     revalidatePath("/settings/privacy");
     return { success: true };
   } catch {
-    return { success: false, error: "Erreur lors de la suppression des donnees" };
+    return {
+      success: false,
+      error: "Erreur lors de la suppression des donnees",
+    };
   }
 }
 
@@ -209,7 +225,7 @@ export async function updateConsent(consents: {
       third_party_sharing: consents.third_party_sharing,
       updated_at: now,
     },
-    { onConflict: "user_id" }
+    { onConflict: "user_id" },
   );
 
   if (error) {
@@ -231,7 +247,9 @@ export async function updateConsent(consents: {
 // Get Data Processing Log (RGPD Art. 30)
 // ---------------------------------------------------------------------------
 
-export async function getDataProcessingLog(): Promise<DataProcessingLogEntry[]> {
+export async function getDataProcessingLog(): Promise<
+  DataProcessingLogEntry[]
+> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -242,7 +260,13 @@ export async function getDataProcessingLog(): Promise<DataProcessingLogEntry[]> 
     .from("audit_logs")
     .select("id, action, entity_type, details, created_at")
     .eq("user_id", user.id)
-    .in("entity_type", ["gdpr", "consent", "profile", "data_export", "data_deletion"])
+    .in("entity_type", [
+      "gdpr",
+      "consent",
+      "profile",
+      "data_export",
+      "data_deletion",
+    ])
     .order("created_at", { ascending: false })
     .limit(50);
 

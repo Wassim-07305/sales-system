@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Document,
-  Page,
-  View,
-  Text,
-  StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 
 interface CertificatePDFProps {
   courseName: string;
@@ -212,15 +206,11 @@ export function CertificatePDF({
             <View style={styles.signatureSection}>
               <View style={styles.signatureLine} />
               <Text style={styles.signatureName}>Damien Reynaud</Text>
-              <Text style={styles.signatureTitle}>
-                Directeur de Formation
-              </Text>
+              <Text style={styles.signatureTitle}>Directeur de Formation</Text>
             </View>
 
             <View style={styles.footer}>
-              <Text style={styles.certificateId}>
-                ID : {certificateId}
-              </Text>
+              <Text style={styles.certificateId}>ID : {certificateId}</Text>
             </View>
           </View>
         </View>

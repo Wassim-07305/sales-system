@@ -29,7 +29,10 @@ export default async function AppLayout({
     const fallback = {
       id: user.id,
       email: user.email || "",
-      full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Utilisateur",
+      full_name:
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
+        "Utilisateur",
       avatar_url: null,
       role: "client_b2c" as UserRole,
       onboarding_completed: false,

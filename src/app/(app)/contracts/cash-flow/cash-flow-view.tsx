@@ -152,7 +152,9 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
       {/* Area Chart - Cash Flow Timeline */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Flux de tresorerie — 6 derniers mois + 3 mois a venir</CardTitle>
+          <CardTitle>
+            Flux de tresorerie — 6 derniers mois + 3 mois a venir
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -188,17 +190,23 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                   }
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
-                  formatter={((value: number, name: string) => {
-                    const labels: Record<string, string> = {
-                      received: "Encaisse",
-                      expected: "Attendu",
-                    };
-                    return [
-                      `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
-                      labels[name] || name,
-                    ];
-                  }) as never}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    borderColor: "hsl(var(--border))",
+                    borderRadius: "8px",
+                  }}
+                  formatter={
+                    ((value: number, name: string) => {
+                      const labels: Record<string, string> = {
+                        received: "Encaisse",
+                        expected: "Attendu",
+                      };
+                      return [
+                        `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
+                        labels[name] || name,
+                      ];
+                    }) as never
+                  }
                 />
                 <Legend
                   formatter={(value: string) => {
@@ -289,9 +297,7 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={
-                                statusColors[payment.status] || ""
-                              }
+                              className={statusColors[payment.status] || ""}
                             >
                               {statusLabels[payment.status] || payment.status}
                             </Badge>
@@ -338,10 +344,16 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                         ))}
                       </Pie>
                       <Tooltip
-                        contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" }}
-                        formatter={((value: number) => [
-                          `${Number(value).toLocaleString("fr-FR")} \u20ac`,
-                        ]) as never}
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          borderColor: "hsl(var(--border))",
+                          borderRadius: "8px",
+                        }}
+                        formatter={
+                          ((value: number) => [
+                            `${Number(value).toLocaleString("fr-FR")} \u20ac`,
+                          ]) as never
+                        }
                       />
                     </PieChart>
                   </ResponsiveContainer>

@@ -5,9 +5,16 @@ import { ReportsView } from "./reports-view";
 
 export default async function ReportsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: savedReports, useLocalStorage } = await getSavedReports();
-  return <ReportsView initialSavedReports={savedReports} useLocalStorage={useLocalStorage || false} />;
+  return (
+    <ReportsView
+      initialSavedReports={savedReports}
+      useLocalStorage={useLocalStorage || false}
+    />
+  );
 }

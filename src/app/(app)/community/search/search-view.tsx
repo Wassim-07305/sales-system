@@ -77,7 +77,10 @@ export function CommunitySearchView() {
 
   return (
     <div>
-      <PageHeader title="Rechercher" description="Rechercher dans la communauté">
+      <PageHeader
+        title="Rechercher"
+        description="Rechercher dans la communauté"
+      >
         <Link href="/community">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -97,18 +100,23 @@ export function CommunitySearchView() {
       </div>
 
       {isPending && (
-        <p className="text-sm text-muted-foreground mb-4">Recherche en cours...</p>
+        <p className="text-sm text-muted-foreground mb-4">
+          Recherche en cours...
+        </p>
       )}
 
-      {hasSearched && posts.length === 0 && comments.length === 0 && !isPending && (
-        <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">Aucun résultat</p>
-            <p className="text-sm">Essayez avec d&apos;autres mots-clés</p>
-          </CardContent>
-        </Card>
-      )}
+      {hasSearched &&
+        posts.length === 0 &&
+        comments.length === 0 &&
+        !isPending && (
+          <Card>
+            <CardContent className="p-12 text-center text-muted-foreground">
+              <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="font-medium">Aucun résultat</p>
+              <p className="text-sm">Essayez avec d&apos;autres mots-clés</p>
+            </CardContent>
+          </Card>
+        )}
 
       {posts.length > 0 && (
         <div className="mb-8">
@@ -122,7 +130,9 @@ export function CommunitySearchView() {
               <Link key={post.id} href={`/community/forum/${post.id}`}>
                 <Card className="hover:border-brand/30 transition-colors cursor-pointer mb-3">
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-1">{post.title || "Sans titre"}</h3>
+                    <h3 className="font-semibold mb-1">
+                      {post.title || "Sans titre"}
+                    </h3>
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                       {post.content}
                     </p>
@@ -148,17 +158,23 @@ export function CommunitySearchView() {
             {comments.map((comment) => (
               <Link
                 key={comment.id}
-                href={comment.post ? `/community/forum/${comment.post.id}` : "#"}
+                href={
+                  comment.post ? `/community/forum/${comment.post.id}` : "#"
+                }
               >
                 <Card className="hover:border-brand/30 transition-colors cursor-pointer mb-3">
                   <CardContent className="p-4">
-                    <p className="text-sm line-clamp-2 mb-2">{comment.content}</p>
+                    <p className="text-sm line-clamp-2 mb-2">
+                      {comment.content}
+                    </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{comment.author?.full_name || "Anonyme"}</span>
                       {comment.post && (
                         <>
                           <span>&middot;</span>
-                          <span>dans : {comment.post.title || "Sans titre"}</span>
+                          <span>
+                            dans : {comment.post.title || "Sans titre"}
+                          </span>
                         </>
                       )}
                     </div>

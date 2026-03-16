@@ -5,7 +5,9 @@ import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
 
 export default async function ChallengesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profileCheck } = await supabase
@@ -14,7 +16,10 @@ export default async function ChallengesPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profileCheck || !["admin", "manager", "setter", "closer"].includes(profileCheck.role)) {
+  if (
+    !profileCheck ||
+    !["admin", "manager", "setter", "closer"].includes(profileCheck.role)
+  ) {
     redirect("/dashboard");
   }
 
@@ -47,9 +52,15 @@ export default async function ChallengesPage() {
     .select("*")
     .eq("user_id", user.id);
 
-  const progressMap: Record<string, { current_value: number; completed: boolean }> = {};
+  const progressMap: Record<
+    string,
+    { current_value: number; completed: boolean }
+  > = {};
   for (const p of progress || []) {
-    progressMap[p.challenge_id] = { current_value: p.current_value, completed: p.completed };
+    progressMap[p.challenge_id] = {
+      current_value: p.current_value,
+      completed: p.completed,
+    };
   }
 
   // Leaderboard

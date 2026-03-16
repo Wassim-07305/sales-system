@@ -150,7 +150,7 @@ function downloadCSV(data: Record<string, unknown>[], columns: string[]) {
         const str = String(val).replace(/"/g, '""');
         return `"${str}"`;
       })
-      .join(";")
+      .join(";"),
   );
   const csv = [header, ...rows].join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -169,12 +169,24 @@ interface ReportsViewProps {
   useLocalStorage: boolean;
 }
 
-export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsViewProps) {
+export function ReportsView({
+  initialSavedReports,
+  useLocalStorage,
+}: ReportsViewProps) {
   // Query config state
-  const [selectedTable, setSelectedTable] = useState<QueryConfig["table"]>("deals");
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(["id", "name", "value", "status", "created_at"]);
+  const [selectedTable, setSelectedTable] =
+    useState<QueryConfig["table"]>("deals");
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([
+    "id",
+    "name",
+    "value",
+    "status",
+    "created_at",
+  ]);
   const [filters, setFilters] = useState<QueryFilter[]>([]);
-  const [orderBy, setOrderBy] = useState<{ column: string; direction: "asc" | "desc" } | undefined>(undefined);
+  const [orderBy, setOrderBy] = useState<
+    { column: string; direction: "asc" | "desc" } | undefined
+  >(undefined);
   const [limit, setLimit] = useState(100);
 
   // Results
@@ -184,7 +196,8 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
   const [hasExecuted, setHasExecuted] = useState(false);
 
   // Saved reports
-  const [savedReports, setSavedReports] = useState<SavedReport[]>(initialSavedReports);
+  const [savedReports, setSavedReports] =
+    useState<SavedReport[]>(initialSavedReports);
   const [reportName, setReportName] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadPanel, setShowLoadPanel] = useState(false);
@@ -202,7 +215,9 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
     setSelectedTable(t);
     const cols = TABLE_COLUMNS[t];
     // Select first few columns by default
-    setSelectedColumns(cols.slice(0, Math.min(5, cols.length)).map((c) => c.key));
+    setSelectedColumns(
+      cols.slice(0, Math.min(5, cols.length)).map((c) => c.key),
+    );
     setFilters([]);
     setOrderBy(undefined);
     setResults([]);
@@ -211,7 +226,7 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
 
   const toggleColumn = useCallback((col: string) => {
     setSelectedColumns((prev) =>
-      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col]
+      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col],
     );
   }, []);
 
@@ -232,7 +247,7 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
         return next;
       });
     },
-    []
+    [],
   );
 
   const removeFilter = useCallback((index: number) => {
@@ -263,7 +278,9 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
         setResults(result.data);
         setTotalCount(result.totalCount);
         setHasExecuted(true);
-        toast.success(`${result.totalCount} resultat${result.totalCount > 1 ? "s" : ""} trouve${result.totalCount > 1 ? "s" : ""}`);
+        toast.success(
+          `${result.totalCount} resultat${result.totalCount > 1 ? "s" : ""} trouve${result.totalCount > 1 ? "s" : ""}`,
+        );
       }
     } catch {
       toast.error("Erreur lors de l'execution de la requete");
@@ -319,14 +336,24 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
       } else {
         toast.success("Rapport sauvegarde");
         // Refresh saved reports from server
-        const { data } = await import("@/lib/actions/reports").then((m) => m.getSavedReports());
+        const { data } = await import("@/lib/actions/reports").then((m) =>
+          m.getSavedReports(),
+        );
         setSavedReports(data);
       }
     }
 
     setReportName("");
     setShowSaveDialog(false);
-  }, [reportName, selectedTable, selectedColumns, filters, orderBy, limit, useLocalStorage]);
+  }, [
+    reportName,
+    selectedTable,
+    selectedColumns,
+    filters,
+    orderBy,
+    limit,
+    useLocalStorage,
+  ]);
 
   // Load report
   const handleLoad = useCallback((report: SavedReport) => {
@@ -359,14 +386,16 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
           toast.error(result.error);
           return;
         }
-        const { data } = await import("@/lib/actions/reports").then((m) => m.getSavedReports());
+        const { data } = await import("@/lib/actions/reports").then((m) =>
+          m.getSavedReports(),
+        );
         if (data.length > 0) {
           setSavedReports(data);
         }
         toast.success("Rapport supprime");
       }
     },
-    [useLocalStorage]
+    [useLocalStorage],
   );
 
   const availableColumns = TABLE_COLUMNS[selectedTable] || [];
@@ -395,12 +424,18 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
               <FolderOpen className="size-4" />
               Rapports sauvegardes
             </h3>
-            <Button variant="ghost" size="sm" onClick={() => setShowLoadPanel(false)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowLoadPanel(false)}
+            >
               <X className="size-4" />
             </Button>
           </div>
           {savedReports.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Aucun rapport sauvegarde</p>
+            <p className="text-muted-foreground text-sm">
+              Aucun rapport sauvegarde
+            </p>
           ) : (
             <div className="space-y-2">
               {savedReports.map((report) => (
@@ -409,7 +444,9 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
                   className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{report.name}</p>
+                    <p className="font-medium text-sm truncate">
+                      {report.name}
+                    </p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="secondary" className="text-xs">
                         {TABLE_LABELS[report.config.table]}
@@ -422,7 +459,11 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
                     </div>
                   </div>
                   <div className="flex items-center gap-1 ml-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleLoad(report)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleLoad(report)}
+                    >
                       Charger
                     </Button>
                     <Button
@@ -502,7 +543,9 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
               </Button>
             </div>
             {filters.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Aucun filtre applique</p>
+              <p className="text-xs text-muted-foreground">
+                Aucun filtre applique
+              </p>
             ) : (
               <div className="space-y-3">
                 {filters.map((filter, index) => (
@@ -553,7 +596,9 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
                     <Input
                       placeholder="Valeur..."
                       value={filter.value}
-                      onChange={(e) => updateFilter(index, "value", e.target.value)}
+                      onChange={(e) =>
+                        updateFilter(index, "value", e.target.value)
+                      }
                     />
                   </div>
                 ))}
@@ -569,14 +614,19 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
             </Label>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-muted-foreground">Trier par</label>
+                <label className="text-xs text-muted-foreground">
+                  Trier par
+                </label>
                 <Select
                   value={orderBy?.column || "__none__"}
                   onValueChange={(v) => {
                     if (v === "__none__") {
                       setOrderBy(undefined);
                     } else {
-                      setOrderBy({ column: v, direction: orderBy?.direction || "desc" });
+                      setOrderBy({
+                        column: v,
+                        direction: orderBy?.direction || "desc",
+                      });
                     }
                   }}
                 >
@@ -595,7 +645,9 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
               </div>
               {orderBy && (
                 <div>
-                  <label className="text-xs text-muted-foreground">Direction</label>
+                  <label className="text-xs text-muted-foreground">
+                    Direction
+                  </label>
                   <Select
                     value={orderBy.direction}
                     onValueChange={(v) =>
@@ -621,7 +673,14 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
                   min={1}
                   max={1000}
                   value={limit}
-                  onChange={(e) => setLimit(Math.min(1000, Math.max(1, Number(e.target.value) || 100)))}
+                  onChange={(e) =>
+                    setLimit(
+                      Math.min(
+                        1000,
+                        Math.max(1, Number(e.target.value) || 100),
+                      ),
+                    )
+                  }
                   className="mt-1"
                 />
               </div>
@@ -630,7 +689,11 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
 
           {/* Action buttons */}
           <div className="flex flex-col gap-2">
-            <Button onClick={handleExecute} disabled={loading} className="w-full">
+            <Button
+              onClick={handleExecute}
+              disabled={loading}
+              className="w-full"
+            >
               <Play className="size-4 mr-2" />
               {loading ? "Execution..." : "Executer la requete"}
             </Button>
@@ -715,7 +778,8 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Search className="size-10 text-muted-foreground mb-3" />
                 <p className="text-muted-foreground text-sm">
-                  Configurez votre requete puis cliquez sur &quot;Executer la requete&quot;
+                  Configurez votre requete puis cliquez sur &quot;Executer la
+                  requete&quot;
                 </p>
               </div>
             ) : results.length === 0 ? (
@@ -731,9 +795,14 @@ export function ReportsView({ initialSavedReports, useLocalStorage }: ReportsVie
                   <TableHeader>
                     <TableRow className="bg-muted/30">
                       {selectedColumns.map((col) => {
-                        const colDef = availableColumns.find((c) => c.key === col);
+                        const colDef = availableColumns.find(
+                          (c) => c.key === col,
+                        );
                         return (
-                          <TableHead key={col} className="text-xs font-semibold">
+                          <TableHead
+                            key={col}
+                            className="text-xs font-semibold"
+                          >
                             {colDef?.label || col}
                           </TableHead>
                         );

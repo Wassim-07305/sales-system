@@ -2,7 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +17,10 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, Bell, Lock, CreditCard, Save } from "lucide-react";
-import { changePassword, saveNotificationPreferences } from "@/lib/actions/settings";
+import {
+  changePassword,
+  saveNotificationPreferences,
+} from "@/lib/actions/settings";
 
 interface ClientSettingsViewProps {
   userEmail: string;
@@ -63,7 +72,10 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <PageHeader title="Paramètres" description="Gérez vos préférences et votre compte" />
+      <PageHeader
+        title="Paramètres"
+        description="Gérez vos préférences et votre compte"
+      />
 
       {/* Notifications */}
       <Card className="border-border/50 hover:shadow-md transition-all">
@@ -74,20 +86,26 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
             </div>
             Notifications
           </CardTitle>
-          <CardDescription>Gérez comment vous souhaitez être notifié</CardDescription>
+          <CardDescription>
+            Gérez comment vous souhaitez être notifié
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Notifications push</p>
-              <p className="text-xs text-muted-foreground">Recevoir des alertes dans le navigateur</p>
+              <p className="text-xs text-muted-foreground">
+                Recevoir des alertes dans le navigateur
+              </p>
             </div>
             <Switch checked={pushEnabled} onCheckedChange={setPushEnabled} />
           </div>
           <div className="flex items-center justify-between rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors">
             <div>
               <p className="text-sm font-medium">Notifications email</p>
-              <p className="text-xs text-muted-foreground">Recevoir des résumés par email</p>
+              <p className="text-xs text-muted-foreground">
+                Recevoir des résumés par email
+              </p>
             </div>
             <Switch checked={emailNotif} onCheckedChange={setEmailNotif} />
           </div>
@@ -171,9 +189,16 @@ export function ClientSettingsView({ userEmail }: ClientSettingsViewProps) {
           <div className="flex items-center justify-between rounded-lg border border-border/50 p-4">
             <div>
               <p className="font-medium">Plan actuel</p>
-              <p className="text-sm text-muted-foreground">Accès complet à la plateforme</p>
+              <p className="text-sm text-muted-foreground">
+                Accès complet à la plateforme
+              </p>
             </div>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Actif</Badge>
+            <Badge
+              variant="outline"
+              className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+            >
+              Actif
+            </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
             Pour toute question sur votre abonnement, contactez le support.

@@ -10,13 +10,26 @@ export async function getOrgSettings() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { org_name: "", contact_email: "", email_notifications: true, booking_reminders: true, cs_alerts: true };
+  if (!user)
+    return {
+      org_name: "",
+      contact_email: "",
+      email_notifications: true,
+      booking_reminders: true,
+      cs_alerts: true,
+    };
 
   const { data } = await supabase
     .from("user_settings")
     .select("key, value")
     .eq("user_id", user.id)
-    .in("key", ["org_name", "contact_email", "email_notifications", "booking_reminders", "cs_alerts"]);
+    .in("key", [
+      "org_name",
+      "contact_email",
+      "email_notifications",
+      "booking_reminders",
+      "cs_alerts",
+    ]);
 
   const settings: Record<string, string> = {};
   if (data) {
@@ -64,7 +77,7 @@ export async function saveOrgSettings(formData: {
         key: entry.key,
         value: entry.value,
       },
-      { onConflict: "user_id,key" }
+      { onConflict: "user_id,key" },
     );
     if (error) {
       console.error("Erreur sauvegarde paramètre:", entry.key, error);
@@ -182,7 +195,7 @@ export async function saveBrandingSettings(params: {
       key: "color_palette",
       value: params.color_palette,
     },
-    { onConflict: "user_id,key" }
+    { onConflict: "user_id,key" },
   );
 
   if (settingsError) {
@@ -236,7 +249,7 @@ export async function saveNotificationPreferences(params: {
         key: entry.key,
         value: entry.value,
       },
-      { onConflict: "user_id,key" }
+      { onConflict: "user_id,key" },
     );
     if (error) {
       console.error("Erreur sauvegarde notification:", entry.key, error);

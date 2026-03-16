@@ -15,7 +15,10 @@ export default function WhatsappLoading() {
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-2xl border border-border/50 shadow-sm p-4 space-y-2">
+          <div
+            key={i}
+            className="rounded-2xl border border-border/50 shadow-sm p-4 space-y-2"
+          >
             <div className="flex items-center gap-2">
               <Skeleton className="h-4 w-4" />
               <Skeleton className="h-3 w-24" />
@@ -31,7 +34,10 @@ export default function WhatsappLoading() {
           </div>
           <div className="space-y-0">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="p-3 border-b flex items-center gap-3 hover:bg-secondary/50 transition-colors">
+              <div
+                key={i}
+                className="p-3 border-b flex items-center gap-3 hover:bg-secondary/50 transition-colors"
+              >
                 <Skeleton className="h-10 w-10 rounded-full shrink-0" />
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
@@ -54,8 +60,13 @@ export default function WhatsappLoading() {
           </div>
           <div className="flex-1 p-4 space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                <Skeleton className={`h-14 rounded-2xl ${i % 2 === 0 ? "w-48" : "w-40"}`} />
+              <div
+                key={i}
+                className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
+              >
+                <Skeleton
+                  className={`h-14 rounded-2xl ${i % 2 === 0 ? "w-48" : "w-40"}`}
+                />
               </div>
             ))}
           </div>

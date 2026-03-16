@@ -40,7 +40,10 @@ export interface ImportLog {
 
 // --- Contact fields definition ---
 
-const CONTACT_FIELDS: Record<string, { label: string; required: boolean; validate?: (v: string) => string | null }> = {
+const CONTACT_FIELDS: Record<
+  string,
+  { label: string; required: boolean; validate?: (v: string) => string | null }
+> = {
   first_name: {
     label: "Prénom",
     required: false,
@@ -84,7 +87,10 @@ const CONTACT_FIELDS: Record<string, { label: string; required: boolean; validat
   },
 };
 
-const DEAL_FIELDS: Record<string, { label: string; required: boolean; validate?: (v: string) => string | null }> = {
+const DEAL_FIELDS: Record<
+  string,
+  { label: string; required: boolean; validate?: (v: string) => string | null }
+> = {
   title: {
     label: "Titre",
     required: true,
@@ -123,7 +129,7 @@ const DEAL_FIELDS: Record<string, { label: string; required: boolean; validate?:
 export async function validateImportData(
   rows: Record<string, string>[],
   mapping: Record<string, string>,
-  type: "contacts" | "deals"
+  type: "contacts" | "deals",
 ): Promise<ValidationResult> {
   const fields = type === "contacts" ? CONTACT_FIELDS : DEAL_FIELDS;
   const valid: ValidatedRow[] = [];
@@ -143,7 +149,10 @@ export async function validateImportData(
 
     // Check required fields
     for (const [fieldName, fieldDef] of Object.entries(fields)) {
-      if (fieldDef.required && (!mappedRow[fieldName] || mappedRow[fieldName] === "")) {
+      if (
+        fieldDef.required &&
+        (!mappedRow[fieldName] || mappedRow[fieldName] === "")
+      ) {
         errors.push({
           row: i + 1,
           field: fieldDef.label,
@@ -174,7 +183,7 @@ export async function executeImport(
   rows: Record<string, string>[],
   mapping: Record<string, string>,
   type: "contacts" | "deals",
-  options: { skipDuplicates: boolean; fileName?: string }
+  options: { skipDuplicates: boolean; fileName?: string },
 ): Promise<ImportResult> {
   const supabase = await createClient();
   const {
@@ -208,9 +217,13 @@ export async function executeImport(
         }
       }
 
-      const fullName = [row.first_name, row.last_name].filter(Boolean).join(" ") || null;
+      const fullName =
+        [row.first_name, row.last_name].filter(Boolean).join(" ") || null;
       const tags = row.tags
-        ? row.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
+        ? row.tags
+            .split(",")
+            .map((t: string) => t.trim())
+            .filter(Boolean)
         : [];
 
       const { error } = await supabase.from("contacts").insert({

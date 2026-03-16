@@ -17,7 +17,12 @@ function getDemoReviews() {
       transcript:
         "Vendeur: Bonjour M. Dupont, merci d'avoir accepté cet appel. Comment allez-vous aujourd'hui ?\nProspect: Bonjour, bien merci. J'ai vu votre solution en ligne et je voulais en savoir plus.\nVendeur: Parfait ! Avant de vous présenter notre offre, j'aimerais comprendre votre situation actuelle. Quels sont vos défis principaux en matière de gestion commerciale ?\nProspect: On perd beaucoup de temps avec notre CRM actuel, les rapports sont compliqués à générer.\nVendeur: Je comprends tout à fait. Combien de temps votre équipe passe-t-elle par semaine sur ces tâches administratives ?\nProspect: Facilement 10 heures par semaine, c'est énorme.\nVendeur: En effet, c'est considérable. Notre solution automatise 80% de ces tâches. Vous pourriez récupérer environ 8 heures par semaine.\nProspect: C'est intéressant, mais le coût ? On a déjà un budget serré.\nVendeur: Je comprends votre préoccupation. Si je vous montre que le ROI est positif dès le premier mois, est-ce que ça changerait votre perspective ?\nProspect: Oui, montrez-moi les chiffres.\nVendeur: Avec 8 heures récupérées par semaine à un coût horaire moyen de 35€, vous économisez 1120€ par mois. Notre abonnement est à 299€. Le gain net est de 821€ mensuel.\nProspect: Les chiffres parlent d'eux-mêmes. Quand peut-on démarrer ?",
       aiAnalysis: {
-        scoreBreakdown: { ouverture: 9, decouverte: 8, argumentation: 9, closing: 8 },
+        scoreBreakdown: {
+          ouverture: 9,
+          decouverte: 8,
+          argumentation: 9,
+          closing: 8,
+        },
         sentimentTimeline: [
           { time: "0:00", sentiment: "neutre" as const },
           { time: "1:00", sentiment: "positif" as const },
@@ -63,7 +68,12 @@ function getDemoReviews() {
       transcript:
         "Vendeur: Bonjour Mme Martin, je suis ravi de vous retrouver. Suite à notre dernier échange, avez-vous eu le temps de réfléchir ?\nProspect: Oui, mais j'ai encore des doutes. Mon associé pense qu'on devrait attendre l'année prochaine.\nVendeur: Je comprends. Qu'est-ce qui motive cette volonté d'attendre exactement ?\nProspect: On a beaucoup de projets en cours, on ne veut pas surcharger l'équipe.\nVendeur: C'est justement pour alléger la charge de votre équipe que notre outil existe. Imaginez : pendant que vos projets avancent, le CRM travaille en arrière-plan.\nProspect: Hmm, mais l'intégration prend combien de temps ?\nVendeur: 48 heures maximum, et notre équipe s'occupe de tout. Zéro effort de votre côté.\nProspect: D'accord, mais je dois en parler à mon associé.\nVendeur: Bien sûr. Et si on planifiait une démo rapide de 15 minutes avec lui ? Comme ça, il peut voir par lui-même.\nProspect: Oui, pourquoi pas. Jeudi prochain ça irait ?",
       aiAnalysis: {
-        scoreBreakdown: { ouverture: 7, decouverte: 7, argumentation: 8, closing: 7 },
+        scoreBreakdown: {
+          ouverture: 7,
+          decouverte: 7,
+          argumentation: 8,
+          closing: 7,
+        },
         sentimentTimeline: [
           { time: "0:00", sentiment: "neutre" as const },
           { time: "0:30", sentiment: "négatif" as const },
@@ -116,7 +126,12 @@ function getDemoReviews() {
       transcript:
         "Vendeur: Salut Pierre, comment vas-tu ?\nProspect: Salut, ça va. Écoute, j'ai pas beaucoup de temps, tu peux me faire un résumé rapide ?\nVendeur: Bien sûr. En gros, on aide les équipes commerciales à doubler leur productivité avec notre plateforme.\nProspect: Ok, mais on utilise déjà Salesforce.\nVendeur: Oui, mais notre solution s'intègre avec Salesforce et vient compléter les fonctionnalités manquantes.\nProspect: Quelles fonctionnalités manquantes ?\nVendeur: Euh... ben, l'automatisation des relances et le scoring prédictif par exemple.\nProspect: On a déjà ça avec nos plugins. Désolé, je ne vois pas l'intérêt. On se rappelle si besoin.\nVendeur: D'accord, bonne journée.",
       aiAnalysis: {
-        scoreBreakdown: { ouverture: 4, decouverte: 3, argumentation: 4, closing: 2 },
+        scoreBreakdown: {
+          ouverture: 4,
+          decouverte: 3,
+          argumentation: 4,
+          closing: 2,
+        },
         sentimentTimeline: [
           { time: "0:00", sentiment: "neutre" as const },
           { time: "0:30", sentiment: "négatif" as const },
@@ -164,7 +179,12 @@ function getDemoReviews() {
       transcript:
         "Vendeur: Bonjour Mme Rousseau, merci d'avoir pris ce rendez-vous. J'ai lu votre article sur LinkedIn concernant les défis de digitalisation de votre secteur, très pertinent.\nProspect: Merci ! Oui, c'est un sujet qui me tient à cœur. La digitalisation est un vrai enjeu pour nous.\nVendeur: J'imagine. Pouvez-vous me parler de votre processus commercial actuel ? Comment gérez-vous le suivi de vos opportunités ?\nProspect: On a un tableur Excel partagé... C'est un peu le chaos, surtout quand on a plusieurs commerciaux qui travaillent en même temps.\nVendeur: Le classique ! Et concrètement, quelles sont les conséquences de ce chaos au quotidien ?\nProspect: On perd des affaires, des prospects tombent dans l'oubli, et on n'a aucune visibilité sur le pipeline.\nVendeur: Ça doit être frustrant. Si je vous disais qu'on peut mettre en place un système où chaque prospect est suivi automatiquement, avec des alertes et un pipeline visuel, en combien de temps aimeriez-vous que ce soit opérationnel ?\nProspect: Hier ! (rires) Non, sérieusement, on aurait besoin de quelque chose rapidement.\nVendeur: Parfait. Voici ce que je propose : je vous fais une démo personnalisée avec vos données réelles, et si ça vous convient, on peut être opérationnel en 5 jours. Quand êtes-vous disponible cette semaine ?\nProspect: Mercredi après-midi, ça vous va ?\nVendeur: Parfait, je vous envoie l'invitation de suite. J'aurai besoin d'un export de votre fichier Excel pour préparer la démo. Pouvez-vous me l'envoyer d'ici demain ?\nProspect: Oui, je fais ça aujourd'hui.",
       aiAnalysis: {
-        scoreBreakdown: { ouverture: 10, decouverte: 9, argumentation: 9, closing: 10 },
+        scoreBreakdown: {
+          ouverture: 10,
+          decouverte: 9,
+          argumentation: 9,
+          closing: 10,
+        },
         sentimentTimeline: [
           { time: "0:00", sentiment: "positif" as const },
           { time: "1:00", sentiment: "positif" as const },
@@ -189,7 +209,14 @@ function getDemoReviews() {
         ],
       },
       score: 9.5,
-      keywords: ["pipeline", "digitalisation", "Excel", "suivi", "automatisation", "démo"],
+      keywords: [
+        "pipeline",
+        "digitalisation",
+        "Excel",
+        "suivi",
+        "automatisation",
+        "démo",
+      ],
       sentiment: "positif" as const,
       strengths: [
         "Préparation excellente (article LinkedIn)",
@@ -212,7 +239,12 @@ function getDemoReviews() {
       transcript:
         "Vendeur: Bonjour M. Garcia, suite à votre demande sur notre site, je vous appelle pour discuter de vos besoins.\nProspect: Oui bonjour. J'ai rempli le formulaire mais c'était surtout par curiosité. On n'est pas vraiment en phase d'achat.\nVendeur: Pas de souci, c'est justement le bon moment pour en discuter sans pression. Qu'est-ce qui a attiré votre attention sur notre site ?\nProspect: La partie scoring des leads, ça avait l'air intéressant.\nVendeur: Le scoring est effectivement notre point fort. Actuellement, comment priorisez-vous vos leads ?\nProspect: Au feeling, honnêtement. Le premier arrivé, premier servi.\nVendeur: Et ça fonctionne bien ?\nProspect: Pas vraiment. On gaspille du temps sur des prospects pas qualifiés.\nVendeur: Exactement le problème que notre scoring résout. On analyse 15 critères en temps réel pour prioriser automatiquement. Un de nos clients dans votre secteur a augmenté son taux de conversion de 35% en 2 mois.\nProspect: 35% ? C'est significatif. Mais on n'a que 3 commerciaux, c'est pas trop pour une grosse structure ?\nVendeur: Au contraire, c'est justement les petites équipes qui en bénéficient le plus. Avec 3 commerciaux, chaque heure compte. Voulez-vous voir une démo de 20 minutes ?\nProspect: Oui, envoyez-moi un lien.",
       aiAnalysis: {
-        scoreBreakdown: { ouverture: 8, decouverte: 8, argumentation: 9, closing: 7 },
+        scoreBreakdown: {
+          ouverture: 8,
+          decouverte: 8,
+          argumentation: 9,
+          closing: 7,
+        },
         sentimentTimeline: [
           { time: "0:00", sentiment: "neutre" as const },
           { time: "0:30", sentiment: "négatif" as const },
@@ -240,7 +272,13 @@ function getDemoReviews() {
         ],
       },
       score: 8.0,
-      keywords: ["scoring", "leads", "conversion", "priorisation", "qualification"],
+      keywords: [
+        "scoring",
+        "leads",
+        "conversion",
+        "priorisation",
+        "qualification",
+      ],
       sentiment: "positif" as const,
       strengths: [
         "Excellente gestion du prospect froid",
@@ -398,7 +436,9 @@ export async function getReviewStats() {
 
     const totalReviews = data.length;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const averageScore = data.reduce((sum: number, r: any) => sum + (r.score || 0), 0) / totalReviews;
+    const averageScore =
+      data.reduce((sum: number, r: any) => sum + (r.score || 0), 0) /
+      totalReviews;
 
     // Count keywords
     const keywordMap = new Map<string, number>();
@@ -428,7 +468,10 @@ export async function getReviewStats() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const scoreOverTime = data.map((r: any) => ({
-      date: new Date(r.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+      date: new Date(r.created_at).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
       score: r.score || 0,
     }));
 
@@ -466,12 +509,20 @@ export async function analyzeTranscript(transcript: string) {
   try {
     const analysis = await aiJSON<{
       score: number;
-      scoreBreakdown: { ouverture: number; decouverte: number; argumentation: number; closing: number };
+      scoreBreakdown: {
+        ouverture: number;
+        decouverte: number;
+        argumentation: number;
+        closing: number;
+      };
       keywords: string[];
       sentiment: "positif" | "neutre" | "négatif" | "mixte";
       strengths: string[];
       improvements: string[];
-      sentimentTimeline: { time: string; sentiment: "positif" | "neutre" | "négatif" }[];
+      sentimentTimeline: {
+        time: string;
+        sentiment: "positif" | "neutre" | "négatif";
+      }[];
       objections: string[];
       recommendations: string[];
       talkRatio: { vendeur: number; prospect: number };
@@ -497,13 +548,15 @@ export async function analyzeTranscript(transcript: string) {
 - durationEstimate: durée estimée en minutes`,
         model: "anthropic/claude-3.5-sonnet",
         maxTokens: 2048,
-      }
+      },
     );
 
     return analysis;
   } catch (aiError) {
     console.error("[analyzeTranscript] Erreur IA:", aiError);
-    throw new Error("L'analyse IA du transcript a échoué. Veuillez réessayer plus tard.");
+    throw new Error(
+      "L'analyse IA du transcript a échoué. Veuillez réessayer plus tard.",
+    );
   }
 }
 

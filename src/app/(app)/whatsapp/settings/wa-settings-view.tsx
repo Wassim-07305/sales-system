@@ -28,7 +28,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { connectWhatsApp, disconnectWhatsApp } from "@/lib/actions/whatsapp";
-import { generateUnipileAuthLink, getUnipileStatus } from "@/lib/actions/unipile";
+import {
+  generateUnipileAuthLink,
+  getUnipileStatus,
+} from "@/lib/actions/unipile";
 import { saveApiKey, deleteApiKey } from "@/lib/api-keys";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -77,18 +80,28 @@ export function WaSettingsView({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [phoneNumber, setPhoneNumber] = useState(
-    connection?.phone_number || ""
+    connection?.phone_number || "",
   );
   const [copied, setCopied] = useState(false);
   const [ghlEnabled, setGhlEnabled] = useState(!!integrationKeys?.ghl_api_key);
-  const [iClosedEnabled, setIClosedEnabled] = useState(!!integrationKeys?.iclosed_api_key);
+  const [iClosedEnabled, setIClosedEnabled] = useState(
+    !!integrationKeys?.iclosed_api_key,
+  );
   const [ghlKey, setGhlKey] = useState(integrationKeys?.ghl_api_key || "");
-  const [iClosedKey, setIClosedKey] = useState(integrationKeys?.iclosed_api_key || "");
+  const [iClosedKey, setIClosedKey] = useState(
+    integrationKeys?.iclosed_api_key || "",
+  );
   const [ghlSaved, setGhlSaved] = useState(!!integrationKeys?.ghl_api_key);
-  const [iClosedSaved, setIClosedSaved] = useState(!!integrationKeys?.iclosed_api_key);
+  const [iClosedSaved, setIClosedSaved] = useState(
+    !!integrationKeys?.iclosed_api_key,
+  );
   const [connectingUnipile, setConnectingUnipile] = useState(false);
-  const [unipileConnected, setUnipileConnected] = useState(unipileWhatsApp?.connected || false);
-  const [unipileName, setUnipileName] = useState(unipileWhatsApp?.accountName || "");
+  const [unipileConnected, setUnipileConnected] = useState(
+    unipileWhatsApp?.connected || false,
+  );
+  const [unipileName, setUnipileName] = useState(
+    unipileWhatsApp?.accountName || "",
+  );
 
   async function handleConnectUnipile() {
     setConnectingUnipile(true);
@@ -97,8 +110,14 @@ export function WaSettingsView({
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-        toast.info("Scannez le QR code WhatsApp dans la fenêtre, puis cliquez Rafraîchir");
+        window.open(
+          result.url,
+          "_blank",
+          "width=600,height=700,scrollbars=yes",
+        );
+        toast.info(
+          "Scannez le QR code WhatsApp dans la fenêtre, puis cliquez Rafraîchir",
+        );
       }
     } catch {
       toast.error("Erreur lors de la connexion Unipile");
@@ -109,7 +128,9 @@ export function WaSettingsView({
   async function handleRefreshUnipile() {
     try {
       const status = await getUnipileStatus();
-      const wa = status.accounts.find((a) => a.provider.toUpperCase() === "WHATSAPP");
+      const wa = status.accounts.find(
+        (a) => a.provider.toUpperCase() === "WHATSAPP",
+      );
       setUnipileConnected(!!wa);
       setUnipileName(wa?.name || "");
       if (wa) {
@@ -225,7 +246,11 @@ export function WaSettingsView({
         description="Configuration de la connexion WhatsApp"
       >
         <Link href="/whatsapp">
-          <Button variant="outline" size="sm" className="rounded-xl font-medium">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl font-medium"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
@@ -238,8 +263,9 @@ export function WaSettingsView({
           <div className="flex items-center gap-2 text-amber-600">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <p className="text-sm font-medium">
-              WhatsApp n&apos;est pas connecté. Les messages ne seront ni envoyés ni reçus.
-              Connectez votre compte via Unipile (recommandé) ou manuellement ci-dessous.
+              WhatsApp n&apos;est pas connecté. Les messages ne seront ni
+              envoyés ni reçus. Connectez votre compte via Unipile (recommandé)
+              ou manuellement ci-dessous.
             </p>
           </div>
         </div>
@@ -247,7 +273,9 @@ export function WaSettingsView({
 
       <div className="grid gap-6 max-w-2xl">
         {/* Unipile Connection — Recommended */}
-        <Card className={`shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-brand/30" : ""}`}>
+        <Card
+          className={`shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-brand/30" : ""}`}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
@@ -256,12 +284,16 @@ export function WaSettingsView({
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   Connexion via Unipile
-                  <Badge variant="outline" className="text-[10px] bg-brand/10 text-brand border-brand/20">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] bg-brand/10 text-brand border-brand/20"
+                  >
                     Recommandé
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground font-normal mt-0.5">
-                  Connectez WhatsApp en un clic — scannez le QR code, c&apos;est tout
+                  Connectez WhatsApp en un clic — scannez le QR code, c&apos;est
+                  tout
                 </p>
               </div>
             </CardTitle>
@@ -272,9 +304,13 @@ export function WaSettingsView({
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-brand" />
                   <div>
-                    <p className="text-sm font-medium text-brand">WhatsApp connecté</p>
+                    <p className="text-sm font-medium text-brand">
+                      WhatsApp connecté
+                    </p>
                     {unipileName && (
-                      <p className="text-xs text-muted-foreground">{unipileName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {unipileName}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -340,7 +376,9 @@ export function WaSettingsView({
 
             {/* Status */}
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Statut</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Statut
+              </span>
               <Badge variant="outline" className={statusInfo.color}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {statusInfo.label}
@@ -349,7 +387,9 @@ export function WaSettingsView({
 
             {connection?.connected_at && (
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Connecté depuis</span>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Connecté depuis
+                </span>
                 <span className="text-sm text-muted-foreground">
                   {new Date(connection.connected_at).toLocaleDateString(
                     "fr-FR",
@@ -359,7 +399,7 @@ export function WaSettingsView({
                       year: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
-                    }
+                    },
                   )}
                 </span>
               </div>
@@ -422,7 +462,10 @@ export function WaSettingsView({
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-sm">GoHighLevel (GHL)</p>
                   {ghlSaved && (
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]"
+                    >
                       <Check className="h-3 w-3 mr-0.5" />
                       Connecté
                     </Badge>
@@ -446,7 +489,10 @@ export function WaSettingsView({
                 <div className="flex items-center gap-2">
                   <Input
                     value={ghlKey}
-                    onChange={(e) => { setGhlKey(e.target.value); setGhlSaved(false); }}
+                    onChange={(e) => {
+                      setGhlKey(e.target.value);
+                      setGhlSaved(false);
+                    }}
                     placeholder="ghl_xxxxxxxxxxxx"
                     className="mt-1 h-9 rounded-xl font-mono text-xs"
                     type="password"
@@ -462,7 +508,8 @@ export function WaSettingsView({
                   </Button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  La synchronisation complète sera disponible prochainement. Votre clé est enregistrée en toute sécurité.
+                  La synchronisation complète sera disponible prochainement.
+                  Votre clé est enregistrée en toute sécurité.
                 </p>
               </div>
             )}
@@ -475,7 +522,10 @@ export function WaSettingsView({
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-sm">iClosed</p>
                   {iClosedSaved && (
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]"
+                    >
                       <Check className="h-3 w-3 mr-0.5" />
                       Connecté
                     </Badge>
@@ -499,7 +549,10 @@ export function WaSettingsView({
                 <div className="flex items-center gap-2">
                   <Input
                     value={iClosedKey}
-                    onChange={(e) => { setIClosedKey(e.target.value); setIClosedSaved(false); }}
+                    onChange={(e) => {
+                      setIClosedKey(e.target.value);
+                      setIClosedSaved(false);
+                    }}
                     placeholder="ic_xxxxxxxxxxxx"
                     className="mt-1 h-9 rounded-xl font-mono text-xs"
                     type="password"
@@ -511,11 +564,16 @@ export function WaSettingsView({
                     disabled={isPending || iClosedSaved}
                     className="shrink-0 h-9 rounded-xl font-medium"
                   >
-                    {iClosedSaved ? <Check className="h-4 w-4" /> : "Enregistrer"}
+                    {iClosedSaved ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      "Enregistrer"
+                    )}
                   </Button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  La synchronisation complète sera disponible prochainement. Votre clé est enregistrée en toute sécurité.
+                  La synchronisation complète sera disponible prochainement.
+                  Votre clé est enregistrée en toute sécurité.
                 </p>
               </div>
             )}

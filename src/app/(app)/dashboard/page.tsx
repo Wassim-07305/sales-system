@@ -37,7 +37,10 @@ export default async function DashboardPage() {
 
   // F85: Fetch mobile widget data for admin/manager/setter/closer roles
   const mobileWidgetData =
-    role === "admin" || role === "manager" || role === "setter" || role === "closer"
+    role === "admin" ||
+    role === "manager" ||
+    role === "setter" ||
+    role === "closer"
       ? await getMobileDashboardWidgetData()
       : null;
 

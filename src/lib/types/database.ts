@@ -1,18 +1,44 @@
-export type UserRole = "admin" | "manager" | "setter" | "closer" | "client_b2b" | "client_b2c";
+export type UserRole =
+  | "admin"
+  | "manager"
+  | "setter"
+  | "closer"
+  | "client_b2b"
+  | "client_b2c";
 
 export type DealTemperature = "hot" | "warm" | "cold";
 
-export type DealActivityType = "call" | "message" | "email" | "note" | "meeting" | "status_change";
+export type DealActivityType =
+  | "call"
+  | "message"
+  | "email"
+  | "note"
+  | "meeting"
+  | "status_change";
 
-export type BookingStatus = "confirmed" | "completed" | "no_show" | "cancelled" | "rescheduled";
+export type BookingStatus =
+  | "confirmed"
+  | "completed"
+  | "no_show"
+  | "cancelled"
+  | "rescheduled";
 
 export type ContractStatus = "draft" | "sent" | "signed" | "expired";
 
-export type ProspectStatus = "new" | "contacted" | "replied" | "booked" | "not_interested";
+export type ProspectStatus =
+  | "new"
+  | "contacted"
+  | "replied"
+  | "booked"
+  | "not_interested";
 
 export type ContentPostStatus = "draft" | "scheduled" | "published";
 
-export type AiMode = "full_ai" | "critical_validation" | "full_human" | "half_time";
+export type AiMode =
+  | "full_ai"
+  | "critical_validation"
+  | "full_human"
+  | "half_time";
 
 export type WhatsAppStatus = "connected" | "disconnected" | "pending";
 
@@ -608,7 +634,11 @@ export interface FollowUpSequence {
   id: string;
   name: string;
   description: string | null;
-  steps: Array<{ delay_hours: number; message_template: string; channel: string }>;
+  steps: Array<{
+    delay_hours: number;
+    message_template: string;
+    channel: string;
+  }>;
   trigger_type: string | null;
   is_active: boolean;
   created_by: string | null;
@@ -925,9 +955,18 @@ export interface PushSubscription {
   created_at: string;
 }
 
-export type CoachingObjectiveCategory = "calls" | "deals" | "revenue" | "skills" | "other";
+export type CoachingObjectiveCategory =
+  | "calls"
+  | "deals"
+  | "revenue"
+  | "skills"
+  | "other";
 
-export type CoachingObjectiveStatus = "in_progress" | "completed" | "overdue" | "at_risk";
+export type CoachingObjectiveStatus =
+  | "in_progress"
+  | "completed"
+  | "overdue"
+  | "at_risk";
 
 export interface CoachingObjective {
   id: string;
@@ -951,7 +990,13 @@ export interface DevelopmentPlan {
   id: string;
   user_id: string;
   skills: Array<{ name: string; level: number; target: number }>;
-  actions: Array<{ id: string; title: string; description: string; priority: "high" | "medium" | "low"; done: boolean }>;
+  actions: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: "high" | "medium" | "low";
+    done: boolean;
+  }>;
   resources: Array<{ title: string; url: string; type: string }>;
   created_at: string;
   updated_at: string;
@@ -961,80 +1006,478 @@ export interface DevelopmentPlan {
 export interface Database {
   public: {
     Tables: {
-      profiles: { Row: Profile; Insert: Partial<Profile> & { id: string; email: string }; Update: Partial<Profile> };
-      pipeline_stages: { Row: PipelineStage; Insert: Partial<PipelineStage>; Update: Partial<PipelineStage> };
-      deals: { Row: Deal; Insert: Partial<Deal> & { title: string }; Update: Partial<Deal> };
-      deal_activities: { Row: DealActivity; Insert: Partial<DealActivity> & { deal_id: string; type: string }; Update: Partial<DealActivity> };
-      booking_slots: { Row: BookingSlot; Insert: Partial<BookingSlot> & { user_id: string; start_time: string; end_time: string }; Update: Partial<BookingSlot> };
-      bookings: { Row: Booking; Insert: Partial<Booking> & { prospect_name: string; prospect_email: string; scheduled_at: string }; Update: Partial<Booking> };
-      contract_templates: { Row: ContractTemplate; Insert: Partial<ContractTemplate> & { name: string; content: string }; Update: Partial<ContractTemplate> };
-      contracts: { Row: Contract; Insert: Partial<Contract> & { content: string }; Update: Partial<Contract> };
-      courses: { Row: Course; Insert: Partial<Course> & { title: string; position: number }; Update: Partial<Course> };
-      lessons: { Row: Lesson; Insert: Partial<Lesson> & { course_id: string; title: string; position: number }; Update: Partial<Lesson> };
-      quizzes: { Row: Quiz; Insert: Partial<Quiz> & { lesson_id: string; questions: Quiz["questions"] }; Update: Partial<Quiz> };
-      lesson_progress: { Row: LessonProgress; Insert: Partial<LessonProgress> & { user_id: string; lesson_id: string }; Update: Partial<LessonProgress> };
-      scripts: { Row: Script; Insert: Partial<Script> & { title: string; content: string }; Update: Partial<Script> };
-      objections: { Row: Objection; Insert: Partial<Objection> & { objection: string; best_responses: Objection["best_responses"] }; Update: Partial<Objection> };
-      channels: { Row: Channel; Insert: Partial<Channel> & { name: string }; Update: Partial<Channel> };
-      messages: { Row: Message; Insert: Partial<Message> & { channel_id: string }; Update: Partial<Message> };
-      notifications: { Row: Notification; Insert: Partial<Notification> & { user_id: string; title: string }; Update: Partial<Notification> };
-      gamification_profiles: { Row: GamificationProfile; Insert: Partial<GamificationProfile> & { user_id: string }; Update: Partial<GamificationProfile> };
-      challenges: { Row: Challenge; Insert: Partial<Challenge> & { title: string; target_value: number; metric: string }; Update: Partial<Challenge> };
-      challenge_progress: { Row: ChallengeProgress; Insert: Partial<ChallengeProgress> & { user_id: string; challenge_id: string }; Update: Partial<ChallengeProgress> };
-      group_calls: { Row: GroupCall; Insert: Partial<GroupCall> & { title: string; scheduled_at: string }; Update: Partial<GroupCall> };
-      client_kpis: { Row: ClientKpi; Insert: Partial<ClientKpi> & { client_id: string; date: string }; Update: Partial<ClientKpi> };
-      prospect_lists: { Row: ProspectList; Insert: Partial<ProspectList> & { name: string }; Update: Partial<ProspectList> };
-      prospects: { Row: Prospect; Insert: Partial<Prospect> & { name: string }; Update: Partial<Prospect> };
-      dm_templates: { Row: DmTemplate; Insert: Partial<DmTemplate> & { name: string; content: string }; Update: Partial<DmTemplate> };
-      daily_quotas: { Row: DailyQuota; Insert: Partial<DailyQuota> & { user_id: string; date: string }; Update: Partial<DailyQuota> };
-      content_posts: { Row: ContentPost; Insert: Partial<ContentPost>; Update: Partial<ContentPost> };
-      community_posts: { Row: CommunityPost; Insert: Partial<CommunityPost> & { content: string }; Update: Partial<CommunityPost> };
-      community_comments: { Row: CommunityComment; Insert: Partial<CommunityComment> & { post_id: string; content: string }; Update: Partial<CommunityComment> };
-      affiliates: { Row: Affiliate; Insert: Partial<Affiliate> & { user_id: string; referral_code: string }; Update: Partial<Affiliate> };
-      referrals: { Row: Referral; Insert: Partial<Referral> & { affiliate_id: string }; Update: Partial<Referral> };
-      dm_conversations: { Row: DmConversation; Insert: Partial<DmConversation> & { platform: string }; Update: Partial<DmConversation> };
-      voice_profiles: { Row: VoiceProfile; Insert: Partial<VoiceProfile> & { user_id: string }; Update: Partial<VoiceProfile> };
-      voice_messages: { Row: VoiceMessage; Insert: Partial<VoiceMessage>; Update: Partial<VoiceMessage> };
-      onboarding_quiz_responses: { Row: OnboardingQuizResponse; Insert: Partial<OnboardingQuizResponse> & { user_id: string }; Update: Partial<OnboardingQuizResponse> };
-      welcome_packs: { Row: WelcomePack; Insert: Partial<WelcomePack> & { target_role: string }; Update: Partial<WelcomePack> };
-      daily_journals: { Row: DailyJournal; Insert: Partial<DailyJournal> & { user_id: string; date: string }; Update: Partial<DailyJournal> };
-      course_prerequisites: { Row: CoursePrerequisite; Insert: Partial<CoursePrerequisite> & { course_id: string; prerequisite_course_id: string }; Update: Partial<CoursePrerequisite> };
-      quiz_attempts: { Row: QuizAttempt; Insert: Partial<QuizAttempt> & { user_id: string; lesson_id: string }; Update: Partial<QuizAttempt> };
-      resource_items: { Row: ResourceItem; Insert: Partial<ResourceItem> & { title: string; resource_type: string; url: string }; Update: Partial<ResourceItem> };
-      revision_cards: { Row: RevisionCard; Insert: Partial<RevisionCard> & { lesson_id: string; question: string; answer: string }; Update: Partial<RevisionCard> };
-      roleplay_prospect_profiles: { Row: RoleplayProspectProfile; Insert: Partial<RoleplayProspectProfile> & { name: string; persona: string }; Update: Partial<RoleplayProspectProfile> };
-      roleplay_sessions: { Row: RoleplaySession; Insert: Partial<RoleplaySession> & { user_id: string; prospect_profile_id: string }; Update: Partial<RoleplaySession> };
-      prospect_scores: { Row: ProspectScore; Insert: Partial<ProspectScore> & { prospect_id: string }; Update: Partial<ProspectScore> };
-      follow_up_sequences: { Row: FollowUpSequence; Insert: Partial<FollowUpSequence> & { name: string }; Update: Partial<FollowUpSequence> };
-      follow_up_tasks: { Row: FollowUpTask; Insert: Partial<FollowUpTask> & { sequence_id: string; prospect_id: string; scheduled_at: string }; Update: Partial<FollowUpTask> };
-      ai_mode_configs: { Row: AiModeConfig; Insert: Partial<AiModeConfig> & { user_id: string }; Update: Partial<AiModeConfig> };
-      whatsapp_connections: { Row: WhatsAppConnection; Insert: Partial<WhatsAppConnection> & { user_id: string }; Update: Partial<WhatsAppConnection> };
-      whatsapp_sequences: { Row: WhatsAppSequence; Insert: Partial<WhatsAppSequence> & { name: string }; Update: Partial<WhatsAppSequence> };
-      whatsapp_messages: { Row: WhatsAppMessage; Insert: Partial<WhatsAppMessage> & { connection_id: string }; Update: Partial<WhatsAppMessage> };
-      script_flowcharts: { Row: ScriptFlowchart; Insert: Partial<ScriptFlowchart> & { title: string }; Update: Partial<ScriptFlowchart> };
-      mind_maps: { Row: MindMap; Insert: Partial<MindMap> & { title: string }; Update: Partial<MindMap> };
-      script_templates: { Row: ScriptTemplate; Insert: Partial<ScriptTemplate> & { title: string }; Update: Partial<ScriptTemplate> };
-      video_rooms: { Row: VideoRoom; Insert: Partial<VideoRoom> & { title: string; host_id: string }; Update: Partial<VideoRoom> };
-      video_room_participants: { Row: VideoRoomParticipant; Insert: Partial<VideoRoomParticipant> & { room_id: string; user_id: string }; Update: Partial<VideoRoomParticipant> };
-      polls: { Row: Poll; Insert: Partial<Poll> & { created_by: string; question: string }; Update: Partial<Poll> };
-      poll_votes: { Row: PollVote; Insert: Partial<PollVote> & { poll_id: string; user_id: string; option_index: number }; Update: Partial<PollVote> };
-      broadcast_messages: { Row: BroadcastMessage; Insert: Partial<BroadcastMessage> & { sender_id: string; content: string }; Update: Partial<BroadcastMessage> };
-      attribution_events: { Row: AttributionEvent; Insert: Partial<AttributionEvent> & { touchpoint_type: string }; Update: Partial<AttributionEvent> };
-      setter_weekly_reports: { Row: SetterWeeklyReport; Insert: Partial<SetterWeeklyReport> & { setter_id: string; week_start: string }; Update: Partial<SetterWeeklyReport> };
-      white_label_configs: { Row: WhiteLabelConfig; Insert: Partial<WhiteLabelConfig> & { entrepreneur_id: string }; Update: Partial<WhiteLabelConfig> };
-      entrepreneur_reports: { Row: EntrepreneurReport; Insert: Partial<EntrepreneurReport> & { entrepreneur_id: string; report_month: string }; Update: Partial<EntrepreneurReport> };
-      payment_installments: { Row: PaymentInstallment; Insert: Partial<PaymentInstallment> & { contract_id: string; amount: number; due_date: string }; Update: Partial<PaymentInstallment> };
-      invoices: { Row: Invoice; Insert: Partial<Invoice> & { contract_id: string; client_id: string; amount: number; invoice_number: string }; Update: Partial<Invoice> };
-      automation_rules: { Row: AutomationRule; Insert: Partial<AutomationRule> & { name: string; type: AutomationType }; Update: Partial<AutomationRule> };
-      automation_executions: { Row: AutomationExecution; Insert: Partial<AutomationExecution> & { rule_id: string; target_user_id: string }; Update: Partial<AutomationExecution> };
-      marketplace_listings: { Row: MarketplaceListing; Insert: Partial<MarketplaceListing> & { entrepreneur_id: string; title: string }; Update: Partial<MarketplaceListing> };
-      marketplace_applications: { Row: MarketplaceApplication; Insert: Partial<MarketplaceApplication> & { listing_id: string; setter_id: string }; Update: Partial<MarketplaceApplication> };
-      setter_maturity_scores: { Row: SetterMaturityScore; Insert: Partial<SetterMaturityScore> & { setter_id: string }; Update: Partial<SetterMaturityScore> };
-      push_subscriptions: { Row: PushSubscription; Insert: Partial<PushSubscription> & { user_id: string; endpoint: string }; Update: Partial<PushSubscription> };
-      channel_reads: { Row: ChannelRead; Insert: Partial<ChannelRead> & { channel_id: string; user_id: string }; Update: Partial<ChannelRead> };
-      coaching_objectives: { Row: CoachingObjective; Insert: Partial<CoachingObjective> & { assignee_id: string; title: string; category: CoachingObjectiveCategory; target_value: number; target_date: string }; Update: Partial<CoachingObjective> };
-      development_plans: { Row: DevelopmentPlan; Insert: Partial<DevelopmentPlan> & { user_id: string }; Update: Partial<DevelopmentPlan> };
-      relance_workflows: { Row: RelanceWorkflow; Insert: Partial<RelanceWorkflow> & { prospect_id: string; platform: string; created_by: string }; Update: Partial<RelanceWorkflow> };
+      profiles: {
+        Row: Profile;
+        Insert: Partial<Profile> & { id: string; email: string };
+        Update: Partial<Profile>;
+      };
+      pipeline_stages: {
+        Row: PipelineStage;
+        Insert: Partial<PipelineStage>;
+        Update: Partial<PipelineStage>;
+      };
+      deals: {
+        Row: Deal;
+        Insert: Partial<Deal> & { title: string };
+        Update: Partial<Deal>;
+      };
+      deal_activities: {
+        Row: DealActivity;
+        Insert: Partial<DealActivity> & { deal_id: string; type: string };
+        Update: Partial<DealActivity>;
+      };
+      booking_slots: {
+        Row: BookingSlot;
+        Insert: Partial<BookingSlot> & {
+          user_id: string;
+          start_time: string;
+          end_time: string;
+        };
+        Update: Partial<BookingSlot>;
+      };
+      bookings: {
+        Row: Booking;
+        Insert: Partial<Booking> & {
+          prospect_name: string;
+          prospect_email: string;
+          scheduled_at: string;
+        };
+        Update: Partial<Booking>;
+      };
+      contract_templates: {
+        Row: ContractTemplate;
+        Insert: Partial<ContractTemplate> & { name: string; content: string };
+        Update: Partial<ContractTemplate>;
+      };
+      contracts: {
+        Row: Contract;
+        Insert: Partial<Contract> & { content: string };
+        Update: Partial<Contract>;
+      };
+      courses: {
+        Row: Course;
+        Insert: Partial<Course> & { title: string; position: number };
+        Update: Partial<Course>;
+      };
+      lessons: {
+        Row: Lesson;
+        Insert: Partial<Lesson> & {
+          course_id: string;
+          title: string;
+          position: number;
+        };
+        Update: Partial<Lesson>;
+      };
+      quizzes: {
+        Row: Quiz;
+        Insert: Partial<Quiz> & {
+          lesson_id: string;
+          questions: Quiz["questions"];
+        };
+        Update: Partial<Quiz>;
+      };
+      lesson_progress: {
+        Row: LessonProgress;
+        Insert: Partial<LessonProgress> & {
+          user_id: string;
+          lesson_id: string;
+        };
+        Update: Partial<LessonProgress>;
+      };
+      scripts: {
+        Row: Script;
+        Insert: Partial<Script> & { title: string; content: string };
+        Update: Partial<Script>;
+      };
+      objections: {
+        Row: Objection;
+        Insert: Partial<Objection> & {
+          objection: string;
+          best_responses: Objection["best_responses"];
+        };
+        Update: Partial<Objection>;
+      };
+      channels: {
+        Row: Channel;
+        Insert: Partial<Channel> & { name: string };
+        Update: Partial<Channel>;
+      };
+      messages: {
+        Row: Message;
+        Insert: Partial<Message> & { channel_id: string };
+        Update: Partial<Message>;
+      };
+      notifications: {
+        Row: Notification;
+        Insert: Partial<Notification> & { user_id: string; title: string };
+        Update: Partial<Notification>;
+      };
+      gamification_profiles: {
+        Row: GamificationProfile;
+        Insert: Partial<GamificationProfile> & { user_id: string };
+        Update: Partial<GamificationProfile>;
+      };
+      challenges: {
+        Row: Challenge;
+        Insert: Partial<Challenge> & {
+          title: string;
+          target_value: number;
+          metric: string;
+        };
+        Update: Partial<Challenge>;
+      };
+      challenge_progress: {
+        Row: ChallengeProgress;
+        Insert: Partial<ChallengeProgress> & {
+          user_id: string;
+          challenge_id: string;
+        };
+        Update: Partial<ChallengeProgress>;
+      };
+      group_calls: {
+        Row: GroupCall;
+        Insert: Partial<GroupCall> & { title: string; scheduled_at: string };
+        Update: Partial<GroupCall>;
+      };
+      client_kpis: {
+        Row: ClientKpi;
+        Insert: Partial<ClientKpi> & { client_id: string; date: string };
+        Update: Partial<ClientKpi>;
+      };
+      prospect_lists: {
+        Row: ProspectList;
+        Insert: Partial<ProspectList> & { name: string };
+        Update: Partial<ProspectList>;
+      };
+      prospects: {
+        Row: Prospect;
+        Insert: Partial<Prospect> & { name: string };
+        Update: Partial<Prospect>;
+      };
+      dm_templates: {
+        Row: DmTemplate;
+        Insert: Partial<DmTemplate> & { name: string; content: string };
+        Update: Partial<DmTemplate>;
+      };
+      daily_quotas: {
+        Row: DailyQuota;
+        Insert: Partial<DailyQuota> & { user_id: string; date: string };
+        Update: Partial<DailyQuota>;
+      };
+      content_posts: {
+        Row: ContentPost;
+        Insert: Partial<ContentPost>;
+        Update: Partial<ContentPost>;
+      };
+      community_posts: {
+        Row: CommunityPost;
+        Insert: Partial<CommunityPost> & { content: string };
+        Update: Partial<CommunityPost>;
+      };
+      community_comments: {
+        Row: CommunityComment;
+        Insert: Partial<CommunityComment> & {
+          post_id: string;
+          content: string;
+        };
+        Update: Partial<CommunityComment>;
+      };
+      affiliates: {
+        Row: Affiliate;
+        Insert: Partial<Affiliate> & { user_id: string; referral_code: string };
+        Update: Partial<Affiliate>;
+      };
+      referrals: {
+        Row: Referral;
+        Insert: Partial<Referral> & { affiliate_id: string };
+        Update: Partial<Referral>;
+      };
+      dm_conversations: {
+        Row: DmConversation;
+        Insert: Partial<DmConversation> & { platform: string };
+        Update: Partial<DmConversation>;
+      };
+      voice_profiles: {
+        Row: VoiceProfile;
+        Insert: Partial<VoiceProfile> & { user_id: string };
+        Update: Partial<VoiceProfile>;
+      };
+      voice_messages: {
+        Row: VoiceMessage;
+        Insert: Partial<VoiceMessage>;
+        Update: Partial<VoiceMessage>;
+      };
+      onboarding_quiz_responses: {
+        Row: OnboardingQuizResponse;
+        Insert: Partial<OnboardingQuizResponse> & { user_id: string };
+        Update: Partial<OnboardingQuizResponse>;
+      };
+      welcome_packs: {
+        Row: WelcomePack;
+        Insert: Partial<WelcomePack> & { target_role: string };
+        Update: Partial<WelcomePack>;
+      };
+      daily_journals: {
+        Row: DailyJournal;
+        Insert: Partial<DailyJournal> & { user_id: string; date: string };
+        Update: Partial<DailyJournal>;
+      };
+      course_prerequisites: {
+        Row: CoursePrerequisite;
+        Insert: Partial<CoursePrerequisite> & {
+          course_id: string;
+          prerequisite_course_id: string;
+        };
+        Update: Partial<CoursePrerequisite>;
+      };
+      quiz_attempts: {
+        Row: QuizAttempt;
+        Insert: Partial<QuizAttempt> & { user_id: string; lesson_id: string };
+        Update: Partial<QuizAttempt>;
+      };
+      resource_items: {
+        Row: ResourceItem;
+        Insert: Partial<ResourceItem> & {
+          title: string;
+          resource_type: string;
+          url: string;
+        };
+        Update: Partial<ResourceItem>;
+      };
+      revision_cards: {
+        Row: RevisionCard;
+        Insert: Partial<RevisionCard> & {
+          lesson_id: string;
+          question: string;
+          answer: string;
+        };
+        Update: Partial<RevisionCard>;
+      };
+      roleplay_prospect_profiles: {
+        Row: RoleplayProspectProfile;
+        Insert: Partial<RoleplayProspectProfile> & {
+          name: string;
+          persona: string;
+        };
+        Update: Partial<RoleplayProspectProfile>;
+      };
+      roleplay_sessions: {
+        Row: RoleplaySession;
+        Insert: Partial<RoleplaySession> & {
+          user_id: string;
+          prospect_profile_id: string;
+        };
+        Update: Partial<RoleplaySession>;
+      };
+      prospect_scores: {
+        Row: ProspectScore;
+        Insert: Partial<ProspectScore> & { prospect_id: string };
+        Update: Partial<ProspectScore>;
+      };
+      follow_up_sequences: {
+        Row: FollowUpSequence;
+        Insert: Partial<FollowUpSequence> & { name: string };
+        Update: Partial<FollowUpSequence>;
+      };
+      follow_up_tasks: {
+        Row: FollowUpTask;
+        Insert: Partial<FollowUpTask> & {
+          sequence_id: string;
+          prospect_id: string;
+          scheduled_at: string;
+        };
+        Update: Partial<FollowUpTask>;
+      };
+      ai_mode_configs: {
+        Row: AiModeConfig;
+        Insert: Partial<AiModeConfig> & { user_id: string };
+        Update: Partial<AiModeConfig>;
+      };
+      whatsapp_connections: {
+        Row: WhatsAppConnection;
+        Insert: Partial<WhatsAppConnection> & { user_id: string };
+        Update: Partial<WhatsAppConnection>;
+      };
+      whatsapp_sequences: {
+        Row: WhatsAppSequence;
+        Insert: Partial<WhatsAppSequence> & { name: string };
+        Update: Partial<WhatsAppSequence>;
+      };
+      whatsapp_messages: {
+        Row: WhatsAppMessage;
+        Insert: Partial<WhatsAppMessage> & { connection_id: string };
+        Update: Partial<WhatsAppMessage>;
+      };
+      script_flowcharts: {
+        Row: ScriptFlowchart;
+        Insert: Partial<ScriptFlowchart> & { title: string };
+        Update: Partial<ScriptFlowchart>;
+      };
+      mind_maps: {
+        Row: MindMap;
+        Insert: Partial<MindMap> & { title: string };
+        Update: Partial<MindMap>;
+      };
+      script_templates: {
+        Row: ScriptTemplate;
+        Insert: Partial<ScriptTemplate> & { title: string };
+        Update: Partial<ScriptTemplate>;
+      };
+      video_rooms: {
+        Row: VideoRoom;
+        Insert: Partial<VideoRoom> & { title: string; host_id: string };
+        Update: Partial<VideoRoom>;
+      };
+      video_room_participants: {
+        Row: VideoRoomParticipant;
+        Insert: Partial<VideoRoomParticipant> & {
+          room_id: string;
+          user_id: string;
+        };
+        Update: Partial<VideoRoomParticipant>;
+      };
+      polls: {
+        Row: Poll;
+        Insert: Partial<Poll> & { created_by: string; question: string };
+        Update: Partial<Poll>;
+      };
+      poll_votes: {
+        Row: PollVote;
+        Insert: Partial<PollVote> & {
+          poll_id: string;
+          user_id: string;
+          option_index: number;
+        };
+        Update: Partial<PollVote>;
+      };
+      broadcast_messages: {
+        Row: BroadcastMessage;
+        Insert: Partial<BroadcastMessage> & {
+          sender_id: string;
+          content: string;
+        };
+        Update: Partial<BroadcastMessage>;
+      };
+      attribution_events: {
+        Row: AttributionEvent;
+        Insert: Partial<AttributionEvent> & { touchpoint_type: string };
+        Update: Partial<AttributionEvent>;
+      };
+      setter_weekly_reports: {
+        Row: SetterWeeklyReport;
+        Insert: Partial<SetterWeeklyReport> & {
+          setter_id: string;
+          week_start: string;
+        };
+        Update: Partial<SetterWeeklyReport>;
+      };
+      white_label_configs: {
+        Row: WhiteLabelConfig;
+        Insert: Partial<WhiteLabelConfig> & { entrepreneur_id: string };
+        Update: Partial<WhiteLabelConfig>;
+      };
+      entrepreneur_reports: {
+        Row: EntrepreneurReport;
+        Insert: Partial<EntrepreneurReport> & {
+          entrepreneur_id: string;
+          report_month: string;
+        };
+        Update: Partial<EntrepreneurReport>;
+      };
+      payment_installments: {
+        Row: PaymentInstallment;
+        Insert: Partial<PaymentInstallment> & {
+          contract_id: string;
+          amount: number;
+          due_date: string;
+        };
+        Update: Partial<PaymentInstallment>;
+      };
+      invoices: {
+        Row: Invoice;
+        Insert: Partial<Invoice> & {
+          contract_id: string;
+          client_id: string;
+          amount: number;
+          invoice_number: string;
+        };
+        Update: Partial<Invoice>;
+      };
+      automation_rules: {
+        Row: AutomationRule;
+        Insert: Partial<AutomationRule> & {
+          name: string;
+          type: AutomationType;
+        };
+        Update: Partial<AutomationRule>;
+      };
+      automation_executions: {
+        Row: AutomationExecution;
+        Insert: Partial<AutomationExecution> & {
+          rule_id: string;
+          target_user_id: string;
+        };
+        Update: Partial<AutomationExecution>;
+      };
+      marketplace_listings: {
+        Row: MarketplaceListing;
+        Insert: Partial<MarketplaceListing> & {
+          entrepreneur_id: string;
+          title: string;
+        };
+        Update: Partial<MarketplaceListing>;
+      };
+      marketplace_applications: {
+        Row: MarketplaceApplication;
+        Insert: Partial<MarketplaceApplication> & {
+          listing_id: string;
+          setter_id: string;
+        };
+        Update: Partial<MarketplaceApplication>;
+      };
+      setter_maturity_scores: {
+        Row: SetterMaturityScore;
+        Insert: Partial<SetterMaturityScore> & { setter_id: string };
+        Update: Partial<SetterMaturityScore>;
+      };
+      push_subscriptions: {
+        Row: PushSubscription;
+        Insert: Partial<PushSubscription> & {
+          user_id: string;
+          endpoint: string;
+        };
+        Update: Partial<PushSubscription>;
+      };
+      channel_reads: {
+        Row: ChannelRead;
+        Insert: Partial<ChannelRead> & { channel_id: string; user_id: string };
+        Update: Partial<ChannelRead>;
+      };
+      coaching_objectives: {
+        Row: CoachingObjective;
+        Insert: Partial<CoachingObjective> & {
+          assignee_id: string;
+          title: string;
+          category: CoachingObjectiveCategory;
+          target_value: number;
+          target_date: string;
+        };
+        Update: Partial<CoachingObjective>;
+      };
+      development_plans: {
+        Row: DevelopmentPlan;
+        Insert: Partial<DevelopmentPlan> & { user_id: string };
+        Update: Partial<DevelopmentPlan>;
+      };
+      relance_workflows: {
+        Row: RelanceWorkflow;
+        Insert: Partial<RelanceWorkflow> & {
+          prospect_id: string;
+          platform: string;
+          created_by: string;
+        };
+        Update: Partial<RelanceWorkflow>;
+      };
     };
   };
 }

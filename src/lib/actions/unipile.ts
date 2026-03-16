@@ -46,7 +46,8 @@ export async function getUnipileStatus(): Promise<{
   }>;
 }> {
   const dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
-  const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+  const apiKey =
+    process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
 
   if (!dsn || !apiKey) {
     return { configured: false, accounts: [] };
@@ -57,19 +58,24 @@ export async function getUnipileStatus(): Promise<{
     if (!client) return { configured: false, accounts: [] };
 
     const response = await client.account.getAll();
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
 
-    const accounts = (items as Array<{
-      id: string;
-      type?: string;
-      provider?: string;
-      name?: string;
-      connection_params?: { name?: string };
-      status?: string;
-    }>).map((acc) => ({
+    const accounts = (
+      items as Array<{
+        id: string;
+        type?: string;
+        provider?: string;
+        name?: string;
+        connection_params?: { name?: string };
+        status?: string;
+      }>
+    ).map((acc) => ({
       id: acc.id,
       provider: acc.type || acc.provider || "unknown",
-      channel: UNIPILE_PROVIDER_MAP[acc.type || acc.provider || ""] || "unknown",
+      channel:
+        UNIPILE_PROVIDER_MAP[acc.type || acc.provider || ""] || "unknown",
       name: acc.name || acc.connection_params?.name || acc.id,
       status: acc.status || "connected",
     }));
@@ -93,19 +99,28 @@ export async function generateUnipileAuthLink(provider?: string): Promise<{
     await requireAdmin();
 
     const dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
-    const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
-    if (!dsn || !apiKey) return { error: "Unipile non configuré. Ajoutez UNIPILE_DSN et UNIPILE_API_KEY." };
+    const apiKey =
+      process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+    if (!dsn || !apiKey)
+      return {
+        error: "Unipile non configuré. Ajoutez UNIPILE_DSN et UNIPILE_API_KEY.",
+      };
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-      || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null)
-      || "http://localhost:3001";
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : null) ||
+      "http://localhost:3001";
 
     // Use REST API directly for connect link (more control over parameters)
     const body: Record<string, unknown> = {
       type: "create",
       api_url: dsn,
-      expiresOn: new Date(Date.now() + 30 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, ".000Z"),
+      expiresOn: new Date(Date.now() + 30 * 60 * 1000)
+        .toISOString()
+        .replace(/\.\d{3}Z$/, ".000Z"),
       success_redirect_url: `${appUrl}/settings/integrations`,
       failure_redirect_url: `${appUrl}/settings/integrations`,
     };
@@ -133,7 +148,9 @@ export async function generateUnipileAuthLink(provider?: string): Promise<{
     return { url: data.url };
   } catch (err) {
     console.error("Unipile auth link error:", err);
-    return { error: err instanceof Error ? err.message : "Erreur de connexion Unipile" };
+    return {
+      error: err instanceof Error ? err.message : "Erreur de connexion Unipile",
+    };
   }
 }
 
@@ -156,7 +173,8 @@ export async function disconnectUnipileAccount(accountId: string): Promise<{
     console.error("Unipile disconnect error:", err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Erreur lors de la déconnexion",
+      error:
+        err instanceof Error ? err.message : "Erreur lors de la déconnexion",
     };
   }
 }
@@ -245,19 +263,27 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     if (accountId) params.account_id = accountId;
 
     const response = await client.messaging.getAllChats(params);
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
 
-    const conversations = (items as Array<{
-      id: string;
-      provider?: string;
-      account_type?: string;
-      attendees?: Array<{ display_name?: string; id?: string }>;
-      last_message?: { text?: string; timestamp?: string };
-      unread_count?: number;
-    }>).map((chat) => ({
+    const conversations = (
+      items as Array<{
+        id: string;
+        provider?: string;
+        account_type?: string;
+        attendees?: Array<{ display_name?: string; id?: string }>;
+        last_message?: { text?: string; timestamp?: string };
+        unread_count?: number;
+      }>
+    ).map((chat) => ({
       id: chat.id,
-      provider: UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] || "unknown",
-      participants: (chat.attendees || []).map((a) => a.display_name || a.id || ""),
+      provider:
+        UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
+        "unknown",
+      participants: (chat.attendees || []).map(
+        (a) => a.display_name || a.id || "",
+      ),
       lastMessage: chat.last_message?.text,
       lastMessageAt: chat.last_message?.timestamp,
       unreadCount: chat.unread_count || 0,
@@ -298,16 +324,20 @@ export async function getUnipileMessages(chatId: string): Promise<{
       limit: 100,
     });
 
-    const items = Array.isArray(response) ? response : (response as { items?: unknown[] }).items || [];
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
 
-    const messages = (items as Array<{
-      id: string;
-      text?: string;
-      body?: string;
-      sender?: { display_name?: string; id?: string };
-      timestamp?: string;
-      is_sender?: boolean;
-    }>).map((msg) => ({
+    const messages = (
+      items as Array<{
+        id: string;
+        text?: string;
+        body?: string;
+        sender?: { display_name?: string; id?: string };
+        timestamp?: string;
+        is_sender?: boolean;
+      }>
+    ).map((msg) => ({
       id: msg.id,
       text: msg.text || msg.body || "",
       sender: msg.sender?.display_name || "",
@@ -330,13 +360,25 @@ export async function getUnipileMessages(chatId: string): Promise<{
 // Get LinkedIn / Instagram conversations for Chat sidebar
 // ---------------------------------------------------------------------------
 
-export async function getUnipileSocialConversations(platform: "linkedin" | "instagram"): Promise<
+export async function getUnipileSocialConversations(
+  platform: "linkedin" | "instagram",
+): Promise<
   Array<{
     id: string;
     prospect_id: string;
-    prospect: { id: string; name: string; platform: string; profile_url: string | null } | null;
+    prospect: {
+      id: string;
+      name: string;
+      platform: string;
+      profile_url: string | null;
+    } | null;
     platform: string;
-    messages: Array<{ sender: string; content: string; type: string; timestamp: string }>;
+    messages: Array<{
+      sender: string;
+      content: string;
+      type: string;
+      timestamp: string;
+    }>;
     last_message_at: string;
     unread_count: number;
   }>
@@ -345,7 +387,9 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
     // Auth check
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return [];
 
     const dsn = process.env.UNIPILE_DSN;
@@ -359,18 +403,25 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
     const accountsRes = await client.account.getAll();
     const accounts = Array.isArray(accountsRes)
       ? accountsRes
-      : (accountsRes as { items?: Array<{ id: string; type?: string; provider?: string }> }).items || [];
+      : (
+          accountsRes as {
+            items?: Array<{ id: string; type?: string; provider?: string }>;
+          }
+        ).items || [];
 
     const providerName = platform === "linkedin" ? "LINKEDIN" : "INSTAGRAM";
-    const account = (accounts as Array<{ id: string; type?: string; provider?: string }>).find(
-      (a) => (a.type || a.provider || "").toUpperCase() === providerName
-    );
+    const account = (
+      accounts as Array<{ id: string; type?: string; provider?: string }>
+    ).find((a) => (a.type || a.provider || "").toUpperCase() === providerName);
     if (!account) return [];
 
     // Fetch chats
-    const chatsRes = await fetch(`${dsn}/api/v1/chats?account_id=${account.id}&limit=50`, {
-      headers: { "X-API-KEY": apiKey, Accept: "application/json" },
-    });
+    const chatsRes = await fetch(
+      `${dsn}/api/v1/chats?account_id=${account.id}&limit=50`,
+      {
+        headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+      },
+    );
     if (!chatsRes.ok) return [];
     const chatsData = await chatsRes.json();
     const chats = (chatsData.items || []) as Array<{
@@ -391,9 +442,12 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
       Promise.all(
         chatsToProcess.map(async (chat) => {
           try {
-            const res = await fetch(`${dsn}/api/v1/chats/${chat.id}/attendees`, {
-              headers: { "X-API-KEY": apiKey, Accept: "application/json" },
-            });
+            const res = await fetch(
+              `${dsn}/api/v1/chats/${chat.id}/attendees`,
+              {
+                headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+              },
+            );
             if (!res.ok) return [];
             const data = await res.json();
             return (data.items || []) as Array<{
@@ -406,15 +460,18 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
           } catch {
             return [];
           }
-        })
+        }),
       ),
       // Fetch last message
       Promise.all(
         chatsToProcess.map(async (chat) => {
           try {
-            const res = await fetch(`${dsn}/api/v1/chats/${chat.id}/messages?limit=1`, {
-              headers: { "X-API-KEY": apiKey, Accept: "application/json" },
-            });
+            const res = await fetch(
+              `${dsn}/api/v1/chats/${chat.id}/messages?limit=1`,
+              {
+                headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+              },
+            );
             if (!res.ok) return null;
             const data = await res.json();
             const msg = data.items?.[0];
@@ -429,48 +486,62 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
           } catch {
             return null;
           }
-        })
+        }),
       ),
     ]);
 
-    return chatsToProcess.map((chat, idx) => {
-      const attendees = attendeesResults[idx];
-      const otherAttendee = attendees.find((a) => !a.is_self);
-      const contactName = otherAttendee?.name || chat.name || "Contact";
-      const profileUrl = otherAttendee?.profile_url || null;
-      const lastMsg = messagesResults[idx];
-      const lastMsgTime = lastMsg?.timestamp || chat.timestamp || new Date().toISOString();
+    return chatsToProcess
+      .map((chat, idx) => {
+        const attendees = attendeesResults[idx];
+        const otherAttendee = attendees.find((a) => !a.is_self);
+        const contactName = otherAttendee?.name || chat.name || "Contact";
+        const profileUrl = otherAttendee?.profile_url || null;
+        const lastMsg = messagesResults[idx];
+        const lastMsgTime =
+          lastMsg?.timestamp || chat.timestamp || new Date().toISOString();
 
-      const messages: Array<{ sender: string; content: string; type: string; timestamp: string }> = [];
-      if (lastMsg) {
-        const hasAttachment = lastMsg.attachments && lastMsg.attachments.length > 0;
-        const content = lastMsg.text
-          || (hasAttachment ? `[${lastMsg.attachments[0]?.type || "pièce jointe"}]` : "");
-        messages.push({
-          sender: lastMsg.is_sender ? "me" : "prospect",
-          content,
-          type: "text",
-          timestamp: lastMsgTime,
-        });
-      }
+        const messages: Array<{
+          sender: string;
+          content: string;
+          type: string;
+          timestamp: string;
+        }> = [];
+        if (lastMsg) {
+          const hasAttachment =
+            lastMsg.attachments && lastMsg.attachments.length > 0;
+          const content =
+            lastMsg.text ||
+            (hasAttachment
+              ? `[${lastMsg.attachments[0]?.type || "pièce jointe"}]`
+              : "");
+          messages.push({
+            sender: lastMsg.is_sender ? "me" : "prospect",
+            content,
+            type: "text",
+            timestamp: lastMsgTime,
+          });
+        }
 
-      return {
-        id: `unipile-${chat.id}`,
-        prospect_id: `unipile-${chat.id}`,
-        prospect: {
+        return {
           id: `unipile-${chat.id}`,
-          name: contactName,
+          prospect_id: `unipile-${chat.id}`,
+          prospect: {
+            id: `unipile-${chat.id}`,
+            name: contactName,
+            platform,
+            profile_url: profileUrl,
+          },
           platform,
-          profile_url: profileUrl,
-        },
-        platform,
-        messages,
-        last_message_at: lastMsgTime,
-        unread_count: chat.unread_count || 0,
-      };
-    }).sort((a, b) =>
-      new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-    );
+          messages,
+          last_message_at: lastMsgTime,
+          unread_count: chat.unread_count || 0,
+        };
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.last_message_at).getTime() -
+          new Date(a.last_message_at).getTime(),
+      );
   } catch (err) {
     console.error(`Unipile ${platform} conversations error:`, err);
     return [];
@@ -481,7 +552,10 @@ export async function getUnipileSocialConversations(platform: "linkedin" | "inst
 // LinkedIn: get profile
 // ---------------------------------------------------------------------------
 
-export async function getLinkedInProfileViaUnipile(accountId: string, profileUrl: string): Promise<{
+export async function getLinkedInProfileViaUnipile(
+  accountId: string,
+  profileUrl: string,
+): Promise<{
   data?: {
     id: string;
     name: string;
@@ -519,7 +593,9 @@ export async function getLinkedInProfileViaUnipile(accountId: string, profileUrl
     return {
       data: {
         id: profile.id || identifier,
-        name: [profile.first_name, profile.last_name].filter(Boolean).join(" ") || identifier,
+        name:
+          [profile.first_name, profile.last_name].filter(Boolean).join(" ") ||
+          identifier,
         headline: profile.headline || null,
         profile_url: profileUrl,
         company: profile.company || null,
@@ -529,7 +605,10 @@ export async function getLinkedInProfileViaUnipile(accountId: string, profileUrl
     };
   } catch (err) {
     console.error("Unipile LinkedIn profile error:", err);
-    return { error: err instanceof Error ? err.message : "Erreur de récupération profil" };
+    return {
+      error:
+        err instanceof Error ? err.message : "Erreur de récupération profil",
+    };
   }
 }
 
@@ -537,10 +616,13 @@ export async function getLinkedInProfileViaUnipile(accountId: string, profileUrl
 // Calendar: list events (via REST — not in SDK)
 // ---------------------------------------------------------------------------
 
-export async function getUnipileCalendarEvents(accountId: string, params?: {
-  start?: string;
-  end?: string;
-}): Promise<{
+export async function getUnipileCalendarEvents(
+  accountId: string,
+  params?: {
+    start?: string;
+    end?: string;
+  },
+): Promise<{
   events: Array<{
     id: string;
     title: string;
@@ -556,7 +638,8 @@ export async function getUnipileCalendarEvents(accountId: string, params?: {
     await requireAuth();
 
     const dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
-    const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+    const apiKey =
+      process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
     if (!dsn || !apiKey) return { events: [], error: "Unipile non configuré" };
 
     const queryParams = new URLSearchParams({ account_id: accountId });
@@ -574,21 +657,25 @@ export async function getUnipileCalendarEvents(accountId: string, params?: {
     const data = await res.json();
     const items = Array.isArray(data) ? data : data.items || [];
 
-    const events = (items as Array<{
-      id: string;
-      title?: string;
-      summary?: string;
-      start?: { date_time?: string; date?: string };
-      end?: { date_time?: string; date?: string };
-      attendees?: Array<{ email?: string; display_name?: string }>;
-      location?: string;
-      description?: string;
-    }>).map((evt) => ({
+    const events = (
+      items as Array<{
+        id: string;
+        title?: string;
+        summary?: string;
+        start?: { date_time?: string; date?: string };
+        end?: { date_time?: string; date?: string };
+        attendees?: Array<{ email?: string; display_name?: string }>;
+        location?: string;
+        description?: string;
+      }>
+    ).map((evt) => ({
       id: evt.id,
       title: evt.title || evt.summary || "Sans titre",
       start: evt.start?.date_time || evt.start?.date || "",
       end: evt.end?.date_time || evt.end?.date || "",
-      attendees: (evt.attendees || []).map((a) => a.display_name || a.email || ""),
+      attendees: (evt.attendees || []).map(
+        (a) => a.display_name || a.email || "",
+      ),
       location: evt.location || null,
       description: evt.description || null,
     }));
@@ -598,7 +685,10 @@ export async function getUnipileCalendarEvents(accountId: string, params?: {
     console.error("Unipile calendar events error:", err);
     return {
       events: [],
-      error: err instanceof Error ? err.message : "Erreur de récupération calendrier",
+      error:
+        err instanceof Error
+          ? err.message
+          : "Erreur de récupération calendrier",
     };
   }
 }
@@ -607,19 +697,23 @@ export async function getUnipileCalendarEvents(accountId: string, params?: {
 // Calendar: create event (via REST)
 // ---------------------------------------------------------------------------
 
-export async function createUnipileCalendarEvent(accountId: string, event: {
-  title: string;
-  start: string;
-  end: string;
-  description?: string;
-  location?: string;
-  attendees?: string[];
-}): Promise<{ eventId?: string; error?: string }> {
+export async function createUnipileCalendarEvent(
+  accountId: string,
+  event: {
+    title: string;
+    start: string;
+    end: string;
+    description?: string;
+    location?: string;
+    attendees?: string[];
+  },
+): Promise<{ eventId?: string; error?: string }> {
   try {
     await requireAuth();
 
     const dsn = process.env.UNIPILE_DSN || (await getApiKey("UNIPILE_DSN"));
-    const apiKey = process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
+    const apiKey =
+      process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
     if (!dsn || !apiKey) return { error: "Unipile non configuré" };
 
     const res = await fetch(`${dsn}/api/v1/calendar/events`, {
@@ -649,7 +743,10 @@ export async function createUnipileCalendarEvent(accountId: string, event: {
     return { eventId: data.id || data.event_id };
   } catch (err) {
     console.error("Unipile create event error:", err);
-    return { error: err instanceof Error ? err.message : "Erreur de création événement" };
+    return {
+      error:
+        err instanceof Error ? err.message : "Erreur de création événement",
+    };
   }
 }
 
@@ -657,7 +754,9 @@ export async function createUnipileCalendarEvent(accountId: string, event: {
 // Webhook handler
 // ---------------------------------------------------------------------------
 
-export async function handleUnipileWebhook(body: Record<string, unknown>): Promise<void> {
+export async function handleUnipileWebhook(
+  body: Record<string, unknown>,
+): Promise<void> {
   const supabase = await createClient();
 
   const eventType = body.event as string;
@@ -679,7 +778,9 @@ export async function handleUnipileWebhook(body: Record<string, unknown>): Promi
         const { data: prospect } = await supabase
           .from("prospects")
           .select("id")
-          .or(`instagram_id.eq.${senderId},profile_url.ilike.%${senderId}%,phone.eq.${senderId}`)
+          .or(
+            `instagram_id.eq.${senderId},profile_url.ilike.%${senderId}%,phone.eq.${senderId}`,
+          )
           .limit(1)
           .single();
         prospectId = prospect?.id || null;

@@ -9,10 +9,16 @@ interface PresenceUser {
   onlineAt: string;
 }
 
-export function usePresence(channelId: string | null, userId: string, userName: string) {
+export function usePresence(
+  channelId: string | null,
+  userId: string,
+  userName: string,
+) {
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
   const [typingUsers, setTypingUsers] = useState<PresenceUser[]>([]);
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const channelRef = useRef<ReturnType<
+    ReturnType<typeof createClient>["channel"]
+  > | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   useEffect(() => {
@@ -34,7 +40,12 @@ export function usePresence(channelId: string | null, userId: string, userName: 
 
     channel.subscribe(async (status) => {
       if (status === "SUBSCRIBED") {
-        await channel.track({ userId, userName, isTyping: false, onlineAt: new Date().toISOString() });
+        await channel.track({
+          userId,
+          userName,
+          isTyping: false,
+          onlineAt: new Date().toISOString(),
+        });
       }
     });
 
@@ -47,16 +58,26 @@ export function usePresence(channelId: string | null, userId: string, userName: 
   const setTyping = useCallback(
     (typing: boolean) => {
       if (channelRef.current) {
-        channelRef.current.track({ userId, userName, isTyping: typing, onlineAt: new Date().toISOString() });
+        channelRef.current.track({
+          userId,
+          userName,
+          isTyping: typing,
+          onlineAt: new Date().toISOString(),
+        });
         if (typing) {
           if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
           typingTimeoutRef.current = setTimeout(() => {
-            channelRef.current?.track({ userId, userName, isTyping: false, onlineAt: new Date().toISOString() });
+            channelRef.current?.track({
+              userId,
+              userName,
+              isTyping: false,
+              onlineAt: new Date().toISOString(),
+            });
           }, 3000);
         }
       }
     },
-    [userId, userName]
+    [userId, userName],
   );
 
   return { onlineUsers, typingUsers, setTyping };

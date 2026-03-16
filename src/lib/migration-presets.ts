@@ -41,11 +41,14 @@ export interface MigrationLog {
   created_at: string;
 }
 
-export const CRM_PRESETS: Record<CrmSource, {
-  label: string;
-  contactMappings: MigrationFieldMapping[];
-  dealMappings: MigrationFieldMapping[];
-}> = {
+export const CRM_PRESETS: Record<
+  CrmSource,
+  {
+    label: string;
+    contactMappings: MigrationFieldMapping[];
+    dealMappings: MigrationFieldMapping[];
+  }
+> = {
   hubspot: {
     label: "HubSpot",
     contactMappings: [
@@ -89,7 +92,11 @@ export const CRM_PRESETS: Record<CrmSource, {
       { source: "Valeur", target: "value", transform: "number" },
       { source: "Étape", target: "stage_name", transform: "stage" },
       { source: "Personne de contact", target: "contact_email" },
-      { source: "Date de clôture attendue", target: "next_action_date", transform: "date" },
+      {
+        source: "Date de clôture attendue",
+        target: "next_action_date",
+        transform: "date",
+      },
       { source: "Source", target: "source" },
     ],
   },

@@ -5,13 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Flame,
-  Calendar,
-  Clock,
-  Activity,
-} from "lucide-react";
+import { ArrowLeft, Flame, Calendar, Clock, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HeatmapCell {
@@ -29,7 +23,15 @@ interface HeatmapResult {
 }
 
 const dayLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-const dayLabelsFull = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+const dayLabelsFull = [
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+  "Dimanche",
+];
 
 function getIntensityColor(value: number, maxValue: number): string {
   if (maxValue === 0 || value === 0) return "bg-muted/30";
@@ -82,8 +84,12 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
                 <Calendar className="h-5 w-5 text-brand" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{dayLabelsFull[data.bestDay]}</p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Meilleur jour</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {dayLabelsFull[data.bestDay]}
+            </p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Meilleur jour
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
@@ -94,7 +100,9 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">{bestTimeSlot}</p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Meilleur créneau</p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Meilleur créneau
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
@@ -104,8 +112,12 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
                 <Activity className="h-5 w-5 text-purple-500" />
               </div>
             </div>
-            <p className="text-2xl font-bold tracking-tight">{data.totalEngagement.toLocaleString("fr-FR")}</p>
-            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Engagement total</p>
+            <p className="text-2xl font-bold tracking-tight">
+              {data.totalEngagement.toLocaleString("fr-FR")}
+            </p>
+            <p className="text-[11px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+              Engagement total
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -122,8 +134,11 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
             </CardTitle>
             {hoveredCell && (
               <div className="text-sm text-muted-foreground">
-                {dayLabelsFull[hoveredCell.day]} {formatHour(hoveredCell.hour)} :{" "}
-                <span className="font-medium text-foreground">{hoveredCell.value}</span>{" "}
+                {dayLabelsFull[hoveredCell.day]} {formatHour(hoveredCell.hour)}{" "}
+                :{" "}
+                <span className="font-medium text-foreground">
+                  {hoveredCell.value}
+                </span>{" "}
                 interaction{hoveredCell.value > 1 ? "s" : ""}
               </div>
             )}
@@ -162,7 +177,7 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
                         colorClass,
                         hoveredCell?.day === day && hoveredCell?.hour === hour
                           ? "ring-2 ring-brand ring-offset-1"
-                          : "hover:ring-1 hover:ring-brand/50"
+                          : "hover:ring-1 hover:ring-brand/50",
                       )}
                       onMouseEnter={() => setHoveredCell({ day, hour, value })}
                       onMouseLeave={() => setHoveredCell(null)}
@@ -195,7 +210,8 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
               <Flame className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium">Aucune donnée d&apos;engagement</p>
               <p className="text-sm mt-1">
-                La carte de chaleur se remplira avec les interactions enregistrées.
+                La carte de chaleur se remplira avec les interactions
+                enregistrées.
               </p>
             </div>
           )}

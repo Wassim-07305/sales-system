@@ -2,11 +2,17 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { ContractView } from "./contract-view";
 
-export default async function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ContractDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) notFound();
 
   const { data: contract } = await supabase
@@ -27,10 +33,6 @@ export default async function ContractDetailPage({ params }: { params: Promise<{
   const isAdmin = profile?.role === "admin" || profile?.role === "manager";
 
   return (
-    <ContractView
-      contract={contract}
-      isClient={isClient}
-      isAdmin={isAdmin}
-    />
+    <ContractView contract={contract} isClient={isClient} isAdmin={isAdmin} />
   );
 }

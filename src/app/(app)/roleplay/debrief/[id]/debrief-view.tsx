@@ -78,7 +78,7 @@ function ScoreCircle({ score }: { score: number }) {
     <div
       className={cn(
         "h-32 w-32 rounded-full border-4 flex flex-col items-center justify-center mx-auto",
-        color
+        color,
       )}
     >
       <span className="text-4xl font-bold">{score}</span>
@@ -149,7 +149,10 @@ export function DebriefView({ session }: Props) {
             </Button>
           </Link>
           <Link href="/roleplay">
-            <Button size="sm" className="bg-brand text-brand-dark hover:bg-brand/90">
+            <Button
+              size="sm"
+              className="bg-brand text-brand-dark hover:bg-brand/90"
+            >
               <RotateCcw className="h-4 w-4 mr-2" />
               Nouvelle session
             </Button>
@@ -252,53 +255,78 @@ export function DebriefView({ session }: Props) {
           )}
 
           {/* Progression vs past sessions */}
-          {session.pastSessions && session.pastSessions.length > 0 && feedback && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-brand" />
-                  Progression
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {(() => {
-                    const pastScores = session.pastSessions!
-                      .filter((s) => s.score !== null)
-                      .map((s) => s.score!);
-                    const avgPast = pastScores.length > 0
-                      ? Math.round(pastScores.reduce((a, b) => a + b, 0) / pastScores.length)
-                      : 0;
-                    const diff = score - avgPast;
-                    const TrendIcon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
-                    const trendColor = diff > 0 ? "text-brand" : diff < 0 ? "text-foreground" : "text-muted-foreground";
+          {session.pastSessions &&
+            session.pastSessions.length > 0 &&
+            feedback && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-brand" />
+                    Progression
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {(() => {
+                      const pastScores = session
+                        .pastSessions!.filter((s) => s.score !== null)
+                        .map((s) => s.score!);
+                      const avgPast =
+                        pastScores.length > 0
+                          ? Math.round(
+                              pastScores.reduce((a, b) => a + b, 0) /
+                                pastScores.length,
+                            )
+                          : 0;
+                      const diff = score - avgPast;
+                      const TrendIcon =
+                        diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
+                      const trendColor =
+                        diff > 0
+                          ? "text-brand"
+                          : diff < 0
+                            ? "text-foreground"
+                            : "text-muted-foreground";
 
-                    return (
-                      <>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Moy. sessions precedentes</span>
-                          <span className="text-sm font-medium">{avgPast}%</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Cette session</span>
-                          <span className="text-sm font-bold">{score}%</span>
-                        </div>
-                        <div className={cn("flex items-center gap-1 pt-1", trendColor)}>
-                          <TrendIcon className="h-4 w-4" />
-                          <span className="text-sm font-medium">
-                            {diff > 0 ? `+${diff}` : diff} points
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-1">
-                            ({pastScores.length} session{pastScores.length > 1 ? "s" : ""} precedente{pastScores.length > 1 ? "s" : ""})
-                          </span>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      return (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Moy. sessions precedentes
+                            </span>
+                            <span className="text-sm font-medium">
+                              {avgPast}%
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Cette session
+                            </span>
+                            <span className="text-sm font-bold">{score}%</span>
+                          </div>
+                          <div
+                            className={cn(
+                              "flex items-center gap-1 pt-1",
+                              trendColor,
+                            )}
+                          >
+                            <TrendIcon className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                              {diff > 0 ? `+${diff}` : diff} points
+                            </span>
+                            <span className="text-xs text-muted-foreground ml-1">
+                              ({pastScores.length} session
+                              {pastScores.length > 1 ? "s" : ""} precedente
+                              {pastScores.length > 1 ? "s" : ""})
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Recommended exercises */}
           {feedback && (
@@ -311,25 +339,40 @@ export function DebriefView({ session }: Props) {
               </CardHeader>
               <CardContent className="space-y-2">
                 {feedback.objection_handling < 70 && (
-                  <Link href="/roleplay" className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm">
-                    Entrainement gestion des objections (score: {feedback.objection_handling}%)
+                  <Link
+                    href="/roleplay"
+                    className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm"
+                  >
+                    Entrainement gestion des objections (score:{" "}
+                    {feedback.objection_handling}%)
                   </Link>
                 )}
                 {feedback.rapport_building < 70 && (
-                  <Link href="/roleplay" className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm">
-                    Entrainement creation de rapport (score: {feedback.rapport_building}%)
+                  <Link
+                    href="/roleplay"
+                    className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm"
+                  >
+                    Entrainement creation de rapport (score:{" "}
+                    {feedback.rapport_building}%)
                   </Link>
                 )}
                 {feedback.closing_technique < 70 && (
-                  <Link href="/roleplay" className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm">
-                    Entrainement technique de closing (score: {feedback.closing_technique}%)
+                  <Link
+                    href="/roleplay"
+                    className="block p-2 rounded-lg bg-muted/50 hover:bg-muted text-sm"
+                  >
+                    Entrainement technique de closing (score:{" "}
+                    {feedback.closing_technique}%)
                   </Link>
                 )}
-                {feedback.objection_handling >= 70 && feedback.rapport_building >= 70 && feedback.closing_technique >= 70 && (
-                  <p className="text-sm text-muted-foreground">
-                    Excellent ! Tous tes scores sont au-dessus de 70%. Continue comme ca !
-                  </p>
-                )}
+                {feedback.objection_handling >= 70 &&
+                  feedback.rapport_building >= 70 &&
+                  feedback.closing_technique >= 70 && (
+                    <p className="text-sm text-muted-foreground">
+                      Excellent ! Tous tes scores sont au-dessus de 70%.
+                      Continue comme ca !
+                    </p>
+                  )}
               </CardContent>
             </Card>
           )}
@@ -354,14 +397,17 @@ export function DebriefView({ session }: Props) {
                     return (
                       <div
                         key={i}
-                        className={cn("flex gap-3", isUser && "flex-row-reverse")}
+                        className={cn(
+                          "flex gap-3",
+                          isUser && "flex-row-reverse",
+                        )}
                       >
                         <div
                           className={cn(
                             "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
                             isUser
                               ? "bg-brand/10 text-brand"
-                              : "bg-muted text-muted-foreground"
+                              : "bg-muted text-muted-foreground",
                           )}
                         >
                           {isUser ? (
@@ -371,26 +417,26 @@ export function DebriefView({ session }: Props) {
                           )}
                         </div>
                         <div
-                          className={cn(
-                            "max-w-[80%]",
-                            isUser && "text-right"
-                          )}
+                          className={cn("max-w-[80%]", isUser && "text-right")}
                         >
                           <div
                             className={cn(
                               "inline-block rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                               isUser
                                 ? "bg-brand-dark text-white rounded-br-md"
-                                : "bg-muted rounded-bl-md"
+                                : "bg-muted rounded-bl-md",
                             )}
                           >
                             {msg.content}
                           </div>
                           <p className="text-[10px] text-muted-foreground mt-1 px-1">
-                            {new Date(msg.timestamp).toLocaleTimeString("fr-FR", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(msg.timestamp).toLocaleTimeString(
+                              "fr-FR",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </p>
                         </div>
                       </div>

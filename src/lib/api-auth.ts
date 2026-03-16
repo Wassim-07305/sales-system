@@ -12,8 +12,13 @@ export async function validateApiRequest(request: NextRequest) {
   if (!authHeader?.startsWith("Bearer ")) {
     return {
       error: NextResponse.json(
-        { error: { code: "UNAUTHORIZED", message: "Token manquant. Utilisez: Authorization: Bearer <token>" } },
-        { status: 401 }
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Token manquant. Utilisez: Authorization: Bearer <token>",
+          },
+        },
+        { status: 401 },
       ),
       user: null,
     };
@@ -31,8 +36,10 @@ export async function validateApiRequest(request: NextRequest) {
   if (error || !user) {
     return {
       error: NextResponse.json(
-        { error: { code: "UNAUTHORIZED", message: "Token invalide ou expiré" } },
-        { status: 401 }
+        {
+          error: { code: "UNAUTHORIZED", message: "Token invalide ou expiré" },
+        },
+        { status: 401 },
       ),
       user: null,
     };
@@ -47,11 +54,18 @@ export async function validateApiRequest(request: NextRequest) {
     if (entry.count >= RATE_LIMIT) {
       return {
         error: NextResponse.json(
-          { error: { code: "RATE_LIMITED", message: `Limite de ${RATE_LIMIT} requêtes/minute dépassée` } },
+          {
+            error: {
+              code: "RATE_LIMITED",
+              message: `Limite de ${RATE_LIMIT} requêtes/minute dépassée`,
+            },
+          },
           {
             status: 429,
-            headers: { "Retry-After": String(Math.ceil((entry.resetAt - now) / 1000)) },
-          }
+            headers: {
+              "Retry-After": String(Math.ceil((entry.resetAt - now) / 1000)),
+            },
+          },
         ),
         user: null,
       };
@@ -71,8 +85,13 @@ export async function validateApiRequest(request: NextRequest) {
   if (!profile || ["client_b2b", "client_b2c"].includes(profile.role)) {
     return {
       error: NextResponse.json(
-        { error: { code: "FORBIDDEN", message: "Accès API réservé aux membres de l'équipe" } },
-        { status: 403 }
+        {
+          error: {
+            code: "FORBIDDEN",
+            message: "Accès API réservé aux membres de l'équipe",
+          },
+        },
+        { status: 403 },
       ),
       user: null,
     };
@@ -81,7 +100,10 @@ export async function validateApiRequest(request: NextRequest) {
   return { error: null, user, supabase };
 }
 
-export function jsonResponse(data: unknown, meta?: { page: number; limit: number; total: number | null }) {
+export function jsonResponse(
+  data: unknown,
+  meta?: { page: number; limit: number; total: number | null },
+) {
   return NextResponse.json({ data, meta: meta || undefined });
 }
 

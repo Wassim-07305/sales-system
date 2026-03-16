@@ -144,7 +144,7 @@ export function EventsView({
       router.refresh();
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Erreur lors de la création"
+        err instanceof Error ? err.message : "Erreur lors de la création",
       );
     } finally {
       setCreating(false);
@@ -181,9 +181,7 @@ export function EventsView({
       }
       router.refresh();
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Erreur"
-      );
+      toast.error(err instanceof Error ? err.message : "Erreur");
     } finally {
       setLoadingRsvp(null);
     }
@@ -217,7 +215,7 @@ export function EventsView({
                 <p className="text-xs font-semibold text-brand">
                   {new Date(meta.event_date + "T00:00:00").toLocaleDateString(
                     "fr-FR",
-                    { day: "numeric", month: "short" }
+                    { day: "numeric", month: "short" },
                   )}
                 </p>
               </div>
@@ -233,7 +231,10 @@ export function EventsView({
                   {eventTypeLabels[meta.type] || meta.type}
                 </Badge>
                 {isFull && !isPast && (
-                  <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+                  <Badge
+                    variant="outline"
+                    className="bg-red-500/10 text-red-600 border-red-500/20"
+                  >
                     Complet
                   </Badge>
                 )}
@@ -260,7 +261,9 @@ export function EventsView({
                     ) : (
                       <MapPin className="h-3.5 w-3.5" />
                     )}
-                    {meta.location.startsWith("http") ? "En ligne" : meta.location}
+                    {meta.location.startsWith("http")
+                      ? "En ligne"
+                      : meta.location}
                   </span>
                 )}
                 <span className="flex items-center gap-1">
@@ -289,7 +292,9 @@ export function EventsView({
                       ? "border-brand text-brand hover:bg-brand/10"
                       : "bg-brand text-brand-dark hover:bg-brand/90"
                   }
-                  disabled={loadingRsvp === event.id || (isFull && !isRegistered)}
+                  disabled={
+                    loadingRsvp === event.id || (isFull && !isRegistered)
+                  }
                   onClick={() => handleToggleRsvp(event.id)}
                 >
                   {isRegistered ? (
@@ -361,9 +366,7 @@ export function EventsView({
             </CardContent>
           </Card>
         ) : (
-          upcoming.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))
+          upcoming.map((event) => <EventCard key={event.id} event={event} />)
         )}
       </div>
 

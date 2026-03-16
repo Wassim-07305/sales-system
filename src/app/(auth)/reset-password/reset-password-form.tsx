@@ -8,7 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Eye, EyeOff, Loader2, ArrowLeft, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  ArrowLeft,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ResetPasswordForm() {
@@ -21,8 +28,10 @@ export function ResetPasswordForm() {
   const router = useRouter();
 
   const passwordStrength = getPasswordStrength(password);
-  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
-  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+  const passwordsMatch =
+    confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,7 +61,9 @@ export function ResetPasswordForm() {
       setLoading(false);
       setSuccess(true);
     } catch {
-      toast.error("Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.");
+      toast.error(
+        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+      );
       setLoading(false);
     }
   }
@@ -64,9 +75,13 @@ export function ResetPasswordForm() {
           <CheckCircle2 className="h-9 w-9 text-brand" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-brand-dark">{"Mot de passe mis \u00e0 jour"}</h3>
+          <h3 className="text-xl font-bold text-brand-dark">
+            {"Mot de passe mis \u00e0 jour"}
+          </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            {"Votre mot de passe a \u00e9t\u00e9 modifi\u00e9 avec succ\u00e8s. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."}
+            {
+              "Votre mot de passe a \u00e9t\u00e9 modifi\u00e9 avec succ\u00e8s. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+            }
           </p>
         </div>
         <div className="pt-2">
@@ -88,7 +103,9 @@ export function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium">Nouveau mot de passe</Label>
+        <Label htmlFor="password" className="text-sm font-medium">
+          Nouveau mot de passe
+        </Label>
         <div className="relative">
           <Input
             id="password"
@@ -106,7 +123,11 @@ export function ResetPasswordForm() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
-            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-label={
+              showPassword
+                ? "Masquer le mot de passe"
+                : "Afficher le mot de passe"
+            }
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -130,19 +151,21 @@ export function ResetPasswordForm() {
                         : passwordStrength.level <= 2
                           ? "bg-amber-500"
                           : "bg-brand"
-                      : "bg-border/40"
+                      : "bg-border/40",
                   )}
                 />
               ))}
             </div>
-            <p className={cn(
-              "text-xs font-medium transition-colors",
-              passwordStrength.level <= 1
-                ? "text-destructive"
-                : passwordStrength.level <= 2
-                  ? "text-amber-500"
-                  : "text-brand"
-            )}>
+            <p
+              className={cn(
+                "text-xs font-medium transition-colors",
+                passwordStrength.level <= 1
+                  ? "text-destructive"
+                  : passwordStrength.level <= 2
+                    ? "text-amber-500"
+                    : "text-brand",
+              )}
+            >
               {passwordStrength.label}
             </p>
           </div>
@@ -154,7 +177,9 @@ export function ResetPasswordForm() {
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmer le mot de passe</Label>
+        <Label htmlFor="confirmPassword" className="text-sm font-medium">
+          Confirmer le mot de passe
+        </Label>
         <div className="relative">
           <Input
             id="confirmPassword"
@@ -168,7 +193,8 @@ export function ResetPasswordForm() {
             className={cn(
               "h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50",
               passwordsMatch && "border-brand/60 focus-visible:border-brand",
-              passwordsMismatch && "border-destructive/60 focus-visible:border-destructive"
+              passwordsMismatch &&
+                "border-destructive/60 focus-visible:border-destructive",
             )}
           />
           <button
@@ -176,7 +202,11 @@ export function ResetPasswordForm() {
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
-            aria-label={showConfirmPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-label={
+              showConfirmPassword
+                ? "Masquer le mot de passe"
+                : "Afficher le mot de passe"
+            }
           >
             {showConfirmPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -220,7 +250,10 @@ export function ResetPasswordForm() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        <Link href="/login" className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
+        >
           <ArrowLeft className="h-3.5 w-3.5" />
           {"Retour \u00e0 la connexion"}
         </Link>
@@ -229,7 +262,10 @@ export function ResetPasswordForm() {
   );
 }
 
-function getPasswordStrength(password: string): { level: number; label: string } {
+function getPasswordStrength(password: string): {
+  level: number;
+  label: string;
+} {
   if (password.length === 0) return { level: 0, label: "" };
   if (password.length < 8) return { level: 1, label: "Trop court" };
 

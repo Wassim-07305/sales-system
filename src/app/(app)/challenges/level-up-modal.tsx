@@ -11,7 +11,16 @@ interface Props {
 
 export function LevelUpModal({ level, levelName }: Props) {
   const [visible, setVisible] = useState(true);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string; delay: number; duration: number }>>([]);
+  const [particles, setParticles] = useState<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+      color: string;
+      delay: number;
+      duration: number;
+    }>
+  >([]);
 
   useEffect(() => {
     // Generate confetti particles
@@ -65,7 +74,8 @@ export function LevelUpModal({ level, levelName }: Props) {
             </h2>
             <p className="text-brand text-lg font-semibold mb-2">{levelName}</p>
             <p className="text-white/60 text-sm mb-6">
-              Félicitations ! Vous avez atteint un nouveau niveau. Continuez comme ça !
+              Félicitations ! Vous avez atteint un nouveau niveau. Continuez
+              comme ça !
             </p>
 
             <Button

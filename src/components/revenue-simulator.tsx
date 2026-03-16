@@ -23,12 +23,21 @@ import {
 import { toast } from "sonner";
 
 function calculateRevenueLocal(inputs: SimulatorInputs): SimulatorResults {
-  const monthlyConversations = inputs.dailyConversations * inputs.workingDaysPerMonth;
-  const monthlyBookedCalls = Math.round(monthlyConversations * (inputs.conversionRate / 100));
-  const monthlyShowUps = Math.round(monthlyBookedCalls * (inputs.showUpRate / 100));
-  const monthlyClosedDeals = Math.round(monthlyShowUps * (inputs.closingRate / 100));
+  const monthlyConversations =
+    inputs.dailyConversations * inputs.workingDaysPerMonth;
+  const monthlyBookedCalls = Math.round(
+    monthlyConversations * (inputs.conversionRate / 100),
+  );
+  const monthlyShowUps = Math.round(
+    monthlyBookedCalls * (inputs.showUpRate / 100),
+  );
+  const monthlyClosedDeals = Math.round(
+    monthlyShowUps * (inputs.closingRate / 100),
+  );
   const monthlyGrossRevenue = monthlyClosedDeals * inputs.averageDealValue;
-  const monthlySetterCommission = Math.round(monthlyGrossRevenue * (inputs.commissionRate / 100));
+  const monthlySetterCommission = Math.round(
+    monthlyGrossRevenue * (inputs.commissionRate / 100),
+  );
   const yearlySetterCommission = monthlySetterCommission * 12;
 
   const funnel = [
@@ -36,17 +45,26 @@ function calculateRevenueLocal(inputs: SimulatorInputs): SimulatorResults {
     {
       label: "Appels bookes",
       value: monthlyBookedCalls,
-      percent: monthlyConversations > 0 ? Math.round((monthlyBookedCalls / monthlyConversations) * 100) : 0,
+      percent:
+        monthlyConversations > 0
+          ? Math.round((monthlyBookedCalls / monthlyConversations) * 100)
+          : 0,
     },
     {
       label: "Show-ups",
       value: monthlyShowUps,
-      percent: monthlyConversations > 0 ? Math.round((monthlyShowUps / monthlyConversations) * 100) : 0,
+      percent:
+        monthlyConversations > 0
+          ? Math.round((monthlyShowUps / monthlyConversations) * 100)
+          : 0,
     },
     {
       label: "Deals closes",
       value: monthlyClosedDeals,
-      percent: monthlyConversations > 0 ? Math.round((monthlyClosedDeals / monthlyConversations) * 100) : 0,
+      percent:
+        monthlyConversations > 0
+          ? Math.round((monthlyClosedDeals / monthlyConversations) * 100)
+          : 0,
     },
   ];
 
@@ -78,7 +96,7 @@ export function RevenueSimulator({
   savedInputs?: SimulatorInputs | null;
 }) {
   const [inputs, setInputs] = useState<SimulatorInputs>(
-    savedInputs || DEFAULT_INPUTS
+    savedInputs || DEFAULT_INPUTS,
   );
   const [isPending, startTransition] = useTransition();
 
@@ -101,7 +119,12 @@ export function RevenueSimulator({
     });
   }
 
-  const funnelColors = ["bg-blue-500", "bg-yellow-500", "bg-orange-500", "bg-green-500"];
+  const funnelColors = [
+    "bg-blue-500",
+    "bg-yellow-500",
+    "bg-orange-500",
+    "bg-green-500",
+  ];
   const maxFunnel = results.funnel[0]?.value || 1;
 
   return (
@@ -227,22 +250,29 @@ export function RevenueSimulator({
           {/* Revenue highlight */}
           <Card className="bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
             <CardContent className="p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Tes revenus mensuels estimes</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                Tes revenus mensuels estimes
+              </p>
               <p className="text-4xl font-bold text-brand">
                 {results.monthlySetterCommission.toLocaleString("fr-FR")} €
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                soit {results.yearlySetterCommission.toLocaleString("fr-FR")} €/an
+                soit {results.yearlySetterCommission.toLocaleString("fr-FR")}{" "}
+                €/an
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3 text-left">
                 <div className="bg-background/60 rounded-lg p-3">
-                  <p className="text-[10px] text-muted-foreground">CA genere/mois</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    CA genere/mois
+                  </p>
                   <p className="font-semibold">
                     {results.monthlyGrossRevenue.toLocaleString("fr-FR")} €
                   </p>
                 </div>
                 <div className="bg-background/60 rounded-lg p-3">
-                  <p className="text-[10px] text-muted-foreground">Deals closes/mois</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Deals closes/mois
+                  </p>
                   <p className="font-semibold">{results.monthlyClosedDeals}</p>
                 </div>
               </div>

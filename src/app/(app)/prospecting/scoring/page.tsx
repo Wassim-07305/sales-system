@@ -14,7 +14,9 @@ export default async function ScoringPage() {
   // Fetch all prospects with their scores
   const { data: prospects } = await supabase
     .from("prospects")
-    .select("*, scores:prospect_scores(engagement_score, responsiveness_score, qualification_score, total_score, temperature, computed_at)")
+    .select(
+      "*, scores:prospect_scores(engagement_score, responsiveness_score, qualification_score, total_score, temperature, computed_at)",
+    )
     .order("created_at", { ascending: false });
 
   const allProspects = (prospects || []).map((p: Record<string, unknown>) => ({
@@ -23,17 +25,21 @@ export default async function ScoringPage() {
   }));
 
   // Compute advanced score breakdowns for each prospect
-  const prospectsWithBreakdown = allProspects.map((p: Record<string, unknown>) => ({
-    ...p,
-    breakdown: computeScoreBreakdown(p, allProspects),
-  }));
+  const prospectsWithBreakdown = allProspects.map(
+    (p: Record<string, unknown>) => ({
+      ...p,
+      breakdown: computeScoreBreakdown(p, allProspects),
+    }),
+  );
 
   // Sort by total score descending
-  prospectsWithBreakdown.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
-    const bkA = a.breakdown as { total: number };
-    const bkB = b.breakdown as { total: number };
-    return bkB.total - bkA.total;
-  });
+  prospectsWithBreakdown.sort(
+    (a: Record<string, unknown>, b: Record<string, unknown>) => {
+      const bkA = a.breakdown as { total: number };
+      const bkB = b.breakdown as { total: number };
+      return bkB.total - bkA.total;
+    },
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <ScoringView prospects={prospectsWithBreakdown as any} />;

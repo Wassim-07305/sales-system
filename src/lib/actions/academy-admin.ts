@@ -2,11 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { notify } from "@/lib/actions/notifications";
 
 // Helper: require admin or manager role
 async function requireAdmin() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   const { data: profile } = await supabase
@@ -28,7 +31,9 @@ export async function getAdminCourses() {
   const { supabase } = await requireAdmin();
   const { data } = await supabase
     .from("courses")
-    .select("*, modules:course_modules(id, title, position, lessons:lessons(id))")
+    .select(
+      "*, modules:course_modules(id, title, position, lessons:lessons(id))",
+    )
     .order("position", { ascending: true });
 
   return (data || []).map((c: Record<string, unknown>) => ({
@@ -62,7 +67,12 @@ export async function createCourse(data: {
       title: data.title,
       description: data.description || null,
       thumbnail_url: data.thumbnail_url || null,
-      target_roles: data.target_roles || ["setter", "closer", "client_b2b", "client_b2c"],
+      target_roles: data.target_roles || [
+        "setter",
+        "closer",
+        "client_b2b",
+        "client_b2c",
+      ],
       is_published: data.is_published ?? false,
       position,
     })
@@ -71,16 +81,47 @@ export async function createCourse(data: {
 
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
+
+  // Notifier les users du role cible
+  try {
+    const targetRoles = data.target_roles || [
+      "setter",
+      "closer",
+      "client_b2b",
+      "client_b2c",
+    ];
+    const { data: targetUsers } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", targetRoles);
+    for (const u of (targetUsers || []).slice(0, 50)) {
+      await notify(
+        u.id,
+        "Nouveau contenu disponible",
+        `"${data.title}" a été ajouté dans l'Academy`,
+        {
+          link: "/academy",
+          type: "content_update",
+        },
+      );
+    }
+  } catch {
+    /* ignore notification errors */
+  }
+
   return course?.id;
 }
 
-export async function updateCourse(courseId: string, data: {
-  title?: string;
-  description?: string;
-  thumbnail_url?: string;
-  target_roles?: string[];
-  is_published?: boolean;
-}) {
+export async function updateCourse(
+  courseId: string,
+  data: {
+    title?: string;
+    description?: string;
+    thumbnail_url?: string;
+    target_roles?: string[];
+    is_published?: boolean;
+  },
+) {
   const { supabase } = await requireAdmin();
 
   const { error } = await supabase
@@ -90,15 +131,44 @@ export async function updateCourse(courseId: string, data: {
 
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
+
+  // Notifier les users du role cible
+  try {
+    const { data: course } = await supabase
+      .from("courses")
+      .select("target_roles")
+      .eq("id", courseId)
+      .single();
+    const targetRoles = course?.target_roles || [
+      "admin",
+      "manager",
+      "setter",
+      "closer",
+    ];
+    const { data: targetUsers } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", targetRoles);
+    for (const u of (targetUsers || []).slice(0, 50)) {
+      await notify(
+        u.id,
+        "Nouveau contenu disponible",
+        `"${data.title || "Un cours"}" a été modifié dans l'Academy`,
+        {
+          link: "/academy",
+          type: "content_update",
+        },
+      );
+    }
+  } catch {
+    /* ignore notification errors */
+  }
 }
 
 export async function deleteCourse(courseId: string) {
   const { supabase } = await requireAdmin();
 
-  const { error } = await supabase
-    .from("courses")
-    .delete()
-    .eq("id", courseId);
+  const { error } = await supabase.from("courses").delete().eq("id", courseId);
 
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
@@ -152,10 +222,13 @@ export async function createModule(data: {
   return mod?.id;
 }
 
-export async function updateModule(moduleId: string, data: {
-  title?: string;
-  description?: string;
-}) {
+export async function updateModule(
+  moduleId: string,
+  data: {
+    title?: string;
+    description?: string;
+  },
+) {
   const { supabase } = await requireAdmin();
 
   const { error } = await supabase
@@ -179,7 +252,10 @@ export async function deleteModule(moduleId: string) {
   revalidatePath("/academy", "page");
 }
 
-export async function reorderModules(courseId: string, orderedModuleIds: string[]) {
+export async function reorderModules(
+  courseId: string,
+  orderedModuleIds: string[],
+) {
   const { supabase } = await requireAdmin();
 
   for (let i = 0; i < orderedModuleIds.length; i++) {
@@ -231,18 +307,54 @@ export async function createLesson(data: {
 
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
+
+  // Notifier les users du role cible
+  try {
+    const { data: course } = await supabase
+      .from("courses")
+      .select("target_roles")
+      .eq("id", data.course_id)
+      .single();
+    const targetRoles = course?.target_roles || [
+      "admin",
+      "manager",
+      "setter",
+      "closer",
+    ];
+    const { data: targetUsers } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", targetRoles);
+    for (const u of (targetUsers || []).slice(0, 50)) {
+      await notify(
+        u.id,
+        "Nouveau contenu disponible",
+        `"${data.title}" a été ajouté dans l'Academy`,
+        {
+          link: "/academy",
+          type: "content_update",
+        },
+      );
+    }
+  } catch {
+    /* ignore notification errors */
+  }
+
   return lesson?.id;
 }
 
-export async function updateLesson(lessonId: string, data: {
-  title?: string;
-  description?: string;
-  video_url?: string | null;
-  subtitle_url?: string | null;
-  duration_minutes?: number | null;
-  content_html?: string | null;
-  attachments?: Array<{ name: string; url: string; type: string }>;
-}) {
+export async function updateLesson(
+  lessonId: string,
+  data: {
+    title?: string;
+    description?: string;
+    video_url?: string | null;
+    subtitle_url?: string | null;
+    duration_minutes?: number | null;
+    content_html?: string | null;
+    attachments?: Array<{ name: string; url: string; type: string }>;
+  },
+) {
   const { supabase } = await requireAdmin();
 
   const { error } = await supabase
@@ -252,21 +364,60 @@ export async function updateLesson(lessonId: string, data: {
 
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
+
+  // Notifier les users du role cible
+  try {
+    const { data: lesson } = await supabase
+      .from("lessons")
+      .select("course_id")
+      .eq("id", lessonId)
+      .single();
+    if (lesson?.course_id) {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("target_roles")
+        .eq("id", lesson.course_id)
+        .single();
+      const targetRoles = course?.target_roles || [
+        "admin",
+        "manager",
+        "setter",
+        "closer",
+      ];
+      const { data: targetUsers } = await supabase
+        .from("profiles")
+        .select("id")
+        .in("role", targetRoles);
+      for (const u of (targetUsers || []).slice(0, 50)) {
+        await notify(
+          u.id,
+          "Nouveau contenu disponible",
+          `"${data.title || "Une leçon"}" a été modifié dans l'Academy`,
+          {
+            link: "/academy",
+            type: "content_update",
+          },
+        );
+      }
+    }
+  } catch {
+    /* ignore notification errors */
+  }
 }
 
 export async function deleteLesson(lessonId: string) {
   const { supabase } = await requireAdmin();
 
-  const { error } = await supabase
-    .from("lessons")
-    .delete()
-    .eq("id", lessonId);
+  const { error } = await supabase.from("lessons").delete().eq("id", lessonId);
 
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
 }
 
-export async function reorderLessons(moduleId: string, orderedLessonIds: string[]) {
+export async function reorderLessons(
+  moduleId: string,
+  orderedLessonIds: string[],
+) {
   const { supabase } = await requireAdmin();
 
   for (let i = 0; i < orderedLessonIds.length; i++) {
@@ -279,11 +430,14 @@ export async function reorderLessons(moduleId: string, orderedLessonIds: string[
   revalidatePath("/academy", "page");
 }
 
-export async function addLessonAttachment(lessonId: string, attachment: {
-  name: string;
-  url: string;
-  type: string;
-}) {
+export async function addLessonAttachment(
+  lessonId: string,
+  attachment: {
+    name: string;
+    url: string;
+    type: string;
+  },
+) {
   const { supabase } = await requireAdmin();
 
   // Get current attachments
@@ -293,7 +447,9 @@ export async function addLessonAttachment(lessonId: string, attachment: {
     .eq("id", lessonId)
     .single();
 
-  const attachments = Array.isArray(lesson?.attachments) ? lesson.attachments : [];
+  const attachments = Array.isArray(lesson?.attachments)
+    ? lesson.attachments
+    : [];
   attachments.push(attachment);
 
   const { error } = await supabase
@@ -305,7 +461,10 @@ export async function addLessonAttachment(lessonId: string, attachment: {
   revalidatePath("/academy", "page");
 }
 
-export async function removeLessonAttachment(lessonId: string, attachmentUrl: string) {
+export async function removeLessonAttachment(
+  lessonId: string,
+  attachmentUrl: string,
+) {
   const { supabase } = await requireAdmin();
 
   const { data: lesson } = await supabase
@@ -315,7 +474,9 @@ export async function removeLessonAttachment(lessonId: string, attachmentUrl: st
     .single();
 
   const attachments = Array.isArray(lesson?.attachments)
-    ? (lesson.attachments as Array<{ name: string; url: string; type: string }>).filter((a) => a.url !== attachmentUrl)
+    ? (
+        lesson.attachments as Array<{ name: string; url: string; type: string }>
+      ).filter((a) => a.url !== attachmentUrl)
     : [];
 
   const { error } = await supabase

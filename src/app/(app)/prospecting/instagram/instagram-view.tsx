@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -38,11 +39,11 @@ import {
   RefreshCw,
   Unplug,
   AlertTriangle,
+  Send,
+  Wand2,
+  MessageCircle,
 } from "lucide-react";
-import {
-  scrapeStories,
-  generateAiMessage,
-} from "@/lib/actions/hub-setting";
+import { scrapeStories, generateAiMessage } from "@/lib/actions/hub-setting";
 import {
   generateUnipileAuthLink,
   getUnipileStatus,
@@ -105,7 +106,9 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
 
   // Unipile state
   const [connectingUnipile, setConnectingUnipile] = useState(false);
-  const [igConnected, setIgConnected] = useState(unipileInstagram?.connected ?? false);
+  const [igConnected, setIgConnected] = useState(
+    unipileInstagram?.connected ?? false,
+  );
   const [igName, setIgName] = useState(unipileInstagram?.accountName ?? "");
   const [refreshingUnipile, setRefreshingUnipile] = useState(false);
 
@@ -116,7 +119,11 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        window.open(
+          result.url,
+          "_blank",
+          "width=600,height=700,scrollbars=yes",
+        );
         toast.info("Connectez votre compte Instagram, puis cliquez Rafraîchir");
       }
     } catch {
@@ -130,11 +137,15 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
     try {
       const result = await getUnipileStatus();
       const igAccount = result.accounts.find(
-        (a) => a.provider.toUpperCase() === "INSTAGRAM"
+        (a) => a.provider.toUpperCase() === "INSTAGRAM",
       );
       setIgConnected(!!igAccount);
       setIgName(igAccount?.name ?? "");
-      toast.success(igAccount ? "Instagram connecté via Unipile" : "Aucun compte Instagram détecté");
+      toast.success(
+        igAccount
+          ? "Instagram connecté via Unipile"
+          : "Aucun compte Instagram détecté",
+      );
     } catch {
       toast.error("Erreur lors du rafraîchissement");
     }
@@ -155,6 +166,30 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
   const [dmContext, setDmContext] = useState("");
   const [generatedDm, setGeneratedDm] = useState("");
   const [generatingDm, setGeneratingDm] = useState(false);
+
+  // Story reaction generator
+  const [storyUrl, setStoryUrl] = useState("");
+  const [storyReaction, setStoryReaction] = useState("");
+  const [generatingReaction, setGeneratingReaction] = useState(false);
+
+  async function handleGenerateStoryReaction() {
+    if (!storyUrl.trim()) {
+      toast.error("Collez une URL ou description de story Instagram");
+      return;
+    }
+    setGeneratingReaction(true);
+    setStoryReaction("");
+    try {
+      const context = `Réagir à cette story Instagram: ${storyUrl}. Générer un message de réaction naturel et engageant pour ouvrir la conversation.`;
+      const msg = await generateAiMessage("ce prospect", context, "instagram");
+      setStoryReaction(msg);
+      toast.success("Message de réaction généré");
+    } catch {
+      toast.error("Erreur de génération");
+    } finally {
+      setGeneratingReaction(false);
+    }
+  }
 
   // Mode Duo IA+Humain — per-conversation auto mode
   const [autoModeIds, setAutoModeIds] = useState<Set<string>>(new Set());
@@ -236,7 +271,10 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
         title="Instagram"
         description="Prospection et outils Instagram"
       >
-        <Badge variant="outline" className="bg-muted/60 text-muted-foreground border-border/50 gap-1">
+        <Badge
+          variant="outline"
+          className="bg-muted/60 text-muted-foreground border-border/50 gap-1"
+        >
           <Instagram className="h-3 w-3" />
           {prospects.length} prospects
         </Badge>
@@ -248,8 +286,9 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
           <div className="flex items-center gap-2 text-amber-600">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <p className="text-sm font-medium">
-              Intégration Instagram non configurée. Les messages et stories ne seront pas synchronisés automatiquement.
-              Connectez votre compte ci-dessous pour activer toutes les fonctionnalités.
+              Intégration Instagram non configurée. Les messages et stories ne
+              seront pas synchronisés automatiquement. Connectez votre compte
+              ci-dessous pour activer toutes les fonctionnalités.
             </p>
           </div>
         </div>
@@ -268,7 +307,9 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                     Instagram connecté via Unipile
                   </span>
                   {igName && (
-                    <span className="text-xs text-muted-foreground">({igName})</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({igName})
+                    </span>
                   )}
                 </>
               ) : (
@@ -303,7 +344,9 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
               onClick={handleRefreshUnipile}
               disabled={refreshingUnipile}
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${refreshingUnipile ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${refreshingUnipile ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </CardContent>
@@ -464,6 +507,79 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                       <Copy className="h-3 w-3 mr-1" />
                       Copier le message
                     </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Story Reaction Generator */}
+            <Card className="lg:col-span-2 shadow-sm rounded-2xl border-brand/20">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Réagir à une Story
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Collez l&apos;URL d&apos;une story ou décrivez son contenu
+                  pour générer un message de réaction personnalisé.
+                </p>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="URL de la story ou description du contenu..."
+                    value={storyUrl}
+                    onChange={(e) => setStoryUrl(e.target.value)}
+                    className="h-11 rounded-xl flex-1"
+                  />
+                  <Button
+                    onClick={handleGenerateStoryReaction}
+                    disabled={generatingReaction}
+                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  >
+                    {generatingReaction ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-4 w-4 mr-2" />
+                    )}
+                    Générer réaction
+                  </Button>
+                </div>
+
+                {storyReaction && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      Message de réaction (modifiable)
+                    </label>
+                    <Textarea
+                      value={storyReaction}
+                      onChange={(e) => setStoryReaction(e.target.value)}
+                      className="min-h-[100px] rounded-xl"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => copyToClipboard(storyReaction)}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copier
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl"
+                        onClick={() => {
+                          copyToClipboard(storyReaction);
+                          toast.success(
+                            "Réaction copiée ! Collez-la dans Instagram.",
+                          );
+                        }}
+                      >
+                        <Send className="h-3 w-3 mr-1" />
+                        Envoyer (copier)
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>

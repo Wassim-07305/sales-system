@@ -4,7 +4,11 @@ import { NewContractForm } from "./new-contract-form";
 export default async function NewContractPage({
   searchParams,
 }: {
-  searchParams: Promise<{ dealId?: string; clientId?: string; amount?: string }>;
+  searchParams: Promise<{
+    dealId?: string;
+    clientId?: string;
+    amount?: string;
+  }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -30,7 +34,7 @@ export default async function NewContractPage({
     id: d.id as string,
     title: d.title as string,
     value: d.value as number,
-    contact: Array.isArray(d.contact) ? (d.contact[0] || null) : d.contact,
+    contact: Array.isArray(d.contact) ? d.contact[0] || null : d.contact,
   }));
 
   return (

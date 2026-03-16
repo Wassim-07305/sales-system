@@ -9,7 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Bell, Shield, ChevronRight, Loader2, Check } from "lucide-react";
+import {
+  Settings,
+  Bell,
+  Shield,
+  ChevronRight,
+  Loader2,
+  Check,
+} from "lucide-react";
 import { saveOrgSettings, changePassword } from "@/lib/actions/settings";
 import { toast } from "sonner";
 
@@ -21,11 +28,21 @@ interface OrgSettings {
   cs_alerts: boolean;
 }
 
-export function SettingsView({ initialSettings }: { initialSettings: OrgSettings }) {
+export function SettingsView({
+  initialSettings,
+}: {
+  initialSettings: OrgSettings;
+}) {
   const [orgName, setOrgName] = useState(initialSettings.org_name);
-  const [contactEmail, setContactEmail] = useState(initialSettings.contact_email);
-  const [emailNotifications, setEmailNotifications] = useState(initialSettings.email_notifications);
-  const [bookingReminders, setBookingReminders] = useState(initialSettings.booking_reminders);
+  const [contactEmail, setContactEmail] = useState(
+    initialSettings.contact_email,
+  );
+  const [emailNotifications, setEmailNotifications] = useState(
+    initialSettings.email_notifications,
+  );
+  const [bookingReminders, setBookingReminders] = useState(
+    initialSettings.booking_reminders,
+  );
   const [csAlerts, setCsAlerts] = useState(initialSettings.cs_alerts);
   const [newPassword, setNewPassword] = useState("");
   const [isSaving, startSaving] = useTransition();
@@ -141,10 +158,7 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
                 Alerter quand un client passe en zone rouge
               </p>
             </div>
-            <Switch
-              checked={csAlerts}
-              onCheckedChange={setCsAlerts}
-            />
+            <Switch checked={csAlerts} onCheckedChange={setCsAlerts} />
           </div>
         </CardContent>
       </Card>
@@ -210,7 +224,8 @@ export function SettingsView({ initialSettings }: { initialSettings: OrgSettings
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Gérez vos consentements, exportez vos données et exercez vos droits RGPD.
+            Gérez vos consentements, exportez vos données et exercez vos droits
+            RGPD.
           </p>
           <Link href="/settings/privacy">
             <Button variant="outline" className="w-full justify-between">

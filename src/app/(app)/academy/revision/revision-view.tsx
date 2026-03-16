@@ -53,7 +53,8 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
 
   const currentCard = filteredCards[currentIndex] || null;
   const totalCards = filteredCards.length;
-  const progressPercent = totalCards > 0 ? Math.round(((currentIndex + 1) / totalCards) * 100) : 0;
+  const progressPercent =
+    totalCards > 0 ? Math.round(((currentIndex + 1) / totalCards) * 100) : 0;
 
   const handleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
@@ -68,7 +69,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
       }));
       setHasScored(true);
     },
-    [hasScored]
+    [hasScored],
   );
 
   const handleNext = useCallback(() => {
@@ -117,8 +118,12 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
           <div className="h-16 w-16 rounded-2xl bg-muted/40 ring-1 ring-border/30 flex items-center justify-center mb-4">
             <BookOpen className="h-8 w-8 text-muted-foreground/40" />
           </div>
-          <p className="font-medium text-sm">Aucune carte de revision disponible</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">Complétez des leçons pour générer vos flashcards</p>
+          <p className="font-medium text-sm">
+            Aucune carte de revision disponible
+          </p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            Complétez des leçons pour générer vos flashcards
+          </p>
         </div>
       </div>
     );
@@ -148,9 +153,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
       {filteredCards.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <BookOpen className="h-12 w-12 mb-4 opacity-30" />
-          <p className="text-sm">
-            Aucune carte de revision pour ce cours
-          </p>
+          <p className="text-sm">Aucune carte de revision pour ce cours</p>
         </div>
       ) : sessionFinished ? (
         /* Session summary */
@@ -186,7 +189,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
                       ? Math.round(
                           (scores.correct /
                             (scores.correct + scores.incorrect)) *
-                            100
+                            100,
                         )
                       : 0}
                     %
@@ -329,11 +332,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
               Precedente
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={handleFlip}
-              className="gap-2"
-            >
+            <Button variant="outline" onClick={handleFlip} className="gap-2">
               <RotateCcw className="h-4 w-4" />
               Retourner
             </Button>

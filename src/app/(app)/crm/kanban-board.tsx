@@ -34,7 +34,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, BarChart3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { getFilteredDeals, getDealSources, getTeamMembers, updateDealStage, type DealFilters } from "@/lib/actions/crm";
+import {
+  getFilteredDeals,
+  getDealSources,
+  getTeamMembers,
+  updateDealStage,
+  type DealFilters,
+} from "@/lib/actions/crm";
 
 interface TeamMember {
   id: string;
@@ -54,7 +60,12 @@ interface KanbanBoardProps {
   setterFilter?: SetterInfo[];
 }
 
-export function KanbanBoard({ initialStages, initialDeals, readOnly = false, setterFilter }: KanbanBoardProps) {
+export function KanbanBoard({
+  initialStages,
+  initialDeals,
+  readOnly = false,
+  setterFilter,
+}: KanbanBoardProps) {
   const stages =
     initialStages.length > 0
       ? initialStages
@@ -72,7 +83,9 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
   const [selectedSetter, setSelectedSetter] = useState<string>("all");
 
   // Advanced filters
-  const [advancedFilters, setAdvancedFilters] = useState<DealFilters>({ sortBy: "created_at_desc" });
+  const [advancedFilters, setAdvancedFilters] = useState<DealFilters>({
+    sortBy: "created_at_desc",
+  });
   const [sources, setSources] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [, startTransition] = useTransition();
@@ -114,31 +127,40 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    })
+    }),
   );
 
   // Custom collision detection: prefer columns (stages) over deal cards
   const stageIdSet = new Set(stages.map((s) => s.id));
-  const customCollisionDetection: CollisionDetection = useCallback((args) => {
-    // First try pointerWithin — most natural for columns
-    const pointerCollisions = pointerWithin(args);
-    const columnHit = pointerCollisions.find((c) => stageIdSet.has(c.id as string));
-    if (columnHit) return [columnHit];
+  const customCollisionDetection: CollisionDetection = useCallback(
+    (args) => {
+      // First try pointerWithin — most natural for columns
+      const pointerCollisions = pointerWithin(args);
+      const columnHit = pointerCollisions.find((c) =>
+        stageIdSet.has(c.id as string),
+      );
+      if (columnHit) return [columnHit];
 
-    // Fallback to closestCorners
-    const cornerCollisions = closestCorners(args);
-    const columnCornerHit = cornerCollisions.find((c) => stageIdSet.has(c.id as string));
-    if (columnCornerHit) return [columnCornerHit];
+      // Fallback to closestCorners
+      const cornerCollisions = closestCorners(args);
+      const columnCornerHit = cornerCollisions.find((c) =>
+        stageIdSet.has(c.id as string),
+      );
+      if (columnCornerHit) return [columnCornerHit];
 
-    // Last resort: return whatever we found
-    return cornerCollisions;
-  }, [stageIdSet]);
+      // Last resort: return whatever we found
+      return cornerCollisions;
+    },
+    [stageIdSet],
+  );
 
   const filteredDeals = deals.filter((deal) => {
     const matchesSearch =
       !searchQuery ||
       deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      deal.contact?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+      deal.contact?.full_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
     const matchesTemp = tempFilter === "all" || deal.temperature === tempFilter;
     const matchesSetter =
       selectedSetter === "all" || deal.assigned_to === selectedSetter;
@@ -147,13 +169,13 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
 
   const getDealsForStage = useCallback(
     (stageId: string) => filteredDeals.filter((d) => d.stage_id === stageId),
-    [filteredDeals]
+    [filteredDeals],
   );
 
   const getStageValue = useCallback(
     (stageId: string) =>
       getDealsForStage(stageId).reduce((sum, d) => sum + (d.value || 0), 0),
-    [getDealsForStage]
+    [getDealsForStage],
   );
 
   function handleDragStart(event: DragStartEvent) {
@@ -186,7 +208,7 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
 
     // Optimistic update
     setDeals((prev) =>
-      prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d))
+      prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d)),
     );
 
     // Persist via server action
@@ -197,8 +219,8 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
       toast.error("Erreur : " + result.error);
       setDeals((prev) =>
         prev.map((d) =>
-          d.id === dealId ? { ...d, stage_id: deal.stage_id } : d
-        )
+          d.id === dealId ? { ...d, stage_id: deal.stage_id } : d,
+        ),
       );
     }
   }
@@ -274,10 +296,14 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
             </div>
             <p className="font-semibold text-lg">Votre pipeline est vide</p>
             <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
-              Créez votre premier deal pour commencer à suivre vos opportunités commerciales.
+              Créez votre premier deal pour commencer à suivre vos opportunités
+              commerciales.
             </p>
             <div className="mt-5">
-              <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
+              <NewDealDialog
+                stages={stages}
+                onDealCreated={handleDealCreated}
+              />
             </div>
           </CardContent>
         </Card>
@@ -289,11 +315,16 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
           <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
             <Search className="h-5 w-5 text-muted-foreground/40" />
           </div>
-          <p className="text-sm font-medium">Aucun deal ne correspond aux filtres</p>
+          <p className="text-sm font-medium">
+            Aucun deal ne correspond aux filtres
+          </p>
           <Button
             variant="link"
             size="sm"
-            onClick={() => { setSearchQuery(""); setTempFilter("all"); }}
+            onClick={() => {
+              setSearchQuery("");
+              setTempFilter("all");
+            }}
             className="text-brand mt-1"
           >
             Réinitialiser les filtres
@@ -333,7 +364,7 @@ export function KanbanBoard({ initialStages, initialDeals, readOnly = false, set
           onClose={() => setSelectedDeal(null)}
           onUpdate={(updated) => {
             setDeals((prev) =>
-              prev.map((d) => (d.id === updated.id ? updated : d))
+              prev.map((d) => (d.id === updated.id ? updated : d)),
             );
             setSelectedDeal(updated);
           }}

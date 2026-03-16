@@ -90,7 +90,7 @@ export function DiscoveryView() {
         toast.error(
           err instanceof Error
             ? err.message
-            : "Erreur lors de la recherche Google Maps."
+            : "Erreur lors de la recherche Google Maps.",
         );
       }
     });
@@ -114,7 +114,7 @@ export function DiscoveryView() {
       toast.success(`${lead.name} importé comme prospect.`);
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Erreur lors de l'import."
+        err instanceof Error ? err.message : "Erreur lors de l'import.",
       );
     } finally {
       setImportingId(null);
@@ -202,7 +202,10 @@ export function DiscoveryView() {
             <h2 className="text-lg font-semibold">
               {results.length} résultat{results.length > 1 ? "s" : ""}
             </h2>
-            <Badge variant="outline" className="gap-1.5 border-[#7af17a]/30 text-[#7af17a]">
+            <Badge
+              variant="outline"
+              className="gap-1.5 border-[#7af17a]/30 text-[#7af17a]"
+            >
               <Navigation className="h-3 w-3" />
               Google Maps
             </Badge>
@@ -399,9 +402,9 @@ export function DiscoveryView() {
               Découvrez de nouveaux prospects
             </h3>
             <p className="max-w-md text-sm text-muted-foreground">
-              Recherchez des entreprises sur Google Maps pour trouver de nouveaux
-              prospects B2B. Saisissez un type d'activité et une localisation pour
-              commencer.
+              Recherchez des entreprises sur Google Maps pour trouver de
+              nouveaux prospects B2B. Saisissez un type d'activité et une
+              localisation pour commencer.
             </p>
           </CardContent>
         </Card>
@@ -416,8 +419,8 @@ export function DiscoveryView() {
               Recherche en cours...
             </h3>
             <p className="max-w-md text-sm text-muted-foreground">
-              Analyse des entreprises sur Google Maps. Cela peut prendre quelques
-              instants.
+              Analyse des entreprises sur Google Maps. Cela peut prendre
+              quelques instants.
             </p>
           </CardContent>
         </Card>

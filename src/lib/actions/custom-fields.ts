@@ -3,7 +3,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export type CustomFieldType = "text" | "number" | "date" | "select" | "checkbox";
+export type CustomFieldType =
+  | "text"
+  | "number"
+  | "date"
+  | "select"
+  | "checkbox";
 
 export interface CustomField {
   id: string;
@@ -23,7 +28,7 @@ export interface CustomField {
 // ---------------------------------------------------------------------------
 
 export async function getCustomFields(
-  entity: "deals" | "contacts" | "contracts"
+  entity: "deals" | "contacts" | "contracts",
 ): Promise<CustomField[]> {
   const supabase = await createClient();
   const {
@@ -114,7 +119,7 @@ export async function createCustomField(field: {
 
 export async function updateCustomField(
   id: string,
-  updates: Partial<Omit<CustomField, "id" | "created_at">>
+  updates: Partial<Omit<CustomField, "id" | "created_at">>,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
   const {
@@ -137,7 +142,7 @@ export async function updateCustomField(
 }
 
 export async function deleteCustomField(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
   const {
@@ -166,7 +171,7 @@ export async function deleteCustomField(
 
 export async function getCustomFieldValues(
   entityId: string,
-  entity: "deals" | "contacts" | "contracts"
+  entity: "deals" | "contacts" | "contracts",
 ): Promise<Record<string, unknown>> {
   const supabase = await createClient();
   const {
@@ -189,7 +194,7 @@ export async function getCustomFieldValues(
 export async function saveCustomFieldValues(
   entityId: string,
   entity: "deals" | "contacts" | "contracts",
-  values: Record<string, unknown>
+  values: Record<string, unknown>,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
   const {
@@ -204,7 +209,7 @@ export async function saveCustomFieldValues(
     .eq("id", entityId)
     .single();
 
-  const existingMetadata = ((current?.metadata as Record<string, unknown>) ?? {});
+  const existingMetadata = (current?.metadata as Record<string, unknown>) ?? {};
   const updatedMetadata = {
     ...existingMetadata,
     custom_fields: values,

@@ -60,7 +60,10 @@ interface Recording {
   ended_at: string | null;
 }
 
-function calculateDuration(startedAt: string | null, endedAt: string | null): string {
+function calculateDuration(
+  startedAt: string | null,
+  endedAt: string | null,
+): string {
   if (!startedAt || !endedAt) return "N/A";
   const start = new Date(startedAt).getTime();
   const end = new Date(endedAt).getTime();
@@ -123,7 +126,8 @@ export function ReplayView({
                       Aucun enregistrement disponible
                     </p>
                     <p className="text-sm mt-1 opacity-60">
-                      Cette session n&apos;a pas été enregistrée ou l&apos;enregistrement n&apos;est pas disponible.
+                      Cette session n&apos;a pas été enregistrée ou
+                      l&apos;enregistrement n&apos;est pas disponible.
                     </p>
                   </>
                 )}
@@ -204,7 +208,7 @@ export function ReplayView({
                     {format(
                       new Date(room.started_at),
                       "d MMMM yyyy 'à' HH:mm",
-                      { locale: fr }
+                      { locale: fr },
                     )}
                   </span>
                 </div>

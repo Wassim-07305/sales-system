@@ -82,11 +82,21 @@ export function AuditLogView({ logs }: AuditLogViewProps) {
           <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow className="border-b border-border/30 bg-muted/10 hover:bg-muted/10">
-                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Date</TableHead>
-                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Utilisateur</TableHead>
-                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Action</TableHead>
-                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</TableHead>
-                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Détails</TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Date
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Utilisateur
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Action
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Type
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Détails
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,7 +125,9 @@ export function AuditLogView({ logs }: AuditLogViewProps) {
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs max-w-[300px] truncate">
                     {log.entity_id && (
-                      <span className="mr-2 font-mono">{log.entity_id.slice(0, 8)}</span>
+                      <span className="mr-2 font-mono">
+                        {log.entity_id.slice(0, 8)}
+                      </span>
                     )}
                     {Object.keys(log.details).length > 0
                       ? JSON.stringify(log.details).slice(0, 100)

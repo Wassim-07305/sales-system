@@ -8,7 +8,9 @@ import { notify } from "@/lib/actions/notifications";
 
 export async function getBookingById(bookingId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { booking: null, error: "Non authentifié" };
 
   const { data, error } = await supabase
@@ -54,19 +56,26 @@ export async function createBooking(params: {
 
   // Vérifier les conflits horaires pour le même utilisateur
   const scheduledStart = new Date(params.scheduled_at);
-  const scheduledEnd = new Date(scheduledStart.getTime() + params.duration_minutes * 60 * 1000);
+  const scheduledEnd = new Date(
+    scheduledStart.getTime() + params.duration_minutes * 60 * 1000,
+  );
 
   const { data: existing } = await supabase
     .from("bookings")
     .select("id, scheduled_at, duration_minutes")
     .eq("assigned_to", user.id)
     .neq("status", "cancelled")
-    .gte("scheduled_at", new Date(scheduledStart.getTime() - 24 * 60 * 60 * 1000).toISOString())
+    .gte(
+      "scheduled_at",
+      new Date(scheduledStart.getTime() - 24 * 60 * 60 * 1000).toISOString(),
+    )
     .lte("scheduled_at", scheduledEnd.toISOString());
 
   const hasConflict = (existing || []).some((b) => {
     const bStart = new Date(b.scheduled_at);
-    const bEnd = new Date(bStart.getTime() + (b.duration_minutes || 30) * 60 * 1000);
+    const bEnd = new Date(
+      bStart.getTime() + (b.duration_minutes || 30) * 60 * 1000,
+    );
     return scheduledStart < bEnd && scheduledEnd > bStart;
   });
 
@@ -93,13 +102,24 @@ export async function createBooking(params: {
   if (error) return { error: error.message };
 
   // Notify assigned user about new booking (in-app + push)
-  const scheduledDate = new Date(params.scheduled_at).toLocaleDateString("fr-FR", {
-    day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-  });
-  notify(user.id, "Nouveau booking confirmé", `RDV avec ${params.prospect_name} le ${scheduledDate}`, {
-    type: "booking",
-    link: `/bookings/${data.id}`,
-  });
+  const scheduledDate = new Date(params.scheduled_at).toLocaleDateString(
+    "fr-FR",
+    {
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  );
+  notify(
+    user.id,
+    "Nouveau booking confirmé",
+    `RDV avec ${params.prospect_name} le ${scheduledDate}`,
+    {
+      type: "booking",
+      link: `/bookings/${data.id}`,
+    },
+  );
 
   revalidatePath("/bookings");
   return { booking: data };
@@ -112,7 +132,13 @@ export async function updateBookingStatus(bookingId: string, status: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const validStatuses = ["confirmed", "completed", "cancelled", "rescheduled", "no_show"];
+  const validStatuses = [
+    "confirmed",
+    "completed",
+    "cancelled",
+    "rescheduled",
+    "no_show",
+  ];
   if (!validStatuses.includes(status)) return { error: "Statut invalide" };
 
   // Get booking details for notification
@@ -131,33 +157,46 @@ export async function updateBookingStatus(bookingId: string, status: string) {
 
   // Notify assigned user about status change (in-app + push)
   const statusLabels: Record<string, string> = {
-    confirmed: "confirmé", completed: "terminé", cancelled: "annulé",
-    rescheduled: "replanifié", no_show: "absent (no-show)",
+    confirmed: "confirmé",
+    completed: "terminé",
+    cancelled: "annulé",
+    rescheduled: "replanifié",
+    no_show: "absent (no-show)",
   };
   const targetUser = booking?.assigned_to || user.id;
-  notify(targetUser, `Booking ${statusLabels[status] || status}`, `Le RDV avec ${booking?.prospect_name || "un prospect"} a été ${statusLabels[status] || "mis à jour"}.`, {
-    type: "booking",
-    link: `/bookings/${bookingId}`,
-  });
+  notify(
+    targetUser,
+    `Booking ${statusLabels[status] || status}`,
+    `Le RDV avec ${booking?.prospect_name || "un prospect"} a été ${statusLabels[status] || "mis à jour"}.`,
+    {
+      type: "booking",
+      link: `/bookings/${bookingId}`,
+    },
+  );
 
   revalidatePath("/bookings");
   revalidatePath(`/bookings/${bookingId}`);
   return { success: true };
 }
 
-export async function updateBooking(bookingId: string, data: {
-  prospect_name?: string;
-  prospect_email?: string;
-  prospect_phone?: string;
-  scheduled_at?: string;
-  duration_minutes?: number;
-  slot_type?: string;
-  notes?: string;
-  assigned_to?: string;
-  meeting_link?: string;
-}) {
+export async function updateBooking(
+  bookingId: string,
+  data: {
+    prospect_name?: string;
+    prospect_email?: string;
+    prospect_phone?: string;
+    scheduled_at?: string;
+    duration_minutes?: number;
+    slot_type?: string;
+    notes?: string;
+    assigned_to?: string;
+    meeting_link?: string;
+  },
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -174,7 +213,9 @@ export async function updateBooking(bookingId: string, data: {
 
 export async function rescheduleBooking(bookingId: string, newDate: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Empêcher les reschedule dans le passé
@@ -204,12 +245,20 @@ export async function rescheduleBooking(bookingId: string, newDate: string) {
   // Notify assigned user about reschedule (in-app + push)
   if (booking?.assigned_to) {
     const formattedDate = new Date(newDate).toLocaleDateString("fr-FR", {
-      day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    notify(booking.assigned_to, "Booking replanifié", `Le RDV avec ${booking.prospect_name || "un prospect"} a été déplacé au ${formattedDate}`, {
-      type: "booking",
-      link: `/bookings/${bookingId}`,
-    });
+    notify(
+      booking.assigned_to,
+      "Booking replanifié",
+      `Le RDV avec ${booking.prospect_name || "un prospect"} a été déplacé au ${formattedDate}`,
+      {
+        type: "booking",
+        link: `/bookings/${bookingId}`,
+      },
+    );
   }
 
   revalidatePath("/bookings");
@@ -219,7 +268,9 @@ export async function rescheduleBooking(bookingId: string, newDate: string) {
 
 export async function deleteBooking(bookingId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase

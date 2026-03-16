@@ -196,7 +196,8 @@ export function ProfilesView({ profiles }: Props) {
             </div>
             <p className="font-medium">Aucun profil prospect</p>
             <p className="text-sm mt-1">
-              Créez votre premier profil pour démarrer les sessions de jeu de rôles.
+              Créez votre premier profil pour démarrer les sessions de jeu de
+              rôles.
             </p>
           </CardContent>
         </Card>
@@ -266,7 +267,9 @@ export function ProfilesView({ profiles }: Props) {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingProfile ? "Modifier le profil" : "Nouveau profil prospect"}
+              {editingProfile
+                ? "Modifier le profil"
+                : "Nouveau profil prospect"}
             </DialogTitle>
             <DialogDescription>
               {editingProfile
@@ -384,10 +387,7 @@ export function ProfilesView({ profiles }: Props) {
             >
               Annuler
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-            >
+            <Button variant="destructive" onClick={handleDelete}>
               Supprimer
             </Button>
           </DialogFooter>

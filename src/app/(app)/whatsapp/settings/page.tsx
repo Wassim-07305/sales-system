@@ -25,12 +25,18 @@ export default async function WhatsAppSettingsPage() {
   };
 
   const waAccount = unipileStatus.accounts.find(
-    (a) => a.provider.toUpperCase() === "WHATSAPP"
+    (a) => a.provider.toUpperCase() === "WHATSAPP",
   );
   const unipileWhatsApp = unipileStatus.configured
     ? { connected: !!waAccount, accountName: waAccount?.name }
     : null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <WaSettingsView connection={connection as any} integrationKeys={integrationKeys} unipileWhatsApp={unipileWhatsApp} />;
+  return (
+    <WaSettingsView
+      connection={connection as any}
+      integrationKeys={integrationKeys}
+      unipileWhatsApp={unipileWhatsApp}
+    />
+  );
 }

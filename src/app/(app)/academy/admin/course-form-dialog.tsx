@@ -17,10 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/ui/file-upload";
-import {
-  createCourse,
-  updateCourse,
-} from "@/lib/actions/academy-admin";
+import { createCourse, updateCourse } from "@/lib/actions/academy-admin";
 
 interface CourseData {
   id: string;
@@ -93,9 +90,7 @@ export function CourseFormDialog({
       onSaved();
     } catch {
       toast.error(
-        isEdit
-          ? "Erreur lors de la mise a jour"
-          : "Erreur lors de la creation"
+        isEdit ? "Erreur lors de la mise a jour" : "Erreur lors de la creation",
       );
     } finally {
       setLoading(false);

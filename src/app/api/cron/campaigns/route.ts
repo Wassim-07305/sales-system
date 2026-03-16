@@ -11,7 +11,12 @@ interface DripCampaignStep {
   order: number;
   delay_days: number;
   template_id: string | null;
-  action_type: "send_dm" | "follow_up" | "like_post" | "comment" | "connection_request";
+  action_type:
+    | "send_dm"
+    | "follow_up"
+    | "like_post"
+    | "comment"
+    | "connection_request";
   custom_message?: string;
 }
 
@@ -51,13 +56,13 @@ export async function GET(request: Request) {
   if (!serviceRoleKey) {
     return NextResponse.json(
       { error: "Service role key not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey
+    serviceRoleKey,
   );
 
   const results = {
@@ -79,7 +84,7 @@ export async function GET(request: Request) {
     if (campaignsError) {
       return NextResponse.json(
         { error: `Erreur lecture campaigns: ${campaignsError.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -100,12 +105,12 @@ export async function GET(request: Request) {
         const meta = (campaign.trigger_conditions || {}) as CampaignMeta;
         const listId = meta.list_id;
         const steps = ((campaign.actions || []) as DripCampaignStep[]).sort(
-          (a, b) => a.order - b.order
+          (a, b) => a.order - b.order,
         );
 
         if (!listId || steps.length === 0) {
           results.details.push(
-            `Campaign "${campaign.name}" ignorée : pas de liste ou pas de steps`
+            `Campaign "${campaign.name}" ignorée : pas de liste ou pas de steps`,
           );
           continue;
         }
@@ -118,7 +123,7 @@ export async function GET(request: Request) {
 
         if (prospectsError || !prospects || prospects.length === 0) {
           results.details.push(
-            `Campaign "${campaign.name}" : aucun prospect dans la liste ${listId}`
+            `Campaign "${campaign.name}" : aucun prospect dans la liste ${listId}`,
           );
           continue;
         }
@@ -132,7 +137,12 @@ export async function GET(request: Request) {
         // Construire un index : prospect_id -> liste des steps exécutés
         const executionMap: Record<
           string,
-          { step_id: string; step_order: number; created_at: string; status: string }[]
+          {
+            step_id: string;
+            step_order: number;
+            created_at: string;
+            status: string;
+          }[]
         > = {};
         for (const exec of existingExecutions || []) {
           const r = (exec.result || {}) as ExecutionResult;
@@ -161,12 +171,10 @@ export async function GET(request: Request) {
               .filter((e) => e.status === "completed")
               .sort((a, b) => b.step_order - a.step_order);
 
-            const lastCompletedOrder = completedSteps.length > 0
-              ? completedSteps[0].step_order
-              : 0;
-            const lastCompletedAt = completedSteps.length > 0
-              ? completedSteps[0].created_at
-              : null;
+            const lastCompletedOrder =
+              completedSteps.length > 0 ? completedSteps[0].step_order : 0;
+            const lastCompletedAt =
+              completedSteps.length > 0 ? completedSteps[0].created_at : null;
 
             // Si tous les steps sont complétés, passer au prospect suivant
             if (lastCompletedOrder >= steps.length) {
@@ -183,7 +191,7 @@ export async function GET(request: Request) {
 
             // Vérifier que ce step n'est pas déjà en cours d'exécution (idempotence)
             const alreadyExecuted = prospectExecs.some(
-              (e) => e.step_id === nextStep.id
+              (e) => e.step_id === nextStep.id,
             );
             if (alreadyExecuted) {
               continue;
@@ -192,7 +200,9 @@ export async function GET(request: Request) {
             // Vérifier le délai : delay_days depuis le dernier step (ou depuis l'inscription)
             const referenceDate = lastCompletedAt
               ? new Date(lastCompletedAt)
-              : new Date(prospect.status === "active" ? Date.now() : Date.now());
+              : new Date(
+                  prospect.status === "active" ? Date.now() : Date.now(),
+                );
 
             // Pour le premier step, on utilise la date de création du prospect
             // Pour les suivants, la date du dernier step complété
@@ -206,7 +216,11 @@ export async function GET(request: Request) {
             }
 
             // --- 6. Exécuter le step ---
-            const message = await buildStepMessage(supabase, nextStep, prospect);
+            const message = await buildStepMessage(
+              supabase,
+              nextStep,
+              prospect,
+            );
 
             // Envoyer le message selon le type d'action
             let sendSuccess = false;
@@ -220,7 +234,7 @@ export async function GET(request: Request) {
                 supabase,
                 prospect,
                 message,
-                campaign.created_by
+                campaign.created_by,
               );
               sendSuccess = result.success;
               sendError = result.error;
@@ -252,20 +266,20 @@ export async function GET(request: Request) {
             } else {
               results.errors++;
               results.details.push(
-                `Échec envoi à ${prospect.name} (campaign "${campaign.name}", step ${nextStep.order}): ${sendError}`
+                `Échec envoi à ${prospect.name} (campaign "${campaign.name}", step ${nextStep.order}): ${sendError}`,
               );
             }
           } catch (prospectErr) {
             results.errors++;
             results.details.push(
-              `Erreur prospect ${prospect.id}: ${prospectErr instanceof Error ? prospectErr.message : "Erreur inconnue"}`
+              `Erreur prospect ${prospect.id}: ${prospectErr instanceof Error ? prospectErr.message : "Erreur inconnue"}`,
             );
           }
         }
       } catch (campaignErr) {
         results.errors++;
         results.details.push(
-          `Erreur campaign "${campaign.name}": ${campaignErr instanceof Error ? campaignErr.message : "Erreur inconnue"}`
+          `Erreur campaign "${campaign.name}": ${campaignErr instanceof Error ? campaignErr.message : "Erreur inconnue"}`,
         );
       }
     }
@@ -274,7 +288,7 @@ export async function GET(request: Request) {
       {
         error: `Erreur globale: ${globalErr instanceof Error ? globalErr.message : "Erreur inconnue"}`,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -296,7 +310,7 @@ export async function GET(request: Request) {
 async function buildStepMessage(
   supabase: AnySupabaseClient,
   step: DripCampaignStep,
-  prospect: { id: string; name: string }
+  prospect: { id: string; name: string },
 ): Promise<string> {
   // Si un template est référencé, le charger
   if (step.template_id) {
@@ -332,10 +346,7 @@ async function buildStepMessage(
 /**
  * Remplace les variables {{nom}}, {{prenom}} etc. dans un message.
  */
-function replaceVariables(
-  content: string,
-  prospect: { name: string }
-): string {
+function replaceVariables(content: string, prospect: { name: string }): string {
   return content
     .replace(/\{\{nom\}\}/gi, prospect.name)
     .replace(/\{\{name\}\}/gi, prospect.name)
@@ -350,7 +361,7 @@ async function sendProspectMessage(
   supabase: AnySupabaseClient,
   prospect: { id: string; name: string; platform: string | null },
   message: string,
-  campaignOwnerId: string | null
+  campaignOwnerId: string | null,
 ): Promise<{ success: boolean; error: string | null }> {
   try {
     // Récupérer le téléphone du prospect
@@ -380,7 +391,7 @@ async function sendProspectMessage(
             : accountsData.items || [];
           const waAccount = items.find(
             (a: { type?: string; provider?: string }) =>
-              (a.type || a.provider || "").toUpperCase() === "WHATSAPP"
+              (a.type || a.provider || "").toUpperCase() === "WHATSAPP",
           );
 
           if (waAccount?.id) {
@@ -431,12 +442,18 @@ async function sendProspectMessage(
               type: "text",
               text: { body: message },
             }),
-          }
+          },
         );
 
         if (res.ok) {
           // Enregistrer le message en base si une connexion WhatsApp existe
-          await storeWhatsAppMessage(supabase, campaignOwnerId, prospect.id, message, "sent");
+          await storeWhatsAppMessage(
+            supabase,
+            campaignOwnerId,
+            prospect.id,
+            message,
+            "sent",
+          );
           return { success: true, error: null };
         }
 
@@ -447,7 +464,13 @@ async function sendProspectMessage(
     }
 
     // --- Fallback : stocker le message en base pour envoi ultérieur ---
-    await storeWhatsAppMessage(supabase, campaignOwnerId, prospect.id, message, "queued");
+    await storeWhatsAppMessage(
+      supabase,
+      campaignOwnerId,
+      prospect.id,
+      message,
+      "queued",
+    );
 
     return { success: true, error: null };
   } catch (err) {
@@ -461,7 +484,7 @@ async function sendProspectMessage(
  */
 async function getOrgSetting(
   supabase: AnySupabaseClient,
-  key: string
+  key: string,
 ): Promise<string | null> {
   try {
     const { data } = await supabase
@@ -483,7 +506,7 @@ async function storeWhatsAppMessage(
   userId: string | null,
   prospectId: string,
   content: string,
-  status: string
+  status: string,
 ) {
   if (!userId) return;
 

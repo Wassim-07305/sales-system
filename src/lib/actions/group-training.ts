@@ -5,20 +5,28 @@ import { revalidatePath } from "next/cache";
 
 export async function getTrainingGroups() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   try {
     const { data, error } = await supabase
       .from("training_groups")
-      .select("*, training_group_members(user_id, profiles(full_name, avatar_url, role)), training_group_sessions(id)")
+      .select(
+        "*, training_group_members(user_id, profiles(full_name, avatar_url, role)), training_group_sessions(id)",
+      )
       .order("created_at", { ascending: false });
 
     if (error) throw error;
 
     return (data || []).map((g: Record<string, unknown>) => {
-      const members = Array.isArray(g.training_group_members) ? g.training_group_members : [];
-      const sessions = Array.isArray(g.training_group_sessions) ? g.training_group_sessions : [];
+      const members = Array.isArray(g.training_group_members)
+        ? g.training_group_members
+        : [];
+      const sessions = Array.isArray(g.training_group_sessions)
+        ? g.training_group_sessions
+        : [];
       return {
         id: g.id as string,
         name: g.name as string,
@@ -36,7 +44,8 @@ export async function getTrainingGroups() {
       {
         id: "demo-1",
         name: "Closers débutants",
-        description: "Groupe de formation pour les nouveaux closers. Focus sur les fondamentaux de la vente.",
+        description:
+          "Groupe de formation pour les nouveaux closers. Focus sur les fondamentaux de la vente.",
         niche: "Closing",
         member_count: 6,
         sessions_count: 12,
@@ -46,7 +55,8 @@ export async function getTrainingGroups() {
       {
         id: "demo-2",
         name: "Setters avancés",
-        description: "Perfectionnement des techniques de setting pour profils confirmés.",
+        description:
+          "Perfectionnement des techniques de setting pour profils confirmés.",
         niche: "Setting",
         member_count: 4,
         sessions_count: 8,
@@ -56,7 +66,8 @@ export async function getTrainingGroups() {
       {
         id: "demo-3",
         name: "Objection handling",
-        description: "Maîtrise des techniques de traitement des objections courantes.",
+        description:
+          "Maîtrise des techniques de traitement des objections courantes.",
         niche: "Objection handling",
         member_count: 8,
         sessions_count: 15,
@@ -76,7 +87,8 @@ export async function getTrainingGroups() {
       {
         id: "demo-5",
         name: "Négociation",
-        description: "Techniques de négociation et gestion des prix en closing.",
+        description:
+          "Techniques de négociation et gestion des prix en closing.",
         niche: "Négociation",
         member_count: 3,
         sessions_count: 6,
@@ -94,7 +106,9 @@ export async function createTrainingGroup(data: {
   memberIds: string[];
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   try {
@@ -130,7 +144,9 @@ export async function createTrainingGroup(data: {
 
 export async function getGroupDetails(groupId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   // Demo data for demo group IDs
@@ -176,25 +192,116 @@ export async function getGroupDetails(groupId: string) {
 
 function getDemoGroupDetails(groupId: string) {
   const demoMembers = [
-    { user_id: "u1", profile: { id: "u1", full_name: "Lucas Martin", avatar_url: null, role: "closer" }, sessions_attended: 10, avg_score: 82, progress: 15 },
-    { user_id: "u2", profile: { id: "u2", full_name: "Emma Dupont", avatar_url: null, role: "setter" }, sessions_attended: 8, avg_score: 76, progress: 12 },
-    { user_id: "u3", profile: { id: "u3", full_name: "Thomas Bernard", avatar_url: null, role: "closer" }, sessions_attended: 12, avg_score: 88, progress: 20 },
-    { user_id: "u4", profile: { id: "u4", full_name: "Julie Leroy", avatar_url: null, role: "setter" }, sessions_attended: 6, avg_score: 71, progress: 8 },
+    {
+      user_id: "u1",
+      profile: {
+        id: "u1",
+        full_name: "Lucas Martin",
+        avatar_url: null,
+        role: "closer",
+      },
+      sessions_attended: 10,
+      avg_score: 82,
+      progress: 15,
+    },
+    {
+      user_id: "u2",
+      profile: {
+        id: "u2",
+        full_name: "Emma Dupont",
+        avatar_url: null,
+        role: "setter",
+      },
+      sessions_attended: 8,
+      avg_score: 76,
+      progress: 12,
+    },
+    {
+      user_id: "u3",
+      profile: {
+        id: "u3",
+        full_name: "Thomas Bernard",
+        avatar_url: null,
+        role: "closer",
+      },
+      sessions_attended: 12,
+      avg_score: 88,
+      progress: 20,
+    },
+    {
+      user_id: "u4",
+      profile: {
+        id: "u4",
+        full_name: "Julie Leroy",
+        avatar_url: null,
+        role: "setter",
+      },
+      sessions_attended: 6,
+      avg_score: 71,
+      progress: 8,
+    },
   ];
 
   const demoSessions = [
-    { id: "s1", title: "Gestion des objections prix", date: "2026-03-08T14:00:00Z", type: "roleplay", participants: 4 },
-    { id: "s2", title: "Debrief semaine 10", date: "2026-03-07T10:00:00Z", type: "debrief", participants: 3 },
-    { id: "s3", title: "Techniques de closing avancées", date: "2026-03-05T14:00:00Z", type: "workshop", participants: 4 },
-    { id: "s4", title: "Simulation appel découverte", date: "2026-03-03T09:00:00Z", type: "roleplay", participants: 4 },
+    {
+      id: "s1",
+      title: "Gestion des objections prix",
+      date: "2026-03-08T14:00:00Z",
+      type: "roleplay",
+      participants: 4,
+    },
+    {
+      id: "s2",
+      title: "Debrief semaine 10",
+      date: "2026-03-07T10:00:00Z",
+      type: "debrief",
+      participants: 3,
+    },
+    {
+      id: "s3",
+      title: "Techniques de closing avancées",
+      date: "2026-03-05T14:00:00Z",
+      type: "workshop",
+      participants: 4,
+    },
+    {
+      id: "s4",
+      title: "Simulation appel découverte",
+      date: "2026-03-03T09:00:00Z",
+      type: "roleplay",
+      participants: 4,
+    },
   ];
 
-  const groups: Record<string, { name: string; description: string; niche: string }> = {
-    "demo-1": { name: "Closers débutants", description: "Groupe de formation pour les nouveaux closers.", niche: "Closing" },
-    "demo-2": { name: "Setters avancés", description: "Perfectionnement des techniques de setting.", niche: "Setting" },
-    "demo-3": { name: "Objection handling", description: "Maîtrise du traitement des objections.", niche: "Objection handling" },
-    "demo-4": { name: "Prospection B2B", description: "Stratégies de prospection avancées B2B.", niche: "Prospection" },
-    "demo-5": { name: "Négociation", description: "Techniques de négociation et gestion des prix.", niche: "Négociation" },
+  const groups: Record<
+    string,
+    { name: string; description: string; niche: string }
+  > = {
+    "demo-1": {
+      name: "Closers débutants",
+      description: "Groupe de formation pour les nouveaux closers.",
+      niche: "Closing",
+    },
+    "demo-2": {
+      name: "Setters avancés",
+      description: "Perfectionnement des techniques de setting.",
+      niche: "Setting",
+    },
+    "demo-3": {
+      name: "Objection handling",
+      description: "Maîtrise du traitement des objections.",
+      niche: "Objection handling",
+    },
+    "demo-4": {
+      name: "Prospection B2B",
+      description: "Stratégies de prospection avancées B2B.",
+      niche: "Prospection",
+    },
+    "demo-5": {
+      name: "Négociation",
+      description: "Techniques de négociation et gestion des prix.",
+      niche: "Négociation",
+    },
   };
 
   const g = groups[groupId] || groups["demo-1"];
@@ -211,22 +318,26 @@ function getDemoGroupDetails(groupId: string) {
 
 export async function addGroupSession(
   groupId: string,
-  data: { title: string; date: string; type: "roleplay" | "workshop" | "debrief" }
+  data: {
+    title: string;
+    date: string;
+    type: "roleplay" | "workshop" | "debrief";
+  },
 ) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
   try {
-    const { error } = await supabase
-      .from("training_group_sessions")
-      .insert({
-        group_id: groupId,
-        title: data.title,
-        date: data.date,
-        type: data.type,
-        created_by: user.id,
-      });
+    const { error } = await supabase.from("training_group_sessions").insert({
+      group_id: groupId,
+      title: data.title,
+      date: data.date,
+      type: data.type,
+      created_by: user.id,
+    });
 
     if (error) throw error;
   } catch {
@@ -238,14 +349,34 @@ export async function addGroupSession(
 
 export async function getGroupLeaderboard(groupId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   if (groupId.startsWith("demo-")) {
     return [
-      { rank: 1, name: "Thomas Bernard", sessions: 12, avg_score: 88, progress: 20 },
-      { rank: 2, name: "Lucas Martin", sessions: 10, avg_score: 82, progress: 15 },
-      { rank: 3, name: "Emma Dupont", sessions: 8, avg_score: 76, progress: 12 },
+      {
+        rank: 1,
+        name: "Thomas Bernard",
+        sessions: 12,
+        avg_score: 88,
+        progress: 20,
+      },
+      {
+        rank: 2,
+        name: "Lucas Martin",
+        sessions: 10,
+        avg_score: 82,
+        progress: 15,
+      },
+      {
+        rank: 3,
+        name: "Emma Dupont",
+        sessions: 8,
+        avg_score: 76,
+        progress: 12,
+      },
       { rank: 4, name: "Julie Leroy", sessions: 6, avg_score: 71, progress: 8 },
     ];
   }
@@ -274,7 +405,9 @@ export async function getGroupLeaderboard(groupId: string) {
 
 export async function getTeamMembers() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   try {
@@ -291,10 +424,25 @@ export async function getTeamMembers() {
     return [
       { id: "u1", full_name: "Lucas Martin", avatar_url: null, role: "closer" },
       { id: "u2", full_name: "Emma Dupont", avatar_url: null, role: "setter" },
-      { id: "u3", full_name: "Thomas Bernard", avatar_url: null, role: "closer" },
+      {
+        id: "u3",
+        full_name: "Thomas Bernard",
+        avatar_url: null,
+        role: "closer",
+      },
       { id: "u4", full_name: "Julie Leroy", avatar_url: null, role: "setter" },
-      { id: "u5", full_name: "Sophie Moreau", avatar_url: null, role: "manager" },
-      { id: "u6", full_name: "Antoine Petit", avatar_url: null, role: "closer" },
+      {
+        id: "u5",
+        full_name: "Sophie Moreau",
+        avatar_url: null,
+        role: "manager",
+      },
+      {
+        id: "u6",
+        full_name: "Antoine Petit",
+        avatar_url: null,
+        role: "closer",
+      },
     ];
   }
 }

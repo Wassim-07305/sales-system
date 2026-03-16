@@ -37,28 +37,31 @@
 
 ## Comptes de test
 
-| Rôle       | Email                    | Mot de passe |
-|------------|--------------------------|--------------|
-| Admin      | admin@sales-system.test  | Admin2026!   |
-| Client B2B | b2b@sales-system.test    | B2B2026!     |
-| Client B2C | test@salessystem.fr      | Test1234x    |
+| Rôle       | Email                   | Mot de passe |
+| ---------- | ----------------------- | ------------ |
+| Admin      | admin@sales-system.test | Admin2026!   |
+| Client B2B | b2b@sales-system.test   | B2B2026!     |
+| Client B2C | test@salessystem.fr     | Test1234x    |
 
 ## Business de Damien — Logique métier
 
 ### Modèle économique
 
 **B2C (formation de setters) :**
+
 - Damien forme des gens à devenir setters (prospection commerciale)
 - C'est un accompagnement : modules vidéos, quiz, progression (style School/Skool)
 - Après ~1 mois de formation, Damien leur trouve leurs premières missions de setting
 - Les setters (B2C) prospectent POUR les clients B2B
 
 **B2B (placement de setters) :**
+
 - Damien prospecte des businesses (B2B) et leur propose des setters
 - Les B2B paient pour avoir des setters qui prospectent à leur place
 - Damien prend une commission sur la somme
 
 **Setting IA :**
+
 - Sur Instagram et LinkedIn pour le B2B
 - Les B2C (setters) ont aussi accès au setting IA pour l'utiliser
 - Scripts IA générés à partir des infos du business B2B → donnés aux setters humains ET à l'IA
@@ -75,9 +78,11 @@
 **Admin/Manager :** tout (CRM, Contacts, Bookings, Contrats, Analytics, Inbox, Chat, WhatsApp, Prospection, Role-Play, Scripts, Automation, Communauté, Academy, Challenges, Team, Marketplace, Paramètres)
 
 **B2B :** Dashboard, CRM (simplifié), Bookings, Inbox, Chat, Portail, Calls, Ressources, KPIs, Prospects, Scripts IA, Settings IA, Parrainage, Paramètres
+
 - PAS de : Academy, Communauté, Support, Roadmap
 
 **B2C :** Dashboard, CRM (simplifié), Bookings, Inbox, Chat, Portail, Calls, Ressources, KPIs, Academy, Communauté, Prospects, Scripts IA (lecture seule), Parrainage, Paramètres
+
 - PAS de : Support, Roadmap
 
 ### Onboarding (flow multi-étapes, plein écran, déclenché au premier login)
@@ -92,17 +97,10 @@
 - Les messages doivent s'afficher en temps réel (pas de délai)
 - Support images, vocaux à terme
 
-### Extension LinkedIn
-
-- Chrome Extension MV3 dans `/chrome-extension/`
-- Sync auto toutes les 2 min (conversations LinkedIn → Supabase `dm_conversations`)
-- Envoi de messages depuis l'app (poll toutes les 1 min pour `pending_messages`)
-- Nécessite un onglet LinkedIn ouvert pour capturer le CSRF token
-- Rate limit : 20 appels/heure, délais 3-8s entre appels
-
 ## Audit — Bugs et modifications à vérifier
 
 ### Fait (commits existants) ✅
+
 - [x] Onboarding retiré de la sidebar B2B/B2C
 - [x] Support + Roadmap retirés de la sidebar B2B/B2C
 - [x] Dropdown profil header (click → profil, paramètres, déconnexion)
@@ -119,12 +117,14 @@
 - [x] Extension LinkedIn améliorée (sync auto, envoi messages, popup status)
 
 ### Vérifié ✅ (existe et fonctionne)
+
 - [x] Chat temps réel (Supabase realtime subscription sur INSERT)
 - [x] Scripts IA : flowchart existe déjà dans /scripts/flowchart/ avec @xyflow/react
 - [x] Paramètres B2B (b2b-settings-view.tsx — notifications, sécurité, abonnement)
 - [x] Setting IA Instagram (champ username Instagram dans settings-ia)
 
 ### À coder ❌ / En cours ⚠️
+
 - [x] Admin : full CRUD chat (créer/supprimer canaux, choisir membres B2B/B2C) — ✅ `lib/actions/chat-admin.ts` + `chat/chat-layout.tsx`
 - [x] CRM B2C ↔ B2B liés — ✅ Deals cross-rôle via `matched_entrepreneur_id`, B2B voit deals setters en read-only, filtre par setter
 - [x] Admin : page pour relier setters (B2C) à businesses (B2B) — ✅ `team/assignments/page.tsx` + `lib/actions/team-assignments.ts`

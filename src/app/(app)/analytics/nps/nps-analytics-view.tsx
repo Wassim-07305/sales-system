@@ -30,9 +30,20 @@ import { cn } from "@/lib/utils";
 import type { NpsAnalyticsResult } from "@/lib/actions/nps";
 
 function NpsGauge({ score }: { score: number }) {
-  const color = score >= 50 ? "text-green-600" : score >= 0 ? "text-amber-500" : "text-red-500";
-  const bg = score >= 50 ? "bg-green-50 dark:bg-green-950/30" : score >= 0 ? "bg-amber-50 dark:bg-amber-950/30" : "bg-red-50 dark:bg-red-950/30";
-  const label = score >= 50 ? "Excellent" : score >= 0 ? "Correct" : "À améliorer";
+  const color =
+    score >= 50
+      ? "text-green-600"
+      : score >= 0
+        ? "text-amber-500"
+        : "text-red-500";
+  const bg =
+    score >= 50
+      ? "bg-green-50 dark:bg-green-950/30"
+      : score >= 0
+        ? "bg-amber-50 dark:bg-amber-950/30"
+        : "bg-red-50 dark:bg-red-950/30";
+  const label =
+    score >= 50 ? "Excellent" : score >= 0 ? "Correct" : "À améliorer";
 
   return (
     <div className={cn("rounded-2xl p-6 text-center", bg)}>
@@ -88,7 +99,9 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
               <div className="h-9 w-9 rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
                 <BarChart3 className="h-4 w-4 text-emerald-500" />
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">CSAT</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                CSAT
+              </span>
             </div>
             <p className="text-2xl font-bold">{csatScore}%</p>
             <p className="text-xs text-muted-foreground">Score &ge; 7/10</p>
@@ -101,10 +114,14 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
               <div className="h-9 w-9 rounded-lg ring-1 ring-blue-500/20 bg-blue-500/10 flex items-center justify-center">
                 <TrendingUp className="h-4 w-4 text-blue-500" />
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Moyenne</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Moyenne
+              </span>
             </div>
             <p className="text-2xl font-bold">{avgScore}/10</p>
-            <p className="text-xs text-muted-foreground">{totalResponses} réponses</p>
+            <p className="text-xs text-muted-foreground">
+              {totalResponses} réponses
+            </p>
           </CardContent>
         </Card>
 
@@ -114,11 +131,15 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
               <div className="h-9 w-9 rounded-lg ring-1 ring-purple-500/20 bg-purple-500/10 flex items-center justify-center">
                 <MessageSquare className="h-4 w-4 text-purple-500" />
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Réponses</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Réponses
+              </span>
             </div>
             <p className="text-2xl font-bold">{totalResponses}</p>
             <p className="text-xs text-muted-foreground">
-              {totalPending > 0 ? `${totalPending} en attente` : "Aucune en attente"}
+              {totalPending > 0
+                ? `${totalPending} en attente`
+                : "Aucune en attente"}
             </p>
           </CardContent>
         </Card>
@@ -131,21 +152,27 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                   <SmilePlus className="h-3.5 w-3.5 text-green-600" />
                   <span className="text-xs">Promoteurs</span>
                 </div>
-                <span className="text-sm font-bold text-green-600">{promoters}</span>
+                <span className="text-sm font-bold text-green-600">
+                  {promoters}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Meh className="h-3.5 w-3.5 text-amber-500" />
                   <span className="text-xs">Passifs</span>
                 </div>
-                <span className="text-sm font-bold text-amber-500">{passives}</span>
+                <span className="text-sm font-bold text-amber-500">
+                  {passives}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Frown className="h-3.5 w-3.5 text-red-500" />
                   <span className="text-xs">Détracteurs</span>
                 </div>
-                <span className="text-sm font-bold text-red-500">{detractors}</span>
+                <span className="text-sm font-bold text-red-500">
+                  {detractors}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -163,7 +190,10 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={distribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.06)"
+                  />
                   <XAxis dataKey="score" stroke="#888" />
                   <YAxis allowDecimals={false} stroke="#888" />
                   <Tooltip
@@ -187,13 +217,16 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
             </div>
             <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500" /> 0-6 Détracteurs
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500" /> 0-6
+                Détracteurs
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> 7-8 Passifs
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> 7-8
+                Passifs
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2.5 w-2.5 rounded-full bg-green-500" /> 9-10 Promoteurs
+                <span className="h-2.5 w-2.5 rounded-full bg-green-500" /> 9-10
+                Promoteurs
               </span>
             </div>
           </CardContent>
@@ -202,13 +235,18 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
         {/* NPS Trend */}
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
-            <CardTitle className="text-base">Évolution du NPS (6 mois)</CardTitle>
+            <CardTitle className="text-base">
+              Évolution du NPS (6 mois)
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.06)"
+                  />
                   <XAxis dataKey="month" stroke="#888" />
                   <YAxis domain={[-100, 100]} stroke="#888" />
                   <Tooltip
@@ -272,16 +310,29 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Client</th>
-                    <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Score</th>
-                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Commentaire</th>
-                    <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Déclencheur</th>
-                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Date</th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Client
+                    </th>
+                    <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Score
+                    </th>
+                    <th className="text-left p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Commentaire
+                    </th>
+                    <th className="text-center p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Déclencheur
+                    </th>
+                    <th className="text-right p-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Date
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentFeedback.map((fb) => (
-                    <tr key={fb.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr
+                      key={fb.id}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
                       <td className="p-4 font-medium">{fb.clientName}</td>
                       <td className="p-4 text-center">
                         <span
@@ -291,7 +342,7 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                               ? "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20"
                               : fb.score >= 7
                                 ? "bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20"
-                                : "bg-red-500/10 text-red-600 ring-1 ring-red-500/20"
+                                : "bg-red-500/10 text-red-600 ring-1 ring-red-500/20",
                           )}
                         >
                           {fb.score}
@@ -302,7 +353,9 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                       </td>
                       <td className="p-4 text-center">
                         <span className="text-xs bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded-full">
-                          {fb.triggerDay === -1 ? "Post-closing" : `Jour ${fb.triggerDay}`}
+                          {fb.triggerDay === -1
+                            ? "Post-closing"
+                            : `Jour ${fb.triggerDay}`}
                         </span>
                       </td>
                       <td className="p-4 text-right text-muted-foreground">

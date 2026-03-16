@@ -17,7 +17,7 @@ const APIFY_BASE = "https://api.apify.com/v2";
 export async function callApifyActor<T = unknown>(
   actorId: string,
   input: Record<string, unknown>,
-  timeoutSec = 60
+  timeoutSec = 60,
 ): Promise<T[] | null> {
   const token = process.env.APIFY_TOKEN;
   if (!token) {
@@ -33,11 +33,13 @@ export async function callApifyActor<T = unknown>(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
-      }
+      },
     );
 
     if (!runRes.ok) {
-      console.error(`[Apify] Erreur lancement acteur ${actorId}: ${runRes.status} ${runRes.statusText}`);
+      console.error(
+        `[Apify] Erreur lancement acteur ${actorId}: ${runRes.status} ${runRes.statusText}`,
+      );
       return null;
     }
 
@@ -59,7 +61,7 @@ export async function callApifyActor<T = unknown>(
 
     // Récupérer les résultats du dataset
     const dataRes = await fetch(
-      `${APIFY_BASE}/datasets/${datasetId}/items?token=${token}`
+      `${APIFY_BASE}/datasets/${datasetId}/items?token=${token}`,
     );
 
     if (!dataRes.ok) {

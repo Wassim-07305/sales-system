@@ -78,7 +78,6 @@ const categoryColors: Record<string, string> = {
   outils: "bg-rose-500/10 text-rose-600 border-rose-500/20",
 };
 
-
 export function ResourcesView({ resources, categories }: Props) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

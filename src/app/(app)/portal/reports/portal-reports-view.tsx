@@ -47,9 +47,13 @@ function MetricItem({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="h-9 w-9 rounded-xl ring-1 ring-border/50 bg-muted/50 flex items-center justify-center text-muted-foreground">{icon}</div>
+      <div className="h-9 w-9 rounded-xl ring-1 ring-border/50 bg-muted/50 flex items-center justify-center text-muted-foreground">
+        {icon}
+      </div>
       <div>
-        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
+        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+          {label}
+        </p>
         <p className="text-sm font-medium">{value}</p>
       </div>
     </div>
@@ -100,7 +104,10 @@ export function PortalReportsView({ reports }: { reports: Report[] }) {
           {reports.map((report) => {
             const metrics = report.metrics || {};
             return (
-              <Card key={report.id} className="border-border/50 hover:shadow-md transition-all">
+              <Card
+                key={report.id}
+                className="border-border/50 hover:shadow-md transition-all"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg capitalize">

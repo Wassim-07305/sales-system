@@ -27,7 +27,9 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
     const { data: contacts } = await supabase
       .from("contacts")
       .select("id, first_name, last_name, email, company")
-      .or(`first_name.ilike.${q},last_name.ilike.${q},email.ilike.${q},company.ilike.${q}`)
+      .or(
+        `first_name.ilike.${q},last_name.ilike.${q},email.ilike.${q},company.ilike.${q}`,
+      )
       .limit(5);
 
     if (contacts) {
@@ -35,7 +37,10 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
         results.push({
           id: c.id,
           type: "contact",
-          title: `${c.first_name || ""} ${c.last_name || ""}`.trim() || c.email || "Contact",
+          title:
+            `${c.first_name || ""} ${c.last_name || ""}`.trim() ||
+            c.email ||
+            "Contact",
           subtitle: c.company || c.email || "",
           href: `/contacts/${c.id}`,
         });
@@ -59,7 +64,8 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
           id: d.id,
           type: "deal",
           title: d.title,
-          subtitle: `${d.value ? `${Number(d.value).toLocaleString("fr-FR")} €` : ""} ${d.stage ? `• ${d.stage}` : ""}`.trim(),
+          subtitle:
+            `${d.value ? `${Number(d.value).toLocaleString("fr-FR")} €` : ""} ${d.stage ? `• ${d.stage}` : ""}`.trim(),
           href: `/crm`,
         });
       }

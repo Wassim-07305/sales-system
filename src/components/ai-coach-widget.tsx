@@ -35,7 +35,11 @@ export function AiCoachWidget() {
             for (const h of history.reverse()) {
               restored.push({ id: h.id, role: "user", content: h.question });
               if (h.answer) {
-                restored.push({ id: h.id + "-a", role: "assistant", content: h.answer });
+                restored.push({
+                  id: h.id + "-a",
+                  role: "assistant",
+                  content: h.answer,
+                });
               }
             }
             setMessages(restored);
@@ -72,7 +76,10 @@ export function AiCoachWidget() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Une erreur est survenue. Réessaie dans quelques instants." },
+        {
+          role: "assistant",
+          content: "Une erreur est survenue. Réessaie dans quelques instants.",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -86,7 +93,7 @@ export function AiCoachWidget() {
         onClick={() => setOpen(!open)}
         className={cn(
           "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 h-12 w-12 rounded-full bg-brand text-brand-dark flex items-center justify-center shadow-lg hover:bg-brand/90 transition-all",
-          open && "rotate-90 scale-90"
+          open && "rotate-90 scale-90",
         )}
         aria-label="Assistant IA"
       >
@@ -104,7 +111,9 @@ export function AiCoachWidget() {
               </div>
               <div>
                 <p className="text-sm font-semibold">Assistant IA</p>
-                <p className="text-[10px] text-muted-foreground">Coach setting & formation</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Coach setting & formation
+                </p>
               </div>
             </div>
             <button
@@ -121,21 +130,25 @@ export function AiCoachWidget() {
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
                 <Bot className="h-8 w-8 text-muted-foreground/40 mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  Pose-moi une question sur le setting, les scripts ou la formation !
+                  Pose-moi une question sur le setting, les scripts ou la
+                  formation !
                 </p>
               </div>
             )}
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}
+                className={cn(
+                  "flex",
+                  msg.role === "user" ? "justify-end" : "justify-start",
+                )}
               >
                 <div
                   className={cn(
                     "max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap",
                     msg.role === "user"
                       ? "bg-brand text-brand-dark rounded-br-md"
-                      : "bg-muted rounded-bl-md"
+                      : "bg-muted rounded-bl-md",
                   )}
                 >
                   {msg.content}
@@ -161,7 +174,9 @@ export function AiCoachWidget() {
               className="flex-1 text-sm"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !e.shiftKey && handleSend()
+              }
               disabled={loading}
             />
             <Button

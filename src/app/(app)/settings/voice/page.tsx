@@ -5,7 +5,9 @@ import { VoiceSettings } from "./voice-settings";
 
 export default async function VoiceSettingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -20,5 +22,10 @@ export default async function VoiceSettingsPage() {
   const voiceMessages = await getVoiceMessages();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <VoiceSettings voiceProfile={voiceProfile} voiceMessages={voiceMessages as any} />;
+  return (
+    <VoiceSettings
+      voiceProfile={voiceProfile}
+      voiceMessages={voiceMessages as any}
+    />
+  );
 }
