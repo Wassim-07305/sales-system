@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { BookingForm } from "./booking-form";
 
 export const metadata: Metadata = {
-  title: "Réserver un créneau — Setting Academy",
-  description: "Prenez rendez-vous avec notre équipe pour découvrir Setting Academy.",
+  title: "Réserver un créneau — Sales System",
+  description:
+    "Prenez rendez-vous avec notre équipe pour découvrir Sales System.",
 };
 
 interface Props {
@@ -20,9 +21,7 @@ export default async function PublicBookingPage({ params }: Props) {
           <h1 className="font-serif text-3xl font-bold text-white mb-2">
             Sales<span className="text-brand">System</span>
           </h1>
-          <p className="text-white/70">
-            Réservez votre appel découverte
-          </p>
+          <p className="text-white/70">Réservez votre appel découverte</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-2xl">

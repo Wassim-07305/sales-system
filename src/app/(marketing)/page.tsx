@@ -314,7 +314,7 @@ function DashboardMockup() {
             <span className="size-2.5 rounded-full bg-green-500/60" />
           </div>
           <div className="ml-3 flex-1 rounded-md bg-white/[0.04] px-3 py-1 text-[11px] text-white/30">
-            app.settingacademy.fr/dashboard
+            app.salessystem.fr/dashboard
           </div>
         </div>
 

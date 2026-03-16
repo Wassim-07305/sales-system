@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Setting Academy — La plateforme tout-en-un pour les equipes de vente",
+  title: "Sales System — La plateforme tout-en-un pour les equipes de vente",
   description:
     "Formation, CRM, prospection IA et management d'equipe. Remplacez 10 outils par un seul. Rejoignez +200 setters et +50 entreprises.",
   openGraph: {
-    title: "Setting Academy — La plateforme tout-en-un pour les equipes de vente",
+    title: "Sales System — La plateforme tout-en-un pour les equipes de vente",
     description:
-      "Formation, CRM integre, IA et communaute. Rejoignez des centaines de setters qui performent avec Setting Academy.",
+      "Formation, CRM integre, IA et communaute. Rejoignez des centaines de setters qui performent avec Sales System.",
     type: "website",
     locale: "fr_FR",
-    siteName: "Setting Academy",
-    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "Setting Academy" }],
+    siteName: "Sales System",
+    images: [
+      { url: "/icon-512.png", width: 512, height: 512, alt: "Sales System" },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Setting Academy — La plateforme tout-en-un pour les equipes de vente",
+    title: "Sales System — La plateforme tout-en-un pour les equipes de vente",
     description:
       "Formation, CRM, prospection IA et management d'equipe. Remplacez 10 outils par un seul.",
   },
