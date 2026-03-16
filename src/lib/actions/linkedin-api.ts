@@ -285,24 +285,12 @@ export async function getLinkedInProfile(profileUrl: string) {
     };
   }
 
-  // --- Stub data ---
-  const vanityMatch = profileUrl.match(/linkedin\.com\/in\/([^/?#]+)/);
-  const vanityName = vanityMatch?.[1]?.replace(/-/g, " ") || profileUrl;
-
+  // No data available — return error instead of fake stub
   return {
-    data: {
-      id: null,
-      name: vanityName,
-      headline: null,
-      profile_url: profileUrl,
-      source: "stub" as const,
-    },
-    ...(!token
-      ? {
-          error:
-            "API LinkedIn non configurée — données locales uniquement. Ajoutez LINKEDIN_ACCESS_TOKEN ou connectez votre compte.",
-        }
-      : {}),
+    data: null,
+    error: "Profil LinkedIn introuvable. " + (!token
+      ? "API LinkedIn non configurée — ajoutez LINKEDIN_ACCESS_TOKEN ou connectez votre compte dans Paramètres."
+      : "Le profil n'a pas pu être récupéré via l'API. Vérifiez l'URL."),
   };
 }
 

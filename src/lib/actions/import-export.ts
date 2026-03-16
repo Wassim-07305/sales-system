@@ -161,6 +161,14 @@ export async function importDealsCSV(
   const errors: string[] = [];
   const validTemperatures = ["hot", "warm", "cold"];
 
+  // Fetch default pipeline stage
+  const { data: defaultStage } = await supabase
+    .from("pipeline_stages")
+    .select("id")
+    .order("position", { ascending: true })
+    .limit(1)
+    .single();
+
   for (let i = 0; i < objects.length; i++) {
     const row = objects[i];
     const lineNum = i + 2;
@@ -199,6 +207,7 @@ export async function importDealsCSV(
       contact_id: contactId,
       temperature,
       assigned_to: user.id,
+      ...(defaultStage?.id ? { stage_id: defaultStage.id } : {}),
     });
 
     if (error) {

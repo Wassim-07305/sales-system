@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     serviceRoleKey
   );
 
-  const results = { digests: 0, reminders: 0, callReminders: 0, errors: 0 };
+  const results = { digests: 0, reminders: 0, callReminders: 0, sequenceMessages: 0, errors: 0 };
 
   // --- 0. Video Call Reminders (today's scheduled calls) ---
   try {
@@ -127,6 +127,59 @@ export async function GET(request: Request) {
           prospectName: booking.prospect_name || "Client",
         });
         results.reminders++;
+      } catch {
+        results.errors++;
+      }
+    }
+  } catch {
+    results.errors++;
+  }
+
+  // --- 3. WhatsApp Sequence Follow-up Tasks ---
+  try {
+    const now = new Date();
+    const { data: pendingTasks } = await supabase
+      .from("follow_up_tasks")
+      .select("id, sequence_id, prospect_id, step_index, message_content")
+      .eq("completed", false)
+      .lte("scheduled_at", now.toISOString())
+      .limit(100);
+
+    for (const task of pendingTasks || []) {
+      try {
+        if (!task.message_content || !task.prospect_id) {
+          await supabase.from("follow_up_tasks").update({ completed: true, completed_at: now.toISOString() }).eq("id", task.id);
+          continue;
+        }
+
+        // Find the WhatsApp connection for the sequence owner
+        const { data: sequence } = await supabase
+          .from("whatsapp_sequences")
+          .select("created_by")
+          .eq("id", task.sequence_id)
+          .single();
+
+        if (sequence?.created_by) {
+          const { data: connection } = await supabase
+            .from("whatsapp_connections")
+            .select("id")
+            .eq("user_id", sequence.created_by)
+            .single();
+
+          if (connection) {
+            await supabase.from("whatsapp_messages").insert({
+              connection_id: connection.id,
+              prospect_id: task.prospect_id,
+              direction: "outbound",
+              content: task.message_content,
+              status: "queued",
+              sequence_id: task.sequence_id,
+            });
+          }
+        }
+
+        await supabase.from("follow_up_tasks").update({ completed: true, completed_at: now.toISOString() }).eq("id", task.id);
+        results.sequenceMessages++;
       } catch {
         results.errors++;
       }

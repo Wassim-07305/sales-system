@@ -422,8 +422,7 @@ export async function getReputationLeaderboard() {
       .neq("content", "__RSVP__");
 
     if ((!posts || posts.length === 0) && (!comments || comments.length === 0)) {
-      // Return demo data
-      return getDemoLeaderboard();
+      return [];
     }
 
     const scores: Record<string, { points: number; posts: number; replies: number; likes: number; bestAnswers: number }> = {};
@@ -457,7 +456,7 @@ export async function getReputationLeaderboard() {
       .sort(([, a], [, b]) => b.points - a.points)
       .slice(0, 20);
 
-    if (sorted.length === 0) return getDemoLeaderboard();
+    if (sorted.length === 0) return [];
 
     // Fetch profiles
     const topIds = sorted.map(([uid]) => uid);
@@ -480,30 +479,8 @@ export async function getReputationLeaderboard() {
       bestAnswers: stats.bestAnswers,
     }));
   } catch {
-    return getDemoLeaderboard();
+    return [];
   }
-}
-
-function getDemoLeaderboard() {
-  const demoNames = [
-    "Sophie Martin", "Lucas Dupont", "Emma Bernard", "Hugo Petit",
-    "Léa Richard", "Nathan Moreau", "Chloé Laurent", "Louis Simon",
-    "Manon Michel", "Théo Lefebvre", "Camille Leroy", "Raphaël Roux",
-    "Inès David", "Arthur Bertrand", "Jade Morel", "Ethan Fournier",
-    "Zoé Girard", "Mathis Bonnet", "Lola Dupuis", "Noah Lambert",
-  ];
-
-  return demoNames.map((name, i) => ({
-    position: i + 1,
-    userId: `demo-${i}`,
-    fullName: name,
-    avatarUrl: null,
-    points: Math.max(50, 2500 - i * 120 + Math.floor(Math.random() * 50)),
-    posts: Math.max(1, 30 - i * 2),
-    replies: Math.max(2, 45 - i * 3),
-    likes: Math.max(0, 60 - i * 4),
-    bestAnswers: Math.max(0, 5 - Math.floor(i / 4)),
-  }));
 }
 
 export async function awardReputation(userId: string, action: string, points: number) {

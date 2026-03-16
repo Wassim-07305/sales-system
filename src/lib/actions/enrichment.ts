@@ -102,7 +102,7 @@ function mapApifyToEnrichment(data: ApifyCompanyEnrichment) {
     profil_twitter_probable: data.socials?.twitter || "",
     site_web_probable: data.domain ? `https://${data.domain}` : "",
     points_cles: pointsCles.length > 0 ? pointsCles : ["Données vérifiées via Apify"],
-    confiance: 85, // Données réelles, confiance élevée
+    confiance: Math.min(100, 40 + pointsCles.length * 10 + (data.industry ? 10 : 0) + (data.domain ? 10 : 0) + (data.socials?.linkedin ? 10 : 0)),
   };
 }
 

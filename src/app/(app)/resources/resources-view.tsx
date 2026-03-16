@@ -78,79 +78,18 @@ const categoryColors: Record<string, string> = {
   outils: "bg-rose-500/10 text-rose-600 border-rose-500/20",
 };
 
-// Fallback resources if database is empty
-const fallbackResources: Resource[] = [
-  {
-    id: "1",
-    title: "Guide de démarrage rapide",
-    description:
-      "Tout ce qu'il faut savoir pour bien commencer avec la plateforme",
-    category: "formation",
-    file_type: "pdf",
-    file_url: null,
-    file_size: 2500000,
-    thumbnail_url: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Template de scripts d'appel",
-    description: "Scripts personnalisables pour vos appels de closing",
-    category: "scripts",
-    file_type: "pdf",
-    file_url: null,
-    file_size: 1100000,
-    thumbnail_url: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Replay — Masterclass Closing",
-    description: "Session complète sur les techniques de closing avancées",
-    category: "replays",
-    file_type: "video",
-    file_url: null,
-    file_size: null,
-    thumbnail_url: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    title: "Checklist prospection quotidienne",
-    description:
-      "Liste des actions à effectuer chaque jour pour maximiser vos résultats",
-    category: "outils",
-    file_type: "pdf",
-    file_url: null,
-    file_size: 500000,
-    thumbnail_url: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    title: "Modèle de suivi des leads",
-    description: "Fichier Excel pour tracker vos prospects et conversions",
-    category: "templates",
-    file_type: "xlsx",
-    file_url: null,
-    file_size: 350000,
-    thumbnail_url: null,
-    created_at: new Date().toISOString(),
-  },
-];
 
 export function ResourcesView({ resources, categories }: Props) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  // Use fallback if no resources from DB
-  const displayResources = resources.length > 0 ? resources : fallbackResources;
+  const displayResources = resources;
   const displayCategories =
     categories.length > 0
       ? categories
       : ([
-          ...new Set(fallbackResources.map((r) => r.category).filter(Boolean)),
+          ...new Set(resources.map((r) => r.category).filter(Boolean)),
         ] as string[]);
 
   // Filter resources

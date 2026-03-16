@@ -232,7 +232,14 @@ export async function executeImport(
       }
     }
   } else {
-    // Deals import
+    // Deals import — fetch default stage (first pipeline stage)
+    const { data: defaultStage } = await supabase
+      .from("pipeline_stages")
+      .select("id")
+      .order("position", { ascending: true })
+      .limit(1)
+      .single();
+
     for (const row of valid) {
       const { error } = await supabase.from("deals").insert({
         title: row.title,
@@ -243,6 +250,7 @@ export async function executeImport(
         tags: [],
         temperature: "cold" as const,
         probability: 0,
+        ...(defaultStage?.id ? { stage_id: defaultStage.id } : {}),
       });
 
       if (error) {

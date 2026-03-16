@@ -216,8 +216,8 @@ async function moveDealToSigned(
       .eq("id", contract.deal_id);
 
     revalidatePath("/crm");
-  } catch (err) {
-    console.error("moveDealToSigned failed:", err);
+  } catch {
+    // Non-blocking: deal stage update is best-effort after contract signature
   }
 }
 

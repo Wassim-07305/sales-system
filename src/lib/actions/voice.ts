@@ -92,16 +92,14 @@ export async function cloneVoice(sampleUrl: string) {
   const ELEVENLABS_API_KEY = await getApiKey("ELEVENLABS_API_KEY");
 
   if (!ELEVENLABS_API_KEY) {
-    // Mock mode: mark as pending, user is informed the key is missing
     await supabase
       .from("voice_profiles")
       .update({ sample_url: sampleUrl, status: "pending" })
       .eq("id", profile.id);
     revalidatePath("/settings/voice");
     return {
-      success: true,
-      mock: true,
-      message: "Clé API ElevenLabs non configurée. Le clonage sera effectué dès que la clé sera ajoutée.",
+      success: false,
+      error: "Clé API ElevenLabs non configurée. Ajoutez-la dans Paramètres > API pour activer le clonage vocal.",
     };
   }
 
@@ -169,7 +167,6 @@ export async function generateVoiceMessage(text: string, prospectName?: string) 
   const ELEVENLABS_API_KEY = await getApiKey("ELEVENLABS_API_KEY");
 
   if (!ELEVENLABS_API_KEY) {
-    // Store the message request even without API key
     await supabase.from("voice_messages").insert({
       voice_profile_id: profile?.id || null,
       input_text: text,
@@ -178,9 +175,8 @@ export async function generateVoiceMessage(text: string, prospectName?: string) 
     });
     revalidatePath("/settings/voice");
     return {
-      success: true,
-      mock: true,
-      message: "Clé API ElevenLabs non configurée. Le message sera généré dès que la clé sera ajoutée.",
+      success: false,
+      error: "Clé API ElevenLabs non configurée. Ajoutez-la dans Paramètres > API pour générer des messages vocaux.",
     };
   }
 

@@ -1120,7 +1120,7 @@ export async function triggerOptInSequence(
   if (!sequence) throw new Error("Séquence introuvable");
 
   // Envoyer le premier message de la séquence pour déclencher le nurturing
-  const steps = (sequence.steps as Array<{ message: string }>) || [];
+  const steps = (sequence.steps as Array<{ delay_minutes: number; message: string; media_url?: string }>) || [];
   if (steps.length > 0) {
     await supabase.from("whatsapp_messages").insert({
       connection_id: connection.id,
@@ -1130,6 +1130,25 @@ export async function triggerOptInSequence(
       status: "sent",
       sequence_id: sequenceId,
     });
+
+    // Schedule remaining steps as follow_up_tasks for cron execution
+    const now = new Date();
+    for (let i = 1; i < steps.length; i++) {
+      const step = steps[i];
+      const scheduledAt = new Date(now.getTime() + step.delay_minutes * 60 * 1000);
+      try {
+        await supabase.from("follow_up_tasks").insert({
+          sequence_id: sequenceId,
+          prospect_id: prospectId,
+          step_index: i,
+          message_content: step.message,
+          scheduled_at: scheduledAt.toISOString(),
+          completed: false,
+        });
+      } catch {
+        // Silently continue if table doesn't exist yet
+      }
+    }
   }
 
   revalidatePath("/whatsapp");

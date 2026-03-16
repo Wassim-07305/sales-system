@@ -440,10 +440,9 @@ async function sendProspectMessage(
           return { success: true, error: null };
         }
 
-        const errBody = await res.text();
-        console.error("Meta WhatsApp API error:", errBody);
-      } catch (err) {
-        console.error("Meta WhatsApp send error:", err);
+        await res.text();
+      } catch {
+        // Meta WhatsApp send failed — fall through to local storage
       }
     }
 
@@ -453,7 +452,6 @@ async function sendProspectMessage(
     return { success: true, error: null };
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : "Erreur inconnue";
-    console.error(`Erreur envoi message prospect ${prospect.id}:`, errorMsg);
     return { success: false, error: errorMsg };
   }
 }

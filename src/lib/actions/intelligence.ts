@@ -22,28 +22,30 @@ export async function getLookalikes(prospectId: string) {
 
   if (!prospect) throw new Error("Prospect introuvable");
 
-  const result = await aiJSON<{
-    lookalikes: {
-      name: string;
-      sector: string;
-      similarity: number;
-      reason: string;
-      suggestedApproach: string;
-    }[];
-  }>(
-    `Analyse ce prospect et suggère 5 profils similaires à cibler.
-Prospect : ${JSON.stringify({ name: prospect.name, platform: prospect.platform, notes: prospect.notes, status: prospect.status })}
+  // Search for real similar prospects in the database based on shared attributes
+  let query = supabase
+    .from("prospects")
+    .select("id, name, platform, status, notes, score, profile_url")
+    .neq("id", prospectId)
+    .limit(10);
 
-Réponds en JSON avec un tableau "lookalikes" contenant pour chaque suggestion :
-- name (nom fictif réaliste d'entreprise ou personne)
-- sector (secteur d'activité)
-- similarity (score de 0 à 100)
-- reason (pourquoi ce profil est similaire)
-- suggestedApproach (approche recommandée)`,
-    { model: SMART_MODEL, maxTokens: 2048 }
-  );
+  if (prospect.platform) {
+    query = query.eq("platform", prospect.platform);
+  }
 
-  return result.lookalikes;
+  const { data: similar } = await query;
+
+  if (!similar || similar.length === 0) {
+    return [];
+  }
+
+  return similar.map((p) => ({
+    name: p.name || "Inconnu",
+    sector: p.platform || "—",
+    similarity: p.score ?? 50,
+    reason: `Même plateforme (${p.platform || "N/A"}) — statut : ${p.status || "N/A"}`,
+    suggestedApproach: p.notes || "Approche standard recommandée",
+  }));
 }
 
 // ─── LinkedIn Company Scraper ───────────────────────────────────────

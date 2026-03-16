@@ -769,8 +769,7 @@ export async function createRelanceWorkflow(config: RelanceConfig) {
 
   if (error) {
     if (isTableMissing(error)) {
-      // Table does not exist yet — return a mock result
-      return { id: "mock", prospect_id: config.prospect_id, status: "pending" };
+      throw new Error("La table de relances automatiques n'est pas encore configurée. Contactez l'administrateur.");
     }
     throw new Error(error.message);
   }

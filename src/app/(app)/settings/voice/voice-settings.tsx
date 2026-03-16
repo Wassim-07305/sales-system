@@ -109,11 +109,7 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
     try {
       const result = await cloneVoice(voiceProfile.sample_url);
       if (result.success) {
-        if ("mock" in result && result.mock) {
-          toast.info(result.message as string);
-        } else {
-          toast.success("Voix clonee avec succes !");
-        }
+        toast.success("Voix clonée avec succès !");
         router.refresh();
       } else {
         toast.error(result.error || "Erreur lors du clonage");
@@ -136,15 +132,13 @@ export function VoiceSettings({ voiceProfile, voiceMessages }: { voiceProfile: V
     try {
       const result = await generateVoiceMessage(testText);
       if (result.success) {
-        if ("mock" in result && result.mock) {
-          toast.info(result.message as string);
-        } else if ("audioUrl" in result && result.audioUrl) {
+        if ("audioUrl" in result && result.audioUrl) {
           setGeneratedAudioUrl(result.audioUrl);
-          toast.success("Audio genere !");
+          toast.success("Audio généré !");
         }
         router.refresh();
       } else {
-        toast.error(result.error || "Erreur lors de la generation");
+        toast.error(result.error || "Erreur lors de la génération");
       }
     } catch {
       toast.error("Erreur lors de la generation vocale");

@@ -191,14 +191,13 @@ Critères d'évaluation :
       { system: "Tu es un coach expert en vente et setting. Analyse uniquement en français." }
     );
   } catch {
-    // Fallback if AI fails
     feedback = {
-      score: Math.floor(Math.random() * 40) + 60,
-      strengths: ["Bonne introduction", "Questions pertinentes"],
-      improvements: ["Gestion des objections à améliorer", "Closing trop rapide"],
-      objection_handling: Math.floor(Math.random() * 30) + 60,
-      rapport_building: Math.floor(Math.random() * 30) + 65,
-      closing_technique: Math.floor(Math.random() * 30) + 55,
+      score: 0,
+      strengths: [],
+      improvements: ["Analyse IA indisponible — réessayez dans quelques instants."],
+      objection_handling: 0,
+      rapport_building: 0,
+      closing_technique: 0,
     };
   }
 
@@ -265,10 +264,10 @@ Criteres d'evaluation :
     return feedback;
   } catch {
     return {
-      score: 65,
-      strengths: ["Bonne introduction", "Questions pertinentes"],
-      improvements: ["Gestion des objections a ameliorer", "Closing trop rapide"],
-      tips: ["Pose plus de questions ouvertes", "Laisse le prospect s'exprimer davantage"],
+      score: 0,
+      strengths: [],
+      improvements: ["Analyse IA indisponible — réessayez dans quelques instants."],
+      tips: ["Vérifiez la configuration de l'API IA dans les paramètres."],
     };
   }
 }

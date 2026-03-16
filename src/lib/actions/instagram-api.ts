@@ -268,16 +268,8 @@ export async function getInstagramProfile(username: string) {
   }
 
   return {
-    data: {
-      username,
-      name: username,
-      biography: null,
-      followers_count: null,
-      follows_count: null,
-      media_count: null,
-      profile_picture_url: null,
-      source: "stub" as const,
-    },
+    data: null,
+    error: "Profil Instagram introuvable. Configurez l'API Instagram dans Paramètres ou vérifiez le nom d'utilisateur.",
   };
 }
 

@@ -45,6 +45,18 @@ export async function getConversation(id: string) {
 export async function sendMessage(conversationId: string, content: string, type: string = "text") {
   const supabase = await createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Get sender name from profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  const senderName = profile?.full_name || user.email?.split("@")[0] || "moi";
+
   const { data: conv } = await supabase
     .from("dm_conversations")
     .select("messages, linkedin_conversation_id")
@@ -57,7 +69,7 @@ export async function sendMessage(conversationId: string, content: string, type:
   const messages = Array.isArray(conv.messages) ? conv.messages : [];
 
   const newMessage: Record<string, unknown> = {
-    sender: "damien",
+    sender: senderName,
     content,
     type,
     timestamp: new Date().toISOString(),
@@ -76,7 +88,6 @@ export async function sendMessage(conversationId: string, content: string, type:
   }).eq("id", conversationId);
 
   if (error) {
-    console.error("Inbox sendMessage error:", error.message);
     throw new Error("Échec de l'envoi du message");
   }
 
@@ -113,10 +124,19 @@ export async function createConversation(prospectId: string, platform: string = 
 export async function importConversation(prospectId: string, platform: string, rawText: string) {
   const supabase = await createClient();
 
+  // Get sender name from profile
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = user ? await supabase.from("profiles").select("full_name").eq("id", user.id).single() : { data: null };
+  const senderName = profile?.full_name || "moi";
+
+  // Get prospect name
+  const { data: prospect } = await supabase.from("prospects").select("name").eq("id", prospectId).single();
+  const prospectName = prospect?.name || "prospect";
+
   // Parse raw text into messages (simple line-by-line parsing)
   const lines = rawText.split("\n").filter((l) => l.trim());
   const messages = lines.map((line, i) => ({
-    sender: i % 2 === 0 ? "prospect" : "damien",
+    sender: i % 2 === 0 ? prospectName : senderName,
     content: line.trim(),
     type: "text",
     timestamp: new Date(Date.now() - (lines.length - i) * 60000).toISOString(),
@@ -153,14 +173,6 @@ export async function generateQuickReplies(conversationContext: string, prospect
     );
     return { suggestions: parsed.suggestions || [] };
   } catch {
-    // fallback
+    return { suggestions: [], error: "Suggestions IA indisponibles — réessayez dans quelques instants." };
   }
-
-  return {
-    suggestions: [
-      `Salut ${prospectName} ! Merci pour ta réponse. Est-ce que tu aurais 15 min cette semaine pour en discuter ?`,
-      `Super intéressant ce que tu me dis. J'ai justement un client qui avait la même problématique, je peux te montrer comment on l'a résolu.`,
-      `Je comprends ${prospectName}. Si tu veux, je t'envoie un cas concret par message pour que tu puisses voir les résultats avant de te décider.`,
-    ],
-  };
 }

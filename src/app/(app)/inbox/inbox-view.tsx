@@ -254,7 +254,7 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
   }
 
   async function handleVoiceAi() {
-    toast.success("Vocal IA programme (en attente d'integration ElevenLabs)");
+    toast.info("Fonctionnalité Vocal IA en cours de développement — intégration ElevenLabs à venir.");
     setVoiceAiDialogOpen(false);
     setVoiceAiText("");
   }
@@ -456,8 +456,9 @@ export function InboxView({ conversations: initialConversations, prospects }: { 
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setVoiceAiDialogOpen(true)}
-                  title="Vocal IA"
+                  onClick={() => toast.info("Vocal IA — intégration ElevenLabs à venir.")}
+                  title="Vocal IA (bientôt disponible)"
+                  disabled
                 >
                   <Bot className="h-4 w-4" />
                 </Button>

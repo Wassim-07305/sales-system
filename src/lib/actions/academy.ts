@@ -237,14 +237,9 @@ Sois constructif mais exigeant. Le score doit refléter la qualité réelle de l
     return result;
   } catch {
     return {
-      score: Math.floor(Math.random() * 30) + 70,
-      feedback:
-        "Bonne réponse dans l'ensemble. Points d'amélioration : structure plus claire, ajout d'exemples concrets.",
-      suggestions: [
-        "Utilisez des exemples tirés de votre expérience",
-        "Structurez votre réponse en 3 parties",
-        "Ajoutez une conclusion avec un call-to-action",
-      ],
+      score: 0,
+      feedback: "Correction IA indisponible — réessayez dans quelques instants. Vérifiez la configuration de l'API IA.",
+      suggestions: [],
     };
   }
 }
@@ -606,20 +601,7 @@ Règles :
     );
     return result.questions;
   } catch {
-    return [
-      {
-        question: "Quel est l'objectif principal du setting ?",
-        options: ["Vendre directement", "Qualifier et booker un appel", "Envoyer des emails", "Créer du contenu"],
-        correctIndex: 1,
-        explanation: "Le setting consiste à qualifier les prospects et les amener à booker un appel de découverte.",
-      },
-      {
-        question: "Quelle est la meilleure approche en DM ?",
-        options: ["Pitcher immédiatement", "Poser des questions ouvertes", "Envoyer un lien", "Ignorer les objections"],
-        correctIndex: 1,
-        explanation: "Les questions ouvertes permettent de comprendre le besoin du prospect et de créer du lien.",
-      },
-    ];
+    throw new Error("Génération de quiz indisponible — vérifiez la configuration de l'API IA.");
   }
 }
 

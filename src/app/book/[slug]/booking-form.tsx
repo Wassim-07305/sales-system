@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,11 @@ interface BookingFormProps {
 
 type Step = "qualify" | "schedule" | "confirmed" | "disqualified";
 
+const DEFAULT_TIMES = [
+  "09:00", "09:30", "10:00", "10:30", "11:00",
+  "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+];
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function BookingForm({ slug }: BookingFormProps) {
   const [step, setStep] = useState<Step>("qualify");
@@ -39,6 +44,49 @@ export function BookingForm({ slug }: BookingFormProps) {
   // Schedule data
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const fetchAvailableSlots = useCallback(async (date: string) => {
+    setLoadingSlots(true);
+    setSelectedTime("");
+    try {
+      const supabase = createClient();
+      const dayOfWeek = new Date(date).getDay(); // 0=Sun, 1=Mon...
+
+      const { data: slots } = await supabase
+        .from("booking_slots")
+        .select("start_time, end_time, duration_minutes")
+        .eq("day_of_week", dayOfWeek)
+        .eq("is_active", true)
+        .order("start_time", { ascending: true });
+
+      if (slots && slots.length > 0) {
+        // Generate time options from slot ranges
+        const times: string[] = [];
+        for (const slot of slots) {
+          const [startH, startM] = slot.start_time.split(":").map(Number);
+          const [endH, endM] = slot.end_time.split(":").map(Number);
+          const duration = slot.duration_minutes || 30;
+          let current = startH * 60 + startM;
+          const end = endH * 60 + endM;
+          while (current + duration <= end) {
+            const h = Math.floor(current / 60).toString().padStart(2, "0");
+            const m = (current % 60).toString().padStart(2, "0");
+            times.push(`${h}:${m}`);
+            current += duration;
+          }
+        }
+        setAvailableTimes(times.length > 0 ? times : DEFAULT_TIMES);
+      } else {
+        setAvailableTimes(DEFAULT_TIMES);
+      }
+    } catch {
+      setAvailableTimes(DEFAULT_TIMES);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
 
   // Simple qualification logic
   function handleQualify(e: React.FormEvent) {
@@ -103,11 +151,12 @@ export function BookingForm({ slug }: BookingFormProps) {
     setLoading(false);
   }
 
-  // Available times (mock - would come from booking_slots in production)
-  const availableTimes = [
-    "09:00", "09:30", "10:00", "10:30", "11:00", "14:00",
-    "14:30", "15:00", "15:30", "16:00", "16:30",
-  ];
+  // Fetch slots when date changes
+  useEffect(() => {
+    if (selectedDate) {
+      fetchAvailableSlots(selectedDate);
+    }
+  }, [selectedDate, fetchAvailableSlots]);
 
   if (step === "confirmed") {
     return (
