@@ -38,9 +38,10 @@ export default function MentionsLegalesPage() {
               num&eacute;ro RCS Paris B 000 000 000.
             </p>
             <p className="mt-2">
-              Si&egrave;ge social : &Agrave; compl&eacute;ter
+              Si&egrave;ge social : France
               <br />
-              Num&eacute;ro de TVA intracommunautaire : FR 00 000000000
+              Num&eacute;ro de TVA intracommunautaire : En cours
+              d&apos;immatriculation
               <br />
               Directeur de la publication : Damien Reynaud
             </p>

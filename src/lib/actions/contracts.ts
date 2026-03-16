@@ -4,6 +4,21 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify, notifyMany } from "@/lib/actions/notifications";
 
+/**
+ * Remplace les variables dynamiques {{variable}} dans le contenu du contrat.
+ * Variables supportées : client_name, client_email, client_company, amount, date, payment_schedule
+ */
+function replaceContractVariables(
+  content: string,
+  variables: Record<string, string>,
+): string {
+  let result = content;
+  for (const [key, value] of Object.entries(variables)) {
+    result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, "gi"), value);
+  }
+  return result;
+}
+
 export async function createContract(formData: {
   templateId: string;
   clientId: string;
@@ -13,7 +28,9 @@ export async function createContract(formData: {
   paymentSchedule: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié", data: null };
 
   // Empêcher les doublons de contrat pour un même deal
@@ -27,9 +44,43 @@ export async function createContract(formData: {
       .maybeSingle();
 
     if (existing) {
-      return { error: `Un contrat existe déjà pour ce deal (statut: ${existing.status}). Veuillez d'abord annuler le contrat existant.`, data: null };
+      return {
+        error: `Un contrat existe déjà pour ce deal (statut: ${existing.status}). Veuillez d'abord annuler le contrat existant.`,
+        data: null,
+      };
     }
   }
+
+  // Fetch client profile for variable replacement
+  const { data: clientProfile } = await supabase
+    .from("profiles")
+    .select("full_name, email, company")
+    .eq("id", formData.clientId)
+    .single();
+
+  const variables: Record<string, string> = {
+    client_name: clientProfile?.full_name || "",
+    client_email: clientProfile?.email || "",
+    client_company: clientProfile?.company || "",
+    nom: clientProfile?.full_name?.split(" ").slice(-1)[0] || "",
+    prenom: clientProfile?.full_name?.split(" ")[0] || "",
+    montant: new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(formData.amount),
+    date: new Date().toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+    payment_schedule: formData.paymentSchedule,
+    echeances: formData.paymentSchedule,
+  };
+
+  const processedContent = replaceContractVariables(
+    formData.content,
+    variables,
+  );
 
   const { data, error } = await supabase
     .from("contracts")
@@ -37,7 +88,7 @@ export async function createContract(formData: {
       template_id: formData.templateId,
       client_id: formData.clientId,
       deal_id: formData.dealId || null,
-      content: formData.content,
+      content: processedContent,
       amount: formData.amount,
       payment_schedule: formData.paymentSchedule,
       status: "draft",
@@ -45,14 +96,21 @@ export async function createContract(formData: {
     .select()
     .single();
 
-  if (error) return { error: "Impossible de créer le contrat. Vérifiez les informations saisies.", data: null };
+  if (error)
+    return {
+      error:
+        "Impossible de créer le contrat. Vérifiez les informations saisies.",
+      data: null,
+    };
   revalidatePath("/contracts");
   return { error: null, data };
 }
 
 export async function sendContract(contractId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -70,10 +128,15 @@ export async function sendContract(contractId: string) {
     .single();
 
   if (contract?.client_id) {
-    notify(contract.client_id, "Nouveau contrat à signer", "Un contrat vous a été envoyé. Cliquez pour le consulter et le signer.", {
-      type: "contract",
-      link: `/contracts/${contractId}`,
-    });
+    notify(
+      contract.client_id,
+      "Nouveau contrat à signer",
+      "Un contrat vous a été envoyé. Cliquez pour le consulter et le signer.",
+      {
+        type: "contract",
+        link: `/contracts/${contractId}`,
+      },
+    );
   }
 
   revalidatePath("/contracts");
@@ -83,7 +146,9 @@ export async function sendContract(contractId: string) {
 
 export async function signContract(contractId: string, signatureData: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { error } = await supabase
@@ -105,10 +170,15 @@ export async function signContract(contractId: string, signatureData: string) {
     .in("role", ["admin", "manager"]);
 
   if (admins) {
-    notifyMany(admins.map((a) => a.id), "Contrat signé", "Un client vient de signer son contrat.", {
-      type: "contract",
-      link: `/contracts/${contractId}`,
-    });
+    notifyMany(
+      admins.map((a) => a.id),
+      "Contrat signé",
+      "Un client vient de signer son contrat.",
+      {
+        type: "contract",
+        link: `/contracts/${contractId}`,
+      },
+    );
   }
 
   // Auto-update deal to "Client Signé" stage
@@ -119,7 +189,10 @@ export async function signContract(contractId: string, signatureData: string) {
   return { success: true };
 }
 
-async function moveDealToSigned(supabase: Awaited<ReturnType<typeof createClient>>, contractId: string) {
+async function moveDealToSigned(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  contractId: string,
+) {
   try {
     const { data: contract } = await supabase
       .from("contracts")
@@ -150,7 +223,9 @@ async function moveDealToSigned(supabase: Awaited<ReturnType<typeof createClient
 
 export async function savePdfUrl(contractId: string, pdfUrl: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   if (!pdfUrl || pdfUrl.trim().length === 0) {
@@ -169,10 +244,12 @@ export async function savePdfUrl(contractId: string, pdfUrl: string) {
 export async function saveSignature(
   contractId: string,
   signatureData: string,
-  signerName: string
+  signerName: string,
 ) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { data: contract } = await supabase
@@ -182,7 +259,8 @@ export async function saveSignature(
     .single();
 
   if (!contract) return { error: "Contrat introuvable" };
-  if (contract.status === "signed") return { error: "Ce contrat est déjà signé" };
+  if (contract.status === "signed")
+    return { error: "Ce contrat est déjà signé" };
 
   const { error } = await supabase
     .from("contracts")
@@ -204,10 +282,15 @@ export async function saveSignature(
     .in("role", ["admin", "manager"]);
 
   if (admins) {
-    notifyMany(admins.map((a) => a.id), "Contrat signé", `Le contrat a été signé par ${signerName}.`, {
-      type: "contract",
-      link: `/contracts/${contractId}`,
-    });
+    notifyMany(
+      admins.map((a) => a.id),
+      "Contrat signé",
+      `Le contrat a été signé par ${signerName}.`,
+      {
+        type: "contract",
+        link: `/contracts/${contractId}`,
+      },
+    );
   }
 
   // Auto-update deal to "Client Signé" stage
@@ -220,12 +303,16 @@ export async function saveSignature(
 
 export async function getSignatureStatus(contractId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   const { data: contract, error } = await supabase
     .from("contracts")
-    .select("id, status, signed_at, signature_data, signer_name, signer_user_id")
+    .select(
+      "id, status, signed_at, signature_data, signer_name, signer_user_id",
+    )
     .eq("id", contractId)
     .single();
 
@@ -242,7 +329,9 @@ export async function getSignatureStatus(contractId: string) {
 
 export async function revokeSignature(contractId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
   // Check admin role

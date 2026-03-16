@@ -64,7 +64,8 @@ export async function updateSession(request: NextRequest) {
     user &&
     (pathname === "/login" ||
       pathname === "/register" ||
-      pathname === "/forgot-password")
+      pathname === "/forgot-password" ||
+      pathname === "/reset-password")
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
@@ -144,7 +145,6 @@ export async function updateSession(request: NextRequest) {
         "/resources",
         "/support",
         "/referral",
-        "/challenges",
         "/kpis",
         "/bookings",
         "/calls",

@@ -12,7 +12,6 @@ import {
   BarChart3,
   ArrowRight,
   CheckCircle2,
-  Sparkles,
   TrendingUp,
   Star,
   Menu,
