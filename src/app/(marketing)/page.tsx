@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -44,7 +45,7 @@ function useInView(threshold = 0.15) {
           observer.unobserve(el);
         }
       },
-      { threshold }
+      { threshold },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -377,7 +378,7 @@ function DashboardMockup() {
                         style={{ height: `${h}%` }}
                       />
                     </div>
-                  )
+                  ),
                 )}
               </div>
             </div>
@@ -461,13 +462,17 @@ export default function LandingPage() {
           <Link
             href="/"
             className="flex items-center gap-2.5"
-            aria-label="Setting Academy - Accueil"
+            aria-label="Sales System - Accueil"
           >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-[#7af17a] shadow-[0_0_12px_rgba(122,241,122,0.3)]">
-              <Sparkles className="size-4 text-[#0a0a0a]" aria-hidden="true" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Sales System"
+              width={32}
+              height={32}
+              className="rounded-lg shadow-[0_0_12px_rgba(122,241,122,0.3)]"
+            />
             <span className="font-serif text-lg font-bold tracking-tight">
-              Setting Academy
+              Sales System
             </span>
           </Link>
 
@@ -510,9 +515,7 @@ export default function LandingPage() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
-              aria-label={
-                mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"
-              }
+              aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
             >
               {mobileMenuOpen ? (
                 <X className="size-5" aria-hidden="true" />
@@ -572,7 +575,10 @@ export default function LandingPage() {
         {/* ============================================================== */}
         <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-44 lg:pb-36">
           {/* Background orbs */}
-          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+          >
             <div className="absolute left-1/2 top-0 h-[700px] w-[1000px] -translate-x-1/2 rounded-full bg-[#7af17a]/[0.04] blur-[160px]" />
             <div className="absolute right-1/4 top-1/4 h-[300px] w-[300px] rounded-full bg-blue-500/[0.02] blur-[100px]" />
             <div className="absolute left-1/4 top-1/3 h-[250px] w-[250px] rounded-full bg-[#7af17a]/[0.02] blur-[120px]" />
@@ -712,7 +718,10 @@ export default function LandingPage() {
           aria-labelledby="features-heading"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <FadeIn isInView={featuresSection.isInView} className="mx-auto max-w-2xl text-center">
+            <FadeIn
+              isInView={featuresSection.isInView}
+              className="mx-auto max-w-2xl text-center"
+            >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
                 Fonctionnalites
               </p>
@@ -722,11 +731,11 @@ export default function LandingPage() {
               >
                 Tout ce dont vous avez besoin
                 <br className="hidden sm:block" />
-                pour{" "}
-                <span className="text-white/40">performer</span>
+                pour <span className="text-white/40">performer</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
-                Une suite d&apos;outils concus pour les equipes de vente ambitieuses.
+                Une suite d&apos;outils concus pour les equipes de vente
+                ambitieuses.
               </p>
             </FadeIn>
 
@@ -773,7 +782,10 @@ export default function LandingPage() {
           aria-labelledby="how-heading"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <FadeIn isInView={howSection.isInView} className="mx-auto max-w-2xl text-center">
+            <FadeIn
+              isInView={howSection.isInView}
+              className="mx-auto max-w-2xl text-center"
+            >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
                 Comment ca marche
               </p>
@@ -781,8 +793,7 @@ export default function LandingPage() {
                 id="how-heading"
                 className="font-serif text-3xl font-bold tracking-tight sm:text-4xl"
               >
-                Operationnel en{" "}
-                <span className="text-white/40">3 etapes</span>
+                Operationnel en <span className="text-white/40">3 etapes</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
                 Une mise en place simple pour des resultats rapides.
@@ -834,7 +845,10 @@ export default function LandingPage() {
           aria-labelledby="pricing-heading"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <FadeIn isInView={pricingSection.isInView} className="mx-auto max-w-2xl text-center">
+            <FadeIn
+              isInView={pricingSection.isInView}
+              className="mx-auto max-w-2xl text-center"
+            >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
                 Tarifs
               </p>
@@ -908,18 +922,22 @@ export default function LandingPage() {
                   </p>
 
                   <div className="mt-6 flex items-baseline gap-1">
-                    {plan.priceValue[billingYearly ? "yearly" : "monthly"] === 0 ? (
+                    {plan.priceValue[billingYearly ? "yearly" : "monthly"] ===
+                    0 ? (
                       <span className="font-serif text-4xl font-bold tracking-tight">
                         Gratuit
                       </span>
-                    ) : plan.priceValue[billingYearly ? "yearly" : "monthly"] === -1 ? (
+                    ) : plan.priceValue[
+                        billingYearly ? "yearly" : "monthly"
+                      ] === -1 ? (
                       <span className="font-serif text-2xl font-bold tracking-tight">
                         Sur mesure
                       </span>
                     ) : (
                       <>
                         <span className="font-serif text-4xl font-bold tracking-tight">
-                          {plan.price[billingYearly ? "yearly" : "monthly"]}&euro;
+                          {plan.price[billingYearly ? "yearly" : "monthly"]}
+                          &euro;
                         </span>
                         <span className="text-[15px] text-white/30">/mois</span>
                       </>
@@ -968,7 +986,8 @@ export default function LandingPage() {
             </div>
 
             <p className="mx-auto mt-10 max-w-md text-center text-[13px] text-white/45">
-              Annulation possible a tout moment. Sans carte bancaire pour le plan Starter.
+              Annulation possible a tout moment. Sans carte bancaire pour le
+              plan Starter.
             </p>
           </div>
         </section>
@@ -983,7 +1002,10 @@ export default function LandingPage() {
           aria-labelledby="testimonials-heading"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <FadeIn isInView={testimonialsSection.isInView} className="mx-auto max-w-2xl text-center">
+            <FadeIn
+              isInView={testimonialsSection.isInView}
+              className="mx-auto max-w-2xl text-center"
+            >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
                 Temoignages
               </p>
@@ -1061,7 +1083,10 @@ export default function LandingPage() {
           className="relative overflow-hidden py-24 sm:py-32 lg:py-40"
           aria-labelledby="cta-heading"
         >
-          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+          >
             <div className="absolute left-1/2 bottom-0 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-[#7af17a]/[0.03] blur-[160px]" />
           </div>
           <FadeIn
@@ -1077,7 +1102,8 @@ export default function LandingPage() {
               <span className="text-white/40">votre equipe commerciale</span> ?
             </h2>
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/50 sm:text-lg">
-              Rejoignez des centaines de professionnels qui ont deja fait le choix de l&apos;excellence.
+              Rejoignez des centaines de professionnels qui ont deja fait le
+              choix de l&apos;excellence.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
               <Link href="/register">
@@ -1114,16 +1140,17 @@ export default function LandingPage() {
               <Link
                 href="/"
                 className="flex items-center gap-2.5"
-                aria-label="Setting Academy - Accueil"
+                aria-label="Sales System - Accueil"
               >
-                <div className="flex size-7 items-center justify-center rounded-md bg-[#7af17a]">
-                  <Sparkles
-                    className="size-3.5 text-[#0a0a0a]"
-                    aria-hidden="true"
-                  />
-                </div>
+                <Image
+                  src="/logo.png"
+                  alt="Sales System"
+                  width={28}
+                  height={28}
+                  className="rounded-md"
+                />
                 <span className="font-serif text-[15px] font-bold">
-                  Setting Academy
+                  Sales System
                 </span>
               </Link>
               <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-white/50">
@@ -1154,7 +1181,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-14 border-t border-white/[0.04] pt-8 text-center text-[12px] text-white/45">
-            &copy; 2026 Setting Academy. Tous droits reserves.
+            &copy; 2026 Sales System. Tous droits reserves.
           </div>
         </div>
       </footer>
