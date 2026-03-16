@@ -90,8 +90,8 @@ export async function GET(request: Request) {
         });
       }
     }
-  } catch (err) {
-    console.error("Erreur envoi emails:", err);
+  } catch {
+    // Email sending failed — logged via Resend dashboard
   }
 
   return NextResponse.json({

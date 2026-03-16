@@ -739,60 +739,7 @@ export async function getReputationActivity(userId?: string) {
     );
     return events.slice(0, 10);
   } catch {
-    // Fallback demo activity
-    const now = new Date();
-    return [
-      {
-        label: "Nouveau post",
-        points: 10,
-        date: new Date(now.getTime() - 1000 * 60 * 30).toISOString(),
-      },
-      {
-        label: "Meilleure réponse",
-        points: 50,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString(),
-      },
-      {
-        label: "Réponse à un post",
-        points: 5,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 5).toISOString(),
-      },
-      {
-        label: "3 likes reçus",
-        points: 6,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 8).toISOString(),
-      },
-      {
-        label: "Nouveau post : Astuce closing",
-        points: 10,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 24).toISOString(),
-      },
-      {
-        label: "Réponse à un post",
-        points: 5,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 30).toISOString(),
-      },
-      {
-        label: "2 likes reçus",
-        points: 4,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 48).toISOString(),
-      },
-      {
-        label: "Nouveau post",
-        points: 10,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 72).toISOString(),
-      },
-      {
-        label: "Réponse à un post",
-        points: 5,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 96).toISOString(),
-      },
-      {
-        label: "Meilleure réponse",
-        points: 50,
-        date: new Date(now.getTime() - 1000 * 60 * 60 * 120).toISOString(),
-      },
-    ];
+    return [];
   }
 }
 
