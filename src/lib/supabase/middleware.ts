@@ -16,17 +16,17 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   const {
@@ -36,11 +36,23 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that don't require auth
-  const publicRoutes = ["/login", "/register", "/book", "/forgot-password", "/reset-password"];
-  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+  const publicRoutes = [
+    "/login",
+    "/register",
+    "/book",
+    "/forgot-password",
+    "/reset-password",
+  ];
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route),
+  );
 
   // Landing page + marketing/legal pages are public for all users
-  const isMarketingRoute = pathname === "/" || pathname.startsWith("/cgv") || pathname.startsWith("/mentions-legales") || pathname.startsWith("/confidentialite");
+  const isMarketingRoute =
+    pathname === "/" ||
+    pathname.startsWith("/cgv") ||
+    pathname.startsWith("/mentions-legales") ||
+    pathname.startsWith("/confidentialite");
 
   if (!user && !isPublicRoute && !isMarketingRoute) {
     const url = request.nextUrl.clone();
@@ -48,7 +60,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password")) {
+  if (
+    user &&
+    (pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/forgot-password")
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
@@ -56,7 +73,11 @@ export async function updateSession(request: NextRequest) {
 
   // Role-based route restrictions & onboarding check
   // Skip for API routes, public routes, marketing pages, and static assets
-  const skipRoleCheck = pathname.startsWith("/api") || pathname.startsWith("/onboarding") || isPublicRoute || isMarketingRoute;
+  const skipRoleCheck =
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/onboarding") ||
+    isPublicRoute ||
+    isMarketingRoute;
   if (user && !skipRoleCheck) {
     // Always fetch from DB to prevent cookie spoofing — cached for performance via httpOnly cookie
     const cachedRole = request.cookies.get("x-user-role")?.value;
@@ -76,8 +97,24 @@ export async function updateSession(request: NextRequest) {
       onboardingCompleted = profile?.onboarding_completed ?? true;
 
       // Cache role in httpOnly cookie for 5 minutes to reduce DB queries
-      supabaseResponse.cookies.set("x-user-role", role || "", { maxAge: 300, path: "/", httpOnly: true, secure: true, sameSite: "lax" });
-      supabaseResponse.cookies.set("x-onboarding-done", onboardingCompleted ? "1" : "0", { maxAge: 300, path: "/", httpOnly: true, secure: true, sameSite: "lax" });
+      supabaseResponse.cookies.set("x-user-role", role || "", {
+        maxAge: 300,
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+      supabaseResponse.cookies.set(
+        "x-onboarding-done",
+        onboardingCompleted ? "1" : "0",
+        {
+          maxAge: 300,
+          path: "/",
+          httpOnly: true,
+          secure: true,
+          sameSite: "lax",
+        },
+      );
     }
 
     // Onboarding redirect for clients
@@ -95,16 +132,42 @@ export async function updateSession(request: NextRequest) {
     // Client roles can only access their specific routes
     if (role && ["client_b2b", "client_b2c"].includes(role)) {
       const clientAllowedRoutes = [
-        "/dashboard", "/academy", "/profile", "/settings/subscription",
-        "/settings/notifications", "/notifications", "/onboarding",
-        "/portal", "/community", "/chat", "/resources", "/support",
-        "/referral", "/challenges", "/kpis", "/bookings",
+        "/dashboard",
+        "/academy",
+        "/profile",
+        "/settings",
+        "/notifications",
+        "/onboarding",
+        "/portal",
+        "/community",
+        "/chat",
+        "/resources",
+        "/support",
+        "/referral",
+        "/challenges",
+        "/kpis",
+        "/bookings",
+        "/calls",
+        "/inbox",
+        "/help",
       ];
-      // B2B entrepreneurs can also access the CRM (read-only view of their setters' deals)
+      // B2B entrepreneurs get extra access: CRM, prospects, scripts IA, settings IA
       if (role === "client_b2b") {
-        clientAllowedRoutes.push("/crm");
+        clientAllowedRoutes.push(
+          "/crm",
+          "/prospects",
+          "/ai-scripts",
+          "/settings-ia",
+          "/prospecting",
+        );
       }
-      const isAllowed = clientAllowedRoutes.some((route) => pathname.startsWith(route));
+      // B2C setters get extra access: prospects, scripts IA (read-only)
+      if (role === "client_b2c") {
+        clientAllowedRoutes.push("/prospects", "/ai-scripts", "/prospecting");
+      }
+      const isAllowed = clientAllowedRoutes.some((route) =>
+        pathname.startsWith(route),
+      );
       if (!isAllowed) {
         const url = request.nextUrl.clone();
         url.pathname = "/dashboard";
@@ -115,12 +178,20 @@ export async function updateSession(request: NextRequest) {
     // Setter/closer cannot access admin-only routes
     if (role && ["setter", "closer"].includes(role)) {
       const adminOnlyRoutes = [
-        "/settings/branding", "/settings/white-label", "/settings/onboarding",
-        "/settings/ai-modes", "/settings/custom-fields", "/settings/integrations",
-        "/settings/migration", "/settings/security", "/settings/privacy",
+        "/settings/branding",
+        "/settings/white-label",
+        "/settings/onboarding",
+        "/settings/ai-modes",
+        "/settings/custom-fields",
+        "/settings/integrations",
+        "/settings/migration",
+        "/settings/security",
+        "/settings/privacy",
         "/settings/dashboard-builder",
       ];
-      const isRestricted = adminOnlyRoutes.some((route) => pathname.startsWith(route));
+      const isRestricted = adminOnlyRoutes.some((route) =>
+        pathname.startsWith(route),
+      );
       if (isRestricted) {
         const url = request.nextUrl.clone();
         url.pathname = "/dashboard";
