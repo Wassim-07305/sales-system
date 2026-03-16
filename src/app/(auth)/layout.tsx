@@ -42,7 +42,7 @@ export default function AuthLayout({
               "Formation & Academy",
               "Booking & Calendrier",
               "Analytics & KPIs",
-              "Chat temps r\u00e9el",
+              "Chat temps réel",
               "Gamification",
             ].map((feature) => (
               <div
@@ -58,7 +58,7 @@ export default function AuthLayout({
           </div>
           <div className="mt-16 pt-8 border-t border-white/10">
             <p className="text-white/40 text-xs tracking-wide">
-              {"Utilis\u00e9 par plus de 500 commerciaux en France"}
+              {"Utilisé par plus de 500 commerciaux en France"}
             </p>
           </div>
         </div>

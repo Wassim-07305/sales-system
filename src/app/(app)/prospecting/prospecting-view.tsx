@@ -952,7 +952,7 @@ export function ProspectingView({
                               new Date(prospect.last_message_at),
                               { addSuffix: true, locale: fr },
                             )
-                          : "\u2014"}
+                          : "—"}
                       </td>
                       <td className="p-4">
                         {prospect.relance_status === "pending" && (
@@ -1004,7 +1004,7 @@ export function ProspectingView({
                         )}
                         {!prospect.relance_status && (
                           <span className="text-xs text-muted-foreground">
-                            \u2014
+                            —
                           </span>
                         )}
                       </td>

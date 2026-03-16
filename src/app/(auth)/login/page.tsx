@@ -8,7 +8,7 @@ export default function LoginPage() {
           Connexion
         </h2>
         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-          {"Entrez vos identifiants pour acc\u00e9der \u00e0 votre espace."}
+          {"Entrez vos identifiants pour accéder à votre espace."}
         </p>
       </div>
       <LoginForm />

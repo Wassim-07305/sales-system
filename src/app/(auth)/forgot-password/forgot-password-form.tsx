@@ -28,7 +28,7 @@ export function ForgotPasswordForm() {
       );
 
       if (error) {
-        toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+        toast.error("Une erreur est survenue. Veuillez réessayer.");
         setLoading(false);
         return;
       }
@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
       setLoading(false);
     } catch {
       toast.error(
-        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+        "Erreur de connexion au serveur. Vérifiez votre connexion internet.",
       );
       setLoading(false);
     }
@@ -51,15 +51,15 @@ export function ForgotPasswordForm() {
         </div>
         <div className="space-y-2">
           <h3 className="text-xl font-bold text-brand-dark">
-            {"Email envoy\u00e9"}
+            {"Email envoyé"}
           </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {
-              "Un email de r\u00e9initialisation a \u00e9t\u00e9 envoy\u00e9 \u00e0"
+              "Un email de réinitialisation a été envoyé à"
             }{" "}
             <strong className="text-foreground">{email}</strong>.
             {
-              " V\u00e9rifiez votre bo\u00eete de r\u00e9ception et cliquez sur le lien pour r\u00e9initialiser votre mot de passe."
+              " Vérifiez votre boîte de réception et cliquez sur le lien pour réinitialiser votre mot de passe."
             }
           </p>
         </div>
@@ -70,7 +70,7 @@ export function ForgotPasswordForm() {
               className="w-full h-12 rounded-xl border-border/60 hover:border-brand/50 hover:bg-brand/5 transition-all duration-200"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {"Retour \u00e0 la connexion"}
+              {"Retour à la connexion"}
             </Button>
           </Link>
         </div>
@@ -108,7 +108,7 @@ export function ForgotPasswordForm() {
           ) : (
             <ArrowRight className="mr-2 h-4 w-4" />
           )}
-          {"R\u00e9initialiser le mot de passe"}
+          {"Réinitialiser le mot de passe"}
         </Button>
       </div>
 
@@ -124,7 +124,7 @@ export function ForgotPasswordForm() {
           className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          {"Retour \u00e0 la connexion"}
+          {"Retour à la connexion"}
         </Link>
       </p>
     </form>

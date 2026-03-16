@@ -40,7 +40,7 @@ export function LoginForm() {
       setLoading(false);
     } catch {
       toast.error(
-        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+        "Erreur de connexion au serveur. Vérifiez votre connexion internet.",
       );
       setLoading(false);
     }
@@ -72,14 +72,14 @@ export function LoginForm() {
             href="/forgot-password"
             className="text-xs text-muted-foreground hover:text-brand transition-colors duration-200"
           >
-            {"Mot de passe oubli\u00e9 ?"}
+            {"Mot de passe oublié ?"}
           </Link>
         </div>
         <div className="relative">
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder={"\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
+            placeholder={"••••••••"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -129,12 +129,12 @@ export function LoginForm() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        {"Pas encore de compte ?\u00a0"}
+        {"Pas encore de compte ? "}
         <Link
           href="/register"
           className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
         >
-          {"Cr\u00e9er un compte"}
+          {"Créer un compte"}
         </Link>
       </p>
     </form>

@@ -42,7 +42,7 @@ export function ResetPasswordForm() {
     }
 
     if (password.length < 8) {
-      toast.error("Le mot de passe doit contenir au moins 8 caract\u00e8res");
+      toast.error("Le mot de passe doit contenir au moins 8 caractères");
       return;
     }
 
@@ -53,7 +53,7 @@ export function ResetPasswordForm() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        toast.error("Une erreur est survenue. Veuillez r\u00e9essayer.");
+        toast.error("Une erreur est survenue. Veuillez réessayer.");
         setLoading(false);
         return;
       }
@@ -62,7 +62,7 @@ export function ResetPasswordForm() {
       setSuccess(true);
     } catch {
       toast.error(
-        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+        "Erreur de connexion au serveur. Vérifiez votre connexion internet.",
       );
       setLoading(false);
     }
@@ -76,11 +76,11 @@ export function ResetPasswordForm() {
         </div>
         <div className="space-y-2">
           <h3 className="text-xl font-bold text-brand-dark">
-            {"Mot de passe mis \u00e0 jour"}
+            {"Mot de passe mis à jour"}
           </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {
-              "Votre mot de passe a \u00e9t\u00e9 modifi\u00e9 avec succ\u00e8s. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+              "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
             }
           </p>
         </div>
@@ -93,7 +93,7 @@ export function ResetPasswordForm() {
             }}
           >
             <ArrowRight className="mr-2 h-4 w-4" />
-            {"Acc\u00e9der \u00e0 mon espace"}
+            {"Accéder à mon espace"}
           </Button>
         </div>
       </div>
@@ -110,7 +110,7 @@ export function ResetPasswordForm() {
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder={"\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
+            placeholder={"••••••••"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -172,7 +172,7 @@ export function ResetPasswordForm() {
         )}
         {password.length === 0 && (
           <p className="text-xs text-muted-foreground/70">
-            {"Minimum 8 caract\u00e8res"}
+            {"Minimum 8 caractères"}
           </p>
         )}
       </div>
@@ -184,7 +184,7 @@ export function ResetPasswordForm() {
           <Input
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
-            placeholder={"\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
+            placeholder={"••••••••"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
@@ -239,7 +239,7 @@ export function ResetPasswordForm() {
           ) : (
             <ArrowRight className="mr-2 h-4 w-4" />
           )}
-          {"Mettre \u00e0 jour le mot de passe"}
+          {"Mettre à jour le mot de passe"}
         </Button>
       </div>
 
@@ -255,7 +255,7 @@ export function ResetPasswordForm() {
           className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          {"Retour \u00e0 la connexion"}
+          {"Retour à la connexion"}
         </Link>
       </p>
     </form>

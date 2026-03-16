@@ -73,7 +73,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
       if (result.error) throw new Error(result.error);
 
       setAvatarUrl(publicUrl);
-      toast.success("Photo de profil mise \u00e0 jour !");
+      toast.success("Photo de profil mise à jour !");
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Erreur lors de l'upload",
@@ -95,7 +95,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
       if (result.error) {
         toast.error("Erreur lors de la sauvegarde");
       } else {
-        toast.success("Profil mis \u00e0 jour !");
+        toast.success("Profil mis à jour !");
       }
     });
   }
@@ -106,7 +106,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
     <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <PageHeader
         title="Mon profil"
-        description="G\u00e9rez vos informations personnelles"
+        description="Gérez vos informations personnelles"
       />
 
       {/* Avatar & Identity Card */}
@@ -234,7 +234,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
             <Textarea
               value={goals}
               onChange={(e) => setGoals(e.target.value)}
-              placeholder="D\u00e9crivez vos objectifs..."
+              placeholder="Décrivez vos objectifs..."
               rows={3}
               className="rounded-xl border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 resize-none placeholder:text-muted-foreground/50"
             />

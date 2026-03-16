@@ -70,8 +70,8 @@ const FIELD_TYPES: {
   { value: "text", label: "Texte", icon: Type },
   { value: "number", label: "Nombre", icon: Hash },
   { value: "date", label: "Date", icon: Calendar },
-  { value: "select", label: "Liste d\u00e9roulante", icon: List },
-  { value: "checkbox", label: "Case \u00e0 cocher", icon: CheckSquare },
+  { value: "select", label: "Liste déroulante", icon: List },
+  { value: "checkbox", label: "Case à cocher", icon: CheckSquare },
 ];
 
 function slugify(str: string): string {
@@ -180,7 +180,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
       return;
     }
     if (formType === "select" && formOptions.length === 0) {
-      toast.error("Ajoutez au moins une option pour une liste d\u00e9roulante");
+      toast.error("Ajoutez au moins une option pour une liste déroulante");
       return;
     }
 
@@ -195,7 +195,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
           options: formType === "select" ? formOptions : undefined,
         });
         if (!result.success) {
-          toast.error(result.error ?? "Erreur lors de la mise \u00e0 jour");
+          toast.error(result.error ?? "Erreur lors de la mise à jour");
           return;
         }
         setFields((prev) =>
@@ -212,7 +212,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
               : f,
           ),
         );
-        toast.success("Champ personnalis\u00e9 mis \u00e0 jour");
+        toast.success("Champ personnalisé mis à jour");
       } else {
         const result = await createCustomField({
           entity: activeTab,
@@ -223,7 +223,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
           options: formType === "select" ? formOptions : undefined,
         });
         if (!result.success) {
-          toast.error(result.error ?? "Erreur lors de la cr\u00e9ation");
+          toast.error(result.error ?? "Erreur lors de la création");
           return;
         }
         // Optimistic: add to local state with a temp id (will refresh on next load)
@@ -239,7 +239,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
           created_at: new Date().toISOString(),
         };
         setFields((prev) => [...prev, tempField]);
-        toast.success("Champ personnalis\u00e9 cr\u00e9\u00e9");
+        toast.success("Champ personnalisé créé");
       }
       setDialogOpen(false);
       resetForm();
@@ -270,7 +270,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
         return;
       }
       setFields((prev) => prev.filter((f) => f.id !== deletingField.id));
-      toast.success("Champ supprim\u00e9");
+      toast.success("Champ supprimé");
       setDeleteDialogOpen(false);
       setDeletingField(null);
     } catch {
@@ -283,8 +283,8 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Champs personnalis\u00e9s"
-        description="G\u00e9rez les champs suppl\u00e9mentaires pour vos deals, contacts et contrats."
+        title="Champs personnalisés"
+        description="Gérez les champs supplémentaires pour vos deals, contacts et contrats."
       >
         <Button
           size="sm"
@@ -316,7 +316,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                   <Settings className="size-7 text-muted-foreground opacity-50" />
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  Aucun champ personnalis\u00e9 pour {tab.label}.
+                  Aucun champ personnalisé pour {tab.label}.
                 </p>
                 <Button
                   variant="outline"
@@ -325,7 +325,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                   onClick={openCreateDialog}
                 >
                   <Plus className="size-4" />
-                  Cr\u00e9er un champ
+                  Créer un champ
                 </Button>
               </div>
             ) : (
@@ -420,7 +420,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
           onClick={() => setPreviewOpen(true)}
         >
           <Eye className="size-4" />
-          Aper\u00e7u du formulaire
+          Aperçu du formulaire
         </Button>
       )}
 
@@ -431,12 +431,12 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
             <DialogTitle>
               {editingField
                 ? "Modifier le champ"
-                : "Nouveau champ personnalis\u00e9"}
+                : "Nouveau champ personnalisé"}
             </DialogTitle>
             <DialogDescription>
               {editingField
-                ? "Modifiez les propri\u00e9t\u00e9s de ce champ."
-                : `Ajoutez un champ personnalis\u00e9 pour ${ENTITY_TABS.find((t) => t.value === activeTab)?.label ?? activeTab}.`}
+                ? "Modifiez les propriétés de ce champ."
+                : `Ajoutez un champ personnalisé pour ${ENTITY_TABS.find((t) => t.value === activeTab)?.label ?? activeTab}.`}
             </DialogDescription>
           </DialogHeader>
 
@@ -446,7 +446,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
               <Label htmlFor="field-label">Label</Label>
               <Input
                 id="field-label"
-                placeholder="ex: Secteur d'activit\u00e9"
+                placeholder="ex: Secteur d'activité"
                 value={formLabel}
                 onChange={(e) => handleLabelChange(e.target.value)}
               />
@@ -463,7 +463,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Identifiant technique utilis\u00e9 en base de donn\u00e9es.
+                Identifiant technique utilisé en base de données.
               </p>
             </div>
 
@@ -528,7 +528,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                         onClick={() => removeOption(opt)}
                       >
                         {opt}
-                        <span className="text-xs">\u00d7</span>
+                        <span className="text-xs">×</span>
                       </Badge>
                     ))}
                   </div>
@@ -543,7 +543,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                   Obligatoire
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Le champ devra \u00eatre renseign\u00e9.
+                  Le champ devra être renseigné.
                 </p>
               </div>
               <Switch
@@ -572,8 +572,8 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
               {saving
                 ? "Enregistrement..."
                 : editingField
-                  ? "Mettre \u00e0 jour"
-                  : "Cr\u00e9er"}
+                  ? "Mettre à jour"
+                  : "Créer"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -585,9 +585,9 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
           <DialogHeader>
             <DialogTitle>Supprimer le champ</DialogTitle>
             <DialogDescription>
-              \u00cates-vous s\u00fbr de vouloir supprimer le champ{" "}
+              Êtes-vous sûr de vouloir supprimer le champ{" "}
               <strong>{deletingField?.label}</strong> ? Cette action est
-              irr\u00e9versible.
+              irréversible.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -615,9 +615,9 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Aper\u00e7u du formulaire</DialogTitle>
+            <DialogTitle>Aperçu du formulaire</DialogTitle>
             <DialogDescription>
-              Voici comment les champs personnalis\u00e9s apparaissent dans un
+              Voici comment les champs personnalisés apparaissent dans un
               formulaire.
             </DialogDescription>
           </DialogHeader>
@@ -640,7 +640,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                 {field.type === "select" && (
                   <Select disabled>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="S\u00e9lectionner..." />
+                      <SelectValue placeholder="Sélectionner..." />
                     </SelectTrigger>
                     <SelectContent>
                       {(field.options ?? []).map((opt) => (
@@ -667,7 +667,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
             ))}
             {filteredFields.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
-                Aucun champ \u00e0 pr\u00e9visualiser.
+                Aucun champ à prévisualiser.
               </p>
             )}
           </div>

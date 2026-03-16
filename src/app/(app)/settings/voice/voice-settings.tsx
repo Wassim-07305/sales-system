@@ -429,7 +429,7 @@ export function VoiceSettings({
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">
-                        {vm.input_text || "\u2014"}
+                        {vm.input_text || "—"}
                       </p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         {vm.prospect && <span>Pour: {vm.prospect.name}</span>}

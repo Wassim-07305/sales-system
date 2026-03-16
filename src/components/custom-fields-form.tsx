@@ -78,10 +78,10 @@ export function CustomFieldsForm({
       const result = await saveCustomFieldValues(entityId, entity, values);
       if (result.success) {
         setDirty(false);
-        toast.success("Champs personnalis\u00e9s enregistr\u00e9s");
+        toast.success("Champs personnalisés enregistrés");
         onSaved?.();
       } else {
-        toast.error(result.error ?? "Erreur lors de l\u2019enregistrement");
+        toast.error(result.error ?? "Erreur lors de l'enregistrement");
       }
     } catch {
       toast.error("Une erreur est survenue");
@@ -109,7 +109,7 @@ export function CustomFieldsForm({
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-        Champs personnalis\u00e9s
+        Champs personnalisés
       </h3>
 
       {fields.map((field) => {
@@ -171,7 +171,7 @@ export function CustomFieldsForm({
                 }}
               >
                 <SelectTrigger id={`cf-${field.name}`} className="w-full">
-                  <SelectValue placeholder="S\u00e9lectionner..." />
+                  <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
                 <SelectContent>
                   {(field.options ?? []).map((opt) => (

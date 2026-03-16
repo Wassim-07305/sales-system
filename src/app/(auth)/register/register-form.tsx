@@ -41,7 +41,7 @@ export function RegisterForm() {
 
       if (error) {
         toast.error(
-          "Une erreur est survenue lors de l\u2019inscription. Veuillez r\u00e9essayer.",
+          "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
         );
         setLoading(false);
         return;
@@ -51,7 +51,7 @@ export function RegisterForm() {
       setSuccess(true);
     } catch {
       toast.error(
-        "Erreur de connexion au serveur. V\u00e9rifiez votre connexion internet.",
+        "Erreur de connexion au serveur. Vérifiez votre connexion internet.",
       );
       setLoading(false);
     }
@@ -65,13 +65,13 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <h3 className="text-xl font-bold text-brand-dark">
-            {"Compte cr\u00e9\u00e9 avec succ\u00e8s"}
+            {"Compte créé avec succès"}
           </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            {"Un email de confirmation a \u00e9t\u00e9 envoy\u00e9 \u00e0"}{" "}
+            {"Un email de confirmation a été envoyé à"}{" "}
             <strong className="text-foreground">{email}</strong>.
             {
-              " V\u00e9rifiez votre bo\u00eete de r\u00e9ception pour activer votre compte."
+              " Vérifiez votre boîte de réception pour activer votre compte."
             }
           </p>
         </div>
@@ -81,7 +81,7 @@ export function RegisterForm() {
             className="w-full h-12 rounded-xl border-border/60 hover:border-brand/50 hover:bg-brand/5 transition-all duration-200"
             onClick={() => router.push("/login")}
           >
-            {"Retour \u00e0 la connexion"}
+            {"Retour à la connexion"}
           </Button>
         </div>
       </div>
@@ -128,7 +128,7 @@ export function RegisterForm() {
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder={"\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"}
+            placeholder={"••••••••"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -192,7 +192,7 @@ export function RegisterForm() {
         )}
         {password.length === 0 && (
           <p className="text-xs text-muted-foreground/70">
-            {"Minimum 8 caract\u00e8res"}
+            {"Minimum 8 caractères"}
           </p>
         )}
       </div>
@@ -209,7 +209,7 @@ export function RegisterForm() {
           ) : (
             <ArrowRight className="mr-2 h-4 w-4" />
           )}
-          {"Cr\u00e9er mon compte"}
+          {"Créer mon compte"}
         </Button>
       </div>
 
@@ -220,7 +220,7 @@ export function RegisterForm() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        {"D\u00e9j\u00e0 un compte ?\u00a0"}
+        {"Déjà un compte ? "}
         <Link
           href="/login"
           className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"

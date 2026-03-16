@@ -17,7 +17,7 @@ function getMediaErrorMessage(err: unknown): string {
   if (err instanceof DOMException) {
     switch (err.name) {
       case "NotAllowedError":
-        return "Accès refusé. Veuillez autoriser l\u2019accès à la caméra et au micro dans les paramètres de votre navigateur.";
+        return "Accès refusé. Veuillez autoriser l'accès à la caméra et au micro dans les paramètres de votre navigateur.";
       case "NotFoundError":
         return "Aucun périphérique trouvé. Vérifiez que votre caméra et votre micro sont connectés.";
       case "NotReadableError":
@@ -27,13 +27,13 @@ function getMediaErrorMessage(err: unknown): string {
       case "AbortError":
         return "La capture a été interrompue. Veuillez réessayer.";
       default:
-        return `Erreur d\u2019accès au média : ${err.message}`;
+        return `Erreur d'accès au média : ${err.message}`;
     }
   }
   if (err instanceof Error) {
     return `Erreur inattendue : ${err.message}`;
   }
-  return "Une erreur inconnue est survenue lors de l\u2019accès aux médias.";
+  return "Une erreur inconnue est survenue lors de l'accès aux médias.";
 }
 
 export function useMediaStream(): UseMediaStreamReturn {

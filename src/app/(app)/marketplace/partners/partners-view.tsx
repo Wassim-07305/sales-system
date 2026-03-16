@@ -751,7 +751,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                       <TableCell className="text-muted-foreground">
                         {payout.paid_at
                           ? new Date(payout.paid_at).toLocaleDateString("fr-FR")
-                          : "\u2014"}
+                          : "—"}
                       </TableCell>
                     </TableRow>
                   ))}

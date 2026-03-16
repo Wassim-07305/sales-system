@@ -601,10 +601,10 @@ export async function redeemReward(rewardId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Non authentifi\u00e9" };
+  if (!user) return { success: false, error: "Non authentifié" };
 
   const reward = REWARDS_CATALOG.find((r) => r.id === rewardId);
-  if (!reward) return { success: false, error: "R\u00e9compense introuvable" };
+  if (!reward) return { success: false, error: "Récompense introuvable" };
 
   // Get current profile
   const { data: profile } = await supabase

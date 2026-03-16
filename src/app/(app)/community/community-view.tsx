@@ -124,7 +124,7 @@ const CHANNELS: ChannelDef[] = [
   {
     id: "questions",
     label: "Questions globales",
-    description: "Posez vos questions \u00e0 la communaut\u00e9",
+    description: "Posez vos questions à la communauté",
     icon: <HelpCircle className="h-4 w-4" />,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
@@ -134,7 +134,7 @@ const CHANNELS: ChannelDef[] = [
   {
     id: "wins",
     label: "Wins & Victoires",
-    description: "Partagez vos succ\u00e8s et c\u00e9l\u00e9brez",
+    description: "Partagez vos succès et célébrez",
     icon: <PartyPopper className="h-4 w-4" />,
     color: "text-emerald-500",
     bgColor: "bg-emerald-500/10",
@@ -143,7 +143,7 @@ const CHANNELS: ChannelDef[] = [
   },
   {
     id: "general",
-    label: "Chat g\u00e9n\u00e9ral",
+    label: "Chat général",
     description: "Discussion libre entre membres",
     icon: <MessagesSquare className="h-4 w-4" />,
     color: "text-amber-500",
@@ -154,7 +154,7 @@ const CHANNELS: ChannelDef[] = [
   {
     id: "team_interne",
     label: "Team interne",
-    description: "Canal priv\u00e9 admin / manager / setter",
+    description: "Canal privé admin / manager / setter",
     icon: <ShieldCheck className="h-4 w-4" />,
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
@@ -272,7 +272,7 @@ export function CommunityView({
       const { data } = supabase.storage.from("community").getPublicUrl(path);
       setNewImageUrl(data.publicUrl);
       setNewImagePreview(data.publicUrl);
-      toast.success("Image ajout\u00e9e !");
+      toast.success("Image ajoutée !");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur upload image");
     } finally {
@@ -291,7 +291,7 @@ export function CommunityView({
         image_url: newImageUrl || undefined,
         channel: newChannel,
       });
-      toast.success("Post publi\u00e9 !");
+      toast.success("Post publié !");
       setDialogOpen(false);
       setNewContent("");
       setNewTitle("");
@@ -537,14 +537,14 @@ export function CommunityView({
   return (
     <div>
       <PageHeader
-        title="Communaut\u00e9"
-        description="\u00c9changez avec les autres membres"
+        title="Communauté"
+        description="Échangez avec les autres membres"
       >
         <div className="flex gap-2">
           <Link href="/community/events">
             <Button variant="outline" size="sm">
               <Calendar className="h-4 w-4 mr-2" />
-              \u00c9v\u00e9nements
+              Événements
             </Button>
           </Link>
           <Link href="/community/members">
@@ -671,7 +671,7 @@ export function CommunityView({
                           <span className="flex items-center gap-1 mt-0.5">
                             <ShieldCheck className="h-2.5 w-2.5 text-purple-400" />
                             <span className="text-[10px] text-purple-400 font-medium">
-                              Priv\u00e9
+                              Privé
                             </span>
                           </span>
                         )}
@@ -717,7 +717,7 @@ export function CommunityView({
                       variant="outline"
                       className="text-[10px] border-purple-500/30 text-purple-500 bg-purple-500/5"
                     >
-                      <ShieldCheck className="h-3 w-3 mr-0.5" /> Priv\u00e9
+                      <ShieldCheck className="h-3 w-3 mr-0.5" /> Privé
                     </Badge>
                   )}
                 </h2>
@@ -794,7 +794,7 @@ export function CommunityView({
                   Aucun post dans ce canal
                 </p>
                 <p className="text-sm text-muted-foreground mb-5">
-                  Soyez le premier \u00e0 lancer la discussion !
+                  Soyez le premier à lancer la discussion !
                 </p>
                 <Button
                   onClick={() => {
@@ -806,7 +806,7 @@ export function CommunityView({
                   className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Cr\u00e9er un post
+                  Créer un post
                 </Button>
               </CardContent>
             </Card>
@@ -829,7 +829,7 @@ export function CommunityView({
           <DialogHeader>
             <DialogTitle className="text-lg">Nouveau post</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Partagez avec la communaut\u00e9
+              Partagez avec la communauté
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 pt-2">
@@ -892,7 +892,7 @@ export function CommunityView({
               <Input
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Donnez un titre \u00e0 votre post..."
+                placeholder="Donnez un titre à votre post..."
                 className="h-10"
               />
             </div>
@@ -920,7 +920,7 @@ export function CommunityView({
                 <div className="relative mt-1">
                   <img
                     src={newImagePreview}
-                    alt="Aper\u00e7u"
+                    alt="Aperçu"
                     className="w-full rounded-xl max-h-48 object-cover ring-1 ring-border"
                   />
                   <button

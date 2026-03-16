@@ -123,7 +123,7 @@ export function PrivacyView({
     try {
       const data = await exportUserData();
       if (!data) {
-        toast.error("Impossible d\u2019exporter les donnees");
+        toast.error("Impossible d'exporter les donnees");
         return;
       }
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -139,7 +139,7 @@ export function PrivacyView({
       URL.revokeObjectURL(url);
       toast.success("Export telecharge avec succes");
     } catch {
-      toast.error("Erreur lors de l\u2019export");
+      toast.error("Erreur lors de l'export");
     } finally {
       setExporting(false);
     }
@@ -172,7 +172,7 @@ export function PrivacyView({
       key: "analytics",
       label: "Analytiques",
       description:
-        "Collecte de donnees d\u2019utilisation pour ameliorer nos services",
+        "Collecte de donnees d'utilisation pour ameliorer nos services",
     },
     {
       key: "marketing",

@@ -85,7 +85,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
           ...prev,
         ]);
         toast.success(`${reward.name} obtenue !`, {
-          description: `${reward.pointsCost} points d\u00e9duits. Il vous reste ${result.remainingPoints} points.`,
+          description: `${reward.pointsCost} points déduits. Il vous reste ${result.remainingPoints} points.`,
         });
       } else {
         toast.error("Erreur", { description: result.error });
@@ -97,13 +97,13 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
   return (
     <div>
       <PageHeader
-        title="R\u00e9compenses"
-        description="\u00c9changez vos points contre des primes et r\u00e9compenses r\u00e9elles"
+        title="Récompenses"
+        description="Échangez vos points contre des primes et récompenses réelles"
       >
         <Link href="/challenges">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour aux d\u00e9fis
+            Retour aux défis
           </Button>
         </Link>
       </PageHeader>
@@ -128,7 +128,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
       {/* Rewards grid */}
       <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
         <Gift className="h-5 w-5 text-brand" />
-        Catalogue des r\u00e9compenses
+        Catalogue des récompenses
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {rewards.map((reward) => {
@@ -171,7 +171,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
                     disabled={!canAfford}
                     onClick={() => setConfirmReward(reward)}
                   >
-                    \u00c9changer
+                    Échanger
                   </Button>
                 </div>
               </CardContent>
@@ -185,23 +185,23 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <History className="h-5 w-5 text-brand" />
-            Historique des \u00e9changes
+            Historique des échanges
           </CardTitle>
         </CardHeader>
         <CardContent>
           {redemptions.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-6">
-              Aucun \u00e9change pour le moment. \u00c9changez vos points contre
-              des r\u00e9compenses !
+              Aucun échange pour le moment. Échangez vos points contre
+              des récompenses !
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>R\u00e9compense</TableHead>
+                  <TableHead>Récompense</TableHead>
                   <TableHead className="text-right">
-                    Points d\u00e9pens\u00e9s
+                    Points dépensés
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -234,9 +234,9 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmer l&apos;\u00e9change</DialogTitle>
+            <DialogTitle>Confirmer l&apos;échange</DialogTitle>
             <DialogDescription>
-              Vous \u00eates sur le point d&apos;\u00e9changer{" "}
+              Vous êtes sur le point d&apos;échanger{" "}
               <strong>
                 {confirmReward?.pointsCost.toLocaleString("fr-FR")} points
               </strong>{" "}
@@ -258,7 +258,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            Apr\u00e8s l&apos;\u00e9change, il vous restera{" "}
+            Après l&apos;échange, il vous restera{" "}
             <strong>
               {(points - (confirmReward?.pointsCost ?? 0)).toLocaleString(
                 "fr-FR",
@@ -279,12 +279,12 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  \u00c9change en cours...
+                  Échange en cours...
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Confirmer l&apos;\u00e9change
+                  Confirmer l&apos;échange
                 </>
               )}
             </Button>
