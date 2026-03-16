@@ -145,7 +145,7 @@ export async function sendPushNotification(
   // (imported dynamically to avoid circular deps at module level)
   try {
     const { sendPush } = await import("@/lib/actions/push");
-    const result = await sendPush(userId, title, body);
+    const result = await sendPush(userId, title, body, link);
     return {
       success: true,
       notificationId: notification?.id,
@@ -250,6 +250,77 @@ export async function updateNotificationPreferences(prefs: {
 
   revalidatePath("/settings/notifications");
   return { success: true };
+}
+
+/**
+ * Résout le deep link approprié selon le type de notification et un identifiant optionnel.
+ * Utilisé pour enrichir les notifications push avec une URL cliquable.
+ */
+export async function resolveDeepLink(
+  type: string,
+  entityId?: string,
+): Promise<string> {
+  switch (type) {
+    case "video_call_reminder":
+      return entityId ? `/chat/video/${entityId}` : "/chat";
+    case "message":
+    case "chat":
+      return entityId ? `/chat` : "/chat";
+    case "deal":
+    case "deal_stage_change":
+      return entityId ? `/crm/${entityId}` : "/crm";
+    case "payment":
+    case "payment_reminder":
+      return "/contracts/payments";
+    case "booking_reminder":
+      return entityId ? `/bookings` : "/bookings";
+    case "challenge":
+    case "gamification":
+      return "/challenges";
+    case "community":
+    case "forum":
+      return "/community";
+    case "contract":
+      return entityId ? `/contracts/${entityId}` : "/contracts";
+    case "team":
+    case "leaderboard":
+      return "/team";
+    default:
+      return "/notifications";
+  }
+}
+
+/**
+ * Crée une notification in-app + push avec deep link automatique basé sur le type.
+ * Conçu pour être appelé depuis d'autres server actions ou crons.
+ * Fire-and-forget — ne throw jamais.
+ */
+export async function notifyWithDeepLink(
+  userId: string,
+  title: string,
+  body: string,
+  type: string,
+  entityId?: string,
+  customLink?: string,
+) {
+  const link = customLink || (await resolveDeepLink(type, entityId));
+  await notify(userId, title, body, { link, type });
+}
+
+/**
+ * Envoie des notifications in-app + push à plusieurs utilisateurs avec deep link automatique.
+ * Fire-and-forget — ne throw jamais.
+ */
+export async function notifyManyWithDeepLink(
+  userIds: string[],
+  title: string,
+  body: string,
+  type: string,
+  entityId?: string,
+  customLink?: string,
+) {
+  const link = customLink || (await resolveDeepLink(type, entityId));
+  await notifyMany(userIds, title, body, { link, type });
 }
 
 export async function markNotificationRead(notificationId: string) {

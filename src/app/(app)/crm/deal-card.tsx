@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Deal } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 import {
@@ -18,6 +19,9 @@ interface DealCardProps {
   deal: Deal;
   isDragging?: boolean;
   onClick?: () => void;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (selected: boolean) => void;
 }
 
 const TEMP_CONFIG = {
@@ -62,7 +66,14 @@ function getAvatarColor(str: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
+export function DealCard({
+  deal,
+  isDragging,
+  onClick,
+  selectionMode,
+  isSelected,
+  onSelectionChange,
+}: DealCardProps) {
   const {
     attributes,
     listeners,
@@ -70,7 +81,7 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
     transform,
     transition,
     isDragging: isSortableDragging,
-  } = useSortable({ id: deal.id });
+  } = useSortable({ id: deal.id, disabled: selectionMode });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -81,23 +92,43 @@ export function DealCard({ deal, isDragging, onClick }: DealCardProps) {
   const TempIcon = temp.icon;
   const dragging = isDragging || isSortableDragging;
 
+  function handleCardClick(e: React.MouseEvent) {
+    if (selectionMode) {
+      e.stopPropagation();
+      onSelectionChange?.(!isSelected);
+      return;
+    }
+    onClick?.();
+  }
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
+      {...(selectionMode ? {} : { ...attributes, ...listeners })}
       className={cn(
-        "cursor-grab active:cursor-grabbing transition-all duration-200 border-border/50 rounded-xl",
+        "transition-all duration-200 border-border/50 rounded-xl",
+        selectionMode ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
         "hover:shadow-md hover:border-border/80 hover:-translate-y-0.5",
         dragging &&
           "opacity-60 shadow-xl rotate-1 scale-105 border-brand/30 ring-1 ring-brand/10",
+        isSelected && "ring-2 ring-brand/50 border-brand/40 bg-brand/5",
       )}
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       <CardContent className="p-3.5">
         {/* Title + Temperature */}
         <div className="flex items-start justify-between gap-2 mb-2.5">
+          {selectionMode && (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) =>
+                onSelectionChange?.(checked === true)
+              }
+              onClick={(e) => e.stopPropagation()}
+              className="mt-0.5 shrink-0"
+            />
+          )}
           <h4 className="text-[13px] font-semibold leading-tight line-clamp-2">
             {deal.title}
           </h4>

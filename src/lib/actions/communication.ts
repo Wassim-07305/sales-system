@@ -6,6 +6,65 @@ import { aiComplete, aiJSON } from "@/lib/ai/client";
 import { notifyMany } from "@/lib/actions/notifications";
 
 // ---------------------------------------------------------------------------
+// Search Messages (Full-text)
+// ---------------------------------------------------------------------------
+
+export async function searchMessages(
+  query: string,
+  channelId?: string,
+): Promise<
+  {
+    id: string;
+    content: string;
+    channel_id: string;
+    channel_name: string;
+    sender_name: string;
+    sender_id: string;
+    created_at: string;
+  }[]
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  if (!query || query.trim().length < 2) return [];
+
+  let q = supabase
+    .from("messages")
+    .select(
+      "id, content, channel_id, sender_id, created_at, sender:profiles!messages_sender_id_fkey(full_name), channel:channels!messages_channel_id_fkey(name)",
+    )
+    .ilike("content", `%${query.trim()}%`)
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (channelId) {
+    q = q.eq("channel_id", channelId);
+  }
+
+  const { data } = await q;
+
+  return (data || []).map((m: Record<string, unknown>) => {
+    const sender = Array.isArray(m.sender) ? m.sender[0] : m.sender;
+    const channel = Array.isArray(m.channel) ? m.channel[0] : m.channel;
+    return {
+      id: m.id as string,
+      content: m.content as string,
+      channel_id: m.channel_id as string,
+      channel_name:
+        ((channel as Record<string, unknown>)?.name as string) || "Channel",
+      sender_name:
+        ((sender as Record<string, unknown>)?.full_name as string) ||
+        "Utilisateur",
+      sender_id: m.sender_id as string,
+      created_at: m.created_at as string,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Video Rooms
 // ---------------------------------------------------------------------------
 
@@ -34,6 +93,7 @@ export async function createVideoRoom(data: {
   scheduledAt?: string;
   maxParticipants?: number;
   instant?: boolean;
+  meetingLink?: string;
 }) {
   const supabase = await createClient();
   const {
@@ -44,6 +104,9 @@ export async function createVideoRoom(data: {
   const now = new Date().toISOString();
   const isInstant = data.instant === true;
 
+  // Générer un lien Google Meet : utilise le lien fourni ou le lien de création instantanée
+  const meetingLink = data.meetingLink || "https://meet.google.com/new";
+
   const { data: room, error } = await supabase
     .from("video_rooms")
     .insert({
@@ -53,6 +116,7 @@ export async function createVideoRoom(data: {
       scheduled_at: isInstant ? now : data.scheduledAt,
       started_at: isInstant ? now : null,
       max_participants: data.maxParticipants || 10,
+      meeting_link: meetingLink,
     })
     .select("id")
     .single();
@@ -924,9 +988,10 @@ export async function saveRecordingMetadata(data: {
 // ---------------------------------------------------------------------------
 
 /**
- * Sends push notifications for video rooms scheduled today.
+ * Sends push notifications for video rooms scheduled in the next 24h.
  * Designed to be called from the daily cron job.
  * Uses admin client (service role) — no auth required.
+ * Inclut le titre de la room, l'heure, le lien Meet et un deep link.
  */
 export async function notifyUpcomingCalls() {
   const { createClient: createServiceClient } =
@@ -944,42 +1009,91 @@ export async function notifyUpcomingCalls() {
   const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
 
   const now = new Date();
-  const endOfDay = new Date(now);
-  endOfDay.setHours(23, 59, 59, 999);
+  const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-  // Find all scheduled video rooms for today
+  // Récupérer toutes les video rooms planifiées dans les 24 prochaines heures
   const { data: upcomingRooms } = await supabase
     .from("video_rooms")
-    .select("id, title, scheduled_at, host_id")
+    .select("id, title, scheduled_at, host_id, meeting_link")
     .eq("status", "scheduled")
     .gte("scheduled_at", now.toISOString())
-    .lte("scheduled_at", endOfDay.toISOString());
+    .lte("scheduled_at", in24h.toISOString())
+    .order("scheduled_at", { ascending: true });
 
   if (!upcomingRooms || upcomingRooms.length === 0) {
     return { sent: 0 };
   }
 
+  // Récupérer les membres de l'équipe une seule fois
+  const { data: allUsers } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", ["admin", "manager", "setter", "closer"]);
+
+  if (!allUsers || allUsers.length === 0) {
+    return { sent: 0 };
+  }
+
+  const userIds = allUsers.map((u: { id: string }) => u.id);
   let totalSent = 0;
 
+  // Préparer VAPID une seule fois
+  let webPush: typeof import("web-push") | null = null;
+  let vapidReady = false;
+  try {
+    webPush = await import("web-push");
+    const { getApiKey } = await import("@/lib/api-keys");
+    const publicKey = await getApiKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
+    const privateKey = await getApiKey("VAPID_PRIVATE_KEY");
+    const email =
+      (await getApiKey("VAPID_EMAIL")) || "mailto:admin@salessystem.com";
+
+    if (publicKey && privateKey && webPush) {
+      webPush.setVapidDetails(email, publicKey, privateKey);
+      vapidReady = true;
+    }
+  } catch {
+    // VAPID non disponible
+  }
+
+  // Charger les subscriptions push une seule fois
+  let subscriptions: { user_id: string; endpoint: string; keys: unknown }[] =
+    [];
+  if (vapidReady) {
+    const { data: subs } = await supabase
+      .from("push_subscriptions")
+      .select("user_id, endpoint, keys")
+      .in("user_id", userIds);
+    subscriptions = subs || [];
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+
   for (const room of upcomingRooms) {
-    // Fetch all team members to notify
-    const { data: allUsers } = await supabase.from("profiles").select("id");
-
-    if (!allUsers || allUsers.length === 0) continue;
-
-    const scheduledTime = new Date(room.scheduled_at).toLocaleString("fr-FR", {
-      timeStyle: "short",
+    const scheduledAt = new Date(room.scheduled_at as string);
+    const dateStr = scheduledAt.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    const timeStr = scheduledAt.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
-    const userIds = allUsers.map((u: { id: string }) => u.id);
+    const roomTitle = (room.title as string) || "Appel vidéo";
+    const deepLink = `/chat/video/${room.id}`;
+    const meetingInfo = room.meeting_link
+      ? " — Lien Meet disponible dans la salle."
+      : "";
 
-    // Insert notifications directly (no auth needed with service role)
+    // Créer les notifications in-app avec deep link
     const notifications = userIds.map((uid: string) => ({
       user_id: uid,
-      title: "Rappel : appel vidéo aujourd'hui",
-      body: `"${room.title}" prévu à ${scheduledTime}`,
+      title: `Rappel : ${roomTitle}`,
+      body: `Prévu le ${dateStr} à ${timeStr}.${meetingInfo} Cliquez pour rejoindre.`,
       type: "video_call_reminder",
-      link: `/chat/video/${room.id}`,
+      link: deepLink,
     }));
 
     const { error } = await supabase
@@ -987,45 +1101,28 @@ export async function notifyUpcomingCalls() {
       .insert(notifications);
     if (!error) totalSent += userIds.length;
 
-    // Send web push via push_subscriptions (fire-and-forget)
-    try {
-      const { data: subscriptions } = await supabase
-        .from("push_subscriptions")
-        .select("user_id, endpoint, keys")
-        .in("user_id", userIds);
-
-      if (subscriptions && subscriptions.length > 0) {
-        const webPush = (await import("web-push")).default;
-        const { getApiKey } = await import("@/lib/api-keys");
-        const publicKey = await getApiKey("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
-        const privateKey = await getApiKey("VAPID_PRIVATE_KEY");
-        const email =
-          (await getApiKey("VAPID_EMAIL")) || "mailto:admin@salessystem.com";
-
-        if (publicKey && privateKey) {
-          webPush.setVapidDetails(email, publicKey, privateKey);
-          for (const sub of subscriptions) {
-            try {
-              await webPush.sendNotification(
-                {
-                  endpoint: sub.endpoint,
-                  keys: sub.keys as { p256dh: string; auth: string },
-                },
-                JSON.stringify({
-                  title: "Rappel : appel vidéo aujourd'hui",
-                  body: `"${room.title}" prévu à ${scheduledTime}`,
-                  icon: "/icons/icon-192x192.png",
-                  data: { url: `/chat/video/${room.id}` },
-                }),
-              );
-            } catch {
-              // Ignore individual push failures
-            }
-          }
+    // Envoyer les web push avec deep link
+    if (vapidReady && webPush && subscriptions.length > 0) {
+      for (const sub of subscriptions) {
+        try {
+          await webPush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: sub.keys as { p256dh: string; auth: string },
+            },
+            JSON.stringify({
+              title: `Rappel : ${roomTitle}`,
+              body: `Aujourd'hui à ${timeStr}${meetingInfo}`,
+              icon: "/icons/icon-192x192.png",
+              badge: "/icons/icon-72x72.png",
+              tag: `video-reminder-${room.id}`,
+              data: { url: `${appUrl}${deepLink}` },
+            }),
+          );
+        } catch {
+          // Ignore individual push failures
         }
       }
-    } catch {
-      // Push delivery is best-effort
     }
   }
 

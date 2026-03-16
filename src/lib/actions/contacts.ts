@@ -83,6 +83,100 @@ export async function createContact(params: {
   return { contact: data };
 }
 
+// ─── Tags sur les contacts ───────────────────────────────────────
+
+export async function addContactTag(contactId: string, tag: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const trimmed = tag.trim().toLowerCase();
+  if (!trimmed) return { error: "Tag vide" };
+
+  // Fetch current tags
+  const { data: contact } = await supabase
+    .from("profiles")
+    .select("tags")
+    .eq("id", contactId)
+    .single();
+
+  if (!contact) return { error: "Contact introuvable" };
+
+  const currentTags: string[] = Array.isArray(contact.tags) ? contact.tags : [];
+  if (currentTags.includes(trimmed)) {
+    return { error: "Ce tag existe déjà sur ce contact" };
+  }
+
+  const newTags = [...currentTags, trimmed];
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ tags: newTags, updated_at: new Date().toISOString() })
+    .eq("id", contactId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/contacts");
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true, tags: newTags };
+}
+
+export async function removeContactTag(contactId: string, tag: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const { data: contact } = await supabase
+    .from("profiles")
+    .select("tags")
+    .eq("id", contactId)
+    .single();
+
+  if (!contact) return { error: "Contact introuvable" };
+
+  const currentTags: string[] = Array.isArray(contact.tags) ? contact.tags : [];
+  const newTags = currentTags.filter((t) => t !== tag);
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ tags: newTags, updated_at: new Date().toISOString() })
+    .eq("id", contactId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/contacts");
+  revalidatePath(`/contacts/${contactId}`);
+  return { success: true, tags: newTags };
+}
+
+export async function getAllContactTags() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: contacts } = await supabase
+    .from("profiles")
+    .select("tags")
+    .not("tags", "is", null);
+
+  if (!contacts) return [];
+
+  const tagSet = new Set<string>();
+  contacts.forEach((c) => {
+    if (Array.isArray(c.tags)) {
+      c.tags.forEach((t: string) => tagSet.add(t));
+    }
+  });
+
+  return Array.from(tagSet).sort();
+}
+
 /**
  * Find potential duplicate contacts by matching email, phone, or similar names.
  * Returns groups of potential duplicates with a confidence score.

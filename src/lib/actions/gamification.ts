@@ -1212,6 +1212,298 @@ export async function deleteSetterTask(taskId: string) {
   return { error: null };
 }
 
+// ---------------------------------------------------------------------------
+// Admin: CRUD Challenges (admin/manager only)
+// ---------------------------------------------------------------------------
+
+export interface ChallengeFormData {
+  title: string;
+  description: string;
+  type: "individual" | "team";
+  metric: string;
+  target_value: number;
+  start_date: string;
+  end_date: string;
+  points_reward: number;
+  recurrence: "once" | "weekly" | "monthly";
+}
+
+async function requireAdminOrManager() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { supabase, user: null, error: "Non authentifié" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    return { supabase, user: null, error: "Accès réservé aux administrateurs" };
+  }
+
+  return { supabase, user, error: null };
+}
+
+export async function createChallenge(data: ChallengeFormData) {
+  const { supabase, error: authError } = await requireAdminOrManager();
+  if (authError) return { success: false, error: authError };
+
+  const { error } = await supabase.from("challenges").insert({
+    title: data.title,
+    description: data.description,
+    challenge_type: data.type,
+    metric: data.metric,
+    target_value: data.target_value,
+    start_date: data.start_date,
+    end_date: data.end_date,
+    points_reward: data.points_reward,
+    recurrence: data.recurrence,
+    is_active: true,
+  });
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/challenges");
+  return { success: true };
+}
+
+export async function updateChallenge(id: string, data: ChallengeFormData) {
+  const { supabase, error: authError } = await requireAdminOrManager();
+  if (authError) return { success: false, error: authError };
+
+  const { error } = await supabase
+    .from("challenges")
+    .update({
+      title: data.title,
+      description: data.description,
+      challenge_type: data.type,
+      metric: data.metric,
+      target_value: data.target_value,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      points_reward: data.points_reward,
+      recurrence: data.recurrence,
+    })
+    .eq("id", id);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/challenges");
+  return { success: true };
+}
+
+export async function deleteChallenge(id: string) {
+  const { supabase, error: authError } = await requireAdminOrManager();
+  if (authError) return { success: false, error: authError };
+
+  // Supprimer les progressions associées d'abord
+  await supabase.from("challenge_progress").delete().eq("challenge_id", id);
+
+  const { error } = await supabase.from("challenges").delete().eq("id", id);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/challenges");
+  return { success: true };
+}
+
+export async function getAllChallengesForAdmin() {
+  const { supabase, error: authError } = await requireAdminOrManager();
+  if (authError) return [];
+
+  const { data } = await supabase
+    .from("challenges")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  return data || [];
+}
+
+export async function getPastChallenges(
+  period?: "month" | "last_month" | "all",
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const now = new Date();
+  let query = supabase
+    .from("challenges")
+    .select("*")
+    .eq("is_active", false)
+    .order("end_date", { ascending: false });
+
+  if (period === "month") {
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split("T")[0];
+    query = query.gte("end_date", startOfMonth);
+  } else if (period === "last_month") {
+    const startLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      .toISOString()
+      .split("T")[0];
+    const startThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split("T")[0];
+    query = query
+      .gte("end_date", startLastMonth)
+      .lt("end_date", startThisMonth);
+  }
+
+  const { data } = await query;
+
+  if (!data || data.length === 0) return [];
+
+  // Pour chaque challenge passé, récupérer le gagnant
+  const challengeIds = data.map((c) => c.id);
+  const { data: allProgress } = await supabase
+    .from("challenge_progress")
+    .select("challenge_id, user_id, current_value, completed, completed_at")
+    .in("challenge_id", challengeIds);
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url");
+
+  const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+  return data.map((challenge) => {
+    const progressEntries = (allProgress || []).filter(
+      (p) => p.challenge_id === challenge.id,
+    );
+    // Trouver le gagnant (celui qui a complété en premier ou avec la plus haute valeur)
+    const completedEntries = progressEntries
+      .filter((p) => p.completed)
+      .sort((a, b) => {
+        if (a.completed_at && b.completed_at) {
+          return (
+            new Date(a.completed_at).getTime() -
+            new Date(b.completed_at).getTime()
+          );
+        }
+        return (b.current_value || 0) - (a.current_value || 0);
+      });
+
+    const winner = completedEntries[0]
+      ? profileMap.get(completedEntries[0].user_id)
+      : null;
+
+    return {
+      ...challenge,
+      participants_count: progressEntries.length,
+      completed_count: completedEntries.length,
+      winner: winner
+        ? { full_name: winner.full_name, avatar_url: winner.avatar_url }
+        : null,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Challenge Notifications (début/fin)
+// ---------------------------------------------------------------------------
+
+export async function notifyChallengeStart(challengeId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: challenge } = await supabase
+    .from("challenges")
+    .select("title, description, points_reward")
+    .eq("id", challengeId)
+    .single();
+
+  if (!challenge) return;
+
+  // Notifier tous les setters et closers (participants potentiels)
+  const { data: participants } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", ["setter", "closer", "admin", "manager"]);
+
+  if (!participants || participants.length === 0) return;
+
+  const { notifyMany } = await import("@/lib/actions/notifications");
+  const userIds = participants.map((p) => p.id);
+
+  notifyMany(
+    userIds,
+    `Nouveau défi : ${challenge.title}`,
+    `${challenge.description || "Un nouveau défi vient de commencer !"} — ${challenge.points_reward} points à gagner !`,
+    { type: "challenge_start", link: "/challenges" },
+  );
+}
+
+export async function notifyChallengeEnd(challengeId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: challenge } = await supabase
+    .from("challenges")
+    .select("title, points_reward")
+    .eq("id", challengeId)
+    .single();
+
+  if (!challenge) return;
+
+  // Trouver le gagnant
+  const { data: progressEntries } = await supabase
+    .from("challenge_progress")
+    .select("user_id, current_value, completed, completed_at")
+    .eq("challenge_id", challengeId)
+    .eq("completed", true)
+    .order("completed_at", { ascending: true })
+    .limit(1);
+
+  let winnerName = "Personne";
+  if (progressEntries && progressEntries.length > 0) {
+    const { data: winnerProfile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", progressEntries[0].user_id)
+      .single();
+    winnerName = winnerProfile?.full_name || "Un participant";
+  }
+
+  // Notifier tous les participants
+  const { data: allParticipants } = await supabase
+    .from("challenge_progress")
+    .select("user_id")
+    .eq("challenge_id", challengeId);
+
+  if (!allParticipants || allParticipants.length === 0) return;
+
+  const { notifyMany } = await import("@/lib/actions/notifications");
+  const userIds = allParticipants.map((p) => p.user_id);
+
+  notifyMany(
+    userIds,
+    `Défi terminé : ${challenge.title}`,
+    `Le défi "${challenge.title}" est terminé ! Gagnant : ${winnerName}. ${challenge.points_reward} points attribués.`,
+    { type: "challenge_end", link: "/challenges" },
+  );
+
+  // Désactiver le challenge
+  await supabase
+    .from("challenges")
+    .update({ is_active: false })
+    .eq("id", challengeId);
+
+  revalidatePath("/challenges");
+}
+
 export async function getRedemptionHistory() {
   const supabase = await createClient();
   const {

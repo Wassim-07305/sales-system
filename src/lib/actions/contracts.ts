@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify, notifyMany } from "@/lib/actions/notifications";
+import { subDays } from "date-fns";
 
 /**
  * Remplace les variables dynamiques {{variable}} dans le contenu du contrat.
@@ -389,4 +390,77 @@ export async function revokeSignature(contractId: string) {
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${contractId}`);
   return { success: true };
+}
+
+// ─── Expiration automatique des contrats inactifs ─────────────────
+
+/**
+ * Passe les contrats "draft" ou "sent" créés il y a plus de 30 jours
+ * au statut "expired". Notifie le client et les admins/managers.
+ * Peut être appelée depuis un cron ou manuellement.
+ */
+export async function expireStaleContracts() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié", count: 0 };
+
+  const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
+
+  // Récupérer les contrats éligibles à l'expiration
+  const { data: staleContracts, error: fetchError } = await supabase
+    .from("contracts")
+    .select("id, client_id, status")
+    .in("status", ["draft", "sent"])
+    .lt("created_at", thirtyDaysAgo);
+
+  if (fetchError || !staleContracts || staleContracts.length === 0) {
+    return { error: fetchError?.message || null, count: 0 };
+  }
+
+  // Marquer comme expirés
+  const staleIds = staleContracts.map((c) => c.id);
+  const { error: updateError } = await supabase
+    .from("contracts")
+    .update({ status: "expired" })
+    .in("id", staleIds);
+
+  if (updateError) return { error: updateError.message, count: 0 };
+
+  // Notifier pour chaque contrat expiré
+  for (const contract of staleContracts) {
+    if (contract.client_id) {
+      notify(
+        contract.client_id,
+        "Contrat expiré",
+        `Votre contrat #${contract.id.slice(0, 8)} a expiré car il n'a pas été signé dans les 30 jours.`,
+        {
+          type: "contract_expired",
+          link: `/contracts/${contract.id}`,
+        },
+      );
+    }
+
+    // Notifier les admins/managers
+    const { data: admins } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", ["admin", "manager"]);
+
+    if (admins && admins.length > 0) {
+      notifyMany(
+        admins.map((a) => a.id),
+        "Contrat expiré automatiquement",
+        `Le contrat #${contract.id.slice(0, 8)} (était "${contract.status}") a expiré après 30 jours sans signature.`,
+        {
+          type: "contract_expired",
+          link: `/contracts/${contract.id}`,
+        },
+      );
+    }
+  }
+
+  revalidatePath("/contracts");
+  return { error: null, count: staleContracts.length };
 }

@@ -1562,6 +1562,27 @@ function clearStoredPosition(lessonId: string) {
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
+function getStoredPlaybackSpeed(): number {
+  try {
+    const stored = localStorage.getItem("academy-playback-speed");
+    if (stored) {
+      const speed = parseFloat(stored);
+      if (PLAYBACK_SPEEDS.includes(speed)) return speed;
+    }
+  } catch {
+    // ignore
+  }
+  return 1;
+}
+
+function storePlaybackSpeed(speed: number) {
+  try {
+    localStorage.setItem("academy-playback-speed", String(speed));
+  } catch {
+    // quota exceeded
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Video player sub-component
 // ---------------------------------------------------------------------------
@@ -1575,7 +1596,9 @@ function VideoPlayer({
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onTimeUpdate: () => void;
 }) {
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [playbackSpeed, setPlaybackSpeed] = useState(() =>
+    getStoredPlaybackSpeed(),
+  );
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [resumeTime, setResumeTime] = useState<number | null>(null);
   const [showResumeBar, setShowResumeBar] = useState(false);
@@ -1694,7 +1717,9 @@ function VideoPlayer({
           {
             const idx = PLAYBACK_SPEEDS.indexOf(playbackSpeed);
             if (idx < PLAYBACK_SPEEDS.length - 1) {
-              setPlaybackSpeed(PLAYBACK_SPEEDS[idx + 1]);
+              const newSpeed = PLAYBACK_SPEEDS[idx + 1];
+              setPlaybackSpeed(newSpeed);
+              storePlaybackSpeed(newSpeed);
             }
           }
           break;
@@ -1703,7 +1728,9 @@ function VideoPlayer({
           {
             const idx = PLAYBACK_SPEEDS.indexOf(playbackSpeed);
             if (idx > 0) {
-              setPlaybackSpeed(PLAYBACK_SPEEDS[idx - 1]);
+              const newSpeed = PLAYBACK_SPEEDS[idx - 1];
+              setPlaybackSpeed(newSpeed);
+              storePlaybackSpeed(newSpeed);
             }
           }
           break;
@@ -1798,6 +1825,7 @@ function VideoPlayer({
                   key={speed}
                   onClick={() => {
                     setPlaybackSpeed(speed);
+                    storePlaybackSpeed(speed);
                     setShowSpeedMenu(false);
                   }}
                   className={cn(

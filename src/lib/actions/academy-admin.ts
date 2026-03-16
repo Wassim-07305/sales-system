@@ -487,3 +487,99 @@ export async function removeLessonAttachment(
   if (error) throw new Error(error.message);
   revalidatePath("/academy", "page");
 }
+
+// ─── Auto-generation de flashcards depuis le contenu d'une lecon ──────
+
+/**
+ * Genere des flashcards (question/reponse) a partir du contenu texte
+ * d'une lecon. Extraction basique : chaque section/paragraphe significatif
+ * devient une flashcard.
+ */
+export async function generateFlashcardsFromLesson(lessonId: string) {
+  const { supabase } = await requireAdmin();
+
+  // Recuperer la lecon avec son contenu
+  const { data: lesson, error: lessonError } = await supabase
+    .from("lessons")
+    .select("id, title, description, content_html")
+    .eq("id", lessonId)
+    .single();
+
+  if (lessonError || !lesson) throw new Error("Lecon introuvable");
+
+  // Extraire le texte brut du contenu HTML + description
+  const rawParts: string[] = [];
+
+  if (lesson.description) {
+    rawParts.push(lesson.description);
+  }
+
+  if (lesson.content_html) {
+    // Retirer les balises HTML pour ne garder que le texte
+    const textContent = (lesson.content_html as string)
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/?(p|div|h[1-6]|li|ul|ol|blockquote)[^>]*>/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
+    rawParts.push(textContent);
+  }
+
+  const fullText = rawParts.join("\n");
+
+  if (!fullText.trim()) {
+    throw new Error(
+      "Aucun contenu textuel dans cette lecon pour generer des flashcards",
+    );
+  }
+
+  // Decouper en sections/paragraphes significatifs
+  const paragraphs = fullText
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 30); // Ignorer les paragraphes trop courts
+
+  if (paragraphs.length === 0) {
+    throw new Error(
+      "Le contenu de la lecon est trop court pour generer des flashcards",
+    );
+  }
+
+  // Generer les flashcards : le titre de la lecon + index comme question,
+  // le paragraphe comme reponse
+  const flashcards = paragraphs.slice(0, 20).map((paragraph, index) => {
+    // Extraire la premiere phrase comme question potentielle
+    const firstSentence = paragraph.split(/[.!?]/)[0]?.trim();
+    const question =
+      firstSentence && firstSentence.length > 15
+        ? `Qu'est-ce que : "${firstSentence}" ?`
+        : `${lesson.title} — Point cle ${index + 1} : De quoi s'agit-il ?`;
+
+    return {
+      lesson_id: lessonId,
+      question,
+      answer:
+        paragraph.length > 500 ? paragraph.slice(0, 500) + "..." : paragraph,
+      category: lesson.title,
+    };
+  });
+
+  // Inserer les flashcards
+  const { error: insertError } = await supabase
+    .from("revision_cards")
+    .insert(flashcards);
+
+  if (insertError) throw new Error(insertError.message);
+
+  revalidatePath("/academy/revision", "page");
+  revalidatePath("/academy", "page");
+
+  return flashcards.length;
+}

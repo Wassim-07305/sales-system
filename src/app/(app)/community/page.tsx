@@ -5,6 +5,7 @@ import {
   getCommunityLeaderboard,
   getUserReputationBatch,
   getCommunityChannelCounts,
+  getPendingReportsCount,
 } from "@/lib/actions/community";
 import { CommunityView } from "./community-view";
 
@@ -35,11 +36,13 @@ export default async function CommunityPage() {
     redirect("/dashboard");
   }
 
-  const [posts, leaderboard, channelCounts] = await Promise.all([
-    getCommunityPosts(),
-    getCommunityLeaderboard(),
-    getCommunityChannelCounts(),
-  ]);
+  const [posts, leaderboard, channelCounts, pendingReportsCount] =
+    await Promise.all([
+      getCommunityPosts(),
+      getCommunityLeaderboard(),
+      getCommunityChannelCounts(),
+      getPendingReportsCount(),
+    ]);
 
   const isAdmin = profile?.role === "admin" || profile?.role === "manager";
   const userRole = profile?.role || "client_b2c";
@@ -53,9 +56,9 @@ export default async function CommunityPage() {
   ] as string[];
   const reputations = await getUserReputationBatch(authorIds);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <CommunityView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       posts={posts as any}
       userId={user.id}
       isAdmin={isAdmin}
@@ -63,6 +66,7 @@ export default async function CommunityPage() {
       reputations={reputations}
       userRole={userRole}
       channelCounts={channelCounts}
+      pendingReportsCount={isAdmin ? pendingReportsCount : 0}
     />
   );
 }

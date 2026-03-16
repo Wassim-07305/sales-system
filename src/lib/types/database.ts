@@ -67,6 +67,7 @@ export interface Profile {
   goals: string | null;
   onboarding_completed: boolean;
   onboarding_step: number;
+  tags: string[];
   health_score: number;
   is_ready_to_place: boolean;
   matched_entrepreneur_id: string | null;
@@ -440,6 +441,50 @@ export interface CommunityComment {
   author?: Profile;
 }
 
+export type ModerationCategory =
+  | "spam"
+  | "contenu_inapproprie"
+  | "hors_sujet"
+  | "harcelement"
+  | "autre";
+
+export interface CommunityBan {
+  id: string;
+  user_id: string;
+  banned_by: string;
+  reason: string;
+  created_at: string;
+  lifted_at: string | null;
+  user?: Profile;
+  moderator?: Profile;
+}
+
+export interface CommunityReport {
+  id: string;
+  post_id: string;
+  reporter_id: string;
+  category: ModerationCategory;
+  reason: string;
+  status: "pending" | "reviewed" | "dismissed";
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  reporter?: Profile;
+  post?: CommunityPost;
+}
+
+export interface CommunityModerationLog {
+  id: string;
+  post_id: string;
+  moderator_id: string;
+  action: "hide" | "unhide" | "delete";
+  reason: string;
+  category: ModerationCategory;
+  created_at: string;
+  moderator?: Profile;
+  post?: CommunityPost;
+}
+
 export interface Affiliate {
   id: string;
   user_id: string;
@@ -778,6 +823,7 @@ export interface VideoRoom {
   ai_summary: string | null;
   chapters: Array<{ timestamp: string; label: string }>;
   max_participants: number;
+  meeting_link: string | null;
   created_at: string;
   host?: Profile;
 }
@@ -1181,6 +1227,36 @@ export interface Database {
           content: string;
         };
         Update: Partial<CommunityComment>;
+      };
+      community_bans: {
+        Row: CommunityBan;
+        Insert: Partial<CommunityBan> & {
+          user_id: string;
+          banned_by: string;
+          reason: string;
+        };
+        Update: Partial<CommunityBan>;
+      };
+      community_reports: {
+        Row: CommunityReport;
+        Insert: Partial<CommunityReport> & {
+          post_id: string;
+          reporter_id: string;
+          category: ModerationCategory;
+          reason: string;
+        };
+        Update: Partial<CommunityReport>;
+      };
+      community_moderation_logs: {
+        Row: CommunityModerationLog;
+        Insert: Partial<CommunityModerationLog> & {
+          post_id: string;
+          moderator_id: string;
+          action: "hide" | "unhide" | "delete";
+          reason: string;
+          category: ModerationCategory;
+        };
+        Update: Partial<CommunityModerationLog>;
       };
       affiliates: {
         Row: Affiliate;

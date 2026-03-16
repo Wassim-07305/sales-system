@@ -42,12 +42,14 @@ import {
   ShieldCheck,
   Hash,
   Sparkles,
+  Flag,
 } from "lucide-react";
 import {
   createCommunityPost,
   toggleLike,
   getComments,
   addComment,
+  reportPost,
 } from "@/lib/actions/community";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -181,6 +183,7 @@ export function CommunityView({
   reputations = {},
   userRole = "client_b2c",
   channelCounts = {},
+  pendingReportsCount = 0,
 }: {
   posts: Post[];
   userId: string;
@@ -189,6 +192,7 @@ export function CommunityView({
   reputations?: Record<string, number>;
   userRole?: string;
   channelCounts?: Record<string, number>;
+  pendingReportsCount?: number;
 }) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -206,6 +210,10 @@ export function CommunityView({
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
+  const [reportDialog, setReportDialog] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reportCategory, setReportCategory] = useState("autre");
+  const [isReporting, setIsReporting] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Filter channels by role
@@ -324,6 +332,35 @@ export function CommunityView({
     router.refresh();
   }
 
+  async function handleReport() {
+    if (!reportDialog || !reportReason.trim()) {
+      toast.error("Veuillez saisir une raison");
+      return;
+    }
+    setIsReporting(true);
+    try {
+      const result = await reportPost(
+        reportDialog,
+        reportReason,
+        reportCategory,
+      );
+      if (result && "error" in result && result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Signalement envoyé. Les modérateurs vont l'examiner.");
+      }
+      setReportDialog(null);
+      setReportReason("");
+      setReportCategory("autre");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Erreur lors du signalement",
+      );
+    } finally {
+      setIsReporting(false);
+    }
+  }
+
   function PostCard({ post, isWinGrid }: { post: Post; isWinGrid?: boolean }) {
     const postChannel = CHANNELS.find(
       (c) => c.id === (post.channel || "general"),
@@ -423,6 +460,15 @@ export function CommunityView({
               <MessageCircle className="h-4 w-4" />
               <span className="font-medium">Commenter</span>
             </button>
+            {post.author_id !== userId && (
+              <button
+                onClick={() => setReportDialog(post.id)}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-amber-500 hover:bg-amber-500/5 transition-all ml-auto"
+              >
+                <Flag className="h-4 w-4" />
+                <span className="font-medium">Signaler</span>
+              </button>
+            )}
           </div>
 
           {/* Comments section */}
@@ -503,9 +549,14 @@ export function CommunityView({
           </Link>
           {isAdmin && (
             <Link href="/community/manage">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="relative">
                 <Settings2 className="h-4 w-4 mr-2" />
-                Mod\u00e9ration
+                Modération
+                {pendingReportsCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center h-5 min-w-[20px] rounded-full bg-red-500 text-white text-[10px] font-bold px-1">
+                    {pendingReportsCount}
+                  </span>
+                )}
               </Button>
             </Link>
           )}
@@ -902,6 +953,87 @@ export function CommunityView({
                 <Send className="h-4 w-4 mr-2" />
               )}
               Publier
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Report dialog ─── */}
+      <Dialog
+        open={!!reportDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReportDialog(null);
+            setReportReason("");
+            setReportCategory("autre");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-amber-500" />
+              Signaler ce post
+            </DialogTitle>
+            <DialogDescription>
+              Ce signalement sera examiné par les modérateurs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Catégorie
+              </Label>
+              <Select value={reportCategory} onValueChange={setReportCategory}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="spam">Spam</SelectItem>
+                  <SelectItem value="contenu_inapproprie">
+                    Contenu inapproprié
+                  </SelectItem>
+                  <SelectItem value="hors_sujet">Hors sujet</SelectItem>
+                  <SelectItem value="harcelement">Harcèlement</SelectItem>
+                  <SelectItem value="autre">Autre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Raison
+              </Label>
+              <Textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="Décrivez pourquoi vous signalez ce post..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setReportDialog(null);
+                setReportReason("");
+                setReportCategory("autre");
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleReport}
+              disabled={isReporting || !reportReason.trim()}
+              className="bg-amber-500 text-white hover:bg-amber-600"
+            >
+              {isReporting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Flag className="h-4 w-4 mr-2" />
+              )}
+              Envoyer le signalement
             </Button>
           </div>
         </DialogContent>

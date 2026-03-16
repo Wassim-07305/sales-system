@@ -33,6 +33,9 @@ import {
   Circle,
   ArrowLeft,
   MonitorOff,
+  Video,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import {
   joinRoom,
@@ -83,6 +86,7 @@ interface VideoRoom {
   started_at: string | null;
   ended_at: string | null;
   max_participants: number;
+  meeting_link: string | null;
   host?: {
     id: string;
     full_name: string | null;
@@ -1015,6 +1019,44 @@ export function VideoRoomView({
           )}
         </div>
       </div>
+
+      {/* Lien Google Meet */}
+      {room.meeting_link && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b bg-brand/5">
+          <div className="flex items-center gap-2 min-w-0">
+            <Video className="h-5 w-5 text-brand shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Lien Google Meet</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {room.meeting_link}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(room.meeting_link!);
+                toast.success("Lien copié dans le presse-papier");
+              }}
+            >
+              <Copy className="h-3.5 w-3.5 mr-1.5" />
+              Copier le lien
+            </Button>
+            <Button
+              size="sm"
+              className="bg-brand text-brand-dark hover:bg-brand/90"
+              onClick={() =>
+                window.open(room.meeting_link!, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+              Rejoindre l&apos;appel
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">

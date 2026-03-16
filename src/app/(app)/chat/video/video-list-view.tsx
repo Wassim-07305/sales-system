@@ -27,6 +27,7 @@ import {
   ArrowRight,
   Radio,
   Zap,
+  ExternalLink,
 } from "lucide-react";
 import { createVideoRoom } from "@/lib/actions/communication";
 import { toast } from "sonner";
@@ -41,6 +42,7 @@ interface VideoRoom {
   started_at: string | null;
   ended_at: string | null;
   max_participants: number;
+  meeting_link: string | null;
   host?: {
     id: string;
     full_name: string | null;
@@ -125,6 +127,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
   const [title, setTitle] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [maxParticipants, setMaxParticipants] = useState("10");
+  const [meetingLink, setMeetingLink] = useState("");
 
   const scheduled = rooms.filter((r) => r.status === "scheduled");
   const live = rooms.filter((r) => r.status === "live");
@@ -146,11 +149,13 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
           title,
           scheduledAt: new Date(scheduledAt).toISOString(),
           maxParticipants: parseInt(maxParticipants) || 10,
+          meetingLink: meetingLink.trim() || undefined,
         });
         toast.success("Visioconférence créée");
         setTitle("");
         setScheduledAt("");
         setMaxParticipants("10");
+        setMeetingLink("");
         setDialogOpen(false);
         router.refresh();
       } catch {
@@ -214,16 +219,38 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {room.meeting_link &&
+              (room.status === "live" || room.status === "scheduled") && (
+                <Button
+                  size="sm"
+                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  onClick={() =>
+                    window.open(
+                      room.meeting_link!,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                  Rejoindre Meet
+                </Button>
+              )}
             {room.status === "live" && (
               <Button
                 size="sm"
+                variant={room.meeting_link ? "outline" : "default"}
                 asChild
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className={
+                  room.meeting_link
+                    ? ""
+                    : "bg-brand text-brand-dark hover:bg-brand/90"
+                }
               >
                 <Link href={`/chat/video/${room.id}`}>
                   <Play className="h-3.5 w-3.5 mr-1" />
-                  Rejoindre
+                  {room.meeting_link ? "Détails" : "Rejoindre"}
                 </Link>
               </Button>
             )}
@@ -306,6 +333,17 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                     value={maxParticipants}
                     onChange={(e) => setMaxParticipants(e.target.value)}
                   />
+                </div>
+                <div>
+                  <Label className="mb-2 block">Lien Meet (optionnel)</Label>
+                  <Input
+                    placeholder="https://meet.google.com/xxx-yyyy-zzz"
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Laissez vide pour générer un lien automatiquement
+                  </p>
                 </div>
                 <Button
                   onClick={handleCreate}

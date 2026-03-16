@@ -1,6 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getAllPostsForModeration } from "@/lib/actions/community";
+import {
+  getAllPostsForModeration,
+  getReports,
+  getCommunityBans,
+  getModerationLogs,
+  getCommunityMembers,
+  getPendingReportsCount,
+} from "@/lib/actions/community";
 import { ManageView } from "./manage-view";
 
 export default async function ManagePage() {
@@ -18,7 +25,29 @@ export default async function ManagePage() {
   if (!profile || !["admin", "manager"].includes(profile.role))
     redirect("/community");
 
-  const posts = await getAllPostsForModeration();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <ManageView posts={posts as any} />;
+  const [posts, reports, bans, logs, members, pendingReportsCount] =
+    await Promise.all([
+      getAllPostsForModeration(),
+      getReports(),
+      getCommunityBans(),
+      getModerationLogs(),
+      getCommunityMembers(),
+      getPendingReportsCount(),
+    ]);
+
+  return (
+    <ManageView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      posts={posts as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      reports={reports as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bans={bans as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      logs={logs as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      members={members as any}
+      pendingReportsCount={pendingReportsCount}
+    />
+  );
 }

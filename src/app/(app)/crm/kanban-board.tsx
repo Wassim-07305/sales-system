@@ -32,13 +32,24 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, BarChart3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  Filter,
+  BarChart3,
+  CheckSquare,
+  X,
+  ArrowRight,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   getFilteredDeals,
   getDealSources,
   getTeamMembers,
+  getContactTags,
   updateDealStage,
+  bulkMoveDeals,
   type DealFilters,
 } from "@/lib/actions/crm";
 
@@ -82,18 +93,28 @@ export function KanbanBoard({
   const [tempFilter, setTempFilter] = useState<string>("all");
   const [selectedSetter, setSelectedSetter] = useState<string>("all");
 
+  // Selection mode (bulk actions)
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [isBulkMoving, setIsBulkMoving] = useState(false);
+
   // Advanced filters
   const [advancedFilters, setAdvancedFilters] = useState<DealFilters>({
     sortBy: "created_at_desc",
   });
   const [sources, setSources] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [, startTransition] = useTransition();
 
-  // Load sources and team members on mount
+  // Load sources, team members, and tags on mount
   useEffect(() => {
     getDealSources().then(setSources);
     getTeamMembers().then(setTeamMembers);
+    getContactTags().then(setAvailableTags);
   }, []);
 
   // Apply advanced filters via server action
@@ -164,7 +185,15 @@ export function KanbanBoard({
     const matchesTemp = tempFilter === "all" || deal.temperature === tempFilter;
     const matchesSetter =
       selectedSetter === "all" || deal.assigned_to === selectedSetter;
-    return matchesSearch && matchesTemp && matchesSetter;
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some(
+        (tag) =>
+          (Array.isArray(deal.tags) && deal.tags.includes(tag)) ||
+          (Array.isArray(deal.contact?.tags) &&
+            deal.contact.tags.includes(tag)),
+      );
+    return matchesSearch && matchesTemp && matchesSetter && matchesTags;
   });
 
   const getDealsForStage = useCallback(
@@ -229,6 +258,60 @@ export function KanbanBoard({
     setDeals((prev) => [newDeal, ...prev]);
   }
 
+  function handleDealSelectionChange(dealId: string, selected: boolean) {
+    setSelectedDealIds((prev) => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(dealId);
+      } else {
+        next.delete(dealId);
+      }
+      return next;
+    });
+  }
+
+  function toggleSelectionMode() {
+    if (selectionMode) {
+      setSelectedDealIds(new Set());
+    }
+    setSelectionMode(!selectionMode);
+  }
+
+  async function handleBulkMove(targetStageId: string) {
+    const ids = Array.from(selectedDealIds);
+    if (ids.length === 0) return;
+
+    setIsBulkMoving(true);
+
+    // Optimistic update
+    setDeals((prev) =>
+      prev.map((d) =>
+        selectedDealIds.has(d.id) ? { ...d, stage_id: targetStageId } : d,
+      ),
+    );
+
+    const result = await bulkMoveDeals(ids, targetStageId);
+
+    if (result.error) {
+      toast.error("Erreur : " + result.error);
+      // Revert would be complex, just reload
+      const refreshed = await getFilteredDeals(advancedFilters);
+      if (refreshed.deals) setDeals(refreshed.deals as Deal[]);
+    } else {
+      toast.success(`${ids.length} deal(s) déplacé(s) avec succès`);
+      setSelectedDealIds(new Set());
+      setSelectionMode(false);
+    }
+
+    setIsBulkMoving(false);
+  }
+
+  function toggleTag(tag: string) {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+  }
+
   return (
     <>
       {/* Advanced Filters */}
@@ -237,6 +320,9 @@ export function KanbanBoard({
         onFiltersChange={setAdvancedFilters}
         sources={sources}
         teamMembers={teamMembers}
+        availableTags={availableTags}
+        selectedTags={selectedTags}
+        onToggleTag={toggleTag}
       />
 
       {/* Pipeline Stats */}
@@ -281,11 +367,58 @@ export function KanbanBoard({
           </Select>
         )}
         {!readOnly && (
-          <div className="ml-auto">
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant={selectionMode ? "default" : "outline"}
+              size="sm"
+              onClick={toggleSelectionMode}
+              className={cn(
+                "gap-2 h-11 rounded-xl",
+                selectionMode && "bg-brand text-brand-dark hover:bg-brand/90",
+              )}
+            >
+              <CheckSquare className="h-3.5 w-3.5" />
+              {selectionMode ? "Annuler" : "Sélection"}
+            </Button>
             <NewDealDialog stages={stages} onDealCreated={handleDealCreated} />
           </div>
         )}
       </div>
+
+      {/* Tag filter */}
+      {availableTags.length > 0 && (
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className="text-xs font-medium text-muted-foreground mr-1">
+            Tags :
+          </span>
+          {availableTags.map((tag) => (
+            <Badge
+              key={tag}
+              variant={selectedTags.includes(tag) ? "default" : "outline"}
+              className={cn(
+                "cursor-pointer text-[11px] transition-colors",
+                selectedTags.includes(tag)
+                  ? "bg-brand text-brand-dark hover:bg-brand/90"
+                  : "hover:bg-muted",
+              )}
+              onClick={() => toggleTag(tag)}
+            >
+              {tag}
+            </Badge>
+          ))}
+          {selectedTags.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedTags([])}
+              className="h-6 px-2 text-[11px] text-muted-foreground"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Effacer
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Empty state: zero deals */}
       {deals.length === 0 && (
@@ -347,6 +480,9 @@ export function KanbanBoard({
               deals={getDealsForStage(stage.id)}
               totalValue={getStageValue(stage.id)}
               onDealClick={setSelectedDeal}
+              selectionMode={selectionMode}
+              selectedDealIds={selectedDealIds}
+              onDealSelectionChange={handleDealSelectionChange}
             />
           ))}
         </div>
@@ -369,6 +505,49 @@ export function KanbanBoard({
             setSelectedDeal(updated);
           }}
         />
+      )}
+
+      {/* Bulk actions floating bar */}
+      {selectionMode && selectedDealIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-background/95 backdrop-blur-sm border border-border/80 shadow-2xl rounded-2xl px-5 py-3">
+          <span className="text-sm font-semibold tabular-nums">
+            {selectedDealIds.size} sélectionné
+            {selectedDealIds.size > 1 ? "s" : ""}
+          </span>
+          <div className="h-5 w-px bg-border" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedDealIds(new Set())}
+            className="text-muted-foreground text-xs h-8"
+          >
+            <X className="h-3 w-3 mr-1" />
+            Tout désélectionner
+          </Button>
+          <div className="h-5 w-px bg-border" />
+          <div className="flex items-center gap-1.5">
+            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground mr-1">
+              Déplacer vers
+            </span>
+            {stages.map((stage) => (
+              <Button
+                key={stage.id}
+                variant="outline"
+                size="sm"
+                disabled={isBulkMoving}
+                onClick={() => handleBulkMove(stage.id)}
+                className="h-8 text-xs rounded-lg gap-1.5"
+              >
+                <div
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ backgroundColor: stage.color }}
+                />
+                {stage.name}
+              </Button>
+            ))}
+          </div>
+        </div>
       )}
     </>
   );

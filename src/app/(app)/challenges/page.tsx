@@ -2,6 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ChallengesView } from "./challenges-view";
 import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
+import {
+  getAllChallengesForAdmin,
+  getPastChallenges,
+} from "@/lib/actions/gamification";
 
 export default async function ChallengesPage() {
   const supabase = await createClient();
@@ -22,6 +26,8 @@ export default async function ChallengesPage() {
   ) {
     redirect("/dashboard");
   }
+
+  const isAdmin = ["admin", "manager"].includes(profileCheck.role);
 
   // Get gamification profile
   let { data: gamProfile } = await supabase
@@ -70,6 +76,12 @@ export default async function ChallengesPage() {
     .order("total_points", { ascending: false })
     .limit(10);
 
+  // Admin: all challenges for management
+  const adminChallenges = isAdmin ? await getAllChallengesForAdmin() : [];
+
+  // Past challenges for history tab
+  const pastChallenges = await getPastChallenges("all");
+
   return (
     <ChallengesView
       gamProfile={gamProfile}
@@ -78,6 +90,9 @@ export default async function ChallengesPage() {
       leaderboard={leaderboard || []}
       currentUserId={user.id}
       allBadges={BADGE_DEFINITIONS}
+      isAdmin={isAdmin}
+      adminChallenges={adminChallenges}
+      pastChallenges={pastChallenges}
     />
   );
 }

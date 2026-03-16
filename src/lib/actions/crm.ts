@@ -324,6 +324,67 @@ export async function createDeal(params: {
   return { deal: data };
 }
 
+export async function bulkMoveDeals(dealIds: string[], stageId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  if (!dealIds.length) return { error: "Aucun deal sélectionné" };
+
+  // Validate that stageId exists
+  const { data: stage } = await supabase
+    .from("pipeline_stages")
+    .select("id, name")
+    .eq("id", stageId)
+    .single();
+
+  if (!stage) return { error: "Stage invalide" };
+
+  const { error } = await supabase
+    .from("deals")
+    .update({ stage_id: stageId, updated_at: new Date().toISOString() })
+    .in("id", dealIds);
+
+  if (error) return { error: error.message };
+
+  logAuditEvent({
+    action: "update",
+    entity_type: "deal",
+    entity_id: dealIds.join(","),
+    details: { bulk_move: true, stage_id: stageId, count: dealIds.length },
+  }).catch(() => {});
+
+  revalidatePath("/crm");
+  return { success: true, count: dealIds.length };
+}
+
+export async function getContactTags() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Get all distinct tags from deals
+  const { data: deals } = await supabase
+    .from("deals")
+    .select("tags")
+    .not("tags", "is", null);
+
+  if (!deals) return [];
+
+  const tagSet = new Set<string>();
+  deals.forEach((d) => {
+    if (Array.isArray(d.tags)) {
+      d.tags.forEach((t: string) => tagSet.add(t));
+    }
+  });
+
+  return Array.from(tagSet).sort();
+}
+
 export async function updateDealStage(dealId: string, stageId: string) {
   const supabase = await createClient();
   const {

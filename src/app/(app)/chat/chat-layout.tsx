@@ -57,6 +57,7 @@ import {
   UserPlus,
   AtSign,
   ArrowLeft,
+  Reply,
   Phone,
   Inbox,
   Instagram,
@@ -85,6 +86,7 @@ import {
   getOrCreateDM,
   editMessage as editMessageAction,
   deleteMessage as deleteMessageAction,
+  searchMessages,
 } from "@/lib/actions/communication";
 import { sendWhatsAppMessage } from "@/lib/actions/whatsapp";
 import {
@@ -673,6 +675,28 @@ export function ChatLayout({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
 
+  // ---- Reply ----
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+
+  // ---- Message search ----
+  const [msgSearchOpen, setMsgSearchOpen] = useState(false);
+  const [msgSearchQuery, setMsgSearchQuery] = useState("");
+  const [msgSearchResults, setMsgSearchResults] = useState<
+    {
+      id: string;
+      content: string;
+      channel_id: string;
+      channel_name: string;
+      sender_name: string;
+      sender_id: string;
+      created_at: string;
+    }[]
+  >([]);
+  const [msgSearching, setMsgSearching] = useState(false);
+  const msgSearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
   // ---- Admin state ----
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showMembersDialog, setShowMembersDialog] = useState(false);
@@ -819,6 +843,8 @@ export function ChatLayout({
 
   useEffect(() => {
     if (!activeChannel) return;
+
+    setReplyTo(null);
 
     async function loadMessages() {
       setLoading(true);
@@ -999,12 +1025,14 @@ export function ChatLayout({
       created_at: new Date().toISOString(),
       sender: { id: currentUserId, full_name: "Moi", avatar_url: null },
       is_edited: false,
-      reply_to: null,
+      reply_to: replyTo?.id || null,
       file_name: null,
     } as unknown as Message;
     setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
     setTyping(false);
+    const currentReplyTo = replyTo;
+    setReplyTo(null);
     if (isImage) {
       setImageUrl(null);
       setImagePreview(null);
@@ -1017,6 +1045,7 @@ export function ChatLayout({
       message_type: isImage ? "image" : "text",
     };
     if (isImage) insertData.file_url = imageUrl;
+    if (currentReplyTo) insertData.reply_to = currentReplyTo.id;
     const { data: inserted, error } = await supabase
       .from("messages")
       .insert(insertData)
@@ -1257,6 +1286,48 @@ export function ChatLayout({
     } catch {
       toast.error("Erreur lors de la suppression");
     }
+  }
+
+  function handleMsgSearchInput(value: string) {
+    setMsgSearchQuery(value);
+    if (msgSearchTimeoutRef.current) clearTimeout(msgSearchTimeoutRef.current);
+    if (value.trim().length < 2) {
+      setMsgSearchResults([]);
+      return;
+    }
+    msgSearchTimeoutRef.current = setTimeout(async () => {
+      setMsgSearching(true);
+      try {
+        const results = await searchMessages(value);
+        setMsgSearchResults(results);
+      } catch {
+        toast.error("Erreur de recherche");
+      } finally {
+        setMsgSearching(false);
+      }
+    }, 400);
+  }
+
+  function handleSearchResultClick(result: { id: string; channel_id: string }) {
+    // Navigate to the channel and scroll to the message
+    const targetChannel = channels.find((c) => c.id === result.channel_id);
+    if (targetChannel) {
+      setActiveChannel(targetChannel);
+      setActiveWA(null);
+      setActiveSocial(null);
+    }
+    setMsgSearchOpen(false);
+    setMsgSearchQuery("");
+    setMsgSearchResults([]);
+    // After loading, try to scroll to the message
+    setTimeout(() => {
+      const el = document.getElementById(`msg-${result.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("bg-[#7af17a]/10");
+        setTimeout(() => el.classList.remove("bg-[#7af17a]/10"), 2000);
+      }
+    }, 600);
   }
 
   async function handleStartDM(otherUserId: string) {
@@ -1579,17 +1650,98 @@ export function ChatLayout({
               )}
             </div>
           </div>
-          <button
-            onClick={() => {
-              setDmSearch("");
-              setShowNewDMDialog(true);
-            }}
-            className="h-8 w-8 rounded-xl bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
-            title="Nouveau message"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setMsgSearchOpen((v) => !v)}
+              className={cn(
+                "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-200",
+                msgSearchOpen
+                  ? "bg-[#7af17a]/15 text-[#7af17a]"
+                  : "bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary",
+              )}
+              title="Rechercher dans les messages"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => {
+                setDmSearch("");
+                setShowNewDMDialog(true);
+              }}
+              className="h-8 w-8 rounded-xl bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
+              title="Nouveau message"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
         </div>
+
+        {/* Message search panel */}
+        {msgSearchOpen && (
+          <div className="px-4 pb-3 border-b border-border/50">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Input
+                placeholder="Rechercher dans les messages..."
+                value={msgSearchQuery}
+                onChange={(e) => handleMsgSearchInput(e.target.value)}
+                className="pl-10 pr-8 h-9 text-[13px] bg-secondary/50 border-0 rounded-xl placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-[#7af17a]/30 focus-visible:bg-background transition-all"
+                autoFocus
+              />
+              {msgSearchQuery && (
+                <button
+                  onClick={() => {
+                    setMsgSearchQuery("");
+                    setMsgSearchResults([]);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            {msgSearching && (
+              <div className="flex items-center gap-2 py-3 px-1 text-xs text-muted-foreground/60">
+                <Loader2 className="h-3 w-3 animate-spin" /> Recherche...
+              </div>
+            )}
+            {!msgSearching && msgSearchResults.length > 0 && (
+              <ScrollArea className="max-h-64 mt-2">
+                <div className="space-y-0.5">
+                  {msgSearchResults.map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => handleSearchResultClick(r)}
+                      className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-secondary/60 transition-all"
+                    >
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[12px] font-semibold text-foreground truncate">
+                          {r.sender_name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/40">
+                          dans #{r.channel_name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/40 ml-auto shrink-0">
+                          {format(new Date(r.created_at), "dd/MM HH:mm")}
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-muted-foreground/70 truncate">
+                        {r.content}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+            {!msgSearching &&
+              msgSearchQuery.length >= 2 &&
+              msgSearchResults.length === 0 && (
+                <p className="text-[11px] text-muted-foreground/40 text-center py-3">
+                  Aucun résultat
+                </p>
+              )}
+          </div>
+        )}
 
         {/* Search */}
         <div className="px-4 py-3">
@@ -2634,7 +2786,11 @@ export function ChatLayout({
                         );
 
                       return (
-                        <div key={message.id}>
+                        <div
+                          key={message.id}
+                          id={`msg-${message.id}`}
+                          className="transition-colors duration-500"
+                        >
                           {showDate && (
                             <DateSeparator
                               date={new Date(message.created_at)}
@@ -2701,6 +2857,51 @@ export function ChatLayout({
                                   </div>
                                 ) : (
                                   <>
+                                    {message.reply_to &&
+                                      (() => {
+                                        const quoted = messages.find(
+                                          (m) => m.id === message.reply_to,
+                                        );
+                                        if (!quoted) return null;
+                                        return (
+                                          <button
+                                            onClick={() => {
+                                              const el =
+                                                document.getElementById(
+                                                  `msg-${quoted.id}`,
+                                                );
+                                              if (el) {
+                                                el.scrollIntoView({
+                                                  behavior: "smooth",
+                                                  block: "center",
+                                                });
+                                                el.classList.add(
+                                                  "bg-[#7af17a]/10",
+                                                );
+                                                setTimeout(
+                                                  () =>
+                                                    el.classList.remove(
+                                                      "bg-[#7af17a]/10",
+                                                    ),
+                                                  2000,
+                                                );
+                                              }
+                                            }}
+                                            className="w-full text-left mb-2 pl-3 border-l-2 border-[#7af17a]/40 bg-background/30 rounded-r-lg py-1.5 pr-2"
+                                          >
+                                            <p className="text-[10px] font-semibold text-[#7af17a]/70 mb-0.5">
+                                              {quoted.sender_id ===
+                                              currentUserId
+                                                ? "Moi"
+                                                : quoted.sender?.full_name ||
+                                                  "Utilisateur"}
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground/60 truncate">
+                                              {quoted.content || "Message"}
+                                            </p>
+                                          </button>
+                                        );
+                                      })()}
                                     {message.message_type === "voice" &&
                                     message.file_url ? (
                                       <VoicePlayer
@@ -2763,6 +2964,13 @@ export function ChatLayout({
                                     isOwn ? "left-2" : "right-2",
                                   )}
                                 >
+                                  <button
+                                    onClick={() => setReplyTo(message)}
+                                    className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Répondre"
+                                  >
+                                    <Reply className="h-3.5 w-3.5" />
+                                  </button>
                                   <div className="relative">
                                     <button
                                       onClick={() =>
@@ -2908,6 +3116,51 @@ export function ChatLayout({
                                   </div>
                                 ) : (
                                   <>
+                                    {message.reply_to &&
+                                      (() => {
+                                        const quoted = messages.find(
+                                          (m) => m.id === message.reply_to,
+                                        );
+                                        if (!quoted) return null;
+                                        return (
+                                          <button
+                                            onClick={() => {
+                                              const el =
+                                                document.getElementById(
+                                                  `msg-${quoted.id}`,
+                                                );
+                                              if (el) {
+                                                el.scrollIntoView({
+                                                  behavior: "smooth",
+                                                  block: "center",
+                                                });
+                                                el.classList.add(
+                                                  "bg-[#7af17a]/10",
+                                                );
+                                                setTimeout(
+                                                  () =>
+                                                    el.classList.remove(
+                                                      "bg-[#7af17a]/10",
+                                                    ),
+                                                  2000,
+                                                );
+                                              }
+                                            }}
+                                            className="w-full text-left mb-1.5 pl-3 border-l-2 border-[#7af17a]/40 bg-secondary/30 rounded-r-lg py-1.5 pr-2"
+                                          >
+                                            <p className="text-[10px] font-semibold text-[#7af17a]/70 mb-0.5">
+                                              {quoted.sender_id ===
+                                              currentUserId
+                                                ? "Moi"
+                                                : quoted.sender?.full_name ||
+                                                  "Utilisateur"}
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground/60 truncate">
+                                              {quoted.content || "Message"}
+                                            </p>
+                                          </button>
+                                        );
+                                      })()}
                                     {message.message_type === "voice" &&
                                     message.file_url ? (
                                       <VoicePlayer
@@ -2948,6 +3201,13 @@ export function ChatLayout({
                               </div>
                               {!isEditing && (
                                 <div className="absolute -top-3 right-2 hidden group-hover:flex items-center gap-0.5 bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-lg px-1 py-1">
+                                  <button
+                                    onClick={() => setReplyTo(message)}
+                                    className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Répondre"
+                                  >
+                                    <Reply className="h-3.5 w-3.5" />
+                                  </button>
                                   <div className="relative">
                                     <button
                                       onClick={() =>
@@ -3027,6 +3287,31 @@ export function ChatLayout({
                     className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-foreground/80 flex items-center justify-center text-background hover:bg-foreground transition-colors shadow-sm"
                   >
                     <X className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {replyTo && (
+              <div className="px-5 pt-3 pb-1">
+                <div className="flex items-center gap-3 pl-3 border-l-2 border-[#7af17a]/50 bg-secondary/30 rounded-r-xl py-2 pr-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold text-[#7af17a]/80 mb-0.5 flex items-center gap-1.5">
+                      <Reply className="h-3 w-3" />
+                      Réponse à{" "}
+                      {replyTo.sender_id === currentUserId
+                        ? "moi-même"
+                        : replyTo.sender?.full_name || "Utilisateur"}
+                    </p>
+                    <p className="text-[12px] text-muted-foreground/60 truncate">
+                      {replyTo.content || "Message"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setReplyTo(null)}
+                    className="h-6 w-6 shrink-0 rounded-lg flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>

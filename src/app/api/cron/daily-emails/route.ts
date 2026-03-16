@@ -102,7 +102,7 @@ export async function GET(request: Request) {
     results.errors++;
   }
 
-  // --- 2. Booking Reminders (next 24h) ---
+  // --- 2. Booking Reminders (next 24h) — email + notification in-app ---
   try {
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -126,20 +126,87 @@ export async function GET(request: Request) {
           .eq("id", booking.user_id)
           .single();
 
-        if (!assignee?.email) continue;
-
-        const { sendBookingReminder } = await import("@/lib/actions/email");
-        await sendBookingReminder({
-          email: assignee.email,
-          name: assignee.full_name || "",
-          date: new Date(booking.scheduled_at).toLocaleString("fr-FR", {
-            dateStyle: "long",
-            timeStyle: "short",
-          }),
-          type: booking.slot_type || "Rendez-vous",
-          prospectName: booking.prospect_name || "Client",
+        const prospectName = booking.prospect_name || "Client";
+        const scheduledDate = new Date(booking.scheduled_at);
+        const dateFormatted = scheduledDate.toLocaleString("fr-FR", {
+          dateStyle: "long",
+          timeStyle: "short",
         });
-        results.reminders++;
+        const timeFormatted = scheduledDate.toLocaleTimeString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const slotType = booking.slot_type || "Rendez-vous";
+
+        // 2a. Envoyer l'email rappel J-1
+        if (assignee?.email) {
+          try {
+            const { sendBookingReminder } = await import("@/lib/actions/email");
+            await sendBookingReminder({
+              email: assignee.email,
+              name: assignee.full_name || "",
+              date: dateFormatted,
+              type: slotType,
+              prospectName,
+            });
+            results.reminders++;
+          } catch {
+            results.errors++;
+          }
+        }
+
+        // 2b. Créer la notification in-app avec deep link + push
+        try {
+          const bookingLink = `/bookings`;
+          await supabase.from("notifications").insert({
+            user_id: booking.user_id,
+            title: `Rappel : ${slotType} demain avec ${prospectName}`,
+            body: `${prospectName} — demain à ${timeFormatted}. Préparez vos notes !`,
+            type: "booking_reminder",
+            link: bookingLink,
+            read: false,
+          });
+
+          // Envoyer le push notification (best-effort)
+          const { data: pushSub } = await supabase
+            .from("push_subscriptions")
+            .select("endpoint, keys")
+            .eq("user_id", booking.user_id)
+            .single();
+
+          if (pushSub) {
+            try {
+              const webPush = await import("web-push");
+              const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+              const privateKey = process.env.VAPID_PRIVATE_KEY;
+              const vapidEmail =
+                process.env.VAPID_EMAIL || "mailto:admin@salessystem.com";
+              const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+
+              if (publicKey && privateKey) {
+                webPush.setVapidDetails(vapidEmail, publicKey, privateKey);
+                await webPush.sendNotification(
+                  {
+                    endpoint: pushSub.endpoint,
+                    keys: pushSub.keys as { p256dh: string; auth: string },
+                  },
+                  JSON.stringify({
+                    title: `Rappel : ${slotType} demain`,
+                    body: `${prospectName} — demain à ${timeFormatted}`,
+                    icon: "/icons/icon-192x192.png",
+                    badge: "/icons/icon-72x72.png",
+                    tag: `booking-reminder-${booking.id}`,
+                    data: { url: `${appUrl}/bookings` },
+                  }),
+                );
+              }
+            } catch {
+              // Push best-effort
+            }
+          }
+        } catch {
+          // Notification in-app best-effort
+        }
       } catch {
         results.errors++;
       }

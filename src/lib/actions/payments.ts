@@ -203,7 +203,7 @@ export async function generateInvoice(contractId: string, amount: number) {
 
   // Generate invoice number atomically via RPC to avoid race conditions
   const year = new Date().getFullYear();
-  const prefix = `INV-${year}-`;
+  const prefix = `FAC-${year}-`;
 
   // Get the highest existing invoice number for this year
   const { data: lastInvoice } = await supabase

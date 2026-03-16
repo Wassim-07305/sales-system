@@ -22,6 +22,12 @@ import {
 } from "@/components/ui/select";
 import type { Profile, UserRole } from "@/lib/types/database";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import {
   Search,
   Mail,
   Phone,
@@ -31,10 +37,14 @@ import {
   ChevronRight,
   ArrowUpDown,
   ExternalLink,
+  Plus,
+  X,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ImportExportDialog } from "./import-export-dialog";
 import { ExportDialog } from "@/components/export-dialog";
+import { addContactTag, removeContactTag } from "@/lib/actions/contacts";
 import { cn } from "@/lib/utils";
 
 interface ContactsListProps {
@@ -91,13 +101,150 @@ const PAGE_SIZE = 25;
 type SortKey = "name" | "email" | "role" | "company" | "health";
 type SortDir = "asc" | "desc";
 
+// Tag colors (cycling through them for visual variety)
+const TAG_COLORS = [
+  "bg-brand/10 text-brand border-brand/20",
+  "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+];
+
+function getTagColor(tag: string) {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++)
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+}
+
+function ContactTagManager({
+  contact,
+  onTagsChanged,
+}: {
+  contact: Profile;
+  onTagsChanged: (contactId: string, tags: string[]) => void;
+}) {
+  const [newTag, setNewTag] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const tags: string[] = Array.isArray(contact.tags) ? contact.tags : [];
+
+  async function handleAddTag() {
+    const trimmed = newTag.trim().toLowerCase();
+    if (!trimmed) return;
+    setIsAdding(true);
+    const result = await addContactTag(contact.id, trimmed);
+    if (result.error) {
+      toast.error(result.error);
+    } else if (result.tags) {
+      onTagsChanged(contact.id, result.tags);
+      toast.success(`Tag "${trimmed}" ajouté`);
+    }
+    setNewTag("");
+    setIsAdding(false);
+  }
+
+  async function handleRemoveTag(tag: string) {
+    const result = await removeContactTag(contact.id, tag);
+    if (result.error) {
+      toast.error(result.error);
+    } else if (result.tags) {
+      onTagsChanged(contact.id, result.tags);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {tags.map((tag) => (
+        <Badge
+          key={tag}
+          variant="outline"
+          className={cn(
+            "text-[10px] px-1.5 py-0 h-5 gap-0.5 font-medium border",
+            getTagColor(tag),
+          )}
+        >
+          {tag}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleRemoveTag(tag);
+            }}
+            className="ml-0.5 hover:opacity-70"
+          >
+            <X className="h-2.5 w-2.5" />
+          </button>
+        </Badge>
+      ))}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            className="h-5 w-5 rounded-md border border-dashed border-border/50 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            title="Ajouter un tag"
+          >
+            <Plus className="h-3 w-3 text-muted-foreground" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-3" align="start">
+          <div className="space-y-2">
+            <p className="text-xs font-medium">Ajouter un tag</p>
+            <div className="flex gap-1.5">
+              <Input
+                placeholder="Nouveau tag..."
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+                className="h-8 text-xs"
+                disabled={isAdding}
+              />
+              <Button
+                size="sm"
+                className="h-8 px-2.5"
+                onClick={handleAddTag}
+                disabled={isAdding || !newTag.trim()}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
 export function ContactsList({ initialContacts }: ContactsListProps) {
+  const [contacts, setContacts] = useState<Profile[]>(initialContacts);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [tagFilter, setTagFilter] = useState<string>("all");
   const [exportOpen, setExportOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  // Collect all unique tags across contacts
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    contacts.forEach((c) => {
+      if (Array.isArray(c.tags)) {
+        c.tags.forEach((t) => tagSet.add(t));
+      }
+    });
+    return Array.from(tagSet).sort();
+  }, [contacts]);
+
+  function handleTagsChanged(contactId: string, newTags: string[]) {
+    setContacts((prev) =>
+      prev.map((c) => (c.id === contactId ? { ...c, tags: newTags } : c)),
+    );
+  }
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -110,14 +257,17 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
   }
 
   const filtered = useMemo(() => {
-    const result = initialContacts.filter((c) => {
+    const result = contacts.filter((c) => {
       const matchesSearch =
         !search ||
         c.full_name?.toLowerCase().includes(search.toLowerCase()) ||
         c.email.toLowerCase().includes(search.toLowerCase()) ||
         c.company?.toLowerCase().includes(search.toLowerCase());
       const matchesRole = roleFilter === "all" || c.role === roleFilter;
-      return matchesSearch && matchesRole;
+      const matchesTag =
+        tagFilter === "all" ||
+        (Array.isArray(c.tags) && c.tags.includes(tagFilter));
+      return matchesSearch && matchesRole && matchesTag;
     });
 
     result.sort((a, b) => {
@@ -139,18 +289,18 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
     });
 
     return result;
-  }, [initialContacts, search, roleFilter, sortKey, sortDir]);
+  }, [contacts, search, roleFilter, tagFilter, sortKey, sortDir]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const roleCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    initialContacts.forEach((c) => {
+    contacts.forEach((c) => {
       counts[c.role] = (counts[c.role] || 0) + 1;
     });
     return counts;
-  }, [initialContacts]);
+  }, [contacts]);
 
   const renderSortHeader = (label: string, sortId: SortKey) => {
     const active = sortKey === sortId;
@@ -177,7 +327,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Users className="h-4 w-4" />
           <span className="font-semibold text-foreground">
-            {initialContacts.length}
+            {contacts.length}
           </span>{" "}
           contacts
         </div>
@@ -239,6 +389,28 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
             <SelectItem value="manager">Manager</SelectItem>
           </SelectContent>
         </Select>
+        {allTags.length > 0 && (
+          <Select
+            value={tagFilter}
+            onValueChange={(v) => {
+              setTagFilter(v);
+              setPage(0);
+            }}
+          >
+            <SelectTrigger className="w-[160px] h-11 rounded-xl">
+              <Tag className="h-3.5 w-3.5 mr-2" />
+              <SelectValue placeholder="Tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les tags</SelectItem>
+              {allTags.map((tag) => (
+                <SelectItem key={tag} value={tag}>
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <div className="flex gap-2 ml-auto">
           <ImportExportDialog />
           <Button
@@ -271,6 +443,11 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                   <TableHead>{renderSortHeader("Email", "email")}</TableHead>
                   <TableHead className="w-[120px]">
                     {renderSortHeader("Rôle", "role")}
+                  </TableHead>
+                  <TableHead className="w-[200px]">
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Tags
+                    </span>
                   </TableHead>
                   <TableHead>
                     {renderSortHeader("Entreprise", "company")}
@@ -352,6 +529,12 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                         </span>
                       </TableCell>
                       <TableCell>
+                        <ContactTagManager
+                          contact={contact}
+                          onTagsChanged={handleTagsChanged}
+                        />
+                      </TableCell>
+                      <TableCell>
                         <span className="text-sm text-muted-foreground">
                           {contact.company || "—"}
                         </span>
@@ -428,7 +611,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                 })}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-16">
+                    <TableCell colSpan={7} className="text-center py-16">
                       <div className="flex flex-col items-center gap-2">
                         <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-2">
                           <Search className="h-6 w-6 text-muted-foreground/40" />

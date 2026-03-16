@@ -32,6 +32,7 @@ import {
   Paperclip,
   X,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -53,6 +54,7 @@ import {
   reorderLessons,
   addLessonAttachment,
   removeLessonAttachment,
+  generateFlashcardsFromLesson,
 } from "@/lib/actions/academy-admin";
 
 import { ModuleFormDialog } from "./module-form-dialog";
@@ -809,6 +811,7 @@ function LessonEditor({
   const [attachments, setAttachments] = useState(lesson.attachments || []);
   const [saving, setSaving] = useState(false);
   const [addingAttachment, setAddingAttachment] = useState(false);
+  const [generatingFlashcards, setGeneratingFlashcards] = useState(false);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -868,6 +871,24 @@ function LessonEditor({
       toast.success("Piece jointe supprimee");
     } catch {
       toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const handleGenerateFlashcards = async () => {
+    setGeneratingFlashcards(true);
+    try {
+      const count = await generateFlashcardsFromLesson(lesson.id);
+      toast.success(
+        `${count} flashcard${count > 1 ? "s" : ""} generee${count > 1 ? "s" : ""} avec succes`,
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de la generation des flashcards",
+      );
+    } finally {
+      setGeneratingFlashcards(false);
     }
   };
 
@@ -987,14 +1008,14 @@ function LessonEditor({
             <FileUpload
               bucket="academy"
               path="videos"
-              accept="video/mp4,video/webm"
+              accept="video/mp4,video/webm,video/quicktime,.mov"
               maxSize={500}
               onUpload={(url) => setVideoUrl(url)}
               onRemove={() => setVideoUrl("")}
               currentUrl={
                 videoUrl && videoUrl.includes("supabase") ? videoUrl : undefined
               }
-              label="Glissez une video ou cliquez pour uploader"
+              label="Glissez une video ou cliquez pour uploader (.mp4, .webm, .mov — max 500 Mo)"
             />
 
             {/* Sous-titres */}
@@ -1102,6 +1123,39 @@ function LessonEditor({
               Enregistrement...
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Flashcards */}
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-base font-semibold">Flashcards</Label>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            Generez automatiquement des flashcards de revision a partir du
+            contenu textuel de cette lecon (description + contenu HTML). Les
+            cartes seront disponibles dans la section Revisions de
+            l&apos;Academy.
+          </p>
+
+          <Button
+            variant="outline"
+            onClick={handleGenerateFlashcards}
+            disabled={generatingFlashcards}
+            className="gap-2"
+          >
+            {generatingFlashcards ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {generatingFlashcards
+              ? "Generation en cours..."
+              : "Generer des flashcards"}
+          </Button>
         </CardContent>
       </Card>
     </div>

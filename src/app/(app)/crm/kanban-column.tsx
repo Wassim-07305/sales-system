@@ -14,6 +14,9 @@ interface KanbanColumnProps {
   deals: Deal[];
   totalValue: number;
   onDealClick: (deal: Deal) => void;
+  selectionMode?: boolean;
+  selectedDealIds?: Set<string>;
+  onDealSelectionChange?: (dealId: string, selected: boolean) => void;
 }
 
 export function KanbanColumn({
@@ -21,6 +24,9 @@ export function KanbanColumn({
   deals,
   totalValue,
   onDealClick,
+  selectionMode,
+  selectedDealIds,
+  onDealSelectionChange,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
@@ -96,6 +102,11 @@ export function KanbanColumn({
               key={deal.id}
               deal={deal}
               onClick={() => onDealClick(deal)}
+              selectionMode={selectionMode}
+              isSelected={selectedDealIds?.has(deal.id)}
+              onSelectionChange={(selected) =>
+                onDealSelectionChange?.(deal.id, selected)
+              }
             />
           ))}
           {deals.length === 0 && (

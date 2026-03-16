@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DealFilters } from "@/lib/actions/crm";
@@ -26,6 +27,9 @@ interface FilterPanelProps {
   onFiltersChange: (filters: DealFilters) => void;
   sources: string[];
   teamMembers: TeamMember[];
+  availableTags?: string[];
+  selectedTags?: string[];
+  onToggleTag?: (tag: string) => void;
 }
 
 export function FilterPanel({
@@ -33,6 +37,9 @@ export function FilterPanel({
   onFiltersChange,
   sources,
   teamMembers,
+  availableTags = [],
+  selectedTags = [],
+  onToggleTag,
 }: FilterPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -236,6 +243,32 @@ export function FilterPanel({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Tags */}
+          {availableTags.length > 0 && (
+            <div className="space-y-2 sm:col-span-2 lg:col-span-4">
+              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                Tags contact
+              </Label>
+              <div className="flex flex-wrap gap-1.5">
+                {availableTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant={selectedTags.includes(tag) ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer text-[11px] transition-colors",
+                      selectedTags.includes(tag)
+                        ? "bg-brand text-brand-dark hover:bg-brand/90"
+                        : "hover:bg-muted",
+                    )}
+                    onClick={() => onToggleTag?.(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
