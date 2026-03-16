@@ -33,9 +33,9 @@ export default function CGVPage() {
             </h2>
             <p>
               Les pr&eacute;sentes conditions g&eacute;n&eacute;rales de vente
-              r&eacute;gissent les relations contractuelles entre Setting
-              Academy SAS et tout utilisateur souscrivant &agrave; un abonnement
-              sur la plateforme salessystem.fr.
+              r&eacute;gissent les relations contractuelles entre Sales System
+              SAS et tout utilisateur souscrivant &agrave; un abonnement sur la
+              plateforme salessystem.fr.
             </p>
           </section>
 
@@ -95,8 +95,8 @@ export default function CGVPage() {
             </h2>
             <p>
               Sales System s&apos;engage &agrave; fournir un acc&egrave;s
-              continu &agrave; la plateforme dans la mesure du possible. Setting
-              Academy ne saurait &ecirc;tre tenu responsable des dommages
+              continu &agrave; la plateforme dans la mesure du possible. Sales
+              System ne saurait &ecirc;tre tenu responsable des dommages
               indirects li&eacute;s &agrave; l&apos;utilisation du service.
             </p>
           </section>

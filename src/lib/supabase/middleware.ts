@@ -54,7 +54,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/mentions-legales") ||
     pathname.startsWith("/confidentialite");
 
-  if (!user && !isPublicRoute && !isMarketingRoute) {
+  // API routes handle their own auth — don't redirect to /login
+  const isApiRoute = pathname.startsWith("/api");
+  if (!user && !isPublicRoute && !isMarketingRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

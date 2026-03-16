@@ -33,9 +33,9 @@ export default function ConfidentialitePage() {
               1. Responsable du traitement
             </h2>
             <p>
-              Le responsable du traitement des donn&eacute;es est Setting
-              Academy SAS, repr&eacute;sent&eacute;e par Damien Reynaud,
-              joignable &agrave; contact@salessystem.fr.
+              Le responsable du traitement des donn&eacute;es est Sales System
+              SAS, repr&eacute;sent&eacute;e par Damien Reynaud, joignable
+              &agrave; contact@salessystem.fr.
             </p>
           </section>
 
