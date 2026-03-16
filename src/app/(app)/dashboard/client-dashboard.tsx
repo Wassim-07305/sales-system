@@ -487,6 +487,55 @@ function B2BClientDashboard({
           </CardContent>
         </Card>
       </div>
+
+      {/* Derniers rapports EOD */}
+      {data.recentJournals && data.recentJournals.length > 0 && (
+        <Card className="mt-6 border-border/50 hover:shadow-md transition-all">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                <BookOpen className="h-3.5 w-3.5 text-brand" />
+              </div>
+              Derniers rapports EOD
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {data.recentJournals.map((j) => (
+                <div
+                  key={j.id}
+                  className="flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center text-xs font-bold text-brand shrink-0">
+                    {j.setterName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {j.setterName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(j.date).toLocaleDateString("fr-FR", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                    <span>{j.dmsSent} DMs</span>
+                    <span>{j.callsBooked} calls</span>
+                    {j.revenueGenerated > 0 && (
+                      <span className="font-semibold text-green-500">
+                        {j.revenueGenerated.toLocaleString("fr-FR")} €
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -488,6 +488,234 @@ export async function removeLessonAttachment(
   revalidatePath("/academy", "page");
 }
 
+// ─── Quiz CRUD ───────────────────────────────────────────────
+
+export async function getQuizForLesson(lessonId: string) {
+  const { supabase } = await requireAdmin();
+
+  const { data } = await supabase
+    .from("quizzes")
+    .select("*")
+    .eq("lesson_id", lessonId)
+    .single();
+
+  return data;
+}
+
+export async function createQuiz(data: {
+  lesson_id: string;
+  questions: Array<{
+    question: string;
+    options: string[];
+    correct_index: number;
+  }>;
+  max_attempts_per_day?: number;
+  passing_score?: number;
+  randomize?: boolean;
+}) {
+  const { supabase } = await requireAdmin();
+
+  const { data: quiz, error } = await supabase
+    .from("quizzes")
+    .insert({
+      lesson_id: data.lesson_id,
+      questions: data.questions,
+      max_attempts_per_day: data.max_attempts_per_day ?? 3,
+      passing_score: data.passing_score ?? 90,
+      randomize: data.randomize ?? true,
+    })
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/academy", "page");
+  return quiz;
+}
+
+export async function updateQuiz(
+  quizId: string,
+  data: {
+    questions?: Array<{
+      question: string;
+      options: string[];
+      correct_index: number;
+    }>;
+    max_attempts_per_day?: number;
+    passing_score?: number;
+    randomize?: boolean;
+  },
+) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("quizzes")
+    .update(data)
+    .eq("id", quizId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/academy", "page");
+}
+
+export async function deleteQuiz(quizId: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase.from("quizzes").delete().eq("id", quizId);
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/academy", "page");
+}
+
+// ─── Admin: Progression des setters ──────────────────────────
+
+/**
+ * Returns a table of all setters/closers with their Academy progress:
+ * name, current module, overall %, best quiz score, last activity date.
+ */
+export async function getSetterProgressTable(): Promise<
+  Array<{
+    userId: string;
+    fullName: string;
+    avatarUrl: string | null;
+    role: string;
+    currentModule: string | null;
+    progressPercent: number;
+    bestQuizScore: number | null;
+    lastActivity: string | null;
+    completedLessons: number;
+    totalLessons: number;
+  }>
+> {
+  const { supabase } = await requireAdmin();
+
+  // Get all setters/closers
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url, role")
+    .in("role", ["setter", "closer"])
+    .order("full_name");
+
+  if (!profiles || profiles.length === 0) return [];
+
+  // Get all published courses with modules and lessons
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("id, modules:course_modules(id, title, position, lessons:lessons(id, position))")
+    .eq("is_published", true)
+    .order("position");
+
+  // Count total lessons
+  let totalLessons = 0;
+  const moduleByLessonId: Record<string, string> = {};
+  const modulePositions: Record<string, number> = {};
+  const moduleTitles: Record<string, string> = {};
+
+  for (const c of courses || []) {
+    const mods = Array.isArray(c.modules) ? c.modules : [];
+    for (const m of mods as Array<{
+      id: string;
+      title: string;
+      position: number;
+      lessons: Array<{ id: string; position: number }>;
+    }>) {
+      moduleTitles[m.id] = m.title;
+      modulePositions[m.id] = m.position;
+      for (const l of m.lessons) {
+        totalLessons++;
+        moduleByLessonId[l.id] = m.id;
+      }
+    }
+  }
+
+  // Get all lesson progress for these users
+  const userIds = profiles.map((p) => p.id);
+  const { data: progress } = await supabase
+    .from("lesson_progress")
+    .select("user_id, lesson_id, completed, completed_at, quiz_score")
+    .in("user_id", userIds)
+    .eq("completed", true);
+
+  // Get quiz attempts for best scores
+  const { data: attempts } = await supabase
+    .from("quiz_attempts")
+    .select("user_id, score, attempted_at")
+    .in("user_id", userIds)
+    .order("attempted_at", { ascending: false });
+
+  // Group data by user
+  const progressByUser: Record<
+    string,
+    {
+      completedLessons: Set<string>;
+      lastActivity: string | null;
+      bestScore: number | null;
+      latestModuleId: string | null;
+    }
+  > = {};
+
+  for (const p of progress || []) {
+    if (!progressByUser[p.user_id]) {
+      progressByUser[p.user_id] = {
+        completedLessons: new Set(),
+        lastActivity: null,
+        bestScore: null,
+        latestModuleId: null,
+      };
+    }
+    const u = progressByUser[p.user_id];
+    u.completedLessons.add(p.lesson_id);
+
+    if (p.completed_at && (!u.lastActivity || p.completed_at > u.lastActivity)) {
+      u.lastActivity = p.completed_at;
+      u.latestModuleId = moduleByLessonId[p.lesson_id] || null;
+    }
+
+    if (p.quiz_score !== null && (u.bestScore === null || p.quiz_score > u.bestScore)) {
+      u.bestScore = p.quiz_score;
+    }
+  }
+
+  // Also check quiz_attempts for best scores & last activity
+  for (const a of attempts || []) {
+    if (!progressByUser[a.user_id]) {
+      progressByUser[a.user_id] = {
+        completedLessons: new Set(),
+        lastActivity: null,
+        bestScore: null,
+        latestModuleId: null,
+      };
+    }
+    const u = progressByUser[a.user_id];
+    if (u.bestScore === null || a.score > u.bestScore) {
+      u.bestScore = a.score;
+    }
+    if (a.attempted_at && (!u.lastActivity || a.attempted_at > u.lastActivity)) {
+      u.lastActivity = a.attempted_at;
+    }
+  }
+
+  return profiles.map((p) => {
+    const u = progressByUser[p.id];
+    const completed = u?.completedLessons.size || 0;
+    const pct = totalLessons > 0 ? Math.round((completed / totalLessons) * 100) : 0;
+    const currentModuleTitle = u?.latestModuleId
+      ? moduleTitles[u.latestModuleId] || null
+      : null;
+
+    return {
+      userId: p.id,
+      fullName: p.full_name || "Utilisateur",
+      avatarUrl: p.avatar_url,
+      role: p.role,
+      currentModule: currentModuleTitle,
+      progressPercent: pct,
+      bestQuizScore: u?.bestScore ?? null,
+      lastActivity: u?.lastActivity ?? null,
+      completedLessons: completed,
+      totalLessons,
+    };
+  });
+}
+
 // ─── Auto-generation de flashcards depuis le contenu d'une lecon ──────
 
 /**

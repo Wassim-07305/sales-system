@@ -1116,6 +1116,80 @@ export async function getMissingEodSetters(date?: string) {
   return setters.filter((s) => !submittedIds.has(s.id));
 }
 
+export async function getTeamJournalRange(
+  from: string,
+  to: string,
+  setterId?: string,
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+    return [];
+
+  let query = supabase
+    .from("daily_journals")
+    .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
+    .gte("date", from)
+    .lte("date", to)
+    .order("date", { ascending: false });
+
+  if (setterId) {
+    query = query.eq("user_id", setterId);
+  } else if (profile.role === "client_b2b") {
+    const { data: assignedSetters } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("matched_entrepreneur_id", user.id);
+    const setterIds = (assignedSetters || []).map((s) => s.id);
+    if (setterIds.length === 0) return [];
+    query = query.in("user_id", setterIds);
+  }
+
+  const { data } = await query;
+  return data || [];
+}
+
+export async function getTeamSetters() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+    return [];
+
+  if (profile.role === "client_b2b") {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("matched_entrepreneur_id", user.id)
+      .order("full_name");
+    return data || [];
+  }
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("role", ["setter", "closer"])
+    .order("full_name");
+  return data || [];
+}
+
 // ---------------------------------------------------------------------------
 // Setter/Closer Tasks (to-do list)
 // ---------------------------------------------------------------------------

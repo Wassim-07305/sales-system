@@ -2172,3 +2172,136 @@ Réponds en JSON:
     };
   }
 }
+
+// ─── Course completion notification ──────────────────────────
+
+/**
+ * Notify admins when a user completes an entire course.
+ */
+export async function notifyCourseCompletion(courseId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  const { data: course } = await supabase
+    .from("courses")
+    .select("title")
+    .eq("id", courseId)
+    .single();
+
+  const userName = profile?.full_name || "Un utilisateur";
+  const courseTitle = course?.title || "un cours";
+
+  // Notify all admins
+  const { data: admins } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", ["admin", "manager"]);
+
+  for (const admin of (admins || []).slice(0, 20)) {
+    await notifyMany(
+      [admin.id],
+      "Formation terminee",
+      `${userName} a termine le cours "${courseTitle}"`,
+      { link: "/academy/admin/progress", type: "achievement" },
+    );
+  }
+}
+
+// ─── Academy Leaderboard ─────────────────────────────────────
+
+/**
+ * Top 7 setters by quiz success rate (passed attempts / total attempts).
+ * Only considers users with role setter or closer who have at least 1 attempt.
+ */
+export async function getAcademyLeaderboard(): Promise<
+  Array<{
+    userId: string;
+    fullName: string;
+    avatarUrl: string | null;
+    role: string;
+    totalAttempts: number;
+    passedAttempts: number;
+    successRate: number;
+    avgScore: number;
+  }>
+> {
+  const supabase = await createClient();
+
+  // Fetch all quiz attempts with user profiles
+  const { data: attempts } = await supabase
+    .from("quiz_attempts")
+    .select("user_id, score, passed, profiles!user_id(full_name, avatar_url, role)")
+    .order("attempted_at", { ascending: false });
+
+  if (!attempts || attempts.length === 0) return [];
+
+  // Group by user
+  const byUser: Record<
+    string,
+    {
+      fullName: string;
+      avatarUrl: string | null;
+      role: string;
+      scores: number[];
+      passedCount: number;
+    }
+  > = {};
+
+  for (const a of attempts) {
+    const profile = Array.isArray(a.profiles) ? a.profiles[0] : a.profiles;
+    if (!profile) continue;
+    const p = profile as unknown as {
+      full_name: string | null;
+      avatar_url: string | null;
+      role: string;
+    };
+    // Only setters and closers
+    if (!["setter", "closer"].includes(p.role)) continue;
+
+    if (!byUser[a.user_id]) {
+      byUser[a.user_id] = {
+        fullName: p.full_name || "Utilisateur",
+        avatarUrl: p.avatar_url,
+        role: p.role,
+        scores: [],
+        passedCount: 0,
+      };
+    }
+    byUser[a.user_id].scores.push(a.score);
+    if (a.passed) byUser[a.user_id].passedCount++;
+  }
+
+  // Compute and sort
+  const leaderboard = Object.entries(byUser)
+    .map(([userId, data]) => ({
+      userId,
+      fullName: data.fullName,
+      avatarUrl: data.avatarUrl,
+      role: data.role,
+      totalAttempts: data.scores.length,
+      passedAttempts: data.passedCount,
+      successRate:
+        data.scores.length > 0
+          ? Math.round((data.passedCount / data.scores.length) * 100)
+          : 0,
+      avgScore:
+        data.scores.length > 0
+          ? Math.round(
+              data.scores.reduce((s, v) => s + v, 0) / data.scores.length,
+            )
+          : 0,
+    }))
+    .sort((a, b) => b.successRate - a.successRate || b.avgScore - a.avgScore)
+    .slice(0, 7);
+
+  return leaderboard;
+}

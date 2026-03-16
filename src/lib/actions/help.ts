@@ -160,7 +160,7 @@ const ARTICLES: HelpArticle[] = [
     excerpt:
       "Utilisez le tableau Kanban pour suivre vos deals à travers les étapes du pipeline.",
     content: `<h2>Le tableau Kanban</h2>
-<p>Le CRM utilise une vue Kanban avec 6 étapes par défaut : Prospect, Contacté, Appel Découverte, Proposition, Closing et Client Signé. Chaque deal est représenté par une carte que vous pouvez déplacer d'une colonne à l'autre par simple glisser-déposer.</p>
+<p>Le CRM utilise une vue Kanban avec 6 étapes par défaut : Nouveau lead, Contacté, Relancé, Call booké, Closing et Fermé (gagné). Chaque deal est représenté par une carte que vous pouvez déplacer d'une colonne à l'autre par simple glisser-déposer.</p>
 <p>Cliquez sur une carte pour accéder au détail du deal : historique des interactions, notes, fichiers joints et informations du contact associé. Vous pouvez également modifier la valeur du deal et ajouter des tags pour faciliter le filtrage.</p>
 <h2>Personnaliser les étapes</h2>
 <p>Les administrateurs peuvent ajouter, renommer ou réorganiser les étapes du pipeline depuis les paramètres. Chaque étape possède une couleur personnalisable pour faciliter la lecture visuelle du tableau.</p>`,

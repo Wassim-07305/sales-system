@@ -183,7 +183,7 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Fonctionnalites mises a jour");
+        toast.success("Fonctionnalités mises à jour");
       }
     });
   }
@@ -343,7 +343,7 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
             <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
               <ToggleRight className="h-4 w-4 text-brand" />
             </div>
-            Fonctionnalites actives
+            Fonctionnalités actives
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             Choisissez les modules visibles pour les utilisateurs de ce

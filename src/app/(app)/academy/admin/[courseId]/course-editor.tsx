@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useTransition } from "react";
+import { useState, useCallback, useTransition, useEffect } from "react";
 import Link from "next/link";
 import {
   DndContext,
@@ -33,6 +33,7 @@ import {
   X,
   Loader2,
   Sparkles,
+  ClipboardCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,12 +56,14 @@ import {
   addLessonAttachment,
   removeLessonAttachment,
   generateFlashcardsFromLesson,
+  getQuizForLesson,
 } from "@/lib/actions/academy-admin";
 
 import { ModuleFormDialog } from "./module-form-dialog";
 import { LessonFormDialog } from "./lesson-form-dialog";
+import { QuizFormDialog } from "./quiz-form-dialog";
 
-import type { Course, CourseModule, Lesson } from "@/lib/types/database";
+import type { Course, CourseModule, Lesson, Quiz } from "@/lib/types/database";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -812,6 +815,28 @@ function LessonEditor({
   const [saving, setSaving] = useState(false);
   const [addingAttachment, setAddingAttachment] = useState(false);
   const [generatingFlashcards, setGeneratingFlashcards] = useState(false);
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [quizLoading, setQuizLoading] = useState(true);
+  const [quizDialogOpen, setQuizDialogOpen] = useState(false);
+
+  // Charger le quiz existant
+  useEffect(() => {
+    let cancelled = false;
+    setQuizLoading(true);
+    getQuizForLesson(lesson.id)
+      .then((data) => {
+        if (!cancelled) setQuiz(data);
+      })
+      .catch(() => {
+        if (!cancelled) setQuiz(null);
+      })
+      .finally(() => {
+        if (!cancelled) setQuizLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lesson.id]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -1158,6 +1183,71 @@ function LessonEditor({
           </Button>
         </CardContent>
       </Card>
+
+      {/* Quiz */}
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-base font-semibold">Quiz</Label>
+          </div>
+
+          {quizLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Chargement...
+            </div>
+          ) : quiz ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
+                <p className="text-sm font-medium">
+                  {quiz.questions.length} question
+                  {quiz.questions.length > 1 ? "s" : ""}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Score min. {quiz.passing_score}% &middot;{" "}
+                  {quiz.max_attempts_per_day} tentative
+                  {quiz.max_attempts_per_day > 1 ? "s" : ""} / jour &middot;{" "}
+                  {quiz.randomize ? "Ordre aleatoire" : "Ordre fixe"}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setQuizDialogOpen(true)}
+                className="gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                Modifier le quiz
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Aucun quiz associe a cette lecon. Ajoutez un quiz pour
+                verrouiller le module suivant tant que le score minimum
+                n&apos;est pas atteint.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setQuizDialogOpen(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Creer un quiz
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Dialog quiz */}
+      <QuizFormDialog
+        open={quizDialogOpen}
+        onOpenChange={setQuizDialogOpen}
+        lessonId={lesson.id}
+        existingQuiz={quiz}
+        onSaved={(savedQuiz) => setQuiz(savedQuiz)}
+      />
     </div>
   );
 }

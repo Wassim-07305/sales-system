@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
   getTeamJournals,
   getMissingEodSetters,
+  getTeamSetters,
 } from "@/lib/actions/gamification";
 import { TeamJournalView } from "./team-journal-view";
 
@@ -23,10 +24,17 @@ export default async function TeamJournalPage() {
     redirect("/dashboard");
   }
 
-  const [journals, missing] = await Promise.all([
+  const [journals, missing, setters] = await Promise.all([
     getTeamJournals(),
     getMissingEodSetters(),
+    getTeamSetters(),
   ]);
 
-  return <TeamJournalView journals={journals} missingSetters={missing} />;
+  return (
+    <TeamJournalView
+      journals={journals}
+      missingSetters={missing}
+      setters={setters}
+    />
+  );
 }

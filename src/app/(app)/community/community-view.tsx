@@ -43,6 +43,7 @@ import {
   Hash,
   Sparkles,
   Flag,
+  Video,
 } from "lucide-react";
 import {
   createCommunityPost,
@@ -50,6 +51,7 @@ import {
   getComments,
   addComment,
   reportPost,
+  announceGroupCall,
 } from "@/lib/actions/community";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -214,6 +216,10 @@ export function CommunityView({
   const [reportReason, setReportReason] = useState("");
   const [reportCategory, setReportCategory] = useState("autre");
   const [isReporting, setIsReporting] = useState(false);
+  const [callDialogOpen, setCallDialogOpen] = useState(false);
+  const [callTitle, setCallTitle] = useState("");
+  const [callDesc, setCallDesc] = useState("");
+  const [callPosting, setCallPosting] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Filter channels by role
@@ -559,6 +565,16 @@ export function CommunityView({
                 )}
               </Button>
             </Link>
+          )}
+          {isAdmin && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCallDialogOpen(true)}
+            >
+              <Video className="h-4 w-4 mr-2" />
+              Appel de groupe
+            </Button>
           )}
           <Button
             onClick={() => {
@@ -1035,6 +1051,78 @@ export function CommunityView({
               )}
               Envoyer le signalement
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Group call dialog ─── */}
+      <Dialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-lg flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              Annoncer un appel de groupe
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Un post sera publie et tous les membres seront notifies.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label>Titre</Label>
+              <Input
+                value={callTitle}
+                onChange={(e) => setCallTitle(e.target.value)}
+                placeholder="Ex : Appel de groupe — Lundi 18h"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={callDesc}
+                onChange={(e) => setCallDesc(e.target.value)}
+                placeholder="Details de l'appel, lien de la reunion..."
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCallDialogOpen(false)}
+                disabled={callPosting}
+              >
+                Annuler
+              </Button>
+              <Button
+                disabled={callPosting || !callTitle.trim() || !callDesc.trim()}
+                className="bg-brand text-brand-dark hover:bg-brand/90"
+                onClick={async () => {
+                  setCallPosting(true);
+                  try {
+                    await announceGroupCall({
+                      channel:
+                        activeChannel === "all" ? "general" : activeChannel,
+                      title: callTitle.trim(),
+                      description: callDesc.trim(),
+                    });
+                    toast.success("Appel de groupe annonce !");
+                    setCallDialogOpen(false);
+                    setCallTitle("");
+                    setCallDesc("");
+                    router.refresh();
+                  } catch {
+                    toast.error("Erreur lors de l'annonce");
+                  } finally {
+                    setCallPosting(false);
+                  }
+                }}
+              >
+                {callPosting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                Annoncer
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

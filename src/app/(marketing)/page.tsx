@@ -122,10 +122,10 @@ function AnimatedCounter({
 /* ------------------------------------------------------------------ */
 
 const navLinks = [
-  { label: "Fonctionnalites", href: "#features" },
-  { label: "Comment ca marche", href: "#how-it-works" },
+  { label: "Fonctionnalités", href: "#features" },
+  { label: "Comment ça marche", href: "#how-it-works" },
   { label: "Tarifs", href: "#pricing" },
-  { label: "Temoignages", href: "#testimonials" },
+  { label: "Témoignages", href: "#testimonials" },
 ];
 
 const stats = [
@@ -275,9 +275,9 @@ const footerSections = [
   {
     title: "Produit",
     links: [
-      { label: "Fonctionnalites", href: "#features" },
+      { label: "Fonctionnalités", href: "#features" },
       { label: "Tarifs", href: "#pricing" },
-      { label: "Temoignages", href: "#testimonials" },
+      { label: "Témoignages", href: "#testimonials" },
     ],
   },
   {
@@ -722,7 +722,7 @@ export default function LandingPage() {
               className="mx-auto max-w-2xl text-center"
             >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
-                Fonctionnalites
+                Fonctionnalités
               </p>
               <h2
                 id="features-heading"
@@ -786,7 +786,7 @@ export default function LandingPage() {
               className="mx-auto max-w-2xl text-center"
             >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
-                Comment ca marche
+                Comment ça marche
               </p>
               <h2
                 id="how-heading"
@@ -1006,7 +1006,7 @@ export default function LandingPage() {
               className="mx-auto max-w-2xl text-center"
             >
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
-                Temoignages
+                Témoignages
               </p>
               <h2
                 id="testimonials-heading"

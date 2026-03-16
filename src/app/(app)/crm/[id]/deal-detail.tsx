@@ -52,6 +52,7 @@ import {
   MessageSquare,
   Mail,
   Calendar,
+  CalendarPlus,
   Clock,
   Edit2,
   Trash2,
@@ -60,6 +61,9 @@ import {
   Target,
   TrendingUp,
   Thermometer,
+  Linkedin,
+  Instagram,
+  MessageCircle,
 } from "lucide-react";
 import {
   updateDealStage,
@@ -365,6 +369,15 @@ export function DealDetail({
             </Link>
           </Button>
 
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/bookings/new?contactId=${currentDeal.contact_id || ""}&dealId=${currentDeal.id}`}
+            >
+              <CalendarPlus className="h-4 w-4 mr-1" />
+              Booker un appel
+            </Link>
+          </Button>
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
@@ -650,6 +663,18 @@ export function DealDetail({
                   <div className="flex items-center gap-2 text-sm">
                     <User className="h-4 w-4 text-muted-foreground" />
                     {currentDeal.contact.company}
+                  </div>
+                )}
+                {currentDeal.source && (
+                  <div className="flex items-center gap-2 text-sm mt-2">
+                    {currentDeal.source.toLowerCase().includes("linkedin") ? (
+                      <Linkedin className="h-4 w-4 text-blue-400" />
+                    ) : currentDeal.source.toLowerCase().includes("instagram") ? (
+                      <Instagram className="h-4 w-4 text-pink-400" />
+                    ) : currentDeal.source.toLowerCase().includes("whatsapp") ? (
+                      <MessageCircle className="h-4 w-4 text-green-400" />
+                    ) : null}
+                    <span className="text-muted-foreground capitalize">{currentDeal.source}</span>
                   </div>
                 )}
                 <Separator className="my-4" />

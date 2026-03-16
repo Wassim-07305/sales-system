@@ -32,7 +32,7 @@ export async function getAnalyticsData() {
     .select("id, name, position")
     .order("position");
 
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   // Get all deals
   const { data: allDeals } = await supabase
@@ -188,7 +188,7 @@ export async function getSourceData() {
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, name");
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   const { data: deals } = await supabase
     .from("deals")
@@ -251,7 +251,7 @@ export async function getTeamPerformance() {
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, name");
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   // Get team members (setters + closers)
   const { data: teamMembers } = await supabase
@@ -396,7 +396,7 @@ export async function getBenchmarkData(
     .select("id, name")
     .order("position");
 
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   // Get team members
   const { data: teamMembers } = await supabase

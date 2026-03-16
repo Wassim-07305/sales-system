@@ -506,12 +506,12 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
 };
 
 export const PIPELINE_DEFAULT_STAGES = [
-  { name: "Prospect", color: "#6b6b6b", position: 0 },
+  { name: "Nouveau lead", color: "#6b6b6b", position: 0 },
   { name: "Contacté", color: "#3b82f6", position: 1 },
-  { name: "Appel Découverte", color: "#f59e0b", position: 2 },
-  { name: "Proposition", color: "#8b5cf6", position: 3 },
-  { name: "Closing", color: "#ef4444", position: 4 },
-  { name: "Client Signé", color: "#7af17a", position: 5 },
+  { name: "Relancé", color: "#f59e0b", position: 2 },
+  { name: "Call booké", color: "#8b5cf6", position: 3 },
+  { name: "Fermé (gagné)", color: "#7af17a", position: 4 },
+  { name: "Fermé (perdu)", color: "#ef4444", position: 5 },
 ];
 
 export const GAMIFICATION_LEVELS = [

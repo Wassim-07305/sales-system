@@ -14,45 +14,45 @@ import {
 
 const STAGE_MAP: Record<string, string> = {
   // HubSpot stages
-  appointmentscheduled: "Prospect",
+  appointmentscheduled: "Nouveau lead",
   qualifiedtobuy: "Contacte",
-  presentationscheduled: "Appel Decouverte",
-  decisionmakerboughtin: "Proposition",
-  contractsent: "Closing",
-  closedwon: "Client Signé",
+  presentationscheduled: "Relancé",
+  decisionmakerboughtin: "Call booké",
+  contractsent: "Fermé (gagné)",
+  closedwon: "Fermé (gagné)",
   closedlost: "Perdu",
   // Pipedrive stages (French)
   contact: "Contacte",
   contacté: "Contacte",
-  découverte: "Appel Decouverte",
-  proposition: "Proposition",
-  négociation: "Closing",
-  gagné: "Client Signé",
+  découverte: "Relancé",
+  proposition: "Call booké",
+  négociation: "Fermé (gagné)",
+  gagné: "Fermé (gagné)",
   perdu: "Perdu",
   // Salesforce stages
-  prospecting: "Prospect",
+  prospecting: "Nouveau lead",
   qualification: "Contacte",
-  "needs analysis": "Appel Decouverte",
-  "proposal/price quote": "Proposition",
-  "negotiation/review": "Closing",
-  "closed won": "Client Signé",
+  "needs analysis": "Relancé",
+  "proposal/price quote": "Call booké",
+  "negotiation/review": "Fermé (gagné)",
+  "closed won": "Fermé (gagné)",
   "closed lost": "Perdu",
   // Generic
-  nouveau: "Prospect",
-  new: "Prospect",
-  prospect: "Prospect",
-  lead: "Prospect",
+  nouveau: "Nouveau lead",
+  new: "Nouveau lead",
+  prospect: "Nouveau lead",
+  lead: "Nouveau lead",
   qualified: "Contacte",
-  demo: "Appel Decouverte",
-  proposal: "Proposition",
-  closing: "Closing",
-  won: "Client Signé",
+  demo: "Relancé",
+  proposal: "Call booké",
+  closing: "Fermé (gagné)",
+  won: "Fermé (gagné)",
   lost: "Perdu",
 };
 
 function mapStageName(input: string): string {
   const normalized = input.toLowerCase().trim();
-  return STAGE_MAP[normalized] || "Prospect";
+  return STAGE_MAP[normalized] || "Nouveau lead";
 }
 
 // ---------- Transform helpers ----------
@@ -111,7 +111,7 @@ export async function executeMigration(
   const stageByName = new Map<string, string>();
   (stages || []).forEach((s) => stageByName.set(s.name, s.id));
   const defaultStageId =
-    stageByName.get(config.options.defaultStage || "Prospect") ||
+    stageByName.get(config.options.defaultStage || "Nouveau lead") ||
     stages?.[0]?.id ||
     "";
 

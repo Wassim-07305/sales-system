@@ -37,6 +37,7 @@ import {
   Percent,
   Save,
   ArrowRight,
+  CalendarPlus,
 } from "lucide-react";
 import {
   updateDealStage,
@@ -287,7 +288,7 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
               Actions rapides
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -331,6 +332,17 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
               >
                 <Mail className="h-3.5 w-3.5" />
                 Email
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 gap-1.5"
+                asChild
+              >
+                <Link href={`/bookings/new?contactId=${deal.contact?.id || ""}&dealId=${deal.id}`}>
+                  <CalendarPlus className="h-3.5 w-3.5" />
+                  Booker un appel
+                </Link>
               </Button>
             </div>
           </div>

@@ -173,7 +173,7 @@ export async function getRevenueProjections(): Promise<RevenueProjectionResult> 
     .select("id, name, position")
     .order("position");
 
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
   const totalStages = (stages || []).length;
 
   // Fetch all deals
@@ -371,7 +371,7 @@ export async function getAIForecasting(): Promise<AIForecastResult> {
     .select("id, name, position")
     .order("position");
 
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
   const totalStages = (stages || []).length;
 
   const { data: allDeals } = await supabase
@@ -637,7 +637,7 @@ export async function generateSetterReport(
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, name");
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   // Get all bookings
   const { data: allBookings } = await supabase
@@ -850,7 +850,7 @@ export async function generateValueReport(): Promise<ValueReportResult> {
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, name");
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   // Get clients with health scores
   const { data: clients } = await supabase
@@ -1110,7 +1110,7 @@ export async function getCohortData(): Promise<CohortData[]> {
     .from("pipeline_stages")
     .select("id, name");
 
-  const signedStage = stages?.find((s) => s.name === "Client Signé");
+  const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
 
   // Look back 6 months
   const now = new Date();

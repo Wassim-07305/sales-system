@@ -7,12 +7,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { Deal } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 import {
-  User,
   DollarSign,
   Clock,
   Flame,
   Thermometer,
   Snowflake,
+  Linkedin,
+  Instagram,
+  MessageCircle,
+  Globe,
 } from "lucide-react";
 
 interface DealCardProps {
@@ -64,6 +67,31 @@ function getAvatarColor(str: string) {
   for (let i = 0; i < str.length; i++)
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+const SOURCE_ICONS: Record<string, { icon: typeof Globe; color: string }> = {
+  linkedin: { icon: Linkedin, color: "text-blue-400" },
+  instagram: { icon: Instagram, color: "text-pink-400" },
+  whatsapp: { icon: MessageCircle, color: "text-green-400" },
+};
+
+function getSourceIcon(source: string | null | undefined) {
+  if (!source) return null;
+  const key = source.toLowerCase();
+  for (const [k, v] of Object.entries(SOURCE_ICONS)) {
+    if (key.includes(k)) return v;
+  }
+  return null;
+}
+
+function formatRelativeDate(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return "Aujourd'hui";
+  if (days === 1) return "Hier";
+  if (days < 7) return `Il y a ${days}j`;
+  if (days < 30) return `Il y a ${Math.floor(days / 7)}sem`;
+  return `Il y a ${Math.floor(days / 30)}m`;
 }
 
 export function DealCard({
@@ -145,7 +173,7 @@ export function DealCard({
           </span>
         </div>
 
-        {/* Contact */}
+        {/* Contact + Platform */}
         {deal.contact?.full_name && (
           <div className="flex items-center gap-2 mb-2.5">
             <div
@@ -159,6 +187,12 @@ export function DealCard({
             <span className="text-xs text-muted-foreground truncate">
               {deal.contact.full_name}
             </span>
+            {(() => {
+              const src = getSourceIcon(deal.source);
+              if (!src) return null;
+              const SrcIcon = src.icon;
+              return <SrcIcon className={cn("h-3.5 w-3.5 shrink-0", src.color)} />;
+            })()}
           </div>
         )}
 
@@ -191,15 +225,22 @@ export function DealCard({
           </div>
         </div>
 
-        {/* Next action */}
-        {deal.next_action && (
-          <div className="mt-2.5 pt-2 border-t border-border/50">
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-              <p className="text-[11px] text-muted-foreground truncate">
-                {deal.next_action}
+        {/* Next action + Last contact */}
+        {(deal.next_action || deal.last_contact_at) && (
+          <div className="mt-2.5 pt-2 border-t border-border/50 space-y-1">
+            {deal.next_action && (
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {deal.next_action}
+                </p>
+              </div>
+            )}
+            {deal.last_contact_at && (
+              <p className="text-[10px] text-muted-foreground/50">
+                Dernier contact : {formatRelativeDate(deal.last_contact_at)}
               </p>
-            </div>
+            )}
           </div>
         )}
       </CardContent>

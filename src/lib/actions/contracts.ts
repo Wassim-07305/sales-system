@@ -182,7 +182,7 @@ export async function signContract(contractId: string, signatureData: string) {
     );
   }
 
-  // Auto-update deal to "Client Signé" stage
+  // Auto-update deal to "Fermé (gagné)" stage
   await moveDealToSigned(supabase, contractId);
 
   revalidatePath("/contracts");
@@ -206,7 +206,7 @@ async function moveDealToSigned(
     const { data: signedStage } = await supabase
       .from("pipeline_stages")
       .select("id")
-      .eq("name", "Client Signé")
+      .eq("name", "Fermé (gagné)")
       .single();
 
     if (!signedStage) return;
@@ -294,7 +294,7 @@ export async function saveSignature(
     );
   }
 
-  // Auto-update deal to "Client Signé" stage
+  // Auto-update deal to "Fermé (gagné)" stage
   await moveDealToSigned(supabase, contractId);
 
   revalidatePath("/contracts");
@@ -366,13 +366,13 @@ export async function revokeSignature(contractId: string) {
 
   if (error) return { error: "Impossible de révoquer la signature." };
 
-  // Revert deal stage back to "Proposition" if linked
+  // Revert deal stage back to "Call booké" if linked
   if (contractData?.deal_id) {
     try {
       const { data: propositionStage } = await supabase
         .from("pipeline_stages")
         .select("id")
-        .eq("name", "Proposition")
+        .eq("name", "Call booké")
         .single();
 
       if (propositionStage) {

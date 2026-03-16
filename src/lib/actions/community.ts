@@ -1478,3 +1478,66 @@ export async function getCommunityMembers(search?: string) {
     is_banned: bannedUserIds.has(m.id),
   }));
 }
+
+// ─── Announce group call ─────────────────────────────────────
+
+/**
+ * Admin posts a "group call" announcement to a community channel
+ * and sends push notifications to all relevant members.
+ */
+export async function announceGroupCall(data: {
+  channel: string;
+  title: string;
+  description: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, full_name")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    throw new Error("Accès refusé");
+  }
+
+  // Create announcement post
+  const { error } = await supabase.from("community_posts").insert({
+    author_id: user.id,
+    type: "discussion",
+    title: data.title,
+    content: data.description,
+    channel: data.channel || "general",
+    is_pinned: true,
+  });
+
+  if (error) throw new Error(error.message);
+
+  // Notify all members (or channel-specific roles)
+  const channelRoles =
+    data.channel === "team_interne"
+      ? ["admin", "manager", "setter"]
+      : ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"];
+
+  const { data: members } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", channelRoles)
+    .neq("id", user.id);
+
+  for (const m of (members || []).slice(0, 100)) {
+    await notify(
+      m.id,
+      "Appel de groupe annoncé",
+      `${profile.full_name || "Un admin"} : ${data.title}`,
+      { link: "/community", type: "community" },
+    );
+  }
+
+  revalidatePath("/community");
+}

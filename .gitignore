@@ -44,3 +44,5 @@ next-env.d.ts
 public/sw.js.map
 public/workbox-*.js
 public/workbox-*.js.map
+qa-tests/node_modules/
+qa-tests/test-results/

@@ -349,7 +349,7 @@ export async function generateMonthlyReport() {
       .from("deals")
       .select("value")
       .in("assigned_to", setterIds)
-      .eq("stage", "Client Signé")
+      .eq("stage", "Fermé (gagné)")
       .gte("updated_at", startOfMonth.toISOString())
       .lte("updated_at", endOfMonth.toISOString());
 

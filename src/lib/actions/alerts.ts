@@ -29,7 +29,7 @@ export async function runSmartAlerts() {
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .single();
 
   const { data: staleDeals } = await supabase

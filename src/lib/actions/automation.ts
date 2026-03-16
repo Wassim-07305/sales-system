@@ -318,7 +318,7 @@ export async function runAutomationCheck() {
           .from("deals")
           .select("id, contact_id")
           .lt("updated_at", cutoff)
-          .neq("stage", "Client Signé")
+          .neq("stage", "Fermé (gagné)")
           .limit(20);
 
         for (const deal of staleDeals || []) {

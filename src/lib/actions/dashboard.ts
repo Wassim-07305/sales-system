@@ -21,11 +21,11 @@ export async function getAdminDashboardData() {
     1,
   ).toISOString();
 
-  // Get the "Client Signé" stage id
+  // Get the "Fermé (gagné)" stage id
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .single();
 
   const signedStageId = signedStage?.id;
@@ -178,7 +178,7 @@ export async function getAdminDashboardData() {
       .limit(5);
     staleDeals = data;
   } else {
-    // No "Client Signé" stage found — return all stale deals without stage filter
+    // No "Fermé (gagné)" stage found — return all stale deals without stage filter
     const { data } = await supabase
       .from("deals")
       .select("id, title, stage_id, updated_at, pipeline_stages(name)")
@@ -359,11 +359,11 @@ export async function getSetterDashboardData(userId: string) {
     59,
   ).toISOString();
 
-  // Get the "Client Signé" stage id
+  // Get the "Fermé (gagné)" stage id
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .single();
 
   const signedStageId = signedStage?.id;
@@ -630,7 +630,7 @@ export async function getSetterHubData(userId: string) {
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .single();
 
   const { data: monthDeals } = await supabase
@@ -789,7 +789,7 @@ export async function getPersonalPerformanceReport(
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .single();
   const signedStageId = signedStage?.id;
 
@@ -1044,11 +1044,11 @@ export async function getTeamKPIs() {
     59,
   ).toISOString();
 
-  // Get the "Client Signé" stage id
+  // Get the "Fermé (gagné)" stage id
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .single();
 
   const signedStageId = signedStage?.id;
@@ -1232,6 +1232,17 @@ export interface B2BDashboardData {
     description: string;
     date: string;
   }>;
+  recentJournals: Array<{
+    id: string;
+    date: string;
+    setterName: string;
+    dmsSent: number;
+    repliesReceived: number;
+    callsBooked: number;
+    dealsClosed: number;
+    revenueGenerated: number;
+    mood: string;
+  }>;
 }
 
 export async function getB2BDashboardData(
@@ -1362,8 +1373,8 @@ export async function getB2BDashboardData(
     0,
   );
 
-  // Get "Client Signé" stage for closing rate
-  const signedStage = (stages || []).find((s) => s.name === "Client Signé");
+  // Get "Fermé (gagné)" stage for closing rate
+  const signedStage = (stages || []).find((s) => s.name === "Fermé (gagné)");
   const closedDeals = signedStage
     ? dealsForPipeline.filter((d) => d.stage_id === signedStage.id).length
     : 0;
@@ -1419,6 +1430,32 @@ export async function getB2BDashboardData(
     }));
   }
 
+  // Fetch latest EOD journals from assigned setters (last 7 days)
+  let recentJournals: B2BDashboardData["recentJournals"] = [];
+  if (setterIds.length > 0) {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const { data: journals } = await supabase
+      .from("daily_journals")
+      .select("id, user_id, date, dms_sent, replies_received, calls_booked, deals_closed, revenue_generated, mood, profile:profiles!user_id(full_name)")
+      .in("user_id", setterIds)
+      .gte("date", weekAgo.toISOString().split("T")[0])
+      .order("date", { ascending: false })
+      .limit(10);
+
+    recentJournals = (journals || []).map((j) => ({
+      id: j.id,
+      date: j.date,
+      setterName: (j.profile as unknown as { full_name: string | null } | null)?.full_name || "Setter",
+      dmsSent: j.dms_sent || 0,
+      repliesReceived: j.replies_received || 0,
+      callsBooked: j.calls_booked || 0,
+      dealsClosed: j.deals_closed || 0,
+      revenueGenerated: j.revenue_generated || 0,
+      mood: j.mood || "neutral",
+    }));
+  }
+
   return {
     stats: {
       messagesSent: messagesThisMonth,
@@ -1445,6 +1482,7 @@ export async function getB2BDashboardData(
       type: b.slot_type,
     })),
     recentActivity,
+    recentJournals,
   };
 }
 
@@ -1466,16 +1504,16 @@ export async function getMobileDashboardWidgetData() {
     1,
   ).toISOString();
 
-  // Get the "Client Signé" stage id
+  // Get the "Fermé (gagné)" stage id
   const { data: signedStage } = await supabase
     .from("pipeline_stages")
     .select("id")
-    .eq("name", "Client Signé")
+    .eq("name", "Fermé (gagné)")
     .maybeSingle();
 
   const signedStageId = signedStage?.id;
 
-  // Active deals (not in "Client Signé" stage)
+  // Active deals (not in "Fermé (gagné)" stage)
   let dealsEnCours = 0;
   if (signedStageId) {
     const { count } = await supabase

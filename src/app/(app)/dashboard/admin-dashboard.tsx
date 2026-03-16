@@ -105,12 +105,12 @@ interface WidgetDataItem {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  Prospect: "bg-muted/60 text-muted-foreground border-border/60",
+  "Nouveau lead": "bg-muted/60 text-muted-foreground border-border/60",
   Contacté: "bg-muted/60 text-muted-foreground border-border/60",
-  "Appel Découverte": "bg-muted/60 text-muted-foreground border-border/60",
-  Proposition: "bg-muted/60 text-muted-foreground border-border/60",
+  Relancé: "bg-muted/60 text-muted-foreground border-border/60",
+  "Call booké": "bg-muted/60 text-muted-foreground border-border/60",
   Closing: "bg-foreground/5 text-foreground border-foreground/10",
-  "Client Signé": "bg-foreground/5 text-foreground border-foreground/10",
+  "Fermé (gagné)": "bg-foreground/5 text-foreground border-foreground/10",
 };
 
 const AVATAR_COLORS = [

@@ -348,7 +348,7 @@ export async function getHuntingRecommendations() {
   const { data: wonDeals } = await supabase
     .from("deals")
     .select("title, value, stage, contact_id, created_at, closed_at")
-    .eq("stage", "Client Signé")
+    .eq("stage", "Fermé (gagné)")
     .order("value", { ascending: false })
     .limit(30);
 

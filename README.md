@@ -1,6 +1,6 @@
 # Sales System — CRM & Sales Management Platform
 
-Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interface en francais, multi-roles, couvrant l'ensemble du cycle de vente : prospection, pipeline, contrats, facturation, formation, gamification et bien plus.
+Plateforme CRM complete de gestion commerciale par **Damien Reynaud**. Interface en francais, multi-roles, couvrant l'ensemble du cycle de vente : prospection, pipeline, contrats, facturation, formation, gamification et bien plus.
 
 ## Stack Technique
 
@@ -32,13 +32,14 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 
 ### CRM & Pipeline
 
-- Pipeline Kanban configurable avec drag & drop
+- Pipeline Kanban 6 etapes (Nouveau lead > Contacte > Relance > Call booke > Ferme gagne/perdu)
 - Gestion contacts avec deduplication et fusion
 - Import massif CSV avec mapping colonnes et detection doublons
 - Export multi-format (CSV, XLSX, PDF)
-- Fiches deal et contact detaillees
+- Fiches deal et contact detaillees avec icones source (LinkedIn, Instagram, WhatsApp)
 - Timeline complete par deal
 - Champs personnalises (deals, contacts, contrats)
+- Bouton "Booker un appel" sur chaque deal
 
 ### Prospection
 
@@ -71,11 +72,15 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 
 ### Academy (Formation)
 
-- Structure cours / modules / lecons
+- Structure cours / modules / lecons avec deblocage sequentiel (score quiz >= 90%)
+- Quiz admin CRUD (creation, modification, suppression de quiz par lecon)
+- Systeme de quiz : 4 choix, score min. configurable, 3 tentatives/jour, countdown avant reset
+- Leaderboard Academy (top 7 setters par taux de reussite)
+- Tableau de progression admin (setter, module, %, score, derniere activite)
+- Page felicitations + notification admin a la completion d'un cours
 - Apprentissage adaptatif (diagnostic quiz + parcours personnalise)
-- Micro-learning & revision espacee
+- Micro-learning & revision espacee (flashcards auto-generees)
 - Certificats PDF telechargeables
-- Administration des contenus
 
 ### Scripts de Vente
 
@@ -95,11 +100,13 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 
 ### Communaute
 
-- Forum (posts, threads, discussions)
+- 4 canaux : #general, #questions, #wins, #team-interne (prive)
+- Forum (posts, threads, discussions) avec filtrage par role
+- Bouton "Annoncer un appel de groupe" (admin) avec notifications push
 - Systeme de reputation (5 rangs)
 - Evenements & discussions speciales
 - Recherche & decouverte
-- Gestion membres & moderation
+- Gestion membres & moderation (signalements, bans)
 
 ### Gamification
 
@@ -109,6 +116,13 @@ Plateforme CRM complète de gestion commerciale par **Damien Reynaud**. Interfac
 - Recompenses & catalogue de primes
 - Streaks & quotas journaliers
 - Analytics gamification
+
+### Rapports EOD (End of Day)
+
+- Formulaire setter quotidien (DMs, reponses, calls, CA)
+- Vue admin avec filtres par setter et periode (jour/semaine/mois/personnalise)
+- 6 KPIs agreges (rapports, DMs, taux reponse, calls, deals, CA)
+- Integration dashboard B2B (derniers rapports setters)
 
 ### Roleplay & Training
 
@@ -199,6 +213,8 @@ STRIPE_SECRET_KEY=sk_...                  # Pour les paiements
 RESEND_API_KEY=re_...                     # Pour les emails
 ```
 
+Guides de configuration detailles dans `docs/GUIDE-APIS.md` et `docs/GUIDE-CONFIGURATION.md`.
+
 ### Lancer le projet
 
 ```bash
@@ -220,39 +236,56 @@ npm run lint
 ```
 src/
   app/
-    (auth)/              # Routes publiques (login, register)
-    (app)/               # Routes protegees (133 pages)
-      dashboard/         # Tableaux de bord par role
-      crm/               # Pipeline Kanban
-      contacts/          # Contacts + dedup + import
-      bookings/          # Rendez-vous
-      contracts/         # Contrats + signature + facturation
-      prospecting/       # Prospection + scoring + enrichissement
-      analytics/         # Analytics + rapports + query builder
-      academy/           # Formation + diagnostic + certificats
-      scripts/           # Scripts de vente + flowchart + training
-      chat/              # Messagerie + moderation
-      community/         # Forum + reputation
-      challenges/        # Gamification + achievements + rewards
-      roleplay/          # Entrainement + groupes + analyse appels
-      whatsapp/          # Integration WhatsApp
-      team/              # Gestion equipe + coaching
-      marketplace/       # Extensions + partenaires + monetisation
-      settings/          # Configuration + securite + custom fields
-      support/           # Tickets support
-      roadmap/           # Roadmap publique
-      help/              # Centre d'aide
-    api/                 # API routes (push, webhooks)
-    book/[slug]/         # Page de booking publique
+    (auth)/                # Routes publiques (login, register)
+    (app)/                 # Routes protegees (141 pages)
+      dashboard/           # Tableaux de bord par role
+      crm/                 # Pipeline Kanban (6 etapes)
+      contacts/            # Contacts + dedup + import
+      bookings/            # Rendez-vous
+      contracts/           # Contrats + signature + facturation
+      prospecting/         # Prospection + scoring + enrichissement
+      analytics/           # Analytics + rapports + query builder
+      academy/             # Formation + quiz + leaderboard + certificats
+        admin/             # CRUD cours/modules/lecons/quiz
+        admin/progress/    # Tableau progression setters
+        leaderboard/       # Top 7 setters par reussite quiz
+      scripts/             # Scripts de vente + flowchart + training
+      chat/                # Messagerie + moderation
+      community/           # Forum 4 canaux + reputation + appels groupe
+      challenges/          # Gamification + achievements + rewards
+      roleplay/            # Entrainement + groupes + analyse appels
+      whatsapp/            # Integration WhatsApp
+      team/                # Gestion equipe + coaching
+        journal/           # Rapports EOD + filtres + KPIs
+      marketplace/         # Extensions + partenaires + monetisation
+      settings/            # Configuration + securite + custom fields
+      support/             # Tickets support
+      roadmap/             # Roadmap publique
+      help/                # Centre d'aide
+    api/                   # API routes (push, webhooks)
+    book/[slug]/           # Page de booking publique
   components/
-    ui/                  # 24 composants shadcn/ui
-    layout/              # Sidebar, topbar, navigation
+    ui/                    # 44 composants shadcn/ui
+    layout/                # Sidebar, topbar, navigation
   lib/
-    actions/             # 64 fichiers server actions
-    ai/                  # Client OpenRouter
-    supabase/            # Clients Supabase (browser + server)
-    hooks/               # Hooks React
-    types/               # Types TypeScript
+    actions/               # 64 fichiers server actions
+    ai/                    # Client OpenRouter
+    supabase/              # Clients Supabase (browser + server)
+    hooks/                 # Hooks React
+    types/                 # Types TypeScript
+docs/
+  CONTEXT.md               # Contexte projet & client
+  GUIDE-APIS.md            # Guide configuration APIs externes
+  GUIDE-CONFIGURATION.md   # Informations a fournir par le client
+  cahier-des-charges/      # CDC, PDF, notes d'appels, checklist
+  plans/                   # Plans d'implementation
+  screenshots/             # Captures d'ecran UI
+supabase/
+  schema.sql               # Schema DB principal
+  schema-v2.sql            # Schema DB etendu
+  migrations/              # 27 migrations SQL
+  seeds/                   # 5 fichiers de donnees seed
+scripts/                   # Utilitaires (generation VAPID keys, etc.)
 ```
 
 ## Comptes Demo

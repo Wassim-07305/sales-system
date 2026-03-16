@@ -51,7 +51,7 @@ interface PortalData {
 const stageLabels: Record<string, string> = {
   lead: "Lead",
   qualified: "Qualifié",
-  proposal: "Proposition",
+  proposal: "Call booké",
   negotiation: "Négociation",
   won: "Gagné",
   lost: "Perdu",

@@ -12,7 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { markLessonComplete, submitQuizAttempt } from "@/lib/actions/academy";
+import {
+  markLessonComplete,
+  submitQuizAttempt,
+  notifyCourseCompletion,
+} from "@/lib/actions/academy";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -306,6 +310,7 @@ export function CourseView({
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [courseCompleted, setCourseCompleted] = useState(false);
 
   // -- Video auto-completion
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -496,6 +501,15 @@ export function CourseView({
         }
 
         toast.success(`Quiz reussi ! Score : ${score}%`);
+
+        // Check if this was the last lesson — course completed
+        const updatedCompleted = new Set(completedLessonIds);
+        updatedCompleted.add(selectedLessonId);
+        if (updatedCompleted.size >= totalLessons) {
+          setCourseCompleted(true);
+          // Notify admins (fire-and-forget)
+          notifyCourseCompletion(course.id).catch(() => {});
+        }
       } else {
         toast.error(
           `Score : ${score}%. Il faut minimum ${quiz.passing_score || 90}% pour valider. ${
@@ -1210,10 +1224,11 @@ export function CourseView({
                         </div>
                       )}
                       {isQuizLocked(selectedLesson.id) && (
-                        <p className="text-xs text-amber-600 flex items-center gap-1.5 font-medium">
+                        <div className="text-xs text-amber-600 flex items-center gap-1.5 font-medium">
                           <Clock className="h-3 w-3" />
-                          Plus de tentatives aujourd&apos;hui. Revenez demain !
-                        </p>
+                          <span>Plus de tentatives aujourd&apos;hui.</span>
+                          <CountdownToMidnight />
+                        </div>
                       )}
                     </div>
                   )}
@@ -1398,12 +1413,29 @@ export function CourseView({
                               ? "Felicitations ! Vous avez reussi le quiz et debloque la suite."
                               : `Score minimum requis : ${activeQuiz.passing_score || 90}%. Revisez la lecon et reessayez.`}
                           </p>
-                          {quizScore >= (activeQuiz.passing_score || 90) && (
-                            <p className="text-xs text-green-600 dark:text-green-400 mt-1.5 flex items-center gap-1.5 font-medium">
-                              <Sparkles className="h-3 w-3" />
-                              Module suivant debloque
-                            </p>
-                          )}
+                          {quizScore >= (activeQuiz.passing_score || 90) &&
+                            (courseCompleted ? (
+                              <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-brand/10 to-emerald-500/10 border border-brand/20">
+                                <p className="text-sm font-bold text-brand flex items-center gap-2">
+                                  <Sparkles className="h-4 w-4" />
+                                  Formation terminee !
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Vous avez complete toutes les lecons et quiz de ce cours. Bravo !
+                                </p>
+                                <a
+                                  href="/academy"
+                                  className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-brand hover:underline"
+                                >
+                                  Retour a l&apos;Academy
+                                </a>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-green-600 dark:text-green-400 mt-1.5 flex items-center gap-1.5 font-medium">
+                                <Sparkles className="h-3 w-3" />
+                                Module suivant debloque
+                              </p>
+                            ))}
                         </div>
                       </div>
 
@@ -1850,5 +1882,38 @@ function VideoPlayer({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Countdown to midnight ───────────────────────────────────
+
+function CountdownToMidnight() {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    function compute() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      const diff = midnight.getTime() - now.getTime();
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(
+        `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`,
+      );
+    }
+
+    compute();
+    const interval = setInterval(compute, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!timeLeft) return null;
+
+  return (
+    <span className="font-mono tabular-nums text-amber-600">
+      Prochaine tentative dans {timeLeft}
+    </span>
   );
 }

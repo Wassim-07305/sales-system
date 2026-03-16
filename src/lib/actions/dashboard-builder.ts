@@ -71,7 +71,7 @@ export async function getWidgetData(widgetType: string) {
       const { data: signedStage } = await supabase
         .from("pipeline_stages")
         .select("id")
-        .eq("name", "Client Signé")
+        .eq("name", "Fermé (gagné)")
         .single();
 
       const { data: deals } = await supabase
@@ -99,7 +99,7 @@ export async function getWidgetData(widgetType: string) {
       const { data: signedStage } = await supabase
         .from("pipeline_stages")
         .select("id")
-        .eq("name", "Client Signé")
+        .eq("name", "Fermé (gagné)")
         .single();
 
       const { data: deals } = await supabase
@@ -120,7 +120,7 @@ export async function getWidgetData(widgetType: string) {
       const { data: signedStage } = await supabase
         .from("pipeline_stages")
         .select("id")
-        .eq("name", "Client Signé")
+        .eq("name", "Fermé (gagné)")
         .single();
 
       const { data: deals } = await supabase
