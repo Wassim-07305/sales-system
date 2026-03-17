@@ -54,9 +54,7 @@ export function ForgotPasswordForm() {
             {"Email envoyé"}
           </h3>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            {
-              "Un email de réinitialisation a été envoyé à"
-            }{" "}
+            {"Un email de réinitialisation a été envoyé à"}{" "}
             <strong className="text-foreground">{email}</strong>.
             {
               " Vérifiez votre boîte de réception et cliquez sur le lien pour réinitialiser votre mot de passe."

@@ -191,7 +191,9 @@ export function DealCard({
               const src = getSourceIcon(deal.source);
               if (!src) return null;
               const SrcIcon = src.icon;
-              return <SrcIcon className={cn("h-3.5 w-3.5 shrink-0", src.color)} />;
+              return (
+                <SrcIcon className={cn("h-3.5 w-3.5 shrink-0", src.color)} />
+              );
             })()}
           </div>
         )}

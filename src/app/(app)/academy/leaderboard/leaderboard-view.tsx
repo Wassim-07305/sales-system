@@ -21,10 +21,25 @@ interface LeaderboardViewProps {
   leaderboard: LeaderboardEntry[];
 }
 
-const RANK_STYLES: Record<number, { icon: typeof Trophy; color: string; bg: string }> = {
-  0: { icon: Trophy, color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/30" },
-  1: { icon: Medal, color: "text-gray-300", bg: "bg-gray-300/10 border-gray-300/30" },
-  2: { icon: Award, color: "text-amber-600", bg: "bg-amber-600/10 border-amber-600/30" },
+const RANK_STYLES: Record<
+  number,
+  { icon: typeof Trophy; color: string; bg: string }
+> = {
+  0: {
+    icon: Trophy,
+    color: "text-yellow-400",
+    bg: "bg-yellow-400/10 border-yellow-400/30",
+  },
+  1: {
+    icon: Medal,
+    color: "text-gray-300",
+    bg: "bg-gray-300/10 border-gray-300/30",
+  },
+  2: {
+    icon: Award,
+    color: "text-amber-600",
+    bg: "bg-amber-600/10 border-amber-600/30",
+  },
 };
 
 export function LeaderboardView({ leaderboard }: LeaderboardViewProps) {
@@ -126,11 +141,12 @@ export function LeaderboardView({ leaderboard }: LeaderboardViewProps) {
                   {/* Taux de reussite */}
                   <div className="shrink-0 text-right">
                     <Badge
-                      variant={entry.successRate >= 80 ? "default" : "secondary"}
+                      variant={
+                        entry.successRate >= 80 ? "default" : "secondary"
+                      }
                       className={cn(
                         "text-base font-bold px-3 py-1",
-                        entry.successRate >= 80 &&
-                          "bg-brand text-brand-dark",
+                        entry.successRate >= 80 && "bg-brand text-brand-dark",
                       )}
                     >
                       {entry.successRate}%

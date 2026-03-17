@@ -191,8 +191,8 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
         <CardContent>
           {redemptions.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-6">
-              Aucun échange pour le moment. Échangez vos points contre
-              des récompenses !
+              Aucun échange pour le moment. Échangez vos points contre des
+              récompenses !
             </p>
           ) : (
             <Table>
@@ -200,9 +200,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Récompense</TableHead>
-                  <TableHead className="text-right">
-                    Points dépensés
-                  </TableHead>
+                  <TableHead className="text-right">Points dépensés</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

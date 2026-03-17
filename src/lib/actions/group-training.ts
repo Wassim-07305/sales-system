@@ -123,7 +123,14 @@ export async function getGroupDetails(groupId: string) {
       sessions: sessions || [],
     };
   } catch {
-    return { id: groupId, name: "", description: "", niche: "", members: [], sessions: [] };
+    return {
+      id: groupId,
+      name: "",
+      description: "",
+      niche: "",
+      members: [],
+      sessions: [],
+    };
   }
 }
 

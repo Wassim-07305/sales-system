@@ -26,8 +26,7 @@ export const REWARDS_CATALOG: Reward[] = [
   {
     id: "diner_equipe",
     name: "Dîner équipe",
-    description:
-      "Un dîner d’équipe offert dans le restaurant de votre choix.",
+    description: "Un dîner d’équipe offert dans le restaurant de votre choix.",
     pointsCost: 2000,
     icon: "Gift",
   },
@@ -42,8 +41,7 @@ export const REWARDS_CATALOG: Reward[] = [
   {
     id: "bonus_500",
     name: "Bonus 500 \u20ac",
-    description:
-      "Un bonus de 500 \u20ac ajouté à votre prochaine paie.",
+    description: "Un bonus de 500 \u20ac ajouté à votre prochaine paie.",
     pointsCost: 5000,
     icon: "Banknote",
   },

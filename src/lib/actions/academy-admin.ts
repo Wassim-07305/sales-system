@@ -599,7 +599,9 @@ export async function getSetterProgressTable(): Promise<
   // Get all published courses with modules and lessons
   const { data: courses } = await supabase
     .from("courses")
-    .select("id, modules:course_modules(id, title, position, lessons:lessons(id, position))")
+    .select(
+      "id, modules:course_modules(id, title, position, lessons:lessons(id, position))",
+    )
     .eq("is_published", true)
     .order("position");
 
@@ -664,12 +666,18 @@ export async function getSetterProgressTable(): Promise<
     const u = progressByUser[p.user_id];
     u.completedLessons.add(p.lesson_id);
 
-    if (p.completed_at && (!u.lastActivity || p.completed_at > u.lastActivity)) {
+    if (
+      p.completed_at &&
+      (!u.lastActivity || p.completed_at > u.lastActivity)
+    ) {
       u.lastActivity = p.completed_at;
       u.latestModuleId = moduleByLessonId[p.lesson_id] || null;
     }
 
-    if (p.quiz_score !== null && (u.bestScore === null || p.quiz_score > u.bestScore)) {
+    if (
+      p.quiz_score !== null &&
+      (u.bestScore === null || p.quiz_score > u.bestScore)
+    ) {
       u.bestScore = p.quiz_score;
     }
   }
@@ -688,7 +696,10 @@ export async function getSetterProgressTable(): Promise<
     if (u.bestScore === null || a.score > u.bestScore) {
       u.bestScore = a.score;
     }
-    if (a.attempted_at && (!u.lastActivity || a.attempted_at > u.lastActivity)) {
+    if (
+      a.attempted_at &&
+      (!u.lastActivity || a.attempted_at > u.lastActivity)
+    ) {
       u.lastActivity = a.attempted_at;
     }
   }
@@ -696,7 +707,8 @@ export async function getSetterProgressTable(): Promise<
   return profiles.map((p) => {
     const u = progressByUser[p.id];
     const completed = u?.completedLessons.size || 0;
-    const pct = totalLessons > 0 ? Math.round((completed / totalLessons) * 100) : 0;
+    const pct =
+      totalLessons > 0 ? Math.round((completed / totalLessons) * 100) : 0;
     const currentModuleTitle = u?.latestModuleId
       ? moduleTitles[u.latestModuleId] || null
       : null;

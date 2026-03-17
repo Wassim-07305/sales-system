@@ -1421,7 +1421,8 @@ export function CourseView({
                                   Formation terminee !
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  Vous avez complete toutes les lecons et quiz de ce cours. Bravo !
+                                  Vous avez complete toutes les lecons et quiz
+                                  de ce cours. Bravo !
                                 </p>
                                 <a
                                   href="/academy"

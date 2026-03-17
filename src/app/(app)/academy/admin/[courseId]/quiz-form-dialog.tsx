@@ -106,7 +106,10 @@ export function QuizFormDialog({
     setQuestions((prev) =>
       prev.map((q, i) =>
         i === qIndex
-          ? { ...q, options: q.options.map((o, j) => (j === oIndex ? value : o)) }
+          ? {
+              ...q,
+              options: q.options.map((o, j) => (j === oIndex ? value : o)),
+            }
           : q,
       ),
     );
@@ -114,9 +117,7 @@ export function QuizFormDialog({
 
   const setCorrectAnswer = (qIndex: number, oIndex: number) => {
     setQuestions((prev) =>
-      prev.map((q, i) =>
-        i === qIndex ? { ...q, correct_index: oIndex } : q,
-      ),
+      prev.map((q, i) => (i === qIndex ? { ...q, correct_index: oIndex } : q)),
     );
   };
 
@@ -201,7 +202,11 @@ export function QuizFormDialog({
 
   const handleDelete = async () => {
     if (!existingQuiz) return;
-    if (!confirm("Supprimer ce quiz ? Les tentatives existantes seront conservees."))
+    if (
+      !confirm(
+        "Supprimer ce quiz ? Les tentatives existantes seront conservees.",
+      )
+    )
       return;
 
     setDeleting(true);
@@ -248,7 +253,9 @@ export function QuizFormDialog({
                 min={1}
                 max={100}
                 value={passingScore}
-                onChange={(e) => setPassingScore(parseInt(e.target.value) || 90)}
+                onChange={(e) =>
+                  setPassingScore(parseInt(e.target.value) || 90)
+                }
               />
             </div>
             <div className="space-y-2">

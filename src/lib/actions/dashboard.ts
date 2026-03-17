@@ -1437,7 +1437,9 @@ export async function getB2BDashboardData(
     weekAgo.setDate(weekAgo.getDate() - 7);
     const { data: journals } = await supabase
       .from("daily_journals")
-      .select("id, user_id, date, dms_sent, replies_received, calls_booked, deals_closed, revenue_generated, mood, profile:profiles!user_id(full_name)")
+      .select(
+        "id, user_id, date, dms_sent, replies_received, calls_booked, deals_closed, revenue_generated, mood, profile:profiles!user_id(full_name)",
+      )
       .in("user_id", setterIds)
       .gte("date", weekAgo.toISOString().split("T")[0])
       .order("date", { ascending: false })
@@ -1446,7 +1448,9 @@ export async function getB2BDashboardData(
     recentJournals = (journals || []).map((j) => ({
       id: j.id,
       date: j.date,
-      setterName: (j.profile as unknown as { full_name: string | null } | null)?.full_name || "Setter",
+      setterName:
+        (j.profile as unknown as { full_name: string | null } | null)
+          ?.full_name || "Setter",
       dmsSent: j.dms_sent || 0,
       repliesReceived: j.replies_received || 0,
       callsBooked: j.calls_booked || 0,

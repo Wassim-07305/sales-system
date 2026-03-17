@@ -226,10 +226,7 @@ export function TeamJournalView({ journals, missingSetters, setters }: Props) {
         uniqueDays: 0,
       };
 
-    const totalDms = currentJournals.reduce(
-      (s, j) => s + (j.dms_sent || 0),
-      0,
-    );
+    const totalDms = currentJournals.reduce((s, j) => s + (j.dms_sent || 0), 0);
     const totalReplies = currentJournals.reduce(
       (s, j) => s + (j.replies_received || 0),
       0,

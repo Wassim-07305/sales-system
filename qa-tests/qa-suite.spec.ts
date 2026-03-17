@@ -159,14 +159,12 @@ test.describe("3. Dashboard", () => {
     await page.goto("/dashboard");
     await page.waitForLoadState("networkidle");
 
-    const sidebarLinks = [
-      "Dashboard",
-      "CRM",
-      "Academy",
-    ];
+    const sidebarLinks = ["Dashboard", "CRM", "Academy"];
 
     for (const label of sidebarLinks) {
-      const link = page.locator(`nav a:has-text("${label}"), aside a:has-text("${label}")`);
+      const link = page.locator(
+        `nav a:has-text("${label}"), aside a:has-text("${label}")`,
+      );
       const exists = (await link.count()) > 0;
       if (!exists) {
         // Try looking in any link/button on the page
@@ -202,11 +200,21 @@ test.describe("4. CRM", () => {
 
     // Pipeline stages are configurable via DB — check that columns/cards exist
     const expectedStages = [
-      "Prospect", "Contacte", "Contacté",
-      "Appel", "Découverte", "Decouverte",
-      "Proposition", "Closing", "Client",
-      "Nouveau lead", "Relancé", "Call booké",
-      "Fermé", "Gagné", "Perdu",
+      "Prospect",
+      "Contacte",
+      "Contacté",
+      "Appel",
+      "Découverte",
+      "Decouverte",
+      "Proposition",
+      "Closing",
+      "Client",
+      "Nouveau lead",
+      "Relancé",
+      "Call booké",
+      "Fermé",
+      "Gagné",
+      "Perdu",
     ];
 
     const bodyText = await page.textContent("body");
@@ -224,9 +232,7 @@ test.describe("4. CRM", () => {
     await page.waitForTimeout(2000);
 
     // Click first deal card if exists
-    const dealCard = page.locator(
-      '[class*="deal"], [class*="card"]',
-    ).first();
+    const dealCard = page.locator('[class*="deal"], [class*="card"]').first();
     if ((await dealCard.count()) > 0) {
       await dealCard.click();
       await page.waitForTimeout(1000);
@@ -235,8 +241,7 @@ test.describe("4. CRM", () => {
         '[class*="panel"], [class*="sheet"], [class*="drawer"], [class*="detail"]',
       );
       // It may also navigate to a detail page
-      const opened =
-        (await panel.count()) > 0 || page.url().includes("/crm/");
+      const opened = (await panel.count()) > 0 || page.url().includes("/crm/");
       expect(opened).toBeTruthy();
     }
   });
@@ -480,7 +485,9 @@ test.describe("12. Design & UI", () => {
     await page.waitForTimeout(2000);
 
     // Check if body or root has dark class or dark background
-    const hasDarkClass = await page.locator("html.dark, body.dark, [class*='dark']").count();
+    const hasDarkClass = await page
+      .locator("html.dark, body.dark, [class*='dark']")
+      .count();
     const bgColor = await page.evaluate(() => {
       return window.getComputedStyle(document.body).backgroundColor;
     });

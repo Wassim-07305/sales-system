@@ -339,7 +339,9 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 className="h-10 gap-1.5"
                 asChild
               >
-                <Link href={`/bookings/new?contactId=${deal.contact?.id || ""}&dealId=${deal.id}`}>
+                <Link
+                  href={`/bookings/new?contactId=${deal.contact?.id || ""}&dealId=${deal.id}`}
+                >
                   <CalendarPlus className="h-3.5 w-3.5" />
                   Booker un appel
                 </Link>

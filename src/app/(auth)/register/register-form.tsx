@@ -70,9 +70,7 @@ export function RegisterForm() {
           <p className="text-muted-foreground text-sm leading-relaxed">
             {"Un email de confirmation a été envoyé à"}{" "}
             <strong className="text-foreground">{email}</strong>.
-            {
-              " Vérifiez votre boîte de réception pour activer votre compte."
-            }
+            {" Vérifiez votre boîte de réception pour activer votre compte."}
           </p>
         </div>
         <div className="pt-2">

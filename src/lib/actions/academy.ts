@@ -2239,7 +2239,9 @@ export async function getAcademyLeaderboard(): Promise<
   // Fetch all quiz attempts with user profiles
   const { data: attempts } = await supabase
     .from("quiz_attempts")
-    .select("user_id, score, passed, profiles!user_id(full_name, avatar_url, role)")
+    .select(
+      "user_id, score, passed, profiles!user_id(full_name, avatar_url, role)",
+    )
     .order("attempted_at", { ascending: false });
 
   if (!attempts || attempts.length === 0) return [];

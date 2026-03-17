@@ -76,7 +76,9 @@ export function ProgressView({ progress }: ProgressViewProps) {
               <Users className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-2xl font-bold">{totalSetters}</p>
-                <p className="text-xs text-muted-foreground">Setters / Closers</p>
+                <p className="text-xs text-muted-foreground">
+                  Setters / Closers
+                </p>
               </div>
             </div>
           </CardContent>
@@ -87,7 +89,9 @@ export function ProgressView({ progress }: ProgressViewProps) {
               <BookOpen className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-2xl font-bold">{activeSetters}</p>
-                <p className="text-xs text-muted-foreground">Actifs (au moins 1 lecon)</p>
+                <p className="text-xs text-muted-foreground">
+                  Actifs (au moins 1 lecon)
+                </p>
               </div>
             </div>
           </CardContent>
@@ -98,7 +102,9 @@ export function ProgressView({ progress }: ProgressViewProps) {
               <TrendingUp className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-2xl font-bold">{avgProgress}%</p>
-                <p className="text-xs text-muted-foreground">Progression moyenne</p>
+                <p className="text-xs text-muted-foreground">
+                  Progression moyenne
+                </p>
               </div>
             </div>
           </CardContent>
@@ -125,9 +131,15 @@ export function ProgressView({ progress }: ProgressViewProps) {
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="pb-3 pr-4 font-medium">Setter</th>
                     <th className="pb-3 pr-4 font-medium">Module actuel</th>
-                    <th className="pb-3 pr-4 font-medium text-center">Progression</th>
-                    <th className="pb-3 pr-4 font-medium text-center">Meilleur score</th>
-                    <th className="pb-3 font-medium text-right">Derniere activite</th>
+                    <th className="pb-3 pr-4 font-medium text-center">
+                      Progression
+                    </th>
+                    <th className="pb-3 pr-4 font-medium text-center">
+                      Meilleur score
+                    </th>
+                    <th className="pb-3 font-medium text-right">
+                      Derniere activite
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,16 +192,20 @@ export function ProgressView({ progress }: ProgressViewProps) {
                             />
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            {p.completedLessons}/{p.totalLessons} ({p.progressPercent}%)
+                            {p.completedLessons}/{p.totalLessons} (
+                            {p.progressPercent}%)
                           </span>
                         </div>
                       </td>
                       <td className="py-3 pr-4 text-center">
                         {p.bestQuizScore !== null ? (
                           <Badge
-                            variant={p.bestQuizScore >= 90 ? "default" : "secondary"}
+                            variant={
+                              p.bestQuizScore >= 90 ? "default" : "secondary"
+                            }
                             className={cn(
-                              p.bestQuizScore >= 90 && "bg-brand text-brand-dark",
+                              p.bestQuizScore >= 90 &&
+                                "bg-brand text-brand-dark",
                             )}
                           >
                             {p.bestQuizScore}%

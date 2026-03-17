@@ -669,12 +669,18 @@ export function DealDetail({
                   <div className="flex items-center gap-2 text-sm mt-2">
                     {currentDeal.source.toLowerCase().includes("linkedin") ? (
                       <Linkedin className="h-4 w-4 text-blue-400" />
-                    ) : currentDeal.source.toLowerCase().includes("instagram") ? (
+                    ) : currentDeal.source
+                        .toLowerCase()
+                        .includes("instagram") ? (
                       <Instagram className="h-4 w-4 text-pink-400" />
-                    ) : currentDeal.source.toLowerCase().includes("whatsapp") ? (
+                    ) : currentDeal.source
+                        .toLowerCase()
+                        .includes("whatsapp") ? (
                       <MessageCircle className="h-4 w-4 text-green-400" />
                     ) : null}
-                    <span className="text-muted-foreground capitalize">{currentDeal.source}</span>
+                    <span className="text-muted-foreground capitalize">
+                      {currentDeal.source}
+                    </span>
                   </div>
                 )}
                 <Separator className="my-4" />

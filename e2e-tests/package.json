@@ -1,0 +1,27 @@
+{
+  "name": "e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:auth": "playwright test tests/auth/",
+    "test:nav": "playwright test tests/navigation/",
+    "test:features": "playwright test tests/features/",
+    "test:forms": "playwright test tests/forms/",
+    "test:edge": "playwright test tests/edge-cases/",
+    "test:multi": "playwright test tests/multi-user/",
+    "test:security": "playwright test tests/security/",
+    "test:report": "playwright show-report",
+    "seed": "tsx seeds/seed-runner.ts",
+    "cleanup": "tsx seeds/cleanup-runner.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "tsx": "^4.19.0",
+    "dotenv": "^16.5.0"
+  }
+}
