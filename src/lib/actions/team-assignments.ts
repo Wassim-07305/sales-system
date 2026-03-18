@@ -38,21 +38,21 @@ export interface BusinessProfile {
 export async function getAssignments(): Promise<BusinessWithSetters[]> {
   const supabase = await createClient();
 
-  // Récupérer tous les profils B2B
-  const { data: businesses } = await supabase
-    .from("profiles")
-    .select("id, full_name, email, company, avatar_url")
-    .eq("role", "client_b2b")
-    .order("full_name");
+  // Récupérer B2B et setters B2C en parallèle
+  const [{ data: businesses }, { data: allSetters }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, full_name, email, company, avatar_url")
+      .eq("role", "client_b2b")
+      .order("full_name"),
+    supabase
+      .from("profiles")
+      .select("id, full_name, email, avatar_url, matched_entrepreneur_id")
+      .eq("role", "client_b2c")
+      .not("matched_entrepreneur_id", "is", null),
+  ]);
 
   if (!businesses || businesses.length === 0) return [];
-
-  // Récupérer tous les setters B2C qui ont un matched_entrepreneur_id
-  const { data: allSetters } = await supabase
-    .from("profiles")
-    .select("id, full_name, email, avatar_url, matched_entrepreneur_id")
-    .eq("role", "client_b2c")
-    .not("matched_entrepreneur_id", "is", null);
 
   const settersByBusiness = new Map<string, SetterProfile[]>();
   if (allSetters) {

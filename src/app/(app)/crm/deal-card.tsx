@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
@@ -94,7 +95,7 @@ function formatRelativeDate(dateStr: string): string {
   return `Il y a ${Math.floor(days / 30)}m`;
 }
 
-export function DealCard({
+export const DealCard = memo(function DealCard({
   deal,
   isDragging,
   onClick,
@@ -248,4 +249,4 @@ export function DealCard({
       </CardContent>
     </Card>
   );
-}
+});

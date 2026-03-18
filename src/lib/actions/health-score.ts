@@ -6,13 +6,42 @@ import { notify } from "@/lib/actions/notifications";
 export async function calculateHealthScore(clientId: string): Promise<number> {
   const supabase = await createClient();
 
-  // 1. Last connection (25%)
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("updated_at")
-    .eq("id", clientId)
-    .single();
+  // Run all independent queries in parallel
+  const [
+    { data: profile },
+    { data: calls },
+    { data: lessons },
+    { count: completedLessonsCount },
+    { data: recentMessages },
+  ] = await Promise.all([
+    // 1. Last connection (25%)
+    supabase.from("profiles").select("updated_at").eq("id", clientId).single(),
+    // 2. Group call attendance (25%) — fetch recent calls
+    supabase
+      .from("group_calls")
+      .select("id")
+      .gte(
+        "scheduled_at",
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      ),
+    // 3. Training progress (25%) — fetch all lessons
+    supabase.from("lessons").select("id"),
+    // 3b. Training progress — fetch completed lessons for this client
+    supabase
+      .from("lesson_progress")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", clientId)
+      .eq("completed", true),
+    // 4. Message responsiveness (25%)
+    supabase
+      .from("messages")
+      .select("created_at")
+      .eq("sender_id", clientId)
+      .order("created_at", { ascending: false })
+      .limit(1),
+  ]);
 
+  // 1. Last connection score
   let connectionScore = 20;
   if (profile?.updated_at) {
     const daysSince = Math.floor(
@@ -22,15 +51,7 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
     connectionScore = daysSince < 3 ? 100 : daysSince < 7 ? 60 : 20;
   }
 
-  // 2. Group call attendance (25%)
-  const { data: calls } = await supabase
-    .from("group_calls")
-    .select("id")
-    .gte(
-      "scheduled_at",
-      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    );
-
+  // 2. Group call attendance score
   let attendanceScore = 20;
   if (calls && calls.length > 0) {
     const { count } = await supabase
@@ -47,29 +68,14 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
     attendanceScore = rate > 80 ? 100 : rate > 50 ? 60 : 20;
   }
 
-  // 3. Training progress (25%)
-  const { data: lessons } = await supabase.from("lessons").select("id");
-
+  // 3. Training progress score
   let trainingScore = 20;
   if (lessons && lessons.length > 0) {
-    const { count } = await supabase
-      .from("lesson_progress")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", clientId)
-      .eq("completed", true);
-
-    const rate = ((count || 0) / lessons.length) * 100;
+    const rate = ((completedLessonsCount || 0) / lessons.length) * 100;
     trainingScore = rate > 70 ? 100 : rate > 30 ? 60 : 20;
   }
 
-  // 4. Message responsiveness (25%)
-  const { data: recentMessages } = await supabase
-    .from("messages")
-    .select("created_at")
-    .eq("sender_id", clientId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
+  // 4. Message responsiveness score
   let responsivenessScore = 20;
   if (recentMessages && recentMessages.length > 0) {
     const hoursSince = Math.floor(
@@ -145,7 +151,18 @@ export async function recalculateAllHealthScores() {
 
   if (!clients) return;
 
-  for (const client of clients) {
-    await calculateHealthScore(client.id);
+  const BATCH_SIZE = 10;
+
+  for (let i = 0; i < clients.length; i += BATCH_SIZE) {
+    const batch = clients.slice(i, i + BATCH_SIZE);
+    await Promise.all(
+      batch.map(async (client) => {
+        try {
+          await calculateHealthScore(client.id);
+        } catch (error) {
+          console.error(`Erreur calcul health score pour ${client.id}:`, error);
+        }
+      }),
+    );
   }
 }

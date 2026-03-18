@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { BADGE_DEFINITIONS } from "@/lib/badge-definitions";
 import { REWARDS_CATALOG } from "@/lib/reward-definitions";
@@ -578,89 +579,89 @@ export async function getGamificationAnalytics() {
 // Reward and REWARDS_CATALOG imported from @/lib/reward-definitions
 
 export async function getRewardsCatalog() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { rewards: REWARDS_CATALOG, currentPoints: 0 };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("gamification_profiles")
-    .select("total_points")
-    .eq("user_id", user.id)
-    .single();
+    const { data: profile } = await supabase
+      .from("gamification_profiles")
+      .select("total_points")
+      .eq("user_id", user.id)
+      .single();
 
-  return {
-    rewards: REWARDS_CATALOG,
-    currentPoints: profile?.total_points ?? 0,
-  };
+    return {
+      rewards: REWARDS_CATALOG,
+      currentPoints: profile?.total_points ?? 0,
+    };
+  } catch {
+    return { rewards: REWARDS_CATALOG, currentPoints: 0 };
+  }
 }
 
 export async function redeemReward(rewardId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const reward = REWARDS_CATALOG.find((r) => r.id === rewardId);
-  if (!reward) return { success: false, error: "Récompense introuvable" };
+    const reward = REWARDS_CATALOG.find((r) => r.id === rewardId);
+    if (!reward) return { success: false, error: "Récompense introuvable" };
 
-  // Get current profile
-  const { data: profile } = await supabase
-    .from("gamification_profiles")
-    .select("total_points")
-    .eq("user_id", user.id)
-    .single();
+    // Get current profile
+    const { data: profile } = await supabase
+      .from("gamification_profiles")
+      .select("total_points")
+      .eq("user_id", user.id)
+      .single();
 
-  if (!profile)
-    return { success: false, error: "Profil gamification introuvable" };
+    if (!profile)
+      return { success: false, error: "Profil gamification introuvable" };
 
-  if (profile.total_points < reward.pointsCost) {
-    return { success: false, error: "Points insuffisants" };
+    if (profile.total_points < reward.pointsCost) {
+      return { success: false, error: "Points insuffisants" };
+    }
+
+    const newTotal = profile.total_points - reward.pointsCost;
+    const newLevel = getLevelForPoints(newTotal);
+
+    // Deduct points
+    await supabase
+      .from("gamification_profiles")
+      .update({
+        total_points: newTotal,
+        level: newLevel.level,
+        level_name: newLevel.name,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id);
+
+    // Log in audit_logs
+    await supabase.from("audit_logs").insert({
+      user_id: user.id,
+      action: "reward_redeemed",
+      details: {
+        reward_id: reward.id,
+        reward_name: reward.name,
+        points_spent: reward.pointsCost,
+        remaining_points: newTotal,
+      },
+    });
+
+    // Send notification (in-app + push)
+    notify(
+      user.id,
+      `Récompense échangée : ${reward.name}`,
+      `Vous avez échangé ${reward.pointsCost} points contre "${reward.name}". Il vous reste ${newTotal} points.`,
+      {
+        type: "reward",
+        link: "/challenges/rewards",
+      },
+    );
+
+    revalidatePath("/challenges");
+    revalidatePath("/challenges/rewards");
+
+    return { success: true, remainingPoints: newTotal };
+  } catch {
+    return { success: false, error: "Non authentifié" };
   }
-
-  const newTotal = profile.total_points - reward.pointsCost;
-  const newLevel = getLevelForPoints(newTotal);
-
-  // Deduct points
-  await supabase
-    .from("gamification_profiles")
-    .update({
-      total_points: newTotal,
-      level: newLevel.level,
-      level_name: newLevel.name,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("user_id", user.id);
-
-  // Log in audit_logs
-  await supabase.from("audit_logs").insert({
-    user_id: user.id,
-    action: "reward_redeemed",
-    details: {
-      reward_id: reward.id,
-      reward_name: reward.name,
-      points_spent: reward.pointsCost,
-      remaining_points: newTotal,
-    },
-  });
-
-  // Send notification (in-app + push)
-  notify(
-    user.id,
-    `Récompense échangée : ${reward.name}`,
-    `Vous avez échangé ${reward.pointsCost} points contre "${reward.name}". Il vous reste ${newTotal} points.`,
-    {
-      type: "reward",
-      link: "/challenges/rewards",
-    },
-  );
-
-  revalidatePath("/challenges");
-  revalidatePath("/challenges/rewards");
-
-  return { success: true, remainingPoints: newTotal };
 }
 
 // ---------------------------------------------------------------------------
@@ -669,107 +670,107 @@ export async function redeemReward(rewardId: string) {
 
 export async function getAchievements() {
   const { ACHIEVEMENTS } = await import("@/lib/achievement-definitions");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { achievements: [], totalPoints: 0 };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  // Get gamification profile — achievements stored in badges JSONB with type "achievement"
-  const { data: profile } = await supabase
-    .from("gamification_profiles")
-    .select("total_points, current_streak, badges")
-    .eq("user_id", user.id)
-    .single();
+    // Get gamification profile — achievements stored in badges JSONB with type "achievement"
+    const { data: profile } = await supabase
+      .from("gamification_profiles")
+      .select("total_points, current_streak, badges")
+      .eq("user_id", user.id)
+      .single();
 
-  // Extract unlocked achievements from badges JSONB array
-  const allBadges: Array<{
-    badge_id: string;
-    type?: string;
-    earned_at: string;
-  }> = Array.isArray(profile?.badges) ? profile.badges : [];
-  const unlockedMap = new Map<string, string>();
-  for (const b of allBadges) {
-    if (b.type === "achievement") {
-      unlockedMap.set(b.badge_id, b.earned_at);
+    // Extract unlocked achievements from badges JSONB array
+    const allBadges: Array<{
+      badge_id: string;
+      type?: string;
+      earned_at: string;
+    }> = Array.isArray(profile?.badges) ? profile.badges : [];
+    const unlockedMap = new Map<string, string>();
+    for (const b of allBadges) {
+      if (b.type === "achievement") {
+        unlockedMap.set(b.badge_id, b.earned_at);
+      }
     }
-  }
 
-  // Fetch counts for progress computation
-  const [
-    { count: dealsCount },
-    { count: callsCount },
-    { count: prospectsCount },
-    { count: postsCount },
-  ] = await Promise.all([
-    supabase
+    // Fetch counts for progress computation
+    const [
+      { count: dealsCount },
+      { count: callsCount },
+      { count: prospectsCount },
+      { count: postsCount },
+    ] = await Promise.all([
+      supabase
+        .from("deals")
+        .select("id", { count: "exact", head: true })
+        .eq("assigned_to", user.id),
+      supabase
+        .from("calls")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id),
+      supabase
+        .from("prospects")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id),
+      supabase
+        .from("community_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("author_id", user.id),
+    ]);
+
+    const currentStreak = profile?.current_streak ?? 0;
+
+    // Check for speed_closer (deal with closed_at set)
+    const { count: speedCloseCount } = await supabase
       .from("deals")
       .select("id", { count: "exact", head: true })
-      .eq("assigned_to", user.id),
-    supabase
-      .from("calls")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id),
-    supabase
-      .from("prospects")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id),
-    supabase
-      .from("community_posts")
-      .select("id", { count: "exact", head: true })
-      .eq("author_id", user.id),
-  ]);
+      .eq("assigned_to", user.id)
+      .not("closed_at", "is", null);
 
-  const currentStreak = profile?.current_streak ?? 0;
-
-  // Check for speed_closer (deal with closed_at set)
-  const { count: speedCloseCount } = await supabase
-    .from("deals")
-    .select("id", { count: "exact", head: true })
-    .eq("assigned_to", user.id)
-    .not("closed_at", "is", null);
-
-  function getCurrentValue(achievementId: string, category: string): number {
-    switch (category) {
-      case "deals":
-        return dealsCount ?? 0;
-      case "appels":
-        return callsCount ?? 0;
-      case "prospection":
-        return prospectsCount ?? 0;
-      case "streaks":
-        return currentStreak;
-      case "social":
-        return postsCount ?? 0;
-      case "hidden":
-        if (achievementId === "speed_closer") return speedCloseCount ?? 0;
-        // night_owl / early_bird are only unlocked via special triggers
-        if (achievementId === "night_owl" || achievementId === "early_bird") {
-          return unlockedMap.has(achievementId) ? 1 : 0;
-        }
-        return 0;
-      default:
-        return 0;
+    function getCurrentValue(achievementId: string, category: string): number {
+      switch (category) {
+        case "deals":
+          return dealsCount ?? 0;
+        case "appels":
+          return callsCount ?? 0;
+        case "prospection":
+          return prospectsCount ?? 0;
+        case "streaks":
+          return currentStreak;
+        case "social":
+          return postsCount ?? 0;
+        case "hidden":
+          if (achievementId === "speed_closer") return speedCloseCount ?? 0;
+          // night_owl / early_bird are only unlocked via special triggers
+          if (achievementId === "night_owl" || achievementId === "early_bird") {
+            return unlockedMap.has(achievementId) ? 1 : 0;
+          }
+          return 0;
+        default:
+          return 0;
+      }
     }
-  }
 
-  const achievements = ACHIEVEMENTS.map((ach) => {
-    const currentValue = getCurrentValue(ach.id, ach.category);
-    const unlocked = unlockedMap.has(ach.id);
-    const unlockedAt = unlockedMap.get(ach.id) ?? null;
+    const achievements = ACHIEVEMENTS.map((ach) => {
+      const currentValue = getCurrentValue(ach.id, ach.category);
+      const unlocked = unlockedMap.has(ach.id);
+      const unlockedAt = unlockedMap.get(ach.id) ?? null;
+
+      return {
+        ...ach,
+        currentValue: Math.min(currentValue, ach.targetValue),
+        unlocked,
+        unlockedAt,
+      };
+    });
 
     return {
-      ...ach,
-      currentValue: Math.min(currentValue, ach.targetValue),
-      unlocked,
-      unlockedAt,
+      achievements,
+      totalPoints: profile?.total_points ?? 0,
     };
-  });
-
-  return {
-    achievements,
-    totalPoints: profile?.total_points ?? 0,
-  };
+  } catch {
+    return { achievements: [], totalPoints: 0 };
+  }
 }
 
 export async function checkAchievementProgress(userId: string) {
@@ -903,217 +904,217 @@ export async function submitDailyJournal(data: {
   blockers: string;
   plan_tomorrow: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
-
-  const today = new Date().toISOString().split("T")[0];
-
-  // Upsert for today
-  const { error } = await supabase.from("daily_journals").upsert(
-    {
-      user_id: user.id,
-      date: today,
-      dms_sent: data.dms_sent,
-      replies_received: data.replies_received,
-      calls_booked: data.calls_booked,
-      calls_completed: data.calls_completed,
-      deals_closed: data.deals_closed,
-      revenue_generated: data.revenue_generated,
-      mood: data.mood,
-      wins: data.wins,
-      blockers: data.blockers,
-      plan_tomorrow: data.plan_tomorrow,
-      submitted_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id,date" },
-  );
-
-  if (error) return { error: error.message };
-
-  // Notify about the EOD (in-app + push)
-  notify(
-    user.id,
-    "EOD soumis",
-    `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`,
-    {
-      type: "eod_submitted",
-      link: "/team/journal",
-    },
-  );
-
-  // Notify the assigned B2B entrepreneur (matched_entrepreneur_id)
   try {
-    const { data: setterProfile } = await supabase
-      .from("profiles")
-      .select("full_name, matched_entrepreneur_id")
-      .eq("id", user.id)
-      .single();
+    const { supabase, user } = await requireAuth();
 
-    if (setterProfile?.matched_entrepreneur_id) {
-      const setterName = setterProfile.full_name || "Setter";
-      notify(
-        setterProfile.matched_entrepreneur_id,
-        `EOD de ${setterName}`,
-        `Messages envoyés: ${data.dms_sent}, Réponses: ${data.replies_received}, Appels: ${data.calls_booked}`,
-        {
-          type: "eod_report",
-          link: "/team/journal",
-        },
-      );
+    const today = new Date().toISOString().split("T")[0];
+
+    // Upsert for today
+    const { error } = await supabase.from("daily_journals").upsert(
+      {
+        user_id: user.id,
+        date: today,
+        dms_sent: data.dms_sent,
+        replies_received: data.replies_received,
+        calls_booked: data.calls_booked,
+        calls_completed: data.calls_completed,
+        deals_closed: data.deals_closed,
+        revenue_generated: data.revenue_generated,
+        mood: data.mood,
+        wins: data.wins,
+        blockers: data.blockers,
+        plan_tomorrow: data.plan_tomorrow,
+        submitted_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,date" },
+    );
+
+    if (error) return { error: error.message };
+
+    // Notify about the EOD (in-app + push)
+    notify(
+      user.id,
+      "EOD soumis",
+      `Journal du ${today} : ${data.dms_sent} DMs, ${data.calls_booked} calls bookés, ${data.deals_closed} deals closés`,
+      {
+        type: "eod_submitted",
+        link: "/team/journal",
+      },
+    );
+
+    // Notify the assigned B2B entrepreneur (matched_entrepreneur_id)
+    try {
+      const { data: setterProfile } = await supabase
+        .from("profiles")
+        .select("full_name, matched_entrepreneur_id")
+        .eq("id", user.id)
+        .single();
+
+      if (setterProfile?.matched_entrepreneur_id) {
+        const setterName = setterProfile.full_name || "Setter";
+        notify(
+          setterProfile.matched_entrepreneur_id,
+          `EOD de ${setterName}`,
+          `Messages envoyés: ${data.dms_sent}, Réponses: ${data.replies_received}, Appels: ${data.calls_booked}`,
+          {
+            type: "eod_report",
+            link: "/team/journal",
+          },
+        );
+      }
+    } catch {
+      // Don't block EOD submission if entrepreneur notification fails
     }
-  } catch {
-    // Don't block EOD submission if entrepreneur notification fails
-  }
 
-  // Award gamification points for daily journal
-  try {
-    await addPoints(user.id, 5, "Journal quotidien soumis");
-  } catch {
-    // ignore gamification errors
-  }
+    // Award gamification points for daily journal
+    try {
+      await addPoints(user.id, 5, "Journal quotidien soumis");
+    } catch {
+      // ignore gamification errors
+    }
 
-  revalidatePath("/journal");
-  revalidatePath("/team/journal");
-  return { success: true };
+    revalidatePath("/journal");
+    revalidatePath("/team/journal");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function getDailyJournal(date?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const targetDate = date || new Date().toISOString().split("T")[0];
+    const targetDate = date || new Date().toISOString().split("T")[0];
 
-  const { data } = await supabase
-    .from("daily_journals")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("date", targetDate)
-    .single();
+    const { data } = await supabase
+      .from("daily_journals")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", targetDate)
+      .single();
 
-  return data;
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 export async function getJournalHistory(userId?: string, limit = 30) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const targetUserId = userId || user.id;
+    const targetUserId = userId || user.id;
 
-  const { data } = await supabase
-    .from("daily_journals")
-    .select("*")
-    .eq("user_id", targetUserId)
-    .order("date", { ascending: false })
-    .limit(limit);
+    const { data } = await supabase
+      .from("daily_journals")
+      .select("*")
+      .eq("user_id", targetUserId)
+      .order("date", { ascending: false })
+      .limit(limit);
 
-  return data || [];
+    return data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getTeamJournals(date?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
-    return [];
-
-  const targetDate = date || new Date().toISOString().split("T")[0];
-
-  // B2B clients only see journals from their assigned setters
-  if (profile.role === "client_b2b") {
-    const { data: assignedSetters } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
-      .select("id")
-      .eq("matched_entrepreneur_id", user.id);
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+      return [];
 
-    const setterIds = (assignedSetters || []).map((s) => s.id);
-    if (setterIds.length === 0) return [];
+    const targetDate = date || new Date().toISOString().split("T")[0];
 
+    // B2B clients only see journals from their assigned setters
+    if (profile.role === "client_b2b") {
+      const { data: assignedSetters } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("matched_entrepreneur_id", user.id);
+
+      const setterIds = (assignedSetters || []).map((s) => s.id);
+      if (setterIds.length === 0) return [];
+
+      const { data } = await supabase
+        .from("daily_journals")
+        .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
+        .eq("date", targetDate)
+        .in("user_id", setterIds)
+        .order("submitted_at", { ascending: false });
+
+      return data || [];
+    }
+
+    // Admin/Manager see all journals
     const { data } = await supabase
       .from("daily_journals")
       .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
       .eq("date", targetDate)
-      .in("user_id", setterIds)
       .order("submitted_at", { ascending: false });
 
     return data || [];
+  } catch {
+    return [];
   }
-
-  // Admin/Manager see all journals
-  const { data } = await supabase
-    .from("daily_journals")
-    .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
-    .eq("date", targetDate)
-    .order("submitted_at", { ascending: false });
-
-  return data || [];
 }
 
 export async function getMissingEodSetters(date?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+      return [];
+
+    const targetDate = date || new Date().toISOString().split("T")[0];
+
+    // B2B clients only see missing EODs from their assigned setters
+    let setters: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    }[] = [];
+
+    if (profile.role === "client_b2b") {
+      const { data: assignedSetters } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .eq("matched_entrepreneur_id", user.id);
+      setters = assignedSetters || [];
+    } else {
+      // Admin/Manager see all setters/closers
+      const { data: allSetters } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .in("role", ["setter", "closer"]);
+      setters = allSetters || [];
+    }
+
+    if (setters.length === 0) return [];
+
+    // Get who submitted for this date
+    const { data: submitted } = await supabase
+      .from("daily_journals")
+      .select("user_id")
+      .eq("date", targetDate);
+
+    const submittedIds = new Set((submitted || []).map((s) => s.user_id));
+    return setters.filter((s) => !submittedIds.has(s.id));
+  } catch {
     return [];
-
-  const targetDate = date || new Date().toISOString().split("T")[0];
-
-  // B2B clients only see missing EODs from their assigned setters
-  let setters: {
-    id: string;
-    full_name: string | null;
-    avatar_url: string | null;
-  }[] = [];
-
-  if (profile.role === "client_b2b") {
-    const { data: assignedSetters } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url")
-      .eq("matched_entrepreneur_id", user.id);
-    setters = assignedSetters || [];
-  } else {
-    // Admin/Manager see all setters/closers
-    const { data: allSetters } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url")
-      .in("role", ["setter", "closer"]);
-    setters = allSetters || [];
   }
-
-  if (setters.length === 0) return [];
-
-  // Get who submitted for this date
-  const { data: submitted } = await supabase
-    .from("daily_journals")
-    .select("user_id")
-    .eq("date", targetDate);
-
-  const submittedIds = new Set((submitted || []).map((s) => s.user_id));
-  return setters.filter((s) => !submittedIds.has(s.id));
 }
 
 export async function getTeamJournalRange(
@@ -1121,73 +1122,73 @@ export async function getTeamJournalRange(
   to: string,
   setterId?: string,
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
-    return [];
-
-  let query = supabase
-    .from("daily_journals")
-    .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
-    .gte("date", from)
-    .lte("date", to)
-    .order("date", { ascending: false });
-
-  if (setterId) {
-    query = query.eq("user_id", setterId);
-  } else if (profile.role === "client_b2b") {
-    const { data: assignedSetters } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
-      .select("id")
-      .eq("matched_entrepreneur_id", user.id);
-    const setterIds = (assignedSetters || []).map((s) => s.id);
-    if (setterIds.length === 0) return [];
-    query = query.in("user_id", setterIds);
-  }
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+      return [];
 
-  const { data } = await query;
-  return data || [];
+    let query = supabase
+      .from("daily_journals")
+      .select("*, profile:profiles!user_id(full_name, avatar_url, role)")
+      .gte("date", from)
+      .lte("date", to)
+      .order("date", { ascending: false });
+
+    if (setterId) {
+      query = query.eq("user_id", setterId);
+    } else if (profile.role === "client_b2b") {
+      const { data: assignedSetters } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("matched_entrepreneur_id", user.id);
+      const setterIds = (assignedSetters || []).map((s) => s.id);
+      if (setterIds.length === 0) return [];
+      query = query.in("user_id", setterIds);
+    }
+
+    const { data } = await query;
+    return data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getTeamSetters() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
-    return [];
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager", "client_b2b"].includes(profile.role))
+      return [];
 
-  if (profile.role === "client_b2b") {
+    if (profile.role === "client_b2b") {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("matched_entrepreneur_id", user.id)
+        .order("full_name");
+      return data || [];
+    }
+
     const { data } = await supabase
       .from("profiles")
       .select("id, full_name")
-      .eq("matched_entrepreneur_id", user.id)
+      .in("role", ["setter", "closer"])
       .order("full_name");
     return data || [];
+  } catch {
+    return [];
   }
-
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .in("role", ["setter", "closer"])
-    .order("full_name");
-  return data || [];
 }
 
 // ---------------------------------------------------------------------------
@@ -1195,95 +1196,95 @@ export async function getTeamSetters() {
 // ---------------------------------------------------------------------------
 
 export async function getSetterTasks() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
   try {
-    const { data, error } = await supabase
-      .from("setter_tasks")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    const { supabase, user } = await requireAuth();
 
-    // Table doesn't exist – graceful fallback
-    if (error && error.code === "42P01") return [];
-    return data || [];
+    try {
+      const { data, error } = await supabase
+        .from("setter_tasks")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      // Table doesn't exist – graceful fallback
+      if (error && error.code === "42P01") return [];
+      return data || [];
+    } catch {
+      return [];
+    }
   } catch {
     return [];
   }
 }
 
 export async function createSetterTask(title: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { error } = await supabase
-    .from("setter_tasks")
-    .insert({ user_id: user.id, title, completed: false });
+    const { error } = await supabase
+      .from("setter_tasks")
+      .insert({ user_id: user.id, title, completed: false });
 
-  if (error) {
-    // Table may not exist
-    if (error.code === "42P01") return { error: null };
-    return { error: error.message };
+    if (error) {
+      // Table may not exist
+      if (error.code === "42P01") return { error: null };
+      return { error: error.message };
+    }
+
+    revalidatePath("/dashboard");
+    return { error: null };
+  } catch {
+    return { error: "Non authentifié" };
   }
-
-  revalidatePath("/dashboard");
-  return { error: null };
 }
 
 export async function toggleSetterTask(taskId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  // Get current state
-  const { data: task } = await supabase
-    .from("setter_tasks")
-    .select("completed")
-    .eq("id", taskId)
-    .eq("user_id", user.id)
-    .single();
+    // Get current state
+    const { data: task } = await supabase
+      .from("setter_tasks")
+      .select("completed")
+      .eq("id", taskId)
+      .eq("user_id", user.id)
+      .single();
 
-  if (!task) return { error: "Tâche introuvable" };
+    if (!task) return { error: "Tâche introuvable" };
 
-  const { error } = await supabase
-    .from("setter_tasks")
-    .update({
-      completed: !task.completed,
-      completed_at: !task.completed ? new Date().toISOString() : null,
-    })
-    .eq("id", taskId)
-    .eq("user_id", user.id);
+    const { error } = await supabase
+      .from("setter_tasks")
+      .update({
+        completed: !task.completed,
+        completed_at: !task.completed ? new Date().toISOString() : null,
+      })
+      .eq("id", taskId)
+      .eq("user_id", user.id);
 
-  if (error) return { error: error.message };
+    if (error) return { error: error.message };
 
-  revalidatePath("/dashboard");
-  return { error: null };
+    revalidatePath("/dashboard");
+    return { error: null };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function deleteSetterTask(taskId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  await supabase
-    .from("setter_tasks")
-    .delete()
-    .eq("id", taskId)
-    .eq("user_id", user.id);
+    await supabase
+      .from("setter_tasks")
+      .delete()
+      .eq("id", taskId)
+      .eq("user_id", user.id);
 
-  revalidatePath("/dashboard");
-  return { error: null };
+    revalidatePath("/dashboard");
+    return { error: null };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1400,83 +1401,83 @@ export async function getAllChallengesForAdmin() {
 export async function getPastChallenges(
   period?: "month" | "last_month" | "all",
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase } = await requireAuth();
 
-  const now = new Date();
-  let query = supabase
-    .from("challenges")
-    .select("*")
-    .eq("is_active", false)
-    .order("end_date", { ascending: false });
+    const now = new Date();
+    let query = supabase
+      .from("challenges")
+      .select("*")
+      .eq("is_active", false)
+      .order("end_date", { ascending: false });
 
-  if (period === "month") {
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .split("T")[0];
-    query = query.gte("end_date", startOfMonth);
-  } else if (period === "last_month") {
-    const startLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      .toISOString()
-      .split("T")[0];
-    const startThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .split("T")[0];
-    query = query
-      .gte("end_date", startLastMonth)
-      .lt("end_date", startThisMonth);
+    if (period === "month") {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        .toISOString()
+        .split("T")[0];
+      query = query.gte("end_date", startOfMonth);
+    } else if (period === "last_month") {
+      const startLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        .toISOString()
+        .split("T")[0];
+      const startThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        .toISOString()
+        .split("T")[0];
+      query = query
+        .gte("end_date", startLastMonth)
+        .lt("end_date", startThisMonth);
+    }
+
+    const { data } = await query;
+
+    if (!data || data.length === 0) return [];
+
+    // Pour chaque challenge passé, récupérer le gagnant
+    const challengeIds = data.map((c) => c.id);
+    const { data: allProgress } = await supabase
+      .from("challenge_progress")
+      .select("challenge_id, user_id, current_value, completed, completed_at")
+      .in("challenge_id", challengeIds);
+
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url");
+
+    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+    return data.map((challenge) => {
+      const progressEntries = (allProgress || []).filter(
+        (p) => p.challenge_id === challenge.id,
+      );
+      // Trouver le gagnant (celui qui a complété en premier ou avec la plus haute valeur)
+      const completedEntries = progressEntries
+        .filter((p) => p.completed)
+        .sort((a, b) => {
+          if (a.completed_at && b.completed_at) {
+            return (
+              new Date(a.completed_at).getTime() -
+              new Date(b.completed_at).getTime()
+            );
+          }
+          return (b.current_value || 0) - (a.current_value || 0);
+        });
+
+      const winner = completedEntries[0]
+        ? profileMap.get(completedEntries[0].user_id)
+        : null;
+
+      return {
+        ...challenge,
+        participants_count: progressEntries.length,
+        completed_count: completedEntries.length,
+        winner: winner
+          ? { full_name: winner.full_name, avatar_url: winner.avatar_url }
+          : null,
+      };
+    });
+  } catch {
+    return [];
   }
-
-  const { data } = await query;
-
-  if (!data || data.length === 0) return [];
-
-  // Pour chaque challenge passé, récupérer le gagnant
-  const challengeIds = data.map((c) => c.id);
-  const { data: allProgress } = await supabase
-    .from("challenge_progress")
-    .select("challenge_id, user_id, current_value, completed, completed_at")
-    .in("challenge_id", challengeIds);
-
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, full_name, avatar_url");
-
-  const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
-
-  return data.map((challenge) => {
-    const progressEntries = (allProgress || []).filter(
-      (p) => p.challenge_id === challenge.id,
-    );
-    // Trouver le gagnant (celui qui a complété en premier ou avec la plus haute valeur)
-    const completedEntries = progressEntries
-      .filter((p) => p.completed)
-      .sort((a, b) => {
-        if (a.completed_at && b.completed_at) {
-          return (
-            new Date(a.completed_at).getTime() -
-            new Date(b.completed_at).getTime()
-          );
-        }
-        return (b.current_value || 0) - (a.current_value || 0);
-      });
-
-    const winner = completedEntries[0]
-      ? profileMap.get(completedEntries[0].user_id)
-      : null;
-
-    return {
-      ...challenge,
-      participants_count: progressEntries.length,
-      completed_count: completedEntries.length,
-      winner: winner
-        ? { full_name: winner.full_name, avatar_url: winner.avatar_url }
-        : null,
-    };
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1484,121 +1485,121 @@ export async function getPastChallenges(
 // ---------------------------------------------------------------------------
 
 export async function notifyChallengeStart(challengeId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    const { supabase } = await requireAuth();
 
-  const { data: challenge } = await supabase
-    .from("challenges")
-    .select("title, description, points_reward")
-    .eq("id", challengeId)
-    .single();
+    const { data: challenge } = await supabase
+      .from("challenges")
+      .select("title, description, points_reward")
+      .eq("id", challengeId)
+      .single();
 
-  if (!challenge) return;
+    if (!challenge) return;
 
-  // Notifier tous les setters et closers (participants potentiels)
-  const { data: participants } = await supabase
-    .from("profiles")
-    .select("id")
-    .in("role", ["setter", "closer", "admin", "manager"]);
+    // Notifier tous les setters et closers (participants potentiels)
+    const { data: participants } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("role", ["setter", "closer", "admin", "manager"]);
 
-  if (!participants || participants.length === 0) return;
+    if (!participants || participants.length === 0) return;
 
-  const { notifyMany } = await import("@/lib/actions/notifications");
-  const userIds = participants.map((p) => p.id);
+    const { notifyMany } = await import("@/lib/actions/notifications");
+    const userIds = participants.map((p) => p.id);
 
-  notifyMany(
-    userIds,
-    `Nouveau défi : ${challenge.title}`,
-    `${challenge.description || "Un nouveau défi vient de commencer !"} — ${challenge.points_reward} points à gagner !`,
-    { type: "challenge_start", link: "/challenges" },
-  );
+    notifyMany(
+      userIds,
+      `Nouveau défi : ${challenge.title}`,
+      `${challenge.description || "Un nouveau défi vient de commencer !"} — ${challenge.points_reward} points à gagner !`,
+      { type: "challenge_start", link: "/challenges" },
+    );
+  } catch {
+    // Non authentifié — silently ignore
+  }
 }
 
 export async function notifyChallengeEnd(challengeId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    const { supabase } = await requireAuth();
 
-  const { data: challenge } = await supabase
-    .from("challenges")
-    .select("title, points_reward")
-    .eq("id", challengeId)
-    .single();
-
-  if (!challenge) return;
-
-  // Trouver le gagnant
-  const { data: progressEntries } = await supabase
-    .from("challenge_progress")
-    .select("user_id, current_value, completed, completed_at")
-    .eq("challenge_id", challengeId)
-    .eq("completed", true)
-    .order("completed_at", { ascending: true })
-    .limit(1);
-
-  let winnerName = "Personne";
-  if (progressEntries && progressEntries.length > 0) {
-    const { data: winnerProfile } = await supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("id", progressEntries[0].user_id)
+    const { data: challenge } = await supabase
+      .from("challenges")
+      .select("title, points_reward")
+      .eq("id", challengeId)
       .single();
-    winnerName = winnerProfile?.full_name || "Un participant";
+
+    if (!challenge) return;
+
+    // Trouver le gagnant
+    const { data: progressEntries } = await supabase
+      .from("challenge_progress")
+      .select("user_id, current_value, completed, completed_at")
+      .eq("challenge_id", challengeId)
+      .eq("completed", true)
+      .order("completed_at", { ascending: true })
+      .limit(1);
+
+    let winnerName = "Personne";
+    if (progressEntries && progressEntries.length > 0) {
+      const { data: winnerProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", progressEntries[0].user_id)
+        .single();
+      winnerName = winnerProfile?.full_name || "Un participant";
+    }
+
+    // Notifier tous les participants
+    const { data: allParticipants } = await supabase
+      .from("challenge_progress")
+      .select("user_id")
+      .eq("challenge_id", challengeId);
+
+    if (!allParticipants || allParticipants.length === 0) return;
+
+    const { notifyMany } = await import("@/lib/actions/notifications");
+    const userIds = allParticipants.map((p) => p.user_id);
+
+    notifyMany(
+      userIds,
+      `Défi terminé : ${challenge.title}`,
+      `Le défi "${challenge.title}" est terminé ! Gagnant : ${winnerName}. ${challenge.points_reward} points attribués.`,
+      { type: "challenge_end", link: "/challenges" },
+    );
+
+    // Désactiver le challenge
+    await supabase
+      .from("challenges")
+      .update({ is_active: false })
+      .eq("id", challengeId);
+
+    revalidatePath("/challenges");
+  } catch {
+    // Non authentifié — silently ignore
   }
-
-  // Notifier tous les participants
-  const { data: allParticipants } = await supabase
-    .from("challenge_progress")
-    .select("user_id")
-    .eq("challenge_id", challengeId);
-
-  if (!allParticipants || allParticipants.length === 0) return;
-
-  const { notifyMany } = await import("@/lib/actions/notifications");
-  const userIds = allParticipants.map((p) => p.user_id);
-
-  notifyMany(
-    userIds,
-    `Défi terminé : ${challenge.title}`,
-    `Le défi "${challenge.title}" est terminé ! Gagnant : ${winnerName}. ${challenge.points_reward} points attribués.`,
-    { type: "challenge_end", link: "/challenges" },
-  );
-
-  // Désactiver le challenge
-  await supabase
-    .from("challenges")
-    .update({ is_active: false })
-    .eq("id", challengeId);
-
-  revalidatePath("/challenges");
 }
 
 export async function getRedemptionHistory() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: logs } = await supabase
-    .from("audit_logs")
-    .select("id, created_at, details")
-    .eq("user_id", user.id)
-    .eq("action", "reward_redeemed")
-    .order("created_at", { ascending: false });
+    const { data: logs } = await supabase
+      .from("audit_logs")
+      .select("id, created_at, details")
+      .eq("user_id", user.id)
+      .eq("action", "reward_redeemed")
+      .order("created_at", { ascending: false });
 
-  return (logs || []).map((log) => ({
-    id: log.id,
-    createdAt: log.created_at,
-    rewardName:
-      ((log.details as Record<string, unknown>)?.reward_name as string) ||
-      "Inconnu",
-    pointsSpent:
-      ((log.details as Record<string, unknown>)?.points_spent as number) || 0,
-  }));
+    return (logs || []).map((log) => ({
+      id: log.id,
+      createdAt: log.created_at,
+      rewardName:
+        ((log.details as Record<string, unknown>)?.reward_name as string) ||
+        "Inconnu",
+      pointsSpent:
+        ((log.details as Record<string, unknown>)?.points_spent as number) || 0,
+    }));
+  } catch {
+    return [];
+  }
 }

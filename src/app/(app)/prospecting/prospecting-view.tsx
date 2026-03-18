@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -195,46 +195,60 @@ export function ProspectingView({
   const bookings = quota?.bookings_from_dms || 0;
 
   // Client-side filtering
-  const filtered = prospects.filter((p) => {
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase()))
-      return false;
-    if (filterPlatform !== "all" && p.platform !== filterPlatform) return false;
-    if (filterStatus !== "all" && p.status !== filterStatus) return false;
+  const filtered = useMemo(
+    () =>
+      prospects.filter((p) => {
+        if (search && !p.name.toLowerCase().includes(search.toLowerCase()))
+          return false;
+        if (filterPlatform !== "all" && p.platform !== filterPlatform)
+          return false;
+        if (filterStatus !== "all" && p.status !== filterStatus) return false;
 
-    // Temperature filter
-    if (filterTemperature !== "all") {
-      if (!p.computed_score) return false;
-      if (p.computed_score.temperature !== filterTemperature) return false;
-    }
+        // Temperature filter
+        if (filterTemperature !== "all") {
+          if (!p.computed_score) return false;
+          if (p.computed_score.temperature !== filterTemperature) return false;
+        }
 
-    // Score range filter
-    const minScore = scoreMin !== "" ? Number(scoreMin) : null;
-    const maxScore = scoreMax !== "" ? Number(scoreMax) : null;
-    if (minScore !== null || maxScore !== null) {
-      if (!p.computed_score) return false;
-      if (minScore !== null && p.computed_score.total_score < minScore)
-        return false;
-      if (maxScore !== null && p.computed_score.total_score > maxScore)
-        return false;
-    }
+        // Score range filter
+        const minScore = scoreMin !== "" ? Number(scoreMin) : null;
+        const maxScore = scoreMax !== "" ? Number(scoreMax) : null;
+        if (minScore !== null || maxScore !== null) {
+          if (!p.computed_score) return false;
+          if (minScore !== null && p.computed_score.total_score < minScore)
+            return false;
+          if (maxScore !== null && p.computed_score.total_score > maxScore)
+            return false;
+        }
 
-    // Recency filter
-    if (filterRecency === "recent") {
-      if (!p.last_message_at) return false;
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      if (new Date(p.last_message_at) < sevenDaysAgo) return false;
-    } else if (filterRecency === "inactive") {
-      if (p.last_message_at) {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        if (new Date(p.last_message_at) >= thirtyDaysAgo) return false;
-      }
-      // null last_message_at counts as inactive
-    }
+        // Recency filter
+        if (filterRecency === "recent") {
+          if (!p.last_message_at) return false;
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          if (new Date(p.last_message_at) < sevenDaysAgo) return false;
+        } else if (filterRecency === "inactive") {
+          if (p.last_message_at) {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            if (new Date(p.last_message_at) >= thirtyDaysAgo) return false;
+          }
+          // null last_message_at counts as inactive
+        }
 
-    return true;
-  });
+        return true;
+      }),
+    [
+      prospects,
+      search,
+      filterPlatform,
+      filterStatus,
+      filterTemperature,
+      scoreMin,
+      scoreMax,
+      filterRecency,
+    ],
+  );
 
   const hasActiveSegmentFilters =
     filterTemperature !== "all" ||

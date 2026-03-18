@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export interface ProspectSegmentFilters {
@@ -86,12 +87,16 @@ export async function getProspects(filters?: ProspectSegmentFilters) {
 export async function getProspectSegmentStats() {
   const supabase = await createClient();
 
-  const { data: allProspects } = await supabase.from("prospects").select("id");
+  const { data: allProspects } = await supabase
+    .from("prospects")
+    .select("id")
+    .limit(5000);
   const totalCount = allProspects?.length || 0;
 
   const { data: scores } = await supabase
     .from("prospect_scores")
-    .select("prospect_id, total_score, temperature");
+    .select("prospect_id, total_score, temperature")
+    .limit(5000);
 
   let hotCount = 0;
   let warmCount = 0;
@@ -122,23 +127,23 @@ export async function addProspect(formData: {
   platform: string;
   list_id?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { error } = await supabase.from("prospects").insert({
-    name: formData.name,
-    profile_url: formData.profile_url || null,
-    platform: formData.platform,
-    list_id: formData.list_id || null,
-    status: "new",
-    created_by: user.id,
-  });
-  if (error) return { error: "Impossible d'ajouter le prospect." };
-  revalidatePath("/prospecting");
-  return { success: true };
+    const { error } = await supabase.from("prospects").insert({
+      name: formData.name,
+      profile_url: formData.profile_url || null,
+      platform: formData.platform,
+      list_id: formData.list_id || null,
+      status: "new",
+      created_by: user.id,
+    });
+    if (error) return { error: "Impossible d'ajouter le prospect." };
+    revalidatePath("/prospecting");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function updateProspectStatus(prospectId: string, status: string) {
@@ -167,100 +172,101 @@ export async function updateProspectStatus(prospectId: string, status: string) {
 }
 
 export async function getDailyQuota() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const today = new Date().toISOString().split("T")[0];
-  const { data } = await supabase
-    .from("daily_quotas")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("date", today)
-    .single();
+    const today = new Date().toISOString().split("T")[0];
+    const { data } = await supabase
+      .from("daily_quotas")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .single();
 
-  if (data) return data;
+    if (data) return data;
 
-  // Create today's quota
-  const { data: newQuota } = await supabase
-    .from("daily_quotas")
-    .insert({
-      user_id: user.id,
-      date: today,
-      dms_sent: 0,
-      dms_target: 20,
-      replies_received: 0,
-      bookings_from_dms: 0,
-    })
-    .select()
-    .single();
-  return newQuota;
+    // Create today's quota
+    const { data: newQuota } = await supabase
+      .from("daily_quotas")
+      .insert({
+        user_id: user.id,
+        date: today,
+        dms_sent: 0,
+        dms_target: 20,
+        replies_received: 0,
+        bookings_from_dms: 0,
+      })
+      .select()
+      .single();
+    return newQuota;
+  } catch {
+    return null;
+  }
 }
 
 export async function incrementDmsSent() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const today = new Date().toISOString().split("T")[0];
-  const { data: quota } = await supabase
-    .from("daily_quotas")
-    .select("id, dms_sent")
-    .eq("user_id", user.id)
-    .eq("date", today)
-    .single();
-
-  if (quota) {
-    await supabase
+    const today = new Date().toISOString().split("T")[0];
+    const { data: quota } = await supabase
       .from("daily_quotas")
-      .update({ dms_sent: quota.dms_sent + 1 })
-      .eq("id", quota.id);
-  } else {
-    await supabase.from("daily_quotas").insert({
-      user_id: user.id,
-      date: today,
-      dms_sent: 1,
-      dms_target: 20,
-      replies_received: 0,
-      bookings_from_dms: 0,
-    });
+      .select("id, dms_sent")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .single();
+
+    if (quota) {
+      await supabase
+        .from("daily_quotas")
+        .update({ dms_sent: quota.dms_sent + 1 })
+        .eq("id", quota.id);
+    } else {
+      await supabase.from("daily_quotas").insert({
+        user_id: user.id,
+        date: today,
+        dms_sent: 1,
+        dms_target: 20,
+        replies_received: 0,
+        bookings_from_dms: 0,
+      });
+    }
+    revalidatePath("/prospecting");
+  } catch {
+    // Non authentifié — silently ignore
   }
-  revalidatePath("/prospecting");
 }
 
 export async function incrementReplies() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
-  const today = new Date().toISOString().split("T")[0];
-  const { data: quota } = await supabase
-    .from("daily_quotas")
-    .select("id, replies_received")
-    .eq("user_id", user.id)
-    .eq("date", today)
-    .single();
-  if (quota) {
-    await supabase
+  try {
+    const { supabase, user } = await requireAuth();
+
+    const today = new Date().toISOString().split("T")[0];
+    const { data: quota } = await supabase
       .from("daily_quotas")
-      .update({ replies_received: quota.replies_received + 1 })
-      .eq("id", quota.id);
-  } else {
-    await supabase.from("daily_quotas").insert({
-      user_id: user.id,
-      date: today,
-      dms_sent: 0,
-      dms_target: 20,
-      replies_received: 1,
-      bookings_from_dms: 0,
-    });
+      .select("id, replies_received")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .single();
+    if (quota) {
+      await supabase
+        .from("daily_quotas")
+        .update({ replies_received: quota.replies_received + 1 })
+        .eq("id", quota.id);
+    } else {
+      await supabase.from("daily_quotas").insert({
+        user_id: user.id,
+        date: today,
+        dms_sent: 0,
+        dms_target: 20,
+        replies_received: 1,
+        bookings_from_dms: 0,
+      });
+    }
+    revalidatePath("/prospecting");
+  } catch {
+    // Non authentifié — silently ignore
   }
-  revalidatePath("/prospecting");
 }
 
 export async function getProspectLists() {
@@ -290,16 +296,16 @@ export async function createTemplate(formData: {
   content: string;
   variant: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  const { error } = await supabase.from("dm_templates").insert(formData);
-  if (error) return { error: "Impossible de créer le template." };
-  revalidatePath("/prospecting/templates");
-  return { success: true };
+    const { error } = await supabase.from("dm_templates").insert(formData);
+    if (error) return { error: "Impossible de créer le template." };
+    revalidatePath("/prospecting/templates");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function updateTemplate(
@@ -313,76 +319,76 @@ export async function updateTemplate(
     variant?: string;
   },
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  const { error } = await supabase
-    .from("dm_templates")
-    .update(formData)
-    .eq("id", id);
-  if (error) return { error: "Impossible de mettre à jour le template." };
-  revalidatePath("/prospecting/templates");
-  return { success: true };
+    const { error } = await supabase
+      .from("dm_templates")
+      .update(formData)
+      .eq("id", id);
+    if (error) return { error: "Impossible de mettre à jour le template." };
+    revalidatePath("/prospecting/templates");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function deleteTemplate(id: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  const { error } = await supabase.from("dm_templates").delete().eq("id", id);
-  if (error) return { error: "Impossible de supprimer le template." };
-  revalidatePath("/prospecting/templates");
-  return { success: true };
+    const { error } = await supabase.from("dm_templates").delete().eq("id", id);
+    if (error) return { error: "Impossible de supprimer le template." };
+    revalidatePath("/prospecting/templates");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function deleteProspect(id: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  const { error } = await supabase.from("prospects").delete().eq("id", id);
-  if (error) return { error: "Impossible de supprimer le prospect." };
-  revalidatePath("/prospecting");
-  return { success: true };
+    const { error } = await supabase.from("prospects").delete().eq("id", id);
+    if (error) return { error: "Impossible de supprimer le prospect." };
+    revalidatePath("/prospecting");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 // ─── Detail Page Actions ────────────────────────────────────────────
 
 export async function getProspectById(prospectId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { prospect: null, error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  const { data, error } = await supabase
-    .from("prospects")
-    .select(
-      "*, list:prospect_lists(*), assigned_setter:profiles!prospects_assigned_setter_id_fkey(id, full_name, avatar_url)",
-    )
-    .eq("id", prospectId)
-    .single();
+    const { data, error } = await supabase
+      .from("prospects")
+      .select(
+        "*, list:prospect_lists(*), assigned_setter:profiles!prospects_assigned_setter_id_fkey(id, full_name, avatar_url)",
+      )
+      .eq("id", prospectId)
+      .single();
 
-  if (error) return { prospect: null, error: error.message };
+    if (error) return { prospect: null, error: error.message };
 
-  // Normalize joined data
-  const prospect = {
-    ...data,
-    list: Array.isArray(data.list) ? data.list[0] || null : data.list,
-    assigned_setter: Array.isArray(data.assigned_setter)
-      ? data.assigned_setter[0] || null
-      : data.assigned_setter,
-  };
+    // Normalize joined data
+    const prospect = {
+      ...data,
+      list: Array.isArray(data.list) ? data.list[0] || null : data.list,
+      assigned_setter: Array.isArray(data.assigned_setter)
+        ? data.assigned_setter[0] || null
+        : data.assigned_setter,
+    };
 
-  return { prospect, error: null };
+    return { prospect, error: null };
+  } catch {
+    return { prospect: null, error: "Non authentifié" };
+  }
 }
 
 export async function getProspectScore(prospectId: string) {
@@ -408,22 +414,22 @@ export async function updateProspect(
     auto_follow_up?: boolean;
   },
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  const { error } = await supabase
-    .from("prospects")
-    .update(data)
-    .eq("id", prospectId);
+    const { error } = await supabase
+      .from("prospects")
+      .update(data)
+      .eq("id", prospectId);
 
-  if (error) return { error: error.message };
+    if (error) return { error: error.message };
 
-  revalidatePath("/prospecting");
-  revalidatePath(`/prospecting/${prospectId}`);
-  return { success: true };
+    revalidatePath("/prospecting");
+    revalidatePath(`/prospecting/${prospectId}`);
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function addProspectMessage(
@@ -431,50 +437,50 @@ export async function addProspectMessage(
   message: string,
   direction: "sent" | "received",
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  // Get current conversation history
-  const { data: prospect } = await supabase
-    .from("prospects")
-    .select("conversation_history")
-    .eq("id", prospectId)
-    .single();
+    // Get current conversation history
+    const { data: prospect } = await supabase
+      .from("prospects")
+      .select("conversation_history")
+      .eq("id", prospectId)
+      .single();
 
-  const history = Array.isArray(prospect?.conversation_history)
-    ? prospect.conversation_history
-    : [];
+    const history = Array.isArray(prospect?.conversation_history)
+      ? prospect.conversation_history
+      : [];
 
-  const newMessage = {
-    id: crypto.randomUUID(),
-    content: message,
-    direction,
-    timestamp: new Date().toISOString(),
-    user_id: user.id,
-  };
+    const newMessage = {
+      id: crypto.randomUUID(),
+      content: message,
+      direction,
+      timestamp: new Date().toISOString(),
+      user_id: user.id,
+    };
 
-  const { error } = await supabase
-    .from("prospects")
-    .update({
-      conversation_history: [...history, newMessage],
-      last_message_at: new Date().toISOString(),
-    })
-    .eq("id", prospectId);
+    const { error } = await supabase
+      .from("prospects")
+      .update({
+        conversation_history: [...history, newMessage],
+        last_message_at: new Date().toISOString(),
+      })
+      .eq("id", prospectId);
 
-  if (error) return { error: error.message };
+    if (error) return { error: error.message };
 
-  // Update daily quota if sent
-  if (direction === "sent") {
-    await incrementDmsSent();
-  } else {
-    await incrementReplies();
+    // Update daily quota if sent
+    if (direction === "sent") {
+      await incrementDmsSent();
+    } else {
+      await incrementReplies();
+    }
+
+    revalidatePath(`/prospecting/${prospectId}`);
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
   }
-
-  revalidatePath(`/prospecting/${prospectId}`);
-  return { success: true };
 }
 
 export async function convertProspectToDeal(
@@ -485,46 +491,46 @@ export async function convertProspectToDeal(
     stage_id: string;
   },
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  // Get prospect data
-  const { data: prospect } = await supabase
-    .from("prospects")
-    .select("name, profile_url")
-    .eq("id", prospectId)
-    .single();
+    // Get prospect data
+    const { data: prospect } = await supabase
+      .from("prospects")
+      .select("name, profile_url")
+      .eq("id", prospectId)
+      .single();
 
-  if (!prospect) return { error: "Prospect introuvable" };
+    if (!prospect) return { error: "Prospect introuvable" };
 
-  // Create deal
-  const { data: deal, error: dealError } = await supabase
-    .from("deals")
-    .insert({
-      title: dealData.title,
-      value: dealData.value,
-      stage_id: dealData.stage_id,
-      source: "prospecting",
-      temperature: "warm",
-      notes: `Converti depuis prospect: ${prospect.name}`,
-    })
-    .select()
-    .single();
+    // Create deal
+    const { data: deal, error: dealError } = await supabase
+      .from("deals")
+      .insert({
+        title: dealData.title,
+        value: dealData.value,
+        stage_id: dealData.stage_id,
+        source: "prospecting",
+        temperature: "warm",
+        notes: `Converti depuis prospect: ${prospect.name}`,
+      })
+      .select()
+      .single();
 
-  if (dealError) return { error: dealError.message };
+    if (dealError) return { error: dealError.message };
 
-  // Update prospect status
-  await supabase
-    .from("prospects")
-    .update({ status: "booked" })
-    .eq("id", prospectId);
+    // Update prospect status
+    await supabase
+      .from("prospects")
+      .update({ status: "booked" })
+      .eq("id", prospectId);
 
-  revalidatePath("/prospecting");
-  revalidatePath("/crm");
-  return { success: true, dealId: deal.id };
+    revalidatePath("/prospecting");
+    revalidatePath("/crm");
+    return { success: true, dealId: deal.id };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function qualifyProspect(
@@ -534,62 +540,62 @@ export async function qualifyProspect(
     temperature: string;
   },
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase } = await requireAuth();
 
-  // Get prospect data
-  const { data: prospect } = await supabase
-    .from("prospects")
-    .select("name, profile_url, platform")
-    .eq("id", prospectId)
-    .single();
-
-  if (!prospect) return { error: "Prospect introuvable" };
-
-  // Update prospect status to qualified
-  const { error: statusError } = await supabase
-    .from("prospects")
-    .update({ status: "qualified" })
-    .eq("id", prospectId);
-
-  if (statusError) return { error: "Impossible de qualifier le prospect" };
-
-  let dealCreated = false;
-
-  // Optionally create a deal
-  if (params.createDeal) {
-    // Get the first pipeline stage
-    const { data: firstStage } = await supabase
-      .from("pipeline_stages")
-      .select("id")
-      .order("position", { ascending: true })
-      .limit(1)
+    // Get prospect data
+    const { data: prospect } = await supabase
+      .from("prospects")
+      .select("name, profile_url, platform")
+      .eq("id", prospectId)
       .single();
 
-    if (firstStage) {
-      const { error: dealError } = await supabase
-        .from("deals")
-        .insert({
-          title: `${prospect.name} — Qualification scoring`,
-          value: 0,
-          stage_id: firstStage.id,
-          source: "scoring",
-          temperature: params.temperature,
-          notes: `Qualifié automatiquement depuis le scoring (${prospect.platform})`,
-        })
-        .select()
+    if (!prospect) return { error: "Prospect introuvable" };
+
+    // Update prospect status to qualified
+    const { error: statusError } = await supabase
+      .from("prospects")
+      .update({ status: "qualified" })
+      .eq("id", prospectId);
+
+    if (statusError) return { error: "Impossible de qualifier le prospect" };
+
+    let dealCreated = false;
+
+    // Optionally create a deal
+    if (params.createDeal) {
+      // Get the first pipeline stage
+      const { data: firstStage } = await supabase
+        .from("pipeline_stages")
+        .select("id")
+        .order("position", { ascending: true })
+        .limit(1)
         .single();
 
-      dealCreated = !dealError;
-    }
-  }
+      if (firstStage) {
+        const { error: dealError } = await supabase
+          .from("deals")
+          .insert({
+            title: `${prospect.name} — Qualification scoring`,
+            value: 0,
+            stage_id: firstStage.id,
+            source: "scoring",
+            temperature: params.temperature,
+            notes: `Qualifié automatiquement depuis le scoring (${prospect.platform})`,
+          })
+          .select()
+          .single();
 
-  revalidatePath("/prospecting");
-  revalidatePath("/crm");
-  return { success: true, dealCreated };
+        dealCreated = !dealError;
+      }
+    }
+
+    revalidatePath("/prospecting");
+    revalidatePath("/crm");
+    return { success: true, dealCreated };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function getSettersForAssignment() {
@@ -653,11 +659,7 @@ export async function importGoogleMapsLead(lead: {
   googleMapsUrl?: string;
   platform?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   const { data, error } = await supabase
     .from("prospects")

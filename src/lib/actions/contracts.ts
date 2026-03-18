@@ -21,7 +21,9 @@ function replaceContractVariables(
   return result;
 }
 
-async function generateContractNumber(supabase: Awaited<ReturnType<typeof createClient>>): Promise<string> {
+async function generateContractNumber(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `SA-${year}-`;
 
@@ -467,7 +469,8 @@ export async function expireStaleContracts() {
     .from("contracts")
     .select("id, client_id, status")
     .in("status", ["draft", "sent"])
-    .lt("created_at", thirtyDaysAgo);
+    .lt("created_at", thirtyDaysAgo)
+    .limit(500);
 
   if (fetchError || !staleContracts || staleContracts.length === 0) {
     return { error: fetchError?.message || null, count: 0 };

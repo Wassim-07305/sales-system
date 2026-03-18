@@ -26,19 +26,39 @@ export async function getAnalyticsData() {
     59,
   ).toISOString();
 
-  // Get pipeline stages
-  const { data: stages } = await supabase
-    .from("pipeline_stages")
-    .select("id, name, position")
-    .order("position");
+  // Compute 6-month lookback for revenue/deals charts
+  const sixMonthsAgo = new Date(now);
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5, 1);
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+  const sixMonthsAgoISO = sixMonthsAgo.toISOString();
+
+  // Parallel fetch: pipeline stages, deals (last 6 months), active clients, total clients
+  const [
+    { data: stages },
+    { data: allDeals },
+    { count: activeClients },
+    { count: totalClients },
+  ] = await Promise.all([
+    supabase
+      .from("pipeline_stages")
+      .select("id, name, position")
+      .order("position"),
+    supabase
+      .from("deals")
+      .select("id, value, stage_id, assigned_to, created_at")
+      .gte("created_at", sixMonthsAgoISO),
+    supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .in("role", ["client_b2b", "client_b2c"])
+      .gt("health_score", 40),
+    supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .in("role", ["client_b2b", "client_b2c"]),
+  ]);
 
   const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
-
-  // Get all deals
-  const { data: allDeals } = await supabase
-    .from("deals")
-    .select("id, value, source, stage_id, assigned_to, created_at");
-
   const deals = allDeals || [];
 
   // CA this month (signed deals this month)
@@ -61,18 +81,6 @@ export async function getAnalyticsData() {
     (sum, d) => sum + (d.value || 0),
     0,
   );
-
-  // Active clients (health_score > 40)
-  const { count: activeClients } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true })
-    .in("role", ["client_b2b", "client_b2c"])
-    .gt("health_score", 40);
-
-  const { count: totalClients } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true })
-    .in("role", ["client_b2b", "client_b2c"]);
 
   // Pipeline value (non-signed deals)
   const pipelineDeals = deals.filter((d) => d.stage_id !== signedStage?.id);
@@ -162,12 +170,13 @@ export async function getAnalyticsData() {
 export async function getFunnelData() {
   const supabase = await createClient();
 
-  const { data: stages } = await supabase
-    .from("pipeline_stages")
-    .select("id, name, position, color")
-    .order("position");
-
-  const { data: deals } = await supabase.from("deals").select("stage_id");
+  const [{ data: stages }, { data: deals }] = await Promise.all([
+    supabase
+      .from("pipeline_stages")
+      .select("id, name, position, color")
+      .order("position"),
+    supabase.from("deals").select("stage_id").limit(5000),
+  ]);
 
   const funnelData = (stages || []).map((stage) => {
     const count = (deals || []).filter((d) => d.stage_id === stage.id).length;
@@ -185,14 +194,11 @@ export async function getFunnelData() {
 export async function getSourceData() {
   const supabase = await createClient();
 
-  const { data: stages } = await supabase
-    .from("pipeline_stages")
-    .select("id, name");
+  const [{ data: stages }, { data: deals }] = await Promise.all([
+    supabase.from("pipeline_stages").select("id, name"),
+    supabase.from("deals").select("id, value, source, stage_id").limit(5000),
+  ]);
   const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
-
-  const { data: deals } = await supabase
-    .from("deals")
-    .select("id, value, source, stage_id");
 
   const sourceMap = new Map<
     string,
@@ -248,28 +254,28 @@ export async function getTeamPerformance() {
     1,
   ).toISOString();
 
-  const { data: stages } = await supabase
-    .from("pipeline_stages")
-    .select("id, name");
+  // Parallel fetch: stages, team members, bookings, deals
+  const [
+    { data: stages },
+    { data: teamMembers },
+    { data: bookings },
+    { data: deals },
+  ] = await Promise.all([
+    supabase.from("pipeline_stages").select("id, name"),
+    supabase
+      .from("profiles")
+      .select("id, full_name, role")
+      .in("role", ["setter", "closer"]),
+    supabase
+      .from("bookings")
+      .select("id, assigned_to, status, scheduled_at")
+      .gte("scheduled_at", startOfMonth),
+    supabase
+      .from("deals")
+      .select("id, assigned_to, stage_id, value, created_at")
+      .gte("created_at", startOfMonth),
+  ]);
   const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
-
-  // Get team members (setters + closers)
-  const { data: teamMembers } = await supabase
-    .from("profiles")
-    .select("id, full_name, role")
-    .in("role", ["setter", "closer"]);
-
-  // Get bookings this month
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("id, assigned_to, status, scheduled_at")
-    .gte("scheduled_at", startOfMonth);
-
-  // Get deals
-  const { data: deals } = await supabase
-    .from("deals")
-    .select("id, assigned_to, stage_id, value, created_at")
-    .gte("created_at", startOfMonth);
 
   const performance = (teamMembers || []).map((member) => {
     const memberBookings = (bookings || []).filter(
@@ -390,33 +396,31 @@ export async function getBenchmarkData(
     prevPeriodEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
   }
 
-  // Get pipeline stages
-  const { data: stages } = await supabase
-    .from("pipeline_stages")
-    .select("id, name")
-    .order("position");
+  // Parallel fetch: stages, team members, current deals, previous deals
+  const [
+    { data: stages },
+    { data: teamMembers },
+    { data: currentDeals },
+    { data: prevDeals },
+  ] = await Promise.all([
+    supabase.from("pipeline_stages").select("id, name").order("position"),
+    supabase
+      .from("profiles")
+      .select("id, full_name, role")
+      .in("role", ["setter", "closer"]),
+    supabase
+      .from("deals")
+      .select("id, value, stage_id, assigned_to, created_at")
+      .gte("created_at", periodStart.toISOString())
+      .lte("created_at", periodEnd.toISOString()),
+    supabase
+      .from("deals")
+      .select("id, value, stage_id, assigned_to, created_at")
+      .gte("created_at", prevPeriodStart.toISOString())
+      .lte("created_at", prevPeriodEnd.toISOString()),
+  ]);
 
   const signedStage = stages?.find((s) => s.name === "Fermé (gagné)");
-
-  // Get team members
-  const { data: teamMembers } = await supabase
-    .from("profiles")
-    .select("id, full_name, role")
-    .in("role", ["setter", "closer"]);
-
-  // Get deals for current period
-  const { data: currentDeals } = await supabase
-    .from("deals")
-    .select("id, value, stage_id, assigned_to, created_at")
-    .gte("created_at", periodStart.toISOString())
-    .lte("created_at", periodEnd.toISOString());
-
-  // Get deals for previous period
-  const { data: prevDeals } = await supabase
-    .from("deals")
-    .select("id, value, stage_id, assigned_to, created_at")
-    .gte("created_at", prevPeriodStart.toISOString())
-    .lte("created_at", prevPeriodEnd.toISOString());
 
   const deals = currentDeals || [];
   const previousDeals = prevDeals || [];
@@ -525,16 +529,18 @@ export async function getBenchmarkData(
 export async function getContactHeatmap() {
   const supabase = await createClient();
 
-  // Get all prospect interactions with timestamps
-  const { data: prospects } = await supabase
-    .from("prospects")
-    .select("last_message_at, status, created_at")
-    .not("last_message_at", "is", null);
-
-  // Get bookings with scheduling times
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("scheduled_at, status, created_at");
+  // Parallel fetch: prospect interactions and bookings (with safety limits)
+  const [{ data: prospects }, { data: bookings }] = await Promise.all([
+    supabase
+      .from("prospects")
+      .select("last_message_at, status, created_at")
+      .not("last_message_at", "is", null)
+      .limit(1000),
+    supabase
+      .from("bookings")
+      .select("scheduled_at, status, created_at")
+      .limit(1000),
+  ]);
 
   // Build heatmap: 7 days x 24 hours
   const heatmap: number[][] = Array.from({ length: 7 }, () =>

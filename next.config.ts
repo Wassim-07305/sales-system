@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactCompiler: true,
   transpilePackages: ["@react-pdf/renderer"],
   experimental: {
     // Cache les pages dynamiques côté client pendant 30s
@@ -17,6 +18,7 @@ const nextConfig: NextConfig = {
     ],
   },
   images: {
+    formats: ["image/webp", "image/avif"],
     remotePatterns: [
       {
         protocol: "https",

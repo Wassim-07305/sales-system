@@ -38,7 +38,8 @@ export async function getCourseWithPrerequisites(
       const { data: lessons } = await supabase
         .from("lessons")
         .select("id")
-        .eq("course_id", p.prerequisite_course_id as string);
+        .eq("course_id", p.prerequisite_course_id as string)
+        .limit(500);
 
       const lessonIds = (lessons || []).map((l) => l.id);
 
@@ -189,7 +190,8 @@ export async function getResourceLibrary() {
   const { data: resources } = await supabase
     .from("resource_library")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(500);
 
   return resources || [];
 }
@@ -206,7 +208,8 @@ export async function getRevisionCards(courseId?: string) {
     const { data: lessons } = await supabase
       .from("lessons")
       .select("id")
-      .eq("course_id", courseId);
+      .eq("course_id", courseId)
+      .limit(500);
 
     if (lessons && lessons.length > 0) {
       query = query.in(
@@ -216,7 +219,7 @@ export async function getRevisionCards(courseId?: string) {
     }
   }
 
-  const { data: cards } = await query.order("created_at");
+  const { data: cards } = await query.order("created_at").limit(500);
   return (cards || []).map((c: Record<string, unknown>) => ({
     ...c,
     lessons: Array.isArray(c.lessons) ? c.lessons[0] || null : c.lessons,

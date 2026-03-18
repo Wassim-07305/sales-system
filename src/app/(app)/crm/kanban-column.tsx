@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -19,7 +20,7 @@ interface KanbanColumnProps {
   onDealSelectionChange?: (dealId: string, selected: boolean) => void;
 }
 
-export function KanbanColumn({
+export const KanbanColumn = memo(function KanbanColumn({
   stage,
   deals,
   totalValue,
@@ -121,4 +122,4 @@ export function KanbanColumn({
       </SortableContext>
     </div>
   );
-}
+});

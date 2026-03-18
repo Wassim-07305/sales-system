@@ -102,7 +102,8 @@ export async function getAdminDashboardData() {
           "user_id, date, mood, dms_sent, replies_received, calls_booked, deals_closed, conversations_count",
         )
         .in("user_id", setterIds)
-        .order("date", { ascending: false });
+        .order("date", { ascending: false })
+        .limit(100);
 
       // Keep only the most recent journal per setter
       for (const j of journals || []) {
@@ -199,7 +200,9 @@ export async function getAdminDashboardData() {
       contractStats = {
         total: contracts.length,
         signed: contracts.filter((c) => c.status === "signed").length,
-        pending: contracts.filter((c) => c.status === "sent" || c.status === "draft").length,
+        pending: contracts.filter(
+          (c) => c.status === "sent" || c.status === "draft",
+        ).length,
         totalAmount: contracts
           .filter((c) => c.status === "signed")
           .reduce((sum, c) => sum + (c.amount || 0), 0),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,24 +70,35 @@ export function CustomersView({ clients, testimonials }: Props) {
   const [filter, setFilter] = useState("all");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
-  const atRisk = clients.filter((c) => c.health_score < 40);
-  const healthy = clients.filter((c) => c.health_score >= 70);
-  const moderate = clients.filter(
-    (c) => c.health_score >= 40 && c.health_score < 70,
+  const atRisk = useMemo(
+    () => clients.filter((c) => c.health_score < 40),
+    [clients],
+  );
+  const healthy = useMemo(
+    () => clients.filter((c) => c.health_score >= 70),
+    [clients],
+  );
+  const moderate = useMemo(
+    () => clients.filter((c) => c.health_score >= 40 && c.health_score < 70),
+    [clients],
   );
 
-  const filtered = clients.filter((c) => {
-    const matchSearch =
-      (c.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()) ||
-      (c.niche || "").toLowerCase().includes(search.toLowerCase());
+  const filtered = useMemo(
+    () =>
+      clients.filter((c) => {
+        const matchSearch =
+          (c.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
+          c.email.toLowerCase().includes(search.toLowerCase()) ||
+          (c.niche || "").toLowerCase().includes(search.toLowerCase());
 
-    if (filter === "at_risk") return matchSearch && c.health_score < 40;
-    if (filter === "moderate")
-      return matchSearch && c.health_score >= 40 && c.health_score < 70;
-    if (filter === "healthy") return matchSearch && c.health_score >= 70;
-    return matchSearch;
-  });
+        if (filter === "at_risk") return matchSearch && c.health_score < 40;
+        if (filter === "moderate")
+          return matchSearch && c.health_score >= 40 && c.health_score < 70;
+        if (filter === "healthy") return matchSearch && c.health_score >= 70;
+        return matchSearch;
+      }),
+    [clients, search, filter],
+  );
 
   function getScoreColor(score: number) {
     if (score >= 70) return "text-green-500";

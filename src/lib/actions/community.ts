@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { notify } from "@/lib/actions/notifications";
 
@@ -97,11 +98,7 @@ export async function createCommunityPost(formData: {
   target_audience?: "all" | "b2b" | "b2c";
   channel?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   // Check if user is banned
   const banned = await isUserBanned(user.id);
@@ -137,23 +134,27 @@ export async function createCommunityPost(formData: {
 }
 
 export async function toggleLike(postId: string, increment: boolean) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
-  const { data: post } = await supabase
-    .from("community_posts")
-    .select("likes_count")
-    .eq("id", postId)
-    .single();
-  if (!post) return;
-  const newCount = Math.max(0, (post.likes_count || 0) + (increment ? 1 : -1));
-  await supabase
-    .from("community_posts")
-    .update({ likes_count: newCount })
-    .eq("id", postId);
-  revalidatePath("/community");
+  try {
+    const { supabase } = await requireAuth();
+
+    const { data: post } = await supabase
+      .from("community_posts")
+      .select("likes_count")
+      .eq("id", postId)
+      .single();
+    if (!post) return;
+    const newCount = Math.max(
+      0,
+      (post.likes_count || 0) + (increment ? 1 : -1),
+    );
+    await supabase
+      .from("community_posts")
+      .update({ likes_count: newCount })
+      .eq("id", postId);
+    revalidatePath("/community");
+  } catch {
+    // Non authentifié — silently ignore
+  }
 }
 
 export async function getComments(postId: string) {
@@ -170,11 +171,7 @@ export async function getComments(postId: string) {
 }
 
 export async function addComment(postId: string, content: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   // Check if user is banned
   const banned = await isUserBanned(user.id);
@@ -240,73 +237,73 @@ export async function hidePost(
   reason?: string,
   category?: string,
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role))
-    return { error: "Accès refusé" };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role))
+      return { error: "Accès refusé" };
 
-  await supabase
-    .from("community_posts")
-    .update({ hidden: true })
-    .eq("id", postId);
+    await supabase
+      .from("community_posts")
+      .update({ hidden: true })
+      .eq("id", postId);
 
-  // Log moderation action
-  if (reason) {
-    try {
-      await supabase.from("community_moderation_logs").insert({
-        post_id: postId,
-        moderator_id: user.id,
-        action: "hide",
-        reason,
-        category:
-          (category as
-            | "spam"
-            | "contenu_inapproprie"
-            | "hors_sujet"
-            | "harcelement"
-            | "autre") || "autre",
-      });
-    } catch {
-      // Table may not exist yet
+    // Log moderation action
+    if (reason) {
+      try {
+        await supabase.from("community_moderation_logs").insert({
+          post_id: postId,
+          moderator_id: user.id,
+          action: "hide",
+          reason,
+          category:
+            (category as
+              | "spam"
+              | "contenu_inapproprie"
+              | "hors_sujet"
+              | "harcelement"
+              | "autre") || "autre",
+        });
+      } catch {
+        // Table may not exist yet
+      }
     }
-  }
 
-  revalidatePath("/community");
-  revalidatePath("/community/manage");
-  return { success: true };
+    revalidatePath("/community");
+    revalidatePath("/community/manage");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function unhidePost(postId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role))
-    return { error: "Accès refusé" };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role))
+      return { error: "Accès refusé" };
 
-  await supabase
-    .from("community_posts")
-    .update({ hidden: false })
-    .eq("id", postId);
-  revalidatePath("/community");
-  revalidatePath("/community/manage");
-  return { success: true };
+    await supabase
+      .from("community_posts")
+      .update({ hidden: false })
+      .eq("id", postId);
+    revalidatePath("/community");
+    revalidatePath("/community/manage");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function deleteCommunityPost(
@@ -314,73 +311,73 @@ export async function deleteCommunityPost(
   reason?: string,
   category?: string,
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role))
-    return { error: "Accès refusé" };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role))
+      return { error: "Accès refusé" };
 
-  // Log moderation action before deleting
-  if (reason) {
-    try {
-      await supabase.from("community_moderation_logs").insert({
-        post_id: postId,
-        moderator_id: user.id,
-        action: "delete",
-        reason,
-        category:
-          (category as
-            | "spam"
-            | "contenu_inapproprie"
-            | "hors_sujet"
-            | "harcelement"
-            | "autre") || "autre",
-      });
-    } catch {
-      // Table may not exist yet
+    // Log moderation action before deleting
+    if (reason) {
+      try {
+        await supabase.from("community_moderation_logs").insert({
+          post_id: postId,
+          moderator_id: user.id,
+          action: "delete",
+          reason,
+          category:
+            (category as
+              | "spam"
+              | "contenu_inapproprie"
+              | "hors_sujet"
+              | "harcelement"
+              | "autre") || "autre",
+        });
+      } catch {
+        // Table may not exist yet
+      }
     }
-  }
 
-  await supabase.from("community_posts").delete().eq("id", postId);
-  revalidatePath("/community");
-  revalidatePath("/community/manage");
-  return { success: true };
+    await supabase.from("community_posts").delete().eq("id", postId);
+    revalidatePath("/community");
+    revalidatePath("/community/manage");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function deleteComment(commentId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
+  try {
+    const { supabase, user } = await requireAuth();
 
-  // Only allow deleting own comments or admin/manager
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  const isAdmin = profile && ["admin", "manager"].includes(profile.role);
+    // Only allow deleting own comments or admin/manager
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    const isAdmin = profile && ["admin", "manager"].includes(profile.role);
 
-  if (isAdmin) {
-    await supabase.from("community_comments").delete().eq("id", commentId);
-  } else {
-    await supabase
-      .from("community_comments")
-      .delete()
-      .eq("id", commentId)
-      .eq("author_id", user.id);
+    if (isAdmin) {
+      await supabase.from("community_comments").delete().eq("id", commentId);
+    } else {
+      await supabase
+        .from("community_comments")
+        .delete()
+        .eq("id", commentId)
+        .eq("author_id", user.id);
+    }
+    revalidatePath("/community");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
   }
-  revalidatePath("/community");
-  return { success: true };
 }
 
 export async function searchCommunity(query: string) {
@@ -470,10 +467,7 @@ export async function getUserReputation(userId?: string) {
 
   let targetUserId = userId;
   if (!targetUserId) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Non authentifié");
+    const { user } = await requireAuth();
     targetUserId = user.id;
   }
 
@@ -648,11 +642,7 @@ export async function awardReputation(
   action: string,
   points: number,
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   // Try to insert into reputation_events table; if it doesn't exist, silently skip
   try {
@@ -675,10 +665,7 @@ export async function getReputationActivity(userId?: string) {
 
   let targetUserId = userId;
   if (!targetUserId) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Non authentifié");
+    const { user } = await requireAuth();
     targetUserId = user.id;
   }
 
@@ -860,11 +847,7 @@ export async function createEvent(data: {
   metadata: EventMetadata;
   target_audience?: "all" | "b2b" | "b2c";
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   // Only admin / manager may create events
   const { data: profile } = await supabase
@@ -955,11 +938,7 @@ export async function getUpcomingEvents() {
 }
 
 export async function registerForEvent(eventId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   // Check if already registered (look for RSVP comment)
   const { data: existing } = await supabase
@@ -1008,11 +987,7 @@ export async function registerForEvent(eventId: string) {
 }
 
 export async function unregisterFromEvent(eventId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   await supabase
     .from("community_comments")
@@ -1093,149 +1068,150 @@ export async function getUserRsvps(
 }
 
 export async function getAllPostsForModeration() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+  try {
+    const { supabase, user } = await requireAuth();
 
-  const { data } = await supabase
-    .from("community_posts")
-    .select("*, author:profiles(id, full_name, avatar_url)")
-    .order("created_at", { ascending: false });
-  return (data || []).map((d: Record<string, unknown>) => ({
-    ...d,
-    author: Array.isArray(d.author) ? d.author[0] || null : d.author,
-  }));
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+
+    const { data } = await supabase
+      .from("community_posts")
+      .select("*, author:profiles(id, full_name, avatar_url)")
+      .order("created_at", { ascending: false });
+    return (data || []).map((d: Record<string, unknown>) => ({
+      ...d,
+      author: Array.isArray(d.author) ? d.author[0] || null : d.author,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 // ─── Ban / Unban Users ───
 
 export async function banCommunityUser(userId: string, reason: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role))
-    return { error: "Accès refusé" };
-
-  // Cannot ban yourself
-  if (userId === user.id)
-    return { error: "Impossible de vous bannir vous-même" };
-
-  // Cannot ban admins or managers
-  const { data: targetProfile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", userId)
-    .single();
-  if (targetProfile && ["admin", "manager"].includes(targetProfile.role))
-    return { error: "Impossible de bannir un admin ou manager" };
-
   try {
-    await supabase.from("community_bans").insert({
-      user_id: userId,
-      banned_by: user.id,
-      reason,
-    });
-  } catch {
-    // Table may not exist — try upsert fallback
-  }
+    const { supabase, user } = await requireAuth();
 
-  // Notify the banned user
-  try {
-    notify(
-      userId,
-      "Bannissement communauté",
-      `Vous avez été banni de la communauté. Raison : ${reason}`,
-      { type: "community", link: "/community" },
-    );
-  } catch {
-    // Non-blocking
-  }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role))
+      return { error: "Accès refusé" };
 
-  revalidatePath("/community/manage");
-  revalidatePath("/community");
-  return { success: true };
+    // Cannot ban yourself
+    if (userId === user.id)
+      return { error: "Impossible de vous bannir vous-même" };
+
+    // Cannot ban admins or managers
+    const { data: targetProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+    if (targetProfile && ["admin", "manager"].includes(targetProfile.role))
+      return { error: "Impossible de bannir un admin ou manager" };
+
+    try {
+      await supabase.from("community_bans").insert({
+        user_id: userId,
+        banned_by: user.id,
+        reason,
+      });
+    } catch {
+      // Table may not exist — try upsert fallback
+    }
+
+    // Notify the banned user
+    try {
+      notify(
+        userId,
+        "Bannissement communauté",
+        `Vous avez été banni de la communauté. Raison : ${reason}`,
+        { type: "community", link: "/community" },
+      );
+    } catch {
+      // Non-blocking
+    }
+
+    revalidatePath("/community/manage");
+    revalidatePath("/community");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function unbanCommunityUser(userId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role))
-    return { error: "Accès refusé" };
-
   try {
-    await supabase
-      .from("community_bans")
-      .update({ lifted_at: new Date().toISOString() })
-      .eq("user_id", userId)
-      .is("lifted_at", null);
-  } catch {
-    // Table may not exist
-  }
+    const { supabase, user } = await requireAuth();
 
-  revalidatePath("/community/manage");
-  revalidatePath("/community");
-  return { success: true };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role))
+      return { error: "Accès refusé" };
+
+    try {
+      await supabase
+        .from("community_bans")
+        .update({ lifted_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .is("lifted_at", null);
+    } catch {
+      // Table may not exist
+    }
+
+    revalidatePath("/community/manage");
+    revalidatePath("/community");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function getCommunityBans() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
-
   try {
-    const { data } = await supabase
-      .from("community_bans")
-      .select(
-        "*, user:profiles!community_bans_user_id_fkey(id, full_name, avatar_url, role), moderator:profiles!community_bans_banned_by_fkey(id, full_name)",
-      )
-      .is("lifted_at", null)
-      .order("created_at", { ascending: false });
+    const { supabase, user } = await requireAuth();
 
-    if (!data) return [];
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) return [];
 
-    return data.map((d: Record<string, unknown>) => ({
-      ...d,
-      user: Array.isArray(d.user) ? d.user[0] || null : d.user,
-      moderator: Array.isArray(d.moderator)
-        ? d.moderator[0] || null
-        : d.moderator,
-    }));
+    try {
+      const { data } = await supabase
+        .from("community_bans")
+        .select(
+          "*, user:profiles!community_bans_user_id_fkey(id, full_name, avatar_url, role), moderator:profiles!community_bans_banned_by_fkey(id, full_name)",
+        )
+        .is("lifted_at", null)
+        .order("created_at", { ascending: false });
+
+      if (!data) return [];
+
+      return data.map((d: Record<string, unknown>) => ({
+        ...d,
+        user: Array.isArray(d.user) ? d.user[0] || null : d.user,
+        moderator: Array.isArray(d.moderator)
+          ? d.moderator[0] || null
+          : d.moderator,
+      }));
+    } catch {
+      // Table may not exist — return empty
+      return [];
+    }
   } catch {
-    // Table may not exist — return empty
     return [];
   }
 }
@@ -1262,103 +1238,105 @@ export async function reportPost(
   reason: string,
   category: string,
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
-
-  // Check if already reported by this user
   try {
-    const { data: existing } = await supabase
-      .from("community_reports")
-      .select("id")
-      .eq("post_id", postId)
-      .eq("reporter_id", user.id)
-      .limit(1);
-    if (existing && existing.length > 0) {
-      return { error: "Vous avez déjà signalé ce post" };
+    const { supabase, user } = await requireAuth();
+
+    // Check if already reported by this user
+    try {
+      const { data: existing } = await supabase
+        .from("community_reports")
+        .select("id")
+        .eq("post_id", postId)
+        .eq("reporter_id", user.id)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        return { error: "Vous avez déjà signalé ce post" };
+      }
+    } catch {
+      // Table may not exist
     }
-  } catch {
-    // Table may not exist
-  }
 
-  try {
-    await supabase.from("community_reports").insert({
-      post_id: postId,
-      reporter_id: user.id,
-      category:
-        (category as
-          | "spam"
-          | "contenu_inapproprie"
-          | "hors_sujet"
-          | "harcelement"
-          | "autre") || "autre",
-      reason,
-      status: "pending",
-    });
-  } catch {
-    // Table may not exist
-  }
+    try {
+      await supabase.from("community_reports").insert({
+        post_id: postId,
+        reporter_id: user.id,
+        category:
+          (category as
+            | "spam"
+            | "contenu_inapproprie"
+            | "hors_sujet"
+            | "harcelement"
+            | "autre") || "autre",
+        reason,
+        status: "pending",
+      });
+    } catch {
+      // Table may not exist
+    }
 
-  revalidatePath("/community/manage");
-  return { success: true };
+    revalidatePath("/community/manage");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function getReports() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
-
   try {
-    const { data } = await supabase
-      .from("community_reports")
-      .select(
-        "*, reporter:profiles!community_reports_reporter_id_fkey(id, full_name, avatar_url), post:community_posts!community_reports_post_id_fkey(id, title, content, author_id)",
-      )
-      .order("created_at", { ascending: false });
+    const { supabase, user } = await requireAuth();
 
-    if (!data) return [];
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) return [];
 
-    return data.map((d: Record<string, unknown>) => ({
-      ...d,
-      reporter: Array.isArray(d.reporter) ? d.reporter[0] || null : d.reporter,
-      post: Array.isArray(d.post) ? d.post[0] || null : d.post,
-    }));
+    try {
+      const { data } = await supabase
+        .from("community_reports")
+        .select(
+          "*, reporter:profiles!community_reports_reporter_id_fkey(id, full_name, avatar_url), post:community_posts!community_reports_post_id_fkey(id, title, content, author_id)",
+        )
+        .order("created_at", { ascending: false });
+
+      if (!data) return [];
+
+      return data.map((d: Record<string, unknown>) => ({
+        ...d,
+        reporter: Array.isArray(d.reporter)
+          ? d.reporter[0] || null
+          : d.reporter,
+        post: Array.isArray(d.post) ? d.post[0] || null : d.post,
+      }));
+    } catch {
+      return [];
+    }
   } catch {
     return [];
   }
 }
 
 export async function getPendingReportsCount(): Promise<number> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return 0;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return 0;
-
   try {
-    const { count } = await supabase
-      .from("community_reports")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "pending");
-    return count || 0;
+    const { supabase, user } = await requireAuth();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) return 0;
+
+    try {
+      const { count } = await supabase
+        .from("community_reports")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+      return count || 0;
+    } catch {
+      return 0;
+    }
   } catch {
     return 0;
   }
@@ -1368,68 +1346,68 @@ export async function reviewReport(
   reportId: string,
   status: "reviewed" | "dismissed",
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Non authentifié" };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role))
-    return { error: "Accès refusé" };
-
   try {
-    await supabase
-      .from("community_reports")
-      .update({
-        status,
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq("id", reportId);
-  } catch {
-    // Table may not exist
-  }
+    const { supabase, user } = await requireAuth();
 
-  revalidatePath("/community/manage");
-  return { success: true };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role))
+      return { error: "Accès refusé" };
+
+    try {
+      await supabase
+        .from("community_reports")
+        .update({
+          status,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", reportId);
+    } catch {
+      // Table may not exist
+    }
+
+    revalidatePath("/community/manage");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function getModerationLogs() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
-
   try {
-    const { data } = await supabase
-      .from("community_moderation_logs")
-      .select(
-        "*, moderator:profiles!community_moderation_logs_moderator_id_fkey(id, full_name)",
-      )
-      .order("created_at", { ascending: false })
-      .limit(50);
+    const { supabase, user } = await requireAuth();
 
-    if (!data) return [];
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) return [];
 
-    return data.map((d: Record<string, unknown>) => ({
-      ...d,
-      moderator: Array.isArray(d.moderator)
-        ? d.moderator[0] || null
-        : d.moderator,
-    }));
+    try {
+      const { data } = await supabase
+        .from("community_moderation_logs")
+        .select(
+          "*, moderator:profiles!community_moderation_logs_moderator_id_fkey(id, full_name)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (!data) return [];
+
+      return data.map((d: Record<string, unknown>) => ({
+        ...d,
+        moderator: Array.isArray(d.moderator)
+          ? d.moderator[0] || null
+          : d.moderator,
+      }));
+    } catch {
+      return [];
+    }
   } catch {
     return [];
   }
@@ -1438,45 +1416,45 @@ export async function getModerationLogs() {
 // ─── Get community members for ban management ───
 
 export async function getCommunityMembers(search?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (!profile || !["admin", "manager"].includes(profile.role)) return [];
-
-  let query = supabase
-    .from("profiles")
-    .select("id, full_name, avatar_url, role, created_at")
-    .order("full_name");
-
-  if (search) query = query.ilike("full_name", `%${search}%`);
-  const { data: members } = await query;
-
-  if (!members) return [];
-
-  // Get active bans
-  let bannedUserIds: Set<string> = new Set();
   try {
-    const { data: bans } = await supabase
-      .from("community_bans")
-      .select("user_id")
-      .is("lifted_at", null);
-    bannedUserIds = new Set((bans || []).map((b) => b.user_id));
-  } catch {
-    // Table may not exist
-  }
+    const { supabase, user } = await requireAuth();
 
-  return members.map((m) => ({
-    ...m,
-    is_banned: bannedUserIds.has(m.id),
-  }));
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) return [];
+
+    let query = supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url, role, created_at")
+      .order("full_name");
+
+    if (search) query = query.ilike("full_name", `%${search}%`);
+    const { data: members } = await query;
+
+    if (!members) return [];
+
+    // Get active bans
+    let bannedUserIds: Set<string> = new Set();
+    try {
+      const { data: bans } = await supabase
+        .from("community_bans")
+        .select("user_id")
+        .is("lifted_at", null);
+      bannedUserIds = new Set((bans || []).map((b) => b.user_id));
+    } catch {
+      // Table may not exist
+    }
+
+    return members.map((m) => ({
+      ...m,
+      is_banned: bannedUserIds.has(m.id),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 // ─── Announce group call ─────────────────────────────────────
@@ -1490,11 +1468,7 @@ export async function announceGroupCall(data: {
   title: string;
   description: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié");
+  const { supabase, user } = await requireAuth();
 
   const { data: profile } = await supabase
     .from("profiles")
