@@ -83,7 +83,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Academy",
     href: "/academy",
     icon: GraduationCap,
-    roles: ["admin", "manager", "setter", "closer", "client_b2c"],
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
   {
     label: "Équipe",

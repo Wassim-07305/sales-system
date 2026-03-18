@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify, notifyMany } from "@/lib/actions/notifications";
+import { generateInvoice, createInstallmentPlan } from "@/lib/actions/payments";
 import { subDays } from "date-fns";
 
 /**
@@ -325,6 +326,30 @@ export async function saveSignature(
 
   // Auto-update deal to "Fermé (gagné)" stage
   await moveDealToSigned(supabase, contractId);
+
+  // Auto-generate invoice on signature
+  const { data: signedContract } = await supabase
+    .from("contracts")
+    .select("amount, installment_count")
+    .eq("id", contractId)
+    .single();
+
+  if (signedContract?.amount) {
+    try {
+      await generateInvoice(contractId, signedContract.amount);
+      // Auto-create installment plan if multi-payment
+      const installments = signedContract.installment_count || 1;
+      if (installments > 1) {
+        await createInstallmentPlan({
+          contractId,
+          totalAmount: signedContract.amount,
+          installmentCount: installments,
+        });
+      }
+    } catch {
+      // Non-blocking — signature is already saved
+    }
+  }
 
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${contractId}`);

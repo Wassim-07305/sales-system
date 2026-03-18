@@ -11,7 +11,7 @@ export default async function OnboardingPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, onboarding_completed, full_name")
+    .select("role, onboarding_completed, full_name, onboarding_step")
     .eq("id", user.id)
     .single();
 
@@ -25,6 +25,7 @@ export default async function OnboardingPage() {
       role={role}
       userId={user.id}
       userName={profile?.full_name || undefined}
+      savedStep={profile?.onboarding_step || 0}
     />
   );
 }

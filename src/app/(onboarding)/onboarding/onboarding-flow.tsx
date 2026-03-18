@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   completeSimpleOnboarding,
+  generateB2BWorkspace,
   uploadAvatar,
   getWelcomeVideo,
   saveOnboardingProgress,
@@ -227,24 +228,38 @@ export function OnboardingFlow({
 
   // Check if current step can proceed (sequential gating)
   const canProceed = useCallback(() => {
-    if (role !== "client_b2c") return true;
     const stepId = currentStep?.id;
     if (!stepId) return false;
 
-    switch (stepId) {
-      case "b2c_welcome":
-        return true; // Always can proceed from welcome
-      case "b2c_profile":
-        return !!objectifPrincipal && !!niveauExperience;
-      case "b2c_video":
-        return videoUnlocked;
-      case "b2c_booking":
-        return bookingConfirmed;
-      case "b2c_community":
-        return communityJoined;
-      default:
-        return true;
+    if (role === "client_b2c") {
+      switch (stepId) {
+        case "b2c_welcome":
+          return true;
+        case "b2c_profile":
+          return !!objectifPrincipal && !!niveauExperience;
+        case "b2c_video":
+          return videoUnlocked;
+        case "b2c_booking":
+          return bookingConfirmed;
+        case "b2c_community":
+          return communityJoined;
+        default:
+          return true;
+      }
     }
+
+    if (role === "client_b2b") {
+      switch (stepId) {
+        case "b2b_welcome":
+          return true;
+        case "b2b_questionnaire":
+          return !!company && !!secteur && !!offre && !!cible && !!caMensuel && plateforme.length > 0;
+        default:
+          return true;
+      }
+    }
+
+    return true;
   }, [
     role,
     currentStep,
@@ -253,11 +268,17 @@ export function OnboardingFlow({
     videoUnlocked,
     bookingConfirmed,
     communityJoined,
+    company,
+    secteur,
+    offre,
+    cible,
+    caMensuel,
+    plateforme,
   ]);
 
   const goNext = useCallback(async () => {
     if (step >= steps.length - 1) return;
-    if (role === "client_b2c" && !canProceed()) {
+    if (!canProceed()) {
       toast.error("Complète cette étape avant de continuer");
       return;
     }
@@ -339,6 +360,22 @@ export function OnboardingFlow({
         toast.error(result.error);
         setCompleting(false);
         return;
+      }
+
+      // Generate B2B workspace with SOPs and pipeline
+      if (role === "client_b2b") {
+        const wsResult = await generateB2BWorkspace({
+          companyName: company,
+          offer: offre,
+          targetAudience: cible,
+          price: caMensuel,
+          networks: plateforme,
+          communicationTone: "professionnel",
+        });
+        if (wsResult?.error) {
+          console.error("Workspace generation error:", wsResult.error);
+          // Non-blocking — onboarding still completes
+        }
       }
       // Dynamic confetti import
       const confetti = (await import("canvas-confetti")).default;
