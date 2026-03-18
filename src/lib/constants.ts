@@ -28,7 +28,6 @@ import {
   Building2,
   Zap,
   Store,
-  Search,
   SlidersHorizontal,
   Code,
   Plug,
@@ -75,12 +74,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
   {
-    label: "Agenda",
-    href: "/calendar",
-    icon: CalendarDays,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-  {
     label: "Contrats",
     href: "/contracts",
     icon: FileText,
@@ -99,22 +92,10 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager"],
   },
   {
-    label: "Affectations",
-    href: "/team/assignments",
-    icon: UsersRound,
-    roles: ["admin", "manager"],
-  },
-  {
     label: "Analytics",
     href: "/analytics",
     icon: BarChart3,
-    roles: ["admin", "manager"],
-  },
-  {
-    label: "Ma performance",
-    href: "/analytics/performance",
-    icon: BarChart3,
-    roles: ["setter", "closer"],
+    roles: ["admin", "manager", "setter", "closer"],
   },
   {
     label: "Journal EOD",
@@ -126,12 +107,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Prospection",
     href: "/prospecting",
     icon: Target,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-  {
-    label: "Découverte Leads",
-    href: "/prospecting/discovery",
-    icon: Search,
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
@@ -357,7 +332,6 @@ export const NAV_SECTIONS: NavSection[] = [
         "/bookings",
         "/contracts",
         "/analytics",
-        "/analytics/performance",
         "/journal",
       ].includes(i.href),
     ),
@@ -367,7 +341,6 @@ export const NAV_SECTIONS: NavSection[] = [
     items: NAV_ITEMS.filter((i) =>
       [
         "/prospecting",
-        "/prospecting/discovery",
         "/roleplay",
         "/scripts",
         "/automation",
@@ -385,7 +358,6 @@ export const NAV_SECTIONS: NavSection[] = [
     items: NAV_ITEMS.filter((i) =>
       [
         "/team",
-        "/team/assignments",
         "/content",
         "/customers",
         "/marketplace",

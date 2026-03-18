@@ -8,6 +8,8 @@ import {
   completeSimpleOnboarding,
   uploadAvatar,
   getWelcomeVideo,
+  saveOnboardingProgress,
+  postWelcomeCommunityMessage,
 } from "@/lib/actions/onboarding";
 import { WelcomeVideo } from "@/components/welcome-video";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,11 @@ import {
   Link2,
   CheckCircle2,
   Sparkles,
+  Play,
+  Calendar,
+  Users,
+  ExternalLink,
+  Lock,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -33,12 +40,18 @@ interface OnboardingFlowProps {
   role: string;
   userId: string;
   userName?: string;
+  savedStep?: number;
 }
 
 interface StepDef {
   id: string;
   type:
     | "video"
+    | "b2c_welcome"
+    | "b2c_profile"
+    | "b2c_video"
+    | "b2c_booking"
+    | "b2c_community"
     | "welcome"
     | "avatar"
     | "text"
@@ -46,7 +59,9 @@ interface StepDef {
     | "chips"
     | "social"
     | "setter_profile"
-    | "summary";
+    | "summary"
+    | "b2b_questionnaire"
+    | "b2b_confirmation";
   title: string;
   subtitle?: string;
 }
@@ -56,87 +71,57 @@ interface StepDef {
 // ---------------------------------------------------------------------------
 
 const B2C_STEPS: StepDef[] = [
-  { id: "video", type: "video", title: "Vidéo de bienvenue" },
-  { id: "welcome", type: "welcome", title: "Bienvenue sur Sales System" },
   {
-    id: "avatar",
-    type: "avatar",
-    title: "Ta photo de profil",
-    subtitle: "Ajoute une photo pour personnaliser ton compte",
+    id: "b2c_welcome",
+    type: "b2c_welcome",
+    title: "Bienvenue dans la S Academy",
+    subtitle: "Damien Reynaud te souhaite la bienvenue",
   },
   {
-    id: "identity",
-    type: "text",
-    title: "Comment tu t'appelles ?",
-    subtitle: "Ton prénom et nom complet",
+    id: "b2c_profile",
+    type: "b2c_profile",
+    title: "Ton profil",
+    subtitle: "Quelques infos pour personnaliser ton parcours",
   },
   {
-    id: "phone",
-    type: "text",
-    title: "Ton numéro de téléphone",
-    subtitle: "Pour qu'on puisse te contacter",
+    id: "b2c_video",
+    type: "b2c_video",
+    title: "Vidéo de présentation",
+    subtitle: "Regarde cette vidéo pour découvrir la méthode",
   },
   {
-    id: "setter_profile",
-    type: "setter_profile",
-    title: "Ton profil de setter",
-    subtitle: "Ces infos nous aident à te placer chez le bon entrepreneur",
+    id: "b2c_booking",
+    type: "b2c_booking",
+    title: "Réserve ton appel",
+    subtitle: "Planifie ton appel d'onboarding avec l'équipe",
   },
   {
-    id: "bio",
-    type: "textarea",
-    title: "Présente-toi en quelques mots",
-    subtitle: "Ta bio courte (max 200 caractères)",
+    id: "b2c_community",
+    type: "b2c_community",
+    title: "Rejoins la communauté",
+    subtitle: "Présente-toi aux autres membres",
   },
-  {
-    id: "skills",
-    type: "text",
-    title: "Tes compétences",
-    subtitle: "Sépare-les par des virgules",
-  },
-  { id: "summary", type: "summary", title: "Ton profil est prêt !" },
 ];
 
 const B2B_STEPS: StepDef[] = [
-  { id: "video", type: "video", title: "Vidéo de bienvenue" },
-  { id: "welcome", type: "welcome", title: "Bienvenue sur Sales System" },
   {
-    id: "avatar",
-    type: "avatar",
-    title: "Ta photo de profil",
-    subtitle: "L'identité visuelle de ton entreprise",
+    id: "b2b_welcome",
+    type: "b2c_welcome",
+    title: "Bienvenue sur Sales System",
+    subtitle: "Ton espace entrepreneur est prêt à être configuré",
   },
   {
-    id: "company",
-    type: "text",
-    title: "Le nom de ton entreprise",
-    subtitle: "Comment s'appelle ton business ?",
+    id: "b2b_questionnaire",
+    type: "b2b_questionnaire",
+    title: "Ton business",
+    subtitle: "Dis-nous en plus sur ton activité pour configurer ton espace",
   },
   {
-    id: "business",
-    type: "textarea",
-    title: "Décris ton activité",
-    subtitle: "Ton offre, ton marché cible, ce que tu fais exactement",
+    id: "b2b_confirmation",
+    type: "b2b_confirmation",
+    title: "Ton espace est prêt !",
+    subtitle: "Récapitulatif et création de ton workspace",
   },
-  {
-    id: "qualification",
-    type: "textarea",
-    title: "Tes questions de qualification",
-    subtitle: "Quelles questions poses-tu pour qualifier un prospect ?",
-  },
-  {
-    id: "channels",
-    type: "chips",
-    title: "Tes canaux de prospection",
-    subtitle: "Sélectionne ceux que tu utilises",
-  },
-  {
-    id: "social",
-    type: "social",
-    title: "Tes réseaux sociaux",
-    subtitle: "LinkedIn et Instagram pour le setting IA",
-  },
-  { id: "summary", type: "summary", title: "Ton profil est prêt !" },
 ];
 
 const CHANNELS = [
@@ -154,36 +139,47 @@ const CHANNELS = [
 
 export function OnboardingFlow({
   role,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   userId,
   userName,
+  savedStep,
 }: OnboardingFlowProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
   const steps = role === "client_b2b" ? B2B_STEPS : B2C_STEPS;
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(savedStep || 0);
   const [direction, setDirection] = useState(1);
   const [completing, setCompleting] = useState(false);
 
-  // Form state
+  // B2C step completion gating
+  const [stepCompleted, setStepCompleted] = useState<Record<string, boolean>>(
+    {},
+  );
+
+  // Form state — B2C
+  const [objectifPrincipal, setObjectifPrincipal] = useState("");
+  const [whyMotivation, setWhyMotivation] = useState("");
+  const [disponibilitesHeures, setDisponibilitesHeures] = useState("4");
+  const [niveauExperience, setNiveauExperience] = useState("");
+  const [videoWatchSeconds, setVideoWatchSeconds] = useState(0);
+  const [videoUnlocked, setVideoUnlocked] = useState(false);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [communityJoined, setCommunityJoined] = useState(false);
+  const [joiningCommunity, setJoiningCommunity] = useState(false);
+
+  // Form state — B2B
+  const [company, setCompany] = useState("");
+  const [secteur, setSecteur] = useState("");
+  const [offre, setOffre] = useState("");
+  const [cible, setCible] = useState("");
+  const [caMensuel, setCaMensuel] = useState("");
+  const [plateforme, setPlateforme] = useState<string[]>([]);
+  const [objectifB2B, setObjectifB2B] = useState("");
+
+  // Shared state
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [fullName, setFullName] = useState(userName || "");
   const [phone, setPhone] = useState("");
-  const [company, setCompany] = useState("");
-  const [bio, setBio] = useState("");
-  const [skills, setSkills] = useState("");
-  const [businessDesc, setBusinessDesc] = useState("");
-  const [qualificationQ, setQualificationQ] = useState("");
-  const [channels, setChannels] = useState<string[]>([]);
-  const [linkedinUrl, setLinkedinUrl] = useState("");
-  const [instagramUsername, setInstagramUsername] = useState("");
-  const [objectifFinancier, setObjectifFinancier] = useState<
-    "complement" | "remplacement" | "hybride" | ""
-  >("");
-  const [disponibilitesHeures, setDisponibilitesHeures] = useState("4");
-  const [situationActuelle, setSituationActuelle] = useState("");
   const [welcomeVideoData, setWelcomeVideoData] = useState<{
     videoUrl: string;
     title: string;
@@ -191,12 +187,11 @@ export function OnboardingFlow({
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const videoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentStep = steps[step];
   const isLast = step === steps.length - 1;
-  const totalReal = steps.length - 3; // exclude video + welcome + summary
-  const currentReal = Math.max(0, Math.min(step - 2, totalReal));
-  const progress = totalReal > 0 ? (currentReal / totalReal) * 100 : 0;
+  const progress = steps.length > 1 ? ((step) / (steps.length - 1)) * 100 : 0;
 
   // Fetch welcome video data on mount
   useEffect(() => {
@@ -211,11 +206,71 @@ export function OnboardingFlow({
     return () => clearTimeout(timeout);
   }, [step]);
 
-  const goNext = useCallback(() => {
+  // Video unlock timer for B2C step 3
+  useEffect(() => {
+    if (currentStep?.type === "b2c_video" && !videoUnlocked) {
+      videoTimerRef.current = setInterval(() => {
+        setVideoWatchSeconds((prev) => {
+          const next = prev + 1;
+          if (next >= 30) {
+            setVideoUnlocked(true);
+            if (videoTimerRef.current) clearInterval(videoTimerRef.current);
+          }
+          return next;
+        });
+      }, 1000);
+      return () => {
+        if (videoTimerRef.current) clearInterval(videoTimerRef.current);
+      };
+    }
+  }, [currentStep?.type, videoUnlocked]);
+
+  // Check if current step can proceed (sequential gating)
+  const canProceed = useCallback(() => {
+    if (role !== "client_b2c") return true;
+    const stepId = currentStep?.id;
+    if (!stepId) return false;
+
+    switch (stepId) {
+      case "b2c_welcome":
+        return true; // Always can proceed from welcome
+      case "b2c_profile":
+        return !!objectifPrincipal && !!niveauExperience;
+      case "b2c_video":
+        return videoUnlocked;
+      case "b2c_booking":
+        return bookingConfirmed;
+      case "b2c_community":
+        return communityJoined;
+      default:
+        return true;
+    }
+  }, [
+    role,
+    currentStep,
+    objectifPrincipal,
+    niveauExperience,
+    videoUnlocked,
+    bookingConfirmed,
+    communityJoined,
+  ]);
+
+  const goNext = useCallback(async () => {
     if (step >= steps.length - 1) return;
+    if (role === "client_b2c" && !canProceed()) {
+      toast.error("Complète cette étape avant de continuer");
+      return;
+    }
+    // Save progress
+    try {
+      await saveOnboardingProgress(step + 1);
+    } catch {
+      // Non-blocking
+    }
+    setStepCompleted((prev) => ({ ...prev, [currentStep.id]: true }));
     setDirection(1);
     setStep((s) => s + 1);
-  }, [step, steps.length]);
+  }, [step, steps.length, role, canProceed, currentStep]);
 
   const goPrev = useCallback(() => {
     if (step <= 0) return;
@@ -223,17 +278,14 @@ export function OnboardingFlow({
     setStep((s) => s - 1);
   }, [step]);
 
-  // Keyboard navigation
+  // Keyboard navigation — disabled for B2C (sequential gating)
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (isLast) {
           handleComplete();
-        } else if (
-          currentStep.type !== "welcome" &&
-          currentStep.type !== "video"
-        ) {
+        } else if (canProceed()) {
           goNext();
         }
       }
@@ -241,7 +293,7 @@ export function OnboardingFlow({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, isLast, goNext]);
+  }, [step, isLast, goNext, canProceed]);
 
   async function handleAvatarUpload(file: File) {
     if (file.size > 10 * 1024 * 1024) {
@@ -267,14 +319,6 @@ export function OnboardingFlow({
     }
   }
 
-  function toggleChannel(channel: string) {
-    setChannels((prev) =>
-      prev.includes(channel)
-        ? prev.filter((c) => c !== channel)
-        : [...prev, channel],
-    );
-  }
-
   async function handleComplete() {
     setCompleting(true);
     try {
@@ -283,16 +327,13 @@ export function OnboardingFlow({
         phone: phone || undefined,
         company: company || undefined,
         avatar_url: avatarUrl || undefined,
-        bio: bio || undefined,
-        skills: skills || undefined,
-        business_description: businessDesc || undefined,
-        qualification_questions: qualificationQ || undefined,
-        prospection_channels: channels.length > 0 ? channels : undefined,
-        linkedin_url: linkedinUrl || undefined,
-        instagram_username: instagramUsername || undefined,
-        objectif_financier: objectifFinancier || undefined,
+        objectif_financier: objectifPrincipal || undefined,
         disponibilites_heures: disponibilitesHeures || undefined,
-        situation_actuelle: situationActuelle || undefined,
+        situation_actuelle: niveauExperience || undefined,
+        // B2B fields
+        business_description: offre || undefined,
+        qualification_questions: cible || undefined,
+        prospection_channels: plateforme.length > 0 ? plateforme : undefined,
       });
       if (result?.error) {
         toast.error(result.error);
@@ -317,18 +358,17 @@ export function OnboardingFlow({
   }
 
   // ---------------------------------------------------------------------------
-  // Step renderers
+  // Step renderers — B2C
   // ---------------------------------------------------------------------------
 
-  function renderWelcome() {
-    const displayName =
-      userName || (role === "client_b2b" ? "partenaire" : "setter");
+  function renderB2CWelcome() {
+    const displayName = userName || "futur setter";
     return (
       <div className="flex flex-col items-center text-center gap-8">
-        {/* Animated logo */}
+        {/* Damien's photo */}
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{
             type: "spring",
             stiffness: 200,
@@ -336,8 +376,18 @@ export function OnboardingFlow({
             delay: 0.2,
           }}
         >
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#7af17a]/20 to-[#7af17a]/5 border border-[#7af17a]/30 flex items-center justify-center shadow-lg shadow-[#7af17a]/10">
-            <Image src="/logo.png" alt="Sales System" width={56} height={56} />
+          <div className="w-28 h-28 rounded-full overflow-hidden border-3 border-[#7af17a]/40 shadow-xl shadow-[#7af17a]/20">
+            <Image
+              src="/images/damien-reynaud.jpg"
+              alt="Damien Reynaud"
+              width={112}
+              height={112}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback if image not found
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
           </div>
         </motion.div>
 
@@ -347,14 +397,16 @@ export function OnboardingFlow({
           transition={{ delay: 0.5, duration: 0.4 }}
           className="space-y-3"
         >
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
             Bienvenue{userName ? "," : ""}{" "}
-            <span className="text-[#7af17a]">{displayName}</span>
+            <span className="text-[#7af17a]">{displayName}</span> !
           </h1>
-          <p className="text-white/40 text-lg max-w-md">
-            {role === "client_b2b"
-              ? "Quelques questions pour configurer ton espace business et activer le setting IA."
-              : "Quelques étapes pour configurer ton profil et démarrer ta formation."}
+          <p className="text-white/50 text-lg max-w-md leading-relaxed">
+            Je suis <span className="text-white font-medium">Damien Reynaud</span>, fondateur de la S Academy.
+            Tu es au bon endroit pour transformer ta carrière dans le setting.
+          </p>
+          <p className="text-white/40 text-base max-w-md">
+            5 étapes rapides et tu seras prêt à démarrer. On y va ?
           </p>
         </motion.div>
 
@@ -366,8 +418,7 @@ export function OnboardingFlow({
         >
           <Sparkles className="h-4 w-4 text-[#7af17a]" />
           <span className="text-sm text-white/50">
-            {role === "client_b2b" ? "5 étapes" : "3 étapes"} — moins de 2
-            minutes
+            5 étapes — moins de 5 minutes
           </span>
         </motion.div>
 
@@ -384,237 +435,65 @@ export function OnboardingFlow({
     );
   }
 
-  function renderAvatar() {
-    return (
-      <div className="flex flex-col items-center gap-6">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="relative group w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-white/20 hover:border-[#7af17a]/60 transition-all duration-300 bg-white/5 flex items-center justify-center"
-        >
-          {avatarPreview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarPreview}
-              alt="Aperçu"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <Camera className="h-10 w-10 text-white/30 group-hover:text-[#7af17a] transition-colors" />
-          )}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            {uploadingAvatar ? (
-              <Loader2 className="h-6 w-6 text-white animate-spin" />
-            ) : (
-              <Camera className="h-6 w-6 text-white" />
-            )}
-          </div>
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleAvatarUpload(file);
-          }}
-        />
-        <p className="text-sm text-white/40">
-          Clique pour choisir une photo (max 10 Mo)
-        </p>
-      </div>
-    );
-  }
-
-  function renderTextInput() {
-    const id = currentStep.id;
-    const value =
-      id === "identity"
-        ? fullName
-        : id === "phone"
-          ? phone
-          : id === "company"
-            ? company
-            : id === "skills"
-              ? skills
-              : "";
-    const setValue =
-      id === "identity"
-        ? setFullName
-        : id === "phone"
-          ? setPhone
-          : id === "company"
-            ? setCompany
-            : id === "skills"
-              ? setSkills
-              : setFullName;
-    const placeholder =
-      id === "identity"
-        ? "Jean Dupont"
-        : id === "phone"
-          ? "+33 6 12 34 56 78"
-          : id === "company"
-            ? "AgenceX, SaaS Corp..."
-            : id === "skills"
-              ? "Cold calling, LinkedIn, closing..."
-              : "";
-    const type = id === "phone" ? "tel" : "text";
-
-    return (
-      <div className="w-full max-w-md mx-auto">
-        <input
-          ref={inputRef}
-          type={type}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder={placeholder}
-          className="w-full bg-transparent text-2xl sm:text-3xl font-medium text-white placeholder:text-white/20 border-b-2 border-white/20 focus:border-[#7af17a] outline-none pb-3 transition-colors duration-200"
-        />
-      </div>
-    );
-  }
-
-  function renderTextarea() {
-    const id = currentStep.id;
-    const value =
-      id === "bio"
-        ? bio
-        : id === "business"
-          ? businessDesc
-          : id === "qualification"
-            ? qualificationQ
-            : "";
-    const setValue =
-      id === "bio"
-        ? setBio
-        : id === "business"
-          ? setBusinessDesc
-          : id === "qualification"
-            ? setQualificationQ
-            : setBio;
-    const placeholder =
-      id === "bio"
-        ? "Parle-nous de toi en quelques mots..."
-        : id === "business"
-          ? "Décris ton activité, ton offre, ton marché cible..."
-          : id === "qualification"
-            ? "Ex :\n- Quel est ton budget ?\n- Depuis combien de temps cherches-tu une solution ?"
-            : "";
-    const maxLen = id === "bio" ? 200 : undefined;
-
-    return (
-      <div className="w-full max-w-md mx-auto space-y-2">
-        <textarea
-          value={value}
-          onChange={(e) =>
-            setValue(maxLen ? e.target.value.slice(0, maxLen) : e.target.value)
-          }
-          placeholder={placeholder}
-          rows={id === "bio" ? 3 : 5}
-          className="w-full bg-white/5 text-lg text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-4 resize-none transition-colors duration-200"
-        />
-        {maxLen && (
-          <p className="text-xs text-white/30 text-right">
-            {value.length}/{maxLen}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  function renderChips() {
-    return (
-      <div className="w-full max-w-md mx-auto space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          {CHANNELS.map((channel) => {
-            const selected = channels.includes(channel);
-            return (
-              <button
-                key={channel}
-                type="button"
-                onClick={() => toggleChannel(channel)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3.5 rounded-xl border text-sm font-medium transition-all duration-200",
-                  selected
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a] shadow-sm shadow-[#7af17a]/10"
-                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
-                )}
-              >
-                {selected ? (
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                ) : (
-                  <div className="h-4 w-4 rounded-full border border-current shrink-0" />
-                )}
-                {channel}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  function renderSetterProfile() {
+  function renderB2CProfile() {
     const OBJECTIFS = [
-      {
-        value: "complement" as const,
-        label: "Complément de revenu",
-        color: "bg-emerald-500",
-        emoji: "🟢",
-      },
-      {
-        value: "remplacement" as const,
-        label: "Remplacement de salaire",
-        color: "bg-red-500",
-        emoji: "🔴",
-      },
-      {
-        value: "hybride" as const,
-        label: "Profil hybride",
-        color: "bg-amber-500",
-        emoji: "🟡",
-      },
+      { value: "complement", label: "Complément de revenu" },
+      { value: "activite_principale", label: "En faire mon activité principale" },
+      { value: "remplacer_emploi", label: "Remplacer mon emploi actuel" },
     ];
-    const SITUATIONS = [
-      "Étudiant(e)",
-      "Salarié(e)",
-      "Freelance",
-      "Sans emploi",
-      "Entrepreneur(e)",
+    const NIVEAUX = [
+      { value: "debutant", label: "Débutant — Je découvre le setting" },
+      { value: "intermediaire", label: "Intermédiaire — J'ai déjà quelques expériences" },
+      { value: "avance", label: "Avancé — Je suis déjà actif en setting/closing" },
     ];
 
     return (
       <div className="w-full max-w-md mx-auto space-y-8">
-        {/* Objectif financier */}
+        {/* Objectif principal */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
-            Quel est ton objectif ?
+            Quel est ton objectif principal ?
           </label>
           <div className="space-y-2">
             {OBJECTIFS.map((obj) => (
               <button
                 key={obj.value}
                 type="button"
-                onClick={() => setObjectifFinancier(obj.value)}
+                onClick={() => setObjectifPrincipal(obj.value)}
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-sm font-medium transition-all duration-200",
-                  objectifFinancier === obj.value
+                  objectifPrincipal === obj.value
                     ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
-                <span className="text-lg">{obj.emoji}</span>
                 <span>{obj.label}</span>
-                {objectifFinancier === obj.value && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto" />
+                {objectifPrincipal === obj.value && (
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Heures disponibles */}
+        {/* Pourquoi — motivation */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Pourquoi tu veux te lancer dans le setting ?
+          </label>
+          <textarea
+            value={whyMotivation}
+            onChange={(e) => setWhyMotivation(e.target.value.slice(0, 500))}
+            placeholder="Décris ta motivation en quelques phrases..."
+            rows={3}
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-4 resize-none transition-colors duration-200"
+          />
+          <p className="text-xs text-white/30 text-right">
+            {whyMotivation.length}/500
+          </p>
+        </div>
+
+        {/* Disponibilité slider 1-8h */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
             Heures disponibles par jour :{" "}
@@ -625,42 +504,40 @@ export function OnboardingFlow({
           <input
             type="range"
             min="1"
-            max="10"
+            max="8"
             value={disponibilitesHeures}
             onChange={(e) => setDisponibilitesHeures(e.target.value)}
             className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#7af17a]"
           />
           <div className="flex justify-between text-xs text-white/30">
             <span>1h</span>
-            <span>5h</span>
-            <span>10h+</span>
+            <span>4h</span>
+            <span>8h</span>
           </div>
         </div>
 
-        {/* Situation actuelle */}
+        {/* Niveau d'expérience */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
-            Ta situation actuelle
+            Ton niveau d&apos;expérience
           </label>
-          <div className="grid grid-cols-2 gap-2">
-            {SITUATIONS.map((sit) => (
+          <div className="space-y-2">
+            {NIVEAUX.map((niv) => (
               <button
-                key={sit}
+                key={niv.value}
                 type="button"
-                onClick={() => setSituationActuelle(sit)}
+                onClick={() => setNiveauExperience(niv.value)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-200",
-                  situationActuelle === sit
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a] shadow-sm shadow-[#7af17a]/10"
+                  "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-sm font-medium transition-all duration-200",
+                  niveauExperience === niv.value
+                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
-                {situationActuelle === sit ? (
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                ) : (
-                  <div className="h-4 w-4 rounded-full border border-current shrink-0" />
+                <span>{niv.label}</span>
+                {niveauExperience === niv.value && (
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
                 )}
-                {sit}
               </button>
             ))}
           </div>
@@ -669,109 +546,358 @@ export function OnboardingFlow({
     );
   }
 
-  function renderSocial() {
+  function renderB2CVideo() {
+    const remaining = Math.max(0, 30 - videoWatchSeconds);
+
     return (
-      <div className="w-full max-w-md mx-auto space-y-6">
-        <div className="space-y-2">
-          <label className="text-sm text-white/50">URL LinkedIn</label>
-          <input
-            ref={inputRef}
-            type="url"
-            value={linkedinUrl}
-            onChange={(e) => setLinkedinUrl(e.target.value)}
-            placeholder="https://linkedin.com/in/ton-profil"
-            className="w-full bg-white/5 text-lg text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-4 transition-colors duration-200"
-          />
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        {/* Video embed */}
+        <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/50 border border-white/10">
+          {welcomeVideoData?.videoUrl ? (
+            <iframe
+              src={welcomeVideoData.videoUrl}
+              className="w-full h-full"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-[#7af17a]/20 flex items-center justify-center">
+                <Play className="h-8 w-8 text-[#7af17a] ml-1" />
+              </div>
+              <p className="text-white/40 text-sm">Vidéo de présentation</p>
+              <p className="text-white/30 text-xs">La vidéo sera bientôt disponible</p>
+            </div>
+          )}
         </div>
-        <div className="space-y-2">
-          <label className="text-sm text-white/50">Username Instagram</label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-lg">
-              @
-            </span>
-            <input
-              type="text"
-              value={instagramUsername}
-              onChange={(e) =>
-                setInstagramUsername(e.target.value.replace(/^@/, ""))
-              }
-              placeholder="ton_username"
-              className="w-full bg-white/5 text-lg text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-4 pl-9 transition-colors duration-200"
+
+        {/* Timer / Unlock indicator */}
+        <div className="flex items-center justify-center gap-3">
+          {videoUnlocked ? (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#7af17a]/10 border border-[#7af17a]/30"
+            >
+              <CheckCircle2 className="h-4 w-4 text-[#7af17a]" />
+              <span className="text-sm text-[#7af17a] font-medium">
+                Vidéo complétée — tu peux continuer
+              </span>
+            </motion.div>
+          ) : (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+              <Lock className="h-4 w-4 text-white/40" />
+              <span className="text-sm text-white/40">
+                Regarde pendant encore{" "}
+                <span className="text-white font-medium tabular-nums">
+                  {remaining}s
+                </span>{" "}
+                pour débloquer la suite
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Progress bar for video timer */}
+        {!videoUnlocked && (
+          <div className="w-full max-w-sm mx-auto h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-[#7af17a] to-[#4ade80]"
+              animate={{ width: `${(videoWatchSeconds / 30) * 100}%` }}
+              transition={{ duration: 0.3 }}
             />
           </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderB2CBooking() {
+    return (
+      <div className="w-full max-w-md mx-auto space-y-8">
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 rounded-full bg-[#7af17a]/10 border border-[#7af17a]/30 flex items-center justify-center mx-auto">
+            <Calendar className="h-8 w-8 text-[#7af17a]" />
+          </div>
+          <p className="text-white/50 text-base max-w-sm mx-auto leading-relaxed">
+            Réserve ton appel d&apos;onboarding avec un membre de l&apos;équipe
+            pour bien démarrer ta formation.
+          </p>
+        </div>
+
+        {/* iClosed booking link */}
+        <a
+          href="https://iclosed.io/e/s-academy-onboarding"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200"
+        >
+          <ExternalLink className="h-5 w-5" />
+          Réserver mon appel sur iClosed
+        </a>
+
+        {/* Confirmation checkbox */}
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+          <button
+            type="button"
+            onClick={() => setBookingConfirmed(!bookingConfirmed)}
+            className={cn(
+              "mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all duration-200",
+              bookingConfirmed
+                ? "border-[#7af17a] bg-[#7af17a]"
+                : "border-white/30 hover:border-white/50",
+            )}
+          >
+            {bookingConfirmed && (
+              <CheckCircle2 className="h-3.5 w-3.5 text-black" />
+            )}
+          </button>
+          <p className="text-sm text-white/60 leading-relaxed">
+            J&apos;ai réservé mon appel d&apos;onboarding ou je le ferai plus
+            tard depuis mon dashboard
+          </p>
         </div>
       </div>
     );
   }
 
-  function renderSummary() {
-    const items =
-      role === "client_b2b"
-        ? [
-            {
-              icon: User,
-              label: "Photo",
-              value: avatarPreview ? "__avatar__" : "Non définie",
-            },
-            {
-              icon: FileText,
-              label: "Entreprise",
-              value: company || "Non défini",
-            },
-            {
-              icon: FileText,
-              label: "Business",
-              value: businessDesc
-                ? businessDesc.slice(0, 50) + "..."
-                : "Non défini",
-            },
-            {
-              icon: Target,
-              label: "Canaux",
-              value: channels.length > 0 ? channels.join(", ") : "Aucun",
-            },
-            {
-              icon: Link2,
-              label: "LinkedIn",
-              value: linkedinUrl || "Non défini",
-            },
-          ]
-        : [
-            {
-              icon: User,
-              label: "Photo",
-              value: avatarPreview ? "__avatar__" : "Non définie",
-            },
-            { icon: User, label: "Nom", value: fullName || "Non défini" },
-            { icon: Phone, label: "Téléphone", value: phone || "Non défini" },
-            {
-              icon: Target,
-              label: "Objectif",
-              value:
-                objectifFinancier === "complement"
-                  ? "🟢 Complément de revenu"
-                  : objectifFinancier === "remplacement"
-                    ? "🔴 Remplacement de salaire"
-                    : objectifFinancier === "hybride"
-                      ? "🟡 Profil hybride"
-                      : "Non défini",
-            },
-            {
-              icon: Sparkles,
-              label: "Disponibilité",
-              value: `${disponibilitesHeures}h/jour — ${situationActuelle || "Non défini"}`,
-            },
-            {
-              icon: FileText,
-              label: "Bio",
-              value: bio ? bio.slice(0, 50) + "..." : "Non définie",
-            },
-            {
-              icon: Target,
-              label: "Compétences",
-              value: skills || "Non défini",
-            },
-          ];
+  async function handleJoinCommunity() {
+    if (joiningCommunity) return;
+    setJoiningCommunity(true);
+    try {
+      await postWelcomeCommunityMessage(fullName || userName || "Nouveau membre");
+      setCommunityJoined(true);
+      toast.success("Message posté dans la communauté !");
+    } catch {
+      // Allow to proceed even if post fails
+      setCommunityJoined(true);
+      toast.error("Impossible de poster, mais tu peux continuer");
+    } finally {
+      setJoiningCommunity(false);
+    }
+  }
+
+  function renderB2CCommunity() {
+    return (
+      <div className="w-full max-w-md mx-auto space-y-8">
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 rounded-full bg-[#7af17a]/10 border border-[#7af17a]/30 flex items-center justify-center mx-auto">
+            <Users className="h-8 w-8 text-[#7af17a]" />
+          </div>
+          <p className="text-white/50 text-base max-w-sm mx-auto leading-relaxed">
+            Rejoins la communauté et présente-toi aux autres membres.
+            On publiera automatiquement un message de bienvenue dans le canal #général.
+          </p>
+        </div>
+
+        {communityJoined ? (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="p-6 rounded-2xl bg-[#7af17a]/10 border border-[#7af17a]/30 text-center space-y-3"
+          >
+            <CheckCircle2 className="h-10 w-10 text-[#7af17a] mx-auto" />
+            <p className="text-[#7af17a] font-medium">
+              Bienvenue dans la communauté !
+            </p>
+            <p className="text-white/40 text-sm">
+              Ton message de présentation a été posté dans #général
+            </p>
+          </motion.div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleJoinCommunity}
+            disabled={joiningCommunity}
+            className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50"
+          >
+            {joiningCommunity ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <Users className="h-5 w-5" />
+                Rejoindre la communauté
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Step renderers — B2B
+  // ---------------------------------------------------------------------------
+
+  function renderB2BQuestionnaire() {
+    const CA_OPTIONS = [
+      "Moins de 5 000 €",
+      "5 000 € - 10 000 €",
+      "10 000 € - 30 000 €",
+      "30 000 € - 100 000 €",
+      "Plus de 100 000 €",
+    ];
+    const PLATEFORMES = [
+      "LinkedIn",
+      "Instagram",
+      "Facebook",
+      "TikTok",
+      "Email",
+      "Téléphone",
+      "Site web",
+      "YouTube",
+    ];
+
+    return (
+      <div className="w-full max-w-md mx-auto space-y-6">
+        {/* Entreprise */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Nom de ton entreprise
+          </label>
+          <input
+            ref={inputRef}
+            type="text"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="Mon entreprise..."
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 transition-colors duration-200"
+          />
+        </div>
+
+        {/* Secteur */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Secteur d&apos;activité
+          </label>
+          <input
+            type="text"
+            value={secteur}
+            onChange={(e) => setSecteur(e.target.value)}
+            placeholder="Coaching, SaaS, E-commerce..."
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 transition-colors duration-200"
+          />
+        </div>
+
+        {/* Offre */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Décris ton offre principale
+          </label>
+          <textarea
+            value={offre}
+            onChange={(e) => setOffre(e.target.value)}
+            placeholder="Quelle est ton offre et à quel prix ?"
+            rows={2}
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 resize-none transition-colors duration-200"
+          />
+        </div>
+
+        {/* Cible */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Ta cible idéale
+          </label>
+          <input
+            type="text"
+            value={cible}
+            onChange={(e) => setCible(e.target.value)}
+            placeholder="Qui est ton client idéal ?"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 transition-colors duration-200"
+          />
+        </div>
+
+        {/* CA mensuel */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Chiffre d&apos;affaires mensuel actuel
+          </label>
+          <div className="space-y-1.5">
+            {CA_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setCaMensuel(opt)}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left text-sm transition-all duration-200",
+                  caMensuel === opt
+                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white"
+                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20",
+                )}
+              >
+                <span>{opt}</span>
+                {caMensuel === opt && (
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Plateformes */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Sur quelles plateformes tu prospectes ?
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {PLATEFORMES.map((pl) => {
+              const selected = plateforme.includes(pl);
+              return (
+                <button
+                  key={pl}
+                  type="button"
+                  onClick={() =>
+                    setPlateforme((prev) =>
+                      selected
+                        ? prev.filter((p) => p !== pl)
+                        : [...prev, pl],
+                    )
+                  }
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm transition-all duration-200",
+                    selected
+                      ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a]"
+                      : "border-white/10 bg-white/5 text-white/50 hover:border-white/20",
+                  )}
+                >
+                  {selected ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                  ) : (
+                    <div className="h-3.5 w-3.5 rounded-full border border-current shrink-0" />
+                  )}
+                  {pl}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Objectif */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            Ton objectif avec Sales System
+          </label>
+          <textarea
+            value={objectifB2B}
+            onChange={(e) => setObjectifB2B(e.target.value)}
+            placeholder="Qu'est-ce que tu attends de la plateforme ?"
+            rows={2}
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 resize-none transition-colors duration-200"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  function renderB2BConfirmation() {
+    const items = [
+      { icon: FileText, label: "Entreprise", value: company || "Non défini" },
+      { icon: Target, label: "Secteur", value: secteur || "Non défini" },
+      { icon: FileText, label: "Offre", value: offre ? offre.slice(0, 60) + (offre.length > 60 ? "..." : "") : "Non défini" },
+      { icon: User, label: "Cible", value: cible || "Non défini" },
+      { icon: Sparkles, label: "CA mensuel", value: caMensuel || "Non défini" },
+      { icon: Link2, label: "Plateformes", value: plateforme.length > 0 ? plateforme.join(", ") : "Aucune" },
+    ];
 
     return (
       <div className="w-full max-w-md mx-auto space-y-6">
@@ -791,29 +917,29 @@ export function OnboardingFlow({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/40">{item.label}</p>
-                  {item.value === "__avatar__" ? (
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={avatarPreview}
-                        alt=""
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                      <CheckCircle2 className="h-4 w-4 text-[#7af17a]" />
-                    </div>
-                  ) : (
-                    <p className="text-sm text-white truncate">{item.value}</p>
-                  )}
+                  <p className="text-sm text-white truncate">{item.value}</p>
                 </div>
               </motion.div>
             );
           })}
         </div>
 
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
+          className="p-4 rounded-xl bg-[#7af17a]/5 border border-[#7af17a]/20 text-center"
+        >
+          <p className="text-sm text-white/60">
+            Ton workspace sera automatiquement configuré avec un SOP personnalisé
+            et un pipeline adapté à ton activité.
+          </p>
+        </motion.div>
+
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
           onClick={handleComplete}
           disabled={completing}
           className="w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
@@ -823,7 +949,7 @@ export function OnboardingFlow({
           ) : (
             <>
               <Sparkles className="h-5 w-5" />
-              Terminer et accéder au dashboard
+              Créer mon workspace
             </>
           )}
         </motion.button>
@@ -831,34 +957,26 @@ export function OnboardingFlow({
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Step router
+  // ---------------------------------------------------------------------------
+
   function renderStepContent() {
     switch (currentStep.type) {
-      case "video":
-        return (
-          <WelcomeVideo
-            videoUrl={welcomeVideoData?.videoUrl}
-            title={welcomeVideoData?.title}
-            description={welcomeVideoData?.description || undefined}
-            userName={userName}
-            onContinue={goNext}
-          />
-        );
-      case "welcome":
-        return renderWelcome();
-      case "avatar":
-        return renderAvatar();
-      case "text":
-        return renderTextInput();
-      case "textarea":
-        return renderTextarea();
-      case "chips":
-        return renderChips();
-      case "setter_profile":
-        return renderSetterProfile();
-      case "social":
-        return renderSocial();
-      case "summary":
-        return renderSummary();
+      case "b2c_welcome":
+        return renderB2CWelcome();
+      case "b2c_profile":
+        return renderB2CProfile();
+      case "b2c_video":
+        return renderB2CVideo();
+      case "b2c_booking":
+        return renderB2CBooking();
+      case "b2c_community":
+        return renderB2CCommunity();
+      case "b2b_questionnaire":
+        return renderB2BQuestionnaire();
+      case "b2b_confirmation":
+        return renderB2BConfirmation();
       default:
         return null;
     }
@@ -892,7 +1010,7 @@ export function OnboardingFlow({
       />
 
       {/* Progress bar — fixed top */}
-      {currentStep.type !== "welcome" && currentStep.type !== "video" && (
+      {currentStep.type !== "b2c_welcome" && (
         <div className="fixed left-0 right-0 top-0 z-50 h-1 bg-white/10">
           <motion.div
             className="h-full bg-gradient-to-r from-[#7af17a] to-[#4ade80]"
@@ -903,14 +1021,14 @@ export function OnboardingFlow({
       )}
 
       {/* Top bar */}
-      {currentStep.type !== "welcome" && currentStep.type !== "video" && (
+      {currentStep.type !== "b2c_welcome" && (
         <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 py-4 pt-6">
           {/* Back button */}
           <button
             onClick={goPrev}
             className={cn(
               "h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all",
-              step <= 1 && "opacity-0 pointer-events-none",
+              step <= 0 && "opacity-0 pointer-events-none",
             )}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -926,7 +1044,7 @@ export function OnboardingFlow({
 
           {/* Step counter */}
           <span className="text-sm text-white/40 font-medium tabular-nums">
-            {currentReal}/{totalReal}
+            {step + 1}/{steps.length}
           </span>
         </div>
       )}
@@ -943,10 +1061,9 @@ export function OnboardingFlow({
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="w-full max-w-2xl"
           >
-            {/* Step title (not on welcome/summary) */}
-            {currentStep.type !== "video" &&
-              currentStep.type !== "welcome" &&
-              currentStep.type !== "summary" && (
+            {/* Step title (not on welcome/confirmation) */}
+            {currentStep.type !== "b2c_welcome" &&
+              currentStep.type !== "b2b_confirmation" && (
                 <div className="text-center mb-10">
                   <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                     {currentStep.title}
@@ -959,8 +1076,8 @@ export function OnboardingFlow({
                 </div>
               )}
 
-            {/* Summary title */}
-            {currentStep.type === "summary" && (
+            {/* B2B confirmation title */}
+            {currentStep.type === "b2b_confirmation" && (
               <div className="text-center mb-10">
                 <motion.div
                   initial={{ scale: 0 }}
@@ -974,7 +1091,7 @@ export function OnboardingFlow({
                   {currentStep.title}
                 </h2>
                 <p className="text-white/40 mt-2">
-                  Voici un résumé de ton profil
+                  {currentStep.subtitle}
                 </p>
               </div>
             )}
@@ -984,22 +1101,45 @@ export function OnboardingFlow({
               {renderStepContent()}
             </div>
 
-            {/* OK / Continue button (not on welcome/summary) */}
-            {currentStep.type !== "video" &&
-              currentStep.type !== "welcome" &&
-              currentStep.type !== "summary" && (
+            {/* Continue button — shown for steps that need it (not welcome, not confirmation, not community when done) */}
+            {currentStep.type !== "b2c_welcome" &&
+              currentStep.type !== "b2b_confirmation" &&
+              !isLast && (
                 <div className="flex justify-center mt-10">
                   <button
                     onClick={goNext}
-                    className="group flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all text-sm font-medium"
+                    disabled={!canProceed()}
+                    className={cn(
+                      "group flex items-center gap-2 px-8 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200",
+                      canProceed()
+                        ? "bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black shadow-lg shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105"
+                        : "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed",
+                    )}
                   >
-                    OK
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-white/10 text-white/40 group-hover:text-white/60 transition-colors">
-                      Entrée
-                    </span>
+                    Continuer
                   </button>
                 </div>
               )}
+
+            {/* Final step (B2C community) — complete button */}
+            {isLast && currentStep.type === "b2c_community" && communityJoined && (
+              <div className="flex justify-center mt-10">
+                <button
+                  onClick={handleComplete}
+                  disabled={completing}
+                  className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50"
+                >
+                  {completing ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5" />
+                      Accéder à mon dashboard
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

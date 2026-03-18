@@ -38,6 +38,7 @@ import {
   Save,
   ArrowRight,
   CalendarPlus,
+  FileText,
 } from "lucide-react";
 import {
   updateDealStage,
@@ -347,6 +348,19 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 </Link>
               </Button>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full h-10 gap-1.5 mt-2 border-brand/30 text-brand hover:bg-brand/10"
+              asChild
+            >
+              <Link
+                href={`/contracts/new?dealId=${deal.id}&clientId=${deal.contact?.id || ""}&amount=${deal.value}`}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                Générer un contrat
+              </Link>
+            </Button>
           </div>
 
           {/* Next action */}

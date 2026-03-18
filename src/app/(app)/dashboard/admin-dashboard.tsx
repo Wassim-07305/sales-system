@@ -27,6 +27,7 @@ import {
   MessageSquare,
   Send,
   Smile,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
@@ -54,6 +55,12 @@ interface AdminDashboardData {
     pipelineTotal: number;
     activeClients: number;
     weeklyBookings: number;
+  };
+  contractStats?: {
+    total: number;
+    signed: number;
+    pending: number;
+    totalAmount: number;
   };
   recentDeals: Array<{
     id: string;
@@ -342,6 +349,68 @@ export function AdminDashboard({
           );
         })}
       </div>
+
+      {/* Contract KPIs */}
+      {data.contractStats && data.contractStats.total > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-border/50">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <FileText className="h-4 w-4 text-brand" />
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Contrats ce mois
+                </span>
+              </div>
+              <p className="text-2xl font-bold">{data.contractStats.total}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="h-9 w-9 rounded-xl bg-green-500/10 flex items-center justify-center ring-1 ring-green-500/20">
+                  <FileText className="h-4 w-4 text-green-500" />
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Signés
+                </span>
+              </div>
+              <p className="text-2xl font-bold">{data.contractStats.signed}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  En attente
+                </span>
+              </div>
+              <p className="text-2xl font-bold">{data.contractStats.pending}</p>
+            </CardContent>
+          </Card>
+          <Link href="/contracts">
+            <Card className="border-border/50 h-full hover:shadow-md transition-all">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                    <DollarSign className="h-4 w-4 text-brand" />
+                  </div>
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    CA contrats signés
+                  </span>
+                </div>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(data.contractStats.totalAmount)}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      )}
 
       {/* Main Grid: Deals + Bookings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

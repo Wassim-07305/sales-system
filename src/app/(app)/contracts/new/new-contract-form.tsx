@@ -105,6 +105,7 @@ export function NewContractForm({
 
     setLoading(true);
     try {
+      const installmentCount = paymentSchedule === "2x" ? 2 : paymentSchedule === "3x" ? 3 : 1;
       const result = await createContract({
         templateId,
         clientId,
@@ -112,6 +113,7 @@ export function NewContractForm({
         content: getPreviewContent(),
         amount: Number(amount),
         paymentSchedule,
+        installmentCount,
       });
 
       if (result.error) {
@@ -244,14 +246,39 @@ export function NewContractForm({
 
               <div>
                 <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Échéancier de paiement
+                  Modalité de paiement
                 </Label>
-                <Input
+                <Select
                   value={paymentSchedule}
-                  onChange={(e) => setPaymentSchedule(e.target.value)}
-                  placeholder="ex: 3 x 1000€ / mois"
-                  className="h-11 rounded-xl"
-                />
+                  onValueChange={setPaymentSchedule}
+                >
+                  <SelectTrigger className="h-11 rounded-xl">
+                    <SelectValue placeholder="Choisir une modalité" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1x">
+                      Paiement en 1x —{" "}
+                      {amount
+                        ? `${Number(amount).toLocaleString("fr-FR")} €`
+                        : "montant total"}
+                    </SelectItem>
+                    <SelectItem value="2x">
+                      Paiement en 2x —{" "}
+                      {amount
+                        ? `2 × ${(Number(amount) / 2).toLocaleString("fr-FR")} €`
+                        : "2 échéances"}
+                    </SelectItem>
+                    <SelectItem value="3x">
+                      Paiement en 3x —{" "}
+                      {amount
+                        ? `3 × ${(Number(amount) / 3).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`
+                        : "3 échéances"}
+                    </SelectItem>
+                    <SelectItem value="securio">
+                      Paiement via Securio (lien externe)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>

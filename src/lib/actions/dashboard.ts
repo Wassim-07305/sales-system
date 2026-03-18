@@ -187,6 +187,28 @@ export async function getAdminDashboardData() {
     staleDeals = data;
   }
 
+  // Contract KPIs
+  let contractStats = { total: 0, signed: 0, pending: 0, totalAmount: 0 };
+  try {
+    const { data: contracts } = await supabase
+      .from("contracts")
+      .select("id, status, amount")
+      .gte("created_at", startOfMonth);
+
+    if (contracts) {
+      contractStats = {
+        total: contracts.length,
+        signed: contracts.filter((c) => c.status === "signed").length,
+        pending: contracts.filter((c) => c.status === "sent" || c.status === "draft").length,
+        totalAmount: contracts
+          .filter((c) => c.status === "signed")
+          .reduce((sum, c) => sum + (c.amount || 0), 0),
+      };
+    }
+  } catch {
+    // contracts table may not exist
+  }
+
   return {
     stats: {
       monthlyRevenue,
@@ -194,6 +216,7 @@ export async function getAdminDashboardData() {
       activeClients: activeClients || 0,
       weeklyBookings: (weekBookings || []).length,
     },
+    contractStats,
     recentDeals: (recentDeals || []).map((d) => {
       const stage = Array.isArray(d.pipeline_stages)
         ? d.pipeline_stages[0]

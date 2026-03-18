@@ -20,6 +20,29 @@ function replaceContractVariables(
   return result;
 }
 
+async function generateContractNumber(supabase: Awaited<ReturnType<typeof createClient>>): Promise<string> {
+  const year = new Date().getFullYear();
+  const prefix = `SA-${year}-`;
+
+  // Get the latest contract number for this year
+  const { data } = await supabase
+    .from("contracts")
+    .select("contract_number")
+    .like("contract_number", `${prefix}%`)
+    .order("contract_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let nextNum = 1;
+  if (data?.contract_number) {
+    const parts = data.contract_number.split("-");
+    const lastNum = parseInt(parts[2], 10);
+    if (!isNaN(lastNum)) nextNum = lastNum + 1;
+  }
+
+  return `${prefix}${String(nextNum).padStart(3, "0")}`;
+}
+
 export async function createContract(formData: {
   templateId: string;
   clientId: string;
@@ -27,6 +50,7 @@ export async function createContract(formData: {
   content: string;
   amount: number;
   paymentSchedule: string;
+  installmentCount?: number;
 }) {
   const supabase = await createClient();
   const {
@@ -59,7 +83,10 @@ export async function createContract(formData: {
     .eq("id", formData.clientId)
     .single();
 
+  const contractNumber = await generateContractNumber(supabase);
+
   const variables: Record<string, string> = {
+    contract_number: contractNumber,
     client_name: clientProfile?.full_name || "",
     client_email: clientProfile?.email || "",
     client_company: clientProfile?.company || "",
@@ -86,12 +113,14 @@ export async function createContract(formData: {
   const { data, error } = await supabase
     .from("contracts")
     .insert({
+      contract_number: contractNumber,
       template_id: formData.templateId,
       client_id: formData.clientId,
       deal_id: formData.dealId || null,
       content: processedContent,
       amount: formData.amount,
       payment_schedule: formData.paymentSchedule,
+      installment_count: formData.installmentCount || 1,
       status: "draft",
     })
     .select()

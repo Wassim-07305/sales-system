@@ -613,6 +613,48 @@ export async function hasCompletedCommitments(userId: string) {
   return !!data;
 }
 
+// --- Save onboarding step progress ---
+
+export async function saveOnboardingProgress(stepNumber: number) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  await supabase
+    .from("profiles")
+    .update({ onboarding_step: stepNumber })
+    .eq("id", user.id);
+
+  return { success: true };
+}
+
+// --- Post welcome message in community ---
+
+export async function postWelcomeCommunityMessage(userName: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  const content = `Salut à tous ! Je suis ${userName} et je viens de rejoindre la S Academy. Hâte de commencer cette aventure avec vous ! 🚀`;
+
+  await supabase.from("community_posts").insert({
+    author_id: user.id,
+    type: "discussion",
+    title: `${userName} rejoint la communauté !`,
+    content,
+    target_audience: "all",
+    channel: "general",
+    likes_count: 0,
+  });
+
+  revalidatePath("/community");
+  return { success: true };
+}
+
 // --- Onboarding simple (B2C / B2B) ---
 
 export async function completeSimpleOnboarding(data: {
@@ -762,4 +804,32 @@ export async function generateB2BWorkspace(data: {
   revalidatePath("/dashboard");
   revalidatePath("/crm");
   return { success: true, sop };
+}
+
+// --- Admin: liste des onboardings en cours ---
+
+export async function getOnboardingUsers() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin" && profile?.role !== "manager") return [];
+
+  const { data } = await supabase
+    .from("profiles")
+    .select(
+      "id, full_name, email, role, onboarding_step, onboarding_completed, updated_at",
+    )
+    .eq("onboarding_completed", false)
+    .order("updated_at", { ascending: false });
+
+  return data || [];
 }
