@@ -30,7 +30,10 @@ export async function waitForPageReady(page: Page) {
 }
 
 /** Measure page load time */
-export async function measureLoadTime(page: Page, url: string): Promise<number> {
+export async function measureLoadTime(
+  page: Page,
+  url: string,
+): Promise<number> {
   const start = Date.now();
   await page.goto(url);
   await page.waitForLoadState("domcontentloaded");

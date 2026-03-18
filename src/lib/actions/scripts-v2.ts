@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { aiComplete } from "@/lib/ai/client";
+import { aiComplete, aiJSON, SMART_MODEL } from "@/lib/ai/client";
 
 // ---------------------
 // Flowcharts
@@ -809,6 +809,255 @@ Adapte le ton au réseau ${network} (${
       network,
     };
   }
+}
+
+// ---------------------
+// AI Flowchart Generation
+// ---------------------
+
+interface AIFlowchartStep {
+  type: "opening" | "question" | "objection" | "response" | "closing";
+  label: string;
+  content: string;
+}
+
+interface AIFlowchartResponse {
+  title: string;
+  steps: AIFlowchartStep[];
+}
+
+export async function generateAiFlowchart(params: {
+  business: string;
+  method?: string;
+  network?: string;
+  format?: "flowchart" | "mindmap";
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const networkTone = params.network
+    ? params.network === "LinkedIn"
+      ? "professionnel et structuré"
+      : params.network === "Instagram"
+        ? "décontracté et direct, émojis modérés"
+        : params.network === "WhatsApp"
+          ? "conversationnel et personnel"
+          : "direct et concis"
+    : "professionnel";
+
+  const prompt = `Génère un script de vente complet sous forme de flowchart pour le secteur suivant : "${params.business}".
+${params.method ? `\nMéthode de vente à utiliser : ${params.method}` : ""}
+${params.network ? `\nPlateforme : ${params.network} (ton ${networkTone})` : ""}
+
+Le flowchart doit contenir entre 8 et 15 étapes couvrant :
+- Une accroche d'ouverture percutante
+- 2-3 questions de découverte pour qualifier le prospect
+- 2-3 objections courantes avec leurs réponses
+- Un closing efficace avec CTA
+
+Chaque étape a un type parmi : "opening", "question", "objection", "response", "closing".
+Les objections doivent être immédiatement suivies d'une étape "response".
+
+Réponds avec ce format JSON exact :
+{
+  "title": "Titre du script",
+  "steps": [
+    { "type": "opening", "label": "Titre court", "content": "Contenu détaillé de l'étape" },
+    ...
+  ]
+}`;
+
+  let title: string;
+  let nodes: Array<{
+    id: string;
+    type: string;
+    position: { x: number; y: number };
+    data: { label: string; type: string };
+  }>;
+  let edges: Array<{ id: string; source: string; target: string }>;
+
+  try {
+    const rawResult = await aiComplete(prompt, {
+      system:
+        "Tu es un expert en scripts de vente et setting. Tu crées des flowcharts de prospection structurés et efficaces pour des entrepreneurs francophones. Chaque étape doit être actionnable et concrète. Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, sans texte avant ou après.",
+      model: SMART_MODEL,
+      maxTokens: 3000,
+      temperature: 0.3,
+    });
+
+    // Nettoyer le JSON (enlever backticks markdown si présents)
+    const cleaned = rawResult
+      .replace(/^```json?\n?/i, "")
+      .replace(/\n?```$/i, "")
+      .trim();
+
+    console.log("[AI Script] Raw response length:", rawResult.length);
+    console.log("[AI Script] Cleaned JSON preview:", cleaned.substring(0, 200));
+
+    const aiResult = JSON.parse(cleaned) as AIFlowchartResponse;
+
+    title = aiResult.title || `Script IA — ${params.business}`;
+    nodes = [];
+    edges = [];
+
+    let y = 50;
+    let nodeIndex = 0;
+    let prevNodeId: string | null = null;
+
+    for (const step of aiResult.steps) {
+      const isObjection = step.type === "objection";
+      const x = isObjection ? 550 : 300;
+      const nodeId = `${step.type}-${nodeIndex}`;
+
+      nodes.push({
+        id: nodeId,
+        type: step.type,
+        position: { x, y },
+        data: { label: step.label, type: step.type },
+      });
+
+      if (prevNodeId) {
+        edges.push({
+          id: `e-${prevNodeId}-${nodeId}`,
+          source: prevNodeId,
+          target: nodeId,
+        });
+      }
+
+      prevNodeId = nodeId;
+      nodeIndex++;
+
+      // Si c'est une objection, l'étape suivante (response) sera placée en dessous
+      if (isObjection) {
+        y += 180;
+      } else {
+        y += 180;
+      }
+    }
+  } catch (err) {
+    // Log l'erreur pour debug
+    console.error("[AI Script] Erreur generation:", err);
+    // Fallback : créer un flowchart basique si l'IA échoue
+    title = `Script — ${params.business}`;
+    nodes = [
+      {
+        id: "opening-0",
+        type: "opening",
+        position: { x: 300, y: 50 },
+        data: { label: "Accroche", type: "opening" },
+      },
+      {
+        id: "question-1",
+        type: "question",
+        position: { x: 300, y: 230 },
+        data: { label: "Question de découverte", type: "question" },
+      },
+      {
+        id: "closing-2",
+        type: "closing",
+        position: { x: 300, y: 410 },
+        data: { label: "Closing", type: "closing" },
+      },
+    ];
+    edges = [
+      {
+        id: "e-opening-0-question-1",
+        source: "opening-0",
+        target: "question-1",
+      },
+      {
+        id: "e-question-1-closing-2",
+        source: "question-1",
+        target: "closing-2",
+      },
+    ];
+  }
+
+  // Construire une version markdown du script a partir des noeuds
+  const openingNodes = nodes.filter((n) => n.data.type === "opening");
+  const questionNodes = nodes.filter((n) => n.data.type === "question");
+  const objectionNodes = nodes.filter((n) => n.data.type === "objection");
+  const responseNodes = nodes.filter((n) => n.data.type === "response");
+  const closingNodes = nodes.filter((n) => n.data.type === "closing");
+
+  const mdParts: string[] = [];
+
+  if (openingNodes.length > 0) {
+    mdParts.push("## Accroche");
+    openingNodes.forEach((n) => mdParts.push(n.data.label));
+  }
+
+  if (questionNodes.length > 0) {
+    mdParts.push("\n## Questions de découverte");
+    questionNodes.forEach((n) => mdParts.push(`- ${n.data.label}`));
+  }
+
+  if (objectionNodes.length > 0 || responseNodes.length > 0) {
+    mdParts.push("\n## Objections & Réponses");
+    // Associer objections et reponses par ordre
+    for (let i = 0; i < objectionNodes.length; i++) {
+      mdParts.push(`**Objection :** ${objectionNodes[i].data.label}`);
+      if (i < responseNodes.length) {
+        mdParts.push(`**Réponse :** ${responseNodes[i].data.label}`);
+      }
+      mdParts.push("");
+    }
+    // Reponses orphelines
+    for (let i = objectionNodes.length; i < responseNodes.length; i++) {
+      mdParts.push(`**Réponse :** ${responseNodes[i].data.label}`);
+    }
+  }
+
+  if (closingNodes.length > 0) {
+    mdParts.push("\n## Closing");
+    closingNodes.forEach((n) => mdParts.push(n.data.label));
+  }
+
+  const markdownDescription = mdParts.join("\n");
+
+  if (params.format === "mindmap") {
+    const { data: mindmap, error } = await supabase
+      .from("mind_maps")
+      .insert({
+        title,
+        description:
+          markdownDescription ||
+          `Mind map générée par IA pour : ${params.business}${params.network ? ` (${params.network})` : ""}`,
+        category: params.network || null,
+        nodes,
+        edges,
+        created_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    revalidatePath("/scripts");
+    return { id: mindmap.id, format: "mindmap" as const };
+  }
+
+  const { data: flowchart, error } = await supabase
+    .from("script_flowcharts")
+    .insert({
+      title,
+      description:
+        markdownDescription ||
+        `Script généré par IA pour : ${params.business}${params.network ? ` (${params.network})` : ""}`,
+      category: params.network || null,
+      nodes,
+      edges,
+      is_template: false,
+      created_by: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/scripts");
+  return { id: flowchart.id, format: "flowchart" as const };
 }
 
 // ---------------------

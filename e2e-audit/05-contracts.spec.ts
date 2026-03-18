@@ -8,11 +8,13 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
 
   // ── Section Contrats ──
 
-  test("CONTRACT-01: La page Contrats charge correctement", async ({ page }) => {
+  test("CONTRACT-01: La page Contrats charge correctement", async ({
+    page,
+  }) => {
     await page.goto("/contracts");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasContracts =
       body.toLowerCase().includes("contrat") ||
       body.toLowerCase().includes("contract") ||
@@ -21,11 +23,13 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     expect(hasContracts).toBeTruthy();
   });
 
-  test("CONTRACT-02: La liste affiche les colonnes attendues", async ({ page }) => {
+  test("CONTRACT-02: La liste affiche les colonnes attendues", async ({
+    page,
+  }) => {
     await page.goto("/contracts");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Check for expected column headers or content
     const expectedCols = ["numéro", "client", "montant", "statut", "date"];
     let foundCols = 0;
@@ -37,11 +41,13 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     expect(body.length).toBeGreaterThan(100);
   });
 
-  test("CONTRACT-03: La page nouveau contrat est accessible", async ({ page }) => {
+  test("CONTRACT-03: La page nouveau contrat est accessible", async ({
+    page,
+  }) => {
     await page.goto("/contracts/new");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasForm =
       body.toLowerCase().includes("contrat") ||
       body.toLowerCase().includes("montant") ||
@@ -51,11 +57,13 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     expect(hasForm).toBeTruthy();
   });
 
-  test("CONTRACT-04: Les modalités de paiement sont disponibles", async ({ page }) => {
+  test("CONTRACT-04: Les modalités de paiement sont disponibles", async ({
+    page,
+  }) => {
     await page.goto("/contracts/new");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Check payment modalities exist in form
     const hasPaymentOptions =
       body.includes("1x") ||
@@ -67,12 +75,14 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     expect(hasPaymentOptions).toBeTruthy();
   });
 
-  test("CONTRACT-05: Le pré-remplissage depuis un deal fonctionne", async ({ page }) => {
+  test("CONTRACT-05: Le pré-remplissage depuis un deal fonctionne", async ({
+    page,
+  }) => {
     // Navigate with query params simulating deal link
     await page.goto("/contracts/new?dealId=test&amount=5000");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Page should load without error
     expect(body.length).toBeGreaterThan(100);
   });
@@ -83,7 +93,7 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     await page.goto("/contracts/invoices");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasInvoices =
       body.toLowerCase().includes("facture") ||
       body.toLowerCase().includes("invoice") ||
@@ -92,11 +102,13 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     expect(hasInvoices).toBeTruthy();
   });
 
-  test("CONTRACT-07: La page paiements/échéances est accessible", async ({ page }) => {
+  test("CONTRACT-07: La page paiements/échéances est accessible", async ({
+    page,
+  }) => {
     await page.goto("/contracts/payments");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasPayments =
       body.toLowerCase().includes("paiement") ||
       body.toLowerCase().includes("échéance") ||
@@ -111,7 +123,7 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/lib/actions/contracts.ts",
-      "utf-8"
+      "utf-8",
     );
 
     expect(content).toContain("generateContractNumber");
@@ -123,7 +135,7 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/lib/actions/contracts.ts",
-      "utf-8"
+      "utf-8",
     );
 
     expect(content).toContain("generateInvoice");
@@ -136,7 +148,7 @@ test.describe("FONCTIONNALITÉ 5 — CONTRATS ET FACTURATION", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/app/(app)/crm/deal-panel.tsx",
-      "utf-8"
+      "utf-8",
     );
 
     expect(content).toContain("Générer un contrat");

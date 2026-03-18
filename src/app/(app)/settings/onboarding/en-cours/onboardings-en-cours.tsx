@@ -136,7 +136,10 @@ export function OnboardingsEnCours({ users }: OnboardingsEnCoursProps) {
               const progress = Math.round((step / maxSteps) * 100);
 
               return (
-                <Card key={u.id} className="transition-colors hover:bg-muted/30">
+                <Card
+                  key={u.id}
+                  className="transition-colors hover:bg-muted/30"
+                >
                   <CardContent className="flex items-center gap-4 py-4">
                     {/* Avatar */}
                     <div

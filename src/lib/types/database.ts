@@ -42,6 +42,76 @@ export type AiMode =
 
 export type WhatsAppStatus = "connected" | "disconnected" | "pending";
 
+// ─── GenSpark Presentations ─────────────────────────────────────────────────
+
+export type SlideLayout =
+  | "title"
+  | "title_content"
+  | "bullets"
+  | "two_columns"
+  | "image_left"
+  | "image_right"
+  | "image_full"
+  | "quote"
+  | "chart"
+  | "section"
+  | "blank";
+
+export type SlideTransition = "fade" | "slide" | "zoom" | "none";
+
+export type PresentationTheme = "dark" | "light" | "brand";
+
+export interface SlideContent {
+  title?: string;
+  subtitle?: string;
+  body?: string;
+  bullets?: string[];
+  image_url?: string;
+  image_alt?: string;
+  quote?: string;
+  quote_author?: string;
+  chart_type?: "bar" | "line" | "pie" | "area";
+  chart_data?: Array<Record<string, unknown>>;
+  column_left?: string;
+  column_right?: string;
+}
+
+export interface Presentation {
+  id: string;
+  title: string;
+  description: string | null;
+  theme: PresentationTheme;
+  aspect_ratio: string;
+  slide_count: number;
+  is_template: boolean;
+  template_category: string | null;
+  generation_prompt: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PresentationSlide {
+  id: string;
+  presentation_id: string;
+  position: number;
+  layout: SlideLayout;
+  content: SlideContent;
+  notes: string | null;
+  transition: SlideTransition;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PresentationShare {
+  id: string;
+  presentation_id: string;
+  shared_by: string;
+  shared_with: string;
+  permission: "view" | "edit";
+  created_at: string;
+}
+
 export type VideoRoomStatus = "scheduled" | "live" | "ended";
 
 export type PaymentStatus = "pending" | "paid" | "overdue" | "failed";
@@ -131,6 +201,27 @@ export interface BookingSlot {
   is_active: boolean;
 }
 
+export type CallResultType =
+  | "vente_realisee"
+  | "non_realisee"
+  | "suivi_prevu"
+  | "no_show";
+
+export type BookingLeadStatus =
+  | "new"
+  | "qualified"
+  | "booked"
+  | "disqualified"
+  | "lost";
+
+export interface QualificationField {
+  id: string;
+  label: string;
+  type: "text" | "select" | "textarea" | "number";
+  required: boolean;
+  options?: string[];
+}
+
 export interface Booking {
   id: string;
   prospect_name: string;
@@ -147,7 +238,121 @@ export interface Booking {
   reminder_sent: boolean;
   notes: string | null;
   created_at: string;
+  // Booking pages fields
+  booking_page_id: string | null;
+  closer_id: string | null;
+  date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  qualification_answers: Record<string, unknown>;
+  call_result: CallResultType | null;
+  objections: string | null;
+  follow_up_notes: string | null;
+  follow_up_date: string | null;
+  // Joined
   assigned_user?: Profile;
+  closer?: Profile;
+  booking_page?: BookingPage;
+}
+
+export interface BookingPage {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  brand_color: string;
+  slot_duration: number;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  max_days_ahead: number;
+  qualification_fields: QualificationField[];
+  timezone: string;
+  og_title: string | null;
+  og_description: string | null;
+  og_image_url: string | null;
+  email_visible: boolean;
+  email_required: boolean;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  creator?: Profile;
+}
+
+export interface BookingAvailability {
+  id: string;
+  booking_page_id: string;
+  closer_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  priority: number;
+  is_active: boolean;
+  created_at: string;
+  closer?: Profile;
+}
+
+export interface BookingException {
+  id: string;
+  booking_page_id: string;
+  closer_id: string | null;
+  exception_date: string;
+  type: "blocked" | "override";
+  start_time: string | null;
+  end_time: string | null;
+  reason: string | null;
+  created_at: string;
+  closer?: Profile;
+}
+
+export interface BookingPageView {
+  id: string;
+  booking_page_id: string;
+  referrer: string | null;
+  created_at: string;
+}
+
+export interface BookingLead {
+  id: string;
+  booking_page_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  status: BookingLeadStatus;
+  qualification_answers: Record<string, unknown>;
+  booking_id: string | null;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
+  booking?: Booking;
+  assigned_user?: Profile;
+  booking_page?: BookingPage;
+}
+
+export interface AvailableSlot {
+  start_time: string;
+  end_time: string;
+  closer_id: string;
+}
+
+export interface PublicBookingPageData {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  brand_color: string;
+  slot_duration: number;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  max_days_ahead: number;
+  qualification_fields: QualificationField[];
+  timezone: string;
+  og_title: string | null;
+  og_description: string | null;
+  og_image_url: string | null;
+  email_visible: boolean;
+  email_required: boolean;
+  created_by_name: string | null;
 }
 
 export interface ContractTemplate {
@@ -1048,6 +1253,59 @@ export interface DevelopmentPlan {
   updated_at: string;
 }
 
+// ==========================================
+// Live Sessions
+// ==========================================
+
+export type LiveSessionType = "one_on_one" | "live" | "screen_share";
+export type LiveSessionStatus = "scheduled" | "live" | "ended" | "cancelled";
+
+export interface LiveSession {
+  id: string;
+  title: string;
+  description: string | null;
+  host_id: string;
+  guest_id: string | null;
+  session_type: LiveSessionType;
+  status: LiveSessionStatus;
+  scheduled_at: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  actual_duration_seconds: number | null;
+  created_at: string;
+  updated_at: string;
+  host?: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string;
+  };
+  guest?: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string;
+  } | null;
+}
+
+export interface TranscriptEntry {
+  id: string;
+  speaker: string;
+  speakerId: string;
+  text: string;
+  timestamp: number;
+}
+
+export interface LiveSessionNote {
+  id: string;
+  session_id: string;
+  author_id: string;
+  content: string;
+  action_items: Array<{ text: string; done: boolean }>;
+  created_at: string;
+  updated_at: string;
+}
+
 // Supabase Database type (simplified for now - will be generated from Supabase CLI later)
 export interface Database {
   public: {
@@ -1089,6 +1347,44 @@ export interface Database {
           scheduled_at: string;
         };
         Update: Partial<Booking>;
+      };
+      booking_pages: {
+        Row: BookingPage;
+        Insert: Partial<BookingPage> & { slug: string; title: string };
+        Update: Partial<BookingPage>;
+      };
+      booking_availability: {
+        Row: BookingAvailability;
+        Insert: Partial<BookingAvailability> & {
+          booking_page_id: string;
+          closer_id: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+        };
+        Update: Partial<BookingAvailability>;
+      };
+      booking_exceptions: {
+        Row: BookingException;
+        Insert: Partial<BookingException> & {
+          booking_page_id: string;
+          exception_date: string;
+          type: string;
+        };
+        Update: Partial<BookingException>;
+      };
+      booking_page_views: {
+        Row: BookingPageView;
+        Insert: Partial<BookingPageView> & { booking_page_id: string };
+        Update: Partial<BookingPageView>;
+      };
+      booking_leads: {
+        Row: BookingLead;
+        Insert: Partial<BookingLead> & {
+          booking_page_id: string;
+          name: string;
+        };
+        Update: Partial<BookingLead>;
       };
       contract_templates: {
         Row: ContractTemplate;

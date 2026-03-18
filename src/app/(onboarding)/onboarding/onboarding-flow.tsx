@@ -192,7 +192,7 @@ export function OnboardingFlow({
 
   const currentStep = steps[step];
   const isLast = step === steps.length - 1;
-  const progress = steps.length > 1 ? ((step) / (steps.length - 1)) * 100 : 0;
+  const progress = steps.length > 1 ? (step / (steps.length - 1)) * 100 : 0;
 
   // Fetch welcome video data on mount
   useEffect(() => {
@@ -253,7 +253,14 @@ export function OnboardingFlow({
         case "b2b_welcome":
           return true;
         case "b2b_questionnaire":
-          return !!company && !!secteur && !!offre && !!cible && !!caMensuel && plateforme.length > 0;
+          return (
+            !!company &&
+            !!secteur &&
+            !!offre &&
+            !!cible &&
+            !!caMensuel &&
+            plateforme.length > 0
+          );
         default:
           return true;
       }
@@ -439,8 +446,10 @@ export function OnboardingFlow({
             <span className="text-[#7af17a]">{displayName}</span> !
           </h1>
           <p className="text-white/50 text-lg max-w-md leading-relaxed">
-            Je suis <span className="text-white font-medium">Damien Reynaud</span>, fondateur de la S Academy.
-            Tu es au bon endroit pour transformer ta carrière dans le setting.
+            Je suis{" "}
+            <span className="text-white font-medium">Damien Reynaud</span>,
+            fondateur de la S Academy. Tu es au bon endroit pour transformer ta
+            carrière dans le setting.
           </p>
           <p className="text-white/40 text-base max-w-md">
             5 étapes rapides et tu seras prêt à démarrer. On y va ?
@@ -475,13 +484,22 @@ export function OnboardingFlow({
   function renderB2CProfile() {
     const OBJECTIFS = [
       { value: "complement", label: "Complément de revenu" },
-      { value: "activite_principale", label: "En faire mon activité principale" },
+      {
+        value: "activite_principale",
+        label: "En faire mon activité principale",
+      },
       { value: "remplacer_emploi", label: "Remplacer mon emploi actuel" },
     ];
     const NIVEAUX = [
       { value: "debutant", label: "Débutant — Je découvre le setting" },
-      { value: "intermediaire", label: "Intermédiaire — J'ai déjà quelques expériences" },
-      { value: "avance", label: "Avancé — Je suis déjà actif en setting/closing" },
+      {
+        value: "intermediaire",
+        label: "Intermédiaire — J'ai déjà quelques expériences",
+      },
+      {
+        value: "avance",
+        label: "Avancé — Je suis déjà actif en setting/closing",
+      },
     ];
 
     return (
@@ -603,7 +621,9 @@ export function OnboardingFlow({
                 <Play className="h-8 w-8 text-[#7af17a] ml-1" />
               </div>
               <p className="text-white/40 text-sm">Vidéo de présentation</p>
-              <p className="text-white/30 text-xs">La vidéo sera bientôt disponible</p>
+              <p className="text-white/30 text-xs">
+                La vidéo sera bientôt disponible
+              </p>
             </div>
           )}
         </div>
@@ -702,7 +722,9 @@ export function OnboardingFlow({
     if (joiningCommunity) return;
     setJoiningCommunity(true);
     try {
-      await postWelcomeCommunityMessage(fullName || userName || "Nouveau membre");
+      await postWelcomeCommunityMessage(
+        fullName || userName || "Nouveau membre",
+      );
       setCommunityJoined(true);
       toast.success("Message posté dans la communauté !");
     } catch {
@@ -722,8 +744,9 @@ export function OnboardingFlow({
             <Users className="h-8 w-8 text-[#7af17a]" />
           </div>
           <p className="text-white/50 text-base max-w-sm mx-auto leading-relaxed">
-            Rejoins la communauté et présente-toi aux autres membres.
-            On publiera automatiquement un message de bienvenue dans le canal #général.
+            Rejoins la communauté et présente-toi aux autres membres. On
+            publiera automatiquement un message de bienvenue dans le canal
+            #général.
           </p>
         </div>
 
@@ -885,9 +908,7 @@ export function OnboardingFlow({
                   type="button"
                   onClick={() =>
                     setPlateforme((prev) =>
-                      selected
-                        ? prev.filter((p) => p !== pl)
-                        : [...prev, pl],
+                      selected ? prev.filter((p) => p !== pl) : [...prev, pl],
                     )
                   }
                   className={cn(
@@ -930,10 +951,20 @@ export function OnboardingFlow({
     const items = [
       { icon: FileText, label: "Entreprise", value: company || "Non défini" },
       { icon: Target, label: "Secteur", value: secteur || "Non défini" },
-      { icon: FileText, label: "Offre", value: offre ? offre.slice(0, 60) + (offre.length > 60 ? "..." : "") : "Non défini" },
+      {
+        icon: FileText,
+        label: "Offre",
+        value: offre
+          ? offre.slice(0, 60) + (offre.length > 60 ? "..." : "")
+          : "Non défini",
+      },
       { icon: User, label: "Cible", value: cible || "Non défini" },
       { icon: Sparkles, label: "CA mensuel", value: caMensuel || "Non défini" },
-      { icon: Link2, label: "Plateformes", value: plateforme.length > 0 ? plateforme.join(", ") : "Aucune" },
+      {
+        icon: Link2,
+        label: "Plateformes",
+        value: plateforme.length > 0 ? plateforme.join(", ") : "Aucune",
+      },
     ];
 
     return (
@@ -968,8 +999,8 @@ export function OnboardingFlow({
           className="p-4 rounded-xl bg-[#7af17a]/5 border border-[#7af17a]/20 text-center"
         >
           <p className="text-sm text-white/60">
-            Ton workspace sera automatiquement configuré avec un SOP personnalisé
-            et un pipeline adapté à ton activité.
+            Ton workspace sera automatiquement configuré avec un SOP
+            personnalisé et un pipeline adapté à ton activité.
           </p>
         </motion.div>
 
@@ -1127,9 +1158,7 @@ export function OnboardingFlow({
                 <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   {currentStep.title}
                 </h2>
-                <p className="text-white/40 mt-2">
-                  {currentStep.subtitle}
-                </p>
+                <p className="text-white/40 mt-2">{currentStep.subtitle}</p>
               </div>
             )}
 
@@ -1159,24 +1188,26 @@ export function OnboardingFlow({
               )}
 
             {/* Final step (B2C community) — complete button */}
-            {isLast && currentStep.type === "b2c_community" && communityJoined && (
-              <div className="flex justify-center mt-10">
-                <button
-                  onClick={handleComplete}
-                  disabled={completing}
-                  className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50"
-                >
-                  {completing ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Sparkles className="h-5 w-5" />
-                      Accéder à mon dashboard
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
+            {isLast &&
+              currentStep.type === "b2c_community" &&
+              communityJoined && (
+                <div className="flex justify-center mt-10">
+                  <button
+                    onClick={handleComplete}
+                    disabled={completing}
+                    className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50"
+                  >
+                    {completing ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5" />
+                        Accéder à mon dashboard
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
           </motion.div>
         </AnimatePresence>
       </div>

@@ -8,11 +8,13 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
 
   // ── Création workspace ──
 
-  test("B2B-01: La page Workspaces B2B est accessible (admin)", async ({ page }) => {
+  test("B2B-01: La page Workspaces B2B est accessible (admin)", async ({
+    page,
+  }) => {
     await page.goto("/settings/workspaces");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasWorkspaces =
       body.toLowerCase().includes("workspace") ||
       body.toLowerCase().includes("entrepreneur") ||
@@ -22,15 +24,21 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
     expect(hasWorkspaces).toBeTruthy();
   });
 
-  test("B2B-02: Le bouton Créer un entrepreneur est présent", async ({ page }) => {
+  test("B2B-02: Le bouton Créer un entrepreneur est présent", async ({
+    page,
+  }) => {
     await page.goto("/settings/workspaces");
     await waitForPageReady(page);
 
-    const createBtn = page.getByRole("button", { name: /créer|nouveau|ajouter/i }).first();
-    const hasBtn = await createBtn.isVisible({ timeout: 5000 }).catch(() => false);
+    const createBtn = page
+      .getByRole("button", { name: /créer|nouveau|ajouter/i })
+      .first();
+    const hasBtn = await createBtn
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
 
     // Or look for the text
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasCreateOption =
       hasBtn ||
       body.toLowerCase().includes("créer un entrepreneur") ||
@@ -39,12 +47,16 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
     expect(hasCreateOption).toBeTruthy();
   });
 
-  test("B2B-03: Le dialog de création contient les champs requis", async ({ page }) => {
+  test("B2B-03: Le dialog de création contient les champs requis", async ({
+    page,
+  }) => {
     await page.goto("/settings/workspaces");
     await waitForPageReady(page);
 
     // Click create button
-    const createBtn = page.getByRole("button", { name: /créer|nouveau|ajouter/i }).first();
+    const createBtn = page
+      .getByRole("button", { name: /créer|nouveau|ajouter/i })
+      .first();
     if (await createBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
       await createBtn.click();
       await page.waitForTimeout(1000);
@@ -52,7 +64,7 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
       // Check for email, name, company fields in dialog
       const dialog = page.locator('[role="dialog"]').first();
       if (await dialog.isVisible({ timeout: 3000 }).catch(() => false)) {
-        const dialogText = await dialog.textContent() || "";
+        const dialogText = (await dialog.textContent()) || "";
         const hasFields =
           dialogText.toLowerCase().includes("email") ||
           dialogText.toLowerCase().includes("nom") ||
@@ -65,11 +77,13 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
 
   // ── Assignments ──
 
-  test("B2B-04: La page affectations setters est accessible", async ({ page }) => {
+  test("B2B-04: La page affectations setters est accessible", async ({
+    page,
+  }) => {
     await page.goto("/team/assignments");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasAssignments =
       body.toLowerCase().includes("affectation") ||
       body.toLowerCase().includes("assignment") ||
@@ -85,7 +99,7 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
     await page.goto("/settings/workspaces");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Should show workspace list or empty state
     expect(body.length).toBeGreaterThan(100);
   });
@@ -96,11 +110,13 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/lib/constants.ts",
-      "utf-8"
+      "utf-8",
     );
 
     // Academy should include client_b2b in roles
-    const academyMatch = content.match(/label:\s*"Academy"[\s\S]*?roles:\s*\[([^\]]+)\]/);
+    const academyMatch = content.match(
+      /label:\s*"Academy"[\s\S]*?roles:\s*\[([^\]]+)\]/,
+    );
     expect(academyMatch).toBeTruthy();
     expect(academyMatch![1]).toContain("client_b2b");
   });
@@ -109,7 +125,7 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/lib/actions/workspace.ts",
-      "utf-8"
+      "utf-8",
     );
 
     expect(content).toContain("inviteUserByEmail");
@@ -120,7 +136,7 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/lib/actions/workspace.ts",
-      "utf-8"
+      "utf-8",
     );
 
     expect(content).toContain("getB2BWorkspaceOverview");
@@ -129,7 +145,9 @@ test.describe("FONCTIONNALITÉ 6 — WORKSPACE B2B ISOLÉ", () => {
 
   // ── Route security ──
 
-  test("B2B-09: Les pages admin ne sont pas accessibles sans auth", async ({ page }) => {
+  test("B2B-09: Les pages admin ne sont pas accessibles sans auth", async ({
+    page,
+  }) => {
     // Clear cookies first
     await page.context().clearCookies();
     await page.goto("/settings/workspaces");

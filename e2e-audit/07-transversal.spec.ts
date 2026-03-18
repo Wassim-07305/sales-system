@@ -4,7 +4,9 @@ import { loginAsAdmin, waitForPageReady, measureLoadTime } from "./helpers";
 test.describe("TESTS TRANSVERSAUX", () => {
   // ── Sécurité des routes ──
 
-  test("SEC-01: /dashboard redirige vers /login sans auth", async ({ page }) => {
+  test("SEC-01: /dashboard redirige vers /login sans auth", async ({
+    page,
+  }) => {
     await page.context().clearCookies();
     await page.goto("/dashboard");
     await page.waitForTimeout(5000);
@@ -18,14 +20,18 @@ test.describe("TESTS TRANSVERSAUX", () => {
     expect(page.url()).toMatch(/\/(login|register)/);
   });
 
-  test("SEC-03: /contracts redirige vers /login sans auth", async ({ page }) => {
+  test("SEC-03: /contracts redirige vers /login sans auth", async ({
+    page,
+  }) => {
     await page.context().clearCookies();
     await page.goto("/contracts");
     await page.waitForTimeout(5000);
     expect(page.url()).toMatch(/\/(login|register)/);
   });
 
-  test("SEC-04: /settings/workspaces redirige vers /login sans auth", async ({ page }) => {
+  test("SEC-04: /settings/workspaces redirige vers /login sans auth", async ({
+    page,
+  }) => {
     await page.context().clearCookies();
     await page.goto("/settings/workspaces");
     await page.waitForTimeout(5000);
@@ -48,12 +54,16 @@ test.describe("TESTS TRANSVERSAUX", () => {
 
   // ── Performance ──
 
-  test("PERF-01: La page login charge en moins de 3 secondes", async ({ page }) => {
+  test("PERF-01: La page login charge en moins de 3 secondes", async ({
+    page,
+  }) => {
     const loadTime = await measureLoadTime(page, "/login");
     expect(loadTime).toBeLessThan(5000); // 5s tolerance for Vercel cold start
   });
 
-  test("PERF-02: Le dashboard charge en moins de 5 secondes", async ({ page }) => {
+  test("PERF-02: Le dashboard charge en moins de 5 secondes", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     const start = Date.now();
     await page.goto("/dashboard");
@@ -62,7 +72,9 @@ test.describe("TESTS TRANSVERSAUX", () => {
     expect(loadTime).toBeLessThan(8000); // 8s tolerance for cold start + data fetch
   });
 
-  test("PERF-03: La page CRM charge en moins de 5 secondes", async ({ page }) => {
+  test("PERF-03: La page CRM charge en moins de 5 secondes", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     const start = Date.now();
     await page.goto("/crm");
@@ -82,7 +94,9 @@ test.describe("TESTS TRANSVERSAUX", () => {
     // Use exact selectors matching login-form.tsx
     await expect(page.locator("#email")).toBeVisible({ timeout: 10_000 });
     await expect(page.locator("#password")).toBeVisible();
-    await expect(page.getByRole("button", { name: /se connecter/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /se connecter/i }),
+    ).toBeVisible();
   });
 
   test("DESIGN-02: Le sidebar est visible après login", async ({ page }) => {
@@ -95,14 +109,24 @@ test.describe("TESTS TRANSVERSAUX", () => {
     await expect(sidebar).toBeVisible({ timeout: 10_000 });
   });
 
-  test("DESIGN-03: Le texte français est utilisé dans l'interface", async ({ page }) => {
+  test("DESIGN-03: Le texte français est utilisé dans l'interface", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     await page.goto("/dashboard");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // French words should be present
-    const frenchWords = ["dashboard", "tableau", "contrat", "équipe", "message", "profil", "paramètre"];
+    const frenchWords = [
+      "dashboard",
+      "tableau",
+      "contrat",
+      "équipe",
+      "message",
+      "profil",
+      "paramètre",
+    ];
     let foundFrench = 0;
     for (const word of frenchWords) {
       if (body.toLowerCase().includes(word)) foundFrench++;
@@ -116,7 +140,7 @@ test.describe("TESTS TRANSVERSAUX", () => {
     await page.goto("/this-page-does-not-exist-12345");
     await page.waitForTimeout(3000);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Should show 404 or redirect
     const is404OrRedirect =
       body.includes("404") ||
@@ -130,7 +154,9 @@ test.describe("TESTS TRANSVERSAUX", () => {
 
   // ── Navigation ──
 
-  test("NAV-01: Les liens du sidebar mènent aux bonnes pages", async ({ page }) => {
+  test("NAV-01: Les liens du sidebar mènent aux bonnes pages", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
 
     const routes = ["/dashboard", "/crm", "/contracts", "/chat", "/academy"];
@@ -142,7 +168,9 @@ test.describe("TESTS TRANSVERSAUX", () => {
     }
   });
 
-  test("NAV-02: Toutes les pages principales chargent sans erreur JS", async ({ page }) => {
+  test("NAV-02: Toutes les pages principales chargent sans erreur JS", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
 
     const errors: string[] = [];
@@ -176,7 +204,7 @@ test.describe("TESTS TRANSVERSAUX", () => {
         !e.includes("chunk") &&
         !e.includes("Loading") &&
         !e.includes("NEXT_REDIRECT") &&
-        !e.includes("ResizeObserver")
+        !e.includes("ResizeObserver"),
     );
 
     // Log all errors for report

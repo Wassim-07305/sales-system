@@ -4,12 +4,14 @@ import { loginAsAdmin, waitForPageReady } from "./helpers";
 test.describe("FONCTIONNALITÉ 4 — ONBOARDING", () => {
   // ── Vue admin ──
 
-  test("ONBOARD-01: Page onboarding en cours accessible (admin)", async ({ page }) => {
+  test("ONBOARD-01: Page onboarding en cours accessible (admin)", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     await page.goto("/settings/onboarding/en-cours");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasContent =
       body.toLowerCase().includes("onboarding") ||
       body.toLowerCase().includes("en cours") ||
@@ -18,18 +20,22 @@ test.describe("FONCTIONNALITÉ 4 — ONBOARDING", () => {
     expect(hasContent).toBeTruthy();
   });
 
-  test("ONBOARD-02: Page settings onboarding accessible (admin)", async ({ page }) => {
+  test("ONBOARD-02: Page settings onboarding accessible (admin)", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     await page.goto("/settings/onboarding");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     expect(body.length).toBeGreaterThan(100);
   });
 
   // ── Onboarding flow structure ──
 
-  test("ONBOARD-03: La page /onboarding redirige un admin vers /dashboard", async ({ page }) => {
+  test("ONBOARD-03: La page /onboarding redirige un admin vers /dashboard", async ({
+    page,
+  }) => {
     await loginAsAdmin(page);
     await page.goto("/onboarding");
     await page.waitForTimeout(3000);
@@ -46,7 +52,7 @@ test.describe("FONCTIONNALITÉ 4 — ONBOARDING", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/app/(onboarding)/onboarding/onboarding-flow.tsx",
-      "utf-8"
+      "utf-8",
     );
 
     // B2B gating should exist
@@ -59,7 +65,7 @@ test.describe("FONCTIONNALITÉ 4 — ONBOARDING", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/app/(onboarding)/onboarding/page.tsx",
-      "utf-8"
+      "utf-8",
     );
 
     expect(content).toContain("onboarding_step");
@@ -70,11 +76,13 @@ test.describe("FONCTIONNALITÉ 4 — ONBOARDING", () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/Users/gilles/Downloads/Projets Client/sales-system-main/src/app/(onboarding)/onboarding/onboarding-flow.tsx",
-      "utf-8"
+      "utf-8",
     );
 
     // goNext should check canProceed for all roles, not just B2C
-    expect(content).toContain('if (!canProceed())');
-    expect(content).not.toContain('if (role === "client_b2c" && !canProceed())');
+    expect(content).toContain("if (!canProceed())");
+    expect(content).not.toContain(
+      'if (role === "client_b2c" && !canProceed())',
+    );
   });
 });

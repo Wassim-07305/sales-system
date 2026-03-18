@@ -8,18 +8,29 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
 
   // ── Pipeline Kanban ──
 
-  test("CRM-01: Les 6 colonnes Kanban s'affichent dans le bon ordre", async ({ page }) => {
+  test("CRM-01: Les 6 colonnes Kanban s'affichent dans le bon ordre", async ({
+    page,
+  }) => {
     await page.goto("/crm");
     await waitForPageReady(page);
 
     // Stage names come from DB pipeline_stages table (may differ from constants.ts defaults)
     // Actual DB stages: Prospect, Contacté, Appel Découverte, Proposition, Closing, Client Signé
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const possibleStages = [
       // DB names
-      "Prospect", "Contacté", "Appel Découverte", "Proposition", "Closing", "Client Signé",
+      "Prospect",
+      "Contacté",
+      "Appel Découverte",
+      "Proposition",
+      "Closing",
+      "Client Signé",
       // Default names from constants.ts
-      "Nouveau lead", "Relancé", "Call booké", "Fermé (gagné)", "Fermé (perdu)",
+      "Nouveau lead",
+      "Relancé",
+      "Call booké",
+      "Fermé (gagné)",
+      "Fermé (perdu)",
     ];
     let foundStages = 0;
     for (const stage of possibleStages) {
@@ -29,12 +40,16 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
     expect(foundStages).toBeGreaterThanOrEqual(6);
   });
 
-  test("CRM-02: Créer un nouveau deal → apparaît dans Nouveau lead", async ({ page }) => {
+  test("CRM-02: Créer un nouveau deal → apparaît dans Nouveau lead", async ({
+    page,
+  }) => {
     await page.goto("/crm");
     await waitForPageReady(page);
 
     // Click create deal button
-    const createBtn = page.getByRole("button", { name: /nouveau|créer|ajouter/i }).first();
+    const createBtn = page
+      .getByRole("button", { name: /nouveau|créer|ajouter/i })
+      .first();
     await createBtn.click();
 
     // Wait for dialog/form
@@ -47,7 +62,10 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
       await nameInput.fill(dealName);
     } else {
       // Try label-based approach
-      await page.getByLabel(/nom|titre/i).first().fill(dealName);
+      await page
+        .getByLabel(/nom|titre/i)
+        .first()
+        .fill(dealName);
     }
 
     // Fill amount
@@ -62,24 +80,34 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
     }
 
     // Submit
-    const submitBtn = page.getByRole("button", { name: /créer|enregistrer|sauvegarder|valider/i }).first();
+    const submitBtn = page
+      .getByRole("button", { name: /créer|enregistrer|sauvegarder|valider/i })
+      .first();
     await submitBtn.click();
     await page.waitForTimeout(2000);
 
     // Verify deal appears
-    await expect(page.getByText(dealName).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(dealName).first()).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
-  test("CRM-03: La page CRM charge et affiche le pipeline", async ({ page }) => {
+  test("CRM-03: La page CRM charge et affiche le pipeline", async ({
+    page,
+  }) => {
     await page.goto("/crm");
     await waitForPageReady(page);
 
     // Verify pipeline is rendered (columns or board)
-    const board = page.locator('[class*="kanban"], [class*="pipeline"], [class*="board"], [data-testid*="kanban"]').first();
+    const board = page
+      .locator(
+        '[class*="kanban"], [class*="pipeline"], [class*="board"], [data-testid*="kanban"]',
+      )
+      .first();
     const columns = page.locator('[class*="column"], [data-testid*="column"]');
 
     // At minimum, the page should have the CRM content loaded
-    const pageContent = await page.textContent("body") || "";
+    const pageContent = (await page.textContent("body")) || "";
     // Check for any pipeline stage name (DB or default)
     const hasPipeline =
       pageContent.includes("Prospect") ||
@@ -89,7 +117,9 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
     expect(hasPipeline).toBeTruthy();
   });
 
-  test("CRM-04: Rafraîchir la page → les deals persistent", async ({ page }) => {
+  test("CRM-04: Rafraîchir la page → les deals persistent", async ({
+    page,
+  }) => {
     await page.goto("/crm");
     await waitForPageReady(page);
 
@@ -101,7 +131,7 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
     await page.reload();
     await waitForPageReady(page);
 
-    const afterContent = await page.textContent("body") || "";
+    const afterContent = (await page.textContent("body")) || "";
     // Pipeline stages should still be there after reload
     const hasPipeline =
       afterContent.includes("Prospect") ||
@@ -113,18 +143,27 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
 
   // ── Fiche Lead ──
 
-  test("CRM-05: Cliquer sur un deal → panel latéral avec infos", async ({ page }) => {
+  test("CRM-05: Cliquer sur un deal → panel latéral avec infos", async ({
+    page,
+  }) => {
     await page.goto("/crm");
     await waitForPageReady(page);
 
     // Click on a deal card
-    const dealCard = page.locator('[class*="card"]').filter({ hasText: /deal|lead|prospect/i }).first();
+    const dealCard = page
+      .locator('[class*="card"]')
+      .filter({ hasText: /deal|lead|prospect/i })
+      .first();
     if (await dealCard.isVisible({ timeout: 5000 }).catch(() => false)) {
       await dealCard.click();
       await page.waitForTimeout(1500);
 
       // Check for panel/sheet/drawer
-      const panel = page.locator('[role="dialog"], [class*="sheet"], [class*="panel"], [class*="drawer"]').first();
+      const panel = page
+        .locator(
+          '[role="dialog"], [class*="sheet"], [class*="panel"], [class*="drawer"]',
+        )
+        .first();
       await expect(panel).toBeVisible({ timeout: 5000 });
     } else {
       // No deals exist — try any clickable element in the pipeline
@@ -132,7 +171,9 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
     }
   });
 
-  test("CRM-06: Le bouton Générer un contrat est présent dans le deal panel", async ({ page }) => {
+  test("CRM-06: Le bouton Générer un contrat est présent dans le deal panel", async ({
+    page,
+  }) => {
     await page.goto("/crm");
     await waitForPageReady(page);
 
@@ -163,7 +204,9 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
 
   // ── EOD / Journal ──
 
-  test("CRM-07: Le formulaire EOD est accessible et contient tous les champs", async ({ page }) => {
+  test("CRM-07: Le formulaire EOD est accessible et contient tous les champs", async ({
+    page,
+  }) => {
     await page.goto("/journal");
     await waitForPageReady(page);
 
@@ -197,11 +240,13 @@ test.describe("FONCTIONNALITÉ 1 — CRM AUTOMATISÉ", () => {
     expect(hasKPIs).toBeTruthy();
   });
 
-  test("CRM-09: Dashboard admin affiche les KPIs contrats", async ({ page }) => {
+  test("CRM-09: Dashboard admin affiche les KPIs contrats", async ({
+    page,
+  }) => {
     await page.goto("/dashboard");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Check for contract-related KPIs
     const hasContractKPIs =
       body.includes("Contrats") ||

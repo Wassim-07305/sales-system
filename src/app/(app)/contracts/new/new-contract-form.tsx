@@ -105,7 +105,8 @@ export function NewContractForm({
 
     setLoading(true);
     try {
-      const installmentCount = paymentSchedule === "2x" ? 2 : paymentSchedule === "3x" ? 3 : 1;
+      const installmentCount =
+        paymentSchedule === "2x" ? 2 : paymentSchedule === "3x" ? 3 : 1;
       const result = await createContract({
         templateId,
         clientId,

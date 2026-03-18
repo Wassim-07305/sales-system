@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useTransition, memo } from "react";
+import { useCallback, useEffect, useState, useTransition, memo } from "react";
 import {
   ReactFlow,
   Background,
@@ -17,6 +17,7 @@ import {
   type OnConnect,
   type NodeTypes,
   type NodeProps,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -107,14 +108,55 @@ const nodeTypeConfig: Record<
   },
 };
 
-function ScriptNodeComponent({ data }: NodeProps) {
+function ScriptNodeComponent({ data, id }: NodeProps) {
   const nodeData = data as { label: string; type: string };
   const config = nodeTypeConfig[nodeData.type] || nodeTypeConfig.opening;
   const Icon = config.icon;
+  const { setNodes } = useReactFlow();
+  const [editing, setEditing] = useState(false);
+  const [label, setLabel] = useState(nodeData.label);
+
+  function handleDoubleClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    setEditing(true);
+  }
+
+  function handleBlur() {
+    setEditing(false);
+    if (label.trim() !== nodeData.label) {
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === id
+            ? {
+                ...n,
+                data: { ...n.data, label: label.trim() || nodeData.label },
+              }
+            : n,
+        ),
+      );
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleBlur();
+    }
+    if (e.key === "Escape") {
+      setLabel(nodeData.label);
+      setEditing(false);
+    }
+  }
+
+  // Sync if label changes externally
+  useEffect(() => {
+    setLabel(nodeData.label);
+  }, [nodeData.label]);
 
   return (
     <div
-      className={`px-4 py-3 rounded-xl border shadow-sm min-w-[180px] ${config.bg} ${config.border} hover:shadow-lg transition-all duration-300`}
+      className={`px-4 py-3 rounded-xl border shadow-sm min-w-[180px] max-w-[280px] ${config.bg} ${config.border} hover:shadow-lg transition-all duration-300`}
+      onDoubleClick={handleDoubleClick}
     >
       <Handle
         type="target"
@@ -129,7 +171,21 @@ function ScriptNodeComponent({ data }: NodeProps) {
           {config.label}
         </span>
       </div>
-      <p className="text-sm font-medium text-foreground">{nodeData.label}</p>
+      {editing ? (
+        <textarea
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          className="nodrag w-full text-sm font-medium text-foreground bg-transparent border border-brand/30 rounded-md px-2 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-brand/50"
+          rows={Math.max(2, Math.ceil(label.length / 30))}
+        />
+      ) : (
+        <p className="text-sm font-medium text-foreground cursor-text whitespace-pre-wrap">
+          {nodeData.label}
+        </p>
+      )}
       <Handle
         type="source"
         position={Position.Bottom}

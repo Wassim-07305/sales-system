@@ -1,0 +1,250 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import {
+  MoreHorizontal,
+  Reply,
+  Pencil,
+  Trash2,
+  Pin,
+  SmilePlus,
+  AlertTriangle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatMessageTime } from "@/lib/messaging-utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MessageContent } from "./message-content";
+import { MessageReactions } from "./message-reactions";
+import type { EnrichedMessage } from "@/lib/types/messaging";
+
+const QUICK_REACTIONS = [
+  "\u{1F44D}",
+  "\u{2764}\u{FE0F}",
+  "\u{1F602}",
+  "\u{1F389}",
+  "\u{1F914}",
+  "\u{1F440}",
+];
+
+const STAFF_ROLES = ["admin", "manager"];
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+interface MessageBubbleProps {
+  message: EnrichedMessage;
+  isOwn: boolean;
+  showSender: boolean;
+  currentUserId: string;
+  onReply: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onTogglePin: () => void;
+  onToggleReaction: (emoji: string) => void;
+}
+
+export function MessageBubble({
+  message,
+  isOwn,
+  showSender,
+  currentUserId,
+  onReply,
+  onEdit,
+  onDelete,
+  onTogglePin,
+  onToggleReaction,
+}: MessageBubbleProps) {
+  const [showActions, setShowActions] = useState(false);
+  const [showQuickReact, setShowQuickReact] = useState(false);
+
+  const isStaff = message.sender
+    ? STAFF_ROLES.includes(message.sender.role)
+    : false;
+
+  const handleQuickReact = useCallback(
+    (emoji: string) => {
+      onToggleReaction(emoji);
+      setShowQuickReact(false);
+    },
+    [onToggleReaction],
+  );
+
+  // System messages
+  if (message.content_type === "system") {
+    return (
+      <div className="flex justify-center py-1">
+        <span className="text-xs italic text-muted-foreground">
+          {message.content}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "group relative flex gap-3 px-4 py-0.5 hover:bg-muted/30 transition-colors",
+        message.is_urgent && "bg-destructive/5 border-l-2 border-destructive",
+      )}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => {
+        setShowActions(false);
+        setShowQuickReact(false);
+      }}
+    >
+      {/* Avatar */}
+      {showSender ? (
+        <Avatar className="h-8 w-8 shrink-0 mt-0.5">
+          <AvatarImage src={message.sender?.avatar_url ?? undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary text-xs">
+            {message.sender?.full_name
+              ? getInitials(message.sender.full_name)
+              : "?"}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <div className="w-8 shrink-0" />
+      )}
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        {showSender && (
+          <div className="flex items-baseline gap-2 mb-0.5">
+            <span
+              className={cn(
+                "text-sm font-semibold",
+                isStaff ? "text-primary" : "text-foreground",
+              )}
+            >
+              {message.sender?.full_name ?? "Inconnu"}
+            </span>
+            {message.sender?.role && (
+              <span className="text-[10px] text-muted-foreground capitalize">
+                {message.sender.role.replace("_", " ")}
+              </span>
+            )}
+            <span className="text-[10px] text-muted-foreground">
+              {formatMessageTime(message.created_at)}
+            </span>
+            {message.is_urgent && (
+              <span className="flex items-center gap-0.5 text-[10px] text-destructive font-medium">
+                <AlertTriangle className="h-3 w-3" />
+                Urgent
+              </span>
+            )}
+            {message.is_pinned && (
+              <Pin className="h-3 w-3 text-primary fill-primary" />
+            )}
+          </div>
+        )}
+
+        {/* Reply reference */}
+        {message.reply_message && (
+          <div className="mb-1 flex items-center gap-2 rounded border-l-2 border-primary/50 bg-muted/50 px-3 py-1.5">
+            <Reply className="h-3 w-3 text-muted-foreground shrink-0" />
+            <div className="min-w-0">
+              <span className="text-xs font-medium text-primary">
+                {message.reply_message.sender?.full_name ?? "Inconnu"}
+              </span>
+              <p className="truncate text-xs text-muted-foreground">
+                {message.reply_message.content}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <MessageContent message={message} />
+
+        <MessageReactions
+          reactions={message.reactions}
+          currentUserId={currentUserId}
+          onToggleReaction={onToggleReaction}
+        />
+      </div>
+
+      {/* Hover actions */}
+      {showActions && (
+        <div className="absolute -top-3 right-4 flex items-center gap-0.5 rounded-lg border bg-background px-1 py-0.5 shadow-sm">
+          {/* Quick react */}
+          <div className="relative">
+            <button
+              onClick={() => setShowQuickReact(!showQuickReact)}
+              className="rounded p-1 hover:bg-muted transition-colors"
+              title="Reagir"
+            >
+              <SmilePlus className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+            {showQuickReact && (
+              <div className="absolute bottom-full right-0 mb-1 flex items-center gap-0.5 rounded-lg border bg-background p-1 shadow-md">
+                {QUICK_REACTIONS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => handleQuickReact(emoji)}
+                    className="rounded p-1 text-sm hover:bg-muted transition-colors"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={onReply}
+            className="rounded p-1 hover:bg-muted transition-colors"
+            title="Repondre"
+          >
+            <Reply className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="rounded p-1 hover:bg-muted transition-colors">
+                <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={onReply}>
+                <Reply className="mr-2 h-4 w-4" />
+                Repondre
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onTogglePin}>
+                <Pin className="mr-2 h-4 w-4" />
+                {message.is_pinned ? "Desepingler" : "Epingler"}
+              </DropdownMenuItem>
+              {isOwn && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Modifier
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={onDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Supprimer
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+    </div>
+  );
+}

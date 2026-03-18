@@ -8,11 +8,13 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
 
   // ── Modules et déverrouillage ──
 
-  test("ACADEMY-01: La page Academy charge et affiche du contenu", async ({ page }) => {
+  test("ACADEMY-01: La page Academy charge et affiche du contenu", async ({
+    page,
+  }) => {
     await page.goto("/academy");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Should show academy content — courses or modules
     const hasContent =
       body.includes("Academy") ||
@@ -33,11 +35,13 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
     const cardCount = await cards.count();
 
     // Should have at least some content (courses or empty state)
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     expect(body.length).toBeGreaterThan(100);
   });
 
-  test("ACADEMY-03: Accéder à un cours → lecteur vidéo présent", async ({ page }) => {
+  test("ACADEMY-03: Accéder à un cours → lecteur vidéo présent", async ({
+    page,
+  }) => {
     await page.goto("/academy");
     await waitForPageReady(page);
 
@@ -47,11 +51,14 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
       await courseLink.click();
       await waitForPageReady(page);
 
-      const body = await page.textContent("body") || "";
+      const body = (await page.textContent("body")) || "";
       // Check for video player or video-related content
-      const hasVideoContent =
-        page.locator("video, iframe, [class*='video'], [class*='player']").first();
-      const videoVisible = await hasVideoContent.isVisible({ timeout: 5000 }).catch(() => false);
+      const hasVideoContent = page
+        .locator("video, iframe, [class*='video'], [class*='player']")
+        .first();
+      const videoVisible = await hasVideoContent
+        .isVisible({ timeout: 5000 })
+        .catch(() => false);
 
       // Video should be present, or at minimum, course content should load
       expect(body.length).toBeGreaterThan(100);
@@ -63,7 +70,9 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
 
   // ── Quiz ──
 
-  test("ACADEMY-04: Vérifier que le quiz est accessible dans un module", async ({ page }) => {
+  test("ACADEMY-04: Vérifier que le quiz est accessible dans un module", async ({
+    page,
+  }) => {
     await page.goto("/academy");
     await waitForPageReady(page);
 
@@ -72,7 +81,7 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
       await courseLink.click();
       await waitForPageReady(page);
 
-      const body = await page.textContent("body") || "";
+      const body = (await page.textContent("body")) || "";
       const hasQuiz =
         body.toLowerCase().includes("quiz") ||
         body.toLowerCase().includes("question") ||
@@ -87,11 +96,13 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
 
   // ── Leaderboard ──
 
-  test("ACADEMY-05: Le leaderboard Academy est accessible", async ({ page }) => {
+  test("ACADEMY-05: Le leaderboard Academy est accessible", async ({
+    page,
+  }) => {
     await page.goto("/academy/leaderboard");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasLeaderboard =
       body.toLowerCase().includes("leaderboard") ||
       body.toLowerCase().includes("top") ||
@@ -107,7 +118,7 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
     await page.goto("/academy/certificates");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     const hasCerts =
       body.toLowerCase().includes("certificat") ||
       body.toLowerCase().includes("félicitation") ||
@@ -118,23 +129,29 @@ test.describe("FONCTIONNALITÉ 2 — ACADEMY / FORMATION", () => {
 
   // ── Admin progression ──
 
-  test("ACADEMY-07: Vue admin progression setters accessible", async ({ page }) => {
+  test("ACADEMY-07: Vue admin progression setters accessible", async ({
+    page,
+  }) => {
     await page.goto("/academy/admin/progress");
     await waitForPageReady(page);
 
-    const body = await page.textContent("body") || "";
+    const body = (await page.textContent("body")) || "";
     // Should show progress view or redirect to academy admin
     expect(body.length).toBeGreaterThan(50);
   });
 
   // ── CRUD Admin ──
 
-  test("ACADEMY-08: L'admin peut accéder à la gestion Academy", async ({ page }) => {
+  test("ACADEMY-08: L'admin peut accéder à la gestion Academy", async ({
+    page,
+  }) => {
     await page.goto("/academy");
     await waitForPageReady(page);
 
     // Look for admin actions (create, manage, edit buttons)
-    const adminBtn = page.getByRole("button", { name: /créer|nouveau|ajouter|gérer/i }).first();
+    const adminBtn = page
+      .getByRole("button", { name: /créer|nouveau|ajouter|gérer/i })
+      .first();
     const adminLink = page.locator('a[href*="/academy/admin"]').first();
 
     const hasAdminAccess =

@@ -46,11 +46,7 @@ interface Workspace {
   contracts: { count: number; signed: number };
 }
 
-export function WorkspacesAdmin({
-  workspaces,
-}: {
-  workspaces: Workspace[];
-}) {
+export function WorkspacesAdmin({ workspaces }: { workspaces: Workspace[] }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -157,9 +153,7 @@ export function WorkspacesAdmin({
               <p className="text-2xl font-bold">
                 {workspaces.reduce((sum, w) => sum + w.setters.length, 0)}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Setters assignés
-              </p>
+              <p className="text-xs text-muted-foreground">Setters assignés</p>
             </div>
           </CardContent>
         </Card>
@@ -170,14 +164,9 @@ export function WorkspacesAdmin({
             </div>
             <div>
               <p className="text-2xl font-bold">
-                {workspaces.reduce(
-                  (sum, w) => sum + w.contracts.signed,
-                  0,
-                )}
+                {workspaces.reduce((sum, w) => sum + w.contracts.signed, 0)}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Contrats signés
-              </p>
+              <p className="text-xs text-muted-foreground">Contrats signés</p>
             </div>
           </CardContent>
         </Card>
@@ -235,7 +224,8 @@ export function WorkspacesAdmin({
                   <div className="flex items-center gap-4 mt-2">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {w.setters.length} setter{w.setters.length !== 1 ? "s" : ""}
+                      {w.setters.length} setter
+                      {w.setters.length !== 1 ? "s" : ""}
                     </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <FileText className="h-3 w-3" />
@@ -254,11 +244,7 @@ export function WorkspacesAdmin({
                   {w.setters.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {w.setters.map((s) => (
-                        <Badge
-                          key={s.id}
-                          variant="outline"
-                          className="text-xs"
-                        >
+                        <Badge key={s.id} variant="outline" className="text-xs">
                           {s.full_name || s.email}
                         </Badge>
                       ))}
@@ -287,14 +273,12 @@ export function WorkspacesAdmin({
                 <Building2 className="h-7 w-7 text-muted-foreground/60" />
               </div>
               <p className="font-medium text-sm text-foreground mb-1">
-                {search
-                  ? "Aucun résultat"
-                  : "Aucun entrepreneur B2B"}
+                {search ? "Aucun résultat" : "Aucun entrepreneur B2B"}
               </p>
               <p className="text-xs text-muted-foreground">
                 {search
                   ? "Essayez un autre terme de recherche"
-                  : "Cliquez sur \"Créer un entrepreneur\" pour commencer."}
+                  : 'Cliquez sur "Créer un entrepreneur" pour commencer.'}
               </p>
             </CardContent>
           </Card>

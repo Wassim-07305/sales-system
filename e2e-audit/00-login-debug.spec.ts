@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-test("DEBUG: Login with e2e-admin@test.com / TestAdmin2026", async ({ page }) => {
+test("DEBUG: Login with e2e-admin@test.com / TestAdmin2026", async ({
+  page,
+}) => {
   await page.goto("https://sales-system-six.vercel.app/login");
   await page.waitForLoadState("networkidle");
 
@@ -9,7 +11,9 @@ test("DEBUG: Login with e2e-admin@test.com / TestAdmin2026", async ({ page }) =>
 
   page.on("response", (response) => {
     if (response.url().includes("auth")) {
-      console.log(`RESPONSE: ${response.status()} ${response.url().substring(0, 100)}`);
+      console.log(
+        `RESPONSE: ${response.status()} ${response.url().substring(0, 100)}`,
+      );
     }
   });
 

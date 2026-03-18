@@ -33,6 +33,8 @@ import {
   Plug,
   HelpCircle,
   Sparkles,
+  Radio,
+  Presentation,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -136,6 +138,14 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
 
+  // Live (video calls, screen share, lives)
+  {
+    label: "Live",
+    href: "/live",
+    icon: Radio,
+    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+  },
+
   // Setter/Closer specific
   {
     label: "Role-Play",
@@ -147,6 +157,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Scripts",
     href: "/scripts",
     icon: ScrollText,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+  {
+    label: "GenSpark",
+    href: "/genspark",
+    icon: Presentation,
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
@@ -220,14 +236,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/ai-scripts",
     icon: Sparkles,
     roles: ["client_b2b", "client_b2c"],
-  },
-
-  // Help
-  {
-    label: "Centre d'aide",
-    href: "/help",
-    icon: HelpCircle,
-    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
   },
 
   // Profile & Settings
@@ -321,7 +329,9 @@ export interface NavSection {
 export const NAV_SECTIONS: NavSection[] = [
   {
     label: "",
-    items: NAV_ITEMS.filter((i) => ["/dashboard", "/chat"].includes(i.href)),
+    items: NAV_ITEMS.filter((i) =>
+      ["/dashboard", "/chat", "/live"].includes(i.href),
+    ),
   },
   {
     label: "Ventes",
@@ -339,12 +349,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Prospection",
     items: NAV_ITEMS.filter((i) =>
-      [
-        "/prospecting",
-        "/roleplay",
-        "/scripts",
-        "/automation",
-      ].includes(i.href),
+      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href),
     ),
   },
   {
@@ -356,12 +361,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      [
-        "/team",
-        "/content",
-        "/customers",
-        "/marketplace",
-      ].includes(i.href),
+      ["/team", "/content", "/customers", "/marketplace"].includes(i.href),
     ),
   },
   {
@@ -380,12 +380,8 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Outils IA",
     items: NAV_ITEMS.filter((i) =>
-      ["/settings-ia", "/ai-scripts"].includes(i.href),
+      ["/settings-ia", "/ai-scripts", "/genspark"].includes(i.href),
     ),
-  },
-  {
-    label: "Aide",
-    items: NAV_ITEMS.filter((i) => ["/help"].includes(i.href)),
   },
 ];
 
@@ -471,10 +467,78 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   "ai-scripts": "Scripts IA",
   api: "API REST",
   integrations: "Intégrations",
+  genspark: "GenSpark",
+  live: "Live",
   coaching: "Coaching",
   partners: "Partenaires",
   moderation: "Modération",
   migration: "Migration CRM",
+};
+
+// ─── Booking Pages ─────────────────────────────────────────────────────────
+
+export const DAYS_OF_WEEK = [
+  { value: 0, label: "Dimanche", short: "Dim" },
+  { value: 1, label: "Lundi", short: "Lun" },
+  { value: 2, label: "Mardi", short: "Mar" },
+  { value: 3, label: "Mercredi", short: "Mer" },
+  { value: 4, label: "Jeudi", short: "Jeu" },
+  { value: 5, label: "Vendredi", short: "Ven" },
+  { value: 6, label: "Samedi", short: "Sam" },
+];
+
+export const SLOT_DURATIONS = [
+  { value: 15, label: "15 min" },
+  { value: 30, label: "30 min" },
+  { value: 45, label: "45 min" },
+  { value: 60, label: "1h" },
+  { value: 90, label: "1h30" },
+];
+
+export const QUALIFICATION_FIELD_TYPES = [
+  { value: "text", label: "Texte court" },
+  { value: "textarea", label: "Texte long" },
+  { value: "select", label: "Liste déroulante" },
+  { value: "number", label: "Nombre" },
+] as const;
+
+export const CALL_RESULT_OPTIONS = [
+  {
+    value: "vente_realisee",
+    label: "Vente réalisée",
+    color: "bg-brand/10 text-brand border-brand/20",
+  },
+  {
+    value: "non_realisee",
+    label: "Non réalisée",
+    color: "bg-foreground/10 text-foreground border-foreground/20",
+  },
+  {
+    value: "suivi_prevu",
+    label: "Suivi prévu",
+    color: "bg-muted/60 text-muted-foreground border-border/50",
+  },
+  {
+    value: "no_show",
+    label: "No show",
+    color: "bg-muted/40 text-muted-foreground/60 border-border/30",
+  },
+] as const;
+
+export const LEAD_STATUS_LABELS: Record<string, string> = {
+  new: "Nouveau",
+  qualified: "Qualifié",
+  booked: "RDV pris",
+  disqualified: "Disqualifié",
+  lost: "Perdu",
+};
+
+export const LEAD_STATUS_COLORS: Record<string, string> = {
+  new: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  qualified: "bg-brand/10 text-brand border-brand/20",
+  booked: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+  disqualified: "bg-muted/40 text-muted-foreground border-border/30",
+  lost: "bg-red-500/10 text-red-500 border-red-500/20",
 };
 
 export const PIPELINE_DEFAULT_STAGES = [

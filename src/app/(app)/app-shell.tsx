@@ -9,6 +9,7 @@ import { GlobalSearch } from "@/components/layout/global-search";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { Providers } from "@/components/providers";
 import dynamic from "next/dynamic";
 import type { UserRole } from "@/lib/types/database";
 
@@ -16,6 +17,14 @@ const AiCoachWidget = dynamic(
   () =>
     import("@/components/ai-coach-widget").then((m) => ({
       default: m.AiCoachWidget,
+    })),
+  { ssr: false },
+);
+
+const IncomingCallToast = dynamic(
+  () =>
+    import("@/components/incoming-call-toast").then((m) => ({
+      default: m.IncomingCallToast,
     })),
   { ssr: false },
 );
@@ -59,62 +68,65 @@ export function AppShell({
   const wl = whiteLabelConfig?.is_active ? whiteLabelConfig : null;
 
   return (
-    <ThemeProvider>
-      <NavigationProgress />
-      {wl?.primary_color && (
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
+    <Providers>
+      <ThemeProvider>
+        <NavigationProgress />
+        {wl?.primary_color && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
               :root {
                 --brand: ${wl.primary_color};
                 --sidebar-primary: ${wl.primary_color};
               }
               ${wl.secondary_color ? `:root { --sidebar: ${wl.secondary_color}; --sidebar-background: ${wl.secondary_color}; }` : ""}
             `,
-          }}
-        />
-      )}
-      <div className="flex h-dvh overflow-hidden bg-background">
-        {/* Sidebar */}
-        <Sidebar
-          role={role}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          whiteLabelConfig={wl}
-        />
-
-        {/* Main area */}
-        <div className="flex min-w-0 flex-1 flex-col">
-          {/* Offline indicator */}
-          <OfflineIndicator />
-
-          {/* Header */}
-          <Header
-            userName={userName}
-            email={email}
-            avatarUrl={avatarUrl}
+            }}
+          />
+        )}
+        <div className="flex h-dvh overflow-hidden bg-background">
+          {/* Sidebar */}
+          <Sidebar
             role={role}
-            userId={userId}
-            unreadCount={unreadCount}
+            userName={userName}
+            avatarUrl={avatarUrl}
+            whiteLabelConfig={wl}
           />
 
-          {/* Content */}
-          <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
-            <div className="mx-auto max-w-[1400px]">{children}</div>
-          </main>
+          {/* Main area */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            {/* Offline indicator */}
+            <OfflineIndicator />
+
+            {/* Header */}
+            <Header
+              userName={userName}
+              email={email}
+              avatarUrl={avatarUrl}
+              role={role}
+              userId={userId}
+              unreadCount={unreadCount}
+            />
+
+            {/* Content */}
+            <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
+              <div className="mx-auto max-w-[1400px]">{children}</div>
+            </main>
+          </div>
+
+          {/* Mobile bottom nav */}
+          <MobileNav role={role} />
+
+          {/* Global overlays */}
+          <NotificationsPanel
+            userId={userId}
+            onUnreadCountChange={handleUnreadCountChange}
+          />
+          <GlobalSearch />
+          <AiCoachWidget />
+          <IncomingCallToast />
         </div>
-
-        {/* Mobile bottom nav */}
-        <MobileNav role={role} />
-
-        {/* Global overlays */}
-        <NotificationsPanel
-          userId={userId}
-          onUnreadCountChange={handleUnreadCountChange}
-        />
-        <GlobalSearch />
-        <AiCoachWidget />
-      </div>
-    </ThemeProvider>
+      </ThemeProvider>
+    </Providers>
   );
 }
