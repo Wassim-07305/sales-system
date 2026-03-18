@@ -9,11 +9,11 @@ interface DateSeparatorProps {
 export function DateSeparator({ date }: DateSeparatorProps) {
   return (
     <div className="flex items-center gap-3 py-4">
-      <div className="h-px flex-1 bg-border" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
       <span className="text-xs font-medium text-muted-foreground">
         {formatDateSeparator(date)}
       </span>
-      <div className="h-px flex-1 bg-border" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>
   );
 }

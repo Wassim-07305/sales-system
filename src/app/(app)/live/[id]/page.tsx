@@ -14,5 +14,9 @@ export default async function LiveRoomPage({
     notFound();
   }
 
-  return <LiveRoomView session={session} />;
+  return (
+    <div className="-m-4 md:-m-8 h-[calc(100vh-3.5rem)] flex">
+      <LiveRoomView session={session} />
+    </div>
+  );
 }

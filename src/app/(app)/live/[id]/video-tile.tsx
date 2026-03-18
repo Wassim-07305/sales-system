@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { MicOff, VideoOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ interface VideoTileProps {
   isLocal?: boolean;
   isScreenShare?: boolean;
   compact?: boolean;
+  onVideoRef?: (el: HTMLVideoElement | null) => void;
 }
 
 export function VideoTile({
@@ -22,8 +23,19 @@ export function VideoTile({
   isLocal,
   compact,
   isScreenShare,
+  onVideoRef,
 }: VideoTileProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Expose la ref video au parent via callback
+  const setVideoRef = useCallback(
+    (el: HTMLVideoElement | null) => {
+      (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current =
+        el;
+      onVideoRef?.(el);
+    },
+    [onVideoRef],
+  );
 
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -42,7 +54,7 @@ export function VideoTile({
       )}
     >
       <video
-        ref={videoRef}
+        ref={setVideoRef}
         autoPlay
         playsInline
         muted={isLocal}

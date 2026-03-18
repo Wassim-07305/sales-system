@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { aiComplete, aiJSON } from "@/lib/ai/client";
 
 // Modèle gratuit OpenRouter pour GenSpark
-const GENSPARK_MODEL = "meta-llama/llama-4-maverick:free";
+const GENSPARK_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
 import type {
   SlideLayout,
   SlideTransition,
@@ -409,6 +409,13 @@ export async function generatePresentation(params: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
+
+  console.log(
+    "[GenSpark] Starting generation for user:",
+    user.id,
+    "prompt:",
+    params.prompt.substring(0, 50),
+  );
 
   const slideCount = params.slideCount || 8;
   const audienceHint = params.audience

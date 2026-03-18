@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback, type KeyboardEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type KeyboardEvent,
+} from "react";
 import {
   Send,
   Paperclip,
@@ -80,13 +86,21 @@ export function ChatInput({
   disabled = false,
 }: ChatInputProps) {
   const [content, setContent] = useState("");
+  const [editContent, setEditContent] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Use edit content when editing
-  const displayContent = editingMessageId ? editingContent : content;
+  // Sync edit content when editing starts or editingContent changes
+  useEffect(() => {
+    if (editingMessageId) {
+      setEditContent(editingContent);
+    }
+  }, [editingMessageId, editingContent]);
+
+  // Pick the right state based on mode
+  const displayContent = editingMessageId ? editContent : content;
 
   const handleSend = useCallback(() => {
     const text = displayContent.trim();
@@ -94,6 +108,7 @@ export function ChatInput({
 
     if (editingMessageId) {
       onSaveEdit(text);
+      setEditContent("");
       return;
     }
 
@@ -126,14 +141,17 @@ export function ChatInput({
       e.preventDefault();
       handleSend();
     }
+    if (e.key === "Escape" && editingMessageId) {
+      onCancelEdit();
+    }
   };
 
   const handleChange = (value: string) => {
     if (editingMessageId) {
-      // When editing, parent manages content via editingContent prop
-      // We need a callback for this — for simplicity, treat as local
+      setEditContent(value);
+    } else {
+      setContent(value);
     }
-    setContent(value);
     onTyping();
   };
 
@@ -159,7 +177,11 @@ export function ChatInput({
       const end = textarea.selectionEnd;
       const newContent =
         displayContent.slice(0, start) + emoji + displayContent.slice(end);
-      setContent(newContent);
+      if (editingMessageId) {
+        setEditContent(newContent);
+      } else {
+        setContent(newContent);
+      }
       // Move cursor after emoji
       setTimeout(() => {
         textarea.selectionStart = start + emoji.length;
@@ -167,7 +189,11 @@ export function ChatInput({
         textarea.focus();
       }, 0);
     } else {
-      setContent(displayContent + emoji);
+      if (editingMessageId) {
+        setEditContent(displayContent + emoji);
+      } else {
+        setContent(displayContent + emoji);
+      }
     }
   };
 
@@ -181,7 +207,7 @@ export function ChatInput({
     <div className="border-t bg-background">
       {/* Reply preview */}
       {replyTo && (
-        <div className="flex items-center gap-2 border-b px-4 py-2 bg-muted/30">
+        <div className="flex items-center gap-2 border-b border-l-2 border-l-primary px-4 py-2 bg-muted/30">
           <Reply className="h-4 w-4 text-primary shrink-0" />
           <div className="flex-1 min-w-0">
             <span className="text-xs font-medium text-primary">
@@ -249,10 +275,12 @@ export function ChatInput({
             rows={1}
             className={cn(
               "w-full resize-none rounded-xl border bg-muted/30 px-4 py-2.5 text-sm",
+              "ring-1 ring-border/50",
               "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               "max-h-40 scrollbar-thin",
-              isUrgent && "border-destructive/40 bg-destructive/5",
+              isUrgent &&
+                "border-destructive/40 bg-destructive/5 animate-pulse",
             )}
           />
         </div>
@@ -268,8 +296,8 @@ export function ChatInput({
               <Smile className="h-5 w-5" />
             </button>
           </PopoverTrigger>
-          <PopoverContent side="top" align="end" className="w-64 p-2">
-            <div className="grid grid-cols-6 gap-1">
+          <PopoverContent side="top" align="end" className="w-72 p-2">
+            <div className="grid grid-cols-8 gap-1">
               {EMOJI_LIST.map((emoji) => (
                 <button
                   key={emoji}
@@ -343,7 +371,7 @@ export function ChatInput({
           onClick={handleSend}
           disabled={disabled || isSending || !displayContent.trim()}
           size="icon"
-          className="h-10 w-10 rounded-xl shrink-0"
+          className="h-10 w-10 rounded-xl shrink-0 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
         >
           {isSending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

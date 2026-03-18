@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { MessageSquare } from "lucide-react";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
 import { useMessages } from "@/lib/hooks/use-messages";
@@ -50,10 +51,10 @@ export function ChatPanel({
 
   const [editingContent, setEditingContent] = useState("");
 
-  // Mark as read when viewing
-  useState(() => {
+  // Mark as read when viewing or switching channels
+  useEffect(() => {
     markAsRead();
-  });
+  }, [channel.id, markAsRead]);
 
   const handleSend = useCallback(
     (params: {
@@ -143,7 +144,7 @@ export function ChatPanel({
         .upload(path, file);
 
       if (uploadError) {
-        console.error("Upload error:", uploadError);
+        toast.error("Erreur lors de l'upload du fichier");
         return;
       }
 
@@ -180,7 +181,7 @@ export function ChatPanel({
     if (!user) return;
     await supabase
       .from("channel_members")
-      .update({ is_muted: !channel.isMuted })
+      .update({ notifications_muted: !channel.isMuted })
       .eq("channel_id", channel.id)
       .eq("profile_id", user.id);
   }, [user, channel, supabase]);
@@ -207,7 +208,7 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex flex-1 flex-col h-full">
+    <div className="flex flex-1 flex-col h-full animate-fade-in">
       <ChatHeader
         channel={channel}
         memberCount={memberCount}

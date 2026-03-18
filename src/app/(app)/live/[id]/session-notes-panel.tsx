@@ -120,32 +120,34 @@ export function SessionNotesPanel({
   };
 
   return (
-    <div className="w-80 flex flex-col bg-zinc-900 border-l border-white/5 h-full">
+    <div className="w-80 flex flex-col bg-card border-l border-border h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <StickyNote className="w-4 h-4 text-zinc-400" />
-          <h3 className="text-sm font-medium text-white">Notes</h3>
+          <StickyNote className="w-4 h-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium text-foreground">Notes</h3>
           {saving && (
-            <span className="text-[10px] text-zinc-500">Sauvegarde...</span>
+            <span className="text-[10px] text-muted-foreground">
+              Sauvegarde...
+            </span>
           )}
         </div>
         <button
           onClick={handleClose}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* Templates */}
-      <div className="flex gap-1.5 px-3 py-2 border-b border-white/5">
+      <div className="flex gap-1.5 px-3 py-2 border-b border-border">
         {(Object.keys(TEMPLATES) as Array<keyof typeof TEMPLATES>).map(
           (key) => (
             <button
               key={key}
               onClick={() => applyTemplate(key)}
-              className="px-2.5 py-1 rounded-lg bg-zinc-800 text-[11px] text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors capitalize"
+              className="px-2.5 py-1 rounded-lg bg-muted text-[11px] text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors capitalize"
             >
               {key}
             </button>
@@ -159,12 +161,12 @@ export function SessionNotesPanel({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Prenez vos notes ici..."
-          className="w-full h-[45%] resize-none bg-transparent text-sm text-zinc-300 placeholder:text-zinc-600 p-3 focus:outline-none"
+          className="w-full h-[45%] resize-none bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/60 p-3 focus:outline-none"
         />
 
         {/* Action items */}
         <div className="px-3 pb-3">
-          <h4 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
+          <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Actions
           </h4>
 
@@ -176,21 +178,23 @@ export function SessionNotesPanel({
                   className={`w-5 h-5 rounded flex-shrink-0 flex items-center justify-center border transition-colors ${
                     item.done
                       ? "bg-[#7af17a]/20 border-[#7af17a]/50 text-[#7af17a]"
-                      : "border-zinc-600 hover:border-zinc-400"
+                      : "border-muted-foreground/60 hover:border-muted-foreground"
                   }`}
                 >
                   {item.done && <Check className="w-3 h-3" />}
                 </button>
                 <span
                   className={`text-sm flex-1 ${
-                    item.done ? "text-zinc-600 line-through" : "text-zinc-300"
+                    item.done
+                      ? "text-muted-foreground/60 line-through"
+                      : "text-foreground/80"
                   }`}
                 >
                   {item.text}
                 </span>
                 <button
                   onClick={() => removeActionItem(i)}
-                  className="w-5 h-5 rounded flex items-center justify-center text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                  className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -210,12 +214,12 @@ export function SessionNotesPanel({
                 }
               }}
               placeholder="Nouvelle action..."
-              className="flex-1 h-8 rounded-lg bg-zinc-800 border border-white/5 px-2.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#7af17a]/50"
+              className="flex-1 h-8 rounded-lg bg-muted border border-border px-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-[#7af17a]/50"
             />
             <button
               onClick={addActionItem}
               disabled={!newAction.trim()}
-              className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 flex items-center justify-center hover:text-white hover:bg-zinc-700 transition-colors disabled:opacity-30"
+              className="w-8 h-8 rounded-lg bg-muted text-muted-foreground flex items-center justify-center hover:text-foreground hover:bg-muted/80 transition-colors disabled:opacity-30"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>

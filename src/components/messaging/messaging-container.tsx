@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { MessageSquare, Inbox, Menu, X } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createClient } from "@/lib/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
+import { useChannels, useChannelMembers } from "@/lib/hooks/use-channels";
 import { useMessagingStore } from "@/stores/messaging-store";
 import { ChannelSidebar } from "./channel-sidebar";
 import { ChatPanel } from "./chat-panel";
@@ -16,10 +17,53 @@ import type { ChannelWithMeta } from "@/lib/types/messaging";
 
 type ViewMode = "messaging" | "inbox";
 
+/** Enrichit les channels bruts du hook en ChannelWithMeta pour les composants enfants */
+function useEnrichedChannels(
+  channels: ReturnType<typeof useChannels>["channels"],
+  userId: string | undefined,
+): ChannelWithMeta[] {
+  return useMemo(() => {
+    if (!userId) return [];
+    return channels.map((ch) => {
+      const myMembership = ch.members?.find((m) => m.profile_id === userId);
+      const isDM = ch.type === "direct" || ch.type === "dm";
+      const dmPartnerMember = isDM
+        ? ch.members?.find((m) => m.profile_id !== userId)
+        : null;
+
+      return {
+        id: ch.id,
+        name: ch.name,
+        type: ch.type,
+        description: ch.description,
+        created_by: ch.created_by,
+        created_at: ch.created_at,
+        is_archived: ch.is_archived,
+        last_message_at: ch.last_message_at ?? ch.created_at,
+        unreadCount: 0,
+        urgentUnreadCount: 0,
+        isMuted: myMembership?.notifications_muted ?? false,
+        isPinned: myMembership?.is_pinned ?? false,
+        myLastRead: myMembership?.last_read_at ?? null,
+        dmPartner: dmPartnerMember?.profile ?? null,
+      };
+    });
+  }, [channels, userId]);
+}
+
 export function MessagingContainer() {
   const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
   const { user } = useUser();
+  const {
+    publicChannels: rawPublic,
+    dmChannels: rawDm,
+    archivedChannels: rawArchived,
+    isLoading,
+    createChannel,
+    createDMChannel,
+    deleteChannel,
+  } = useChannels();
 
   const {
     activeChannelId,
@@ -32,167 +76,76 @@ export function MessagingContainer() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
-  // Fetch channels
-  const { data: channels = [], isLoading: channelsLoading } = useQuery({
-    queryKey: ["channels"],
-    queryFn: async () => {
-      if (!user) return [];
-
-      // Get channels where user is a member
-      const { data: memberships, error: memberError } = await supabase
-        .from("channel_members")
-        .select("channel_id, is_muted, is_pinned, last_read_at")
-        .eq("profile_id", user.id);
-
-      if (memberError) throw memberError;
-      if (!memberships?.length) return [];
-
-      const channelIds = memberships.map((m) => m.channel_id);
-
-      const { data: channelsData, error: channelsError } = await supabase
-        .from("channels")
-        .select("*")
-        .in("id", channelIds)
-        .order("last_message_at", { ascending: false, nullsFirst: false });
-
-      if (channelsError) throw channelsError;
-
-      // Get unread counts
-      const enriched: ChannelWithMeta[] = await Promise.all(
-        (channelsData ?? []).map(async (ch) => {
-          const membership = memberships.find((m) => m.channel_id === ch.id);
-
-          // Unread count
-          let unreadCount = 0;
-          let urgentUnreadCount = 0;
-          if (membership?.last_read_at) {
-            const { count } = await supabase
-              .from("messages")
-              .select("*", { count: "exact", head: true })
-              .eq("channel_id", ch.id)
-              .gt("created_at", membership.last_read_at)
-              .is("deleted_at", null);
-            unreadCount = count ?? 0;
-
-            const { count: urgentCount } = await supabase
-              .from("messages")
-              .select("*", { count: "exact", head: true })
-              .eq("channel_id", ch.id)
-              .eq("is_urgent", true)
-              .gt("created_at", membership.last_read_at)
-              .is("deleted_at", null);
-            urgentUnreadCount = urgentCount ?? 0;
-          }
-
-          // DM partner
-          let dmPartner: ChannelWithMeta["dmPartner"] = null;
-          if (ch.type === "direct") {
-            const { data: otherMembers } = await supabase
-              .from("channel_members")
-              .select(
-                "profile:profiles!profile_id(id, full_name, avatar_url, role)",
-              )
-              .eq("channel_id", ch.id)
-              .neq("profile_id", user.id)
-              .limit(1);
-
-            if (otherMembers?.[0]) {
-              const profile = otherMembers[0].profile as unknown as {
-                id: string;
-                full_name: string;
-                avatar_url: string | null;
-                role: string;
-              };
-              dmPartner = profile;
-            }
-          }
-
-          return {
-            ...ch,
-            unreadCount,
-            urgentUnreadCount,
-            isMuted: membership?.is_muted ?? false,
-            isPinned: membership?.is_pinned ?? false,
-            myLastRead: membership?.last_read_at ?? null,
-            dmPartner,
-          };
-        }),
-      );
-
-      return enriched;
-    },
-    enabled: !!user,
-    refetchInterval: 30000,
-  });
-
-  // Get active channel
-  const activeChannel = useMemo(
-    () => channels.find((c) => c.id === activeChannelId) ?? null,
-    [channels, activeChannelId],
+  // Enrichir les channels pour les composants qui attendent ChannelWithMeta
+  const publicChannels = useEnrichedChannels(rawPublic, user?.id);
+  const dmChannels = useEnrichedChannels(rawDm, user?.id);
+  const archivedChannels = useEnrichedChannels(rawArchived, user?.id);
+  const allEnriched = useMemo(
+    () => [...publicChannels, ...dmChannels, ...archivedChannels],
+    [publicChannels, dmChannels, archivedChannels],
   );
 
-  // Get member count for active channel
-  const { data: memberCount = 0 } = useQuery({
-    queryKey: ["channel-member-count", activeChannelId],
-    queryFn: async () => {
-      if (!activeChannelId) return 0;
-      const { count, error } = await supabase
-        .from("channel_members")
-        .select("*", { count: "exact", head: true })
-        .eq("channel_id", activeChannelId);
-      if (error) return 0;
-      return count ?? 0;
-    },
-    enabled: !!activeChannelId,
-  });
+  // Channel actif + membres
+  const activeChannel = useMemo(
+    () => allEnriched.find((c) => c.id === activeChannelId) ?? null,
+    [allEnriched, activeChannelId],
+  );
 
-  // Create channel mutation
-  const createChannel = useMutation({
-    mutationFn: async (data: {
+  const { members, addMember, removeMember } =
+    useChannelMembers(activeChannelId);
+  const memberCount = members.length;
+
+  // Auto-selection du premier canal
+  useEffect(() => {
+    if (!activeChannelId && publicChannels.length > 0) {
+      setActiveChannelId(publicChannels[0].id);
+    } else if (!activeChannelId && dmChannels.length > 0) {
+      setActiveChannelId(dmChannels[0].id);
+    }
+  }, [activeChannelId, publicChannels, dmChannels, setActiveChannelId]);
+
+  // Handlers
+  const handleCreateChannel = useCallback(
+    (data: {
       name: string;
       type: "group" | "direct";
       description: string;
       memberIds: string[];
     }) => {
-      if (!user) throw new Error("Not authenticated");
-
-      const { data: channel, error } = await supabase
-        .from("channels")
-        .insert({
+      createChannel.mutate(
+        {
           name: data.name,
           type: data.type,
-          description: data.description || null,
-          created_by: user.id,
-        })
-        .select("id")
-        .single();
-
-      if (error) throw error;
-
-      // Add creator + members
-      const allMemberIds = [user.id, ...data.memberIds];
-      const memberInserts = allMemberIds.map((profileId) => ({
-        channel_id: channel.id,
-        profile_id: profileId,
-        role: profileId === user.id ? "owner" : "member",
-      }));
-
-      const { error: memberError } = await supabase
-        .from("channel_members")
-        .insert(memberInserts);
-
-      if (memberError) throw memberError;
-
-      return channel;
+          description: data.description,
+          memberIds: data.memberIds,
+        },
+        {
+          onSuccess: (channel) => {
+            setActiveChannelId(channel.id);
+            setShowCreateModal(false);
+          },
+        },
+      );
     },
-    onSuccess: (channel) => {
-      queryClient.invalidateQueries({ queryKey: ["channels"] });
-      setActiveChannelId(channel.id);
-      setShowCreateModal(false);
-    },
-  });
+    [createChannel, setActiveChannelId],
+  );
 
-  // Update channel
+  const handleCreateDM = useCallback(
+    (userId: string) => {
+      createDMChannel.mutate(
+        { targetUserId: userId },
+        {
+          onSuccess: (channel) => {
+            setActiveChannelId(channel.id);
+            queryClient.invalidateQueries({ queryKey: ["all-profiles-dm"] });
+          },
+        },
+      );
+    },
+    [createDMChannel, setActiveChannelId, queryClient],
+  );
+
+  // Mise a jour du canal (nom/description)
   const updateChannel = useMutation({
     mutationFn: async (data: { name?: string; description?: string }) => {
       if (!activeChannelId) throw new Error("No channel selected");
@@ -207,71 +160,47 @@ export function MessagingContainer() {
     },
   });
 
-  // Delete channel
-  const handleDeleteChannel = useCallback(async () => {
+  const handleDeleteChannel = useCallback(() => {
     if (!activeChannelId) return;
-    await supabase.from("channels").delete().eq("id", activeChannelId);
-    setActiveChannelId(null);
-    setShowSettingsModal(false);
-    queryClient.invalidateQueries({ queryKey: ["channels"] });
-  }, [activeChannelId, supabase, setActiveChannelId, queryClient]);
+    deleteChannel.mutate(activeChannelId, {
+      onSuccess: () => {
+        setActiveChannelId(null);
+        setShowSettingsModal(false);
+      },
+    });
+  }, [activeChannelId, deleteChannel, setActiveChannelId]);
 
-  // Leave channel
-  const handleLeaveChannel = useCallback(async () => {
+  const handleLeaveChannel = useCallback(() => {
     if (!activeChannelId || !user) return;
-    await supabase
-      .from("channel_members")
-      .delete()
-      .eq("channel_id", activeChannelId)
-      .eq("profile_id", user.id);
-    setActiveChannelId(null);
-    setShowSettingsModal(false);
-    queryClient.invalidateQueries({ queryKey: ["channels"] });
-  }, [activeChannelId, user, supabase, setActiveChannelId, queryClient]);
+    removeMember.mutate(user.id, {
+      onSuccess: () => {
+        setActiveChannelId(null);
+        setShowSettingsModal(false);
+      },
+    });
+  }, [activeChannelId, user, removeMember, setActiveChannelId]);
 
-  // Add member
-  const handleAddMember = useCallback(
-    async (profileId: string) => {
-      if (!activeChannelId) return;
-      await supabase.from("channel_members").insert({
-        channel_id: activeChannelId,
-        profile_id: profileId,
-        role: "member",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["channel-members", activeChannelId],
-      });
-    },
-    [activeChannelId, supabase, queryClient],
+  // Rendu sidebar (reutilise pour desktop et mobile)
+  const sidebarContent = (
+    <ChannelSidebar
+      publicChannels={publicChannels}
+      dmChannels={dmChannels}
+      archivedChannels={archivedChannels}
+      isLoading={isLoading}
+      onCreateChannel={() => setShowCreateModal(true)}
+      onCreateDM={handleCreateDM}
+      onSelectChannel={(id) => {
+        setActiveChannelId(id);
+        setMobileSidebarOpen(false);
+      }}
+    />
   );
-
-  // Remove member
-  const handleRemoveMember = useCallback(
-    async (profileId: string) => {
-      if (!activeChannelId) return;
-      await supabase
-        .from("channel_members")
-        .delete()
-        .eq("channel_id", activeChannelId)
-        .eq("profile_id", profileId);
-      queryClient.invalidateQueries({
-        queryKey: ["channel-members", activeChannelId],
-      });
-    },
-    [activeChannelId, supabase, queryClient],
-  );
-
-  // Auto-select first channel
-  if (!activeChannelId && channels.length > 0 && !channelsLoading) {
-    setActiveChannelId(channels[0].id);
-  }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Top toggle bar */}
+    <div className="flex h-[calc(100vh-10rem)] flex-col">
+      {/* Toggle Messagerie / Boite unifiee */}
       <div className="flex items-center justify-between border-b px-4 py-2 bg-background">
         <div className="flex items-center gap-2">
-          {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
             className="rounded-lg p-2 hover:bg-muted transition-colors md:hidden"
@@ -283,15 +212,14 @@ export function MessagingContainer() {
             )}
           </button>
 
-          {/* View mode toggle */}
-          <div className="flex items-center rounded-lg border bg-muted/30 p-0.5">
+          <div className="backdrop-blur-sm rounded-xl bg-muted/40 border border-border/50 p-1 flex items-center">
             <button
               onClick={() => setViewMode("messaging")}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all",
                 viewMode === "messaging"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-background text-foreground shadow-sm rounded-lg"
+                  : "text-muted-foreground hover:text-foreground rounded-lg",
               )}
             >
               <MessageSquare className="h-3.5 w-3.5" />
@@ -300,10 +228,10 @@ export function MessagingContainer() {
             <button
               onClick={() => setViewMode("inbox")}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all",
                 viewMode === "inbox"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-background text-foreground shadow-sm rounded-lg"
+                  : "text-muted-foreground hover:text-foreground rounded-lg",
               )}
             >
               <Inbox className="h-3.5 w-3.5" />
@@ -313,20 +241,14 @@ export function MessagingContainer() {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Contenu principal */}
       <div className="flex flex-1 overflow-hidden">
         {viewMode === "messaging" ? (
           <>
-            {/* Sidebar - desktop */}
-            <div className="hidden md:block">
-              <ChannelSidebar
-                channels={channels}
-                isLoading={channelsLoading}
-                onCreateChannel={() => setShowCreateModal(true)}
-              />
-            </div>
+            {/* Sidebar desktop */}
+            <div className="hidden md:block">{sidebarContent}</div>
 
-            {/* Sidebar - mobile overlay */}
+            {/* Sidebar mobile overlay */}
             {mobileSidebarOpen && (
               <div className="fixed inset-0 z-40 md:hidden">
                 <div
@@ -334,16 +256,12 @@ export function MessagingContainer() {
                   onClick={() => setMobileSidebarOpen(false)}
                 />
                 <div className="relative h-full w-72 bg-background shadow-xl">
-                  <ChannelSidebar
-                    channels={channels}
-                    isLoading={channelsLoading}
-                    onCreateChannel={() => setShowCreateModal(true)}
-                  />
+                  {sidebarContent}
                 </div>
               </div>
             )}
 
-            {/* Chat panel */}
+            {/* Chat ou placeholder */}
             {activeChannel ? (
               <ChatPanel
                 channel={activeChannel}
@@ -372,11 +290,11 @@ export function MessagingContainer() {
         )}
       </div>
 
-      {/* Modals */}
+      {/* Modales */}
       <CreateChannelModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onCreate={(data) => createChannel.mutate(data)}
+        onCreate={handleCreateChannel}
         isCreating={createChannel.isPending}
       />
 
@@ -388,8 +306,8 @@ export function MessagingContainer() {
           onUpdateChannel={(data) => updateChannel.mutate(data)}
           onDeleteChannel={handleDeleteChannel}
           onLeaveChannel={handleLeaveChannel}
-          onAddMember={handleAddMember}
-          onRemoveMember={handleRemoveMember}
+          onAddMember={(profileId) => addMember.mutate({ profileId })}
+          onRemoveMember={(profileId) => removeMember.mutate(profileId)}
           isUpdating={updateChannel.isPending}
         />
       )}

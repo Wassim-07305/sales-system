@@ -15,16 +15,16 @@ export function TypingIndicator({ typingUsers }: TypingIndicatorProps) {
         : `${typingUsers[0].fullName} et ${typingUsers.length - 1} autres ecrivent`;
 
   return (
-    <div className="flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground">
-      <div className="flex gap-0.5">
-        <span className="animate-bounce delay-0 h-1.5 w-1.5 rounded-full bg-primary" />
+    <div className="flex items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground animate-fade-in">
+      <div className="flex items-center gap-1">
+        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-typing-dot" />
         <span
-          className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
-          style={{ animationDelay: "0.15s" }}
+          className="h-1.5 w-1.5 rounded-full bg-primary animate-typing-dot"
+          style={{ animationDelay: "0.2s" }}
         />
         <span
-          className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
-          style={{ animationDelay: "0.3s" }}
+          className="h-1.5 w-1.5 rounded-full bg-primary animate-typing-dot"
+          style={{ animationDelay: "0.4s" }}
         />
       </div>
       <span>{text}...</span>

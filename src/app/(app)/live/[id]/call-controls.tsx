@@ -45,7 +45,7 @@ export function CallControls({
   const { isMicOn, isCameraOn, isScreenSharing } = useCallStore();
 
   return (
-    <div className="flex items-center justify-center gap-2 py-4 px-4 bg-zinc-950/50 backdrop-blur-md">
+    <div className="flex items-center justify-center gap-2 py-4 px-4 bg-background/80 backdrop-blur-md">
       <ControlButton
         onClick={onToggleMic}
         active={isMicOn}
@@ -148,7 +148,7 @@ function ControlButton({
           ? "bg-red-600/20 text-red-400 hover:bg-red-600/30"
           : active && highlightWhenActive
             ? "bg-[#7af17a]/20 text-[#7af17a] hover:bg-[#7af17a]/30"
-            : "bg-zinc-800 text-white hover:bg-zinc-700",
+            : "bg-muted text-foreground hover:bg-muted/80",
       )}
     >
       <Icon className="w-5 h-5" />

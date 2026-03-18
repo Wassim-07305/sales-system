@@ -21,7 +21,7 @@ export function useMessages(channelId: string | null) {
         .from("messages")
         .select(
           `*,
-          sender:profiles!sender_id(id, full_name, avatar_url, role),
+          sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url, role),
           reactions:message_reactions(id, emoji, user_id),
           attachments:message_attachments(id, file_name, file_url, file_type, file_size)`,
         )

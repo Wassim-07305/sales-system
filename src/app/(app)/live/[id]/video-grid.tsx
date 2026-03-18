@@ -8,6 +8,7 @@ interface VideoGridProps {
   remoteStream: MediaStream | null;
   cameraStream: MediaStream | null;
   localName: string;
+  onLocalVideoRef?: (el: HTMLVideoElement | null) => void;
 }
 
 export function VideoGrid({
@@ -15,6 +16,7 @@ export function VideoGrid({
   remoteStream,
   cameraStream,
   localName,
+  onLocalVideoRef,
 }: VideoGridProps) {
   const {
     isMicOn,
@@ -34,6 +36,7 @@ export function VideoGrid({
             isMuted={!isMicOn}
             isLocal
             isScreenShare
+            onVideoRef={onLocalVideoRef}
           />
 
           {isRemoteConnected ? (
@@ -77,6 +80,7 @@ export function VideoGrid({
         isMuted={!isMicOn}
         isCameraOff={!isCameraOn}
         isLocal
+        onVideoRef={onLocalVideoRef}
       />
 
       {isRemoteConnected ? (

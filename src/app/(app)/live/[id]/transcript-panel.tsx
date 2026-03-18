@@ -48,15 +48,15 @@ export function TranscriptPanel({
   }, [transcriptEntries, sessionTitle]);
 
   return (
-    <div className="w-80 flex flex-col bg-zinc-900 border-l border-white/5 h-full">
+    <div className="w-80 flex flex-col bg-card border-l border-border h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <ScrollText className="w-4 h-4 text-zinc-400" />
-          <h3 className="text-sm font-medium text-white">
+          <ScrollText className="w-4 h-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium text-foreground">
             Transcription
             {transcriptEntries.length > 0 && (
-              <span className="text-zinc-500 ml-1.5">
+              <span className="text-muted-foreground ml-1.5">
                 ({transcriptEntries.length})
               </span>
             )}
@@ -66,7 +66,7 @@ export function TranscriptPanel({
           {transcriptEntries.length > 0 && (
             <button
               onClick={handleDownload}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title="Telecharger"
             >
               <Download className="w-3.5 h-3.5" />
@@ -74,7 +74,7 @@ export function TranscriptPanel({
           )}
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -84,7 +84,7 @@ export function TranscriptPanel({
       {/* Entries */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2">
         {transcriptEntries.length === 0 && (
-          <p className="text-xs text-zinc-500 text-center mt-8">
+          <p className="text-xs text-muted-foreground text-center mt-8">
             La transcription apparaitra ici lorsqu&apos;elle sera activee.
           </p>
         )}

@@ -84,7 +84,10 @@ export function MessageList({
           }
 
           return (
-            <div key={`${group.senderId}-${groupIdx}`}>
+            <div
+              key={`${group.senderId}-${groupIdx}`}
+              className="animate-fade-in"
+            >
               {showDateSep && <DateSeparator date={firstMsg.created_at} />}
               {group.messages.map((msg, msgIdx) => (
                 <MessageBubble

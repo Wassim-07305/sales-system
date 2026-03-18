@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
 import { useWebRTC } from "@/lib/hooks/use-webrtc";
 import { useTranscription } from "@/lib/hooks/use-transcription";
 import { useCallStore } from "@/stores/call-store";
+import { usePiP } from "@/lib/hooks/use-pip";
 import { updateLiveSessionStatus } from "@/lib/actions/live";
 import { notifyPeer } from "@/lib/hooks/use-call-notifications";
 import type { LiveSession, TranscriptEntry } from "@/lib/types/database";
@@ -41,6 +42,11 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
   const transcriptEntries = useCallStore((s) => s.transcriptEntries);
   const resetCall = useCallStore((s) => s.resetCall);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const [localVideoEl, setLocalVideoEl] = useState<HTMLVideoElement | null>(
+    null,
+  );
 
   const [hasJoined, setHasJoined] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -229,16 +235,44 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
     ),
   });
 
-  const handleToggleTranscript = useCallback(() => {
-    if (isTranscribing) {
-      stopTranscription();
-      useCallStore.getState().setTranscribing(false);
-    } else {
-      startTranscription();
-      useCallStore.getState().setTranscribing(true);
-    }
-    setShowTranscript((v) => !v);
-  }, [isTranscribing, startTranscription, stopTranscription]);
+  const togglePanel = useCallback(
+    (panel: "chat" | "transcript" | "notes") => {
+      if (panel === "chat") {
+        setShowChat((v) => !v);
+        if (!showChat) {
+          setShowTranscript(false);
+          setShowNotes(false);
+        }
+      } else if (panel === "transcript") {
+        if (isTranscribing) {
+          stopTranscription();
+          useCallStore.getState().setTranscribing(false);
+        } else {
+          startTranscription();
+          useCallStore.getState().setTranscribing(true);
+        }
+        setShowTranscript((v) => !v);
+        if (!showTranscript) {
+          setShowChat(false);
+          setShowNotes(false);
+        }
+      } else if (panel === "notes") {
+        setShowNotes((v) => !v);
+        if (!showNotes) {
+          setShowChat(false);
+          setShowTranscript(false);
+        }
+      }
+    },
+    [
+      showChat,
+      showTranscript,
+      showNotes,
+      isTranscribing,
+      startTranscription,
+      stopTranscription,
+    ],
+  );
 
   // Join
   const handleJoin = useCallback(async () => {
@@ -339,6 +373,18 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
+  // Picture-in-Picture : mini-player flottant quand on quitte la page live
+  const { enterPiP, exitPiP } = usePiP(localVideoEl);
+  const isOnLivePage = pathname.startsWith(`/live/${session.id}`);
+
+  useEffect(() => {
+    if (!isOnLivePage && phase === "connected" && localVideoEl) {
+      enterPiP();
+    } else if (isOnLivePage) {
+      exitPiP();
+    }
+  }, [isOnLivePage, phase, localVideoEl, enterPiP, exitPiP]);
+
   // Reconnection toast
   useEffect(() => {
     if (phase === "reconnecting" && hasJoined) {
@@ -387,7 +433,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
       previewStream?.getVideoTracks().some((t) => t.enabled) && previewCamera;
 
     return (
-      <div className="flex-1 flex items-center justify-center bg-zinc-950 p-4 relative">
+      <div className="flex-1 flex items-center justify-center bg-background p-4 relative">
         <button
           onClick={() => router.push("/live")}
           className="absolute top-4 left-4 flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
@@ -411,7 +457,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
           </div>
 
           {/* Video preview */}
-          <div className="relative w-full aspect-video bg-zinc-900 rounded-2xl overflow-hidden">
+          <div className="relative w-full aspect-video bg-muted rounded-2xl overflow-hidden">
             {hasVideoTrack ? (
               <video
                 ref={previewVideoRef}
@@ -542,6 +588,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
           remoteStream={remoteStream}
           cameraStream={cameraStream}
           localName={myName}
+          onLocalVideoRef={setLocalVideoEl}
         />
 
         {/* Controls */}
@@ -550,9 +597,9 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
           onToggleCamera={toggleCamera}
           onToggleScreenShare={handleToggleScreenShare}
           onHangUp={handleHangUp}
-          onToggleChat={() => setShowChat((v) => !v)}
-          onToggleTranscript={handleToggleTranscript}
-          onToggleNotes={() => setShowNotes((v) => !v)}
+          onToggleChat={() => togglePanel("chat")}
+          onToggleTranscript={() => togglePanel("transcript")}
+          onToggleNotes={() => togglePanel("notes")}
           isChatOpen={showChat}
           isTranscriptOpen={showTranscript}
           isNotesOpen={showNotes}
@@ -560,24 +607,28 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
         />
       </div>
 
-      {/* Side panels */}
-      {showChat && (
-        <CallChatPanel
-          sessionId={session.id}
-          onClose={() => setShowChat(false)}
-        />
-      )}
-      {showTranscript && (
-        <TranscriptPanel
-          sessionTitle={session.title}
-          onClose={() => setShowTranscript(false)}
-        />
-      )}
-      {showNotes && (
-        <SessionNotesPanel
-          sessionId={session.id}
-          onClose={() => setShowNotes(false)}
-        />
+      {/* Side panel - single slot, only one open at a time */}
+      {(showChat || showTranscript || showNotes) && (
+        <div className="w-80 flex-shrink-0 border-l border-border bg-card">
+          {showChat && (
+            <CallChatPanel
+              sessionId={session.id}
+              onClose={() => setShowChat(false)}
+            />
+          )}
+          {showTranscript && (
+            <TranscriptPanel
+              sessionTitle={session.title}
+              onClose={() => setShowTranscript(false)}
+            />
+          )}
+          {showNotes && (
+            <SessionNotesPanel
+              sessionId={session.id}
+              onClose={() => setShowNotes(false)}
+            />
+          )}
+        </div>
       )}
 
       {/* Hang-up confirmation dialog */}

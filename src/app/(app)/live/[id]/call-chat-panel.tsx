@@ -100,13 +100,13 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
   };
 
   return (
-    <div className="w-80 flex flex-col bg-zinc-900 border-l border-white/5 h-full">
+    <div className="w-80 flex flex-col bg-card border-l border-border h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-        <h3 className="text-sm font-medium text-white">Chat</h3>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <h3 className="text-sm font-medium text-foreground">Chat</h3>
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -115,7 +115,7 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.length === 0 && (
-          <p className="text-xs text-zinc-500 text-center mt-8">
+          <p className="text-xs text-muted-foreground text-center mt-8">
             Aucun message. Commencez la conversation !
           </p>
         )}
@@ -127,7 +127,7 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
               className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
             >
               {!isMe && (
-                <span className="text-[10px] text-zinc-500 mb-0.5 ml-1">
+                <span className="text-[10px] text-muted-foreground mb-0.5 ml-1">
                   {msg.senderName}
                 </span>
               )}
@@ -135,12 +135,12 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
                 className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                   isMe
                     ? "bg-[#7af17a]/20 text-[#7af17a]"
-                    : "bg-zinc-800 text-zinc-200"
+                    : "bg-muted text-foreground/90"
                 }`}
               >
                 {msg.text}
               </div>
-              <span className="text-[10px] text-zinc-600 mt-0.5 mx-1">
+              <span className="text-[10px] text-muted-foreground/60 mt-0.5 mx-1">
                 {formatTime(msg.timestamp)}
               </span>
             </div>
@@ -149,7 +149,7 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-border">
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -157,7 +157,7 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message..."
-            className="flex-1 h-9 rounded-xl bg-zinc-800 border border-white/5 px-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#7af17a]/50"
+            className="flex-1 h-9 rounded-xl bg-muted border border-border px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-[#7af17a]/50"
           />
           <button
             onClick={sendMessage}

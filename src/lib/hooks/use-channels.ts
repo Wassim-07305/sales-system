@@ -27,19 +27,11 @@ interface Channel {
   name: string;
   description: string | null;
   type: string;
-  avatar_url: string | null;
   created_by: string;
   is_archived: boolean;
   created_at: string;
-  updated_at: string;
-  metadata: Record<string, unknown>;
+  last_message_at: string | null;
   members: ChannelMember[];
-  last_message?: {
-    id: string;
-    content: string;
-    created_at: string;
-    sender_id: string;
-  } | null;
 }
 
 // ─── useChannels ─────────────────────────────────────────────
@@ -78,7 +70,7 @@ export function useChannels() {
           )`,
         )
         .in("id", channelIds)
-        .order("updated_at", { ascending: false });
+        .order("last_message_at", { ascending: false, nullsFirst: false });
       if (error) throw error;
 
       return (data ?? []) as Channel[];

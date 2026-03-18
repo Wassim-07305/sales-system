@@ -45,35 +45,52 @@ export function AiGenerateDialog({
   const [prompt, setPrompt] = useState("");
   const [slideCount, setSlideCount] = useState("8");
   const [tone, setTone] = useState("professionnel");
-  const [isGenerating, setIsGenerating] = useState(false);
 
   // Guide mode
   const [guideTopic, setGuideTopic] = useState("");
   const [guideQuestions, setGuideQuestions] = useState<string[]>([]);
   const [guideAnswers, setGuideAnswers] = useState<string[]>([]);
   const [isLoadingQuestions, startLoadingQuestions] = useTransition();
-  const [isGeneratingGuide, setIsGeneratingGuide] = useState(false);
 
   async function handleRapidGenerate() {
     if (!prompt.trim()) {
       toast.error("Veuillez décrire votre présentation");
       return;
     }
-    setIsGenerating(true);
+
+    // Fermer la modal immédiatement + toast de progression
+    const savedPrompt = prompt.trim();
+    const savedSlideCount = parseInt(slideCount);
+    const savedTone = tone;
+    onOpenChange(false);
+    resetState();
+
+    const toastId = toast.loading("Génération de la présentation en cours...", {
+      description: "L'IA travaille, vous pouvez continuer à naviguer.",
+      duration: Infinity,
+    });
+
     try {
       const result = await generatePresentation({
-        prompt: prompt.trim(),
-        slideCount: parseInt(slideCount),
-        tone,
+        prompt: savedPrompt,
+        slideCount: savedSlideCount,
+        tone: savedTone,
       });
-      toast.success("Présentation générée !");
-      onOpenChange(false);
-      resetState();
+      toast.dismiss(toastId);
+      toast.success("Présentation générée !", {
+        description: "Cliquez pour l'ouvrir dans l'éditeur.",
+        action: {
+          label: "Ouvrir",
+          onClick: () => router.push(`/genspark/${result.id}`),
+        },
+        duration: 10000,
+      });
       router.push(`/genspark/${result.id}`);
-    } catch {
-      toast.error("Erreur lors de la génération");
-    } finally {
-      setIsGenerating(false);
+    } catch (err) {
+      toast.dismiss(toastId);
+      toast.error("Erreur lors de la génération", {
+        description: err instanceof Error ? err.message : "Veuillez réessayer.",
+      });
     }
   }
 
@@ -94,24 +111,41 @@ export function AiGenerateDialog({
   }
 
   async function handleGuideGenerate() {
-    setIsGeneratingGuide(true);
+    const savedTopic = guideTopic;
+    const savedAnswers = guideQuestions.map((q, i) => ({
+      question: q,
+      answer: guideAnswers[i] || "",
+    }));
+
+    // Fermer la modal immédiatement
+    onOpenChange(false);
+    resetState();
+
+    const toastId = toast.loading("Génération de la présentation en cours...", {
+      description: "L'IA travaille à partir de vos réponses.",
+      duration: Infinity,
+    });
+
     try {
-      const answers = guideQuestions.map((q, i) => ({
-        question: q,
-        answer: guideAnswers[i] || "",
-      }));
       const result = await generateFromGuide({
-        topic: guideTopic,
-        answers,
+        topic: savedTopic,
+        answers: savedAnswers,
       });
-      toast.success("Présentation générée !");
-      onOpenChange(false);
-      resetState();
+      toast.dismiss(toastId);
+      toast.success("Présentation générée !", {
+        description: "Cliquez pour l'ouvrir dans l'éditeur.",
+        action: {
+          label: "Ouvrir",
+          onClick: () => router.push(`/genspark/${result.id}`),
+        },
+        duration: 10000,
+      });
       router.push(`/genspark/${result.id}`);
-    } catch {
-      toast.error("Erreur lors de la génération");
-    } finally {
-      setIsGeneratingGuide(false);
+    } catch (err) {
+      toast.dismiss(toastId);
+      toast.error("Erreur lors de la génération", {
+        description: err instanceof Error ? err.message : "Veuillez réessayer.",
+      });
     }
   }
 
@@ -209,15 +243,11 @@ export function AiGenerateDialog({
               </Button>
               <Button
                 onClick={handleRapidGenerate}
-                disabled={isGenerating || !prompt.trim()}
+                disabled={!prompt.trim()}
                 className="bg-brand text-brand-dark hover:bg-brand/90"
               >
-                {isGenerating ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4 mr-2" />
-                )}
-                {isGenerating ? "Génération..." : "Générer"}
+                <Sparkles className="h-4 w-4 mr-2" />
+                Générer
               </Button>
             </DialogFooter>
           </TabsContent>
@@ -292,17 +322,10 @@ export function AiGenerateDialog({
                   </Button>
                   <Button
                     onClick={handleGuideGenerate}
-                    disabled={isGeneratingGuide}
                     className="bg-brand text-brand-dark hover:bg-brand/90"
                   >
-                    {isGeneratingGuide ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 mr-2" />
-                    )}
-                    {isGeneratingGuide
-                      ? "Génération..."
-                      : "Générer la présentation"}
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Générer la présentation
                   </Button>
                 </DialogFooter>
               </>
