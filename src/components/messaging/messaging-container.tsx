@@ -154,7 +154,7 @@ export function MessagingContainer() {
     [createDMChannel, setActiveChannelId, queryClient],
   );
 
-  // Mise a jour du canal (nom/description)
+  // Mise à jour du canal (nom/description)
   const updateChannel = useMutation({
     mutationFn: async (data: { name?: string; description?: string }) => {
       if (!activeChannelId) throw new Error("No channel selected");
@@ -189,7 +189,7 @@ export function MessagingContainer() {
     });
   }, [activeChannelId, user, removeMember, setActiveChannelId]);
 
-  // Rendu sidebar (reutilise pour desktop et mobile)
+  // Rendu sidebar (réutilisé pour desktop et mobile)
   const sidebarContent = (
     <ChannelSidebar
       publicChannels={publicChannels}
@@ -207,7 +207,7 @@ export function MessagingContainer() {
 
   return (
     <div className="flex h-[calc(100dvh-4rem)] flex-col">
-      {/* Toggle Messagerie / Boite unifiee */}
+      {/* Toggle Messagerie / Boîte unifiée */}
       <div className="flex items-center justify-between border-b px-4 py-2 bg-background">
         <div className="flex items-center gap-2">
           <button
@@ -244,7 +244,7 @@ export function MessagingContainer() {
               )}
             >
               <Inbox className="h-3.5 w-3.5" />
-              Boite unifiee
+              Boîte unifiée
             </button>
           </div>
         </div>
@@ -285,10 +285,10 @@ export function MessagingContainer() {
                     <MessageSquare className="h-7 w-7 text-primary" />
                   </div>
                   <h3 className="text-sm font-semibold">
-                    Selectionnez une conversation
+                    Sélectionnez une conversation
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Choisissez un canal dans la barre laterale
+                    Choisissez un canal dans la barre latérale
                   </p>
                 </div>
               </div>

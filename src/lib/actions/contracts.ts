@@ -129,12 +129,16 @@ export async function createContract(formData: {
     .select()
     .single();
 
-  if (error)
+  if (error) {
+    console.error("[createContract] Supabase error:", error.message, error.code);
     return {
       error:
-        "Impossible de créer le contrat. Vérifiez les informations saisies.",
+        error.code === "42501"
+          ? "Permissions insuffisantes. Contactez l'administrateur pour vérifier les politiques de sécurité (RLS)."
+          : "Impossible de créer le contrat. Vérifiez les informations saisies.",
       data: null,
     };
+  }
   revalidatePath("/contracts");
   return { error: null, data };
 }

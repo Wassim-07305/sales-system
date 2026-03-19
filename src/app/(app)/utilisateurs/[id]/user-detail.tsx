@@ -42,6 +42,7 @@ interface UserDetailProps {
 const ROLE_LABELS: Record<string, string> = {
   admin: "Admin",
   manager: "Manager",
+  csm: "CSM",
   setter: "Setter",
   closer: "Closer",
   client_b2b: "Client B2B",

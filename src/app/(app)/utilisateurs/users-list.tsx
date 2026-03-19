@@ -338,6 +338,7 @@ export function UsersList({ initialUsers }: UsersListProps) {
           [
             "admin",
             "manager",
+            "csm",
             "setter",
             "closer",
             "client_b2b",
@@ -395,6 +396,7 @@ export function UsersList({ initialUsers }: UsersListProps) {
             <SelectItem value="all">Tous les rôles</SelectItem>
             <SelectItem value="admin">Admin</SelectItem>
             <SelectItem value="manager">Manager</SelectItem>
+            <SelectItem value="csm">CSM</SelectItem>
             <SelectItem value="setter">Setter</SelectItem>
             <SelectItem value="closer">Closer</SelectItem>
             <SelectItem value="client_b2b">Client B2B</SelectItem>

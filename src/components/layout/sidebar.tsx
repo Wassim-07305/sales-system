@@ -54,8 +54,14 @@ export function Sidebar({
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    document.cookie = "x-user-role=; path=/; max-age=0";
-    document.cookie = "x-onboarding-done=; path=/; max-age=0";
+    try {
+      const { logout: serverLogout } = await import("@/lib/actions/auth");
+      await serverLogout();
+    } catch {
+      // Fallback: try clearing non-httpOnly cookies
+      document.cookie = "x-user-role=; path=/; max-age=0";
+      document.cookie = "x-onboarding-done=; path=/; max-age=0";
+    }
     router.push("/login");
     router.refresh();
   }
