@@ -113,11 +113,26 @@ export async function aiJSON<T>(
     temperature: 0.3,
   });
 
-  // Clean potential markdown wrapping
-  const cleaned = result
+  // Clean potential markdown wrapping and stray text
+  let cleaned = result
     .replace(/^```json?\n?/i, "")
     .replace(/\n?```$/i, "")
     .trim();
+
+  // If the model added text before/after JSON, extract the JSON object/array
+  if (!cleaned.startsWith("{") && !cleaned.startsWith("[")) {
+    const jsonStart = cleaned.search(/[{\[]/);
+    if (jsonStart !== -1) {
+      cleaned = cleaned.substring(jsonStart);
+    }
+  }
+  // Trim trailing text after the last } or ]
+  const lastBrace = cleaned.lastIndexOf("}");
+  const lastBracket = cleaned.lastIndexOf("]");
+  const lastJsonChar = Math.max(lastBrace, lastBracket);
+  if (lastJsonChar !== -1 && lastJsonChar < cleaned.length - 1) {
+    cleaned = cleaned.substring(0, lastJsonChar + 1);
+  }
 
   return JSON.parse(cleaned) as T;
 }

@@ -199,7 +199,7 @@ export default async function TeamPage() {
                     >
                       <td className="py-3.5 pl-6 pr-4">
                         <Link
-                          href={`/contacts/${member.id}`}
+                          href={`/utilisateurs/${member.id}`}
                           className="flex items-center gap-3 group"
                         >
                           <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-xs ring-1 ring-brand/20 group-hover:ring-brand/40 transition-all">

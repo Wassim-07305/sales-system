@@ -13,14 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { QUALIFICATION_FIELD_TYPES } from "@/lib/constants";
-
-interface QualificationField {
-  id: string;
-  label: string;
-  type: "text" | "select" | "textarea" | "number";
-  required: boolean;
-  options?: string[];
-}
+import type { QualificationField } from "@/lib/types/database";
 
 interface QualificationFieldEditorProps {
   fields: QualificationField[];

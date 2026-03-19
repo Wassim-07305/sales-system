@@ -21,7 +21,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { SLOT_DURATIONS } from "@/lib/constants";
-import type { BookingPage } from "@/lib/types/database";
+import type { BookingPage, QualificationField } from "@/lib/types/database";
 import {
   createBookingPage,
   updateBookingPage,
@@ -65,13 +65,7 @@ export function BookingPageFormModal({
   const [emailVisible, setEmailVisible] = useState(true);
   const [emailRequired, setEmailRequired] = useState(true);
   const [qualificationFields, setQualificationFields] = useState<
-    Array<{
-      id: string;
-      label: string;
-      type: "text" | "select" | "textarea" | "number";
-      required: boolean;
-      options?: string[];
-    }>
+    QualificationField[]
   >([]);
 
   useEffect(() => {

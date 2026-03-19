@@ -336,7 +336,10 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
               Assigné à
             </label>
             <Select
-              value={((deal as unknown as Record<string, unknown>).assigned_to as string) || ""}
+              value={
+                ((deal as unknown as Record<string, unknown>)
+                  .assigned_to as string) || ""
+              }
               onValueChange={handleAssignChange}
             >
               <SelectTrigger className="h-11 rounded-xl">

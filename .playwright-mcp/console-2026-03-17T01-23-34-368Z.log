@@ -1,0 +1,32 @@
+[    1534ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/:0
+[    1534ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/:0
+[    1535ms] [WARNING] [SW] Enregistrement échoué: InvalidStateError: Failed to register a ServiceWorker: The document is in an invalid state. @ https://sales-system-six.vercel.app/:5
+[    2746ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/:0
+[    2746ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/:0
+[    2746ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/:0
+[    2746ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/:0
+[    6713ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:0
+[    6713ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:0
+[   17288ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tzyqmcuzmvxgexjtsbfe.supabase.co/auth/v1/token?grant_type=password:0
+[   26565ms] tX: Acquiring an exclusive Navigator LockManager lock "lock:sb-tzyqmcuzmvxgexjtsbfe-auth-token" timed out waiting 10000ms
+    at rg.tQ [as lock] (https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:24:51975)
+    at async rg._acquireLock (https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:37:11791)
+    at async https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:24:66718
+[   44395ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   45454ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   47523ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   48724ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ https://sales-system-six.vercel.app/_next/static/chunks/9068-b6506cd1babedfff.js:0
+[   52668ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   59363ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/dashboard:0
+[   59363ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/dashboard:0
+[   59433ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/dashboard:0
+[   59433ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/dashboard:0
+[   62732ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   72797ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   76267ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://sales-system-six.vercel.app/_next/static/chunks/6805-b87a2e0d2914537f.js:4
+[   82925ms] [ERROR] WebSocket connection to 'wss://tzyqmcuzmvxgexjtsbfe.supabase.co/realtime/v1/websocket?apikey=sb_publishable_4l0q-xIn34hedAOyxJqEnw_rQo5m4nN%0A&vsn=2.0.0' failed: HTTP Authentication failed; no valid credentials available @ https://sales-system-six.vercel.app/_next/static/chunks/7716-4e4afbb056826a85.js:5
+[   85062ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-six.vercel.app/crm:0
+[   85062ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-six.vercel.app/crm:0

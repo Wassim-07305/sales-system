@@ -99,7 +99,7 @@ export function PublicProfileView({
         description={`Profil public de ${profile.full_name || "Utilisateur"}`}
       />
 
-      <Link href="/team">
+      <Link href="/utilisateurs">
         <Button variant="ghost" size="sm" className="mb-2">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour

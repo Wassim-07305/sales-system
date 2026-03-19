@@ -1,0 +1,12 @@
+[     162ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/login:0
+[     162ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/login:0
+[   12840ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tzyqmcuzmvxgexjtsbfe.supabase.co/auth/v1/token?grant_type=password:0
+[   22474ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tzyqmcuzmvxgexjtsbfe.supabase.co/auth/v1/token?grant_type=password:0
+[   92677ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tzyqmcuzmvxgexjtsbfe.supabase.co/auth/v1/token?grant_type=password:0
+[  102113ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tzyqmcuzmvxgexjtsbfe.supabase.co/auth/v1/token?grant_type=password:0
+[  125574ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/:9
+[  125574ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/:9
+[  125952ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/:0
+[  125952ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/:0
+[  126169ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/_next/static/chunks/node_modules_sonner_dist_index_mjs_a05b23c0._.js:898
+[  126169ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/_next/static/chunks/node_modules_sonner_dist_index_mjs_a05b23c0._.js:898

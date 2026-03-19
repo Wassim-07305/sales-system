@@ -29,7 +29,7 @@ import { globalSearch, type SearchResult } from "@/lib/actions/search";
 const QUICK_LINKS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "CRM Pipeline", href: "/crm", icon: Kanban },
-  { label: "Contacts", href: "/contacts", icon: Users },
+  { label: "Utilisateurs", href: "/utilisateurs", icon: Users },
   { label: "Bookings", href: "/bookings", icon: CalendarDays },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
   { label: "Prospection", href: "/prospecting", icon: Target },
@@ -199,11 +199,11 @@ export function GlobalSearch() {
                 <span>Nouveau deal</span>
               </CommandItem>
               <CommandItem
-                onSelect={() => handleSelect("/contacts")}
+                onSelect={() => handleSelect("/utilisateurs")}
                 className="gap-3"
               >
                 <Users className="h-4 w-4 text-muted-foreground" />
-                <span>Nouveau contact</span>
+                <span>Nouvel utilisateur</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => handleSelect("/bookings")}

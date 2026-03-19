@@ -78,6 +78,7 @@ export async function createContact(params: {
     if (error) return { error: error.message };
 
     revalidatePath("/contacts");
+    revalidatePath("/utilisateurs");
     return { contact: data };
   } catch {
     return { error: "Non authentifié" };
@@ -120,6 +121,8 @@ export async function addContactTag(contactId: string, tag: string) {
 
     revalidatePath("/contacts");
     revalidatePath(`/contacts/${contactId}`);
+    revalidatePath("/utilisateurs");
+    revalidatePath(`/utilisateurs/${contactId}`);
     return { success: true, tags: newTags };
   } catch {
     return { error: "Non authentifié" };
@@ -152,6 +155,8 @@ export async function removeContactTag(contactId: string, tag: string) {
 
     revalidatePath("/contacts");
     revalidatePath(`/contacts/${contactId}`);
+    revalidatePath("/utilisateurs");
+    revalidatePath(`/utilisateurs/${contactId}`);
     return { success: true, tags: newTags };
   } catch {
     return { error: "Non authentifié" };

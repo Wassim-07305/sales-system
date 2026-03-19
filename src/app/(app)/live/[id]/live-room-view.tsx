@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
@@ -8,6 +8,7 @@ import { useWebRTC } from "@/lib/hooks/use-webrtc";
 import { useTranscription } from "@/lib/hooks/use-transcription";
 import { useCallStore } from "@/stores/call-store";
 import { usePiP } from "@/lib/hooks/use-pip";
+import { useSessionPresence } from "@/lib/hooks/use-session-presence";
 import { updateLiveSessionStatus } from "@/lib/actions/live";
 import { notifyPeer } from "@/lib/hooks/use-call-notifications";
 import type { LiveSession, TranscriptEntry } from "@/lib/types/database";
@@ -27,6 +28,7 @@ import {
   VideoOff,
   ArrowLeft,
   Radio,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -78,6 +80,24 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
 
   const myId = user?.id ?? "";
   const myName = profile?.full_name ?? "Utilisateur";
+
+  // Presence tracking — track quand le user a rejoint la session
+  const presenceUser = useMemo(
+    () =>
+      hasJoined && myId
+        ? {
+            user_id: myId,
+            full_name: myName,
+            avatar_url: profile?.avatar_url ?? null,
+          }
+        : undefined,
+    [hasJoined, myId, myName, profile?.avatar_url],
+  );
+  const { participants: presenceParticipants, count: presenceCount } =
+    useSessionPresence({
+      sessionId: session.id,
+      currentUser: presenceUser,
+    });
 
   // Reset call store on mount
   useEffect(() => {
@@ -572,6 +592,44 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            {/* Participants presence */}
+            {presenceCount > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-1.5">
+                  {presenceParticipants.slice(0, 3).map((p) => (
+                    <div
+                      key={p.user_id}
+                      className="relative w-6 h-6 rounded-full border-2 border-zinc-950 bg-zinc-800 shrink-0"
+                      title={p.full_name}
+                    >
+                      {p.avatar_url ? (
+                        <img
+                          src={p.avatar_url}
+                          alt={p.full_name}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-brand/20 flex items-center justify-center text-[9px] font-semibold text-brand uppercase">
+                          {p.full_name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="absolute -bottom-px -right-px w-2 h-2 rounded-full bg-emerald-500 border border-zinc-950" />
+                    </div>
+                  ))}
+                  {presenceCount > 3 && (
+                    <div className="w-6 h-6 rounded-full border-2 border-zinc-950 bg-zinc-800 flex items-center justify-center shrink-0">
+                      <span className="text-[9px] font-semibold text-zinc-400">
+                        +{presenceCount - 3}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span className="text-[11px] text-zinc-400 hidden sm:inline">
+                  <Users className="w-3 h-3 inline mr-0.5" />
+                  {presenceCount}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-600/20">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-[10px] font-medium text-red-400 uppercase tracking-wider">

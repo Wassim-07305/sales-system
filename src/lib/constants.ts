@@ -64,8 +64,8 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer", "client_b2b"],
   },
   {
-    label: "Contacts",
-    href: "/contacts",
+    label: "Utilisateurs",
+    href: "/utilisateurs",
     icon: Users,
     roles: ["admin", "manager"],
   },
@@ -86,12 +86,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/academy",
     icon: GraduationCap,
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
-  },
-  {
-    label: "Équipe",
-    href: "/team",
-    icon: UsersRound,
-    roles: ["admin", "manager"],
   },
   {
     label: "Analytics",
@@ -118,12 +112,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager"],
   },
   {
-    label: "Clients",
-    href: "/customers",
-    icon: Heart,
-    roles: ["admin", "manager"],
-  },
-  {
     label: "Communauté",
     href: "/community",
     icon: UsersRound,
@@ -140,7 +128,7 @@ export const NAV_ITEMS: NavItem[] = [
 
   // Live (video calls, screen share, lives)
   {
-    label: "Live",
+    label: "Appels & Live",
     href: "/live",
     icon: Radio,
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
@@ -336,14 +324,9 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Ventes",
     items: NAV_ITEMS.filter((i) =>
-      [
-        "/crm",
-        "/contacts",
-        "/bookings",
-        "/contracts",
-        "/analytics",
-        "/journal",
-      ].includes(i.href),
+      ["/crm", "/bookings", "/contracts", "/analytics", "/journal"].includes(
+        i.href,
+      ),
     ),
   },
   {
@@ -361,8 +344,12 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/team", "/content", "/customers", "/marketplace"].includes(i.href),
+      ["/content", "/marketplace"].includes(i.href),
     ),
+  },
+  {
+    label: "Utilisateurs",
+    items: NAV_ITEMS.filter((i) => ["/utilisateurs"].includes(i.href)),
   },
   {
     label: "Espace Client",
@@ -390,6 +377,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
   crm: "CRM",
   contacts: "Contacts",
+  utilisateurs: "Utilisateurs",
   bookings: "Bookings",
   contracts: "Contrats",
   analytics: "Analytics",
@@ -499,7 +487,10 @@ export const QUALIFICATION_FIELD_TYPES = [
   { value: "text", label: "Texte court" },
   { value: "textarea", label: "Texte long" },
   { value: "select", label: "Liste déroulante" },
+  { value: "multi_select", label: "Choix multiples" },
   { value: "number", label: "Nombre" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Téléphone" },
 ] as const;
 
 export const CALL_RESULT_OPTIONS = [

@@ -683,3 +683,116 @@ export async function saveCalendarSettings(
   revalidatePath("/bookings/calendar-sync");
   return { success: true, message: "Paramètres sauvegardés avec succès" };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Auto-sync: create a single Google Calendar event for a new booking
+// Called fire-and-forget from createPublicBooking
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function syncBookingToGoogleCalendar(params: {
+  closerId: string;
+  bookingId: string;
+  date: string;
+  startTime: string;
+  durationMinutes: number;
+  prospectName: string;
+  prospectEmail?: string;
+  pageTitle?: string;
+}): Promise<void> {
+  try {
+    const supabase = await createClient();
+
+    // 1. Try Unipile first
+    const unipileAccountId = await getUnipileGoogleCalendarAccountId();
+    if (unipileAccountId) {
+      const dsn = process.env.UNIPILE_DSN;
+      const apiKey = process.env.UNIPILE_API_KEY;
+      if (dsn && apiKey) {
+        const startDateTime = `${params.date}T${params.startTime}`;
+        const endDate = new Date(startDateTime);
+        endDate.setMinutes(endDate.getMinutes() + params.durationMinutes);
+
+        const res = await fetch(`${dsn}/api/v1/calendar/events`, {
+          method: "POST",
+          headers: {
+            "X-API-KEY": apiKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            account_id: unipileAccountId,
+            title: `${params.pageTitle || "RDV"} — ${params.prospectName}`,
+            description: `Rendez-vous via Sales System\nProspect: ${params.prospectName}${params.prospectEmail ? `\nEmail: ${params.prospectEmail}` : ""}`,
+            start_date: startDateTime,
+            end_date: endDate.toISOString(),
+            timezone: "Europe/Paris",
+          }),
+        });
+
+        if (res.ok) {
+          const event = (await res.json()) as { id?: string };
+          await supabase
+            .from("bookings")
+            .update({ google_event_id: event.id || `unipile_${Date.now()}` })
+            .eq("id", params.bookingId);
+          return;
+        }
+      }
+    }
+
+    // 2. Fallback: Direct Google Calendar API
+    const accessToken = await getGoogleAccessToken(supabase, params.closerId);
+    if (!accessToken) return; // Closer has no Google Calendar connected — skip silently
+
+    const startDateTime = `${params.date}T${params.startTime}`;
+    const endDate = new Date(startDateTime);
+    endDate.setMinutes(endDate.getMinutes() + params.durationMinutes);
+
+    const { data: settingsData } = await supabase
+      .from("user_settings")
+      .select("value")
+      .eq("user_id", params.closerId)
+      .eq("key", "calendar_sync")
+      .single();
+
+    const calendarId =
+      ((settingsData?.value as Record<string, unknown>)?.defaultCalendarId as
+        | string
+        | undefined) || "primary";
+
+    const eventBody = {
+      summary: `${params.pageTitle || "RDV"} — ${params.prospectName}`,
+      description: `Rendez-vous via Sales System\nProspect: ${params.prospectName}${params.prospectEmail ? `\nEmail: ${params.prospectEmail}` : ""}`,
+      start: { dateTime: startDateTime, timeZone: "Europe/Paris" },
+      end: {
+        dateTime: endDate.toISOString().replace("Z", ""),
+        timeZone: "Europe/Paris",
+      },
+      attendees: params.prospectEmail
+        ? [{ email: params.prospectEmail }]
+        : undefined,
+    };
+
+    const createResponse = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?sendUpdates=all`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventBody),
+      },
+    );
+
+    if (createResponse.ok) {
+      const event = await createResponse.json();
+      await supabase
+        .from("bookings")
+        .update({ google_event_id: event.id })
+        .eq("id", params.bookingId);
+    }
+  } catch (err) {
+    // Fire-and-forget: log but don't throw
+    console.error("Auto Google Calendar sync error:", err);
+  }
+}

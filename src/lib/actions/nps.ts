@@ -63,11 +63,12 @@ export async function submitTestimonial(content: string, videoUrl?: string) {
       admins.map((a) => a.id),
       "Nouveau témoignage",
       "Un client a soumis un nouveau témoignage à valider.",
-      { type: "testimonial", link: "/customers?tab=testimonials" },
+      { type: "testimonial", link: "/utilisateurs" },
     );
   }
 
   revalidatePath("/customers");
+  revalidatePath("/utilisateurs");
 }
 
 export async function updateTestimonialStatus(
@@ -80,6 +81,7 @@ export async function updateTestimonialStatus(
     .update({ status })
     .eq("id", testimonialId);
   revalidatePath("/customers");
+  revalidatePath("/utilisateurs");
 }
 
 // ---------- Auto-trigger NPS after deal signed ----------

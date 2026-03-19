@@ -152,7 +152,7 @@ export async function runSmartAlerts() {
         title: `${lowHealthClients.length} client(s) en zone rouge`,
         body: `Clients avec health score < 30 : ${lowHealthClients.map((c) => c.full_name || "Inconnu").join(", ")}`,
         type: "health_alert",
-        link: "/customers",
+        link: "/utilisateurs",
       });
     }
   }
@@ -179,7 +179,7 @@ export async function runSmartAlerts() {
         title: "Client inactif",
         body: `${client.full_name || "Un client B2C"} ne s'est pas connecté depuis plus de 5 jours.`,
         type: "inactive_client",
-        link: "/customers",
+        link: "/utilisateurs",
       });
     }
   }

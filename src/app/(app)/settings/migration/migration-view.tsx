@@ -570,7 +570,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
               >
                 Nouvelle migration
               </Button>
-              <Link href="/contacts">
+              <Link href="/utilisateurs">
                 <Button
                   size="sm"
                   className="bg-brand text-brand-dark hover:bg-brand/90"

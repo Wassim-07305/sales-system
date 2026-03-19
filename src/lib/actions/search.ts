@@ -42,7 +42,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             c.email ||
             "Contact",
           subtitle: c.company || c.email || "",
-          href: `/contacts/${c.id}`,
+          href: `/utilisateurs/${c.id}`,
         });
       }
     }

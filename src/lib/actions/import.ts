@@ -290,6 +290,7 @@ export async function executeImport(
   }
 
   revalidatePath("/contacts");
+  revalidatePath("/utilisateurs");
   revalidatePath("/crm");
 
   return { imported, skipped, errors: errorCount };

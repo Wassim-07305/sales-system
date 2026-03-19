@@ -23,7 +23,12 @@ export type BookingStatus =
   | "cancelled"
   | "rescheduled";
 
-export type ContractStatus = "draft" | "sent" | "signed" | "expired";
+export type ContractStatus =
+  | "draft"
+  | "sent"
+  | "client_signed"
+  | "signed"
+  | "expired";
 
 export type ProspectStatus =
   | "new"
@@ -217,9 +222,17 @@ export type BookingLeadStatus =
 export interface QualificationField {
   id: string;
   label: string;
-  type: "text" | "select" | "textarea" | "number";
+  type:
+    | "text"
+    | "select"
+    | "textarea"
+    | "number"
+    | "email"
+    | "phone"
+    | "multi_select";
   required: boolean;
   options?: string[];
+  placeholder?: string;
 }
 
 export interface Booking {

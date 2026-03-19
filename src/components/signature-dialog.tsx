@@ -16,7 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SignatureCanvas } from "@/components/signature-canvas";
 import { saveSignature } from "@/lib/actions/contracts";
 import { toast } from "sonner";
-import { FileSignature, Check } from "lucide-react";
+import { FileSignature, Check, PenTool, Type } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SignatureDialogProps {
   contractId: string;
@@ -24,6 +25,7 @@ interface SignatureDialogProps {
   amount: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCustomSubmit?: (signatureData: string, signerName: string) => Promise<void>;
 }
 
 export function SignatureDialog({
@@ -32,26 +34,60 @@ export function SignatureDialog({
   amount,
   open,
   onOpenChange,
+  onCustomSubmit,
 }: SignatureDialogProps) {
   const [signerName, setSignerName] = useState("");
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signatureMode, setSignatureMode] = useState<"draw" | "type">("draw");
+  const [typedSignature, setTypedSignature] = useState("");
 
-  const canSubmit = signerName.trim().length > 0 && signatureData && accepted;
+  const hasSignature =
+    signatureMode === "draw" ? !!signatureData : !!typedSignature.trim();
+  const canSubmit = signerName.trim().length > 0 && hasSignature && accepted;
+
+  function textToSignatureImage(text: string): string | null {
+    if (!text.trim()) return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 150;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, 400, 150);
+    ctx.font = "italic 42px 'Segoe Script', 'Dancing Script', cursive";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, 200, 75);
+    return canvas.toDataURL("image/png");
+  }
 
   async function handleSubmit() {
-    if (!canSubmit || !signatureData) return;
+    if (!canSubmit) return;
+
+    let finalSignatureData = signatureData;
+    if (signatureMode === "type") {
+      finalSignatureData = textToSignatureImage(typedSignature);
+    }
+    if (!finalSignatureData) return;
 
     setLoading(true);
     try {
-      await saveSignature(contractId, signatureData, signerName.trim());
+      if (onCustomSubmit) {
+        await onCustomSubmit(finalSignatureData, signerName.trim());
+      } else {
+        await saveSignature(contractId, finalSignatureData, signerName.trim());
+      }
       toast.success("Contrat signe avec succes !");
       onOpenChange(false);
       // Reset state
       setSignerName("");
       setSignatureData(null);
       setAccepted(false);
+      setTypedSignature("");
+      setSignatureMode("draw");
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Erreur lors de la signature",
@@ -66,6 +102,8 @@ export function SignatureDialog({
       setSignerName("");
       setSignatureData(null);
       setAccepted(false);
+      setTypedSignature("");
+      setSignatureMode("draw");
     }
     onOpenChange(value);
   }
@@ -111,14 +149,75 @@ export function SignatureDialog({
           />
         </div>
 
-        {/* Signature canvas */}
-        <div className="space-y-2">
-          <Label>Votre signature</Label>
-          <SignatureCanvas
-            onSign={(dataUrl) => setSignatureData(dataUrl)}
-            height={180}
-          />
+        {/* Signature mode toggle */}
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50 border border-border/50">
+          <button
+            type="button"
+            onClick={() => setSignatureMode("draw")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+              signatureMode === "draw"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <PenTool className="h-3.5 w-3.5" />
+            Dessiner
+          </button>
+          <button
+            type="button"
+            onClick={() => setSignatureMode("type")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+              signatureMode === "type"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Type className="h-3.5 w-3.5" />
+            Taper
+          </button>
         </div>
+
+        {/* Signature input (draw or type) */}
+        {signatureMode === "draw" ? (
+          <div className="space-y-2">
+            <Label>Dessinez votre signature</Label>
+            <SignatureCanvas
+              onSign={(dataUrl) => setSignatureData(dataUrl)}
+              height={180}
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label>Tapez votre signature</Label>
+            <Input
+              value={typedSignature}
+              onChange={(e) => setTypedSignature(e.target.value)}
+              placeholder="Votre nom complet"
+              className="text-xl h-12"
+              style={{
+                fontFamily:
+                  "'Caveat', 'Dancing Script', 'Segoe Script', cursive",
+                fontSize: "24px",
+              }}
+            />
+            {/* Preview */}
+            {typedSignature && (
+              <div className="p-4 bg-white rounded-lg border border-dashed border-border/50 flex items-center justify-center min-h-[120px]">
+                <span
+                  className="text-3xl text-black"
+                  style={{
+                    fontFamily:
+                      "'Caveat', 'Dancing Script', 'Segoe Script', cursive",
+                  }}
+                >
+                  {typedSignature}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Legal text + checkbox */}
         <div className="space-y-3">

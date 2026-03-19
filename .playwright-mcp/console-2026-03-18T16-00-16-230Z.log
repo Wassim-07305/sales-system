@@ -1,0 +1,8 @@
+[    2000ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/login:9
+[    2000ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/login:9
+[   34709ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/:0
+[   34710ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/:0
+[   34902ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/:0
+[   34902ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/:0
+[   35025ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/_next/static/chunks/node_modules_sonner_dist_index_mjs_a05b23c0._.js:898
+[   35025ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/_next/static/chunks/node_modules_sonner_dist_index_mjs_a05b23c0._.js:898

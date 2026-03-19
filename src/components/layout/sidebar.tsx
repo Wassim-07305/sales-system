@@ -14,6 +14,7 @@ import { cn, getInitials } from "@/lib/utils";
 import { NAV_SECTIONS } from "@/lib/constants";
 import type { UserRole } from "@/lib/types/database";
 import { useUIStore } from "@/stores/ui-store";
+import { useUnreadCounts } from "@/lib/hooks/use-unread-counts";
 import { createClient } from "@/lib/supabase/client";
 import {
   Tooltip,
@@ -44,6 +45,7 @@ export function Sidebar({
     sidebarMobileOpen,
     setMobileSidebarOpen,
   } = useUIStore();
+  const { totalUnread } = useUnreadCounts();
 
   function closeMobile() {
     setMobileSidebarOpen(false);
@@ -178,6 +180,20 @@ export function Sidebar({
                         <span className={cn(isCollapsed && "md:hidden")}>
                           {item.label}
                         </span>
+
+                        {/* Badge messages non lus */}
+                        {item.href === "/chat" && totalUnread > 0 && (
+                          <span
+                            className={cn(
+                              "flex items-center justify-center rounded-full bg-brand text-zinc-900 text-[10px] font-bold leading-none",
+                              isCollapsed
+                                ? "absolute -top-1 -right-1 md:flex hidden h-4 min-w-4 px-1"
+                                : "ml-auto h-[18px] min-w-[18px] px-1.5",
+                            )}
+                          >
+                            {totalUnread > 99 ? "99+" : totalUnread}
+                          </span>
+                        )}
                       </Link>
                     );
 

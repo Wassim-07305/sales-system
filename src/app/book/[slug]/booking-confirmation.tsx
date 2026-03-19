@@ -1,63 +1,90 @@
 "use client";
 
-import { CheckCircle2, Calendar, Clock } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface BookingConfirmationProps {
-  email: string;
+  prospectName: string;
+  prospectEmail?: string;
   date: string;
-  time: string;
-  pageTitle?: string;
-  brandColor?: string;
+  startTime: string;
+  endTime: string;
+  brandColor: string;
+  clientName?: string;
 }
 
 export function BookingConfirmation({
-  email,
+  prospectName,
+  prospectEmail,
   date,
-  time,
-  pageTitle,
-  brandColor,
+  startTime,
+  endTime,
+  clientName,
 }: BookingConfirmationProps) {
-  const dateObj = new Date(`${date}T${time}:00`);
+  const formattedDate = format(
+    new Date(date + "T00:00:00"),
+    "EEEE, d MMMM yyyy",
+    { locale: fr },
+  );
+  const displayName = clientName || prospectName;
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <div className="text-center py-8">
-      <div
-        className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-        style={{
-          backgroundColor: brandColor ? brandColor + "15" : undefined,
-        }}
-      >
-        <CheckCircle2
-          className="h-8 w-8"
-          style={{ color: brandColor || "hsl(var(--brand))" }}
-        />
-      </div>
+    <div className="mx-auto max-w-lg text-center">
+      <h1 className="mb-8 text-2xl font-bold text-gray-900">
+        Merci ! Votre réunion est confirmée.
+      </h1>
 
-      <h2 className="text-2xl font-bold mb-2">Rendez-vous confirmé !</h2>
+      <div className="rounded-xl border border-gray-200 bg-white text-left shadow-sm">
+        {/* Prévue avec */}
+        <div className="flex items-center justify-between px-6 py-5">
+          <div>
+            <p className="text-sm text-gray-500">
+              Votre réunion est prévue avec :
+            </p>
+            <p className="mt-1 text-lg font-semibold text-gray-900">
+              {displayName}
+            </p>
+          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white">
+            {initial}
+          </div>
+        </div>
 
-      <p className="text-muted-foreground mb-6">
-        Un email de confirmation a été envoyé à{" "}
-        <strong className="text-foreground">{email}</strong>
-      </p>
+        <div className="mx-6 border-t border-gray-100" />
 
-      <div className="inline-block rounded-xl border border-border/50 bg-muted/30 px-6 py-4">
-        {pageTitle && <p className="text-sm font-semibold mb-2">{pageTitle}</p>}
-        <div className="flex items-center justify-center gap-4 text-sm">
-          <span className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            {format(dateObj, "EEEE d MMMM yyyy", { locale: fr })}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            {time}
-          </span>
+        {/* Temps */}
+        <div className="flex items-start gap-3 px-6 py-5">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+          <div>
+            <p className="text-sm font-medium text-gray-500">Temps</p>
+            <p className="mt-0.5 font-semibold capitalize text-gray-900">
+              {formattedDate}
+            </p>
+            <p className="text-sm text-gray-600">
+              {startTime} - {endTime} (France Time)
+            </p>
+          </div>
+        </div>
+
+        <div className="mx-6 border-t border-gray-100" />
+
+        {/* Invité */}
+        <div className="flex items-start gap-3 px-6 py-5">
+          <Users className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+          <div>
+            <p className="text-sm font-medium text-gray-500">Invité</p>
+            <p className="mt-0.5 font-semibold text-gray-900">
+              {prospectEmail || prospectName}
+            </p>
+          </div>
         </div>
       </div>
 
-      <p className="mt-8 text-xs text-muted-foreground/50">
-        Powered by SalesSystem
+      <p className="mt-8 text-xs text-gray-400">
+        Powered by{" "}
+        <span className="font-semibold text-gray-500">SalesSystem</span>
       </p>
     </div>
   );

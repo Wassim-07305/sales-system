@@ -374,7 +374,7 @@ export function IntegrationsView({
   );
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-12">
+    <div className="space-y-8 pb-12">
       {/* ================================================================= */}
       {/* UNIPILE — Comptes connectés                                       */}
       {/* ================================================================= */}
@@ -546,119 +546,121 @@ export function IntegrationsView({
             {group.label}
           </h2>
 
-          {group.services.map((service) => {
-            const configured = isServiceConfigured(service);
-            const partial = isServicePartial(service);
-            const isSaving = savingService === service.id;
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {group.services.map((service) => {
+              const configured = isServiceConfigured(service);
+              const partial = isServicePartial(service);
+              const isSaving = savingService === service.id;
 
-            return (
-              <Card key={service.id}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted">
-                        {service.icon}
+              return (
+                <Card key={service.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted">
+                          {service.icon}
+                        </div>
+                        <div>
+                          <CardTitle className="text-base">
+                            {service.name}
+                          </CardTitle>
+                          <CardDescription className="text-xs">
+                            {service.description}
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div>
-                        <CardTitle className="text-base">
-                          {service.name}
-                        </CardTitle>
-                        <CardDescription className="text-xs">
-                          {service.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    {configured ? (
-                      <Badge className="bg-brand/15 text-brand border-brand/20">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Connecté
-                      </Badge>
-                    ) : partial ? (
-                      <Badge
-                        variant="outline"
-                        className="text-muted-foreground border-muted-foreground/30"
-                      >
-                        Partiel
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="text-muted-foreground"
-                      >
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Non configuré
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {service.keys.map((k) => (
-                    <div key={k.key} className="space-y-1.5">
-                      <Label className="text-xs font-medium">
-                        {k.label}
-                        {status[k.key] && (
-                          <span className="ml-2 text-brand text-[10px]">
-                            (configuré)
-                          </span>
-                        )}
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          type={visible[k.key] ? "text" : "password"}
-                          value={values[k.key] || ""}
-                          onChange={(e) =>
-                            handleValueChange(k.key, e.target.value)
-                          }
-                          placeholder={
-                            status[k.key] ? "••••••••••••••••" : k.placeholder
-                          }
-                          className="pr-10 font-mono text-xs"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => toggleVisibility(k.key)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      {configured ? (
+                        <Badge className="bg-brand/15 text-brand border-brand/20">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Connecté
+                        </Badge>
+                      ) : partial ? (
+                        <Badge
+                          variant="outline"
+                          className="text-muted-foreground border-muted-foreground/30"
                         >
-                          {visible[k.key] ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="flex items-center gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleSave(service)}
-                      disabled={isSaving || isPending}
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                          Partiel
+                        </Badge>
                       ) : (
-                        <Save className="h-3.5 w-3.5 mr-2" />
+                        <Badge
+                          variant="outline"
+                          className="text-muted-foreground"
+                        >
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Non configuré
+                        </Badge>
                       )}
-                      Enregistrer
-                    </Button>
-                    {configured && (
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {service.keys.map((k) => (
+                      <div key={k.key} className="space-y-1.5">
+                        <Label className="text-xs font-medium">
+                          {k.label}
+                          {status[k.key] && (
+                            <span className="ml-2 text-brand text-[10px]">
+                              (configuré)
+                            </span>
+                          )}
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            type={visible[k.key] ? "text" : "password"}
+                            value={values[k.key] || ""}
+                            onChange={(e) =>
+                              handleValueChange(k.key, e.target.value)
+                            }
+                            placeholder={
+                              status[k.key] ? "••••••••••••••••" : k.placeholder
+                            }
+                            className="pr-10 font-mono text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => toggleVisibility(k.key)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {visible[k.key] ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="flex items-center gap-2 pt-2">
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(service)}
-                        disabled={isPending}
+                        onClick={() => handleSave(service)}
+                        disabled={isSaving || isPending}
                       >
-                        <Trash2 className="h-3.5 w-3.5 mr-2" />
-                        Supprimer
+                        {isSaving ? (
+                          <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                        ) : (
+                          <Save className="h-3.5 w-3.5 mr-2" />
+                        )}
+                        Enregistrer
                       </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                      {configured && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(service)}
+                          disabled={isPending}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 mr-2" />
+                          Supprimer
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       ))}
 

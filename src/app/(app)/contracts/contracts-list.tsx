@@ -32,6 +32,7 @@ const statusColors: Record<string, string> = {
   sent: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   signed: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   expired: "bg-red-500/10 text-red-600 border-red-500/20",
+  client_signed: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -39,6 +40,7 @@ const statusLabels: Record<string, string> = {
   sent: "Envoyé",
   signed: "Signé",
   expired: "Expiré",
+  client_signed: "En attente contresignature",
 };
 
 export function ContractsList({ contracts }: { contracts: ContractPdfData[] }) {

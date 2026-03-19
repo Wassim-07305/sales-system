@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notify } from "@/lib/actions/notifications";
+import { syncBookingToGoogleCalendar } from "@/lib/actions/calendar-sync";
 import type {
   BookingPage,
   BookingAvailability,
@@ -525,9 +526,17 @@ export async function createPublicBooking(params: {
 
   if (error) return { bookingId: null, error: error.message };
 
+  const bookingId = data as string;
+
+  // Fetch the created booking to get closer_id and page details
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("closer_id, booking_page_id, booking_pages(title, slot_duration)")
+    .eq("id", bookingId)
+    .single();
+
   // Notify admins about new public booking
-  const authSupabase = await createClient();
-  const { data: admins } = await authSupabase
+  const { data: admins } = await supabase
     .from("profiles")
     .select("id")
     .in("role", ["admin", "manager"]);
@@ -541,8 +550,27 @@ export async function createPublicBooking(params: {
     );
   }
 
+  // Auto-sync to Google Calendar (fire-and-forget)
+  if (booking?.closer_id) {
+    const pageData = booking.booking_pages as unknown as {
+      title?: string;
+      slot_duration?: number;
+    } | null;
+
+    syncBookingToGoogleCalendar({
+      closerId: booking.closer_id,
+      bookingId,
+      date: params.date,
+      startTime: params.startTime,
+      durationMinutes: pageData?.slot_duration || 30,
+      prospectName: params.name,
+      prospectEmail: params.email || undefined,
+      pageTitle: pageData?.title || undefined,
+    }).catch((err) => console.error("Google Calendar auto-sync failed:", err));
+  }
+
   revalidatePath("/bookings");
-  return { bookingId: data as string, error: null };
+  return { bookingId, error: null };
 }
 
 export async function trackBookingPageView(slug: string, referrer?: string) {

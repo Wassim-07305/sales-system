@@ -276,7 +276,7 @@ export function AdminDashboard({
       value: data.stats.activeClients.toString(),
       compact: data.stats.activeClients.toString(),
       icon: Users,
-      href: "/contacts",
+      href: "/utilisateurs",
     },
     {
       title: "RDV cette semaine",

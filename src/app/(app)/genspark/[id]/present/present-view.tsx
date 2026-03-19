@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, X, StickyNote } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  X,
+  StickyNote,
+  Maximize,
+  Minimize,
+} from "lucide-react";
 import type { Presentation, PresentationSlide } from "@/lib/types/database";
 import { SlideRenderer } from "@/components/genspark/slide-renderer";
 import { cn } from "@/lib/utils";
@@ -17,9 +24,29 @@ interface PresentViewProps {
 export function PresentView({ presentation, slides }: PresentViewProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [showNotes, setShowNotes] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const totalSteps = slides.length;
   const currentSlide = slides[currentStep];
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      await containerRef.current?.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  }, []);
+
+  // Sync fullscreen state with browser
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(!!document.fullscreenElement);
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
 
   const goNext = useCallback(() => {
     if (currentStep < totalSteps - 1) setCurrentStep((s) => s + 1);
@@ -45,7 +72,13 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
           goPrev();
           break;
         case "Escape":
-          // Will navigate back via link
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          }
+          break;
+        case "f":
+        case "F":
+          toggleFullscreen();
           break;
         case "n":
         case "N":
@@ -56,7 +89,7 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, toggleFullscreen]);
 
   if (totalSteps === 0) {
     return (
@@ -74,10 +107,13 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div
+      ref={containerRef}
+      className="min-h-screen bg-background flex flex-col"
+    >
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-border/30 shrink-0">
-        <h2 className="text-white/70 text-sm font-medium truncate max-w-md">
+        <h2 className="text-muted-foreground text-sm font-medium truncate max-w-md">
           {presentation.title}
         </h2>
         <div className="flex items-center gap-3">
@@ -92,18 +128,32 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
             size="sm"
             onClick={() => setShowNotes((v) => !v)}
             className={cn(
-              "text-white/70 hover:text-white hover:bg-white/10",
-              showNotes && "bg-white/10 text-white",
+              "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+              showNotes && "bg-muted/50 text-foreground",
             )}
           >
             <StickyNote className="h-4 w-4 mr-1" />
             Notes
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            title="Plein écran (F)"
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4 mr-1" />
+            ) : (
+              <Maximize className="h-4 w-4 mr-1" />
+            )}
+            {isFullscreen ? "Réduire" : "Plein écran"}
+          </Button>
           <Link href={`/genspark/${presentation.id}`}>
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
             >
               <X className="h-4 w-4 mr-1" />
               Quitter
@@ -114,7 +164,7 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
 
       {/* Progress bar */}
       <div className="px-6 shrink-0">
-        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-1 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full bg-brand rounded-full transition-all duration-300"
             style={{
@@ -161,7 +211,7 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
                 ? "w-6 bg-brand"
                 : idx < currentStep
                   ? "w-2 bg-brand/60"
-                  : "w-2 bg-white/20",
+                  : "w-2 bg-muted-foreground/20",
             )}
           />
         ))}
@@ -174,7 +224,7 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
           disabled={currentStep === 0}
           variant="ghost"
           size="lg"
-          className="text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30"
+          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 disabled:opacity-30"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
           Précédent

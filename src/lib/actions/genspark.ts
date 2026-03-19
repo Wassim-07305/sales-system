@@ -2,10 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { aiComplete, aiJSON } from "@/lib/ai/client";
-
-// Modèle gratuit OpenRouter pour GenSpark
-const GENSPARK_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+import { aiComplete, aiJSON, DEFAULT_MODEL } from "@/lib/ai/client";
 import type {
   SlideLayout,
   SlideTransition,
@@ -454,8 +451,8 @@ Contenu en français.`,
       {
         system:
           "Tu es un expert en création de présentations professionnelles. Tu crées des présentations structurées, visuellement cohérentes et impactantes. Chaque slide doit avoir un message clair. Les notes du présentateur doivent aider à délivrer le message.",
-        model: GENSPARK_MODEL,
-        maxTokens: 4000,
+        model: DEFAULT_MODEL,
+        maxTokens: 8000,
       },
     );
   } catch (err) {
@@ -523,7 +520,7 @@ Réponds UNIQUEMENT avec un tableau JSON de strings, sans markdown :
     {
       system:
         "Tu es un consultant en communication. Tu aides à structurer des présentations en posant les bonnes questions. Réponds UNIQUEMENT en JSON valide.",
-      model: GENSPARK_MODEL,
+      model: DEFAULT_MODEL,
       maxTokens: 500,
       temperature: 0.7,
     },
@@ -607,7 +604,7 @@ Réponds avec le JSON du contenu uniquement.`,
     {
       system:
         "Tu es un expert en création de présentations. Tu modifies le contenu des slides selon les instructions de l'utilisateur tout en maintenant la cohérence et la qualité.",
-      model: GENSPARK_MODEL,
+      model: DEFAULT_MODEL,
       maxTokens: 1000,
     },
   );

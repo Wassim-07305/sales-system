@@ -685,10 +685,10 @@ export function DealDetail({
                 )}
                 <Separator className="my-4" />
                 <Link
-                  href={`/contacts/${currentDeal.contact.id}`}
+                  href={`/utilisateurs/${currentDeal.contact.id}`}
                   className="text-sm text-brand hover:underline"
                 >
-                  Voir la fiche contact
+                  Voir la fiche utilisateur
                 </Link>
               </CardContent>
             </Card>

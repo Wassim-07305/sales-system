@@ -53,8 +53,7 @@ export function NewContractForm({
   const initialDeal = initialDealId
     ? deals.find((d) => d.id === initialDealId)
     : null;
-  const resolvedClientId =
-    initialClientId || initialDeal?.contact?.id || "";
+  const resolvedClientId = initialClientId || initialDeal?.contact?.id || "";
   const resolvedOfferName = initialDeal?.title || "";
 
   const [templateId, setTemplateId] = useState("");

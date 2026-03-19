@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Clock,
   Loader2,
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { VoiceRecorder, VoicePreview } from "./voice-recorder";
 
 const EMOJI_LIST = [
   "\u{1F44D}",
@@ -52,6 +54,12 @@ const EMOJI_LIST = [
   "\u{1F92D}",
 ];
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
 interface ChatInputProps {
   onSend: (params: {
     content: string;
@@ -61,6 +69,7 @@ interface ChatInputProps {
     scheduledAt?: string;
   }) => void;
   onUploadFile: (file: File) => void;
+  onVoiceSend: (blob: Blob, duration: number) => void;
   isSending: boolean;
   replyTo: { id: string; content: string; senderName: string } | null;
   onCancelReply: () => void;
@@ -70,11 +79,15 @@ interface ChatInputProps {
   onCancelEdit: () => void;
   onTyping: () => void;
   disabled?: boolean;
+  channelName?: string;
+  droppedFile?: File | null;
+  onClearDroppedFile?: () => void;
 }
 
 export function ChatInput({
   onSend,
   onUploadFile,
+  onVoiceSend,
   isSending,
   replyTo,
   onCancelReply,
@@ -84,11 +97,18 @@ export function ChatInput({
   onCancelEdit,
   onTyping,
   disabled = false,
+  channelName,
+  droppedFile,
+  onClearDroppedFile,
 }: ChatInputProps) {
   const [content, setContent] = useState("");
   const [editContent, setEditContent] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [pendingVoices, setPendingVoices] = useState<
+    Array<{ blob: Blob; duration: number; levels: number[] }>
+  >([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -99,26 +119,65 @@ export function ChatInput({
     }
   }, [editingMessageId, editingContent]);
 
+  // Handle dropped file from parent
+  useEffect(() => {
+    if (droppedFile) {
+      setPendingFiles((prev) => [...prev, droppedFile]);
+      onClearDroppedFile?.();
+    }
+  }, [droppedFile, onClearDroppedFile]);
+
   // Pick the right state based on mode
   const displayContent = editingMessageId ? editContent : content;
 
-  const handleSend = useCallback(() => {
+  const hasContent =
+    displayContent.trim().length > 0 ||
+    pendingFiles.length > 0 ||
+    pendingVoices.length > 0;
+
+  const handleSend = useCallback(async () => {
     const text = displayContent.trim();
-    if (!text) return;
+    const hasText = !!text;
+    const hasFiles = pendingFiles.length > 0;
+    const hasVoices = pendingVoices.length > 0;
+
+    if (!hasText && !hasFiles && !hasVoices) return;
+    if (isSending) return;
 
     if (editingMessageId) {
-      onSaveEdit(text);
-      setEditContent("");
+      if (hasText) {
+        onSaveEdit(text);
+        setEditContent("");
+      }
       return;
     }
 
-    onSend({
-      content: text,
-      contentType: "text",
-      replyTo: replyTo?.id,
-      isUrgent,
-      scheduledAt: scheduledAt ?? undefined,
-    });
+    // Envoyer les vocaux en premier
+    if (hasVoices) {
+      for (const v of pendingVoices) {
+        onVoiceSend(v.blob, v.duration);
+      }
+      setPendingVoices([]);
+    }
+
+    // Envoyer les fichiers
+    if (hasFiles) {
+      for (const f of pendingFiles) {
+        onUploadFile(f);
+      }
+      setPendingFiles([]);
+    }
+
+    // Envoyer le texte
+    if (hasText) {
+      onSend({
+        content: text,
+        contentType: "text",
+        replyTo: replyTo?.id,
+        isUrgent,
+        scheduledAt: scheduledAt ?? undefined,
+      });
+    }
 
     setContent("");
     setIsUrgent(false);
@@ -129,8 +188,13 @@ export function ChatInput({
   }, [
     displayContent,
     editingMessageId,
+    pendingFiles,
+    pendingVoices,
+    isSending,
     onSend,
     onSaveEdit,
+    onUploadFile,
+    onVoiceSend,
     replyTo,
     isUrgent,
     scheduledAt,
@@ -160,14 +224,22 @@ export function ChatInput({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onUploadFile(file);
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    const files = Array.from(e.target.files ?? []);
+    if (files.length > 0) {
+      setPendingFiles((prev) => [...prev, ...files]);
     }
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removePendingFile = (index: number) => {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removePendingVoice = (index: number) => {
+    setPendingVoices((prev) => prev.filter((_, i) => i !== index));
   };
 
   const insertEmoji = (emoji: string) => {
@@ -182,7 +254,7 @@ export function ChatInput({
       } else {
         setContent(newContent);
       }
-      // Move cursor after emoji
+      // Deplacer le curseur apres l'emoji
       setTimeout(() => {
         textarea.selectionStart = start + emoji.length;
         textarea.selectionEnd = start + emoji.length;
@@ -241,9 +313,50 @@ export function ChatInput({
         </div>
       )}
 
-      {/* Input area */}
+      {/* Pending files preview */}
+      {pendingFiles.length > 0 && (
+        <div className="px-4 pt-3 pb-1 space-y-1.5">
+          {pendingFiles.map((file, i) => (
+            <div
+              key={`file-${i}-${file.name}`}
+              className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-xl border border-border/50"
+            >
+              <Paperclip className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm text-foreground truncate flex-1">
+                {file.name}
+              </span>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {formatFileSize(file.size)}
+              </span>
+              <button
+                onClick={() => removePendingFile(i)}
+                className="w-5 h-5 rounded-md flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pending voice previews */}
+      {pendingVoices.length > 0 && (
+        <div className="px-4 pt-3 pb-1 space-y-1.5">
+          {pendingVoices.map((voice, i) => (
+            <VoicePreview
+              key={`voice-${i}`}
+              blob={voice.blob}
+              duration={voice.duration}
+              levels={voice.levels}
+              onRemove={() => removePendingVoice(i)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Main input area */}
       <div className="flex items-end gap-2 px-4 py-3">
-        {/* File attach */}
+        {/* File attach button */}
         <button
           onClick={handleFileSelect}
           disabled={disabled}
@@ -255,6 +368,7 @@ export function ChatInput({
         <input
           ref={fileInputRef}
           type="file"
+          multiple
           className="hidden"
           onChange={handleFileChange}
           accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
@@ -270,7 +384,11 @@ export function ChatInput({
               autoResize(e.target);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Ecrivez un message..."
+            placeholder={
+              channelName
+                ? `Message ${channelName}...`
+                : "Ecrivez un message..."
+            }
             disabled={disabled}
             rows={1}
             className={cn(
@@ -284,6 +402,13 @@ export function ChatInput({
             )}
           />
         </div>
+
+        {/* Voice recorder */}
+        <VoiceRecorder
+          onRecordingComplete={(blob, duration, levels) =>
+            setPendingVoices((prev) => [...prev, { blob, duration, levels }])
+          }
+        />
 
         {/* Emoji picker */}
         <Popover>
@@ -369,12 +494,21 @@ export function ChatInput({
         {/* Send button */}
         <Button
           onClick={handleSend}
-          disabled={disabled || isSending || !displayContent.trim()}
+          disabled={disabled || isSending || !hasContent}
           size="icon"
-          className="h-10 w-10 rounded-xl shrink-0 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+          className={cn(
+            "h-10 w-10 rounded-xl shrink-0",
+            isUrgent
+              ? "bg-destructive hover:bg-destructive/90"
+              : scheduledAt
+                ? "bg-amber-500 hover:bg-amber-600"
+                : "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
+          )}
         >
           {isSending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
+          ) : scheduledAt ? (
+            <Clock className="h-4 w-4" />
           ) : (
             <Send className="h-4 w-4" />
           )}

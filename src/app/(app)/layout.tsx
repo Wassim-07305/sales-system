@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "./app-shell";
 import { getWhiteLabelConfig } from "@/lib/actions/white-label";
+import { ensureAcademyContract } from "@/lib/actions/contracts";
 import type { UserRole } from "@/lib/types/database";
 
 export default async function AppLayout({
@@ -47,6 +48,11 @@ export default async function AppLayout({
     });
 
     userProfile = fallback;
+  }
+
+  // Auto-create Academy contract for B2C users
+  if (userProfile.role === "client_b2c") {
+    ensureAcademyContract(user.id).catch(() => {});
   }
 
   return (

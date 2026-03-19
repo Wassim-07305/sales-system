@@ -131,7 +131,7 @@ export async function calculateHealthScore(clientId: string): Promise<number> {
             admin.id,
             "Client en zone rouge",
             `${profile?.full_name || "Un client"} a un health score de ${healthScore}. ${clientId}`,
-            { type: "health_alert", link: "/customers" },
+            { type: "health_alert", link: "/utilisateurs" },
           );
         }
       }

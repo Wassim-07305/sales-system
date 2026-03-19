@@ -292,6 +292,7 @@ export async function executeMigration(
   }
 
   revalidatePath("/contacts");
+  revalidatePath("/utilisateurs");
   revalidatePath("/crm");
 
   return result;

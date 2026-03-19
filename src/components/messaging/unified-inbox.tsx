@@ -123,25 +123,25 @@ export function UnifiedInbox() {
                 icon: <Phone className="h-4 w-4 text-green-500" />,
                 label: "WhatsApp Business",
                 desc: "Connectez votre compte WhatsApp",
-                link: "/settings/whatsapp",
+                link: "/settings/integrations",
               },
               {
                 icon: <Linkedin className="h-4 w-4 text-blue-500" />,
                 label: "LinkedIn",
                 desc: "Synchronisez vos messages LinkedIn",
-                link: "/prospecting/linkedin",
+                link: "/settings/integrations",
               },
               {
                 icon: <Instagram className="h-4 w-4 text-pink-500" />,
                 label: "Instagram",
                 desc: "Connectez votre messagerie Instagram",
-                link: "/prospecting/instagram",
+                link: "/settings/integrations",
               },
               {
                 icon: <Mail className="h-4 w-4 text-amber-500" />,
                 label: "Email",
                 desc: "Integrez votre boite mail",
-                link: "#",
+                link: "/settings/integrations",
               },
             ].map((item) => (
               <a

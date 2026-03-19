@@ -20,36 +20,53 @@ export default async function ContractsPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "manager"].includes(profile.role)) {
+  if (!profile) redirect("/dashboard");
+
+  const isAdmin = ["admin", "manager"].includes(profile.role);
+  const isClient = ["client_b2b", "client_b2c"].includes(profile.role);
+
+  if (!isAdmin && !isClient) {
     redirect("/dashboard");
   }
 
-  const { data: contracts } = await supabase
+  const query = supabase
     .from("contracts")
     .select("*, client:profiles(*)")
     .order("created_at", { ascending: false });
 
+  if (isClient) {
+    query.eq("client_id", user.id);
+  }
+
+  const { data: contracts } = await query;
+
   return (
     <div>
       <PageHeader
-        title="Contrats"
-        description="Gérez vos contrats et signatures"
+        title={isAdmin ? "Contrats" : "Mes contrats"}
+        description={
+          isAdmin
+            ? "Gérez vos contrats et signatures"
+            : "Consultez et signez vos contrats"
+        }
       >
-        <div className="flex items-center gap-2">
-          <ContractsExportButton />
-          <Link href="/contracts/cash-flow">
-            <Button variant="outline" size="sm">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Cash Flow
-            </Button>
-          </Link>
-          <Link href="/contracts/new">
-            <Button className="bg-brand text-brand-dark hover:bg-brand/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouveau contrat
-            </Button>
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <ContractsExportButton />
+            <Link href="/contracts/cash-flow">
+              <Button variant="outline" size="sm">
+                <DollarSign className="h-4 w-4 mr-2" />
+                Cash Flow
+              </Button>
+            </Link>
+            <Link href="/contracts/new">
+              <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Nouveau contrat
+              </Button>
+            </Link>
+          </div>
+        )}
       </PageHeader>
 
       <ContractsList contracts={contracts || []} />

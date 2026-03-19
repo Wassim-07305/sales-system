@@ -50,6 +50,8 @@ export function ChatPanel({
   } = useMessagingStore();
 
   const [editingContent, setEditingContent] = useState("");
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [droppedFile, setDroppedFile] = useState<File | null>(null);
 
   // Mark as read when viewing or switching channels
   useEffect(() => {
@@ -177,6 +179,50 @@ export function ChatPanel({
     [user, channel.id, supabase, sendMessage, addAttachment],
   );
 
+  const handleVoiceSend = useCallback(
+    async (blob: Blob, duration: number) => {
+      if (!user) return;
+
+      const ext = blob.type.includes("mp4")
+        ? "m4a"
+        : blob.type.includes("ogg")
+          ? "ogg"
+          : "webm";
+      const path = `messaging/${channel.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("attachments")
+        .upload(path, blob);
+
+      if (uploadError) {
+        toast.error("Erreur lors de l'upload du vocal");
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("attachments").getPublicUrl(path);
+
+      const result = await sendMessage.mutateAsync({
+        content: `Message vocal (${Math.ceil(duration)}s)`,
+        contentType: "audio",
+      });
+
+      if (result?.id) {
+        addAttachment.mutate({
+          messageId: result.id,
+          fileName: `vocal-${Date.now()}.${ext}`,
+          fileUrl: publicUrl,
+          fileType: blob.type || "audio/webm",
+          fileSize: blob.size,
+        });
+      }
+
+      toast.success("Message vocal envoyé");
+    },
+    [user, channel.id, supabase, sendMessage, addAttachment],
+  );
+
   const handleToggleMute = useCallback(async () => {
     if (!user) return;
     await supabase
@@ -208,7 +254,34 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex flex-1 flex-col h-full animate-fade-in">
+    <div
+      className="flex flex-1 flex-col min-h-0 relative animate-fade-in"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDraggingOver(true);
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          setIsDraggingOver(false);
+        }
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDraggingOver(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) setDroppedFile(file);
+      }}
+    >
+      {isDraggingOver && (
+        <div className="absolute inset-0 z-50 bg-primary/5 border-2 border-dashed border-primary rounded-2xl flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <p className="text-sm font-medium text-primary">
+              Deposer le fichier ici
+            </p>
+          </div>
+        </div>
+      )}
+
       <ChatHeader
         channel={channel}
         memberCount={memberCount}
@@ -234,6 +307,7 @@ export function ChatPanel({
       <ChatInput
         onSend={handleSend}
         onUploadFile={handleUploadFile}
+        onVoiceSend={handleVoiceSend}
         isSending={sendMessage.isPending}
         replyTo={replyToMessage}
         onCancelReply={() => setReplyTo(null)}
@@ -243,6 +317,9 @@ export function ChatPanel({
         onCancelEdit={handleCancelEdit}
         onTyping={handleTyping}
         disabled={channel.is_archived}
+        channelName={channel.dmPartner?.full_name ?? channel.name}
+        droppedFile={droppedFile}
+        onClearDroppedFile={() => setDroppedFile(null)}
       />
     </div>
   );

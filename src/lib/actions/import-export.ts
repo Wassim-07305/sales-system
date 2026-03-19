@@ -135,6 +135,7 @@ export async function importContactsCSV(
   }
 
   revalidatePath("/contacts");
+  revalidatePath("/utilisateurs");
   return { imported, errors };
 }
 

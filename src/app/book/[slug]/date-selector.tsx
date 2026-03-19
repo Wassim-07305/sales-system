@@ -1,111 +1,156 @@
 "use client";
 
-import { useMemo } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  getDay,
+  isBefore,
+  isAfter,
   addDays,
   isSameDay,
-  isToday,
-  isBefore,
   startOfDay,
 } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 interface DateSelectorProps {
-  selectedDate: string;
+  selectedDate: string | null;
   onSelect: (date: string) => void;
-  maxDate?: string;
+  maxDaysAhead: number;
+  brandColor: string;
+  disabled?: boolean;
+  disabledMessage?: string;
 }
+
+const DAY_HEADERS = ["DIM.", "LUN.", "MAR.", "MER.", "JEU.", "VEN.", "SAM."];
 
 export function DateSelector({
   selectedDate,
   onSelect,
-  maxDate,
+  maxDaysAhead,
+  brandColor,
+  disabled,
+  disabledMessage,
 }: DateSelectorProps) {
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const today = startOfDay(new Date());
+  const maxDate = addDays(today, maxDaysAhead);
 
   const days = useMemo(() => {
-    const today = startOfDay(new Date());
-    const start = addDays(today, weekOffset * 7);
-    const result: Date[] = [];
-    for (let i = 0; i < 7; i++) {
-      const day = addDays(start, i);
-      // Skip weekends (Sat=6, Sun=0)
-      if (day.getDay() === 0 || day.getDay() === 6) continue;
-      // Skip past dates
-      if (isBefore(day, today)) continue;
-      // Skip dates beyond max
-      if (maxDate && day > new Date(maxDate)) continue;
-      result.push(day);
-    }
-    return result;
-  }, [weekOffset, maxDate]);
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
+    return eachDayOfInterval({ start, end });
+  }, [currentMonth]);
 
-  const selectedDateObj = selectedDate ? new Date(selectedDate) : null;
+  const firstDayOffset = useMemo(() => {
+    return getDay(startOfMonth(currentMonth));
+  }, [currentMonth]);
+
+  const isDateSelectable = (date: Date) => {
+    if (disabled) return false;
+    return !isBefore(date, today) && !isAfter(date, maxDate);
+  };
+
+  const canGoPrev = !isBefore(startOfMonth(currentMonth), today);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">
-          Choisissez un jour
-        </p>
+    <div>
+      {/* Month + Year header */}
+      <div className="mb-5 flex items-center justify-between">
+        <span className="text-sm font-medium capitalize text-gray-900">
+          {format(currentMonth, "MMMM yyyy", { locale: fr })}
+        </span>
         <div className="flex items-center gap-1">
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => setWeekOffset(Math.max(0, weekOffset - 1))}
-            disabled={weekOffset === 0}
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            disabled={!canGoPrev || disabled}
+            className="rounded p-1 text-gray-400 transition-colors hover:text-gray-600 disabled:opacity-30"
           >
             <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => setWeekOffset(weekOffset + 1)}
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            disabled={disabled}
+            className="rounded p-1 text-gray-400 transition-colors hover:text-gray-600 disabled:opacity-30"
           >
             <ChevronRight className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-2">
-        {days.map((day) => {
-          const dateStr = format(day, "yyyy-MM-dd");
-          const isSelected = selectedDateObj && isSameDay(day, selectedDateObj);
-
-          return (
-            <button
-              key={dateStr}
-              type="button"
-              onClick={() => onSelect(dateStr)}
-              className={cn(
-                "flex flex-col items-center rounded-xl border px-2 py-3 text-center transition-all",
-                isSelected
-                  ? "border-brand bg-brand/10 text-brand shadow-sm"
-                  : "border-border/50 hover:border-border hover:shadow-sm",
-                isToday(day) && !isSelected && "border-brand/30",
-              )}
+      {/* Calendar grid */}
+      <div className="relative">
+        {/* Day headers */}
+        <div className="mb-3 grid grid-cols-7 text-center">
+          {DAY_HEADERS.map((day) => (
+            <div
+              key={day}
+              className="py-1 text-[11px] font-medium tracking-wide text-gray-400"
             >
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                {format(day, "EEE", { locale: fr })}
-              </span>
-              <span className="mt-0.5 text-lg font-bold">
-                {format(day, "d")}
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                {format(day, "MMM", { locale: fr })}
-              </span>
-            </button>
-          );
-        })}
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Day numbers */}
+        <div className="grid grid-cols-7 gap-y-1">
+          {Array.from({ length: firstDayOffset }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+          {days.map((day) => {
+            const dateStr = format(day, "yyyy-MM-dd");
+            const selectable = isDateSelectable(day);
+            const isSelected =
+              selectedDate &&
+              isSameDay(day, new Date(selectedDate + "T00:00:00"));
+            const isToday = isSameDay(day, today);
+
+            return (
+              <div
+                key={dateStr}
+                className="flex items-center justify-center py-0.5"
+              >
+                <button
+                  type="button"
+                  disabled={!selectable}
+                  onClick={() => onSelect(dateStr)}
+                  className={`relative flex h-9 w-9 items-center justify-center rounded-full text-sm transition-all ${
+                    isSelected
+                      ? "font-bold text-white"
+                      : selectable
+                        ? "font-medium text-blue-900 bg-blue-50 hover:bg-blue-100"
+                        : "cursor-default font-normal text-gray-300"
+                  }`}
+                  style={
+                    isSelected ? { backgroundColor: brandColor } : undefined
+                  }
+                >
+                  {format(day, "d")}
+                  {isToday && !isSelected && (
+                    <div className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-current" />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Disabled overlay */}
+        {disabled && disabledMessage && (
+          <div className="absolute inset-0 top-10 flex items-center justify-center">
+            <div className="rounded-lg border border-gray-200 bg-white px-5 py-3.5 text-center text-sm leading-relaxed text-gray-600 shadow-sm">
+              {disabledMessage}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

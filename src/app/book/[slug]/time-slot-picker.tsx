@@ -1,86 +1,163 @@
 "use client";
 
-import { Loader2, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import type { AvailableSlot } from "@/lib/types/database";
 
 interface TimeSlotPickerProps {
-  times: string[];
-  selectedTime: string;
-  onSelect: (time: string) => void;
-  loading?: boolean;
-  brandColor?: string;
+  slots: AvailableSlot[];
+  selectedSlot: { start_time: string; closer_id: string } | null;
+  onSelect: (slot: { start_time: string; closer_id: string }) => void;
+  isLoading: boolean;
+  submitting?: boolean;
+  brandColor: string;
+  selectedDate: string;
 }
 
 export function TimeSlotPicker({
-  times,
-  selectedTime,
+  slots,
+  selectedSlot,
   onSelect,
-  loading,
+  isLoading,
+  submitting,
   brandColor,
+  selectedDate,
 }: TimeSlotPickerProps) {
-  if (loading) {
+  const [pendingSlot, setPendingSlot] = useState<{
+    start_time: string;
+    closer_id: string;
+  } | null>(null);
+
+  // Reset pending when date changes
+  useEffect(() => {
+    setPendingSlot(null);
+  }, [selectedDate]);
+
+  // Deduplicate by start_time (pick first available closer)
+  const uniqueSlots = slots.reduce<AvailableSlot[]>((acc, slot) => {
+    if (!acc.find((s) => s.start_time === slot.start_time)) {
+      acc.push(slot);
+    }
+    return acc;
+  }, []);
+
+  // Date header: "Lun 16"
+  const dateObj = new Date(selectedDate + "T00:00:00");
+  const dateHeader = format(dateObj, "EEE d", { locale: fr });
+
+  const handleSlotClick = (slot: { start_time: string; closer_id: string }) => {
+    if (submitting) return;
+    if (
+      pendingSlot?.start_time === slot.start_time &&
+      pendingSlot?.closer_id === slot.closer_id
+    ) {
+      setPendingSlot(null);
+    } else {
+      setPendingSlot(slot);
+    }
+  };
+
+  const handleConfirm = () => {
+    if (!pendingSlot || submitting) return;
+    onSelect(pendingSlot);
+  };
+
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-6">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">
-          Chargement des créneaux...
-        </span>
+      <div>
+        <p className="mb-4 text-sm font-semibold capitalize text-gray-900">
+          {dateHeader}
+        </p>
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-10 animate-pulse rounded-lg bg-gray-100"
+            />
+          ))}
+        </div>
       </div>
     );
   }
 
-  if (times.length === 0) {
+  if (uniqueSlots.length === 0) {
     return (
-      <div className="text-center py-6">
-        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50">
-          <Clock className="h-5 w-5 text-muted-foreground" />
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Aucun créneau disponible pour cette date
+      <div>
+        <p className="mb-4 text-sm font-semibold capitalize text-gray-900">
+          {dateHeader}
+        </p>
+        <p className="py-12 text-center text-sm text-gray-400">
+          Aucun créneau disponible
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">
-        Choisissez un horaire
+    <div>
+      <p className="mb-4 text-sm font-semibold capitalize text-gray-900">
+        {dateHeader}
       </p>
-      <div className="grid grid-cols-3 gap-2">
-        {times.map((time) => {
-          const isSelected = selectedTime === time;
+
+      <div className="max-h-[360px] space-y-2 overflow-y-auto">
+        {uniqueSlots.map((slot) => {
+          const displayTime = slot.start_time.slice(0, 5);
+          const isPending =
+            pendingSlot?.start_time === slot.start_time &&
+            pendingSlot?.closer_id === slot.closer_id;
+          const isConfirmed =
+            selectedSlot?.start_time === slot.start_time &&
+            selectedSlot?.closer_id === slot.closer_id;
+          const isActive = isPending || isConfirmed;
+          const isSubmittingThis = isConfirmed && submitting;
+
           return (
             <button
-              key={time}
+              key={`${slot.start_time}-${slot.closer_id}`}
               type="button"
-              onClick={() => onSelect(time)}
-              className={cn(
-                "rounded-xl border px-3 py-2.5 text-sm font-medium transition-all",
-                isSelected
-                  ? "border-transparent shadow-sm ring-2 ring-brand/20"
-                  : "border-border/50 hover:border-border hover:shadow-sm",
-              )}
-              style={
-                isSelected && brandColor
-                  ? {
-                      backgroundColor: brandColor + "15",
-                      color: brandColor,
-                      borderColor: brandColor + "40",
-                    }
-                  : isSelected
-                    ? {
-                        backgroundColor: "hsl(var(--brand) / 0.1)",
-                        color: "hsl(var(--brand))",
-                      }
-                    : undefined
+              disabled={submitting}
+              onClick={() =>
+                handleSlotClick({
+                  start_time: slot.start_time,
+                  closer_id: slot.closer_id,
+                })
               }
+              className={`flex w-full items-center justify-center rounded-lg border py-2.5 text-sm font-medium transition-all ${
+                isActive
+                  ? "border-transparent text-white shadow-sm"
+                  : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+              } ${submitting && !isActive ? "cursor-not-allowed opacity-40" : ""}`}
+              style={isActive ? { backgroundColor: brandColor } : undefined}
             >
-              {time}
+              {isSubmittingThis ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                displayTime
+              )}
             </button>
           );
         })}
       </div>
+
+      {/* Confirm button */}
+      {pendingSlot && !submitting && (
+        <button
+          type="button"
+          onClick={handleConfirm}
+          className="mt-4 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: brandColor }}
+        >
+          Confirmer — {pendingSlot.start_time.slice(0, 5)}
+        </button>
+      )}
+      {submitting && (
+        <div className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium text-gray-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Réservation en cours...
+        </div>
+      )}
     </div>
   );
 }

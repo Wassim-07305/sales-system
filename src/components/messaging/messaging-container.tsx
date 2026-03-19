@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
 import { useChannels, useChannelMembers } from "@/lib/hooks/use-channels";
+import { useUnreadCounts } from "@/lib/hooks/use-unread-counts";
 import { useMessagingStore } from "@/stores/messaging-store";
 import { ChannelSidebar } from "./channel-sidebar";
 import { ChatPanel } from "./chat-panel";
@@ -21,6 +22,7 @@ type ViewMode = "messaging" | "inbox";
 function useEnrichedChannels(
   channels: ReturnType<typeof useChannels>["channels"],
   userId: string | undefined,
+  unreadMap: Record<string, { unread: number; urgent: number }>,
 ): ChannelWithMeta[] {
   return useMemo(() => {
     if (!userId) return [];
@@ -30,6 +32,7 @@ function useEnrichedChannels(
       const dmPartnerMember = isDM
         ? ch.members?.find((m) => m.profile_id !== userId)
         : null;
+      const counts = unreadMap[ch.id];
 
       return {
         id: ch.id,
@@ -40,15 +43,15 @@ function useEnrichedChannels(
         created_at: ch.created_at,
         is_archived: ch.is_archived,
         last_message_at: ch.last_message_at ?? ch.created_at,
-        unreadCount: 0,
-        urgentUnreadCount: 0,
+        unreadCount: counts?.unread ?? 0,
+        urgentUnreadCount: counts?.urgent ?? 0,
         isMuted: myMembership?.notifications_muted ?? false,
         isPinned: myMembership?.is_pinned ?? false,
         myLastRead: myMembership?.last_read_at ?? null,
         dmPartner: dmPartnerMember?.profile ?? null,
       };
     });
-  }, [channels, userId]);
+  }, [channels, userId, unreadMap]);
 }
 
 export function MessagingContainer() {
@@ -72,14 +75,20 @@ export function MessagingContainer() {
     setMobileSidebarOpen,
   } = useMessagingStore();
 
+  const { unreadMap } = useUnreadCounts();
+
   const [viewMode, setViewMode] = useState<ViewMode>("messaging");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Enrichir les channels pour les composants qui attendent ChannelWithMeta
-  const publicChannels = useEnrichedChannels(rawPublic, user?.id);
-  const dmChannels = useEnrichedChannels(rawDm, user?.id);
-  const archivedChannels = useEnrichedChannels(rawArchived, user?.id);
+  const publicChannels = useEnrichedChannels(rawPublic, user?.id, unreadMap);
+  const dmChannels = useEnrichedChannels(rawDm, user?.id, unreadMap);
+  const archivedChannels = useEnrichedChannels(
+    rawArchived,
+    user?.id,
+    unreadMap,
+  );
   const allEnriched = useMemo(
     () => [...publicChannels, ...dmChannels, ...archivedChannels],
     [publicChannels, dmChannels, archivedChannels],
@@ -197,7 +206,7 @@ export function MessagingContainer() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] flex-col">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col">
       {/* Toggle Messagerie / Boite unifiee */}
       <div className="flex items-center justify-between border-b px-4 py-2 bg-background">
         <div className="flex items-center gap-2">
@@ -242,7 +251,7 @@ export function MessagingContainer() {
       </div>
 
       {/* Contenu principal */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {viewMode === "messaging" ? (
           <>
             {/* Sidebar desktop */}

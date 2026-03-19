@@ -96,6 +96,7 @@ export async function sendMessageToContact(params: {
     }
 
     revalidatePath(`/contacts/${contactId}`);
+    revalidatePath(`/utilisateurs/${contactId}`);
     revalidatePath("/crm");
   }
 

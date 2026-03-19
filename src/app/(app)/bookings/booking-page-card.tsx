@@ -1,25 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Copy,
-  ExternalLink,
-  MoreHorizontal,
+  Check,
   Pencil,
   Trash2,
-  Clock,
-  Users,
-  Settings2,
+  ExternalLink,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import type { BookingPage } from "@/lib/types/database";
 import {
@@ -30,7 +19,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { BookingPageFormModal } from "./booking-page-form-modal";
 import { AvailabilityEditor } from "./availability-editor";
-import { cn } from "@/lib/utils";
 
 interface BookingPageCardProps {
   page: BookingPage;
@@ -38,14 +26,21 @@ interface BookingPageCardProps {
 
 export function BookingPageCard({ page }: BookingPageCardProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [showEdit, setShowEdit] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const bookingUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/book/${page.slug}`
+      : `/book/${page.slug}`;
 
   function handleCopyUrl() {
-    const url = `${window.location.origin}/book/${page.slug}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(bookingUrl);
+    setCopied(true);
     toast.success("URL copiée !");
+    setTimeout(() => setCopied(false), 2000);
   }
 
   function handleToggleActive() {
@@ -75,141 +70,113 @@ export function BookingPageCard({ page }: BookingPageCardProps) {
     });
   }
 
+  const creator =
+    (page as BookingPage & { creator?: { full_name?: string } }).creator
+      ?.full_name || null;
+
   return (
     <>
-      <Card className="group rounded-xl border-border/40 shadow-sm transition-all hover:shadow-md">
-        <CardContent className="p-5">
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className="h-10 w-10 rounded-xl"
-                style={{ backgroundColor: page.brand_color + "20" }}
-              >
-                <div
-                  className="flex h-full w-full items-center justify-center rounded-xl text-sm font-bold"
-                  style={{ color: page.brand_color }}
-                >
-                  {page.title.charAt(0).toUpperCase()}
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{page.title}</h3>
-                <p className="text-xs text-muted-foreground">
-                  /book/{page.slug}
-                </p>
-              </div>
+      <div className="rounded-xl border border-border/40 bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+        {/* Header: dot + title + badge actif */}
+        <div className="mb-3 flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="mt-1.5 h-3 w-3 shrink-0 rounded-full"
+              style={{ backgroundColor: page.brand_color }}
+            />
+            <div>
+              <h3 className="font-semibold text-foreground leading-tight">
+                {page.title}
+              </h3>
+              {creator && (
+                <p className="text-sm text-muted-foreground">{creator}</p>
+              )}
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowEdit(true)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Modifier
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowAvailability(true)}>
-                  <Settings2 className="mr-2 h-4 w-4" />
-                  Disponibilités
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyUrl}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copier l&apos;URL
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <a
-                    href={`/book/${page.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Ouvrir
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleToggleActive}>
-                  {page.is_active ? "Désactiver" : "Activer"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-red-500 focus:text-red-500"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
+          <button
+            onClick={handleToggleActive}
+            className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+              page.is_active
+                ? "bg-emerald-500/10 text-emerald-600"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {page.is_active ? (
+              <>
+                <Eye className="h-3 w-3" /> Actif
+              </>
+            ) : (
+              <>
+                <EyeOff className="h-3 w-3" /> Inactif
+              </>
+            )}
+          </button>
+        </div>
 
-          {/* Description */}
-          {page.description && (
-            <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-              {page.description}
-            </p>
+        {/* Config badges */}
+        <div className="mb-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <span className="rounded bg-muted px-2 py-0.5">
+            {page.slot_duration} min
+          </span>
+          {page.buffer_minutes > 0 && (
+            <span className="rounded bg-muted px-2 py-0.5">
+              Buffer {page.buffer_minutes} min
+            </span>
           )}
+          <span className="rounded bg-muted px-2 py-0.5">
+            {page.max_days_ahead}j max
+          </span>
+        </div>
 
-          {/* Meta */}
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Badge
-              variant="outline"
-              className={cn(
-                "rounded-full text-xs",
-                page.is_active
-                  ? "border-brand/20 bg-brand/10 text-brand"
-                  : "border-border/50 bg-muted/40 text-muted-foreground",
-              )}
-            >
-              {page.is_active ? "Active" : "Inactive"}
-            </Badge>
-            <Badge
-              variant="outline"
-              className="rounded-full border-border/50 text-xs text-muted-foreground"
-            >
-              <Clock className="mr-1 h-3 w-3" />
-              {page.slot_duration} min
-            </Badge>
-            {page.qualification_fields &&
-              page.qualification_fields.length > 0 && (
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-border/50 text-xs text-muted-foreground"
-                >
-                  {page.qualification_fields.length} champs
-                </Badge>
-              )}
-          </div>
+        {/* URL bar with copy + external link */}
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+          <code className="flex-1 truncate text-xs text-muted-foreground">
+            /book/{page.slug}
+          </code>
+          <button
+            onClick={handleCopyUrl}
+            className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
+            title="Copier le lien"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </button>
+          <a
+            href={bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
+            title="Ouvrir"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
 
-          {/* Actions */}
-          <div className="mt-4 flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs"
-              onClick={handleCopyUrl}
-            >
-              <Copy className="mr-1.5 h-3.5 w-3.5" />
-              Copier l&apos;URL
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs"
-              onClick={() => setShowAvailability(true)}
-            >
-              <Users className="mr-1.5 h-3.5 w-3.5" />
-              Disponibilités
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Actions: Gérer les disponibilités + edit + delete */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAvailability(true)}
+            className="flex-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Gérer les disponibilités
+          </button>
+          <button
+            onClick={() => setShowEdit(true)}
+            className="rounded-lg border border-border p-2 text-muted-foreground transition-colors hover:bg-muted"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={handleDelete}
+            className="rounded-lg border border-border p-2 text-destructive transition-colors hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
       {/* Edit Modal */}
       <BookingPageFormModal

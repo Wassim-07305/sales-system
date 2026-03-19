@@ -13,6 +13,9 @@ import {
   postWelcomeCommunityMessage,
 } from "@/lib/actions/onboarding";
 import { WelcomeVideo } from "@/components/welcome-video";
+import { SignatureDialog } from "@/components/signature-dialog";
+import { ensureAcademyContract } from "@/lib/actions/contracts";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -21,15 +24,15 @@ import {
   User,
   Phone,
   FileText,
+  FileSignature,
   Target,
   Link2,
   CheckCircle2,
   Sparkles,
   Play,
-  Calendar,
   Users,
-  ExternalLink,
   Lock,
+  Trophy,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -51,8 +54,8 @@ interface StepDef {
     | "b2c_welcome"
     | "b2c_profile"
     | "b2c_video"
-    | "b2c_booking"
     | "b2c_community"
+    | "b2c_contract"
     | "welcome"
     | "avatar"
     | "text"
@@ -91,16 +94,16 @@ const B2C_STEPS: StepDef[] = [
     subtitle: "Regarde cette vidéo pour découvrir la méthode",
   },
   {
-    id: "b2c_booking",
-    type: "b2c_booking",
-    title: "Réserve ton appel",
-    subtitle: "Planifie ton appel d'onboarding avec l'équipe",
-  },
-  {
     id: "b2c_community",
     type: "b2c_community",
     title: "Rejoins la communauté",
     subtitle: "Présente-toi aux autres membres",
+  },
+  {
+    id: "b2c_contract",
+    type: "b2c_contract" as StepDef["type"],
+    title: "Ton contrat d'accompagnement",
+    subtitle: "Lis et signe ton contrat pour accéder à la plateforme",
   },
 ];
 
@@ -162,8 +165,13 @@ export function OnboardingFlow({
   const [niveauExperience, setNiveauExperience] = useState("");
   const [videoWatchSeconds, setVideoWatchSeconds] = useState(0);
   const [videoUnlocked, setVideoUnlocked] = useState(false);
-  const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [communityJoined, setCommunityJoined] = useState(false);
+  const [contractSigned, setContractSigned] = useState(false);
+  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
+  const [signingContract, setSigningContract] = useState(false);
+  const [academyContractId, setAcademyContractId] = useState<string | null>(
+    null,
+  );
   const [joiningCommunity, setJoiningCommunity] = useState(false);
 
   // Form state — B2B
@@ -226,6 +234,25 @@ export function OnboardingFlow({
     }
   }, [currentStep?.type, videoUnlocked]);
 
+  // Ensure academy contract exists when reaching the contract step
+  useEffect(() => {
+    if (currentStep?.type === "b2c_contract" && !academyContractId) {
+      ensureAcademyContract(userId).then(async () => {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("contracts")
+          .select("id")
+          .eq("client_id", userId)
+          .ilike("content", "%CONTRAT D'ACCOMPAGNEMENT%")
+          .neq("status", "expired")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) setAcademyContractId(data.id);
+      });
+    }
+  }, [currentStep?.type, academyContractId, userId]);
+
   // Check if current step can proceed (sequential gating)
   const canProceed = useCallback(() => {
     const stepId = currentStep?.id;
@@ -239,10 +266,10 @@ export function OnboardingFlow({
           return !!objectifPrincipal && !!niveauExperience;
         case "b2c_video":
           return videoUnlocked;
-        case "b2c_booking":
-          return bookingConfirmed;
         case "b2c_community":
           return communityJoined;
+        case "b2c_contract":
+          return contractSigned;
         default:
           return true;
       }
@@ -273,8 +300,8 @@ export function OnboardingFlow({
     objectifPrincipal,
     niveauExperience,
     videoUnlocked,
-    bookingConfirmed,
     communityJoined,
+    contractSigned,
     company,
     secteur,
     offre,
@@ -384,14 +411,16 @@ export function OnboardingFlow({
           // Non-blocking — onboarding still completes
         }
       }
-      // Dynamic confetti import
-      const confetti = (await import("canvas-confetti")).default;
-      confetti({
-        particleCount: 150,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: ["#7af17a", "#4ade80", "#22c55e", "#16a34a", "#ffffff"],
-      });
+      // Only fire confetti if not already fired (contract signing)
+      if (!contractSigned) {
+        const confetti = (await import("canvas-confetti")).default;
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: ["#7af17a", "#4ade80", "#22c55e", "#16a34a", "#ffffff"],
+        });
+      }
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 2000);
@@ -464,7 +493,7 @@ export function OnboardingFlow({
         >
           <Sparkles className="h-4 w-4 text-[#7af17a]" />
           <span className="text-sm text-white/50">
-            5 étapes — moins de 5 minutes
+            5 étapes — quelques minutes
           </span>
         </motion.div>
 
@@ -669,50 +698,188 @@ export function OnboardingFlow({
     );
   }
 
-  function renderB2CBooking() {
-    return (
-      <div className="w-full max-w-md mx-auto space-y-8">
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-full bg-[#7af17a]/10 border border-[#7af17a]/30 flex items-center justify-center mx-auto">
-            <Calendar className="h-8 w-8 text-[#7af17a]" />
-          </div>
-          <p className="text-white/50 text-base max-w-sm mx-auto leading-relaxed">
-            Réserve ton appel d&apos;onboarding avec un membre de l&apos;équipe
-            pour bien démarrer ta formation.
-          </p>
-        </div>
+  async function handleSignContract() {
+    setShowSignatureDialog(true);
+  }
 
-        {/* iClosed booking link */}
-        <a
-          href="https://iclosed.io/e/s-academy-onboarding"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200"
-        >
-          <ExternalLink className="h-5 w-5" />
-          Réserver mon appel sur iClosed
-        </a>
+  async function onContractSigned() {
+    setContractSigned(true);
+    setShowSignatureDialog(false);
+    // Fire confetti
+    try {
+      const confetti = (await import("canvas-confetti")).default;
+      // Left side
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { x: 0.2, y: 0.6 },
+        colors: ["#7af17a", "#4ade80", "#22c55e", "#ffffff", "#fbbf24"],
+      });
+      // Right side
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { x: 0.8, y: 0.6 },
+          colors: ["#7af17a", "#4ade80", "#22c55e", "#ffffff", "#fbbf24"],
+        });
+      }, 200);
+    } catch {
+      // Non-blocking
+    }
+  }
 
-        {/* Confirmation checkbox */}
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
-          <button
-            type="button"
-            onClick={() => setBookingConfirmed(!bookingConfirmed)}
-            className={cn(
-              "mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all duration-200",
-              bookingConfirmed
-                ? "border-[#7af17a] bg-[#7af17a]"
-                : "border-white/30 hover:border-white/50",
-            )}
+  function renderB2CContract() {
+    if (contractSigned) {
+      // Show celebration after signing
+      return (
+        <div className="w-full max-w-md mx-auto space-y-8 text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 12 }}
           >
-            {bookingConfirmed && (
-              <CheckCircle2 className="h-3.5 w-3.5 text-black" />
+            <div className="w-24 h-24 rounded-full bg-[#7af17a]/20 border-2 border-[#7af17a]/40 flex items-center justify-center mx-auto shadow-xl shadow-[#7af17a]/20">
+              <Trophy className="h-12 w-12 text-[#7af17a]" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-3"
+          >
+            <h2 className="text-3xl font-bold text-white">
+              Bienvenue dans la{" "}
+              <span className="text-[#7af17a]">S Academy</span> !
+            </h2>
+            <p className="text-white/50 text-base max-w-sm mx-auto">
+              Ton contrat est signé. Tu as maintenant accès à toute la
+              plateforme. On se retrouve sur ton dashboard !
+            </p>
+          </motion.div>
+
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            onClick={handleComplete}
+            disabled={completing}
+            className="mt-4 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
+          >
+            {completing ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <Sparkles className="h-5 w-5" />
+                Accéder à mon dashboard
+              </>
             )}
-          </button>
-          <p className="text-sm text-white/60 leading-relaxed">
-            J&apos;ai réservé mon appel d&apos;onboarding ou je le ferai plus
-            tard depuis mon dashboard
-          </p>
+          </motion.button>
+        </div>
+      );
+    }
+
+    // Show contract preview + sign button
+    return (
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        {/* Contract preview card */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
+          {/* Contract header */}
+          <div className="p-6 border-b border-white/10 bg-[#7af17a]/5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#7af17a]/20 flex items-center justify-center">
+                <FileSignature className="h-5 w-5 text-[#7af17a]" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">
+                  Contrat d&apos;Accompagnement
+                </h3>
+                <p className="text-white/40 text-xs">
+                  Formation et Placement — Métier de Setter
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contract body — scrollable */}
+          <div className="p-6 max-h-[40vh] overflow-y-auto space-y-4 text-sm text-white/60 leading-relaxed scrollbar-thin scrollbar-thumb-white/10">
+            <p className="text-white/40 text-xs uppercase tracking-wider font-medium">
+              Entre les soussignés
+            </p>
+
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-white/80 font-medium">LE PRESTATAIRE</p>
+              <p>SalesSystem Academy — Représenté par Damien REYNAUD</p>
+            </div>
+
+            <p className="text-white font-medium mt-4">
+              Article 1 — Objet du contrat
+            </p>
+            <p>
+              SalesSystem Academy s&apos;engage à former le Client au métier de
+              setter et à le placer dans une entreprise partenaire générant
+              entre 10 000 et 200 000 euros de CA mensuel.
+            </p>
+
+            <p className="text-white font-medium mt-4">Article 2 — Formation</p>
+            <ul className="list-disc list-inside space-y-1 text-white/50">
+              <li>Fondamentaux du setting et psychologie de la vente</li>
+              <li>Techniques de qualification (outbound et inbound)</li>
+              <li>Copywriting appliqué aux messages et appels</li>
+              <li>Accès aux templates, scripts et ressources</li>
+              <li>Accompagnement personnalisé sans limitation de durée</li>
+            </ul>
+
+            <p className="text-white font-medium mt-4">Article 5 — Tarif</p>
+            <div className="p-3 rounded-lg bg-[#7af17a]/5 border border-[#7af17a]/20">
+              <p className="text-[#7af17a] font-bold text-lg">2 000 € TTC</p>
+              <p className="text-white/40 text-xs">
+                Formation complète + placement en entreprise
+              </p>
+            </div>
+
+            <p className="text-white font-medium mt-4">
+              Article 7 — Droit de rétractation
+            </p>
+            <p>
+              Délai de rétractation de 14 jours à compter de la signature,
+              conformément à l&apos;article L.221-18 du Code de la consommation.
+            </p>
+
+            <p className="text-white/30 text-xs mt-4">
+              Le contrat complet (12 articles) sera disponible dans votre espace
+              Contrats après signature.
+            </p>
+          </div>
+
+          {/* Contract footer — sign CTA */}
+          <div className="p-6 border-t border-white/10 bg-white/[0.02]">
+            <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
+              <FileSignature className="h-4 w-4 text-white/40 shrink-0" />
+              <p className="text-xs text-white/40">
+                En signant, vous acceptez les termes du contrat
+                d&apos;accompagnement. Signature électronique conforme au
+                règlement eIDAS.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSignContract}
+              disabled={signingContract}
+              className="w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {signingContract ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <FileSignature className="h-5 w-5" />
+                  Signer le contrat
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -1037,8 +1204,8 @@ export function OnboardingFlow({
         return renderB2CProfile();
       case "b2c_video":
         return renderB2CVideo();
-      case "b2c_booking":
-        return renderB2CBooking();
+      case "b2c_contract":
+        return renderB2CContract();
       case "b2c_community":
         return renderB2CCommunity();
       case "b2b_questionnaire":
@@ -1186,31 +1353,25 @@ export function OnboardingFlow({
                   </button>
                 </div>
               )}
-
-            {/* Final step (B2C community) — complete button */}
-            {isLast &&
-              currentStep.type === "b2c_community" &&
-              communityJoined && (
-                <div className="flex justify-center mt-10">
-                  <button
-                    onClick={handleComplete}
-                    disabled={completing}
-                    className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50"
-                  >
-                    {completing ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <>
-                        <Sparkles className="h-5 w-5" />
-                        Accéder à mon dashboard
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Signature Dialog for contract */}
+      {academyContractId && (
+        <SignatureDialog
+          contractId={academyContractId}
+          contractName="Contrat d'Accompagnement Academy"
+          amount={2000}
+          open={showSignatureDialog}
+          onOpenChange={setShowSignatureDialog}
+          onCustomSubmit={async (signatureData, signerName) => {
+            const { saveSignature } = await import("@/lib/actions/contracts");
+            await saveSignature(academyContractId, signatureData, signerName);
+            await onContractSigned();
+          }}
+        />
+      )}
 
       {/* Footer hint */}
       <div className="fixed bottom-6 left-0 right-0 z-40 text-center">

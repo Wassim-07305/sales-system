@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Radio,
@@ -15,11 +15,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { createLiveSession, deleteLiveSession } from "@/lib/actions/live";
+import { useHubPresence } from "@/lib/hooks/use-hub-presence";
 import type {
   Profile,
   LiveSession,
   LiveSessionType,
 } from "@/lib/types/database";
+import type { PresenceParticipant } from "@/lib/hooks/use-session-presence";
 import { cn } from "@/lib/utils";
 
 interface LiveHubViewProps {
@@ -57,6 +59,13 @@ export function LiveHubView({
   const endedSessions = sessions
     .filter((s) => s.status === "ended")
     .slice(0, 10);
+
+  // Presence pour les sessions actives (live + scheduled)
+  const activeSessionIds = useMemo(
+    () => [...liveSessions, ...scheduledSessions].map((s) => s.id),
+    [liveSessions, scheduledSessions],
+  );
+  const { presenceMap } = useHubPresence(activeSessionIds);
 
   const handleCreate = async () => {
     if (!title.trim()) {
@@ -135,7 +144,7 @@ export function LiveHubView({
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
               <Radio className="w-7 h-7 text-brand" />
-              Live
+              Appels & Live
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Appels video, partage d&apos;ecran et sessions live
@@ -168,6 +177,7 @@ export function LiveHubView({
                   onJoin={() => router.push(`/live/${s.id}`)}
                   onDelete={isAdmin ? () => handleDelete(s.id) : undefined}
                   deleting={deleting === s.id}
+                  presence={presenceMap[s.id]}
                 />
               ))}
             </div>
@@ -189,6 +199,7 @@ export function LiveHubView({
                   onJoin={() => router.push(`/live/${s.id}`)}
                   onDelete={isAdmin ? () => handleDelete(s.id) : undefined}
                   deleting={deleting === s.id}
+                  presence={presenceMap[s.id]}
                 />
               ))}
             </div>
@@ -386,13 +397,22 @@ function SessionCard({
   onJoin,
   onDelete,
   deleting,
+  presence,
 }: {
   session: LiveSession;
   isLive?: boolean;
   onJoin: () => void;
   onDelete?: () => void;
   deleting?: boolean;
+  presence?: { count: number; participants: PresenceParticipant[] };
 }) {
+  const [showParticipants, setShowParticipants] = useState(false);
+  const participants = presence?.participants ?? [];
+  const count = presence?.count ?? 0;
+  const maxAvatars = 4;
+  const visibleAvatars = participants.slice(0, maxAvatars);
+  const extraCount = Math.max(0, count - maxAvatars);
+
   return (
     <div
       className={cn(
@@ -415,7 +435,9 @@ function SessionCard({
         <div
           className={cn(
             "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-            isLive ? "bg-red-600/20 text-red-400" : "bg-muted text-muted-foreground",
+            isLive
+              ? "bg-red-600/20 text-red-400"
+              : "bg-muted text-muted-foreground",
           )}
         >
           <SessionTypeIcon type={session.session_type} />
@@ -435,6 +457,90 @@ function SessionCard({
           )}
         </div>
       </div>
+
+      {/* Presence: avatars + compteur */}
+      {count > 0 && (
+        <div className="mt-3 flex items-center gap-2.5">
+          <div
+            className="relative flex items-center cursor-pointer"
+            onMouseEnter={() => setShowParticipants(true)}
+            onMouseLeave={() => setShowParticipants(false)}
+          >
+            {/* Avatar stack */}
+            <div className="flex -space-x-2">
+              {visibleAvatars.map((p) => (
+                <div
+                  key={p.user_id}
+                  className="relative w-7 h-7 rounded-full border-2 border-card bg-muted shrink-0"
+                  title={p.full_name}
+                >
+                  {p.avatar_url ? (
+                    <img
+                      src={p.avatar_url}
+                      alt={p.full_name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-brand/20 flex items-center justify-center text-[10px] font-semibold text-brand uppercase">
+                      {p.full_name.charAt(0)}
+                    </div>
+                  )}
+                  {/* Pulse vert */}
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-card" />
+                </div>
+              ))}
+              {extraCount > 0 && (
+                <div className="w-7 h-7 rounded-full border-2 border-card bg-muted flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-semibold text-muted-foreground">
+                    +{extraCount}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Dropdown participants list */}
+            {showParticipants && participants.length > 0 && (
+              <div className="absolute top-full left-0 mt-1.5 z-20 min-w-48 bg-popover border border-border rounded-xl shadow-xl p-2 space-y-0.5">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 pb-1">
+                  Participants ({count})
+                </p>
+                {participants.map((p) => (
+                  <div
+                    key={p.user_id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted/50"
+                  >
+                    <div className="relative w-6 h-6 rounded-full bg-muted shrink-0">
+                      {p.avatar_url ? (
+                        <img
+                          src={p.avatar_url}
+                          alt={p.full_name}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-brand/20 flex items-center justify-center text-[9px] font-semibold text-brand uppercase">
+                          {p.full_name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="absolute -bottom-px -right-px w-2 h-2 rounded-full bg-emerald-500 border border-popover" />
+                    </div>
+                    <span className="text-xs text-foreground truncate">
+                      {p.full_name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Badge compteur */}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="w-3.5 h-3.5" />
+            <span>
+              {count} participant{count > 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 mt-3">
         <button

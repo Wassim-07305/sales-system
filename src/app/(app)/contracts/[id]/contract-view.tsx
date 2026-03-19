@@ -5,7 +5,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { sendContract, revokeSignature } from "@/lib/actions/contracts";
+import {
+  sendContract,
+  revokeSignature,
+  countersignContract,
+} from "@/lib/actions/contracts";
 import { SignatureDialog } from "@/components/signature-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -64,6 +68,11 @@ const statusConfig: Record<
     color: "text-blue-600",
     bg: "bg-blue-500/10 border-blue-500/20",
   },
+  client_signed: {
+    label: "Signé par le client",
+    color: "text-amber-600",
+    bg: "bg-amber-500/10 border-amber-500/20",
+  },
   signed: {
     label: "Signé",
     color: "text-emerald-600",
@@ -91,6 +100,7 @@ function getAvatarColor(str: string) {
 
 export function ContractView({ contract, isClient, isAdmin }: Props) {
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+  const [isCountersigning, setIsCountersigning] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPdf, setShowPdf] = useState(false);
 
@@ -127,9 +137,30 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
     }
   }
 
+  async function handleCountersign(signatureData: string, signerName: string) {
+    setLoading(true);
+    try {
+      const result = await countersignContract(
+        contract.id,
+        signatureData,
+        signerName,
+      );
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Contrat contresigné avec succès !");
+      }
+    } catch {
+      toast.error("Erreur lors de la contresignature");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const canSign = isClient && contract.status === "sent";
   const canSend = isAdmin && contract.status === "draft";
   const canRevoke = isAdmin && contract.status === "signed";
+  const canCountersign = isAdmin && contract.status === "client_signed";
   const stCfg = statusConfig[contract.status] || statusConfig.draft;
 
   return (
@@ -348,11 +379,54 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
               {canSign && (
                 <Button
                   className="w-full bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
-                  onClick={() => setSignatureDialogOpen(true)}
+                  onClick={() => {
+                    setIsCountersigning(false);
+                    setSignatureDialogOpen(true);
+                  }}
                 >
                   <PenTool className="h-4 w-4" />
                   Signer le contrat
                 </Button>
+              )}
+
+              {canCountersign && (
+                <>
+                  <div className="flex items-center gap-2 p-3 bg-amber-500/5 rounded-xl border border-amber-500/10">
+                    <FileSignature className="h-4 w-4 text-amber-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-600">
+                        En attente de votre signature
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Le client a signé — contresignez pour finaliser
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                    onClick={() => {
+                      setIsCountersigning(true);
+                      setSignatureDialogOpen(true);
+                    }}
+                  >
+                    <PenTool className="h-4 w-4" />
+                    Contresigner le contrat
+                  </Button>
+                </>
+              )}
+
+              {isClient && contract.status === "client_signed" && (
+                <div className="flex items-center gap-2 p-3 bg-amber-500/5 rounded-xl border border-amber-500/10">
+                  <FileSignature className="h-4 w-4 text-amber-600 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-600">
+                      Signature envoyée
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      En attente de la contresignature de SalesSystem Academy
+                    </p>
+                  </div>
+                </div>
               )}
 
               {contract.status === "signed" && (
@@ -411,7 +485,19 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
         contractName={`Contrat #${contract.id.slice(0, 8)}`}
         amount={contract.amount || 0}
         open={signatureDialogOpen}
-        onOpenChange={setSignatureDialogOpen}
+        onOpenChange={(open) => {
+          setSignatureDialogOpen(open);
+          if (!open) setIsCountersigning(false);
+        }}
+        onCustomSubmit={
+          isCountersigning
+            ? async (sigData, sigName) => {
+                await handleCountersign(sigData, sigName);
+                setSignatureDialogOpen(false);
+                setIsCountersigning(false);
+              }
+            : undefined
+        }
       />
     </div>
   );
