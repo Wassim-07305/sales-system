@@ -109,6 +109,12 @@ export function WorkspacesAdmin({ workspaces }: { workspaces: Workspace[] }) {
               Retour
             </Button>
           </Link>
+          <Link href="/settings/workspaces/esops">
+            <Button variant="outline" size="sm">
+              <FileText className="h-4 w-4 mr-2" />
+              ESOPs
+            </Button>
+          </Link>
           <Button
             size="sm"
             className="bg-brand text-brand-dark hover:bg-brand/90"
@@ -254,6 +260,12 @@ export function WorkspacesAdmin({ workspaces }: { workspaces: Workspace[] }) {
 
                 {/* Actions */}
                 <div className="flex gap-2 shrink-0">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/settings/workspaces/${w.id}/sops`}>
+                      <FileText className="h-3.5 w-3.5 mr-1" />
+                      SOPs
+                    </Link>
+                  </Button>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/team/assignments`}>
                       <Users className="h-3.5 w-3.5 mr-1" />

@@ -163,6 +163,9 @@ export function OnboardingFlow({
   const [whyMotivation, setWhyMotivation] = useState("");
   const [disponibilitesHeures, setDisponibilitesHeures] = useState("4");
   const [niveauExperience, setNiveauExperience] = useState("");
+  const [secteursPreferences, setSecteursPreferences] = useState<string[]>([]);
+  const [experienceCommerciale, setExperienceCommerciale] = useState("");
+  const [situationActuelle, setSituationActuelle] = useState("");
   const [videoWatchSeconds, setVideoWatchSeconds] = useState(0);
   const [videoUnlocked, setVideoUnlocked] = useState(false);
   const [communityJoined, setCommunityJoined] = useState(false);
@@ -384,7 +387,12 @@ export function OnboardingFlow({
         avatar_url: avatarUrl || undefined,
         objectif_financier: objectifPrincipal || undefined,
         disponibilites_heures: disponibilitesHeures || undefined,
-        situation_actuelle: niveauExperience || undefined,
+        situation_actuelle: situationActuelle || niveauExperience || undefined,
+        why_motivation: whyMotivation || undefined,
+        secteurs_preferences:
+          secteursPreferences.length > 0 ? secteursPreferences : undefined,
+        experience_commerciale: experienceCommerciale || undefined,
+        niveau_experience: niveauExperience || undefined,
         // B2B fields
         business_description: offre || undefined,
         qualification_questions: cible || undefined,
@@ -512,12 +520,21 @@ export function OnboardingFlow({
 
   function renderB2CProfile() {
     const OBJECTIFS = [
-      { value: "complement", label: "Complément de revenu" },
+      {
+        value: "complement",
+        label: "Complément de revenu",
+        desc: "Je garde mon emploi",
+      },
       {
         value: "activite_principale",
-        label: "En faire mon activité principale",
+        label: "Activité principale",
+        desc: "Je veux vivre du setting",
       },
-      { value: "remplacer_emploi", label: "Remplacer mon emploi actuel" },
+      {
+        value: "transition",
+        label: "Transition professionnelle",
+        desc: "Je veux remplacer mon emploi actuel",
+      },
     ];
     const NIVEAUX = [
       { value: "debutant", label: "Débutant — Je découvre le setting" },
@@ -530,6 +547,38 @@ export function OnboardingFlow({
         label: "Avancé — Je suis déjà actif en setting/closing",
       },
     ];
+    const SECTEURS = [
+      "Coaching",
+      "Formation en ligne",
+      "E-commerce",
+      "Immobilier",
+      "Finance",
+      "Santé et bien-être",
+      "Marketing digital",
+      "Autre",
+    ];
+    const EXP_COMMERCIALE = [
+      { value: "aucune", label: "Aucune expérience" },
+      { value: "moins_6m", label: "Moins de 6 mois" },
+      { value: "6m_1an", label: "6 mois à 1 an" },
+      { value: "1_2ans", label: "1 à 2 ans" },
+      { value: "plus_2ans", label: "Plus de 2 ans" },
+    ];
+    const SITUATIONS = [
+      { value: "etudiant", label: "Étudiant" },
+      { value: "salarie_plein", label: "Salarié à temps plein" },
+      { value: "salarie_partiel", label: "Salarié à temps partiel" },
+      { value: "independant", label: "Indépendant / Freelance" },
+      { value: "sans_emploi", label: "Sans emploi" },
+      { value: "autre", label: "Autre" },
+    ];
+
+    const dispoLabel =
+      Number(disponibilitesHeures) <= 2
+        ? "Idéal pour un complément de revenu"
+        : Number(disponibilitesHeures) <= 4
+          ? "Bonne base pour débuter"
+          : "Profil idéal pour une activité principale";
 
     return (
       <div className="w-full max-w-md mx-auto space-y-8">
@@ -551,9 +600,14 @@ export function OnboardingFlow({
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
-                <span>{obj.label}</span>
+                <div className="flex-1">
+                  <span>{obj.label}</span>
+                  <span className="block text-xs text-white/30 mt-0.5">
+                    {obj.desc}
+                  </span>
+                </div>
                 {objectifPrincipal === obj.value && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] shrink-0" />
                 )}
               </button>
             ))}
@@ -563,12 +617,12 @@ export function OnboardingFlow({
         {/* Pourquoi — motivation */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
-            Pourquoi tu veux te lancer dans le setting ?
+            Pourquoi le setting — ton &quot;why&quot;
           </label>
           <textarea
             value={whyMotivation}
             onChange={(e) => setWhyMotivation(e.target.value.slice(0, 500))}
-            placeholder="Décris ta motivation en quelques phrases..."
+            placeholder="Expliquez en quelques phrases pourquoi vous voulez faire du setting et ce que vous voulez accomplir."
             rows={3}
             className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-4 resize-none transition-colors duration-200"
           />
@@ -580,7 +634,7 @@ export function OnboardingFlow({
         {/* Disponibilité slider 1-8h */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
-            Heures disponibles par jour :{" "}
+            Disponibilité quotidienne :{" "}
             <span className="text-[#7af17a] font-bold">
               {disponibilitesHeures}h
             </span>
@@ -598,12 +652,105 @@ export function OnboardingFlow({
             <span>4h</span>
             <span>8h</span>
           </div>
+          <p className="text-xs text-[#7af17a]/60 text-center">{dispoLabel}</p>
+        </div>
+
+        {/* Secteurs préférés */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Secteurs qui t&apos;intéressent
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {SECTEURS.map((sec) => {
+              const selected = secteursPreferences.includes(sec);
+              return (
+                <button
+                  key={sec}
+                  type="button"
+                  onClick={() =>
+                    setSecteursPreferences((prev) =>
+                      selected
+                        ? prev.filter((s) => s !== sec)
+                        : [...prev, sec],
+                    )
+                  }
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm transition-all duration-200",
+                    selected
+                      ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a]"
+                      : "border-white/10 bg-white/5 text-white/50 hover:border-white/20",
+                  )}
+                >
+                  {selected ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                  ) : (
+                    <div className="h-3.5 w-3.5 rounded-full border border-current shrink-0" />
+                  )}
+                  {sec}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Expérience commerciale */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Expérience commerciale
+          </label>
+          <div className="space-y-2">
+            {EXP_COMMERCIALE.map((exp) => (
+              <button
+                key={exp.value}
+                type="button"
+                onClick={() => setExperienceCommerciale(exp.value)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-sm font-medium transition-all duration-200",
+                  experienceCommerciale === exp.value
+                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
+                )}
+              >
+                <span>{exp.label}</span>
+                {experienceCommerciale === exp.value && (
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Situation actuelle */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-white/60">
+            Situation actuelle
+          </label>
+          <div className="space-y-2">
+            {SITUATIONS.map((sit) => (
+              <button
+                key={sit.value}
+                type="button"
+                onClick={() => setSituationActuelle(sit.value)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-sm font-medium transition-all duration-200",
+                  situationActuelle === sit.value
+                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
+                )}
+              >
+                <span>{sit.label}</span>
+                {situationActuelle === sit.value && (
+                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Niveau d'expérience */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
-            Ton niveau d&apos;expérience
+            Ton niveau en setting
           </label>
           <div className="space-y-2">
             {NIVEAUX.map((niv) => (

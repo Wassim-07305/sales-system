@@ -20,7 +20,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { updateCourse, deleteCourse } from "@/lib/actions/academy-admin";
+import {
+  updateCourse,
+  deleteCourse,
+  seedDamienModules,
+} from "@/lib/actions/academy-admin";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { CourseFormDialog } from "./course-form-dialog";
@@ -55,6 +59,28 @@ export function CourseList({ initialCourses }: CourseListProps) {
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
+
+  async function handleSeedDamien() {
+    setSeeding(true);
+    try {
+      const result = await seedDamienModules();
+      if (result.created) {
+        toast.success(
+          "Les 13 modules de la S Academy ont été créés avec succès !",
+        );
+        startTransition(() => {
+          router.refresh();
+        });
+      } else {
+        toast.info(result.reason || "Les modules existent déjà.");
+      }
+    } catch {
+      toast.error("Erreur lors de la création des modules");
+    } finally {
+      setSeeding(false);
+    }
+  }
 
   function handleCreate() {
     setEditingCourse(null);
@@ -133,10 +159,25 @@ export function CourseList({ initialCourses }: CourseListProps) {
         title="Gestion des formations"
         description="Creez, modifiez et organisez vos formations"
       >
-        <Button onClick={handleCreate} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nouvelle formation
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleSeedDamien}
+            disabled={seeding || isPending}
+            className="gap-2"
+          >
+            {seeding ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <GraduationCap className="h-4 w-4" />
+            )}
+            Initialiser modules Damien
+          </Button>
+          <Button onClick={handleCreate} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nouvelle formation
+          </Button>
+        </div>
       </PageHeader>
 
       {initialCourses.length === 0 ? (

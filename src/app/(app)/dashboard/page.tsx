@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AdminDashboard } from "./admin-dashboard";
 import { SetterDashboard } from "./setter-dashboard";
 import { ClientDashboard } from "./client-dashboard";
+import { CsmDashboard } from "./csm-dashboard";
 import {
   getAdminDashboardData,
   getClientDashboardData,
@@ -10,6 +11,7 @@ import {
   getB2BDashboardData,
   getMobileDashboardWidgetData,
 } from "@/lib/actions/dashboard";
+import { getCsmClients, getClientsAtRisk, getKickCases, getFeedbacks } from "@/lib/actions/csm";
 import { MobileDashboardWidget } from "@/components/mobile-dashboard-widget";
 import { calculateReadinessScore } from "@/lib/actions/readiness";
 import {
@@ -81,6 +83,22 @@ export default async function DashboardPage() {
             widgetData={widgetDataMap}
           />
         </>
+      );
+    }
+    case "csm": {
+      const [clients, atRisk, kickCases, feedbacks] = await Promise.all([
+        getCsmClients(),
+        getClientsAtRisk(),
+        getKickCases({ week: true }),
+        getFeedbacks(),
+      ]);
+      return (
+        <CsmDashboard
+          clients={clients}
+          atRiskClients={atRisk}
+          kickCases={kickCases}
+          feedbacks={feedbacks}
+        />
       );
     }
     case "setter":

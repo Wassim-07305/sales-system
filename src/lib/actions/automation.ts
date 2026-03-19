@@ -1045,6 +1045,98 @@ export async function getRelanceWorkflows(prospectId?: string) {
   }
 }
 
+/**
+ * Get relance statistics for the admin dashboard.
+ */
+export async function getRelanceStats(): Promise<{
+  total: number;
+  pending: number;
+  j2_waiting: number;
+  j2_sent: number;
+  j3_sent: number;
+  responded: number;
+  cancelled: number;
+  sent_today: number;
+  response_rate: number;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifie");
+
+  try {
+    const { data: all, error } = await supabase
+      .from("relance_workflows")
+      .select("id, status, j2_sent_at, j3_sent_at, responded_at, created_at");
+
+    if (error) {
+      if (isTableMissing(error))
+        return {
+          total: 0,
+          pending: 0,
+          j2_waiting: 0,
+          j2_sent: 0,
+          j3_sent: 0,
+          responded: 0,
+          cancelled: 0,
+          sent_today: 0,
+          response_rate: 0,
+        };
+      throw new Error(error.message);
+    }
+
+    const workflows = all || [];
+    const today = new Date().toISOString().split("T")[0];
+    const total = workflows.length;
+    const pending = workflows.filter((w) => w.status === "pending").length;
+    const j2_waiting = workflows.filter(
+      (w) => w.status === "pending" && !w.j2_sent_at,
+    ).length;
+    const j2_sent = workflows.filter((w) => w.j2_sent_at).length;
+    const j3_sent = workflows.filter((w) => w.j3_sent_at).length;
+    const responded = workflows.filter((w) => w.status === "responded").length;
+    const cancelled = workflows.filter((w) => w.status === "cancelled").length;
+    const sent_today = workflows.filter(
+      (w) =>
+        (w.j2_sent_at && w.j2_sent_at.startsWith(today)) ||
+        (w.j3_sent_at && w.j3_sent_at.startsWith(today)),
+    ).length;
+    const completed = workflows.filter(
+      (w) => w.status === "responded" || w.status === "sent",
+    ).length;
+    const response_rate =
+      completed > 0 ? Math.round((responded / completed) * 100) : 0;
+
+    return {
+      total,
+      pending,
+      j2_waiting,
+      j2_sent,
+      j3_sent,
+      responded,
+      cancelled,
+      sent_today,
+      response_rate,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("does not exist"))
+      return {
+        total: 0,
+        pending: 0,
+        j2_waiting: 0,
+        j2_sent: 0,
+        j3_sent: 0,
+        responded: 0,
+        cancelled: 0,
+        sent_today: 0,
+        response_rate: 0,
+      };
+    throw err;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // AI Message Personalization
 // ---------------------------------------------------------------------------

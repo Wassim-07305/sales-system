@@ -36,6 +36,14 @@
     {
       "path": "/api/cron/challenges",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/relances",
+      "schedule": "0 9,14 * * *"
+    },
+    {
+      "path": "/api/cron/ai-auto-send",
+      "schedule": "0 8,13 * * *"
     }
   ]
 }

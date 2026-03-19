@@ -177,6 +177,29 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
+    // CSM has limited access
+    if (role === "csm") {
+      const csmAllowedRoutes = [
+        "/dashboard",
+        "/contacts",
+        "/community",
+        "/chat",
+        "/profile",
+        "/notifications",
+        "/crm",
+        "/inbox",
+        "/help",
+      ];
+      const isAllowed = csmAllowedRoutes.some((route) =>
+        pathname.startsWith(route),
+      );
+      if (!isAllowed) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+    }
+
     // Setter/closer cannot access admin-only routes
     if (role && ["setter", "closer"].includes(role)) {
       const adminOnlyRoutes = [

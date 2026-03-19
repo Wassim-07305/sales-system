@@ -76,6 +76,10 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string }> = {
     label: "Client B2C",
     color: "bg-muted/40 text-muted-foreground/80 border-border/30",
   },
+  csm: {
+    label: "CSM",
+    color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  },
 };
 
 const AVATAR_COLORS = [

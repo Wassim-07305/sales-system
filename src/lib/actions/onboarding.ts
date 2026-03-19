@@ -672,6 +672,10 @@ export async function completeSimpleOnboarding(data: {
   objectif_financier?: string;
   disponibilites_heures?: string;
   situation_actuelle?: string;
+  why_motivation?: string;
+  secteurs_preferences?: string[];
+  experience_commerciale?: string;
+  niveau_experience?: string;
 }) {
   const supabase = await createClient();
   const {
@@ -712,6 +716,13 @@ export async function completeSimpleOnboarding(data: {
     { key: "objectif_financier", value: data.objectif_financier || "" },
     { key: "disponibilites_heures", value: data.disponibilites_heures || "" },
     { key: "situation_actuelle", value: data.situation_actuelle || "" },
+    { key: "why_motivation", value: data.why_motivation || "" },
+    {
+      key: "secteurs_preferences",
+      value: JSON.stringify(data.secteurs_preferences || []),
+    },
+    { key: "experience_commerciale", value: data.experience_commerciale || "" },
+    { key: "niveau_experience", value: data.niveau_experience || "" },
   ].filter((e) => e.value !== "" && e.value !== "[]");
 
   for (const entry of settingsEntries) {
@@ -744,32 +755,60 @@ export async function generateB2BWorkspace(data: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  // Generate SOP document
+  // Generate structured SOP document (compatible with SOPs view)
   const sop = {
+    // Legacy fields for backward compatibility
     company: data.companyName,
     offer: data.offer,
     audience: data.targetAudience,
     price: data.price,
     networks: data.networks,
     tone: data.communicationTone,
-    workflow: {
-      step1: "Identifier les prospects sur " + data.networks.join(", "),
-      step2: "Analyser le profil (bio, derniers posts, activité)",
-      step3: `Premier message personnalisé — Ton : ${data.communicationTone}`,
-      step4: "Si réponse positive → qualifier (besoin, budget, timing)",
-      step5: "Si qualifié → proposer un appel découverte",
-      step6: "Appel → présentation de l'offre " + data.offer,
-      step7: "Follow-up J+1 si pas de réponse",
-      step8: "Relance J+3 avec valeur ajoutée",
+    // Structured SOP sections
+    contexte_business: {
+      entreprise: data.companyName,
+      secteur: "",
+      offre: data.offer,
+      probleme_resolu: "",
+      cible_client: data.targetAudience,
+      ca_mensuel: data.price,
+      plateforme_principale: data.networks[0] || "",
     },
-    scriptTemplate: `Salut [PRÉNOM] ! J'ai vu que [ACCROCHE PERSONNALISÉE]. Chez ${data.companyName}, on aide [${data.targetAudience}] à [BÉNÉFICE PRINCIPAL]. Est-ce que tu aurais 15 min cette semaine pour en discuter ?`,
-    objectionHandling: {
-      "Pas le temps":
-        "Je comprends, c'est justement pour ça qu'on propose un format court de 15 min. On peut trouver un créneau qui t'arrange ?",
-      "Trop cher": `L'investissement de ${data.price} est rentabilisé dès le premier mois grâce à [RÉSULTAT CONCRET].`,
-      "J'y réfléchis":
-        "Bien sûr ! Qu'est-ce qui te ferait passer à l'action aujourd'hui ?",
+    avatar_client: {
+      age_situation: "",
+      douleurs_principales: "",
+      objections_frequentes: "",
+      motivations: "",
+      langage_utilise: "",
     },
+    champ_lexical: {
+      termes: [
+        { mot: "setter", definition: "Personne qui qualifie les prospects et prend les RDV" },
+        { mot: "closer", definition: "Personne qui conclut la vente lors de l'appel" },
+        { mot: "deal", definition: "Opportunité commerciale en cours" },
+        { mot: "call", definition: "Appel téléphonique ou visio de vente" },
+        { mot: "pipeline", definition: "Ensemble des étapes du processus de vente" },
+        { mot: "lead", definition: "Contact potentiellement intéressé par l'offre" },
+      ],
+    },
+    sourcing: {
+      canaux: data.networks.map((n) => ({
+        nom: n,
+        strategie: "",
+        criteres_ciblage: "",
+        volume_quotidien: "",
+      })),
+    },
+    scripts: [
+      {
+        id: crypto.randomUUID(),
+        nom: "Premier message " + (data.networks[0] || "DM"),
+        plateforme: (data.networks[0] || "instagram").toLowerCase(),
+        type: "premier_contact",
+        contenu: `Salut [PRÉNOM] ! J'ai vu que [ACCROCHE PERSONNALISÉE]. Chez ${data.companyName}, on aide ${data.targetAudience} à [BÉNÉFICE PRINCIPAL]. Est-ce que tu aurais 15 min cette semaine pour en discuter ?`,
+      },
+    ],
+    comments: [],
   };
 
   // Save SOP

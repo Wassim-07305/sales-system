@@ -728,6 +728,364 @@ export async function getSetterProgressTable(): Promise<
   });
 }
 
+// ─── Seed des modules de Damien ──────────────────────────────────────
+
+const DAMIEN_COURSE_TITLE = "Formation Setting — S Academy";
+
+interface ModuleSeed {
+  title: string;
+  description: string;
+  lessons: string[];
+  hasQuiz: boolean;
+}
+
+const DAMIEN_MODULES: ModuleSeed[] = [
+  {
+    title: "Module 0 — Introduction au setting",
+    description:
+      "Découvrez les bases du métier de setter et les fondamentaux de la prospection commerciale.",
+    lessons: [
+      "C'est quoi un setter",
+      "Les deux types de prospection (B2C et B2B)",
+      "Travailler avec un entrepreneur",
+      "Les SOPs : c'est quoi et pourquoi",
+      "Les qualités d'un bon setter",
+    ],
+    hasQuiz: false,
+  },
+  {
+    title: "Module 1-2 — Fondamentaux du setting",
+    description:
+      "Maîtrisez les fondamentaux : anatomie d'une conversation, accroche, qualification, valeur et relance.",
+    lessons: [
+      "Anatomie d'une conversation",
+      "L'accroche parfaite",
+      "La qualification",
+      "Apporter de la valeur",
+      "La prise de rendez-vous",
+      "La relance efficace",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 3-4 — Setting B2C",
+    description:
+      "Techniques de setting B2C : inbound, qualification, valeur, CTA et relance spécifiques au B2C.",
+    lessons: [
+      "Introduction au B2C",
+      "L'inbound : les points de contact",
+      "Inbound avancé",
+      "La qualification B2C",
+      "Apporter de la valeur en B2C",
+      "Le CTA",
+      "La relance B2C",
+      "Exemples et cas concrets réels",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 5-6 — Setting B2B actif",
+    description:
+      "Prospection B2B active : sourcing, outbound, inbound et relance dans un contexte professionnel.",
+    lessons: [
+      "Introduction au B2B actif",
+      "Le sourcing de prospects",
+      "L'outbound : prendre contact",
+      "L'inbound B2B",
+      "La relance B2B",
+      "Exemples et cas concrets réels",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 7 — Setting B2B passif",
+    description:
+      "Stratégies de prospection B2B passive : sourcing et outbound passif.",
+    lessons: [
+      "Introduction au B2B passif",
+      "Le sourcing passif",
+      "L'outbound passif",
+      "Exemples et cas concrets réels",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 8 — Setting téléphonique",
+    description:
+      "Maîtrisez l'art du setting par téléphone : préparation, structure, objections et prise de RDV.",
+    lessons: [
+      "Pourquoi le téléphone",
+      "La préparation de l'appel",
+      "La structure de l'appel téléphonique",
+      "Les objections téléphoniques",
+      "La prise de RDV par téléphone",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 9 — Bonus",
+    description:
+      "Contenus bonus : ManyChat (Minichat) et le champ lexical du business en ligne.",
+    lessons: [
+      "Comment utiliser ManyChat (Minichat)",
+      "Le champ lexical du business en ligne : les mots clés indispensables",
+    ],
+    hasQuiz: false,
+  },
+  {
+    title: "Module 10 — Maîtriser les outils",
+    description:
+      "Apprenez à utiliser les SOPs, le CRM et à organiser votre journée de setter.",
+    lessons: [
+      "Comprendre et utiliser les SOPs",
+      "Maîtriser le CRM",
+      "Organiser sa journée de setter",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 11 — Décrocher ses missions",
+    description:
+      "De la micro-entreprise au positionnement sur le marché : décrochez vos premières missions.",
+    lessons: [
+      "Créer sa micro-entreprise",
+      "Créer son site ou carré professionnel",
+      "Se positionner sur le marché",
+    ],
+    hasQuiz: true,
+  },
+  {
+    title: "Module 12 — Rediffusion des appels de groupe",
+    description:
+      "Retrouvez ici les replays de tous les appels de groupe. Mis à jour après chaque session.",
+    lessons: [],
+    hasQuiz: false,
+  },
+];
+
+const QUIZ_MODULE_1_2 = [
+  {
+    question: "Quel est le rôle principal d'un setter ?",
+    options: [
+      "Conclure la vente (closing)",
+      "Qualifier le prospect et décrocher un rendez-vous",
+      "Gérer le SAV des clients",
+      "Créer le contenu marketing",
+    ],
+    correct_index: 1,
+  },
+  {
+    question:
+      "Quelle est la première étape dans l'anatomie d'une conversation de setting ?",
+    options: [
+      "Proposer le rendez-vous directement",
+      "Envoyer un message d'accroche personnalisé",
+      "Demander le numéro de téléphone",
+      "Présenter l'offre du client",
+    ],
+    correct_index: 1,
+  },
+  {
+    question: "Quel est l'objectif de la phase de qualification ?",
+    options: [
+      "Vendre le produit immédiatement",
+      "Déterminer si le prospect correspond au profil idéal",
+      "Obtenir l'email du prospect",
+      "Faire un audit gratuit du business",
+    ],
+    correct_index: 1,
+  },
+  {
+    question: "Qu'est-ce qu'une bonne accroche doit provoquer chez le prospect ?",
+    options: [
+      "L'urgence d'acheter maintenant",
+      "La curiosité et l'envie de répondre",
+      "La peur de rater une opportunité",
+      "L'admiration pour votre profil",
+    ],
+    correct_index: 1,
+  },
+  {
+    question:
+      "Quand est-il recommandé d'apporter de la valeur dans la conversation ?",
+    options: [
+      "Uniquement après le rendez-vous",
+      "Jamais, il faut rester mystérieux",
+      "Pendant la conversation, avant de proposer le RDV",
+      "Seulement si le prospect le demande",
+    ],
+    correct_index: 2,
+  },
+  {
+    question: "Quel est le timing idéal pour une première relance ?",
+    options: [
+      "1 heure après le premier message",
+      "24 à 48 heures après le dernier message",
+      "1 semaine plus tard",
+      "Il ne faut jamais relancer",
+    ],
+    correct_index: 1,
+  },
+  {
+    question: "Quelle est la meilleure approche pour la prise de rendez-vous ?",
+    options: [
+      "Envoyer un lien Calendly sans explication",
+      "Proposer une date et heure précise après avoir qualifié",
+      "Attendre que le prospect demande un RDV",
+      "Forcer le prospect à s'engager immédiatement",
+    ],
+    correct_index: 1,
+  },
+  {
+    question:
+      "Quelle est la différence fondamentale entre la prospection B2C et B2B ?",
+    options: [
+      "Il n'y a aucune différence",
+      "Le B2B cible des entreprises, le B2C cible des particuliers",
+      "Le B2B est plus facile que le B2C",
+      "Le B2C se fait uniquement par téléphone",
+    ],
+    correct_index: 1,
+  },
+  {
+    question: "Pourquoi un setter doit-il connaître les SOPs ?",
+    options: [
+      "Pour impressionner l'entrepreneur",
+      "Pour suivre un processus standardisé et cohérent avec chaque prospect",
+      "Pour remplacer le closer en cas d'absence",
+      "Les SOPs ne sont pas utiles pour un setter",
+    ],
+    correct_index: 1,
+  },
+  {
+    question:
+      "Quelle qualité est la plus importante pour réussir en tant que setter ?",
+    options: [
+      "Avoir un diplôme en marketing",
+      "La régularité et la discipline dans le volume de messages",
+      "Connaître tous les outils CRM du marché",
+      "Avoir déjà travaillé dans la vente physique",
+    ],
+    correct_index: 1,
+  },
+];
+
+/**
+ * Seeds the 10+ modules of Damien's Setting Academy.
+ * Idempotent: checks if the course already exists by title.
+ * Returns { created: true } on success, { created: false, reason } if already exists.
+ */
+export async function seedDamienModules(): Promise<{
+  created: boolean;
+  reason?: string;
+  courseId?: string;
+}> {
+  const { supabase } = await requireAdmin();
+
+  // Check if already seeded
+  const { data: existing } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("title", DAMIEN_COURSE_TITLE)
+    .maybeSingle();
+
+  if (existing) {
+    return {
+      created: false,
+      reason: "La formation existe déjà.",
+      courseId: existing.id,
+    };
+  }
+
+  // Get max position for courses
+  const { data: lastCourse } = await supabase
+    .from("courses")
+    .select("position")
+    .order("position", { ascending: false })
+    .limit(1)
+    .single();
+
+  const coursePosition = (lastCourse?.position ?? -1) + 1;
+
+  // Create the course
+  const { data: course, error: courseError } = await supabase
+    .from("courses")
+    .insert({
+      title: DAMIEN_COURSE_TITLE,
+      description:
+        "La formation complète pour devenir setter professionnel. 13 modules progressifs du débutant à l'expert, couvrant B2C, B2B, téléphone, outils et missions.",
+      is_published: true,
+      position: coursePosition,
+      target_roles: ["setter", "closer", "client_b2c"],
+      has_prerequisites: false,
+    })
+    .select("id")
+    .single();
+
+  if (courseError || !course) {
+    throw new Error(courseError?.message || "Erreur création du cours");
+  }
+
+  // Create modules and lessons
+  for (let mi = 0; mi < DAMIEN_MODULES.length; mi++) {
+    const mod = DAMIEN_MODULES[mi];
+
+    const { data: moduleRow, error: modError } = await supabase
+      .from("course_modules")
+      .insert({
+        course_id: course.id,
+        title: mod.title,
+        description: mod.description,
+        position: mi,
+      })
+      .select("id")
+      .single();
+
+    if (modError || !moduleRow) {
+      throw new Error(modError?.message || `Erreur module ${mi}`);
+    }
+
+    // Create lessons for this module
+    for (let li = 0; li < mod.lessons.length; li++) {
+      const { data: lessonRow, error: lessonError } = await supabase
+        .from("lessons")
+        .insert({
+          course_id: course.id,
+          module_id: moduleRow.id,
+          title: mod.lessons[li],
+          position: li,
+          attachments: [],
+        })
+        .select("id")
+        .single();
+
+      if (lessonError || !lessonRow) {
+        throw new Error(lessonError?.message || `Erreur leçon ${li}`);
+      }
+
+      // Add quiz for module 1-2 (index 1) on the last lesson
+      if (mi === 1 && li === mod.lessons.length - 1) {
+        const { error: quizError } = await supabase.from("quizzes").insert({
+          lesson_id: lessonRow.id,
+          questions: QUIZ_MODULE_1_2,
+          max_attempts_per_day: 3,
+          passing_score: 90,
+          randomize: true,
+        });
+
+        if (quizError) {
+          console.error("Quiz insert error:", quizError.message);
+        }
+      }
+    }
+  }
+
+  revalidatePath("/academy", "page");
+  revalidatePath("/academy/admin", "page");
+
+  return { created: true, courseId: course.id };
+}
+
 // ─── Auto-generation de flashcards depuis le contenu d'une lecon ──────
 
 /**

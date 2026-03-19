@@ -53,7 +53,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+    roles: ["admin", "manager", "csm", "setter", "closer", "client_b2b", "client_b2c"],
   },
 
   // Admin/Manager + B2B (lecture seule pour B2B)
@@ -61,13 +61,13 @@ export const NAV_ITEMS: NavItem[] = [
     label: "CRM",
     href: "/crm",
     icon: Kanban,
-    roles: ["admin", "manager", "setter", "closer", "client_b2b"],
+    roles: ["admin", "manager", "csm", "setter", "closer", "client_b2b"],
   },
   {
     label: "Utilisateurs",
     href: "/utilisateurs",
     icon: Users,
-    roles: ["admin", "manager"],
+    roles: ["admin", "manager", "csm"],
   },
   {
     label: "Bookings",
@@ -115,7 +115,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Communauté",
     href: "/community",
     icon: UsersRound,
-    roles: ["admin", "manager", "client_b2c"],
+    roles: ["admin", "manager", "csm", "client_b2c"],
   },
 
   // Messages (unified: team channels, DMs, WhatsApp, Inbox)
@@ -177,6 +177,18 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Portail",
     href: "/portal",
     icon: Building2,
+    roles: ["client_b2b"],
+  },
+  {
+    label: "Mon ESOP",
+    href: "/portal/esop",
+    icon: FileText,
+    roles: ["client_b2b"],
+  },
+  {
+    label: "Mes SOPs",
+    href: "/portal/sops",
+    icon: FileText,
     roles: ["client_b2b"],
   },
   {

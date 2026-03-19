@@ -816,6 +816,29 @@ export async function handleUnipileWebhook(
         });
       }
 
+      // Reply detection: cancel pending relance workflows for this prospect
+      if (prospectId) {
+        try {
+          await supabase
+            .from("relance_workflows")
+            .update({
+              status: "responded",
+              responded_at: new Date().toISOString(),
+            })
+            .eq("prospect_id", prospectId)
+            .eq("status", "pending");
+
+          // Update prospect status to "replied" if currently "contacted"
+          await supabase
+            .from("prospects")
+            .update({ status: "replied" })
+            .eq("id", prospectId)
+            .eq("status", "contacted");
+        } catch {
+          // Non-critical — don't block webhook processing
+        }
+      }
+
       // Auto-create prospect
       if (!prospectId && senderId && adminProfile) {
         const senderName =

@@ -1,6 +1,7 @@
 export type UserRole =
   | "admin"
   | "manager"
+  | "csm"
   | "setter"
   | "closer"
   | "client_b2b"

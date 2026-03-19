@@ -36,6 +36,9 @@ import {
   UserPlus,
   Zap,
   ArrowRight,
+  BarChart3,
+  MessageSquare,
+  Send as SendIcon,
 } from "lucide-react";
 import {
   completeFollowUpTask,
@@ -91,13 +94,31 @@ interface Prospect {
   status: string;
 }
 
+interface RelanceStats {
+  total: number;
+  pending: number;
+  j2_waiting: number;
+  j2_sent: number;
+  j3_sent: number;
+  responded: number;
+  cancelled: number;
+  sent_today: number;
+  response_rate: number;
+}
+
 interface Props {
   tasks: Task[];
   sequences: Sequence[];
   prospects: Prospect[];
+  relanceStats?: RelanceStats | null;
 }
 
-export function FollowUpsView({ tasks, sequences, prospects }: Props) {
+export function FollowUpsView({
+  tasks,
+  sequences,
+  prospects,
+  relanceStats,
+}: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -459,6 +480,12 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
             <ListChecks className="h-4 w-4 mr-2" />
             Séquences ({sequences.length})
           </TabsTrigger>
+          {relanceStats && (
+            <TabsTrigger value="relances">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Relances auto ({relanceStats.total})
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Today's Tasks Tab */}
@@ -682,6 +709,131 @@ export function FollowUpsView({ tasks, sequences, prospects }: Props) {
             </div>
           )}
         </TabsContent>
+
+        {/* Relances Auto Tab */}
+        {relanceStats && (
+          <TabsContent value="relances">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card className="shadow-sm rounded-2xl">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {relanceStats.pending}
+                    </p>
+                    <p className="text-xs text-muted-foreground">En attente</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm rounded-2xl">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20 flex items-center justify-center">
+                    <SendIcon className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {relanceStats.sent_today}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Envoyees aujourd&apos;hui
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm rounded-2xl">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-brand" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {relanceStats.responded}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Reponses</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm rounded-2xl">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-purple-500/10 ring-1 ring-purple-500/20 flex items-center justify-center">
+                    <BarChart3 className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {relanceStats.response_rate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Taux de reponse
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="shadow-sm rounded-2xl mt-4">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Detail des relances automatiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground">
+                      Total relances creees
+                    </span>
+                    <span className="font-medium">{relanceStats.total}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground">
+                      En attente de J+2
+                    </span>
+                    <Badge variant="outline" className="bg-amber-500/10">
+                      {relanceStats.j2_waiting}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground">
+                      J+2 envoyes
+                    </span>
+                    <Badge variant="outline" className="bg-blue-500/10">
+                      {relanceStats.j2_sent}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground">
+                      J+3 envoyes
+                    </span>
+                    <Badge variant="outline" className="bg-blue-500/10">
+                      {relanceStats.j3_sent}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground">
+                      Prospects ayant repondu
+                    </span>
+                    <Badge variant="outline" className="bg-brand/10">
+                      {relanceStats.responded}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">
+                      Annulees
+                    </span>
+                    <Badge variant="outline" className="bg-muted/50">
+                      {relanceStats.cancelled}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
