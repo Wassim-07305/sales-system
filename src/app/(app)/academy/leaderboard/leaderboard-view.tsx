@@ -73,7 +73,7 @@ export function LeaderboardView({ leaderboard }: LeaderboardViewProps) {
           <CardContent className="py-12 text-center">
             <Trophy className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
             <p className="text-muted-foreground">
-              Aucune donnee disponible. Les resultats apparaitront quand les
+              Aucune données disponible. Les résultats apparaîtront quand les
               setters auront passe des quiz.
             </p>
           </CardContent>

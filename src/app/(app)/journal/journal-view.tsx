@@ -241,6 +241,17 @@ export function JournalView({ todayJournal, history }: Props) {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="flex items-center gap-1.5 text-xs">
+                      <Target className="h-3.5 w-3.5" />
+                      Taux de réponse
+                    </Label>
+                    <div className="h-10 flex items-center px-3 rounded-md bg-muted/50 text-sm font-semibold">
+                      {dmsSent > 0
+                        ? `${Math.round((repliesReceived / dmsSent) * 100)}%`
+                        : "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1.5 text-xs">
                       <Handshake className="h-3.5 w-3.5" />
                       Deals closés
                     </Label>
@@ -373,6 +384,13 @@ export function JournalView({ todayJournal, history }: Props) {
                       label: "Réponses",
                       value: todayJournal.replies_received,
                       icon: Smile,
+                    },
+                    {
+                      label: "Taux de réponse",
+                      value: todayJournal.dms_sent > 0
+                        ? `${Math.round((todayJournal.replies_received / todayJournal.dms_sent) * 100)}%`
+                        : "—",
+                      icon: Target,
                     },
                     {
                       label: "Appels bookés",

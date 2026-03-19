@@ -420,7 +420,7 @@ export function ChannelSidebar({
                       {filteredDmChannels.length === 0 &&
                         filteredUsersWithoutDM.length === 0 && (
                           <p className="text-xs text-muted-foreground px-2.5 py-2">
-                            Aucun resultat
+                            Aucun résultat
                           </p>
                         )}
                     </div>

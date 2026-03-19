@@ -181,7 +181,7 @@ export function AiModesView({ config }: AiModesViewProps) {
   );
   const [autoSendTemplate, setAutoSendTemplate] = useState(
     config.auto_send_template ||
-      "Bonjour {nom}, j'ai vu votre activite autour de {activite} et j'ai trouve {dernier_post} vraiment inspirant. J'aimerais echanger avec vous !",
+      "Bonjour {nom}, j'ai vu votre activité autour de {activité} et j'ai trouvé {dernier_post} vraiment inspirant. J'aimerais échanger avec vous !",
   );
   const [autoSendMode, setAutoSendMode] = useState<AiMode>(
     config.auto_send_mode || "critical_validation",
@@ -488,7 +488,7 @@ export function AiModesView({ config }: AiModesViewProps) {
                     },
                     {
                       var: "{activite}",
-                      tooltip: "Remplace par l'activite du prospect",
+                      tooltip: "Remplace par l'activité du prospect",
                     },
                     {
                       var: "{dernier_post}",
@@ -517,7 +517,7 @@ export function AiModesView({ config }: AiModesViewProps) {
                       setAutoSendTemplate(e.target.value);
                     }
                   }}
-                  placeholder="Bonjour {nom}, j'ai vu votre activite..."
+                  placeholder="Bonjour {nom}, j'ai vu votre activité..."
                   rows={4}
                   className="resize-none pr-16"
                 />

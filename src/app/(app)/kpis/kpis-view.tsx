@@ -389,7 +389,7 @@ export function KpisView({
                 <p className="font-semibold text-lg">Pas encore de donnees</p>
                 <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
                   Vos KPIs apparaitront ici au fur et a mesure de votre
-                  activite.
+                  activité.
                 </p>
               </CardContent>
             </Card>

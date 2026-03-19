@@ -432,7 +432,7 @@ function ObjectivesTab({
             <Target className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
             <p className="text-muted-foreground">Aucun objectif trouve</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Creez votre premier objectif SMART pour commencer
+              Créez votre premier objectif SMART pour commencer
             </p>
           </CardContent>
         </Card>
@@ -747,13 +747,13 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
         <CardHeader>
           <CardTitle className="text-foreground flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-[#7af17a]" />
-            Evaluation des competences
+            Évaluation des compétences
           </CardTitle>
         </CardHeader>
         <CardContent>
           {plan.skills.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
-              Aucune competence evaluee pour le moment.
+              Aucune compétence évaluée pour le moment.
             </p>
           ) : (
             <>
@@ -1102,7 +1102,7 @@ function NotesTab({
             </div>
             <div className="space-y-2">
               <Label className="text-muted-foreground">
-                Evaluation de la session
+                Évaluation de la session
               </Label>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (

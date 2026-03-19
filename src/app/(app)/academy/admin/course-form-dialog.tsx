@@ -143,7 +143,7 @@ export function CourseFormDialog({
               maxSize={5}
               currentUrl={thumbnailUrl}
               preview
-              label="Glissez une image ou cliquez pour selectionner"
+              label="Glissez une image ou cliquez pour sélectionner"
               onUpload={(url) => setThumbnailUrl(url)}
               onRemove={() => setThumbnailUrl(null)}
             />

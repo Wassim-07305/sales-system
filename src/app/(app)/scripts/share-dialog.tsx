@@ -119,7 +119,7 @@ export function ShareDialog({
             Partager le script
           </DialogTitle>
           <DialogDescription>
-            Invitez des membres de votre equipe a consulter ou modifier ce
+            Invitez des membres de votre équipe à consulter ou modifier ce
             script.
           </DialogDescription>
         </DialogHeader>

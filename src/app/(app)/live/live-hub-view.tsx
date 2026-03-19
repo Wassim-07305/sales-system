@@ -126,7 +126,7 @@ export function LiveHubView({
       value: "one_on_one",
       label: "Appel 1-to-1",
       icon: <Video className="w-5 h-5" />,
-      desc: "Appel video prive avec un participant",
+      desc: "Appel vidéo privé avec un participant",
     },
     {
       value: "live",
@@ -147,7 +147,7 @@ export function LiveHubView({
               Appels & Live
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Appels video, partage d&apos;ecran et sessions live
+              Appels vidéo, partage d&apos;écran et sessions live
             </p>
           </div>
           {isAdmin && (
@@ -217,7 +217,7 @@ export function LiveHubView({
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm">
               {isAdmin
-                ? "Creez une nouvelle session pour demarrer un appel video ou un live."
+                ? "Créez une nouvelle session pour démarrer un appel vidéo ou un live."
                 : "Aucune session live en cours. Revenez plus tard."}
             </p>
             {isAdmin && (
@@ -226,7 +226,7 @@ export function LiveHubView({
                 className="mt-4 h-10 px-4 rounded-xl bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
-                Creer une session
+                Créer une session
               </button>
             )}
           </div>
@@ -379,7 +379,7 @@ export function LiveHubView({
                 ) : (
                   <>
                     <Play className="w-4 h-4" />
-                    Demarrer
+                    Démarrer
                   </>
                 )}
               </button>

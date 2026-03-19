@@ -1443,7 +1443,7 @@ export function CourseView({
                       {/* Question results detail */}
                       <div className="mt-5 pt-4 border-t border-border/50 space-y-1.5">
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                          Detail des reponses
+                          Détail des réponses
                         </p>
                         {activeQuiz.questions.map((q, qi) => {
                           const isCorrect = quizAnswers[qi] === q.correct_index;

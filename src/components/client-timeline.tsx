@@ -114,7 +114,7 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Parcours complet</CardTitle>
           <Badge variant="outline" className="text-xs">
-            {filtered.length} evenement{filtered.length > 1 ? "s" : ""}
+            {filtered.length} événement{filtered.length > 1 ? "s" : ""}
           </Badge>
         </div>
         {/* Filters */}
@@ -139,7 +139,7 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
       <CardContent>
         {sortedDates.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
-            Aucun evenement pour ce filtre.
+            Aucun événement pour ce filtre.
           </p>
         ) : (
           <div className="space-y-6">

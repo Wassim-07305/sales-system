@@ -328,7 +328,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
             <div className="py-8 text-center text-muted-foreground">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">
-                Aucun script disponible. Creez votre premier flowchart ou mind
+                Aucun script disponible. Créez votre premier flowchart ou mind
                 map.
               </p>
             </div>

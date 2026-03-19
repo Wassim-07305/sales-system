@@ -135,7 +135,7 @@ export function QuizFormDialog({
       }
       if (!q.options[q.correct_index]?.trim()) {
         toast.error(
-          `Question ${i + 1} : la bonne reponse ne peut pas etre vide`,
+          `Question ${i + 1} : la bonne réponse ne peut pas être vide`,
         );
         return false;
       }
@@ -350,7 +350,7 @@ export function QuizFormDialog({
                     </div>
 
                     <p className="text-xs text-muted-foreground pl-7">
-                      Cliquez sur le cercle pour indiquer la bonne reponse
+                      Cliquez sur le cercle pour indiquer la bonne réponse
                     </p>
                   </div>
                 </div>

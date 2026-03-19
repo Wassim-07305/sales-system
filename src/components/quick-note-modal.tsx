@@ -122,7 +122,7 @@ export function QuickNoteModal({
 
   function handleSubmit() {
     if (!selectedDeal || !content.trim()) {
-      toast.error("Veuillez selectionner un deal et ecrire une note");
+      toast.error("Veuillez sélectionner un deal et écrire une note");
       return;
     }
 
@@ -177,7 +177,7 @@ export function QuickNoteModal({
           <DialogTitle className="flex items-center gap-2">
             <Icon className="h-5 w-5 text-brand" />
             {step === "select"
-              ? "Selectionner un deal"
+              ? "Sélectionner un deal"
               : "Ajouter une note rapide"}
           </DialogTitle>
         </DialogHeader>
@@ -235,7 +235,7 @@ export function QuickNoteModal({
                 <p className="text-xs text-muted-foreground">
                   {(selectedDeal?.contact
                     ? getContactName(selectedDeal.contact)
-                    : null) || "Deal selectionne"}
+                    : null) || "Deal sélectionné"}
                 </p>
               </div>
               {!defaultDealId && (
@@ -272,7 +272,7 @@ export function QuickNoteModal({
 
             {/* Note content */}
             <Textarea
-              placeholder="Ecrivez votre note ici..."
+              placeholder="Écrivez votre note ici..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={4}

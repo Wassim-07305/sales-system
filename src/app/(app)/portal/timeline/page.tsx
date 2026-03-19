@@ -20,7 +20,7 @@ export default async function PortalTimelinePage() {
     <div>
       <PageHeader
         title="Mon parcours"
-        description="Historique complet de votre activite sur la plateforme"
+        description="Historique complet de votre activité sur la plateforme"
       >
         <Link href="/portal">
           <Button variant="outline" size="sm">

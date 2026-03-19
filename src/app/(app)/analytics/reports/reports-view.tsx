@@ -279,11 +279,11 @@ export function ReportsView({
         setTotalCount(result.totalCount);
         setHasExecuted(true);
         toast.success(
-          `${result.totalCount} resultat${result.totalCount > 1 ? "s" : ""} trouve${result.totalCount > 1 ? "s" : ""}`,
+          `${result.totalCount} résultat${result.totalCount > 1 ? "s" : ""} trouvé${result.totalCount > 1 ? "s" : ""}`,
         );
       }
     } catch {
-      toast.error("Erreur lors de l'execution de la requete");
+      toast.error("Erreur lors de l'exécution de la requête");
     } finally {
       setLoading(false);
     }
@@ -695,7 +695,7 @@ export function ReportsView({
               className="w-full"
             >
               <Play className="size-4 mr-2" />
-              {loading ? "Execution..." : "Executer la requete"}
+              {loading ? "Exécution..." : "Exécuter la requête"}
             </Button>
             <div className="flex gap-2">
               <Button
@@ -755,7 +755,7 @@ export function ReportsView({
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-sm flex items-center gap-2">
                 <TableIcon className="size-4" />
-                Resultats
+                Résultats
                 {hasExecuted && (
                   <Badge variant="secondary" className="ml-2">
                     {totalCount} ligne{totalCount > 1 ? "s" : ""}
@@ -778,15 +778,15 @@ export function ReportsView({
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Search className="size-10 text-muted-foreground mb-3" />
                 <p className="text-muted-foreground text-sm">
-                  Configurez votre requete puis cliquez sur &quot;Executer la
-                  requete&quot;
+                  Configurez votre requête puis cliquez sur &quot;Exécuter la
+                  requête&quot;
                 </p>
               </div>
             ) : results.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Filter className="size-10 text-muted-foreground mb-3" />
                 <p className="text-muted-foreground text-sm">
-                  Aucun resultat pour cette requete
+                  Aucun résultat pour cette requête
                 </p>
               </div>
             ) : (
@@ -826,7 +826,7 @@ export function ReportsView({
 
             {hasExecuted && totalCount > results.length && (
               <p className="text-xs text-muted-foreground mt-3 text-center">
-                Affichage de {results.length} sur {totalCount} resultats.
+                Affichage de {results.length} sur {totalCount} résultats.
                 Augmentez la limite pour voir plus de donnees.
               </p>
             )}

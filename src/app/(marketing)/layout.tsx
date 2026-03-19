@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sales System — La plateforme tout-en-un pour les equipes de vente",
+  title: "Sales System — La plateforme tout-en-un pour les équipes de vente",
   description:
-    "Formation, CRM, prospection IA et management d'equipe. Remplacez 10 outils par un seul. Rejoignez +200 setters et +50 entreprises.",
+    "Formation, CRM, prospection IA et management d'équipe. Remplacez 10 outils par un seul. Rejoignez +200 setters et +50 entreprises.",
   openGraph: {
-    title: "Sales System — La plateforme tout-en-un pour les equipes de vente",
+    title: "Sales System — La plateforme tout-en-un pour les équipes de vente",
     description:
-      "Formation, CRM integre, IA et communaute. Rejoignez des centaines de setters qui performent avec Sales System.",
+      "Formation, CRM intégré, IA et communauté. Rejoignez des centaines de setters qui performent avec Sales System.",
     type: "website",
     locale: "fr_FR",
     siteName: "Sales System",
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sales System — La plateforme tout-en-un pour les equipes de vente",
+    title: "Sales System — La plateforme tout-en-un pour les équipes de vente",
     description:
-      "Formation, CRM, prospection IA et management d'equipe. Remplacez 10 outils par un seul.",
+      "Formation, CRM, prospection IA et management d'équipe. Remplacez 10 outils par un seul.",
   },
   robots: {
     index: true,

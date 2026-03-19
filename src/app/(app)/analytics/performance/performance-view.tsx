@@ -138,7 +138,7 @@ export function PerformanceView({
               </div>
               <div>
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Classement equipe
+                  Classement équipe
                 </p>
                 <p className="text-3xl font-bold text-foreground">
                   #{report.ranking.position}

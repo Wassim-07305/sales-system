@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const TEMPLATES = {
   coaching: `## Session Coaching\n\n### Points abordes\n- \n\n### Forces observees\n- \n\n### Axes d'amelioration\n- \n\n### Prochaines etapes\n- `,
-  decouverte: `## Appel Decouverte\n\n### Situation actuelle\n- \n\n### Problemes identifies\n- \n\n### Budget / Timeline\n- \n\n### Decision maker\n- \n\n### Prochaine action\n- `,
+  decouverte: `## Appel Découverte\n\n### Situation actuelle\n- \n\n### Problemes identifies\n- \n\n### Budget / Timeline\n- \n\n### Decision maker\n- \n\n### Prochaine action\n- `,
   suivi: `## Suivi Client\n\n### Resultats depuis dernier appel\n- \n\n### Nouveaux objectifs\n- \n\n### Obstacles\n- \n\n### Actions a prendre\n- `,
 };
 

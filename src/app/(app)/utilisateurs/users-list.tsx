@@ -60,6 +60,10 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string }> = {
     label: "Manager",
     color: "bg-brand/10 text-brand border-brand/20",
   },
+  csm: {
+    label: "CSM",
+    color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  },
   setter: {
     label: "Setter",
     color: "bg-muted/60 text-muted-foreground border-border/50",

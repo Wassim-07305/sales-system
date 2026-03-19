@@ -15,20 +15,29 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     setLoading(true);
+
+    if (!email.trim() || !password) {
+      setError("Veuillez remplir tous les champs.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
-      if (error) {
+      if (authError) {
+        setError("Email ou mot de passe incorrect.");
         toast.error("Email ou mot de passe incorrect");
         setPassword("");
         setLoading(false);
@@ -37,11 +46,9 @@ export function LoginForm() {
 
       router.push("/dashboard");
       router.refresh();
-      setLoading(false);
     } catch {
-      toast.error(
-        "Erreur de connexion au serveur. Vérifiez votre connexion internet.",
-      );
+      setError("Erreur de connexion au serveur. Vérifiez votre connexion internet.");
+      toast.error("Erreur de connexion au serveur.");
       setLoading(false);
     }
   }
@@ -57,7 +64,7 @@ export function LoginForm() {
           type="email"
           placeholder="damien@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => { setEmail(e.target.value); setError(null); }}
           required
           autoComplete="email"
           className="h-11 rounded-xl bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
@@ -81,7 +88,7 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             placeholder={"••••••••"}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setError(null); }}
             required
             autoComplete="current-password"
             className="h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
@@ -105,6 +112,12 @@ export function LoginForm() {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       <div className="pt-2">
         <Button

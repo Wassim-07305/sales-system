@@ -210,7 +210,7 @@ export function DealDetail({
 
     setNewActivity({ type: "note", content: "" });
     setActivityOpen(false);
-    toast.success("Activite ajoutee");
+    toast.success("Activité ajoutée");
     router.refresh();
   }
 
@@ -392,8 +392,8 @@ export function DealDetail({
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer ce deal ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Cette action est irreversible. Toutes les activites associees
-                  seront egalement supprimees.
+                  Cette action est irréversible. Toutes les activités associées
+                  seront également supprimées.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -515,7 +515,7 @@ export function DealDetail({
           <Card>
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-base">
-                Historique des activites
+                Historique des activités
               </CardTitle>
               <Dialog open={activityOpen} onOpenChange={setActivityOpen}>
                 <DialogTrigger asChild>
@@ -526,7 +526,7 @@ export function DealDetail({
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Nouvelle activite</DialogTitle>
+                    <DialogTitle>Nouvelle activité</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
                     <div>
@@ -562,7 +562,7 @@ export function DealDetail({
                             content: e.target.value,
                           })
                         }
-                        placeholder="Decrivez l'activite..."
+                        placeholder="Décrivez l'activité..."
                         rows={4}
                       />
                     </div>
@@ -579,7 +579,7 @@ export function DealDetail({
             <CardContent>
               {activities.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
-                  Aucune activite enregistree
+                  Aucune activité enregistrée
                 </p>
               ) : (
                 <div className="space-y-4">

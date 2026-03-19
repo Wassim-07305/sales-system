@@ -175,7 +175,7 @@ export function CreateChannelModal({
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="ex: equipe-closers"
+                placeholder="ex: équipe-closers"
                 className="h-9"
               />
             </div>
@@ -197,7 +197,7 @@ export function CreateChannelModal({
           {/* Members */}
           <div className="space-y-2">
             <Label className="text-xs">
-              Membres ({selectedMembers.length} selectionne
+              Membres ({selectedMembers.length} sélectionné
               {selectedMembers.length > 1 ? "s" : ""})
             </Label>
 

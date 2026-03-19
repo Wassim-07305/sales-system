@@ -382,12 +382,12 @@ export function ContactDetail({
         {/* Activity timeline */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Activite recente</CardTitle>
+            <CardTitle className="text-lg">Activité récente</CardTitle>
           </CardHeader>
           <CardContent>
             {activities.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                Aucune activite
+                Aucune activité
               </p>
             ) : (
               <div className="space-y-4">

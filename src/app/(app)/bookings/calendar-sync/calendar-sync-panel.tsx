@@ -362,7 +362,7 @@ export function CalendarSyncPanel({
                   </span>
                 </li>
                 <li>
-                  Creez un nouveau projet ou selectionnez un projet existant
+                  Créez un nouveau projet ou sélectionnez un projet existant
                 </li>
                 <li>
                   Activez l&apos;API Google Calendar dans{" "}
@@ -537,7 +537,7 @@ export function CalendarSyncPanel({
               Direction de synchronisation
             </Label>
             <p className="text-xs text-muted-foreground">
-              Choisissez comment les evenements sont synchronises entre
+              Choisissez comment les événements sont synchronisés entre
               l&apos;application et Google Calendar
             </p>
             <Select
@@ -583,7 +583,7 @@ export function CalendarSyncPanel({
             <Label className="text-sm font-medium">Calendrier par defaut</Label>
             <p className="text-xs text-muted-foreground">
               {status.connected
-                ? "Selectionnez le calendrier Google dans lequel creer les evenements"
+                ? "Sélectionnez le calendrier Google dans lequel créer les événements"
                 : "Connectez votre compte Google pour voir vos calendriers disponibles"}
             </p>
             <Select
@@ -629,7 +629,7 @@ export function CalendarSyncPanel({
             <div className="rounded-xl border border-border/50 p-4 text-center">
               <p className="text-2xl font-bold">{status.syncedEventsCount}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Evenements synchronises
+                Événements synchronisés
               </p>
             </div>
             <div className="rounded-xl border border-border/50 p-4 text-center">

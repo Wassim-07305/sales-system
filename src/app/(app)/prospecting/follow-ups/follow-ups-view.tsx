@@ -738,7 +738,7 @@ export function FollowUpsView({
                       {relanceStats.sent_today}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Envoyees aujourd&apos;hui
+                      Envoyées aujourd&apos;hui
                     </p>
                   </div>
                 </CardContent>
@@ -753,7 +753,7 @@ export function FollowUpsView({
                     <p className="text-2xl font-bold">
                       {relanceStats.responded}
                     </p>
-                    <p className="text-xs text-muted-foreground">Reponses</p>
+                    <p className="text-xs text-muted-foreground">Réponses</p>
                   </div>
                 </CardContent>
               </Card>
@@ -768,7 +768,7 @@ export function FollowUpsView({
                       {relanceStats.response_rate}%
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Taux de reponse
+                      Taux de réponse
                     </p>
                   </div>
                 </CardContent>
@@ -778,14 +778,14 @@ export function FollowUpsView({
             <Card className="shadow-sm rounded-2xl mt-4">
               <CardHeader>
                 <CardTitle className="text-base">
-                  Detail des relances automatiques
+                  Détail des relances automatiques
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2 border-b border-border/50">
                     <span className="text-sm text-muted-foreground">
-                      Total relances creees
+                      Total relances créées
                     </span>
                     <span className="font-medium">{relanceStats.total}</span>
                   </div>
@@ -799,7 +799,7 @@ export function FollowUpsView({
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-border/50">
                     <span className="text-sm text-muted-foreground">
-                      J+2 envoyes
+                      J+2 envoyés
                     </span>
                     <Badge variant="outline" className="bg-blue-500/10">
                       {relanceStats.j2_sent}
@@ -807,7 +807,7 @@ export function FollowUpsView({
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-border/50">
                     <span className="text-sm text-muted-foreground">
-                      J+3 envoyes
+                      J+3 envoyés
                     </span>
                     <Badge variant="outline" className="bg-blue-500/10">
                       {relanceStats.j3_sent}
@@ -815,7 +815,7 @@ export function FollowUpsView({
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-border/50">
                     <span className="text-sm text-muted-foreground">
-                      Prospects ayant repondu
+                      Prospects ayant répondu
                     </span>
                     <Badge variant="outline" className="bg-brand/10">
                       {relanceStats.responded}
@@ -823,7 +823,7 @@ export function FollowUpsView({
                   </div>
                   <div className="flex items-center justify-between py-2">
                     <span className="text-sm text-muted-foreground">
-                      Annulees
+                      Annulées
                     </span>
                     <Badge variant="outline" className="bg-muted/50">
                       {relanceStats.cancelled}

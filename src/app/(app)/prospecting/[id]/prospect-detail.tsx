@@ -723,7 +723,7 @@ export function ProspectDetail({
                   <span className="font-medium">{score.engagement_score}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Reactivite</span>
+                  <span className="text-muted-foreground">Réactivité</span>
                   <span className="font-medium">
                     {score.responsiveness_score}
                   </span>

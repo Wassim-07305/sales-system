@@ -157,7 +157,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
     <div>
       <PageHeader
         title="Gestion des formations"
-        description="Creez, modifiez et organisez vos formations"
+        description="Créez, modifiez et organisez vos formations"
       >
         <div className="flex items-center gap-2">
           <Button

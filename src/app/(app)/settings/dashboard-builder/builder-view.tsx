@@ -177,7 +177,7 @@ export function BuilderView({ initialWidgets }: { initialWidgets: Widget[] }) {
               <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <LayoutDashboard className="h-7 w-7 opacity-50" />
               </div>
-              <p className="font-medium">Aucun widget selectionne</p>
+              <p className="font-medium">Aucun widget sélectionné</p>
               <p className="text-sm mt-1">
                 Activez des widgets ci-dessus pour les voir apparaitre ici.
               </p>

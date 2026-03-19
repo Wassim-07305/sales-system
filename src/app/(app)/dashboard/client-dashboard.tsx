@@ -177,7 +177,7 @@ function B2BClientDashboard({
       <Card className="mb-6 bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
-            Bonjour {userName.split(" ")[0]}, voici votre activite du mois
+            Bonjour {userName.split(" ")[0]}, voici votre activité du mois
           </h2>
           <p className="text-muted-foreground text-sm mb-4">
             Suivez les performances de{" "}
@@ -194,7 +194,7 @@ function B2BClientDashboard({
                   {data.stats.messagesSent}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  Messages envoyes
+                  Messages envoyés
                 </p>
               </div>
             </div>
@@ -205,7 +205,7 @@ function B2BClientDashboard({
                   {data.stats.responseRate}%
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  Taux de reponse
+                  Taux de réponse
                 </p>
               </div>
             </div>
@@ -216,7 +216,7 @@ function B2BClientDashboard({
                   {data.stats.bookingsBooked}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  RDV decroches
+                  RDV décrochés
                 </p>
               </div>
             </div>
@@ -267,7 +267,7 @@ function B2BClientDashboard({
                 </p>
                 {data.setterPerformance.lastActivityAt && (
                   <p className="text-xs text-muted-foreground">
-                    Derniere activite :{" "}
+                    Dernière activité :{" "}
                     {formatDistanceToNow(
                       new Date(data.setterPerformance.lastActivityAt),
                       { addSuffix: true, locale: fr },
@@ -293,7 +293,7 @@ function B2BClientDashboard({
                 <div className="flex items-center gap-2 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-blue-500" />
                   <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
-                    Prospects contactes
+                    Prospects contactés
                   </span>
                 </div>
                 <p className="text-2xl font-bold tracking-tight">
@@ -315,7 +315,7 @@ function B2BClientDashboard({
                 <div className="flex items-center gap-2 mb-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
                   <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
-                    Taux de reponse
+                    Taux de réponse
                   </span>
                 </div>
                 <p className="text-2xl font-bold tracking-tight">
@@ -399,7 +399,7 @@ function B2BClientDashboard({
                   <Calendar className="h-6 w-6 text-muted-foreground/40" />
                 </div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Aucun rendez-vous a venir
+                  Aucun rendez-vous à venir
                 </p>
               </div>
             ) : (
@@ -432,14 +432,14 @@ function B2BClientDashboard({
           </CardContent>
         </Card>
 
-        {/* Activite recente */}
+        {/* Activité récente */}
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
                 <Activity className="h-3.5 w-3.5 text-brand" />
               </div>
-              Activite recente
+              Activité récente
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -449,7 +449,7 @@ function B2BClientDashboard({
                   <Activity className="h-6 w-6 text-muted-foreground/40" />
                 </div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Aucune activite recente
+                  Aucune activité récente
                 </p>
               </div>
             ) : (
@@ -574,13 +574,13 @@ function B2CClientDashboard({
 
   function handleSaveJournal() {
     if (mood === 0) {
-      toast.error("Selectionne ton humeur du jour.");
+      toast.error("Sélectionne ton humeur du jour.");
       return;
     }
     startTransition(async () => {
       try {
         await saveDailyJournal({ mood, wins, challenges, goals });
-        toast.success("Journal sauvegarde !");
+        toast.success("Journal sauvegardé !");
       } catch {
         toast.error("Erreur lors de la sauvegarde.");
       }
@@ -595,26 +595,26 @@ function B2CClientDashboard({
       <Card className="mb-6 bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
-            Continue sur ta lancee, {userName.split(" ")[0]} !
+            Continue sur ta lancée, {userName.split(" ")[0]} !
           </h2>
           <p className="text-muted-foreground text-sm mb-4">
-            Tu as complete {overallProgress}% de ta formation.
+            Tu as complété {overallProgress}% de ta formation.
             {overallProgress < 100
-              ? " Continue pour debloquer la suite."
-              : " Felicitations, tu as tout termine !"}
+              ? " Continue pour débloquer la suite."
+              : " Félicitations, tu as tout terminé !"}
           </p>
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2">
               <BookOpen className="h-4 w-4 text-brand" />
               <span className="text-sm">
-                {completedLessons}/{totalLessons} lecons
+                {completedLessons}/{totalLessons} leçons
               </span>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2">
               <Calendar className="h-4 w-4 text-brand" />
               <span className="text-sm">
-                {data.upcomingEvents.length} evenement
-                {data.upcomingEvents.length > 1 ? "s" : ""} a venir
+                {data.upcomingEvents.length} événement
+                {data.upcomingEvents.length > 1 ? "s" : ""} à venir
               </span>
             </div>
             {data.quizAttemptsToday > 0 && (
@@ -658,7 +658,7 @@ function B2CClientDashboard({
           <CardContent className="space-y-6">
             {data.courseProgress.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucune formation en cours. Inscris-toi a un cours pour commencer
+                Aucune formation en cours. Inscris-toi à un cours pour commencer
                 !
               </p>
             ) : (
@@ -686,7 +686,7 @@ function B2CClientDashboard({
                     </div>
                     <Progress value={percent} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-1">
-                      {course.completed}/{course.total} lecons terminees
+                      {course.completed}/{course.total} leçons terminées
                     </p>
                   </div>
                 );
@@ -702,13 +702,13 @@ function B2CClientDashboard({
               <div className="h-7 w-7 rounded-lg bg-blue-500/10 flex items-center justify-center ring-1 ring-blue-500/20">
                 <Calendar className="h-3.5 w-3.5 text-blue-500" />
               </div>
-              Prochains evenements
+              Prochains événements
             </CardTitle>
           </CardHeader>
           <CardContent>
             {data.upcomingEvents.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun evenement a venir.
+                Aucun événement à venir.
               </p>
             ) : (
               <div className="space-y-4">
@@ -751,7 +751,7 @@ function B2CClientDashboard({
             <div className="h-7 w-7 rounded-lg bg-purple-500/10 flex items-center justify-center ring-1 ring-purple-500/20">
               <Star className="h-3.5 w-3.5 text-purple-500" />
             </div>
-            {hasJournal ? "Journal du jour (deja rempli)" : "Journal du jour"}
+            {hasJournal ? "Journal du jour (déjà rempli)" : "Journal du jour"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -785,7 +785,7 @@ function B2CClientDashboard({
               {data.todayJournal?.struggles && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">
-                    Defis
+                    Défis
                   </p>
                   <p className="text-sm">{data.todayJournal.struggles}</p>
                 </div>
@@ -845,7 +845,7 @@ function B2CClientDashboard({
                   Tes victoires du jour
                 </label>
                 <Textarea
-                  placeholder="Qu'est-ce qui s'est bien passe aujourd'hui ?"
+                  placeholder="Qu'est-ce qui s'est bien passé aujourd'hui ?"
                   value={wins}
                   onChange={(e) => setWins(e.target.value)}
                   rows={2}
@@ -855,10 +855,10 @@ function B2CClientDashboard({
               {/* Challenges */}
               <div>
                 <label className="text-sm font-medium mb-1 block">
-                  Tes defis
+                  Tes défis
                 </label>
                 <Textarea
-                  placeholder="Quelles difficultes as-tu rencontrees ?"
+                  placeholder="Quelles difficultés as-tu rencontrées ?"
                   value={challenges}
                   onChange={(e) => setChallenges(e.target.value)}
                   rows={2}

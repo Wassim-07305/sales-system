@@ -129,7 +129,7 @@ const navLinks = [
 ];
 
 const stats = [
-  { value: 200, suffix: "+", label: "Setters formes" },
+  { value: 200, suffix: "+", label: "Setters formés" },
   { value: 50, suffix: "+", label: "Entreprises" },
   { value: 98, suffix: "%", label: "De satisfaction" },
 ];
@@ -138,31 +138,31 @@ const features = [
   {
     icon: LayoutDashboard,
     title: "CRM Intelligent",
-    desc: "Pipeline Kanban drag & drop, automatisation du workflow et suivi des deals en temps reel.",
+    desc: "Pipeline Kanban drag & drop, automatisation du workflow et suivi des deals en temps réel.",
     gradient: "from-blue-500/20 to-blue-500/5",
   },
   {
     icon: GraduationCap,
     title: "Academy",
-    desc: "Formation modulaire progressive, quiz interactifs, certifications et suivi de competences.",
+    desc: "Formation modulaire progressive, quiz interactifs, certifications et suivi de compétences.",
     gradient: "from-emerald-500/20 to-emerald-500/5",
   },
   {
     icon: Bot,
     title: "Prospection IA",
-    desc: "LinkedIn, Instagram et WhatsApp automatises. Relances intelligentes et scoring des leads.",
+    desc: "LinkedIn, Instagram et WhatsApp automatisés. Relances intelligentes et scoring des leads.",
     gradient: "from-violet-500/20 to-violet-500/5",
   },
   {
     icon: GitBranch,
     title: "Scripts de Vente",
-    desc: "Flowcharts interactifs, mind maps visuels et templates de scripts prets a l'emploi.",
+    desc: "Flowcharts interactifs, mind maps visuels et templates de scripts prêts à l'emploi.",
     gradient: "from-amber-500/20 to-amber-500/5",
   },
   {
     icon: MessageSquare,
-    title: "Chat & Communaute",
-    desc: "Messagerie temps reel, forum d'entraide, events communautaires et replays video.",
+    title: "Chat & Communauté",
+    desc: "Messagerie temps réel, forum d'entraide, events communautaires et replays vidéo.",
     gradient: "from-rose-500/20 to-rose-500/5",
   },
   {
@@ -177,14 +177,14 @@ const steps = [
   {
     icon: UserPlus,
     number: "01",
-    title: "Creez votre compte",
+    title: "Créez votre compte",
     desc: "Configuration en 5 minutes. Importez vos contacts et personnalisez votre pipeline.",
   },
   {
     icon: Users,
     number: "02",
-    title: "Formez votre equipe",
-    desc: "Academy complete avec modules progressifs, roleplay IA et certifications.",
+    title: "Formez votre équipe",
+    desc: "Academy complète avec modules progressifs, roleplay IA et certifications.",
   },
   {
     icon: Rocket,
@@ -199,12 +199,12 @@ const pricingPlans = [
     name: "Starter",
     price: { monthly: "Gratuit", yearly: "Gratuit" },
     priceValue: { monthly: 0, yearly: 0 },
-    description: "Pour demarrer et decouvrir la plateforme.",
+    description: "Pour démarrer et découvrir la plateforme.",
     features: [
       "1 utilisateur",
       "CRM basique",
       "Academy (modules gratuits)",
-      "Communaute",
+      "Communauté",
       "Support email",
     ],
     cta: "Commencer gratuitement",
@@ -214,13 +214,13 @@ const pricingPlans = [
     name: "Pro",
     price: { monthly: "49", yearly: "39" },
     priceValue: { monthly: 49, yearly: 39 },
-    description: "Pour les equipes qui veulent scaler.",
+    description: "Pour les équipes qui veulent scaler.",
     features: [
-      "Jusqu'a 5 utilisateurs",
+      "Jusqu'à 5 utilisateurs",
       "CRM complet + Kanban",
-      "Academy integrale",
+      "Academy intégrale",
       "Prospection IA",
-      "Analytics avances",
+      "Analytics avancés",
       "Scripts & flowcharts",
       "Support prioritaire",
     ],
@@ -234,15 +234,15 @@ const pricingPlans = [
     priceValue: { monthly: -1, yearly: -1 },
     description: "Pour les organisations ambitieuses.",
     features: [
-      "Utilisateurs illimites",
+      "Utilisateurs illimités",
       "White-label complet",
-      "API & integrations",
-      "Support dedie",
-      "Onboarding personnalise",
+      "API & intégrations",
+      "Support dédié",
+      "Onboarding personnalisé",
       "SLA garanti",
       "Formation sur site",
     ],
-    cta: "Contacter l'equipe",
+    cta: "Contacter l'équipe",
     highlighted: false,
   },
 ];
@@ -251,23 +251,23 @@ const testimonials = [
   {
     name: "Lucas M.",
     role: "Setter freelance",
-    text: "En 3 mois, j'ai triple mon nombre de rendez-vous qualifies. Le CRM et les scripts ont tout change dans mon approche commerciale.",
+    text: "En 3 mois, j'ai triplé mon nombre de rendez-vous qualifiés. Le CRM et les scripts ont tout changé dans mon approche commerciale.",
     rating: 5,
     metric: "3x plus de RDV",
   },
   {
     name: "Sarah K.",
     role: "Closer B2B",
-    text: "La formation est ultra-complete. Les modules sur la decouverte client m'ont permis de passer de 15% a 40% de taux de closing.",
+    text: "La formation est ultra-complète. Les modules sur la découverte client m'ont permis de passer de 15% à 40% de taux de closing.",
     rating: 5,
     metric: "+25 pts de closing",
   },
   {
     name: "Thomas D.",
     role: "Entrepreneur e-commerce",
-    text: "J'ai recrute 3 setters via la plateforme. Le workspace B2B est exactement ce qu'il me fallait pour scaler mon acquisition.",
+    text: "J'ai recruté 3 setters via la plateforme. Le workspace B2B est exactement ce qu'il me fallait pour scaler mon acquisition.",
     rating: 5,
-    metric: "Equipe x3 en 2 mois",
+    metric: "Équipe x3 en 2 mois",
   },
 ];
 
@@ -288,11 +288,11 @@ const footerSections = [
     ],
   },
   {
-    title: "Legal",
+    title: "Légal",
     links: [
       { label: "CGV", href: "/cgv" },
-      { label: "Mentions legales", href: "/mentions-legales" },
-      { label: "Politique de confidentialite", href: "/confidentialite" },
+      { label: "Mentions légales", href: "/mentions-legales" },
+      { label: "Politique de confidentialité", href: "/confidentialite" },
     ],
   },
 ];
@@ -384,7 +384,7 @@ function DashboardMockup() {
 
             {/* Kanban mock */}
             <div className="grid grid-cols-3 gap-2">
-              {["Prospect", "Decouverte", "Closing"].map((col, ci) => (
+              {["Prospect", "Découverte", "Closing"].map((col, ci) => (
                 <div
                   key={col}
                   className="rounded-lg border border-white/[0.04] bg-white/[0.015] p-2"
@@ -588,7 +588,7 @@ export default function LandingPage() {
               {/* Badge */}
               <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-1.5 text-[13px] font-medium text-white/50 backdrop-blur-sm">
                 <span className="flex size-1.5 rounded-full bg-[#7af17a] shadow-[0_0_6px_rgba(122,241,122,0.6)]" />
-                Plateforme n&deg;1 pour les equipes de vente
+                Plateforme n&deg;1 pour les équipes de vente
               </div>
 
               {/* Headline */}
@@ -603,12 +603,12 @@ export default function LandingPage() {
                     aria-hidden="true"
                   />
                 </span>{" "}
-                pour les equipes de vente
+                pour les équipes de vente
               </h1>
 
               {/* Subheadline */}
               <p className="mx-auto mt-6 max-w-xl text-[1.125rem] leading-relaxed text-white/45 sm:text-lg">
-                Formation, CRM, prospection IA et management d&apos;equipe.
+                Formation, CRM, prospection IA et management d&apos;équipe.
                 Remplacez 10 outils par un seul.
               </p>
 
@@ -631,7 +631,7 @@ export default function LandingPage() {
                     type="button"
                     className="h-12 rounded-xl border border-white/[0.08] bg-white/[0.03] px-7 text-[15px] font-medium text-white/70 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.06] hover:text-white"
                   >
-                    Voir la demo
+                    Voir la démo
                   </button>
                 </a>
               </div>
@@ -650,7 +650,7 @@ export default function LandingPage() {
                 <span className="h-3 w-px bg-white/10" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
                   <Zap className="size-3.5" aria-hidden="true" />
-                  Acces immediat
+                  Accès immédiat
                 </span>
               </div>
             </div>
@@ -733,7 +733,7 @@ export default function LandingPage() {
                 pour <span className="text-white/40">performer</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
-                Une suite d&apos;outils concus pour les equipes de vente
+                Une suite d&apos;outils conçus pour les équipes de vente
                 ambitieuses.
               </p>
             </FadeIn>
@@ -792,10 +792,10 @@ export default function LandingPage() {
                 id="how-heading"
                 className="font-serif text-3xl font-bold tracking-tight sm:text-4xl"
               >
-                Operationnel en <span className="text-white/40">3 etapes</span>
+                Opérationnel en <span className="text-white/40">3 étapes</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
-                Une mise en place simple pour des resultats rapides.
+                Une mise en place simple pour des résultats rapides.
               </p>
             </FadeIn>
 
@@ -855,10 +855,10 @@ export default function LandingPage() {
                 id="pricing-heading"
                 className="font-serif text-3xl font-bold tracking-tight sm:text-4xl"
               >
-                Un investissement, pas une depense
+                Un investissement, pas une dépense
               </h2>
               <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
-                Choisissez le plan adapte a votre equipe.
+                Choisissez le plan adapté à votre équipe.
               </p>
 
               {/* Monthly/Yearly toggle */}
@@ -985,7 +985,7 @@ export default function LandingPage() {
             </div>
 
             <p className="mx-auto mt-10 max-w-md text-center text-[13px] text-white/45">
-              Annulation possible a tout moment. Sans carte bancaire pour le
+              Annulation possible à tout moment. Sans carte bancaire pour le
               plan Starter.
             </p>
           </div>
@@ -1012,10 +1012,10 @@ export default function LandingPage() {
                 id="testimonials-heading"
                 className="font-serif text-3xl font-bold tracking-tight sm:text-4xl"
               >
-                Ils ont transforme leur carriere
+                Ils ont transformé leur carrière
               </h2>
               <p className="mt-5 text-base leading-relaxed text-white/50 sm:text-lg">
-                Decouvrez les retours de nos membres les plus actifs.
+                Découvrez les retours de nos membres les plus actifs.
               </p>
             </FadeIn>
 
@@ -1039,7 +1039,7 @@ export default function LandingPage() {
                   <div
                     className="mb-4 flex gap-0.5"
                     role="img"
-                    aria-label={`${t.rating} etoiles sur 5`}
+                    aria-label={`${t.rating} étoiles sur 5`}
                   >
                     {Array.from({ length: t.rating }).map((_, idx) => (
                       <Star
@@ -1096,12 +1096,12 @@ export default function LandingPage() {
               id="cta-heading"
               className="font-serif text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl"
             >
-              Pret a transformer
+              Prêt à transformer
               <br />
-              <span className="text-white/40">votre equipe commerciale</span> ?
+              <span className="text-white/40">votre équipe commerciale</span> ?
             </h2>
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-white/50 sm:text-lg">
-              Rejoignez des centaines de professionnels qui ont deja fait le
+              Rejoignez des centaines de professionnels qui ont déjà fait le
               choix de l&apos;excellence.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
@@ -1153,7 +1153,7 @@ export default function LandingPage() {
                 </span>
               </Link>
               <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-white/50">
-                La plateforme de reference pour les equipes de vente en France.
+                La plateforme de référence pour les équipes de vente en France.
               </p>
             </div>
 
@@ -1180,7 +1180,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-14 border-t border-white/[0.04] pt-8 text-center text-[12px] text-white/45">
-            &copy; 2026 Sales System. Tous droits reserves.
+            &copy; 2026 Sales System. Tous droits réservés.
           </div>
         </div>
       </footer>

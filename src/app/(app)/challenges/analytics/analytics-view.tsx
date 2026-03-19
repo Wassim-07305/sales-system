@@ -397,7 +397,7 @@ export function GamificationAnalyticsView({ data }: Props) {
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
             Comparaison des performances entre les joueurs actifs (streak de 7
-            jours ou plus) et les autres membres de l&apos;equipe.
+            jours ou plus) et les autres membres de l&apos;équipe.
           </p>
           <Table>
             <TableHeader>
