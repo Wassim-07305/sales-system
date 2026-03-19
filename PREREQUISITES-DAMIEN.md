@@ -93,7 +93,34 @@ Pour tester le role CSM :
 
 ---
 
-## 6. Test rapide post-configuration
+## 6. Policies RLS — Table `contracts`
+
+La création de contrats (`/contracts/new`) nécessite que les policies RLS autorisent l'INSERT pour les rôles admin et manager.
+
+- [ ] Vérifier dans Supabase Dashboard > Authentication > Policies > table `contracts`
+- [ ] S'assurer qu'une policy INSERT existe pour les rôles `admin` et `manager`
+- [ ] Exemple de policy à ajouter si manquante :
+
+```sql
+CREATE POLICY "Admin and manager can insert contracts"
+ON contracts FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+    AND profiles.role IN ('admin', 'manager')
+  )
+);
+```
+
+- [ ] Vérifier également les policies SELECT et UPDATE sur `contracts`, `invoices` et `payment_installments`
+- [ ] Après ajout, tester la création d'un contrat depuis `/contracts/new`
+- [ ] Vérifier que l'auto-facture se génère après signature (le code est en place via `generateInvoice()`)
+
+---
+
+## 7. Test rapide post-configuration
 
 - [ ] Se connecter en admin > Academy > cliquer "Initialiser modules Damien" > verifier les 13 modules
 - [ ] Se connecter en client_b2b > verifier l'acces a "Mon ESOP" et "Mes SOPs" dans la sidebar
