@@ -21,7 +21,6 @@ export default async function NewContractPage({
   const { data: clients } = await supabase
     .from("profiles")
     .select("id, full_name, email, company")
-    .in("role", ["client_b2b", "client_b2c"])
     .order("full_name");
 
   const { data: rawDeals } = await supabase

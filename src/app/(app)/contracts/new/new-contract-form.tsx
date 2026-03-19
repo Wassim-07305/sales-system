@@ -49,12 +49,22 @@ export function NewContractForm({
   initialAmount,
 }: Props) {
   const router = useRouter();
+  // Auto-resolve client from deal if not passed directly
+  const initialDeal = initialDealId
+    ? deals.find((d) => d.id === initialDealId)
+    : null;
+  const resolvedClientId =
+    initialClientId || initialDeal?.contact?.id || "";
+  const resolvedOfferName = initialDeal?.title || "";
+
   const [templateId, setTemplateId] = useState("");
-  const [clientId, setClientId] = useState(initialClientId || "");
+  const [clientId, setClientId] = useState(resolvedClientId);
   const [dealId, setDealId] = useState(initialDealId || "");
-  const [amount, setAmount] = useState(initialAmount || "");
+  const [amount, setAmount] = useState(
+    initialAmount || String(initialDeal?.value || ""),
+  );
   const [paymentSchedule, setPaymentSchedule] = useState("");
-  const [offerName, setOfferName] = useState("");
+  const [offerName, setOfferName] = useState(resolvedOfferName);
   const [loading, setLoading] = useState(false);
 
   const selectedTemplate = templates.find((t) => t.id === templateId);

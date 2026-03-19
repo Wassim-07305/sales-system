@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Sheet,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -35,16 +36,35 @@ import {
   Thermometer,
   Snowflake,
   Percent,
-  Save,
+  Send,
   ArrowRight,
   CalendarPlus,
   FileText,
+  User,
+  History,
 } from "lucide-react";
 import {
   updateDealStage,
   updateDealTemperature,
-  updateDealNotes,
+  addDealActivity,
+  getDealActivities,
+  getTeamMembers,
+  updateDeal,
 } from "@/lib/actions/crm";
+
+interface Activity {
+  id: string;
+  type: string;
+  content: string;
+  created_at: string;
+  user?: { full_name: string | null } | null;
+}
+
+interface TeamMember {
+  id: string;
+  full_name: string | null;
+  role: string;
+}
 
 interface DealPanelProps {
   deal: Deal;
@@ -96,8 +116,22 @@ function getAvatarColor(str: string) {
 }
 
 export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
-  const [notes, setNotes] = useState(deal.notes || "");
+  const [noteText, setNoteText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
+
+  const loadActivities = useCallback(async () => {
+    const data = await getDealActivities(deal.id);
+    setActivities(data as Activity[]);
+    setLoadingActivities(false);
+  }, [deal.id]);
+
+  useEffect(() => {
+    loadActivities();
+    getTeamMembers().then(setTeamMembers);
+  }, [loadActivities]);
 
   async function handleStageChange(stageId: string) {
     const result = await updateDealStage(deal.id, stageId);
@@ -118,14 +152,26 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
     onUpdate({ ...deal, temperature: temp });
   }
 
-  async function saveNotes() {
+  async function handleAssignChange(userId: string) {
+    const result = await updateDeal(deal.id, { assigned_to: userId });
+    if (result.error) {
+      toast.error("Erreur");
+      return;
+    }
+    onUpdate({ ...deal, assigned_to: userId } as Deal);
+    toast.success("Setter assigné mis à jour");
+  }
+
+  async function addNote() {
+    if (!noteText.trim()) return;
     setSaving(true);
-    const result = await updateDealNotes(deal.id, notes);
+    const result = await addDealActivity(deal.id, "note", noteText.trim());
     if (result.error) {
       toast.error("Erreur");
     } else {
-      onUpdate({ ...deal, notes });
-      toast.success("Notes enregistrées");
+      setNoteText("");
+      await loadActivities();
+      toast.success("Note ajoutée");
     }
     setSaving(false);
   }
@@ -284,6 +330,36 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             </div>
           </div>
 
+          {/* Setter assigné */}
+          <div>
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+              Assigné à
+            </label>
+            <Select
+              value={((deal as unknown as Record<string, unknown>).assigned_to as string) || ""}
+              onValueChange={handleAssignChange}
+            >
+              <SelectTrigger className="h-11 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="Sélectionner un membre" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {teamMembers.map((member) => (
+                  <SelectItem key={member.id} value={member.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{member.full_name || "Sans nom"}</span>
+                      <span className="text-xs text-muted-foreground capitalize">
+                        ({member.role})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Quick actions */}
           <div>
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
@@ -393,27 +469,77 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             </div>
           )}
 
-          {/* Notes */}
+          {/* Notes — journal chronologique */}
           <div>
-            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
-              Notes
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <History className="h-3.5 w-3.5" />
+              Historique des notes
             </label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ajouter des notes sur ce deal..."
-              rows={4}
-              className="mb-3 resize-none"
-            />
-            <Button
-              size="sm"
-              onClick={saveNotes}
-              disabled={saving || notes === (deal.notes || "")}
-              className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
-            >
-              <Save className="h-3.5 w-3.5" />
-              {saving ? "Enregistrement..." : "Enregistrer"}
-            </Button>
+            <div className="flex gap-2 mb-3">
+              <Input
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Ajouter une note..."
+                className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    addNote();
+                  }
+                }}
+              />
+              <Button
+                size="sm"
+                onClick={addNote}
+                disabled={saving || !noteText.trim()}
+                className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5 shrink-0"
+              >
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {loadingActivities ? (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  Chargement...
+                </p>
+              ) : activities.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  Aucune note pour le moment
+                </p>
+              ) : (
+                activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="p-2.5 rounded-lg bg-muted/30 border border-border/50"
+                  >
+                    <p className="text-sm">{activity.content}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(activity.created_at).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
+                      </span>
+                      {activity.user?.full_name && (
+                        <span className="text-[10px] text-muted-foreground">
+                          — {activity.user.full_name}
+                        </span>
+                      )}
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize">
+                        {activity.type === "note"
+                          ? "note"
+                          : activity.type.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </SheetContent>

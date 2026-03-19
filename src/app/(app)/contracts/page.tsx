@@ -1,37 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Plus, FileText, DollarSign } from "lucide-react";
+import { Plus, DollarSign } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { DownloadPdfButton } from "./download-pdf-button";
 import { ContractsExportButton } from "./contracts-export-button";
-
-const statusColors: Record<string, string> = {
-  draft: "bg-muted text-muted-foreground border-border",
-  sent: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  signed: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  expired: "bg-red-500/10 text-red-600 border-red-500/20",
-};
-
-const statusLabels: Record<string, string> = {
-  draft: "Brouillon",
-  sent: "Envoyé",
-  signed: "Signé",
-  expired: "Expiré",
-};
+import { ContractsList } from "./contracts-list";
 
 export default async function ContractsPage() {
   const supabase = await createClient();
@@ -78,81 +52,7 @@ export default async function ContractsPage() {
         </div>
       </PageHeader>
 
-      <Card className="rounded-xl border-border/50 shadow-sm overflow-hidden">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[700px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Contrat</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(contracts || []).map((contract) => (
-                <TableRow
-                  key={contract.id}
-                  className="hover:bg-secondary/50 transition-colors"
-                >
-                  <TableCell>
-                    <Link
-                      href={`/contracts/${contract.id}`}
-                      className="flex items-center gap-2 hover:underline font-medium"
-                    >
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      Contrat #{contract.id.slice(0, 8)}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{contract.client?.full_name || "—"}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-3.5 w-3.5 text-brand" />
-                      {contract.amount?.toLocaleString("fr-FR") || "0"} €
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={statusColors[contract.status]}
-                    >
-                      {statusLabels[contract.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {format(new Date(contract.created_at), "d MMM yyyy", {
-                      locale: fr,
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    <DownloadPdfButton contract={contract} />
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(!contracts || contracts.length === 0) && (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center py-12 text-muted-foreground"
-                  >
-                    <div className="flex flex-col items-center">
-                      <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-                        <FileText className="h-7 w-7 opacity-50" />
-                      </div>
-                      <p className="font-medium">Aucun contrat</p>
-                      <p className="text-sm mt-1">
-                        Créez votre premier contrat pour commencer.
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <ContractsList contracts={contracts || []} />
     </div>
   );
 }

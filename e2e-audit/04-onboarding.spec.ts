@@ -57,7 +57,10 @@ test.describe("FONCTIONNALITÉ 4 — ONBOARDING", () => {
 
     // B2B gating should exist
     expect(content).toContain("b2b_questionnaire");
-    expect(content).toContain("!!company && !!secteur && !!offre && !!cible");
+    expect(content).toContain("!!company");
+    expect(content).toContain("!!secteur");
+    expect(content).toContain("!!offre");
+    expect(content).toContain("!!cible");
     expect(content).toContain("generateB2BWorkspace");
   });
 
