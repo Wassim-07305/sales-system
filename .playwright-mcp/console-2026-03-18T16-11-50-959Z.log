@@ -1,2 +1,0 @@
-[     475ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ http://localhost:3000/chat:323
-[     475ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ http://localhost:3000/chat:323

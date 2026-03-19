@@ -1,3 +1,0 @@
-[     146ms] [WARNING] Failed to decode downloaded font: https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap @ https://sales-system-ahmanewassim6-2668s-projects.vercel.app/login:0
-[     146ms] [WARNING] OTS parsing error: invalid sfntVersion: 791289955 @ https://sales-system-ahmanewassim6-2668s-projects.vercel.app/login:0
-[   11462ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tzyqmcuzmvxgexjtsbfe.supabase.co/auth/v1/token?grant_type=password:0

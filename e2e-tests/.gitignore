@@ -1,6 +1,0 @@
-node_modules/
-.auth/
-test-results/
-test-report/
-playwright-report/
-blob-report/

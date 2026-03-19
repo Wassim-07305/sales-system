@@ -44,5 +44,9 @@ next-env.d.ts
 public/sw.js.map
 public/workbox-*.js
 public/workbox-*.js.map
-qa-tests/node_modules/
-qa-tests/test-results/
+# QA / E2E test artifacts
+qa-tests/
+e2e-tests/
+e2e-audit/
+test-results/
+.playwright-mcp/
