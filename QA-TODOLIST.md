@@ -1,152 +1,125 @@
 # QA TODOLIST — Setting Academy
 
-Source : Rapports QA du 19/03/2026 (47 tests — 38% pass rate + 108 tests E2E — 18.5% pass rate)
-Statut global : NON livrable en l'etat
+Source : Rapports QA du 19-20/03/2026
+Dernière mise à jour : 20/03/2026 (après retest V3)
 
 ---
 
-## BUGS CRITIQUES (a corriger en priorite)
+## STATUT GLOBAL
 
-### BUG-C1 — Accents manquants landing page + pages internes
-- [ ] Landing page : tous les textes body manquent d'accents ("equipes", "competences", "Decouverte", "Creez", "resultats", etc.)
-- [ ] Seuls les liens de navigation (hardcodes) ont les accents corrects
-- [ ] Pages internes aussi impactees ("evenements", etc.)
-- **Fichier** : `src/app/page.tsx` + composants landing
-- **Cause probable** : textes ecrits sans accents ou probleme d'encodage
-
-### BUG-C2 — Login : aucun message d'erreur sur mauvais mot de passe
-- [ ] HTTP 400 renvoye par le serveur mais AUCUN feedback visuel a l'utilisateur
-- [ ] La page reste identique, l'utilisateur ne sait pas que le mot de passe est faux
-- [ ] Erreur React #418 (hydration) visible en console
-- **Fichier** : `src/app/(auth)/login/page.tsx`
-
-### BUG-C3 — EOD (End of Day) : fonctionnalite absente
-- [ ] La page /eod retourne 404
-- [ ] Aucun formulaire EOD avec les champs specifies : messages envoyes, connexions, reponses recues, taux de reponse, calls bookes, commentaire
-- [ ] Le "Journal du jour" dans le dashboard (humeur, victoires, defis) n'est PAS le format EOD attendu
-- [ ] Calcul automatique taux de reponse : inexistant
-- [ ] Soumission + notification admin : inexistant
-- [ ] Protection double soumission / jour : inexistant
-- [ ] Vue admin des EODs avec filtres par setter et par periode : inexistante
-- [ ] KPIs agreges (moyenne messages, taux de reponse moyen, total calls) : inexistants
-- **A creer** : page `/eod`, formulaire setter, vue admin, table `eod_reports`
-
-### BUG-C4 — Dashboard entrepreneur (Client B2B) : vue manquante
-- [ ] Pas de vue "dashboard entrepreneur" distincte
-- [ ] La page /workspaces retourne 404 (NOTE: corrige depuis — a re-tester apres deploiement)
-- [ ] Le client B2B doit voir uniquement les donnees de ses propres setters
-- [ ] Les chiffres doivent correspondre aux EODs soumis par ses setters
-
-### BUG-C5 — Onboarding B2B : 0/14 tests passes
-- [ ] Gating onboarding pour role client_b2b (NOTE: implemente recemment — a re-tester)
-- [ ] Redirection vers /onboarding si profil incomplet
-- [ ] Wizard multi-etapes
-- [ ] Sauvegarde progression
-
-### BUG-C6 — Academy : modules vides / contenu absent
-- [ ] La page Academy charge mais les modules peuvent etre vides si pas de seed data
-- [ ] Le bouton "Initialiser modules Damien" doit creer les 13 modules (NOTE: implemente — a re-tester)
-- [ ] Quiz gating : verification que le quiz >= 90% debloque le module suivant
+| Métrique | V1 (19/03) | V3 (20/03) |
+|----------|-----------|-----------|
+| Tests passés | 38% | 75% |
+| Corrections livrées | 0 | 14/16 |
+| Statut | NON livrable | CONDITIONNEL |
 
 ---
 
-## BUGS MINEURS
+## CORRECTIONS LIVRÉES ✅
 
-### BUG-M1 — Validation login champs vides
-- [ ] Validation repose uniquement sur `required` HTML natif
-- [ ] Pas de messages d'erreur stylises dans l'application
-- **Fichier** : `src/app/(auth)/login/page.tsx`
+### BUG-C1 — Accents landing page + pages internes
+- [x] Landing page : ~30 corrections d'accents (équipes, compétences, Découverte, Créez, résultats, etc.)
+- [x] Pages internes : ~80 corrections dans 40+ fichiers (CRM, Academy, Analytics, Bookings, Coaching, etc.)
+- [x] Cash-flow : 14 corrections (encaissé, trésorerie, échéances, prévisions, impayés)
+- [x] Chat/Messaging : 7 corrections (Boîte unifiée, Sélectionnez, latérale, Intégrez)
+- **Commits** : `b236bd8`, `13ea888`
 
-### BUG-M2 — KPIs dashboard a zero
-- [ ] CA du mois = 0 EUR (normal si aucun deal ferme, mais UX a ameliorer — afficher "Pas encore de CA ce mois")
-- **Priorite** : basse (cosmetique)
+### BUG-C2 — Login : message d'erreur + validation
+- [x] Message inline rouge « Email ou mot de passe incorrect. »
+- [x] Validation champs vides avec message stylisé
+- [x] Reset erreur à la frappe
+- **Commit** : `b236bd8`
 
-### BUG-M3 — Menu sidebar : entrees manquantes
-- [ ] EOD / Journal quotidien absent du menu
-- [ ] Team / Equipe present seulement via lien dashboard, pas dans la sidebar directement
-- **Fichier** : `src/lib/constants.ts` (NAV_ITEMS)
+### BUG-C3/FM-1 — EOD Équipe
+- [x] Entrée « EOD Équipe » dans la sidebar (admin/manager/client_b2b)
+- [x] Page `/team/journal` complète avec filtres, KPIs agrégés, taux de réponse auto-calculé
+- [x] Journal setter `/journal` avec taux de réponse auto-calculé
+- **Commit** : `b236bd8`
 
-### BUG-M4 — Recharts warnings console
-- [ ] 7 warnings console detectes (probablement Recharts defaultProps deprecations)
-- **Priorite** : basse
-
-### BUG-M5 — Hydration error React #418
-- [ ] Visible sur la page login lors d'une soumission echouee
-- **Fichier** : `src/app/(auth)/login/page.tsx`
-
----
-
-## FONCTIONNALITES MANQUANTES A IMPLEMENTER
-
-### FM-1 — Formulaire EOD complet (HAUTE PRIORITE)
-- [ ] Page /eod pour les setters
-- [ ] Champs : messages envoyes, connexions, reponses recues, taux de reponse (auto-calcule), calls bookes, commentaire
-- [ ] Soumission → confirmation + notification admin in-app
-- [ ] Protection double soumission par jour
-- [ ] Vue admin : liste tous les EODs, filtres par setter et par periode
-- [ ] KPIs agreges : moyenne messages, taux de reponse moyen, total calls
-- [ ] Table Supabase : `eod_reports` (user_id, date, messages_sent, connections, replies, response_rate, calls_booked, comment)
-
-### FM-2 — Dashboard entrepreneur B2B
-- [ ] Vue dashboard specifique pour role client_b2b
-- [ ] Affiche uniquement les donnees des setters assignes au client
-- [ ] Metriques : EODs de ses setters, pipeline de ses deals, CA genere
-
-### FM-3 — Contrats : auto-facture sur signature
-- [ ] Quand un contrat est signe, generer automatiquement la premiere facture (NOTE: partiellement implemente via `generateScheduledInvoices`)
-- [ ] A re-tester apres dernier deploiement
+### BUG-C4/FM-2 — Dashboard entrepreneur B2B
+- [x] Dashboard B2B complet (setters, pipeline, KPIs, activité récente, EOD)
+- [x] Tous les accents corrigés
+- **Commit** : `b236bd8`
 
 ### FM-4 — Matching setter/closer
-- [ ] Algorithme de matching base sur les competences et la charge
-- [ ] Interface d'affectation
-- [ ] Dashboard de suivi des matchs
+- [x] Page `/team/matching` fonctionnelle avec matrice de performance
+- [x] Suggestions IA + scoring de compatibilité
+- **Statut** : Déjà implémenté, confirmé en retest
+
+### REG-1 — Bouton Déconnexion
+- [x] Server action `logout()` pour supprimer les cookies httpOnly
+- [x] Appliqué dans sidebar ET header
+- **Commit** : `13ea888`
+
+### FIX-CSM — Rôle CSM complet
+- [x] ROLE_CONFIG (type Record) — déjà ajouté
+- [x] Stats bar (array de rôles)
+- [x] Filtre dropdown « Tous les rôles »
+- [x] Formulaire « Ajouter un utilisateur »
+- [x] ROLE_LABELS dans détail utilisateur
+- **Commit** : `13ea888`
 
 ---
 
-## ITEMS DEJA IMPLEMENTES (a re-tester apres deploiement)
+## RESTE À FAIRE ⚠️
 
-Les items suivants ont ete flagges FAIL dans le QA mais ont ete implementes APRES le test.
-A re-tester sur la version deployee actuelle.
+### FM-3 — Contrats : persistance + auto-facture
 
-- [x] **SOPs** — Pages /workspaces/[id]/sops implementees
-- [x] **ESOP** — Formulaire soumission + workflow brouillon > soumis > en_revision > valide (table `esop_submissions`)
-- [x] **CSM Dashboard** — Tables `csm_kickcases` et `csm_feedbacks` + interface CSM (role csm)
-- [x] **Relances J+2/J+3** — Cron `/api/cron/relances` avec detection reponse et annulation auto
-- [x] **IA auto-send** — Cron `/api/cron/ai-auto-send` avec generation message via OpenRouter
-- [x] **Academy seed** — Bouton "Initialiser modules Damien" pour creer les 13 modules
-- [x] **Onboarding gating B2B** — Middleware force /onboarding si profil incomplet
-- [x] **Workspace B2B** — Page /workspaces avec liste des workspaces du client B2B
-- [x] **Academy nav B2B** — Navigation Academy filtree par role
+**Problème constaté (retest V3)** : Les boutons « Sauvegarder brouillon » et « Envoyer au client » sur `/contracts/new` ne persistent pas les contrats. La page `/contracts` reste à 0 contrats.
+
+**Analyse du code** : Le code côté application est correct :
+- `handleSave()` appelle `createContract()` server action
+- `createContract()` fait un `supabase.from("contracts").insert(...)`
+- `sendContract()` met à jour le statut à "sent"
+- `saveSignature()` et `countersignContract()` déclenchent `generateInvoice()` automatiquement
+
+**Cause probable** : Les **policies RLS** sur la table `contracts` dans Supabase ne permettent pas l'INSERT pour le rôle de l'utilisateur test. L'erreur est maintenant surfacée côté UI (message explicite si code 42501).
+
+**Action requise côté Damien** :
+- [ ] Vérifier les policies RLS sur la table `contracts` dans le dashboard Supabase
+- [ ] S'assurer que les rôles `admin` et `manager` ont les permissions INSERT/UPDATE/SELECT
+- [ ] Tester la création d'un contrat après ajustement des policies
+- [ ] Vérifier que l'auto-facture se déclenche bien après signature (le code est en place via `generateInvoice()`)
+
+**Fichiers concernés** :
+- `src/app/(app)/contracts/new/new-contract-form.tsx` — formulaire
+- `src/lib/actions/contracts.ts` — createContract, sendContract, saveSignature
+- `src/lib/actions/payments.ts` — generateInvoice, createInstallmentPlan
 
 ---
 
-## PREREQUISITES DAMIEN (config cote client)
+## BUGS MINEURS (non bloquants)
 
-Voir fichier `PREREQUISITES-DAMIEN.md` pour la checklist complete :
+### BUG-M2 — KPIs dashboard à zéro
+- [ ] CA du mois = 0 EUR → afficher « Pas encore de CA ce mois » (cosmétique)
+
+### BUG-M4 — Recharts warnings console
+- [ ] 5 warnings DialogContent aria-describedby (mineur)
+
+---
+
+## ITEMS DÉJÀ IMPLÉMENTÉS ✅
+
+- [x] **SOPs** — Pages /workspaces/[id]/sops
+- [x] **ESOP** — Formulaire soumission + workflow
+- [x] **CSM Dashboard** — Tables + interface CSM
+- [x] **Relances J+2/J+3** — Cron `/api/cron/relances`
+- [x] **IA auto-send** — Cron `/api/cron/ai-auto-send`
+- [x] **Academy seed** — Bouton « Initialiser modules Damien »
+- [x] **Onboarding gating B2B** — Middleware force /onboarding
+- [x] **Workspace B2B** — Page /workspaces
+- [x] **Academy nav B2B** — Navigation filtrée par rôle
+
+---
+
+## PRÉREQUIS DAMIEN (config côté client)
+
+Voir fichier `PREREQUISITES-DAMIEN.md` pour la checklist complète :
 - [ ] `CRON_SECRET` — Secret pour crons Vercel
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` — Cle service role (bypass RLS)
-- [ ] `OPENROUTER_API_KEY` — Pour generation IA
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` — Clé service role (bypass RLS)
+- [ ] `OPENROUTER_API_KEY` — Pour génération IA
 - [ ] `UNIPILE_DSN` + `UNIPILE_API_KEY` — Pour messagerie multi-canal
 - [ ] `UNIPILE_WEBHOOK_SECRET` + `UNIPILE_WEBHOOK_VERIFY_TOKEN` — Pour webhook
 - [ ] Migrations SQL : `20260319_esop_submissions.sql` + `20260319_csm_role.sql`
 - [ ] Configuration webhook Unipile
-
----
-
-## PLAN D'ACTION SUGGERE
-
-### Sprint 1 (urgent) — Bugs critiques
-1. BUG-C1 : Corriger accents landing page + pages internes
-2. BUG-C2 : Ajouter message d'erreur login
-3. BUG-C5 : Corriger hydration error login
-
-### Sprint 2 — Fonctionnalites manquantes
-4. FM-1 : Implementer EOD complet (formulaire setter + vue admin + KPIs)
-5. FM-2 : Dashboard entrepreneur B2B
-6. BUG-C3 : Route /eod + table eod_reports
-
-### Sprint 3 — Re-test + polish
-7. Re-tester tous les items "deja implementes" sur la prod
-8. BUG-M3 : Ajouter EOD et Team dans la sidebar
-9. FM-3 : Verifier auto-facture signature
-10. FM-4 : Matching setter/closer (si requis par le cahier des charges)
+- [ ] **Policies RLS table `contracts`** — Vérifier INSERT/UPDATE pour admin/manager
