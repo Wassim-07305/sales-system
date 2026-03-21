@@ -439,14 +439,17 @@ export async function sendLinkedInMessage(profileId: string, message: string) {
 // ---------------------------------------------------------------------------
 // searchLinkedInProfiles
 // ---------------------------------------------------------------------------
-export async function searchLinkedInProfiles(query: string) {
+export async function searchLinkedInProfiles(
+  query: string,
+  filters?: { location?: string; jobTitle?: string },
+) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  if (!query?.trim()) {
+  if (!query?.trim() && !filters?.jobTitle?.trim() && !filters?.location?.trim()) {
     return { error: "Le terme de recherche est requis" };
   }
 
@@ -459,8 +462,11 @@ export async function searchLinkedInProfiles(query: string) {
       const dsn = process.env.UNIPILE_DSN;
       const apiKey = process.env.UNIPILE_API_KEY;
       if (dsn && apiKey) {
+        const keyword = [query, filters?.jobTitle, filters?.location]
+          .filter(Boolean)
+          .join(" ");
         const res = await fetch(
-          `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(query)}&limit=20`,
+          `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(keyword)}&limit=20`,
           { headers: { "X-API-KEY": apiKey } },
         );
         if (res.ok) {
@@ -471,12 +477,18 @@ export async function searchLinkedInProfiles(query: string) {
               last_name?: string;
               headline?: string;
               public_identifier?: string;
+              profile_url?: string;
             }>;
           };
           const results = (data.items || []).map((p) => ({
             id: p.id || p.public_identifier || "",
             name: [p.first_name, p.last_name].filter(Boolean).join(" ") || "",
             headline: p.headline || null,
+            profile_url:
+              p.profile_url ||
+              (p.public_identifier
+                ? `https://linkedin.com/in/${p.public_identifier}`
+                : null),
             source: "unipile" as const,
           }));
           if (results.length > 0) {
@@ -492,8 +504,11 @@ export async function searchLinkedInProfiles(query: string) {
   // --- Direct API path ---
   if (token) {
     try {
+      const keyword = [query, filters?.jobTitle, filters?.location]
+        .filter(Boolean)
+        .join(" ");
       const res = await fetch(
-        `${LINKEDIN_API_BASE}/search/people?q=keywords&keywords=${encodeURIComponent(query)}&count=20`,
+        `${LINKEDIN_API_BASE}/search/people?q=keywords&keywords=${encodeURIComponent(keyword)}&count=20`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -513,16 +528,83 @@ export async function searchLinkedInProfiles(query: string) {
           id: el.id,
           name: `${el.localizedFirstName} ${el.localizedLastName}`,
           headline: el.localizedHeadline || null,
+          profile_url: null as string | null,
           source: "linkedin_api" as const,
         }));
 
         return { data: results };
       }
 
-      console.warn("LinkedIn search API failed, using local fallback");
+      console.warn("LinkedIn search API failed, using Apify fallback");
     } catch (err) {
       console.error("LinkedIn search error:", err);
     }
+  }
+
+  // --- Apify People Search (no token / no Unipile needed) ---
+  try {
+    // Parse query into firstname/lastname if it looks like a name
+    const words = query.trim().split(/\s+/);
+    const isNameQuery = words.length >= 2 && words.every((w) => /^[A-Za-zÀ-ÿ-]+$/.test(w));
+
+    const apifyInput: Record<string, unknown> = {
+      max_profiles: 20,
+      include_email: false,
+    };
+
+    if (isNameQuery) {
+      apifyInput.firstname = words[0];
+      apifyInput.lastname = words.slice(1).join(" ");
+    } else {
+      // Use the query as job title search
+      apifyInput.current_job_title = query.trim();
+    }
+
+    if (filters?.jobTitle?.trim()) {
+      apifyInput.current_job_title = filters.jobTitle.trim();
+    }
+    if (filters?.location?.trim()) {
+      apifyInput.location = filters.location.trim();
+    }
+
+    // If we only have name + job title filter, use both
+    if (isNameQuery && filters?.jobTitle?.trim()) {
+      apifyInput.firstname = words[0];
+      apifyInput.lastname = words.slice(1).join(" ");
+    }
+
+    const apifyResults = await callApifyActor<{
+      full_name?: string;
+      first_name?: string;
+      last_name?: string;
+      headline?: string;
+      profile_url?: string;
+      linkedin_url?: string;
+      location?: string;
+      current_company?: string;
+      [key: string]: unknown;
+    }>("apimaestro/linkedin-profile-search-scraper", apifyInput, 120);
+
+    if (apifyResults && apifyResults.length > 0) {
+      const results = apifyResults.map((p, idx) => {
+        const name =
+          p.full_name ||
+          [p.first_name, p.last_name].filter(Boolean).join(" ") ||
+          "";
+        const profileUrl = p.profile_url || p.linkedin_url || null;
+        const vanity = profileUrl?.match(/linkedin\.com\/in\/([^/?#]+)/)?.[1];
+        return {
+          id: vanity || `apify-${idx}`,
+          name,
+          headline: p.headline || null,
+          profile_url: profileUrl,
+          source: "apify" as const,
+        };
+      });
+      return { data: results };
+    }
+  } catch (apifyErr) {
+    console.error("Apify LinkedIn search error, falling back:", apifyErr);
   }
 
   // --- Fallback: search local prospects ---
@@ -543,10 +625,10 @@ export async function searchLinkedInProfiles(query: string) {
 
   return {
     data: results,
-    ...(!token
+    ...(results.length === 0
       ? {
           error:
-            "API LinkedIn non configurée — recherche locale uniquement. Ajoutez LINKEDIN_ACCESS_TOKEN pour rechercher sur LinkedIn.",
+            "Aucun résultat trouvé. Vérifiez qu'Unipile ou APIFY_TOKEN est configuré pour rechercher sur LinkedIn.",
         }
       : {}),
   };

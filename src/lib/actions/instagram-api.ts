@@ -660,6 +660,44 @@ export async function searchInstagramProfiles(query: string) {
     }
   }
 
+  // --- Apify Instagram Search (no token / no Unipile needed) ---
+  try {
+    const apifyResults = await callApifyActor<{
+      username?: string;
+      fullName?: string;
+      full_name?: string;
+      name?: string;
+      biography?: string;
+      profilePicUrl?: string;
+      profile_pic_url?: string;
+      followersCount?: number;
+      follower_count?: number;
+      [key: string]: unknown;
+    }>("apify/instagram-search-scraper", {
+      search: query,
+      searchType: "user",
+      searchLimit: 20,
+    }, 120);
+
+    if (apifyResults && apifyResults.length > 0) {
+      const results = apifyResults.map((p, idx) => ({
+        id: p.username || `apify-${idx}`,
+        name: p.fullName || p.full_name || p.name || p.username || "",
+        username: p.username || null,
+        biography: p.biography || null,
+        profile_picture_url: p.profilePicUrl || p.profile_pic_url || null,
+        followers_count: p.followersCount ?? p.follower_count ?? null,
+        profile_url: p.username ? `https://instagram.com/${p.username}` : null,
+        source: "apify" as const,
+      }));
+      if (results.length > 0) {
+        return { data: results };
+      }
+    }
+  } catch (apifyErr) {
+    console.error("Apify Instagram search error, falling back:", apifyErr);
+  }
+
   // --- Fallback: search local prospects ---
   const { data: prospects } = await supabase
     .from("prospects")
@@ -679,5 +717,13 @@ export async function searchInstagramProfiles(query: string) {
     source: "local_database" as const,
   }));
 
-  return { data: results };
+  return {
+    data: results,
+    ...(results.length === 0
+      ? {
+          error:
+            "Aucun résultat trouvé. Vérifiez qu'Unipile ou APIFY_TOKEN est configuré pour rechercher sur Instagram.",
+        }
+      : {}),
+  };
 }

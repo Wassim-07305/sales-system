@@ -178,22 +178,29 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
 
   // LinkedIn search
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
+  const [searchJobTitle, setSearchJobTitle] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<
-    Array<{ id: string; name: string; headline: string | null; source: string; profile_url?: string }>
+    Array<{ id: string; name: string; headline: string | null; source: string; profile_url?: string | null }>
   >([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
 
   async function handleSearchLinkedIn() {
-    if (!searchQuery.trim()) {
-      toast.error("Entrez un terme de recherche");
+    const hasQuery = searchQuery.trim() || searchJobTitle.trim() || searchLocation.trim();
+    if (!hasQuery) {
+      toast.error("Entrez au moins un critère de recherche");
       return;
     }
     setSearching(true);
     setSearchResults([]);
     try {
-      const result = await searchLinkedInProfiles(searchQuery);
+      const filters = {
+        location: searchLocation.trim() || undefined,
+        jobTitle: searchJobTitle.trim() || undefined,
+      };
+      const result = await searchLinkedInProfiles(searchQuery, filters);
       if (result.error && !result.data) {
         toast.error(result.error);
       } else {
@@ -208,7 +215,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
     }
   }
 
-  async function handleSaveProspect(result: { id: string; name: string; headline: string | null; source: string; profile_url?: string }) {
+  async function handleSaveProspect(result: { id: string; name: string; headline: string | null; source: string; profile_url?: string | null }) {
     setSavingId(result.id);
     try {
       const profileUrl = result.profile_url || (result.source !== "local_database"
@@ -369,7 +376,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               <CardContent className="pt-6 space-y-4">
                 <div className="flex gap-3">
                   <Input
-                    placeholder="Rechercher par nom, poste, entreprise..."
+                    placeholder="Nom ou mot-clé..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearchLinkedIn()}
@@ -387,6 +394,22 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                     )}
                     Rechercher
                   </Button>
+                </div>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Poste / titre (ex: CEO, Ingénieur...)"
+                    value={searchJobTitle}
+                    onChange={(e) => setSearchJobTitle(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearchLinkedIn()}
+                    className="h-10 rounded-xl flex-1 text-sm"
+                  />
+                  <Input
+                    placeholder="Localisation (ex: Paris, France...)"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearchLinkedIn()}
+                    className="h-10 rounded-xl flex-1 text-sm"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -481,11 +504,11 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               </div>
             )}
 
-            {!searching && !searchQuery && (
+            {!searching && !searchQuery && !searchJobTitle && !searchLocation && (
               <div className="text-center py-12 text-muted-foreground">
                 <Linkedin className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Entrez un terme pour rechercher des profils sur LinkedIn</p>
-                <p className="text-xs mt-1 text-muted-foreground/60">Les résultats proviennent de votre compte LinkedIn connecté</p>
+                <p className="text-sm">Recherchez des profils LinkedIn par nom, poste ou localisation</p>
+                <p className="text-xs mt-1 text-muted-foreground/60">Recherche via Unipile, LinkedIn API ou Apify</p>
               </div>
             )}
           </div>

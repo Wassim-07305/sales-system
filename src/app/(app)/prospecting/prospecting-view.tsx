@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -355,87 +354,82 @@ export function ProspectingView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Prospection"
-        description="Tracker de prospection et quotas journaliers"
-      >
-        <div className="flex gap-2">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-xl font-medium"
+          onClick={handleRecalculateAll}
+          disabled={isRecalculating}
+        >
+          {isRecalculating ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Recalculer les scores
+        </Button>
+        <Link href="/prospecting/templates">
           <Button
             variant="outline"
             size="sm"
             className="rounded-xl font-medium"
-            onClick={handleRecalculateAll}
-            disabled={isRecalculating}
           >
-            {isRecalculating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Recalculer les scores
+            Templates DM
           </Button>
-          <Link href="/prospecting/templates">
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-xl font-medium"
-            >
-              Templates DM
+        </Link>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter un prospect
             </Button>
-          </Link>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter un prospect
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Nouveau prospect</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Nom</Label>
-                  <Input
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Jean Dupont"
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-                <div>
-                  <Label>Plateforme</Label>
-                  <Select value={newPlatform} onValueChange={setNewPlatform}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="linkedin">LinkedIn</SelectItem>
-                      <SelectItem value="instagram">Instagram</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>URL du profil (optionnel)</Label>
-                  <Input
-                    value={newUrl}
-                    onChange={(e) => setNewUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-                <Button
-                  onClick={handleAdd}
-                  className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
-                >
-                  Ajouter
-                </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nouveau prospect</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Nom</Label>
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Jean Dupont"
+                  className="h-11 rounded-xl"
+                />
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </PageHeader>
+              <div>
+                <Label>Plateforme</Label>
+                <Select value={newPlatform} onValueChange={setNewPlatform}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>URL du profil (optionnel)</Label>
+                <Input
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="h-11 rounded-xl"
+                />
+              </div>
+              <Button
+                onClick={handleAdd}
+                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+              >
+                Ajouter
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Segment summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
