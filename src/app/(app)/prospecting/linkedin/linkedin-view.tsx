@@ -215,9 +215,9 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
         return;
       }
 
-      // If Apify started async — poll for results
+      // If async search started — poll for results
       if (result.pending && result.runId) {
-        toast.info("Recherche Apify lancée, résultats dans quelques instants...");
+        toast.info("Recherche LinkedIn en cours, résultats dans quelques instants...");
         const datasetId = result.datasetId || "";
         let attempts = 0;
         const maxAttempts = 24; // 24 × 5s = 2 minutes max
@@ -569,7 +569,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               <div className="text-center py-12 text-muted-foreground">
                 <Linkedin className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Recherchez des profils LinkedIn par nom, poste ou localisation</p>
-                <p className="text-xs mt-1 text-muted-foreground/60">Recherche via Unipile, LinkedIn API ou Apify</p>
+                <p className="text-xs mt-1 text-muted-foreground/60">Recherche de profils LinkedIn en temps réel</p>
               </div>
             )}
           </div>

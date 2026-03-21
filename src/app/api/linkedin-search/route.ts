@@ -3,9 +3,25 @@ import { createClient } from "@/lib/supabase/server";
 
 // ---------------------------------------------------------------------------
 // POST /api/linkedin-search
-// Tries fast tiers (Unipile, LinkedIn API, local DB).
-// If all fail, starts Apify actor async and returns { pending: true, runId }.
+// Tries fast tiers (Unipile, local DB) with strict timeouts.
+// If all fail, starts search actor async and returns { pending: true, runId }.
+// Each tier has a 3s timeout to stay well within Vercel Hobby's 10s limit.
 // ---------------------------------------------------------------------------
+
+/** Fetch with an AbortController timeout */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit & { timeoutMs?: number } = {},
+): Promise<Response> {
+  const { timeoutMs = 3000, ...fetchOptions } = options;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...fetchOptions, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -36,15 +52,15 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .join(" ");
 
-  // --- Tier 1: Unipile (instant) ---
+  // --- Tier 1: Unipile (3s timeout per request) ---
   try {
     const dsn = process.env.UNIPILE_DSN;
     const apiKey = process.env.UNIPILE_API_KEY;
     if (dsn && apiKey) {
-      // Find LinkedIn account ID
-      const accountsRes = await fetch(`${dsn}/api/v1/accounts`, {
-        headers: { "X-API-KEY": apiKey },
-      });
+      const accountsRes = await fetchWithTimeout(
+        `${dsn}/api/v1/accounts`,
+        { headers: { "X-API-KEY": apiKey }, timeoutMs: 3000 },
+      );
       if (accountsRes.ok) {
         const accountsData = (await accountsRes.json()) as {
           items?: Array<{
@@ -59,12 +75,12 @@ export async function POST(req: NextRequest) {
         );
 
         if (liAccount) {
-          const url = `${dsn}/api/v1/linkedin/search/people?account_id=${liAccount.id}&keyword=${encodeURIComponent(keyword)}&limit=20`;
-          const res = await fetch(url, {
-            headers: { "X-API-KEY": apiKey },
-          });
-          if (res.ok) {
-            const data = (await res.json()) as {
+          const searchRes = await fetchWithTimeout(
+            `${dsn}/api/v1/linkedin/search/people?account_id=${liAccount.id}&keyword=${encodeURIComponent(keyword)}&limit=20`,
+            { headers: { "X-API-KEY": apiKey }, timeoutMs: 3000 },
+          );
+          if (searchRes.ok) {
+            const data = (await searchRes.json()) as {
               items?: Array<{
                 id?: string;
                 first_name?: string;
@@ -72,7 +88,6 @@ export async function POST(req: NextRequest) {
                 headline?: string;
                 public_identifier?: string;
                 profile_url?: string;
-                profile_picture_url?: string;
               }>;
             };
             const results = (data.items || []).map((p) => ({
@@ -95,7 +110,8 @@ export async function POST(req: NextRequest) {
       }
     }
   } catch (err) {
-    console.error("[LinkedIn Search] Unipile error:", err);
+    // Timeout or network error — skip to next tier
+    console.error("[LinkedIn Search] Unipile error:", err instanceof Error ? err.message : err);
   }
 
   // --- Tier 2: Local DB (instant) ---
@@ -119,12 +135,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // --- Tier 3: Start Apify actor ASYNC (returns immediately with runId) ---
+  // --- Tier 3: Start search actor ASYNC (returns immediately with runId) ---
   const apifyToken = process.env.APIFY_TOKEN;
   if (!apifyToken) {
     return NextResponse.json({
       data: [],
-      error: "Aucun résultat trouvé. APIFY_TOKEN non configuré.",
+      error: "Aucun résultat trouvé. Clé API de recherche non configurée.",
     });
   }
 
@@ -132,22 +148,21 @@ export async function POST(req: NextRequest) {
     const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(keyword)}`;
 
     // Start the actor WITHOUT waiting for finish (instant response)
-    const runRes = await fetch(
+    const runRes = await fetchWithTimeout(
       `https://api.apify.com/v2/acts/supreme_coder~linkedin-profile-scraper/runs?token=${apifyToken}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          urls: [{ url: searchUrl }],
-        }),
+        body: JSON.stringify({ urls: [{ url: searchUrl }] }),
+        timeoutMs: 5000,
       },
     );
 
     if (!runRes.ok) {
-      console.error("[LinkedIn Search] Apify start error:", runRes.status);
+      console.error("[LinkedIn Search] Search start error:", runRes.status);
       return NextResponse.json({
         data: [],
-        error: "Erreur lors du lancement de la recherche Apify.",
+        error: "Erreur lors du lancement de la recherche.",
       });
     }
 
@@ -161,7 +176,7 @@ export async function POST(req: NextRequest) {
     if (!runId) {
       return NextResponse.json({
         data: [],
-        error: "Erreur: pas de runId Apify.",
+        error: "Erreur lors du lancement de la recherche.",
       });
     }
 
@@ -172,7 +187,7 @@ export async function POST(req: NextRequest) {
       datasetId,
     });
   } catch (err) {
-    console.error("[LinkedIn Search] Apify start error:", err);
+    console.error("[LinkedIn Search] Search start error:", err instanceof Error ? err.message : err);
     return NextResponse.json({
       data: [],
       error: "Erreur lors de la recherche.",
