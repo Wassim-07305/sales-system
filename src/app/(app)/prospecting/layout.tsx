@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Target,
   Link2,
-  Search,
-  Star,
+  BarChart3,
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,8 +13,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { label: "Prospects", href: "/prospecting", icon: Target, exact: true },
   { label: "Hub LinkedIn", href: "/prospecting/linkhub", icon: Link2 },
-  { label: "Acquisition", href: "/prospecting/acquisition", icon: Search },
-  { label: "Qualification", href: "/prospecting/qualification", icon: Star },
+  { label: "Analyse", href: "/prospecting/analyse", icon: BarChart3 },
   { label: "Outreach", href: "/prospecting/outreach", icon: Send },
 ];
 
@@ -42,6 +40,8 @@ export default function ProspectingLayout({
     "/prospecting/campaigns",
     "/prospecting/follow-ups",
     "/prospecting/hub",
+    "/prospecting/acquisition",
+    "/prospecting/qualification",
   ];
   const isOldPage = oldDirectPages.some((p) => pathname.startsWith(p));
 
