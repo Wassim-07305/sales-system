@@ -199,23 +199,76 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
         location: searchLocation.trim() || undefined,
         jobTitle: searchJobTitle.trim() || undefined,
       };
-      // Use API route (not server action) for longer timeout support
       const res = await fetch("/api/linkedin-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery, filters }),
       });
       const result = await res.json();
-      if (result.error && !result.data) {
+
+      // If instant results (Unipile / local DB)
+      if (result.data && !result.pending) {
+        setSearchResults(result.data);
+        if (result.error) toast.info(result.error);
+        if (!result.data.length) toast.info("Aucun résultat trouvé");
+        setSearching(false);
+        return;
+      }
+
+      // If Apify started async — poll for results
+      if (result.pending && result.runId) {
+        toast.info("Recherche Apify lancée, résultats dans quelques instants...");
+        const datasetId = result.datasetId || "";
+        let attempts = 0;
+        const maxAttempts = 24; // 24 × 5s = 2 minutes max
+
+        const poll = async () => {
+          while (attempts < maxAttempts) {
+            attempts++;
+            await new Promise((r) => setTimeout(r, 5000));
+            try {
+              const statusRes = await fetch(
+                `/api/linkedin-search/status?runId=${result.runId}&datasetId=${datasetId}`,
+              );
+              const statusData = await statusRes.json();
+
+              if (statusData.pending) {
+                // Still running, continue polling
+                continue;
+              }
+
+              // Done (success or failure)
+              if (statusData.data && statusData.data.length > 0) {
+                setSearchResults(statusData.data);
+                toast.success(`${statusData.data.length} profil(s) trouvé(s)`);
+              } else {
+                toast.info(statusData.error || "Aucun résultat trouvé");
+              }
+              setSearching(false);
+              return;
+            } catch {
+              // Network error during poll, continue
+              continue;
+            }
+          }
+          // Timeout after max attempts
+          toast.error("La recherche a pris trop de temps. Réessayez.");
+          setSearching(false);
+        };
+
+        poll();
+        return;
+      }
+
+      // Error without data
+      if (result.error) {
         toast.error(result.error);
       } else {
-        setSearchResults(result.data || []);
-        if (result.error) toast.info(result.error);
-        if (!result.data?.length) toast.info("Aucun résultat trouvé");
+        toast.info("Aucun résultat trouvé");
       }
+      setSearching(false);
     } catch {
       toast.error("Erreur lors de la recherche");
-    } finally {
       setSearching(false);
     }
   }
