@@ -445,7 +445,6 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   acquisition: "Acquisition",
   qualification: "Qualification",
   outreach: "Outreach",
-  discovery: "Découverte Leads",
   intelligence: "Hunting Intelligence",
   certificates: "Certificats",
   diagnostic: "Diagnostic",

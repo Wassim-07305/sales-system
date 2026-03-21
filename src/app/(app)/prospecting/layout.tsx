@@ -32,7 +32,6 @@ export default function ProspectingLayout({
 
   // Hide tabs on old direct sub-pages that still exist for backwards compat
   const oldDirectPages = [
-    "/prospecting/discovery",
     "/prospecting/intelligence",
     "/prospecting/linkedin",
     "/prospecting/instagram",

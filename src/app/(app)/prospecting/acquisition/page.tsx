@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DiscoveryView } from "../discovery/discovery-view";
+import { redirect } from "next/navigation";
+import { IntelligenceView } from "../intelligence/intelligence-view";
+import { getCompetitors } from "@/lib/actions/intelligence";
 
 export default async function AcquisitionPage() {
   const supabase = await createClient();
@@ -10,5 +11,7 @@ export default async function AcquisitionPage() {
 
   if (!user) redirect("/login");
 
-  return <DiscoveryView />;
+  const competitors = await getCompetitors();
+
+  return <IntelligenceView competitors={competitors} />;
 }

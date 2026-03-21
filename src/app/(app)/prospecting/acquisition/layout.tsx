@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Brain, Linkedin, Instagram } from "lucide-react";
+import { Brain, Linkedin, Instagram } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { label: "Découverte", href: "/prospecting/acquisition", icon: Search, exact: true },
-  { label: "Intelligence", href: "/prospecting/acquisition/intelligence", icon: Brain },
+  { label: "Intelligence", href: "/prospecting/acquisition", icon: Brain, exact: true },
   { label: "LinkedIn", href: "/prospecting/acquisition/linkedin", icon: Linkedin },
   { label: "Instagram", href: "/prospecting/acquisition/instagram", icon: Instagram },
 ];
