@@ -50,6 +50,7 @@ import type { LinkedInFeed, FeedPost, Recommendation, CommentHistory } from "@/l
 import {
   generateUnipileAuthLink,
   getUnipileStatus,
+  sendLinkedInInvitation,
 } from "@/lib/actions/unipile";
 import { updateProspectStatus } from "@/lib/actions/prospecting";
 import { FeedsView } from "@/app/(app)/prospecting/linkhub/feeds/feeds-view";
@@ -184,6 +185,8 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
 
   // Search cache helpers
   const CACHE_KEY = "li_search_cache";
@@ -346,6 +349,28 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
       toast.error("Erreur lors de la sauvegarde");
     } finally {
       setSavingId(null);
+    }
+  }
+
+  async function handleSendInvitation(result: SearchResult) {
+    const identifier = result.profile_url || result.id;
+    if (!identifier) {
+      toast.error("Profil LinkedIn introuvable");
+      return;
+    }
+    setInvitingId(result.id);
+    try {
+      const res = await sendLinkedInInvitation(identifier);
+      if (res.success) {
+        setInvitedIds((prev) => new Set(prev).add(result.id));
+        toast.success(`Invitation envoyée à ${result.name}`);
+      } else {
+        toast.error(res.error || "Erreur lors de l'envoi");
+      }
+    } catch {
+      toast.error("Erreur lors de l'envoi de l'invitation");
+    } finally {
+      setInvitingId(null);
     }
   }
 
@@ -590,7 +615,30 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                               )}
                             </div>
                           </div>
-                          <div className="shrink-0 ml-3">
+                          <div className="shrink-0 ml-3 flex items-center gap-2">
+                            {result.source !== "local_database" && liConnected && (
+                              invitedIds.has(result.id) ? (
+                                <Badge variant="outline" className="text-[10px] gap-1">
+                                  <Check className="h-3 w-3" />
+                                  Invitation envoyée
+                                </Badge>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSendInvitation(result)}
+                                  disabled={invitingId === result.id}
+                                  className="rounded-xl font-medium text-xs"
+                                >
+                                  {invitingId === result.id ? (
+                                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                  ) : (
+                                    <Linkedin className="h-3.5 w-3.5 mr-1.5" />
+                                  )}
+                                  Ajouter sur LinkedIn
+                                </Button>
+                              )
+                            )}
                             {isSaved ? (
                               <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
                                 <Check className="h-3 w-3" />

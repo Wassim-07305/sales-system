@@ -613,6 +613,57 @@ export async function getLinkedInProfileViaUnipile(
 }
 
 // ---------------------------------------------------------------------------
+// LinkedIn: send connection invitation
+// ---------------------------------------------------------------------------
+
+export async function sendLinkedInInvitation(
+  profileIdentifier: string,
+  message?: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAuth();
+    const client = getUnipileClient();
+    if (!client) return { success: false, error: "Unipile non configuré" };
+
+    // Find the LinkedIn account ID
+    const response = await client.account.getAll();
+    const items = Array.isArray(response)
+      ? response
+      : (response as { items?: unknown[] }).items || [];
+    const liAccount = (
+      items as Array<{ id: string; type?: string; provider?: string }>
+    ).find((a) => (a.type || a.provider || "").toUpperCase() === "LINKEDIN");
+
+    if (!liAccount) {
+      return { success: false, error: "Aucun compte LinkedIn connecté" };
+    }
+
+    // Extract vanity name from URL if needed
+    const vanityMatch = profileIdentifier.match(
+      /linkedin\.com\/in\/([^/?#]+)/,
+    );
+    const providerId = vanityMatch?.[1] || profileIdentifier;
+
+    await client.users.sendInvitation({
+      account_id: liAccount.id,
+      provider_id: providerId,
+      ...(message ? { message } : {}),
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error("Unipile LinkedIn invitation error:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de l'envoi de l'invitation",
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Calendar: list events (via REST — not in SDK)
 // ---------------------------------------------------------------------------
 
