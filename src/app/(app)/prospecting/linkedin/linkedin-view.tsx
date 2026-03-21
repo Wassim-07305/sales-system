@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import {
   Linkedin,
@@ -32,7 +31,6 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
-  Bot,
   Unplug,
   AlertTriangle,
   Send,
@@ -402,9 +400,6 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
     }
   }
 
-  // Mode Duo IA+Humain — per-conversation auto mode
-  const [autoModeIds, setAutoModeIds] = useState<Set<string>>(new Set());
-
   // Prospect action modal state
   type ProspectAction = "analyze" | "dm" | "comments" | null;
   const [prospectAction, setProspectAction] = useState<ProspectAction>(null);
@@ -456,20 +451,6 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
     } finally {
       setProspectActionLoading(false);
     }
-  }
-
-  function toggleAutoMode(prospectId: string) {
-    setAutoModeIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(prospectId)) {
-        next.delete(prospectId);
-        toast.info("Mode manuel activé");
-      } else {
-        next.add(prospectId);
-        toast.success("Mode IA Auto activé");
-      }
-      return next;
-    });
   }
 
   const filteredProspects = prospects.filter((p) => {
@@ -1100,20 +1081,6 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                           <MessageSquare className="h-3 w-3 mr-1" />
                           Commentaires
                         </Button>
-                      </div>
-                      {/* Mode Duo IA+Humain toggle */}
-                      <div className="flex items-center gap-1.5">
-                        {autoModeIds.has(prospect.id) && (
-                          <Badge className="bg-foreground/10 text-foreground border border-foreground/20 text-[10px] gap-1">
-                            <Bot className="h-3 w-3" />
-                            IA Auto
-                          </Badge>
-                        )}
-                        <Switch
-                          checked={autoModeIds.has(prospect.id)}
-                          onCheckedChange={() => toggleAutoMode(prospect.id)}
-                          aria-label="Mode IA Auto"
-                        />
                       </div>
                       <Select
                         value={prospect.status}
