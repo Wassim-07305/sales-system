@@ -180,18 +180,74 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
   const [searchLocation, setSearchLocation] = useState("");
   const [searchJobTitle, setSearchJobTitle] = useState("");
   const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<
-    Array<{ id: string; name: string; headline: string | null; source: string; profile_url?: string | null }>
-  >([]);
+  type SearchResult = { id: string; name: string; headline: string | null; source: string; profile_url?: string | null };
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  async function handleSearchLinkedIn() {
+  // Search cache helpers
+  const CACHE_KEY = "li_search_cache";
+  const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+
+  type CacheEntry = { keyword: string; results: SearchResult[]; timestamp: number };
+
+  function getCachedSearches(): CacheEntry[] {
+    try {
+      return JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
+    } catch { return []; }
+  }
+
+  function getCachedResults(keyword: string): SearchResult[] | null {
+    const entries = getCachedSearches();
+    const entry = entries.find((e) => e.keyword === keyword);
+    if (entry && Date.now() - entry.timestamp < CACHE_TTL) return entry.results;
+    return null;
+  }
+
+  function saveCachedResults(keyword: string, results: SearchResult[]) {
+    const entries = getCachedSearches().filter((e) => e.keyword !== keyword);
+    entries.unshift({ keyword, results, timestamp: Date.now() });
+    // Keep max 20 searches
+    localStorage.setItem(CACHE_KEY, JSON.stringify(entries.slice(0, 20)));
+  }
+
+  function clearCachedSearch(keyword: string) {
+    const entries = getCachedSearches().filter((e) => e.keyword !== keyword);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(entries));
+  }
+
+  // Recent searches state (loaded on mount)
+  const [recentSearches, setRecentSearches] = useState<CacheEntry[]>([]);
+  useState(() => {
+    // Load recent searches on init
+    setRecentSearches(getCachedSearches());
+  });
+
+  function applyResults(results: SearchResult[], keyword: string) {
+    setSearchResults(results);
+    saveCachedResults(keyword, results);
+    setRecentSearches(getCachedSearches());
+  }
+
+  async function handleSearchLinkedIn(forceRefresh = false) {
     const hasQuery = searchQuery.trim() || searchJobTitle.trim() || searchLocation.trim();
     if (!hasQuery) {
       toast.error("Entrez au moins un critère de recherche");
       return;
     }
+
+    const keyword = [searchQuery, searchJobTitle, searchLocation].filter(Boolean).join(" ").trim();
+
+    // Check cache first (unless forced refresh)
+    if (!forceRefresh) {
+      const cached = getCachedResults(keyword);
+      if (cached && cached.length > 0) {
+        setSearchResults(cached);
+        toast.success(`${cached.length} résultat(s) (en cache)`);
+        return;
+      }
+    }
+
     setSearching(true);
     setSearchResults([]);
     try {
@@ -208,7 +264,11 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
 
       // If instant results (Unipile / local DB)
       if (result.data && !result.pending) {
-        setSearchResults(result.data);
+        if (result.data.length > 0) {
+          applyResults(result.data, keyword);
+        } else {
+          setSearchResults([]);
+        }
         if (result.error) toast.info(result.error);
         if (!result.data.length) toast.info("Aucun résultat trouvé");
         setSearching(false);
@@ -232,14 +292,10 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               );
               const statusData = await statusRes.json();
 
-              if (statusData.pending) {
-                // Still running, continue polling
-                continue;
-              }
+              if (statusData.pending) continue;
 
-              // Done (success or failure)
               if (statusData.data && statusData.data.length > 0) {
-                setSearchResults(statusData.data);
+                applyResults(statusData.data, keyword);
                 toast.success(`${statusData.data.length} profil(s) trouvé(s)`);
               } else {
                 toast.info(statusData.error || "Aucun résultat trouvé");
@@ -247,11 +303,9 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               setSearching(false);
               return;
             } catch {
-              // Network error during poll, continue
               continue;
             }
           }
-          // Timeout after max attempts
           toast.error("La recherche a pris trop de temps. Réessayez.");
           setSearching(false);
         };
@@ -441,7 +495,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                     className="h-11 rounded-xl flex-1"
                   />
                   <Button
-                    onClick={handleSearchLinkedIn}
+                    onClick={() => handleSearchLinkedIn()}
                     disabled={searching}
                     className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                   >
@@ -485,9 +539,21 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
             {!searching && searchResults.length > 0 && (
               <Card className="shadow-sm rounded-2xl overflow-hidden">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">
-                    {searchResults.length} résultat{searchResults.length > 1 ? "s" : ""}
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm text-muted-foreground">
+                      {searchResults.length} résultat{searchResults.length > 1 ? "s" : ""}
+                    </CardTitle>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs text-muted-foreground h-7 gap-1"
+                      onClick={() => handleSearchLinkedIn(true)}
+                      disabled={searching}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Actualiser
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y">
@@ -558,18 +624,59 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               </Card>
             )}
 
-            {!searching && searchResults.length === 0 && searchQuery && (
-              <div className="text-center py-12 text-muted-foreground">
-                <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Recherchez des profils LinkedIn par nom, poste ou entreprise</p>
-              </div>
+            {!searching && searchResults.length === 0 && recentSearches.length > 0 && (
+              <Card className="shadow-sm rounded-2xl">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-muted-foreground">Recherches récentes</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {recentSearches.map((entry) => (
+                      <div
+                        key={entry.keyword}
+                        className="flex items-center justify-between p-3 px-4 hover:bg-secondary/50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          setSearchResults(entry.results);
+                          const parts = entry.keyword.split(" ");
+                          setSearchQuery(parts[0] || "");
+                        }}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-sm font-medium truncate">{entry.keyword}</span>
+                          <Badge variant="outline" className="text-[10px] shrink-0">
+                            {entry.results.length} résultat{entry.results.length > 1 ? "s" : ""}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-[10px] text-muted-foreground/60">
+                            {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: fr })}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground/40 hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearCachedSearch(entry.keyword);
+                              setRecentSearches(getCachedSearches());
+                            }}
+                          >
+                            <XCircle className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
-            {!searching && !searchQuery && !searchJobTitle && !searchLocation && (
+            {!searching && searchResults.length === 0 && recentSearches.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <Linkedin className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Recherchez des profils LinkedIn par nom, poste ou localisation</p>
-                <p className="text-xs mt-1 text-muted-foreground/60">Recherche de profils LinkedIn en temps réel</p>
+                <p className="text-xs mt-1 text-muted-foreground/60">Les résultats sont mémorisés pour un accès rapide</p>
               </div>
             )}
           </div>
