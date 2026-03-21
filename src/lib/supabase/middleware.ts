@@ -134,6 +134,12 @@ export async function updateSession(request: NextRequest) {
     // Role-based route restrictions
     // Client roles can only access their specific routes
     if (role && ["client_b2b", "client_b2c"].includes(role)) {
+      // Block LinkedIn Engage specifically (it's under /dashboard but not for clients)
+      if (pathname.startsWith("/dashboard/linkedin-engage")) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
       const clientAllowedRoutes = [
         "/dashboard",
         "/academy",
@@ -189,6 +195,7 @@ export async function updateSession(request: NextRequest) {
         "/crm",
         "/inbox",
         "/help",
+        "/dashboard/linkedin-engage",
       ];
       const isAllowed = csmAllowedRoutes.some((route) =>
         pathname.startsWith(route),

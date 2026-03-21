@@ -267,7 +267,7 @@ export function LinkHubView({ initialPosts, initialStats, prospects }: LinkHubVi
   return (
     <div className="space-y-6">
       <PageHeader
-        title="LinkHub"
+        title="Hub"
         description="Feed d'engagement — Commentez les posts de vos prospects pour vous faire remarquer avant de les contacter en DM."
       >
         <Dialog open={scrapeDialogOpen} onOpenChange={setScrapeDialogOpen}>

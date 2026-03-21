@@ -36,6 +36,8 @@ import {
   Radio,
   Presentation,
   Link2,
+  Linkedin,
+  Play,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -113,7 +115,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
-    label: "LinkHub",
+    label: "Hub",
     href: "/prospecting/linkhub",
     icon: Link2,
     roles: ["admin", "manager", "setter", "closer"],
@@ -177,6 +179,44 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/marketplace",
     icon: Store,
     roles: ["setter", "closer"],
+  },
+
+  // LinkedIn Engage module
+  {
+    label: "LinkedIn Engage",
+    href: "/dashboard/linkedin-engage",
+    icon: Linkedin,
+    roles: ["admin", "manager", "csm", "setter"],
+  },
+  {
+    label: "Feeds LinkedIn",
+    href: "/dashboard/linkedin-engage/feeds",
+    icon: Linkedin,
+    roles: ["admin", "manager", "csm", "setter"],
+  },
+  {
+    label: "Session",
+    href: "/dashboard/linkedin-engage/session",
+    icon: Play,
+    roles: ["admin", "manager", "setter"],
+  },
+  {
+    label: "Stats LinkedIn",
+    href: "/dashboard/linkedin-engage/stats",
+    icon: BarChart3,
+    roles: ["admin", "manager", "csm", "setter"],
+  },
+  {
+    label: "Recommandations",
+    href: "/dashboard/linkedin-engage/recommandations",
+    icon: Sparkles,
+    roles: ["admin", "manager", "setter"],
+  },
+  {
+    label: "Réponses",
+    href: "/dashboard/linkedin-engage/replies",
+    icon: MessageSquare,
+    roles: ["admin", "manager", "csm", "setter"],
   },
   {
     label: "Défis",
@@ -390,6 +430,19 @@ export const NAV_SECTIONS: NavSection[] = [
     ),
   },
   {
+    label: "LinkedIn",
+    items: NAV_ITEMS.filter((i) =>
+      [
+        "/dashboard/linkedin-engage",
+        "/dashboard/linkedin-engage/feeds",
+        "/dashboard/linkedin-engage/session",
+        "/dashboard/linkedin-engage/stats",
+        "/dashboard/linkedin-engage/recommandations",
+        "/dashboard/linkedin-engage/replies",
+      ].includes(i.href),
+    ),
+  },
+  {
     label: "Outils IA",
     items: NAV_ITEMS.filter((i) =>
       ["/settings-ia", "/ai-scripts", "/genspark"].includes(i.href),
@@ -413,7 +466,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   assignments: "Affectations",
   prospecting: "Prospection",
   hub: "Hub",
-  linkhub: "LinkHub",
+  linkhub: "Hub",
   linkedin: "LinkedIn",
   instagram: "Instagram",
   "follow-ups": "Relances",
@@ -487,6 +540,13 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   partners: "Partenaires",
   moderation: "Modération",
   migration: "Migration CRM",
+  "linkedin-engage": "LinkedIn Engage",
+  feeds: "Feeds",
+  "mon-style": "Mon Style",
+  recommandations: "Recommandations",
+  replies: "Réponses",
+  session: "Session",
+  stats: "Statistiques",
 };
 
 // ─── Booking Pages ─────────────────────────────────────────────────────────
