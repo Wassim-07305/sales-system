@@ -902,6 +902,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
 
         {/* Prospects Tab */}
         <TabsContent value="prospects">
+          <div className="space-y-4">
           <div className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1016,6 +1017,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
               </div>
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         {/* Feeds Tab */}
