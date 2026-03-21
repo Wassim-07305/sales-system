@@ -553,47 +553,43 @@ export async function searchLinkedInProfiles(
     console.log("[LinkedIn Search] Apify search URL:", searchUrl);
 
     const apifyResults = await callApifyActor<{
-      fullName?: string;
       firstName?: string;
       lastName?: string;
+      fullName?: string;
       headline?: string;
-      url?: string;
-      profileUrl?: string;
-      location?: string;
+      publicIdentifier?: string;
+      jobTitle?: string;
+      geoLocationName?: string;
+      pictureUrl?: string;
       companyName?: string;
-      position?: string;
       [key: string]: unknown;
     }>("supreme_coder/linkedin-profile-scraper", {
       urls: [{ url: searchUrl }],
-    }, 120);
+    }, 300);
 
     console.log("[LinkedIn Search] Apify results:", apifyResults?.length ?? "null");
-    if (apifyResults && apifyResults.length > 0) {
-      console.log("[LinkedIn Search] Apify first result keys:", Object.keys(apifyResults[0]).join(", "));
-      console.log("[LinkedIn Search] Apify first result:", JSON.stringify(apifyResults[0]).slice(0, 500));
-    }
 
     if (apifyResults && apifyResults.length > 0) {
       const results = apifyResults
-        .filter((p) => p.fullName || p.firstName || p.lastName)
+        .filter((p) => p.firstName || p.lastName || p.fullName)
         .map((p, idx) => {
           const name =
             p.fullName ||
             [p.firstName, p.lastName].filter(Boolean).join(" ") ||
             "";
-          const profileUrl = p.url || p.profileUrl || null;
-          const vanity = profileUrl?.match(
-            /linkedin\.com\/in\/([^/?#]+)/,
-          )?.[1];
+          const vanity = p.publicIdentifier || null;
           return {
             id: vanity || `apify-${idx}`,
             name,
-            headline: p.headline || p.position || null,
-            profile_url: profileUrl,
+            headline: p.headline || p.jobTitle || null,
+            profile_url: vanity
+              ? `https://linkedin.com/in/${vanity}`
+              : null,
             source: "apify" as const,
           };
         });
       if (results.length > 0) {
+        console.log("[LinkedIn Search] Apify returned", results.length, "profiles");
         return { data: results };
       }
     }

@@ -1,5 +1,13 @@
 {
   "regions": ["cdg1"],
+  "functions": {
+    "src/app/**/*.ts": {
+      "maxDuration": 120
+    },
+    "src/app/**/*.tsx": {
+      "maxDuration": 120
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/daily-emails",
