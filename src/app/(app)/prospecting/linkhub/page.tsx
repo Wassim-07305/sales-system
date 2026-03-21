@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getProspectPostsFeed } from "@/lib/actions/linkhub";
-import { LinkHubView } from "./linkhub-view";
+import { createClient } from "@/lib/supabase/server";
+import { getEngageStats, getRecentActivity } from "@/lib/actions/linkedin-engage";
+import { LinkedInEngageDashboard } from "./engage-dashboard";
 
-export default async function LinkHubPage() {
+export default async function HubPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -11,21 +11,15 @@ export default async function LinkHubPage() {
 
   if (!user) redirect("/login");
 
-  // Charger les prospects pour le sélecteur de sourcing
-  const { data: prospects } = await supabase
-    .from("prospects")
-    .select("id, full_name, profile_url, platform, status")
-    .eq("user_id", user.id)
-    .not("profile_url", "is", null)
-    .order("created_at", { ascending: false });
-
-  const { posts, stats } = await getProspectPostsFeed();
+  const [stats, recentActivity] = await Promise.all([
+    getEngageStats(),
+    getRecentActivity(5),
+  ]);
 
   return (
-    <LinkHubView
-      initialPosts={posts}
-      initialStats={stats}
-      prospects={prospects || []}
+    <LinkedInEngageDashboard
+      stats={stats}
+      recentActivity={recentActivity}
     />
   );
 }

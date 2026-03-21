@@ -123,7 +123,7 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
 
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/dashboard/linkedin-engage/session">
+        <Link href="/prospecting/linkhub/session">
           <Card className="cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow border-brand/20">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
@@ -139,7 +139,7 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
           </Card>
         </Link>
 
-        <Link href="/dashboard/linkedin-engage/recommandations">
+        <Link href="/prospecting/linkhub/recommandations">
           <Card className="cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
@@ -155,7 +155,7 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
           </Card>
         </Link>
 
-        <Link href="/dashboard/linkedin-engage/replies">
+        <Link href="/prospecting/linkhub/replies">
           <Card className="cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-foreground/5 ring-1 ring-foreground/10 flex items-center justify-center">
@@ -184,22 +184,22 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
         {[
           {
             label: "Feeds",
-            href: "/dashboard/linkedin-engage/feeds",
+            href: "/prospecting/linkhub/feeds",
             icon: Linkedin,
           },
           {
             label: "Statistiques",
-            href: "/dashboard/linkedin-engage/stats",
+            href: "/prospecting/linkhub/stats",
             icon: BarChart3,
           },
           {
             label: "Mon style",
-            href: "/dashboard/linkedin-engage/mon-style",
+            href: "/prospecting/linkhub/mon-style",
             icon: Target,
           },
           {
             label: "Recommandations",
-            href: "/dashboard/linkedin-engage/recommandations",
+            href: "/prospecting/linkhub/recommandations",
             icon: Sparkles,
           },
         ].map((item) => (

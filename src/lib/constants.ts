@@ -181,40 +181,34 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["setter", "closer"],
   },
 
-  // LinkedIn Engage module
-  {
-    label: "LinkedIn Engage",
-    href: "/dashboard/linkedin-engage",
-    icon: Linkedin,
-    roles: ["admin", "manager", "csm", "setter"],
-  },
+  // LinkedIn Engage sub-pages (inside Hub)
   {
     label: "Feeds LinkedIn",
-    href: "/dashboard/linkedin-engage/feeds",
+    href: "/prospecting/linkhub/feeds",
     icon: Linkedin,
     roles: ["admin", "manager", "csm", "setter"],
   },
   {
     label: "Session",
-    href: "/dashboard/linkedin-engage/session",
+    href: "/prospecting/linkhub/session",
     icon: Play,
     roles: ["admin", "manager", "setter"],
   },
   {
     label: "Stats LinkedIn",
-    href: "/dashboard/linkedin-engage/stats",
+    href: "/prospecting/linkhub/stats",
     icon: BarChart3,
     roles: ["admin", "manager", "csm", "setter"],
   },
   {
     label: "Recommandations",
-    href: "/dashboard/linkedin-engage/recommandations",
+    href: "/prospecting/linkhub/recommandations",
     icon: Sparkles,
     roles: ["admin", "manager", "setter"],
   },
   {
     label: "Réponses",
-    href: "/dashboard/linkedin-engage/replies",
+    href: "/prospecting/linkhub/replies",
     icon: MessageSquare,
     roles: ["admin", "manager", "csm", "setter"],
   },
@@ -433,12 +427,11 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "LinkedIn",
     items: NAV_ITEMS.filter((i) =>
       [
-        "/dashboard/linkedin-engage",
-        "/dashboard/linkedin-engage/feeds",
-        "/dashboard/linkedin-engage/session",
-        "/dashboard/linkedin-engage/stats",
-        "/dashboard/linkedin-engage/recommandations",
-        "/dashboard/linkedin-engage/replies",
+        "/prospecting/linkhub/feeds",
+        "/prospecting/linkhub/session",
+        "/prospecting/linkhub/stats",
+        "/prospecting/linkhub/recommandations",
+        "/prospecting/linkhub/replies",
       ].includes(i.href),
     ),
   },
