@@ -29,7 +29,7 @@ export function MobileNav({ role }: MobileNavProps) {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowMore(false)}
           />
-          <div className="absolute bottom-16 left-0 right-0 bg-background border-t border-border/50 rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe shadow-2xl">
+          <div className="absolute bottom-16 left-0 right-0 bg-sidebar border-t border-sidebar-border rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe shadow-2xl">
             <div className="grid grid-cols-4 gap-2">
               {overflowItems.map((item) => {
                 const isActive =
@@ -46,7 +46,7 @@ export function MobileNav({ role }: MobileNavProps) {
                       "flex flex-col items-center gap-1 p-3 rounded-lg text-[11px] font-medium transition-colors",
                       isActive
                         ? "text-brand bg-brand/10"
-                        : "text-muted-foreground hover:bg-muted",
+                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent",
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -62,7 +62,7 @@ export function MobileNav({ role }: MobileNavProps) {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur-lg md:hidden pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border bg-sidebar backdrop-blur-lg md:hidden pb-safe">
         <div className="flex h-16 items-center justify-around">
           {mainItems.map((item) => {
             const isActive =
@@ -76,7 +76,7 @@ export function MobileNav({ role }: MobileNavProps) {
                 href={item.href}
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[44px] px-2 py-1.5 text-[10px] font-medium transition-all duration-200 rounded-xl active:scale-95",
-                  isActive ? "text-brand" : "text-muted-foreground",
+                  isActive ? "text-brand" : "text-sidebar-foreground/60",
                 )}
               >
                 {isActive && (
@@ -98,7 +98,7 @@ export function MobileNav({ role }: MobileNavProps) {
               onClick={() => setShowMore(!showMore)}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[44px] px-2 py-1.5 text-[10px] font-medium transition-colors rounded-lg active:bg-muted",
-                showMore ? "text-brand" : "text-muted-foreground",
+                showMore ? "text-brand" : "text-sidebar-foreground/60",
               )}
             >
               {showMore ? (
