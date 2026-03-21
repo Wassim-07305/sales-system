@@ -623,6 +623,8 @@ export function ProspectingView({
             <SelectItem value="all">Toutes</SelectItem>
             <SelectItem value="linkedin">LinkedIn</SelectItem>
             <SelectItem value="instagram">Instagram</SelectItem>
+            <SelectItem value="whatsapp">WhatsApp</SelectItem>
+            <SelectItem value="email">Email</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -779,7 +781,7 @@ export function ProspectingView({
               className="gap-1 cursor-pointer"
               onClick={() => setFilterPlatform("all")}
             >
-              {filterPlatform === "linkedin" ? "LinkedIn" : "Instagram"}
+              {{ linkedin: "LinkedIn", instagram: "Instagram", whatsapp: "WhatsApp", email: "Email" }[filterPlatform] || filterPlatform}
               <X className="h-3 w-3" />
             </Badge>
           )}

@@ -18,6 +18,7 @@ import {
   FileText,
   GitBranch,
   ShieldAlert,
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,7 @@ const TABS = [
   { label: "Rapports setter", href: "/analytics/setter-reports", icon: FileText },
   { label: "Rapports valeur", href: "/analytics/value-reports", icon: LineChart },
   { label: "Rapports", href: "/analytics/reports", icon: MapPin },
+  { label: "Intelligence", href: "/analytics/intelligence", icon: Brain },
 ];
 
 export default function AnalyticsLayout({

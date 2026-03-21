@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { IntelligenceView } from "../intelligence/intelligence-view";
+import { IntelligenceView } from "../../prospecting/intelligence/intelligence-view";
 import { getCompetitors } from "@/lib/actions/intelligence";
 
-export default async function AcquisitionPage() {
+export default async function IntelligencePage() {
   const supabase = await createClient();
   const {
     data: { user },

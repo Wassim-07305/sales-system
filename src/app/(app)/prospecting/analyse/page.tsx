@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { IntelligenceView } from "../intelligence/intelligence-view";
-import { getCompetitors } from "@/lib/actions/intelligence";
+import { ScoringView } from "../scoring/scoring-view";
+import { computeScoreBreakdown } from "@/lib/scoring";
 
 export default async function AnalysePage() {
   const supabase = await createClient();
@@ -11,7 +11,33 @@ export default async function AnalysePage() {
 
   if (!user) redirect("/login");
 
-  const competitors = await getCompetitors();
+  const { data: prospects } = await supabase
+    .from("prospects")
+    .select(
+      "*, scores:prospect_scores(engagement_score, responsiveness_score, qualification_score, total_score, temperature, computed_at)",
+    )
+    .order("created_at", { ascending: false });
 
-  return <IntelligenceView competitors={competitors} />;
+  const allProspects = (prospects || []).map((p: Record<string, unknown>) => ({
+    ...p,
+    scores: Array.isArray(p.scores) ? p.scores[0] || null : p.scores,
+  }));
+
+  const prospectsWithBreakdown = allProspects.map(
+    (p: Record<string, unknown>) => ({
+      ...p,
+      breakdown: computeScoreBreakdown(p, allProspects),
+    }),
+  );
+
+  prospectsWithBreakdown.sort(
+    (a: Record<string, unknown>, b: Record<string, unknown>) => {
+      const bkA = a.breakdown as { total: number };
+      const bkB = b.breakdown as { total: number };
+      return bkB.total - bkA.total;
+    },
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return <ScoringView prospects={prospectsWithBreakdown as any} />;
 }

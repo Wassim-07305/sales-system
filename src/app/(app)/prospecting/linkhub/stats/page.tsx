@@ -5,8 +5,9 @@ import {
   getTopComments,
   getTopCreators,
   getHourlyStats,
+  getStyleSamples,
 } from "@/lib/actions/linkedin-engage";
-import { StatsView } from "./stats-view";
+import { StatsAndStyleView } from "./stats-and-style-view";
 
 export default async function StatsPage() {
   const supabase = await createClient();
@@ -16,19 +17,22 @@ export default async function StatsPage() {
 
   if (!user) redirect("/login");
 
-  const [stats, topComments, topCreators, hourlyStats] = await Promise.all([
-    getEngageStats(),
-    getTopComments(10),
-    getTopCreators(),
-    getHourlyStats(),
-  ]);
+  const [stats, topComments, topCreators, hourlyStats, styleSamples] =
+    await Promise.all([
+      getEngageStats(),
+      getTopComments(10),
+      getTopCreators(),
+      getHourlyStats(),
+      getStyleSamples(),
+    ]);
 
   return (
-    <StatsView
+    <StatsAndStyleView
       stats={stats}
       topComments={topComments}
       topCreators={topCreators}
       hourlyStats={hourlyStats}
+      initialSamples={styleSamples}
     />
   );
 }

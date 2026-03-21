@@ -4,7 +4,7 @@ import { getProspects } from "@/lib/actions/prospecting";
 import { getUnipileStatus } from "@/lib/actions/unipile";
 import { InstagramView } from "../../instagram/instagram-view";
 
-export default async function InstagramPage() {
+export default async function InstagramHubPage() {
   const supabase = await createClient();
   const {
     data: { user },

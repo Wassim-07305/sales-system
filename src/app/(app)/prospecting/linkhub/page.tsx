@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getEngageStats, getRecentActivity } from "@/lib/actions/linkedin-engage";
-import { LinkedInEngageDashboard } from "./engage-dashboard";
+import { getFeeds, getAllFeedPosts } from "@/lib/actions/linkedin-engage";
+import { LinkedInHubView } from "./linkedin-hub-view";
 
 export default async function HubPage() {
   const supabase = await createClient();
@@ -11,15 +11,10 @@ export default async function HubPage() {
 
   if (!user) redirect("/login");
 
-  const [stats, recentActivity] = await Promise.all([
-    getEngageStats(),
-    getRecentActivity(5),
+  const [feeds, posts] = await Promise.all([
+    getFeeds(),
+    getAllFeedPosts(100),
   ]);
 
-  return (
-    <LinkedInEngageDashboard
-      stats={stats}
-      recentActivity={recentActivity}
-    />
-  );
+  return <LinkedInHubView initialFeeds={feeds} initialPosts={posts} />;
 }

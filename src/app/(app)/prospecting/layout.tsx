@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Target,
-  Link2,
+  Database,
+  Radar,
   BarChart3,
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { label: "Prospects", href: "/prospecting", icon: Target, exact: true },
-  { label: "Hub LinkedIn", href: "/prospecting/linkhub", icon: Link2 },
+  { label: "Base", href: "/prospecting", icon: Database, exact: true },
+  { label: "Hub", href: "/prospecting/linkhub", icon: Radar },
   { label: "Analyse", href: "/prospecting/analyse", icon: BarChart3 },
   { label: "Outreach", href: "/prospecting/outreach", icon: Send },
 ];
@@ -28,20 +28,9 @@ export default function ProspectingLayout({
   const isDetailPage = /^\/prospecting\/[^/]+$/.test(pathname) &&
     !TABS.some((t) => t.href === pathname);
 
-  // Hide tabs on old direct sub-pages that still exist for backwards compat
+  // Hide tabs on old direct sub-pages that still have view components
   const oldDirectPages = [
-    "/prospecting/intelligence",
-    "/prospecting/linkedin",
     "/prospecting/instagram",
-    "/prospecting/scoring",
-    "/prospecting/segments",
-    "/prospecting/enrichment",
-    "/prospecting/templates",
-    "/prospecting/campaigns",
-    "/prospecting/follow-ups",
-    "/prospecting/hub",
-    "/prospecting/acquisition",
-    "/prospecting/qualification",
   ];
   const isOldPage = oldDirectPages.some((p) => pathname.startsWith(p));
 

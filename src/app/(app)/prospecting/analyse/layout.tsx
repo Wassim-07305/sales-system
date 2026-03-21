@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brain, Star, Layers, Sparkles } from "lucide-react";
+import { Star, Layers, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { label: "Intelligence", href: "/prospecting/analyse", icon: Brain, exact: true },
-  { label: "Scoring", href: "/prospecting/analyse/scoring", icon: Star },
+  { label: "Scoring", href: "/prospecting/analyse", icon: Star, exact: true },
   { label: "Segments", href: "/prospecting/analyse/segments", icon: Layers },
   { label: "Enrichissement", href: "/prospecting/analyse/enrichment", icon: Sparkles },
 ];
