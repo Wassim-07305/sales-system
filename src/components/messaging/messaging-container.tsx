@@ -295,7 +295,9 @@ export function MessagingContainer() {
             )}
           </>
         ) : (
-          <UnifiedInbox />
+          <div className="flex-1 min-w-0">
+            <UnifiedInbox />
+          </div>
         )}
       </div>
 

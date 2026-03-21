@@ -608,36 +608,13 @@ export function AdminDashboard({
           <CardContent className="pt-0">
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
               {[
-                {
-                  label: "Onboarding",
-                  color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-                },
-                {
-                  label: "En formation",
-                  color:
-                    "bg-violet-500/20 text-violet-400 border-violet-500/30",
-                },
-                {
-                  label: "Tests en cours",
-                  color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-                },
-                {
-                  label: "Prêt à placer",
-                  color:
-                    "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-                },
-                {
-                  label: "Placé",
-                  color: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-                },
-                {
-                  label: "Actif",
-                  color: "bg-green-500/20 text-green-400 border-green-500/30",
-                },
-                {
-                  label: "Inactif",
-                  color: "bg-red-500/20 text-red-400 border-red-500/30",
-                },
+                { label: "Onboarding" },
+                { label: "En formation" },
+                { label: "Tests en cours" },
+                { label: "Prêt à placer" },
+                { label: "Placé" },
+                { label: "Actif" },
+                { label: "Inactif" },
               ].map((stage) => {
                 const count = data.setterStats.filter((s) => {
                   const hasEntrepreneur = !!s.revenue;
@@ -676,10 +653,7 @@ export function AdminDashboard({
                 return (
                   <div
                     key={stage.label}
-                    className={cn(
-                      "flex flex-col items-center gap-1 p-3 rounded-xl border text-center",
-                      stage.color,
-                    )}
+                    className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border/50 bg-muted/30 text-center"
                   >
                     <span className="text-2xl font-bold">{count}</span>
                     <span className="text-[10px] font-medium leading-tight">

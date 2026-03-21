@@ -351,12 +351,8 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/content", "/marketplace"].includes(i.href),
+      ["/content", "/marketplace", "/utilisateurs", "/genspark"].includes(i.href),
     ),
-  },
-  {
-    label: "Utilisateurs",
-    items: NAV_ITEMS.filter((i) => ["/utilisateurs"].includes(i.href)),
   },
   {
     label: "Espace Client",
@@ -374,7 +370,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Outils IA",
     items: NAV_ITEMS.filter((i) =>
-      ["/settings-ia", "/ai-scripts", "/genspark"].includes(i.href),
+      ["/settings-ia", "/ai-scripts"].includes(i.href),
     ),
   },
 ];
