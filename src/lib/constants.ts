@@ -36,8 +36,6 @@ import {
   Radio,
   Presentation,
   Link2,
-  Linkedin,
-  Play,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -181,37 +179,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["setter", "closer"],
   },
 
-  // LinkedIn Engage sub-pages (inside Hub)
-  {
-    label: "Feeds LinkedIn",
-    href: "/prospecting/linkhub/feeds",
-    icon: Linkedin,
-    roles: ["admin", "manager", "csm", "setter"],
-  },
-  {
-    label: "Session",
-    href: "/prospecting/linkhub/session",
-    icon: Play,
-    roles: ["admin", "manager", "setter"],
-  },
-  {
-    label: "Stats LinkedIn",
-    href: "/prospecting/linkhub/stats",
-    icon: BarChart3,
-    roles: ["admin", "manager", "csm", "setter"],
-  },
-  {
-    label: "Recommandations",
-    href: "/prospecting/linkhub/recommandations",
-    icon: Sparkles,
-    roles: ["admin", "manager", "setter"],
-  },
-  {
-    label: "Réponses",
-    href: "/prospecting/linkhub/replies",
-    icon: MessageSquare,
-    roles: ["admin", "manager", "csm", "setter"],
-  },
   {
     label: "Défis",
     href: "/challenges",
@@ -420,18 +387,6 @@ export const NAV_SECTIONS: NavSection[] = [
         "/kpis",
         "/referral",
         "/prospects",
-      ].includes(i.href),
-    ),
-  },
-  {
-    label: "LinkedIn",
-    items: NAV_ITEMS.filter((i) =>
-      [
-        "/prospecting/linkhub/feeds",
-        "/prospecting/linkhub/session",
-        "/prospecting/linkhub/stats",
-        "/prospecting/linkhub/recommandations",
-        "/prospecting/linkhub/replies",
       ].includes(i.href),
     ),
   },
