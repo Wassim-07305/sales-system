@@ -145,15 +145,41 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(keyword)}`;
+    // Build structured input for the search actor
+    const actorInput: Record<string, unknown> = {
+      max_profiles: 20,
+      include_email: false,
+    };
+    // Map filters to actor fields
+    if (filters?.jobTitle?.trim()) {
+      actorInput.current_job_title = filters.jobTitle.trim();
+    }
+    if (filters?.location?.trim()) {
+      actorInput.location = filters.location.trim();
+    }
+    // Use query as name search (split into first/last if possible)
+    if (query.trim()) {
+      const parts = query.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        actorInput.firstname = parts[0];
+        actorInput.lastname = parts.slice(1).join(" ");
+      } else {
+        // Single word — use as job title if no job title filter, otherwise as lastname
+        if (!actorInput.current_job_title) {
+          actorInput.current_job_title = parts[0];
+        } else {
+          actorInput.lastname = parts[0];
+        }
+      }
+    }
 
     // Start the actor WITHOUT waiting for finish (instant response)
     const runRes = await fetchWithTimeout(
-      `https://api.apify.com/v2/acts/supreme_coder~linkedin-profile-scraper/runs?token=${apifyToken}`,
+      `https://api.apify.com/v2/acts/apimaestro~linkedin-profile-search-scraper/runs?token=${apifyToken}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls: [{ url: searchUrl }] }),
+        body: JSON.stringify(actorInput),
         timeoutMs: 5000,
       },
     );

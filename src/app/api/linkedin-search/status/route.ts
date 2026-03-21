@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     if (!statusRes.ok) {
       return NextResponse.json(
-        { error: "Erreur Apify status" },
+        { error: "Erreur lors de la vérification du statut" },
         { status: 500 },
       );
     }
@@ -87,34 +87,44 @@ export async function GET(req: NextRequest) {
     }
 
     const items = (await dataRes.json()) as Array<{
+      basic_info?: {
+        fullname?: string;
+        first_name?: string;
+        last_name?: string;
+        headline?: string;
+        public_identifier?: string;
+        profile_url?: string;
+        about?: string;
+        current_company?: string;
+        location?: { full?: string };
+      };
+      // Legacy flat format fallback
       firstName?: string;
       lastName?: string;
       fullName?: string;
       headline?: string;
       publicIdentifier?: string;
-      jobTitle?: string;
-      geoLocationName?: string;
-      pictureUrl?: string;
-      companyName?: string;
       [key: string]: unknown;
     }>;
 
     const results = items
-      .filter((p) => p.firstName || p.lastName || p.fullName)
+      .filter((p) => {
+        const bi = p.basic_info;
+        return bi?.fullname || bi?.first_name || bi?.last_name || p.firstName || p.lastName || p.fullName;
+      })
       .map((p, idx) => {
-        const name =
-          p.fullName ||
-          [p.firstName, p.lastName].filter(Boolean).join(" ") ||
-          "";
-        const vanity = p.publicIdentifier || null;
+        const bi = p.basic_info;
+        const name = bi
+          ? (bi.fullname || [bi.first_name, bi.last_name].filter(Boolean).join(" ") || "")
+          : (p.fullName || [p.firstName, p.lastName].filter(Boolean).join(" ") || "");
+        const vanity = bi?.public_identifier || (p.publicIdentifier as string) || null;
+        const profileUrl = bi?.profile_url || (vanity ? `https://linkedin.com/in/${vanity}` : null);
         return {
           id: vanity || `apify-${idx}`,
           name,
-          headline: p.headline || p.jobTitle || null,
-          profile_url: vanity
-            ? `https://linkedin.com/in/${vanity}`
-            : null,
-          source: "apify" as const,
+          headline: bi?.headline || (p.headline as string) || null,
+          profile_url: profileUrl,
+          source: "search" as const,
         };
       });
 

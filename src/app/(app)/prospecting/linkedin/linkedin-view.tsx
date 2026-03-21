@@ -405,6 +405,59 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
   // Mode Duo IA+Humain — per-conversation auto mode
   const [autoModeIds, setAutoModeIds] = useState<Set<string>>(new Set());
 
+  // Prospect action modal state
+  type ProspectAction = "analyze" | "dm" | "comments" | null;
+  const [prospectAction, setProspectAction] = useState<ProspectAction>(null);
+  const [prospectActionTarget, setProspectActionTarget] = useState<Prospect | null>(null);
+  const [prospectActionLoading, setProspectActionLoading] = useState(false);
+  const [prospectActionResult, setProspectActionResult] = useState<Record<string, unknown> | null>(null);
+  const [prospectDmResult, setProspectDmResult] = useState("");
+  const [prospectCommentsResult, setProspectCommentsResult] = useState<{ type: string; comment: string }[]>([]);
+
+  function openProspectAction(prospect: Prospect, action: ProspectAction) {
+    setProspectActionTarget(prospect);
+    setProspectAction(action);
+    setProspectActionResult(null);
+    setProspectDmResult("");
+    setProspectCommentsResult([]);
+    // Auto-run the action
+    runProspectAction(prospect, action);
+  }
+
+  function closeProspectAction() {
+    setProspectAction(null);
+    setProspectActionTarget(null);
+    setProspectActionResult(null);
+    setProspectDmResult("");
+    setProspectCommentsResult([]);
+    setProspectActionLoading(false);
+  }
+
+  async function runProspectAction(prospect: Prospect, action: ProspectAction) {
+    setProspectActionLoading(true);
+    try {
+      if (action === "analyze" && prospect.profile_url) {
+        const result = await analyzeProfile(prospect.profile_url);
+        setProspectActionResult(result as unknown as Record<string, unknown>);
+      } else if (action === "dm") {
+        const context = prospect.profile_url
+          ? `Profil LinkedIn: ${prospect.name}`
+          : `Prospect: ${prospect.name}`;
+        const msg = await generateAiMessage(prospect.name, context, "linkedin");
+        setProspectDmResult(msg);
+      } else if (action === "comments" && prospect.profile_url) {
+        const result = await suggestComments(prospect.profile_url);
+        setProspectCommentsResult(result);
+      } else {
+        toast.error("URL de profil requise pour cette action");
+      }
+    } catch {
+      toast.error("Erreur lors du traitement");
+    } finally {
+      setProspectActionLoading(false);
+    }
+  }
+
   function toggleAutoMode(prospectId: string) {
     setAutoModeIds((prev) => {
       const next = new Set(prev);
@@ -1014,6 +1067,40 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      {/* Prospect action buttons */}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => openProspectAction(prospect, "analyze")}
+                          disabled={!prospect.profile_url}
+                          title={prospect.profile_url ? "Analyser le profil" : "URL de profil requise"}
+                        >
+                          <Search className="h-3 w-3 mr-1" />
+                          Analyser
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => openProspectAction(prospect, "dm")}
+                        >
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          DM
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => openProspectAction(prospect, "comments")}
+                          disabled={!prospect.profile_url}
+                          title={prospect.profile_url ? "Générer des commentaires" : "URL de profil requise"}
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Commentaires
+                        </Button>
+                      </div>
                       {/* Mode Duo IA+Humain toggle */}
                       <div className="flex items-center gap-1.5">
                         {autoModeIds.has(prospect.id) && (
@@ -1082,6 +1169,134 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Prospect Action Modal */}
+      {prospectAction && prospectActionTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={closeProspectAction}>
+          <div
+            className="bg-background rounded-2xl shadow-xl border w-full max-w-lg mx-4 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-foreground/10 ring-1 ring-foreground/20 flex items-center justify-center text-foreground font-bold">
+                  {prospectActionTarget.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-medium">{prospectActionTarget.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {prospectAction === "analyze" && "Analyse de profil"}
+                    {prospectAction === "dm" && "Génération de DM"}
+                    {prospectAction === "comments" && "Suggestions de commentaires"}
+                  </p>
+                </div>
+              </div>
+              <Button size="sm" variant="ghost" onClick={closeProspectAction} className="h-8 w-8 p-0">
+                <XCircle className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="p-5">
+              {prospectActionLoading && (
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-brand" />
+                  <p className="text-sm text-muted-foreground">
+                    {prospectAction === "analyze" && "Analyse du profil en cours..."}
+                    {prospectAction === "dm" && "Génération du message..."}
+                    {prospectAction === "comments" && "Génération des commentaires..."}
+                  </p>
+                </div>
+              )}
+
+              {/* Analyze result */}
+              {!prospectActionLoading && prospectAction === "analyze" && prospectActionResult && (
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Nom</span>
+                    <span className="font-medium">{prospectActionResult.name as string}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Titre</span>
+                    <span className="text-right max-w-[60%] text-xs">{prospectActionResult.headline as string}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Abonnés</span>
+                    <span>{((prospectActionResult.followers as number) || 0).toLocaleString("fr-FR")}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Score</span>
+                    <Badge className={
+                      (prospectActionResult.score as number) >= 70
+                        ? "bg-brand/10 text-brand border border-brand/20"
+                        : "bg-muted/60 text-muted-foreground border border-border/50"
+                    }>
+                      {prospectActionResult.score as number}/100
+                    </Badge>
+                  </div>
+                  {Array.isArray(prospectActionResult.topics) && (prospectActionResult.topics as string[]).length > 0 && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-muted-foreground">Sujets</span>
+                      <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
+                        {(prospectActionResult.topics as string[]).map((t, i) => (
+                          <Badge key={i} variant="outline" className="text-[10px]">{t}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {typeof prospectActionResult.recommendation === "string" && (
+                    <div className="border-t pt-3 mt-3">
+                      <p className="text-xs text-muted-foreground mb-1">Recommandation</p>
+                      <p className="text-sm">{prospectActionResult.recommendation as string}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* DM result */}
+              {!prospectActionLoading && prospectAction === "dm" && prospectDmResult && (
+                <div className="space-y-3">
+                  <pre className="whitespace-pre-wrap text-sm font-sans bg-muted/30 rounded-xl p-4">
+                    {prospectDmResult}
+                  </pre>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="rounded-xl" onClick={() => copyToClipboard(prospectDmResult)}>
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copier
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      onClick={() => runProspectAction(prospectActionTarget, "dm")}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Regénérer
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Comments result */}
+              {!prospectActionLoading && prospectAction === "comments" && prospectCommentsResult.length > 0 && (
+                <div className="space-y-3">
+                  {prospectCommentsResult.map((c, i) => (
+                    <div key={i} className="border rounded-xl p-3">
+                      <Badge variant="outline" className="text-xs mb-2">
+                        {c.type === "value" ? "Valeur ajoutée" : c.type === "question" ? "Question" : "Témoignage"}
+                      </Badge>
+                      <p className="text-sm mb-2">{c.comment}</p>
+                      <Button size="sm" variant="ghost" onClick={() => copyToClipboard(c.comment)}>
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
