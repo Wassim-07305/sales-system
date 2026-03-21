@@ -180,7 +180,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<
-    Array<{ id: string; name: string; username: string | null; biography: string | null; source: string; profile_url?: string; followers_count?: number | null }>
+    Array<{ id: string; name: string; username: string | null; biography: string | null; source: string; profile_url?: string | null; followers_count?: number | null; profile_picture_url?: string | null }>
   >([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
