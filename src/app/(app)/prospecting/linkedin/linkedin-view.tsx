@@ -45,7 +45,6 @@ import {
   suggestComments,
   generateAiMessage,
 } from "@/lib/actions/hub-setting";
-import { searchLinkedInProfiles } from "@/lib/actions/linkedin-api";
 import { createProspect } from "@/lib/actions/prospects";
 import type { LinkedInFeed, FeedPost, Recommendation, CommentHistory } from "@/lib/actions/linkedin-engage";
 import {
@@ -200,7 +199,13 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
         location: searchLocation.trim() || undefined,
         jobTitle: searchJobTitle.trim() || undefined,
       };
-      const result = await searchLinkedInProfiles(searchQuery, filters);
+      // Use API route (not server action) for longer timeout support
+      const res = await fetch("/api/linkedin-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: searchQuery, filters }),
+      });
+      const result = await res.json();
       if (result.error && !result.data) {
         toast.error(result.error);
       } else {
