@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +26,7 @@ import {
   Loader2,
   Users,
   Wrench,
+  Newspaper,
   ExternalLink,
   Copy,
   CheckCircle2,
@@ -43,11 +43,14 @@ import {
   suggestComments,
   generateAiMessage,
 } from "@/lib/actions/hub-setting";
+import type { LinkedInFeed, FeedPost, Recommendation, CommentHistory } from "@/lib/actions/linkedin-engage";
 import {
   generateUnipileAuthLink,
   getUnipileStatus,
 } from "@/lib/actions/unipile";
 import { updateProspectStatus } from "@/lib/actions/prospecting";
+import { FeedsView } from "@/app/(app)/prospecting/linkhub/feeds/feeds-view";
+import { InteractionsView } from "@/app/(app)/prospecting/linkhub/interactions/interactions-view";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -65,6 +68,10 @@ interface Prospect {
 interface Props {
   prospects: Prospect[];
   unipileLinkedin?: { connected: boolean; accountName?: string } | null;
+  initialFeeds?: LinkedInFeed[];
+  initialPosts?: FeedPost[];
+  recommendations?: Recommendation[];
+  interactionComments?: CommentHistory[];
 }
 
 const statusLabels: Record<string, string> = {
@@ -87,7 +94,7 @@ const statusColors: Record<string, string> = {
   lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
-export function LinkedinView({ prospects, unipileLinkedin }: Props) {
+export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initialPosts, recommendations, interactionComments }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
 
@@ -294,16 +301,6 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="LinkedIn" description="Prospection et outils LinkedIn">
-        <Badge
-          variant="outline"
-          className="bg-foreground/10 text-foreground border-foreground/20 gap-1"
-        >
-          <Linkedin className="h-3 w-3" />
-          {prospects.length} prospects
-        </Badge>
-      </PageHeader>
-
       {/* Warning banner when not connected */}
       {!liConnected && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
@@ -388,6 +385,18 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
             <Users className="h-4 w-4 mr-2" />
             Prospects ({prospects.length})
           </TabsTrigger>
+          {initialFeeds && (
+            <TabsTrigger value="feeds">
+              <Newspaper className="h-4 w-4 mr-2" />
+              Feeds
+            </TabsTrigger>
+          )}
+          {recommendations && (
+            <TabsTrigger value="interactions">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Interactions
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Tools Tab */}
@@ -820,6 +829,20 @@ export function LinkedinView({ prospects, unipileLinkedin }: Props) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Feeds Tab */}
+        {initialFeeds && initialPosts && (
+          <TabsContent value="feeds">
+            <FeedsView initialFeeds={initialFeeds} initialPosts={initialPosts} />
+          </TabsContent>
+        )}
+
+        {/* Interactions Tab */}
+        {recommendations && interactionComments && (
+          <TabsContent value="interactions">
+            <InteractionsView recommendations={recommendations} comments={interactionComments} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

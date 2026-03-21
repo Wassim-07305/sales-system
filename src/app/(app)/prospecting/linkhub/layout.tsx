@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   Linkedin,
   Instagram,
-  BarChart3,
-  MessageSquare,
   Circle,
   Settings,
 } from "lucide-react";
@@ -17,8 +15,6 @@ import { getUnipileStatus } from "@/lib/actions/unipile";
 const TABS = [
   { label: "LinkedIn", href: "/prospecting/linkhub", icon: Linkedin, exact: true },
   { label: "Instagram", href: "/prospecting/linkhub/instagram", icon: Instagram },
-  { label: "Statistiques", href: "/prospecting/linkhub/stats", icon: BarChart3 },
-  { label: "Interactions", href: "/prospecting/linkhub/interactions", icon: MessageSquare },
 ];
 
 export default function LinkhubLayout({

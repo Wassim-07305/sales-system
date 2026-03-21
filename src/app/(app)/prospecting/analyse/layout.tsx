@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Star, Layers, Sparkles } from "lucide-react";
+import { Star, Layers, Sparkles, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { label: "Scoring", href: "/prospecting/analyse", icon: Star, exact: true },
   { label: "Segments", href: "/prospecting/analyse/segments", icon: Layers },
   { label: "Enrichissement", href: "/prospecting/analyse/enrichment", icon: Sparkles },
+  { label: "Statistiques", href: "/prospecting/analyse/stats", icon: BarChart3 },
 ];
 
 export default function AnalyseLayout({

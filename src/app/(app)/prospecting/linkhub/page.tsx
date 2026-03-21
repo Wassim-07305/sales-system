@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getFeeds, getAllFeedPosts } from "@/lib/actions/linkedin-engage";
+import { getFeeds, getAllFeedPosts, getRecommendations } from "@/lib/actions/linkedin-engage";
 import { getProspects } from "@/lib/actions/prospecting";
 import { getUnipileStatus } from "@/lib/actions/unipile";
-import { LinkedInHubView } from "./linkedin-hub-view";
+import { LinkedinView } from "../linkedin/linkedin-view";
 
 export default async function HubPage() {
   const supabase = await createClient();
@@ -13,12 +13,21 @@ export default async function HubPage() {
 
   if (!user) redirect("/login");
 
-  const [feeds, posts, prospects, unipileStatus] = await Promise.all([
-    getFeeds(),
-    getAllFeedPosts(100),
-    getProspects({ platform: "linkedin" }),
-    getUnipileStatus(),
-  ]);
+  const [feeds, posts, prospects, unipileStatus, recommendations, commentsResult] =
+    await Promise.all([
+      getFeeds(),
+      getAllFeedPosts(100),
+      getProspects({ platform: "linkedin" }),
+      getUnipileStatus(),
+      getRecommendations(),
+      supabase
+        .from("linkedin_comment_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .gt("replies_count", 0)
+        .order("posted_at", { ascending: false })
+        .limit(50),
+    ]);
 
   const liAccount = unipileStatus.accounts.find(
     (a) => a.provider.toUpperCase() === "LINKEDIN",
@@ -28,12 +37,15 @@ export default async function HubPage() {
     : null;
 
   return (
-    <LinkedInHubView
-      initialFeeds={feeds}
-      initialPosts={posts}
+    <LinkedinView
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       prospects={prospects as any}
       unipileLinkedin={unipileLinkedin}
+      initialFeeds={feeds}
+      initialPosts={posts}
+      recommendations={recommendations}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      interactionComments={(commentsResult.data || []) as any}
     />
   );
 }
