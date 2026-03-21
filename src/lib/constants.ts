@@ -35,7 +35,6 @@ import {
   Sparkles,
   Radio,
   Presentation,
-  Link2,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -113,12 +112,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
-    label: "Hub",
-    href: "/prospecting/linkhub",
-    icon: Link2,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-  {
     label: "Content",
     href: "/content",
     icon: Newspaper,
@@ -191,18 +184,6 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Portail",
     href: "/portal",
     icon: Building2,
-    roles: ["client_b2b"],
-  },
-  {
-    label: "Mon ESOP",
-    href: "/portal/esop",
-    icon: FileText,
-    roles: ["client_b2b"],
-  },
-  {
-    label: "Mes SOPs",
-    href: "/portal/sops",
-    icon: FileText,
     roles: ["client_b2b"],
   },
   {
@@ -358,7 +339,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Prospection",
     items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/prospecting/linkhub", "/roleplay", "/scripts", "/automation"].includes(i.href),
+      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href),
     ),
   },
   {
