@@ -138,7 +138,7 @@ export async function createProspect(data: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  const { error } = await supabase.from("prospects").insert({
+  let { error } = await supabase.from("prospects").insert({
     name: data.name,
     profile_url: data.profile_url || null,
     platform: data.platform || null,
@@ -146,6 +146,16 @@ export async function createProspect(data: {
     status: "new",
     user_id: user.id,
   });
+  // Fallback if user_id column doesn't exist yet
+  if (error?.message?.includes("user_id")) {
+    ({ error } = await supabase.from("prospects").insert({
+      name: data.name,
+      profile_url: data.profile_url || null,
+      platform: data.platform || null,
+      notes: data.notes || null,
+      status: "new",
+    }));
+  }
   if (error) throw new Error(error.message);
   revalidatePath("/prospects");
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -221,10 +221,10 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
 
   // Recent searches state (loaded on mount)
   const [recentSearches, setRecentSearches] = useState<CacheEntry[]>([]);
-  useState(() => {
-    // Load recent searches on init
+  useEffect(() => {
     setRecentSearches(getCachedSearches());
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function applyResults(results: SearchResult[], keyword: string) {
     setSearchResults(results);

@@ -46,7 +46,7 @@ import {
   Check,
 } from "lucide-react";
 import { scrapeStories, generateAiMessage } from "@/lib/actions/hub-setting";
-import { searchInstagramProfiles } from "@/lib/actions/instagram-api";
+// searchInstagramProfiles imported but replaced by API route for async polling
 import { createProspect } from "@/lib/actions/prospects";
 import {
   generateUnipileAuthLink,
@@ -193,17 +193,67 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
     setSearching(true);
     setSearchResults([]);
     try {
-      const result = await searchInstagramProfiles(searchQuery);
-      if (result.error && !result.data) {
-        toast.error(result.error);
-      } else {
+      const res = await fetch("/api/instagram-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+      const result = await res.json();
+
+      // Instant results (Unipile / local DB)
+      if (result.data && !result.pending) {
         setSearchResults(result.data || []);
         if (result.error) toast.info(result.error);
         if (!result.data?.length) toast.info("Aucun résultat trouvé");
+        setSearching(false);
+        return;
       }
+
+      // Async search started — poll for results
+      if (result.pending && result.runId) {
+        toast.info("Recherche Instagram en cours, résultats dans quelques instants...");
+        const datasetId = result.datasetId || "";
+        let attempts = 0;
+        const maxAttempts = 24;
+
+        const poll = async () => {
+          while (attempts < maxAttempts) {
+            attempts++;
+            await new Promise((r) => setTimeout(r, 5000));
+            try {
+              const statusRes = await fetch(
+                `/api/instagram-search/status?runId=${result.runId}&datasetId=${datasetId}`,
+              );
+              const statusData = await statusRes.json();
+              if (statusData.pending) continue;
+              if (statusData.data && statusData.data.length > 0) {
+                setSearchResults(statusData.data);
+                toast.success(`${statusData.data.length} profil(s) trouvé(s)`);
+              } else {
+                toast.info(statusData.error || "Aucun résultat trouvé");
+              }
+              setSearching(false);
+              return;
+            } catch {
+              continue;
+            }
+          }
+          toast.error("La recherche a pris trop de temps. Réessayez.");
+          setSearching(false);
+        };
+
+        poll();
+        return;
+      }
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.info("Aucun résultat trouvé");
+      }
+      setSearching(false);
     } catch {
       toast.error("Erreur lors de la recherche");
-    } finally {
       setSearching(false);
     }
   }
