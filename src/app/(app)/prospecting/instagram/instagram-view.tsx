@@ -208,7 +208,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
     }
   }
 
-  async function handleSaveInstagramProspect(result: { id: string; name: string; username: string | null; source: string; profile_url?: string }) {
+  async function handleSaveInstagramProspect(result: { id: string; name: string; username: string | null; source: string; profile_url?: string | null }) {
     setSavingId(result.id);
     try {
       const profileUrl = result.profile_url || (result.username
