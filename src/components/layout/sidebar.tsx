@@ -78,7 +78,7 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "z-30 flex h-dvh flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
+          "z-30 flex h-dvh flex-col border-r border-sidebar-border bg-[#0a0a0a] transition-all duration-300",
           "fixed left-0 top-0",
           "md:static",
           sidebarMobileOpen ? "translate-x-0" : "-translate-x-full",
@@ -209,7 +209,7 @@ export function Sidebar({
                           <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
                           <TooltipContent
                             side="right"
-                            className="bg-sidebar text-sidebar-foreground border-sidebar-border"
+                            className="bg-[#0a0a0a] text-sidebar-foreground border-sidebar-border"
                           >
                             {item.label}
                           </TooltipContent>
@@ -259,12 +259,12 @@ export function Sidebar({
                   className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-brand/10"
                 />
               ) : (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/20 text-xs font-semibold text-sidebar-primary ring-2 ring-sidebar-primary/10">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/20 text-xs font-semibold text-sidebar-primary ring-2 ring-[#0a0a0a]-primary/10">
                   {getInitials(userName)}
                 </div>
               )}
               {/* Online indicator */}
-              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-sidebar" />
+              <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-[#0a0a0a]" />
             </div>
             <div
               className={cn("ml-3 min-w-0 flex-1", isCollapsed && "md:hidden")}
@@ -307,7 +307,7 @@ export function Sidebar({
               {isCollapsed && (
                 <TooltipContent
                   side="right"
-                  className="bg-sidebar text-sidebar-foreground border-sidebar-border"
+                  className="bg-[#0a0a0a] text-sidebar-foreground border-sidebar-border"
                 >
                   Paramètres
                 </TooltipContent>
@@ -342,7 +342,7 @@ export function Sidebar({
               {isCollapsed && (
                 <TooltipContent
                   side="right"
-                  className="bg-sidebar text-sidebar-foreground border-sidebar-border"
+                  className="bg-[#0a0a0a] text-sidebar-foreground border-sidebar-border"
                 >
                   Profil
                 </TooltipContent>
@@ -374,7 +374,7 @@ export function Sidebar({
             {isCollapsed && (
               <TooltipContent
                 side="right"
-                className="bg-sidebar text-sidebar-foreground border-sidebar-border"
+                className="bg-[#0a0a0a] text-sidebar-foreground border-sidebar-border"
               >
                 Déconnexion
               </TooltipContent>

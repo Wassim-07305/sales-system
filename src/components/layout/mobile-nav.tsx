@@ -29,7 +29,7 @@ export function MobileNav({ role }: MobileNavProps) {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowMore(false)}
           />
-          <div className="absolute bottom-16 left-0 right-0 bg-sidebar border-t border-sidebar-border rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe shadow-2xl">
+          <div className="absolute bottom-16 left-0 right-0 bg-[#0a0a0a] border-t border-sidebar-border rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto mb-safe shadow-2xl">
             <div className="grid grid-cols-4 gap-2">
               {overflowItems.map((item) => {
                 const isActive =
@@ -62,7 +62,7 @@ export function MobileNav({ role }: MobileNavProps) {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border bg-sidebar backdrop-blur-lg md:hidden pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border bg-[#0a0a0a] backdrop-blur-lg md:hidden pb-safe">
         <div className="flex h-16 items-center justify-around">
           {mainItems.map((item) => {
             const isActive =
