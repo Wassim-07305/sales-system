@@ -415,9 +415,12 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
             </Card>
 
             {searching && (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                Recherche sur LinkedIn en cours...
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <div className="flex items-center">
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Recherche sur LinkedIn en cours...
+                </div>
+                <p className="text-xs mt-2 text-muted-foreground/60">Cela peut prendre jusqu&apos;à 2 minutes</p>
               </div>
             )}
 

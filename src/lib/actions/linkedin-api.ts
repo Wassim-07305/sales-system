@@ -544,8 +544,11 @@ export async function searchLinkedInProfiles(
   // --- Apify People Search (no token / no Unipile needed) ---
   try {
     // Parse query into firstname/lastname if it looks like a name
-    const words = query.trim().split(/\s+/);
-    const isNameQuery = words.length >= 2 && words.every((w) => /^[A-Za-zÀ-ÿ-]+$/.test(w));
+    const trimmedQuery = query.trim();
+    const words = trimmedQuery ? trimmedQuery.split(/\s+/) : [];
+    const isNameQuery =
+      words.length >= 2 &&
+      words.every((w) => /^[A-Za-zÀ-ÿ-]+$/.test(w));
 
     const apifyInput: Record<string, unknown> = {
       max_profiles: 20,
@@ -555,11 +558,12 @@ export async function searchLinkedInProfiles(
     if (isNameQuery) {
       apifyInput.firstname = words[0];
       apifyInput.lastname = words.slice(1).join(" ");
-    } else {
-      // Use the query as job title search
-      apifyInput.current_job_title = query.trim();
+    } else if (trimmedQuery) {
+      // Single word or non-name query → treat as job title
+      apifyInput.current_job_title = trimmedQuery;
     }
 
+    // Explicit filters always override
     if (filters?.jobTitle?.trim()) {
       apifyInput.current_job_title = filters.jobTitle.trim();
     }
@@ -567,69 +571,81 @@ export async function searchLinkedInProfiles(
       apifyInput.location = filters.location.trim();
     }
 
-    // If we only have name + job title filter, use both
-    if (isNameQuery && filters?.jobTitle?.trim()) {
-      apifyInput.firstname = words[0];
-      apifyInput.lastname = words.slice(1).join(" ");
-    }
+    // Only call Apify if we have at least one meaningful input
+    const hasApifyInput =
+      apifyInput.firstname ||
+      apifyInput.current_job_title ||
+      apifyInput.location;
 
-    const apifyResults = await callApifyActor<{
-      full_name?: string;
-      first_name?: string;
-      last_name?: string;
-      headline?: string;
-      profile_url?: string;
-      linkedin_url?: string;
-      location?: string;
-      current_company?: string;
-      [key: string]: unknown;
-    }>("apimaestro/linkedin-profile-search-scraper", apifyInput, 120);
+    if (hasApifyInput) {
+      console.log("[Apify] LinkedIn search input:", JSON.stringify(apifyInput));
+      const apifyResults = await callApifyActor<{
+        full_name?: string;
+        first_name?: string;
+        last_name?: string;
+        headline?: string;
+        profile_url?: string;
+        linkedin_url?: string;
+        location?: string;
+        current_company?: string;
+        [key: string]: unknown;
+      }>("apimaestro/linkedin-profile-search-scraper", apifyInput, 120);
 
-    if (apifyResults && apifyResults.length > 0) {
-      const results = apifyResults.map((p, idx) => {
-        const name =
-          p.full_name ||
-          [p.first_name, p.last_name].filter(Boolean).join(" ") ||
-          "";
-        const profileUrl = p.profile_url || p.linkedin_url || null;
-        const vanity = profileUrl?.match(/linkedin\.com\/in\/([^/?#]+)/)?.[1];
-        return {
-          id: vanity || `apify-${idx}`,
-          name,
-          headline: p.headline || null,
-          profile_url: profileUrl,
-          source: "apify" as const,
-        };
-      });
-      return { data: results };
+      console.log(
+        "[Apify] LinkedIn search results:",
+        apifyResults?.length ?? "null",
+      );
+
+      if (apifyResults && apifyResults.length > 0) {
+        const results = apifyResults.map((p, idx) => {
+          const name =
+            p.full_name ||
+            [p.first_name, p.last_name].filter(Boolean).join(" ") ||
+            "";
+          const profileUrl = p.profile_url || p.linkedin_url || null;
+          const vanity = profileUrl?.match(
+            /linkedin\.com\/in\/([^/?#]+)/,
+          )?.[1];
+          return {
+            id: vanity || `apify-${idx}`,
+            name,
+            headline: p.headline || null,
+            profile_url: profileUrl,
+            source: "apify" as const,
+          };
+        });
+        return { data: results };
+      }
     }
   } catch (apifyErr) {
     console.error("Apify LinkedIn search error, falling back:", apifyErr);
   }
 
-  // --- Fallback: search local prospects ---
-  const { data: prospects } = await supabase
-    .from("prospects")
-    .select("id, name, profile_url, status")
-    .eq("platform", "linkedin")
-    .ilike("name", `%${query}%`)
-    .limit(20);
+  // --- Fallback: search local prospects (only if we have a name query) ---
+  if (query.trim()) {
+    const { data: prospects } = await supabase
+      .from("prospects")
+      .select("id, name, profile_url, status")
+      .eq("platform", "linkedin")
+      .ilike("name", `%${query}%`)
+      .limit(20);
 
-  const results = (prospects || []).map((p) => ({
-    id: p.id,
-    name: p.name,
-    headline: null,
-    profile_url: p.profile_url,
-    source: "local_database" as const,
-  }));
+    const results = (prospects || []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      headline: null,
+      profile_url: p.profile_url,
+      source: "local_database" as const,
+    }));
+
+    if (results.length > 0) {
+      return { data: results };
+    }
+  }
 
   return {
-    data: results,
-    ...(results.length === 0
-      ? {
-          error:
-            "Aucun résultat trouvé. Vérifiez qu'Unipile ou APIFY_TOKEN est configuré pour rechercher sur LinkedIn.",
-        }
-      : {}),
+    data: [],
+    error:
+      "Aucun résultat trouvé. Vérifiez les logs serveur pour diagnostiquer (Unipile / Apify / LinkedIn API).",
   };
 }
