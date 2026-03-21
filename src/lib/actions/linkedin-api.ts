@@ -454,23 +454,30 @@ export async function searchLinkedInProfiles(
   }
 
   const token = await resolveToken(user.id, supabase);
+  const keyword = [query, filters?.jobTitle, filters?.location]
+    .filter(Boolean)
+    .join(" ");
 
-  // --- Unipile path (preferred) ---
+  console.log("[LinkedIn Search] keyword:", keyword, "| query:", query, "| filters:", JSON.stringify(filters));
+
+  // --- Tier 1: Unipile (preferred — uses connected LinkedIn account) ---
   const unipileAccountId = await getUnipileLinkedInAccountId();
+  console.log("[LinkedIn Search] Unipile accountId:", unipileAccountId ?? "none");
+
   if (unipileAccountId) {
     try {
       const dsn = process.env.UNIPILE_DSN;
       const apiKey = process.env.UNIPILE_API_KEY;
       if (dsn && apiKey) {
-        const keyword = [query, filters?.jobTitle, filters?.location]
-          .filter(Boolean)
-          .join(" ");
-        const res = await fetch(
-          `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(keyword)}&limit=20`,
-          { headers: { "X-API-KEY": apiKey } },
-        );
+        const url = `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(keyword)}&limit=20`;
+        console.log("[LinkedIn Search] Unipile URL:", url);
+        const res = await fetch(url, { headers: { "X-API-KEY": apiKey } });
+        console.log("[LinkedIn Search] Unipile status:", res.status);
+
         if (res.ok) {
-          const data = (await res.json()) as {
+          const raw = await res.text();
+          console.log("[LinkedIn Search] Unipile raw response (first 500):", raw.slice(0, 500));
+          const data = JSON.parse(raw) as {
             items?: Array<{
               id?: string;
               first_name?: string;
@@ -492,26 +499,26 @@ export async function searchLinkedInProfiles(
             source: "unipile" as const,
           }));
           if (results.length > 0) {
+            console.log("[LinkedIn Search] Unipile returned", results.length, "results");
             return { data: results };
           }
+          console.log("[LinkedIn Search] Unipile returned 0 items, falling through");
+        } else {
+          const errBody = await res.text();
+          console.error("[LinkedIn Search] Unipile error:", res.status, errBody.slice(0, 300));
         }
       }
     } catch (err) {
-      console.error("Unipile LinkedIn search error, falling back:", err);
+      console.error("[LinkedIn Search] Unipile exception:", err);
     }
   }
 
-  // --- Direct API path ---
+  // --- Tier 2: Direct LinkedIn API ---
   if (token) {
     try {
-      const keyword = [query, filters?.jobTitle, filters?.location]
-        .filter(Boolean)
-        .join(" ");
       const res = await fetch(
         `${LINKEDIN_API_BASE}/search/people?q=keywords&keywords=${encodeURIComponent(keyword)}&count=20`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (res.ok) {
@@ -523,7 +530,6 @@ export async function searchLinkedInProfiles(
             localizedHeadline?: string;
           }>;
         };
-
         const results = (data.elements || []).map((el) => ({
           id: el.id,
           name: `${el.localizedFirstName} ${el.localizedLastName}`,
@@ -531,97 +537,71 @@ export async function searchLinkedInProfiles(
           profile_url: null as string | null,
           source: "linkedin_api" as const,
         }));
-
+        console.log("[LinkedIn Search] Direct API returned", results.length, "results");
         return { data: results };
       }
-
-      console.warn("LinkedIn search API failed, using Apify fallback");
+      console.warn("[LinkedIn Search] Direct API failed:", res.status);
     } catch (err) {
-      console.error("LinkedIn search error:", err);
+      console.error("[LinkedIn Search] Direct API error:", err);
     }
   }
 
-  // --- Apify People Search (no token / no Unipile needed) ---
+  // --- Tier 3: Apify LinkedIn scraper (uses search URL — works for any query) ---
   try {
-    // Parse query into firstname/lastname if it looks like a name
-    const trimmedQuery = query.trim();
-    const words = trimmedQuery ? trimmedQuery.split(/\s+/) : [];
-    const isNameQuery =
-      words.length >= 2 &&
-      words.every((w) => /^[A-Za-zÀ-ÿ-]+$/.test(w));
+    // Build a LinkedIn search URL with the keyword
+    const searchUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(keyword)}`;
+    console.log("[LinkedIn Search] Apify search URL:", searchUrl);
 
-    const apifyInput: Record<string, unknown> = {
-      max_profiles: 20,
-      include_email: false,
-    };
+    const apifyResults = await callApifyActor<{
+      fullName?: string;
+      firstName?: string;
+      lastName?: string;
+      headline?: string;
+      url?: string;
+      profileUrl?: string;
+      location?: string;
+      companyName?: string;
+      position?: string;
+      [key: string]: unknown;
+    }>("supreme_coder/linkedin-profile-scraper", {
+      urls: [{ url: searchUrl }],
+    }, 120);
 
-    if (isNameQuery) {
-      apifyInput.firstname = words[0];
-      apifyInput.lastname = words.slice(1).join(" ");
-    } else if (trimmedQuery) {
-      // Single word or non-name query → treat as job title
-      apifyInput.current_job_title = trimmedQuery;
+    console.log("[LinkedIn Search] Apify results:", apifyResults?.length ?? "null");
+    if (apifyResults && apifyResults.length > 0) {
+      console.log("[LinkedIn Search] Apify first result keys:", Object.keys(apifyResults[0]).join(", "));
+      console.log("[LinkedIn Search] Apify first result:", JSON.stringify(apifyResults[0]).slice(0, 500));
     }
 
-    // Explicit filters always override
-    if (filters?.jobTitle?.trim()) {
-      apifyInput.current_job_title = filters.jobTitle.trim();
-    }
-    if (filters?.location?.trim()) {
-      apifyInput.location = filters.location.trim();
-    }
-
-    // Only call Apify if we have at least one meaningful input
-    const hasApifyInput =
-      apifyInput.firstname ||
-      apifyInput.current_job_title ||
-      apifyInput.location;
-
-    if (hasApifyInput) {
-      console.log("[Apify] LinkedIn search input:", JSON.stringify(apifyInput));
-      const apifyResults = await callApifyActor<{
-        full_name?: string;
-        first_name?: string;
-        last_name?: string;
-        headline?: string;
-        profile_url?: string;
-        linkedin_url?: string;
-        location?: string;
-        current_company?: string;
-        [key: string]: unknown;
-      }>("apimaestro/linkedin-profile-search-scraper", apifyInput, 120);
-
-      console.log(
-        "[Apify] LinkedIn search results:",
-        apifyResults?.length ?? "null",
-      );
-
-      if (apifyResults && apifyResults.length > 0) {
-        const results = apifyResults.map((p, idx) => {
+    if (apifyResults && apifyResults.length > 0) {
+      const results = apifyResults
+        .filter((p) => p.fullName || p.firstName || p.lastName)
+        .map((p, idx) => {
           const name =
-            p.full_name ||
-            [p.first_name, p.last_name].filter(Boolean).join(" ") ||
+            p.fullName ||
+            [p.firstName, p.lastName].filter(Boolean).join(" ") ||
             "";
-          const profileUrl = p.profile_url || p.linkedin_url || null;
+          const profileUrl = p.url || p.profileUrl || null;
           const vanity = profileUrl?.match(
             /linkedin\.com\/in\/([^/?#]+)/,
           )?.[1];
           return {
             id: vanity || `apify-${idx}`,
             name,
-            headline: p.headline || null,
+            headline: p.headline || p.position || null,
             profile_url: profileUrl,
             source: "apify" as const,
           };
         });
+      if (results.length > 0) {
         return { data: results };
       }
     }
   } catch (apifyErr) {
-    console.error("Apify LinkedIn search error, falling back:", apifyErr);
+    console.error("[LinkedIn Search] Apify error:", apifyErr);
   }
 
-  // --- Fallback: search local prospects (only if we have a name query) ---
+  // --- Tier 4: Local prospects DB ---
   if (query.trim()) {
     const { data: prospects } = await supabase
       .from("prospects")
@@ -646,6 +626,6 @@ export async function searchLinkedInProfiles(
   return {
     data: [],
     error:
-      "Aucun résultat trouvé. Vérifiez les logs serveur pour diagnostiquer (Unipile / Apify / LinkedIn API).",
+      "Aucun résultat trouvé. Consultez les Runtime Logs Vercel pour diagnostiquer.",
   };
 }
