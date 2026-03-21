@@ -259,15 +259,15 @@ export function AdminDashboard({
   const statCards = [
     {
       title: "CA du mois",
-      value: formatCurrency(data.stats.monthlyRevenue),
-      compact: formatCompact(data.stats.monthlyRevenue),
+      value: data.stats.monthlyRevenue > 0 ? formatCurrency(data.stats.monthlyRevenue) : "Pas encore de CA",
+      compact: data.stats.monthlyRevenue > 0 ? formatCompact(data.stats.monthlyRevenue) : "—",
       icon: DollarSign,
       href: "/analytics",
     },
     {
       title: "Pipeline total",
-      value: formatCurrency(data.stats.pipelineTotal),
-      compact: formatCompact(data.stats.pipelineTotal),
+      value: data.stats.pipelineTotal > 0 ? formatCurrency(data.stats.pipelineTotal) : "—",
+      compact: data.stats.pipelineTotal > 0 ? formatCompact(data.stats.pipelineTotal) : "—",
       icon: TrendingUp,
       href: "/crm",
     },

@@ -37,6 +37,7 @@ export function LoginForm() {
       });
 
       if (authError) {
+        console.error("[Login] Supabase auth error:", authError.message, authError.status);
         setError("Email ou mot de passe incorrect.");
         toast.error("Email ou mot de passe incorrect");
         setPassword("");

@@ -4,37 +4,30 @@
 
 ### Obligatoires pour les crons
 
-- [ ] `CRON_SECRET` — Secret pour authentifier les crons Vercel
-  - Generer avec : `openssl rand -hex 32`
+- [x] `CRON_SECRET` — Secret pour authentifier les crons Vercel ✅ Ajouté le 21/03
   - Utilise par : `/api/cron/relances`, `/api/cron/ai-auto-send`, `/api/cron/campaigns`, etc.
 
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` — Cle service role Supabase (bypass RLS)
-  - Ou la trouver : Supabase Dashboard > Settings > API > section "service_role" (cle secrete)
+- [x] `SUPABASE_SERVICE_ROLE_KEY` — Cle service role Supabase (bypass RLS) ✅ Déjà présent
   - Utilise par : les crons qui n'ont pas de session utilisateur
 
 ### Obligatoires pour l'IA
 
-- [ ] `OPENROUTER_API_KEY` — Cle API OpenRouter pour la generation IA
-  - Ou la trouver : https://openrouter.ai/keys
+- [x] `OPENROUTER_API_KEY` — Cle API OpenRouter pour la generation IA ✅ Ajouté le 21/03
   - Utilise par : cron ai-auto-send, personnalisation messages, roleplay, scripts IA
   - Modele utilise : `anthropic/claude-3.5-haiku` (rapide et economique)
 
 ### Obligatoires pour la messagerie multi-canal (Unipile)
 
-- [ ] `UNIPILE_DSN` — URL du serveur Unipile (ex: `https://api.unipile.com`)
-  - Ou la trouver : Dashboard Unipile > Settings
+- [x] `UNIPILE_DSN` — URL du serveur Unipile ✅ Déjà présent
   - Utilise par : envoi DM LinkedIn/Instagram, relances auto, IA auto-send
 
-- [ ] `UNIPILE_API_KEY` — Cle API Unipile
-  - Ou la trouver : Dashboard Unipile > API Keys
+- [x] `UNIPILE_API_KEY` — Cle API Unipile ✅ Déjà présent
   - Utilise par : tous les appels Unipile
 
-- [ ] `UNIPILE_WEBHOOK_SECRET` — Secret HMAC pour verifier les webhooks entrants
-  - Generer avec : `openssl rand -hex 32`
+- [x] `UNIPILE_WEBHOOK_SECRET` — Secret HMAC pour verifier les webhooks entrants ✅ Ajouté le 21/03
   - A renseigner aussi dans le dashboard Unipile (voir section 3)
 
-- [ ] `UNIPILE_WEBHOOK_VERIFY_TOKEN` — Token de verification GET (challenge endpoint)
-  - Choisir une valeur arbitraire, la renseigner dans Unipile et dans Vercel
+- [x] `UNIPILE_WEBHOOK_VERIFY_TOKEN` — Token de verification GET ✅ Ajouté le 21/03
 
 ---
 
@@ -43,14 +36,20 @@
 Executer dans le **SQL Editor de Supabase** (https://supabase.com/dashboard > SQL Editor), dans cet ordre :
 
 ### Migration 1 : ESOP Submissions
-- [ ] Fichier : `supabase/migrations/20260319_esop_submissions.sql`
+- [x] Fichier : `supabase/migrations/20260319_esop_submissions.sql` ✅ Exécuté le 21/03
 - Cree la table `esop_submissions` avec RLS
 - Workflow : brouillon > soumis > en_revision > valide
 
 ### Migration 2 : CSM Role
-- [ ] Fichier : `supabase/migrations/20260319_csm_role.sql`
+- [x] Fichier : `supabase/migrations/20260319_csm_role.sql` ✅ Exécuté le 21/03
 - Cree les tables `csm_kickcases` et `csm_feedbacks` avec RLS
 - Permet le suivi des clients a risque par le CSM
+
+### Migration 3 : Contracts RLS Policies
+- [x] Fichier : `supabase/migrations/20260320_contracts_rls_policies.sql` ✅ Exécuté le 21/03
+- Ajoute les policies RLS sur `contracts`
+- Permet la creation/modification de contrats par admin/manager
+- Permet aux clients de voir et signer leurs propres contrats
 
 ### Deja existantes (migration 20260315)
 - Table `relance_workflows` — deja creee
@@ -62,9 +61,9 @@ Executer dans le **SQL Editor de Supabase** (https://supabase.com/dashboard > SQ
 
 Dans le dashboard Unipile, configurer un webhook :
 
-- [ ] **URL** : `https://sales-system-six.vercel.app/api/unipile/webhook`
-- [ ] **Secret** : la meme valeur que `UNIPILE_WEBHOOK_SECRET` dans Vercel
-- [ ] **Events a activer** : `message_received`
+- [x] **URL** : `https://sales-system-six.vercel.app/api/unipile/webhook` ✅ Configuré le 21/03
+- [x] **Secret** : la meme valeur que `UNIPILE_WEBHOOK_SECRET` dans Vercel ✅
+- [x] **Events activés** : tous les events messaging (new message, read, reaction, edit, delete, delivered) ✅
   - Permet la detection automatique des reponses prospects
   - Stoppe les relances J+2/J+3 quand un prospect repond
 
@@ -93,29 +92,13 @@ Pour tester le role CSM :
 
 ---
 
-## 6. Policies RLS — Table `contracts`
+## 6. Policies RLS — Tables `contracts`, `invoices`, `payment_installments`
 
-La création de contrats (`/contracts/new`) nécessite que les policies RLS autorisent l'INSERT pour les rôles admin et manager.
+La création de contrats (`/contracts/new`) nécessite les policies RLS.
 
-- [ ] Vérifier dans Supabase Dashboard > Authentication > Policies > table `contracts`
-- [ ] S'assurer qu'une policy INSERT existe pour les rôles `admin` et `manager`
-- [ ] Exemple de policy à ajouter si manquante :
-
-```sql
-CREATE POLICY "Admin and manager can insert contracts"
-ON contracts FOR INSERT
-TO authenticated
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'manager')
-  )
-);
-```
-
-- [ ] Vérifier également les policies SELECT et UPDATE sur `contracts`, `invoices` et `payment_installments`
-- [ ] Après ajout, tester la création d'un contrat depuis `/contracts/new`
+- [x] **Migration exécutée** : `supabase/migrations/20260320_contracts_rls_policies.sql` ✅ Exécuté le 21/03
+  - Policies RLS sur `contracts` (INSERT/SELECT/UPDATE pour admin/manager, SELECT/UPDATE pour clients)
+- [ ] Tester la création d'un contrat depuis `/contracts/new` (après redéploiement)
 - [ ] Vérifier que l'auto-facture se génère après signature (le code est en place via `generateInvoice()`)
 
 ---

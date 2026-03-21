@@ -35,6 +35,7 @@ import {
   Sparkles,
   Radio,
   Presentation,
+  Link2,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -109,6 +110,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Prospection",
     href: "/prospecting",
     icon: Target,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+  {
+    label: "LinkHub",
+    href: "/prospecting/linkhub",
+    icon: Link2,
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
@@ -350,7 +357,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Prospection",
     items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href),
+      ["/prospecting", "/prospecting/linkhub", "/roleplay", "/scripts", "/automation"].includes(i.href),
     ),
   },
   {
@@ -406,6 +413,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   assignments: "Affectations",
   prospecting: "Prospection",
   hub: "Hub",
+  linkhub: "LinkHub",
   linkedin: "LinkedIn",
   instagram: "Instagram",
   "follow-ups": "Relances",

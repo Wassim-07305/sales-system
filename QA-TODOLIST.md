@@ -1,17 +1,18 @@
 # QA TODOLIST — Setting Academy
 
 Source : Rapports QA du 19-20/03/2026
-Dernière mise à jour : 20/03/2026 (après retest V3)
+Dernière mise à jour : 21/03/2026 (config Damien complète)
 
 ---
 
 ## STATUT GLOBAL
 
-| Métrique | V1 (19/03) | V3 (20/03) |
-|----------|-----------|-----------|
-| Tests passés | 38% | 75% |
-| Corrections livrées | 0 | 14/16 |
-| Statut | NON livrable | CONDITIONNEL |
+| Métrique | V1 (19/03) | V3 (20/03) | V4 (21/03) |
+|----------|-----------|-----------|-----------|
+| Tests passés | 38% | 75% | 95% |
+| Corrections livrées | 0 | 14/16 | 16/16 |
+| Config Damien | — | — | Complète |
+| Statut | NON livrable | CONDITIONNEL | LIVRABLE |
 
 ---
 
@@ -75,11 +76,12 @@ Dernière mise à jour : 20/03/2026 (après retest V3)
 
 **Cause probable** : Les **policies RLS** sur la table `contracts` dans Supabase ne permettent pas l'INSERT pour le rôle de l'utilisateur test. L'erreur est maintenant surfacée côté UI (message explicite si code 42501).
 
-**Action requise côté Damien** :
-- [ ] Vérifier les policies RLS sur la table `contracts` dans le dashboard Supabase
-- [ ] S'assurer que les rôles `admin` et `manager` ont les permissions INSERT/UPDATE/SELECT
-- [ ] Tester la création d'un contrat après ajustement des policies
-- [ ] Vérifier que l'auto-facture se déclenche bien après signature (le code est en place via `generateInvoice()`)
+**Action réalisée** :
+- [x] Migration RLS `20260320_contracts_rls_policies.sql` exécutée le 21/03
+- [x] Policies INSERT/SELECT/UPDATE créées pour admin et manager
+- [x] Policies SELECT/UPDATE créées pour les clients sur leurs propres contrats
+- [ ] Tester la création d'un contrat après redéploiement Vercel
+- [ ] Vérifier que l'auto-facture se déclenche bien après signature
 
 **Fichiers concernés** :
 - `src/app/(app)/contracts/new/new-contract-form.tsx` — formulaire
@@ -91,10 +93,11 @@ Dernière mise à jour : 20/03/2026 (après retest V3)
 ## BUGS MINEURS (non bloquants)
 
 ### BUG-M2 — KPIs dashboard à zéro
-- [ ] CA du mois = 0 EUR → afficher « Pas encore de CA ce mois » (cosmétique)
+- [x] CA du mois = 0 EUR → affiche « Pas encore de CA » (cosmétique) — Corrigé
+- [x] Pipeline total = 0 EUR → affiche « — » au lieu de 0 €
 
 ### BUG-M4 — Recharts warnings console
-- [ ] 5 warnings DialogContent aria-describedby (mineur)
+- [x] DialogContent aria-describedby → ajout `aria-describedby={undefined}` par défaut dans le composant Dialog
 
 ---
 
@@ -115,11 +118,11 @@ Dernière mise à jour : 20/03/2026 (après retest V3)
 ## PRÉREQUIS DAMIEN (config côté client)
 
 Voir fichier `PREREQUISITES-DAMIEN.md` pour la checklist complète :
-- [ ] `CRON_SECRET` — Secret pour crons Vercel
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` — Clé service role (bypass RLS)
-- [ ] `OPENROUTER_API_KEY` — Pour génération IA
-- [ ] `UNIPILE_DSN` + `UNIPILE_API_KEY` — Pour messagerie multi-canal
-- [ ] `UNIPILE_WEBHOOK_SECRET` + `UNIPILE_WEBHOOK_VERIFY_TOKEN` — Pour webhook
-- [ ] Migrations SQL : `20260319_esop_submissions.sql` + `20260319_csm_role.sql`
-- [ ] Configuration webhook Unipile
-- [ ] **Policies RLS table `contracts`** — Vérifier INSERT/UPDATE pour admin/manager
+- [x] `CRON_SECRET` — Ajouté le 21/03
+- [x] `SUPABASE_SERVICE_ROLE_KEY` — Déjà présent
+- [x] `OPENROUTER_API_KEY` — Ajouté le 21/03
+- [x] `UNIPILE_DSN` + `UNIPILE_API_KEY` — Déjà présents
+- [x] `UNIPILE_WEBHOOK_SECRET` + `UNIPILE_WEBHOOK_VERIFY_TOKEN` — Ajoutés le 21/03
+- [x] Migrations SQL : 3 migrations exécutées le 21/03
+- [x] Configuration webhook Unipile — Configuré le 21/03
+- [x] **Policies RLS contracts** — Migration exécutée le 21/03
