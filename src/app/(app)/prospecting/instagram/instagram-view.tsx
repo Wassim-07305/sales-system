@@ -42,8 +42,12 @@ import {
   Send,
   Wand2,
   MessageCircle,
+  UserPlus,
+  Check,
 } from "lucide-react";
 import { scrapeStories, generateAiMessage } from "@/lib/actions/hub-setting";
+import { searchInstagramProfiles } from "@/lib/actions/instagram-api";
+import { createProspect } from "@/lib/actions/prospects";
 import {
   generateUnipileAuthLink,
   getUnipileStatus,
@@ -172,6 +176,59 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
   const [storyReaction, setStoryReaction] = useState("");
   const [generatingReaction, setGeneratingReaction] = useState(false);
 
+  // Instagram search
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<
+    Array<{ id: string; name: string; username: string | null; biography: string | null; source: string; profile_url?: string; followers_count?: number | null }>
+  >([]);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  async function handleSearchInstagram() {
+    if (!searchQuery.trim()) {
+      toast.error("Entrez un terme de recherche");
+      return;
+    }
+    setSearching(true);
+    setSearchResults([]);
+    try {
+      const result = await searchInstagramProfiles(searchQuery);
+      if (result.error && !result.data) {
+        toast.error(result.error);
+      } else {
+        setSearchResults(result.data || []);
+        if (result.error) toast.info(result.error);
+        if (!result.data?.length) toast.info("Aucun résultat trouvé");
+      }
+    } catch {
+      toast.error("Erreur lors de la recherche");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleSaveInstagramProspect(result: { id: string; name: string; username: string | null; source: string; profile_url?: string }) {
+    setSavingId(result.id);
+    try {
+      const profileUrl = result.profile_url || (result.username
+        ? `https://instagram.com/${result.username}`
+        : undefined);
+      await createProspect({
+        name: result.name,
+        profile_url: profileUrl,
+        platform: "instagram",
+      });
+      setSavedIds((prev) => new Set(prev).add(result.id));
+      toast.success(`${result.name} ajouté aux prospects`);
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   async function handleGenerateStoryReaction() {
     if (!storyUrl.trim()) {
       toast.error("Collez une URL ou description de story Instagram");
@@ -268,17 +325,155 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
   return (
     <div className="space-y-6">
 
-      <Tabs defaultValue="outils">
+      <Tabs defaultValue="recherche">
         <TabsList>
-          <TabsTrigger value="outils">
-            <Wrench className="h-4 w-4 mr-2" />
-            Outils
+          <TabsTrigger value="recherche">
+            <Search className="h-4 w-4 mr-2" />
+            Recherche
           </TabsTrigger>
           <TabsTrigger value="prospects">
             <Users className="h-4 w-4 mr-2" />
             Prospects ({prospects.length})
           </TabsTrigger>
+          <TabsTrigger value="outils">
+            <Wrench className="h-4 w-4 mr-2" />
+            Outils
+          </TabsTrigger>
         </TabsList>
+
+        {/* Search Tab */}
+        <TabsContent value="recherche">
+          <div className="space-y-4">
+            <Card className="shadow-sm rounded-2xl">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Rechercher par nom ou @username..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearchInstagram()}
+                    className="h-11 rounded-xl flex-1"
+                  />
+                  <Button
+                    onClick={handleSearchInstagram}
+                    disabled={searching}
+                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  >
+                    {searching ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4 mr-2" />
+                    )}
+                    Rechercher
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {searching && (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                Recherche sur Instagram en cours...
+              </div>
+            )}
+
+            {!searching && searchResults.length > 0 && (
+              <Card className="shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-muted-foreground">
+                    {searchResults.length} résultat{searchResults.length > 1 ? "s" : ""}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {searchResults.map((result) => {
+                      const isSaved = savedIds.has(result.id);
+                      const isSaving = savingId === result.id;
+                      return (
+                        <div
+                          key={result.id}
+                          className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center text-foreground font-bold shrink-0">
+                              {result.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium truncate">{result.name}</p>
+                                {result.username && (
+                                  <a
+                                    href={`https://instagram.com/${result.username}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-foreground shrink-0"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {result.username ? `@${result.username}` : ""}
+                                {result.username && result.followers_count ? " · " : ""}
+                                {result.followers_count ? `${result.followers_count.toLocaleString("fr-FR")} abonnés` : ""}
+                              </p>
+                              {result.biography && (
+                                <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
+                                  {result.biography}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="shrink-0 ml-3">
+                            {isSaved ? (
+                              <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
+                                <Check className="h-3 w-3" />
+                                Ajouté
+                              </Badge>
+                            ) : result.source === "local_database" ? (
+                              <Badge variant="outline" className="text-xs">
+                                Déjà prospect
+                              </Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => handleSaveInstagramProspect(result)}
+                                disabled={isSaving}
+                                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                              >
+                                {isSaving ? (
+                                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                ) : (
+                                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                                )}
+                                Ajouter
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {!searching && searchResults.length === 0 && searchQuery && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Aucun résultat pour &quot;{searchQuery}&quot;</p>
+              </div>
+            )}
+
+            {!searching && !searchQuery && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Instagram className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Entrez un @username ou un nom pour rechercher sur Instagram</p>
+                <p className="text-xs mt-1 text-muted-foreground/60">Les résultats proviennent de votre compte Instagram connecté</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
 
         {/* Tools Tab */}
         <TabsContent value="outils">

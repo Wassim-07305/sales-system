@@ -37,12 +37,16 @@ import {
   AlertTriangle,
   Send,
   Wand2,
+  UserPlus,
+  Check,
 } from "lucide-react";
 import {
   analyzeProfile,
   suggestComments,
   generateAiMessage,
 } from "@/lib/actions/hub-setting";
+import { searchLinkedInProfiles } from "@/lib/actions/linkedin-api";
+import { createProspect } from "@/lib/actions/prospects";
 import type { LinkedInFeed, FeedPost, Recommendation, CommentHistory } from "@/lib/actions/linkedin-engage";
 import {
   generateUnipileAuthLink,
@@ -150,14 +154,6 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Profile analyzer
-  const [profileUrl, setProfileUrl] = useState("");
-  const [profileResult, setProfileResult] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
-  const [analyzingProfile, setAnalyzingProfile] = useState(false);
-
   // Comment suggester
   const [commentUrl, setCommentUrl] = useState("");
   const [comments, setComments] = useState<{ type: string; comment: string }[]>(
@@ -179,6 +175,60 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
     string,
     unknown
   > | null>(null);
+
+  // LinkedIn search
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<
+    Array<{ id: string; name: string; headline: string | null; source: string; profile_url?: string }>
+  >([]);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  async function handleSearchLinkedIn() {
+    if (!searchQuery.trim()) {
+      toast.error("Entrez un terme de recherche");
+      return;
+    }
+    setSearching(true);
+    setSearchResults([]);
+    try {
+      const result = await searchLinkedInProfiles(searchQuery);
+      if (result.error && !result.data) {
+        toast.error(result.error);
+      } else {
+        setSearchResults(result.data || []);
+        if (result.error) toast.info(result.error);
+        if (!result.data?.length) toast.info("Aucun résultat trouvé");
+      }
+    } catch {
+      toast.error("Erreur lors de la recherche");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleSaveProspect(result: { id: string; name: string; headline: string | null; source: string; profile_url?: string }) {
+    setSavingId(result.id);
+    try {
+      const profileUrl = result.profile_url || (result.source !== "local_database"
+        ? `https://linkedin.com/in/${result.id}`
+        : undefined);
+      await createProspect({
+        name: result.name,
+        profile_url: profileUrl,
+        platform: "linkedin",
+        notes: result.headline || undefined,
+      });
+      setSavedIds((prev) => new Set(prev).add(result.id));
+      toast.success(`${result.name} ajouté aux prospects`);
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingId(null);
+    }
+  }
 
   async function handleAnalyzeAndGenerate() {
     if (!comboUrl.trim()) {
@@ -230,23 +280,6 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     return matchSearch && matchStatus;
   });
-
-  async function handleAnalyze() {
-    if (!profileUrl.trim()) {
-      toast.error("Entrez une URL de profil LinkedIn");
-      return;
-    }
-    setAnalyzingProfile(true);
-    try {
-      const result = await analyzeProfile(profileUrl);
-      setProfileResult(result as unknown as Record<string, unknown>);
-      toast.success("Profil analysé");
-    } catch {
-      toast.error("Erreur d'analyse");
-    } finally {
-      setAnalyzingProfile(false);
-    }
-  }
 
   async function handleSuggestComments() {
     if (!commentUrl.trim()) {
@@ -301,15 +334,19 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="outils">
+      <Tabs defaultValue="recherche">
         <TabsList>
-          <TabsTrigger value="outils">
-            <Wrench className="h-4 w-4 mr-2" />
-            Outils
+          <TabsTrigger value="recherche">
+            <Search className="h-4 w-4 mr-2" />
+            Recherche
           </TabsTrigger>
           <TabsTrigger value="prospects">
             <Users className="h-4 w-4 mr-2" />
             Prospects ({prospects.length})
+          </TabsTrigger>
+          <TabsTrigger value="outils">
+            <Wrench className="h-4 w-4 mr-2" />
+            Outils
           </TabsTrigger>
           {initialFeeds && (
             <TabsTrigger value="feeds">
@@ -325,10 +362,139 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
           )}
         </TabsList>
 
+        {/* Search Tab */}
+        <TabsContent value="recherche">
+          <div className="space-y-4">
+            <Card className="shadow-sm rounded-2xl">
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Rechercher par nom, poste, entreprise..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearchLinkedIn()}
+                    className="h-11 rounded-xl flex-1"
+                  />
+                  <Button
+                    onClick={handleSearchLinkedIn}
+                    disabled={searching}
+                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  >
+                    {searching ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4 mr-2" />
+                    )}
+                    Rechercher
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {searching && (
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                Recherche sur LinkedIn en cours...
+              </div>
+            )}
+
+            {!searching && searchResults.length > 0 && (
+              <Card className="shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-muted-foreground">
+                    {searchResults.length} résultat{searchResults.length > 1 ? "s" : ""}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {searchResults.map((result) => {
+                      const isSaved = savedIds.has(result.id);
+                      const isSaving = savingId === result.id;
+                      return (
+                        <div
+                          key={result.id}
+                          className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-xl bg-foreground/10 ring-1 ring-foreground/20 flex items-center justify-center text-foreground font-bold shrink-0">
+                              {result.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium truncate">{result.name}</p>
+                                {result.source !== "local_database" && (
+                                  <a
+                                    href={result.profile_url || `https://linkedin.com/in/${result.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-foreground shrink-0"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
+                              </div>
+                              {result.headline && (
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {result.headline}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="shrink-0 ml-3">
+                            {isSaved ? (
+                              <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
+                                <Check className="h-3 w-3" />
+                                Ajouté
+                              </Badge>
+                            ) : result.source === "local_database" ? (
+                              <Badge variant="outline" className="text-xs">
+                                Déjà prospect
+                              </Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => handleSaveProspect(result)}
+                                disabled={isSaving}
+                                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                              >
+                                {isSaving ? (
+                                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                ) : (
+                                  <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                                )}
+                                Ajouter
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {!searching && searchResults.length === 0 && searchQuery && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Recherchez des profils LinkedIn par nom, poste ou entreprise</p>
+              </div>
+            )}
+
+            {!searching && !searchQuery && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Linkedin className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Entrez un terme pour rechercher des profils sur LinkedIn</p>
+                <p className="text-xs mt-1 text-muted-foreground/60">Les résultats proviennent de votre compte LinkedIn connecté</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
         {/* Tools Tab */}
         <TabsContent value="outils">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Profile Analyzer */}
+            {/* Analyse + Message Combo */}
             <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
@@ -337,70 +503,84 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Input
-                  placeholder="https://linkedin.com/in/nom-du-profil"
-                  value={profileUrl}
-                  onChange={(e) => setProfileUrl(e.target.value)}
-                  className="h-11 rounded-xl"
-                />
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={analyzingProfile}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
-                >
-                  {analyzingProfile ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Search className="h-4 w-4 mr-2" />
-                  )}
-                  Analyser le profil
-                </Button>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="https://linkedin.com/in/nom-du-profil"
+                    value={comboUrl}
+                    onChange={(e) => setComboUrl(e.target.value)}
+                    className="h-11 rounded-xl flex-1"
+                  />
+                  <Button
+                    onClick={handleAnalyzeAndGenerate}
+                    disabled={comboAnalyzing}
+                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  >
+                    {comboAnalyzing ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-4 w-4 mr-2" />
+                    )}
+                    Analyser
+                  </Button>
+                </div>
 
-                {profileResult && (
+                {comboProfile && (
                   <div className="space-y-2 text-sm border-t pt-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Nom</span>
                       <span className="font-medium">
-                        {profileResult.name as string}
+                        {comboProfile.name as string}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Titre</span>
                       <span className="text-right max-w-[60%] text-xs">
-                        {profileResult.headline as string}
+                        {comboProfile.headline as string}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Abonnés</span>
                       <span>
-                        {(profileResult.followers as number)?.toLocaleString(
+                        {(comboProfile.followers as number)?.toLocaleString(
                           "fr-FR",
                         )}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Engagement</span>
-                      <span>{profileResult.engagementRate as number}%</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Score</span>
                       <Badge
                         className={
-                          (profileResult.score as number) >= 70
+                          (comboProfile.score as number) >= 70
                             ? "bg-brand/10 text-brand border border-brand/20"
                             : "bg-muted/60 text-muted-foreground border border-border/50"
                         }
                       >
-                        {profileResult.score as number}/100
+                        {comboProfile.score as number}/100
                       </Badge>
                     </div>
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Recommandation
-                      </p>
-                      <p className="text-xs">
-                        {profileResult.recommendation as string}
-                      </p>
+                  </div>
+                )}
+
+                {comboMessage && (
+                  <div className="space-y-3 border-t pt-3">
+                    <label className="text-sm font-medium">
+                      Message généré
+                    </label>
+                    <Textarea
+                      value={comboMessage}
+                      onChange={(e) => setComboMessage(e.target.value)}
+                      className="min-h-[100px] rounded-xl"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => copyToClipboard(comboMessage)}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copier
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -465,42 +645,40 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
             </Card>
 
             {/* DM Generator */}
-            <Card className="lg:col-span-2 shadow-sm rounded-2xl">
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
-                  Générateur de DM LinkedIn
+                  Générateur de DM
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">
-                      Nom du prospect
-                    </label>
-                    <Input
-                      placeholder="Jean Dupont"
-                      value={dmName}
-                      onChange={(e) => setDmName(e.target.value)}
-                      className="h-11 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">
-                      Contexte / Accroche
-                    </label>
-                    <Input
-                      placeholder="Ex: votre post sur le leadership m'a marqué"
-                      value={dmContext}
-                      onChange={(e) => setDmContext(e.target.value)}
-                      className="h-11 rounded-xl"
-                    />
-                  </div>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">
+                    Nom du prospect
+                  </label>
+                  <Input
+                    placeholder="Jean Dupont"
+                    value={dmName}
+                    onChange={(e) => setDmName(e.target.value)}
+                    className="h-11 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">
+                    Contexte / Accroche
+                  </label>
+                  <Input
+                    placeholder="Ex: votre post sur le leadership m'a marqué"
+                    value={dmContext}
+                    onChange={(e) => setDmContext(e.target.value)}
+                    className="h-11 rounded-xl"
+                  />
                 </div>
                 <Button
                   onClick={handleGenerateDm}
                   disabled={generatingDm}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
                 >
                   {generatingDm ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -511,126 +689,19 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                 </Button>
 
                 {generatedDm && (
-                  <Card className="mt-4">
-                    <CardContent className="p-4">
-                      <pre className="whitespace-pre-wrap text-sm font-sans mb-3">
-                        {generatedDm}
-                      </pre>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => copyToClipboard(generatedDm)}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copier le message
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Analyse + Message Combo */}
-            <Card className="lg:col-span-2 shadow-sm rounded-2xl border-brand/20">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Wand2 className="h-4 w-4" />
-                  Analyser profil + Générer message
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-3">
-                  <Input
-                    placeholder="https://linkedin.com/in/nom-du-profil"
-                    value={comboUrl}
-                    onChange={(e) => setComboUrl(e.target.value)}
-                    className="h-11 rounded-xl flex-1"
-                  />
-                  <Button
-                    onClick={handleAnalyzeAndGenerate}
-                    disabled={comboAnalyzing}
-                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
-                  >
-                    {comboAnalyzing ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Wand2 className="h-4 w-4 mr-2" />
-                    )}
-                    Analyser + Générer
-                  </Button>
-                </div>
-
-                {comboProfile && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                    <div className="border rounded-xl p-3">
-                      <p className="text-xs text-muted-foreground">Nom</p>
-                      <p className="font-medium">
-                        {comboProfile.name as string}
-                      </p>
-                    </div>
-                    <div className="border rounded-xl p-3">
-                      <p className="text-xs text-muted-foreground">Titre</p>
-                      <p className="text-xs">
-                        {comboProfile.headline as string}
-                      </p>
-                    </div>
-                    <div className="border rounded-xl p-3">
-                      <p className="text-xs text-muted-foreground">Score</p>
-                      <Badge
-                        className={
-                          (comboProfile.score as number) >= 70
-                            ? "bg-brand/10 text-brand border border-brand/20"
-                            : "bg-muted/60 text-muted-foreground border border-border/50"
-                        }
-                      >
-                        {comboProfile.score as number}/100
-                      </Badge>
-                    </div>
-                    <div className="border rounded-xl p-3">
-                      <p className="text-xs text-muted-foreground">Abonnés</p>
-                      <p className="font-medium">
-                        {(comboProfile.followers as number)?.toLocaleString(
-                          "fr-FR",
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {comboMessage && (
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium">
-                      Message généré (modifiable)
-                    </label>
-                    <Textarea
-                      value={comboMessage}
-                      onChange={(e) => setComboMessage(e.target.value)}
-                      className="min-h-[120px] rounded-xl"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-xl"
-                        onClick={() => copyToClipboard(comboMessage)}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copier
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl"
-                        onClick={() => {
-                          copyToClipboard(comboMessage);
-                          toast.success(
-                            "Message copié ! Collez-le dans LinkedIn.",
-                          );
-                        }}
-                      >
-                        <Send className="h-3 w-3 mr-1" />
-                        Envoyer (copier)
-                      </Button>
-                    </div>
+                  <div className="space-y-3 border-t pt-3">
+                    <pre className="whitespace-pre-wrap text-sm font-sans">
+                      {generatedDm}
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      onClick={() => copyToClipboard(generatedDm)}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copier
+                    </Button>
                   </div>
                 )}
               </CardContent>

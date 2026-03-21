@@ -577,3 +577,107 @@ export async function getInstagramConversations() {
       : {}),
   };
 }
+
+// ---------------------------------------------------------------------------
+// searchInstagramProfiles
+// ---------------------------------------------------------------------------
+export async function searchInstagramProfiles(query: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié" };
+
+  if (!query?.trim()) {
+    return { error: "Le terme de recherche est requis" };
+  }
+
+  // --- Unipile path (preferred) ---
+  const unipileAccountId = await getUnipileInstagramAccountId();
+  if (unipileAccountId) {
+    try {
+      const dsn = process.env.UNIPILE_DSN;
+      const apiKey = process.env.UNIPILE_API_KEY;
+      if (dsn && apiKey) {
+        const res = await fetch(
+          `${dsn}/api/v1/users/search?account_id=${unipileAccountId}&keyword=${encodeURIComponent(query)}&limit=20`,
+          { headers: { "X-API-KEY": apiKey } },
+        );
+        if (res.ok) {
+          const data = (await res.json()) as {
+            items?: Array<{
+              id?: string;
+              first_name?: string;
+              last_name?: string;
+              username?: string;
+              biography?: string;
+              profile_picture_url?: string;
+              followers_count?: number;
+            }>;
+          };
+          const results = (data.items || []).map((p) => ({
+            id: p.id || p.username || "",
+            name: [p.first_name, p.last_name].filter(Boolean).join(" ") || p.username || "",
+            username: p.username || null,
+            biography: p.biography || null,
+            profile_picture_url: p.profile_picture_url || null,
+            followers_count: p.followers_count ?? null,
+            source: "unipile" as const,
+          }));
+          if (results.length > 0) {
+            return { data: results };
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Unipile Instagram search error, falling back:", err);
+    }
+  }
+
+  // --- Single profile lookup if query looks like a username ---
+  const cleanQuery = query.trim().replace(/^@/, "");
+  if (!cleanQuery.includes(" ")) {
+    try {
+      const profileResult = await getInstagramProfile(cleanQuery);
+      if (profileResult.data) {
+        const p = profileResult.data;
+        return {
+          data: [
+            {
+              id: p.username || cleanQuery,
+              name: p.name || p.username || cleanQuery,
+              username: p.username || cleanQuery,
+              biography: p.biography || null,
+              profile_picture_url: p.profile_picture_url || null,
+              followers_count: p.followers_count ?? null,
+              source: (p.source || "profile_lookup") as string,
+            },
+          ],
+        };
+      }
+    } catch {
+      // fall through to local search
+    }
+  }
+
+  // --- Fallback: search local prospects ---
+  const { data: prospects } = await supabase
+    .from("prospects")
+    .select("id, name, profile_url, status")
+    .eq("platform", "instagram")
+    .ilike("name", `%${query}%`)
+    .limit(20);
+
+  const results = (prospects || []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    username: null,
+    biography: null,
+    profile_picture_url: null,
+    followers_count: null,
+    profile_url: p.profile_url,
+    source: "local_database" as const,
+  }));
+
+  return { data: results };
+}
