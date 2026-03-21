@@ -144,7 +144,7 @@ export async function createProspect(data: {
     platform: data.platform || null,
     notes: data.notes || null,
     status: "new",
-    created_by: user.id,
+    user_id: user.id,
   });
   if (error) throw new Error(error.message);
   revalidatePath("/prospects");
