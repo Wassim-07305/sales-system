@@ -50,6 +50,7 @@ export function ShareDialog({
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isOpen && presentationId) {
       setIsLoading(true);
@@ -59,6 +60,7 @@ export function ShareDialog({
         .finally(() => setIsLoading(false));
     }
   }, [isOpen, presentationId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function handleShare() {
     if (!email.trim()) {

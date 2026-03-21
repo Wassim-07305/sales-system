@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useTransition } from "react";
+import { useState, useCallback, useEffect, useTransition, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -152,7 +152,7 @@ export function KanbanBoard({
   );
 
   // Custom collision detection: prefer columns (stages) over deal cards
-  const stageIdSet = new Set(stages.map((s) => s.id));
+  const stageIdSet = useMemo(() => new Set(stages.map((s) => s.id)), [stages]);
   const customCollisionDetection: CollisionDetection = useCallback(
     (args) => {
       // First try pointerWithin — most natural for columns

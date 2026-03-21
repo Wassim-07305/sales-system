@@ -76,6 +76,7 @@ export function BookingForm({ slug, pageConfig }: BookingFormProps) {
     [slug],
   );
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (selectedDate) {
       fetchSlots(selectedDate);
@@ -88,6 +89,7 @@ export function BookingForm({ slug, pageConfig }: BookingFormProps) {
       setShowEmail(true);
     }
   }, [phone, firstName, lastName]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

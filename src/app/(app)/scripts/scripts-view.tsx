@@ -136,7 +136,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
           className="bg-brand text-brand-dark hover:bg-brand/90"
         >
           <Sparkles className="h-4 w-4 mr-2" />
-          Générer avec l'IA
+          Générer avec l&apos;IA
         </Button>
         <Link href="/scripts/analytics">
           <Button variant="outline" size="sm">
@@ -473,10 +473,10 @@ function GenerateAiDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-brand" />
-            Générer un script avec l'IA
+            Générer un script avec l&apos;IA
           </DialogTitle>
           <DialogDescription>
-            Décrivez le contexte et l'IA créera un script de vente structuré.
+            Décrivez le contexte et l&apos;IA créera un script de vente structuré.
           </DialogDescription>
         </DialogHeader>
 

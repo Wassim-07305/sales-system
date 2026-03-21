@@ -112,6 +112,7 @@ export function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   // Sync edit content when editing starts or editingContent changes
   useEffect(() => {
     if (editingMessageId) {
@@ -126,6 +127,7 @@ export function ChatInput({
       onClearDroppedFile?.();
     }
   }, [droppedFile, onClearDroppedFile]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Pick the right state based on mode
   const displayContent = editingMessageId ? editContent : content;

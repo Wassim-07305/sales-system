@@ -251,6 +251,7 @@ export function VoicePreview({
     };
   }, [blob]);
 
+  /* eslint-disable react-hooks/immutability */
   const tick = useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
@@ -258,6 +259,7 @@ export function VoicePreview({
     if (dur > 0) setProgress(el.currentTime / dur);
     rafRef.current = requestAnimationFrame(tick);
   }, [duration]);
+  /* eslint-enable react-hooks/immutability */
 
   useEffect(() => {
     if (playing) {

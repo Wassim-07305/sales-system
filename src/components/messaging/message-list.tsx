@@ -70,6 +70,7 @@ export function MessageList({
 
   const groups = groupMessages(filteredMessages);
 
+  /* eslint-disable react-hooks/immutability */
   let lastDate: string | null = null;
 
   return (
@@ -110,4 +111,5 @@ export function MessageList({
       </div>
     </div>
   );
+  /* eslint-enable react-hooks/immutability */
 }

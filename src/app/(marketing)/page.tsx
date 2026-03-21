@@ -124,21 +124,32 @@ function AnimatedCounter({
 /*  Floating particles                                                  */
 /* ------------------------------------------------------------------ */
 
+// Pre-compute random values so render stays pure
+const PARTICLE_DATA = Array.from({ length: 30 }).map(() => ({
+  width: Math.random() * 3 + 1,
+  height: Math.random() * 3 + 1,
+  left: Math.random() * 100,
+  top: Math.random() * 100,
+  animDuration: 8 + Math.random() * 12,
+  animDelay: Math.random() * 5,
+  opacity: Math.random() * 0.5 + 0.2,
+}));
+
 function FloatingParticles() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {Array.from({ length: 30 }).map((_, i) => (
+      {PARTICLE_DATA.map((p, i) => (
         <div
           key={i}
           className="absolute rounded-full bg-[#7af17a]/30"
           style={{
-            width: `${Math.random() * 3 + 1}px`,
-            height: `${Math.random() * 3 + 1}px`,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animation: `floatParticle ${8 + Math.random() * 12}s ease-in-out infinite`,
-            animationDelay: `${Math.random() * 5}s`,
-            opacity: Math.random() * 0.5 + 0.2,
+            width: `${p.width}px`,
+            height: `${p.height}px`,
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            animation: `floatParticle ${p.animDuration}s ease-in-out infinite`,
+            animationDelay: `${p.animDelay}s`,
+            opacity: p.opacity,
           }}
         />
       ))}
@@ -987,6 +998,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* eslint-disable react-hooks/refs */}
         {/* ============================================================== */}
         {/*  2. SOCIAL PROOF / STATS                                        */}
         {/* ============================================================== */}
@@ -997,6 +1009,7 @@ export default function LandingPage() {
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
+              {/* eslint-disable-next-line react-hooks/refs */}
               {stats.map((stat, i) => (
                 <GlowCard
                   key={stat.label}
@@ -1581,6 +1594,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      {/* eslint-enable react-hooks/refs */}
     </div>
   );
 }

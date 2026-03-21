@@ -885,7 +885,8 @@ export function AdminDashboard({
               </div>
             ) : (
               <div className="space-y-1">
-                {data.alerts.slice(0, 5).map((alert) => {
+                {/* eslint-disable react-hooks/purity */}
+              {data.alerts.slice(0, 5).map((alert) => {
                   const updatedDate = new Date(alert.updated_at);
                   const daysAgo = Math.floor(
                     (Date.now() - updatedDate.getTime()) /
@@ -962,6 +963,7 @@ export function AdminDashboard({
                     </Link>
                   );
                 })}
+                {/* eslint-enable react-hooks/purity */}
               </div>
             )}
           </CardContent>

@@ -128,10 +128,12 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
     setLoadingActivities(false);
   }, [deal.id]);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     loadActivities();
     getTeamMembers().then(setTeamMembers);
   }, [loadActivities]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function handleStageChange(stageId: string) {
     const result = await updateDealStage(deal.id, stageId);

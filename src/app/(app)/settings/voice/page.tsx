@@ -21,10 +21,10 @@ export default async function VoiceSettingsPage() {
   const voiceProfile = await getVoiceProfile();
   const voiceMessages = await getVoiceMessages();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <VoiceSettings
       voiceProfile={voiceProfile}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       voiceMessages={voiceMessages as any}
     />
   );

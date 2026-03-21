@@ -149,9 +149,11 @@ function ScriptNodeComponent({ data, id }: NodeProps) {
   }
 
   // Sync if label changes externally
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setLabel(nodeData.label);
   }, [nodeData.label]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <div

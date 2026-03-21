@@ -446,8 +446,8 @@ export function DiagnosticView({
                     border: "1px solid #333",
                     borderRadius: "8px",
                   }}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     ((value: number) => [`${value}/100`, "Score"]) as any
                   }
                 />

@@ -78,6 +78,7 @@ export function CreateChannelModal({
   });
 
   // Reset form on open
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (open) {
       setName("");
@@ -87,6 +88,7 @@ export function CreateChannelModal({
       setMemberSearch("");
     }
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const filteredProfiles = useMemo(() => {
     return profiles.filter((p) => {

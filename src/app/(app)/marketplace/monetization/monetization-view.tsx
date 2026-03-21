@@ -253,13 +253,14 @@ export function MonetizationView({
                         borderRadius: "8px",
                         color: "#fff",
                       }}
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
                       formatter={
                         ((value: number) => [
                           `${value.toLocaleString("fr-FR")} €`,
                           "Revenu",
                         ]) as any
                       }
+                      /* eslint-enable @typescript-eslint/no-explicit-any */
                     />
                     <Area
                       type="monotone"

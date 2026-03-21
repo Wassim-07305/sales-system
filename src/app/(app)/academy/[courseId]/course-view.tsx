@@ -1424,12 +1424,12 @@ export function CourseView({
                                   Vous avez complete toutes les lecons et quiz
                                   de ce cours. Bravo !
                                 </p>
-                                <a
+                                <Link
                                   href="/academy"
                                   className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-brand hover:underline"
                                 >
                                   Retour a l&apos;Academy
-                                </a>
+                                </Link>
                               </div>
                             ) : (
                               <p className="text-xs text-green-600 dark:text-green-400 mt-1.5 flex items-center gap-1.5 font-medium">

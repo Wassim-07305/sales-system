@@ -27,10 +27,11 @@ export default async function InboxPage() {
   const conversations = await getConversations();
   const prospects = await getProspects();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <InboxView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conversations={conversations as any}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       prospects={prospects as any}
     />
   );

@@ -357,6 +357,7 @@ function VoicePlayer({ url, duration }: { url: string; duration?: number }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animRef = useRef<number | null>(null);
 
+  /* eslint-disable react-hooks/immutability */
   const updateProgress = useCallback(() => {
     const audio = audioRef.current;
     if (audio && audio.duration && isFinite(audio.duration)) {
@@ -365,6 +366,7 @@ function VoicePlayer({ url, duration }: { url: string; duration?: number }) {
     }
     if (playing) animRef.current = requestAnimationFrame(updateProgress);
   }, [playing]);
+  /* eslint-enable react-hooks/immutability */
 
   useEffect(() => {
     if (playing) {

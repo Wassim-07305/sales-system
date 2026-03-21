@@ -674,13 +674,14 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                         borderRadius: "8px",
                         color: "white",
                       }}
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
                       formatter={
                         ((value: any) => [
                           `${Number(value || 0).toLocaleString("fr-FR")} \u20ac`,
                           undefined,
                         ]) as any
                       }
+                      /* eslint-enable @typescript-eslint/no-explicit-any */
                       labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                     />
                     <Legend />

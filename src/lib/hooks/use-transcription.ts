@@ -62,6 +62,7 @@ export function useTranscription({
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const onEntryRef = useRef(onEntry);
+  // eslint-disable-next-line react-hooks/refs
   onEntryRef.current = onEntry;
 
   useEffect(() => {

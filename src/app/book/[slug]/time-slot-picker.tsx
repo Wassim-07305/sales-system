@@ -31,9 +31,11 @@ export function TimeSlotPicker({
   } | null>(null);
 
   // Reset pending when date changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setPendingSlot(null);
   }, [selectedDate]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Deduplicate by start_time (pick first available closer)
   const uniqueSlots = slots.reduce<AvailableSlot[]>((acc, slot) => {

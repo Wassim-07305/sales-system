@@ -830,8 +830,8 @@ export function ReviewsView({
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "8px",
                       }}
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         ((value: number) => [`${value}/10`, "Score"]) as any
                       }
                     />
@@ -880,8 +880,8 @@ export function ReviewsView({
                           border: "1px solid #333",
                           borderRadius: "8px",
                         }}
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           ((value: number) => [value, "Occurrences"]) as any
                         }
                       />
@@ -917,8 +917,8 @@ export function ReviewsView({
                           border: "1px solid #333",
                           borderRadius: "8px",
                         }}
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         formatter={
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           ((value: number) => [value, "Appels"]) as any
                         }
                       />

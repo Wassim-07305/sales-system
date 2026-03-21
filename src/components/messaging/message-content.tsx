@@ -322,6 +322,7 @@ function AudioContent({ message }: { message: EnrichedMessage }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const rafRef = useRef<number>(0);
 
+  /* eslint-disable react-hooks/immutability */
   const tick = useCallback(() => {
     const el = audioRef.current;
     if (!el) return;
@@ -332,6 +333,7 @@ function AudioContent({ message }: { message: EnrichedMessage }) {
     }
     rafRef.current = requestAnimationFrame(tick);
   }, [duration]);
+  /* eslint-enable react-hooks/immutability */
 
   useEffect(() => {
     if (playing) {

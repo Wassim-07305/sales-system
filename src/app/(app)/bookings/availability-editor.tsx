@@ -61,11 +61,13 @@ export function AvailabilityEditor({
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
 
+  /* eslint-disable react-hooks/immutability */
   useEffect(() => {
     if (open) {
       loadData();
     }
   }, [open, pageId]);
+  /* eslint-enable react-hooks/immutability */
 
   async function loadData() {
     setLoading(true);

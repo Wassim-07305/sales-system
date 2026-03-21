@@ -199,6 +199,19 @@ export function VideoRoomView({
   // WebRTC helpers
   // ---------------------------------------------------------------------------
 
+  const cleanupPeer = useCallback((remoteUserId: string) => {
+    const peer = peersRef.current.get(remoteUserId);
+    if (peer) {
+      peer.pc.close();
+      peersRef.current.delete(remoteUserId);
+      setRemoteStreams((prev) => {
+        const next = new Map(prev);
+        next.delete(remoteUserId);
+        return next;
+      });
+    }
+  }, []);
+
   const createPeerConnection = useCallback(
     (remoteUserId: string): RTCPeerConnection => {
       const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
@@ -258,21 +271,8 @@ export function VideoRoomView({
       peersRef.current.set(remoteUserId, { pc, remoteStream });
       return pc;
     },
-    [currentUserId],
+    [currentUserId, cleanupPeer],
   );
-
-  const cleanupPeer = useCallback((remoteUserId: string) => {
-    const peer = peersRef.current.get(remoteUserId);
-    if (peer) {
-      peer.pc.close();
-      peersRef.current.delete(remoteUserId);
-      setRemoteStreams((prev) => {
-        const next = new Map(prev);
-        next.delete(remoteUserId);
-        return next;
-      });
-    }
-  }, []);
 
   const cleanupAllPeers = useCallback(() => {
     peersRef.current.forEach((peer, id) => {

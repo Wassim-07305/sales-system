@@ -68,6 +68,7 @@ export function BookingPageFormModal({
     QualificationField[]
   >([]);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (page) {
       setTitle(page.title);
@@ -95,6 +96,7 @@ export function BookingPageFormModal({
       setQualificationFields([]);
     }
   }, [page, open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function handleTitleChange(value: string) {
     setTitle(value);

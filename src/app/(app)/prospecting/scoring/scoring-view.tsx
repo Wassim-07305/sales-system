@@ -518,13 +518,14 @@ export function ScoringView({ prospects }: Props) {
                 <XAxis dataKey="range" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  /* eslint-disable @typescript-eslint/no-explicit-any */
                   formatter={
                     ((value: number) => [
                       `${Number(value || 0)} prospect(s)`,
                       "Nombre",
                     ]) as any
                   }
+                  /* eslint-enable @typescript-eslint/no-explicit-any */
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
                     border: "1px solid rgba(255,255,255,0.1)",

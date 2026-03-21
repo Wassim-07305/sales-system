@@ -31,9 +31,9 @@ export default async function WhatsAppSettingsPage() {
     ? { connected: !!waAccount, accountName: waAccount?.name }
     : null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <WaSettingsView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       connection={connection as any}
       integrationKeys={integrationKeys}
       unipileWhatsApp={unipileWhatsApp}

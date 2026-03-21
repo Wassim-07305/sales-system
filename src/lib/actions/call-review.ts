@@ -435,8 +435,8 @@ export async function getReviewStats() {
     }
 
     const totalReviews = data.length;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const averageScore =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data.reduce((sum: number, r: any) => sum + (r.score || 0), 0) /
       totalReviews;
 

@@ -80,9 +80,9 @@ export default async function ProspectingPage() {
     relance_status: relanceMap[p.id as string] ?? null,
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <ProspectingView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       prospects={prospectsWithScores as any}
       quota={quota}
       lists={lists}

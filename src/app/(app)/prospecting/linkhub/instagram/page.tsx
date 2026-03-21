@@ -24,9 +24,9 @@ export default async function InstagramHubPage() {
     ? { connected: !!igAccount, accountName: igAccount?.name }
     : null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <InstagramView
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       prospects={prospects as any}
       unipileInstagram={unipileInstagram}
     />

@@ -321,7 +321,7 @@ export async function enrichBatch(prospectIds: string[]) {
 
   // 3. Appel Apify batch unique pour tous les domaines
   const domains = Array.from(prospectDomainMap.keys());
-  let apifyBatchResults: Map<string, ApifyCompanyEnrichment> = new Map();
+  const apifyBatchResults: Map<string, ApifyCompanyEnrichment> = new Map();
 
   if (domains.length > 0) {
     try {

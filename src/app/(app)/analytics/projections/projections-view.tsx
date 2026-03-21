@@ -176,8 +176,8 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "8px",
                   }}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     ((value: any, name: any) => {
                       const labels: Record<string, string> = {
                         actual: "CA réel",
