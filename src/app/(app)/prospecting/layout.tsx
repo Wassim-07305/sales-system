@@ -6,31 +6,17 @@ import {
   Target,
   Link2,
   Search,
-  Brain,
   Star,
-  FileText,
-  Clock,
-  Sparkles,
   Send,
-  Linkedin,
-  Instagram,
-  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { label: "Prospects", href: "/prospecting", icon: Target, exact: true },
   { label: "Hub LinkedIn", href: "/prospecting/linkhub", icon: Link2 },
-  { label: "Découverte", href: "/prospecting/discovery", icon: Search },
-  { label: "Intelligence", href: "/prospecting/intelligence", icon: Brain },
-  { label: "Scoring", href: "/prospecting/scoring", icon: Star },
-  { label: "Templates", href: "/prospecting/templates", icon: FileText },
-  { label: "Relances", href: "/prospecting/follow-ups", icon: Clock },
-  { label: "Enrichissement", href: "/prospecting/enrichment", icon: Sparkles },
-  { label: "Campagnes", href: "/prospecting/campaigns", icon: Send },
-  { label: "LinkedIn", href: "/prospecting/linkedin", icon: Linkedin, exact: true },
-  { label: "Instagram", href: "/prospecting/instagram", icon: Instagram },
-  { label: "Segments", href: "/prospecting/segments", icon: Layers },
+  { label: "Acquisition", href: "/prospecting/acquisition", icon: Search },
+  { label: "Qualification", href: "/prospecting/qualification", icon: Star },
+  { label: "Outreach", href: "/prospecting/outreach", icon: Send },
 ];
 
 export default function ProspectingLayout({
@@ -40,16 +26,32 @@ export default function ProspectingLayout({
 }) {
   const pathname = usePathname();
 
-  // Don't show prospecting tabs on prospect detail pages
+  // Don't show prospecting tabs on prospect detail pages (/prospecting/[id])
   const isDetailPage = /^\/prospecting\/[^/]+$/.test(pathname) &&
-    !TABS.some((t) => t.href === pathname || (t.exact && pathname === t.href));
+    !TABS.some((t) => t.href === pathname);
+
+  // Hide tabs on old direct sub-pages that still exist for backwards compat
+  const oldDirectPages = [
+    "/prospecting/discovery",
+    "/prospecting/intelligence",
+    "/prospecting/linkedin",
+    "/prospecting/instagram",
+    "/prospecting/scoring",
+    "/prospecting/segments",
+    "/prospecting/enrichment",
+    "/prospecting/templates",
+    "/prospecting/campaigns",
+    "/prospecting/follow-ups",
+    "/prospecting/hub",
+  ];
+  const isOldPage = oldDirectPages.some((p) => pathname.startsWith(p));
 
   function isActive(tab: (typeof TABS)[number]) {
     if (tab.exact) return pathname === tab.href;
     return pathname.startsWith(tab.href);
   }
 
-  if (isDetailPage) {
+  if (isDetailPage || isOldPage) {
     return <>{children}</>;
   }
 
