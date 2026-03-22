@@ -83,8 +83,8 @@ export function Sidebar({
           "md:static",
           sidebarMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
-          "w-[75vw] max-w-60 shrink-0 md:w-60 md:max-w-none",
-          isCollapsed && "md:w-[68px]",
+          "w-[75vw] max-w-60 shrink-0 md:max-w-none",
+          isCollapsed ? "md:w-[68px]" : "md:w-60",
         )}
       >
         {/* Logo */}
