@@ -164,7 +164,7 @@ export function CreateChannelModal({
               <div className="text-left">
                 <p className="text-sm font-medium">Direct</p>
                 <p className="text-xs text-muted-foreground">
-                  Conversation privee
+                  Conversation privée
                 </p>
               </div>
             </button>
@@ -190,7 +190,7 @@ export function CreateChannelModal({
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="A quoi sert ce canal ?"
+                placeholder="À quoi sert ce canal ?"
                 className="h-9"
               />
             </div>
@@ -273,7 +273,7 @@ export function CreateChannelModal({
               })}
               {filteredProfiles.length === 0 && (
                 <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-                  Aucun membre trouve
+                  Aucun membre trouvé
                 </p>
               )}
             </div>
@@ -295,10 +295,10 @@ export function CreateChannelModal({
             {isCreating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creation...
+                Création...
               </>
             ) : (
-              "Creer"
+              "Créer"
             )}
           </Button>
         </DialogFooter>

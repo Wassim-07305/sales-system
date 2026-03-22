@@ -140,25 +140,26 @@ export function MessageBubble({
       <button
         onClick={onReply}
         className="rounded p-1 hover:bg-muted transition-colors"
-        title="Repondre"
+        title="Répondre"
+        aria-label="Répondre"
       >
         <Reply className="h-3.5 w-3.5 text-muted-foreground" />
       </button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="rounded p-1 hover:bg-muted transition-colors">
+          <button className="rounded p-1 hover:bg-muted transition-colors" aria-label="Plus d'options">
             <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuItem onClick={onReply}>
             <Reply className="mr-2 h-4 w-4" />
-            Repondre
+            Répondre
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onTogglePin}>
             <Pin className="mr-2 h-4 w-4" />
-            {message.is_pinned ? "Desepingler" : "Epingler"}
+            {message.is_pinned ? "Désépingler" : "Épingler"}
           </DropdownMenuItem>
           {isOwn && (
             <>
@@ -260,7 +261,7 @@ export function MessageBubble({
       {/* Edited indicator */}
       {message.is_edited && (
         <span className="text-[10px] text-muted-foreground italic ml-1">
-          (modifie)
+          (modifié)
         </span>
       )}
 

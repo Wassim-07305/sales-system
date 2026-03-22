@@ -368,6 +368,7 @@ export function ChatInput({
           disabled={disabled}
           className="rounded-lg p-2 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
           title="Joindre un fichier"
+          aria-label="Joindre un fichier"
         >
           <Paperclip className="h-5 w-5" />
         </button>
@@ -400,7 +401,7 @@ export function ChatInput({
             placeholder={
               channelName
                 ? `Message ${channelName}...`
-                : "Ecrivez un message..."
+                : "Écrivez un message..."
             }
             disabled={disabled}
             rows={1}
@@ -431,6 +432,7 @@ export function ChatInput({
               disabled={disabled}
               className="rounded-lg p-2 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
               title="Emoji"
+              aria-label="Emoji"
             >
               <Smile className="h-5 w-5" />
             </button>
@@ -449,6 +451,7 @@ export function ChatInput({
                 : "hover:bg-muted text-muted-foreground hover:text-foreground",
             )}
             title={isUrgent ? "Retirer urgent" : "Marquer urgent"}
+            aria-label={isUrgent ? "Retirer urgent" : "Marquer urgent"}
           >
             <AlertTriangle className="h-5 w-5" />
           </button>
@@ -467,6 +470,7 @@ export function ChatInput({
                     : "hover:bg-muted text-muted-foreground hover:text-foreground",
                 )}
                 title="Planifier"
+                aria-label="Planifier l'envoi"
               >
                 <Clock className="h-5 w-5" />
               </button>

@@ -96,20 +96,42 @@ function renderMarkdown(text: string) {
   });
 }
 
-function processInline(text: string) {
-  // Bold
-  const processed = text.replace(
-    /\*\*(.*?)\*\*/g,
-    '<strong class="font-semibold">$1</strong>',
-  );
-  // Italic
-  const processed2 = processed.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  // Inline code
-  const processed3 = processed2.replace(
-    /`(.*?)`/g,
-    '<code class="rounded bg-background/80 px-1 py-0.5 text-xs font-mono">$1</code>',
-  );
-  return <span dangerouslySetInnerHTML={{ __html: processed3 }} />;
+function processInline(text: string): React.ReactNode[] {
+  // Parse inline markdown into safe React elements
+  const tokens: React.ReactNode[] = [];
+  // Regex to match **bold**, *italic*, and `code`
+  const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Push text before match
+    if (match.index > lastIndex) {
+      tokens.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2]) {
+      // Bold
+      tokens.push(<strong key={match.index} className="font-semibold">{match[2]}</strong>);
+    } else if (match[3]) {
+      // Italic
+      tokens.push(<em key={match.index}>{match[3]}</em>);
+    } else if (match[4]) {
+      // Inline code
+      tokens.push(
+        <code key={match.index} className="rounded bg-background/80 px-1 py-0.5 text-xs font-mono">
+          {match[4]}
+        </code>,
+      );
+    }
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Push remaining text
+  if (lastIndex < text.length) {
+    tokens.push(text.slice(lastIndex));
+  }
+
+  return tokens.length > 0 ? tokens : [text];
 }
 
 export function AiChatPanel({ onBack }: AiChatPanelProps) {
@@ -265,6 +287,7 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
               onClick={handleClearHistory}
               className="rounded-lg p-1.5 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
               title="Effacer la conversation"
+              aria-label="Effacer la conversation"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -352,6 +375,7 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
                       : "text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted",
                   )}
                   title="Utile"
+                  aria-label="Réponse utile"
                 >
                   <ThumbsUp className="h-3 w-3" />
                 </button>
@@ -364,6 +388,7 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
                       : "text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted",
                   )}
                   title="Pas utile"
+                  aria-label="Réponse pas utile"
                 >
                   <ThumbsDown className="h-3 w-3" />
                 </button>
@@ -372,7 +397,8 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
                     onClick={handleRegenerate}
                     disabled={loading}
                     className="rounded-lg p-1 text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
-                    title="Regénérer la réponse"
+                    title="Régénérer la réponse"
+                    aria-label="Régénérer la réponse"
                   >
                     <RefreshCw className="h-3 w-3" />
                   </button>

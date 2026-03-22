@@ -291,7 +291,7 @@ export function ChatPanel({
         <div className="absolute inset-0 z-50 bg-primary/5 border-2 border-dashed border-primary rounded-2xl flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <p className="text-sm font-medium text-primary">
-              Deposer le fichier ici
+              Déposer le fichier ici
             </p>
           </div>
         </div>

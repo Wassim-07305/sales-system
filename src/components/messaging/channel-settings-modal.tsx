@@ -88,6 +88,7 @@ export function ChannelSettingsModal({
   const [description, setDescription] = useState(channel.description ?? "");
   const [memberSearch, setMemberSearch] = useState("");
   const [showAddMember, setShowAddMember] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const isStaff = currentProfile
     ? STAFF_ROLES.includes(currentProfile.role)
@@ -171,7 +172,7 @@ export function ChannelSettingsModal({
                 {isDM ? "Message direct" : channel.name}
               </h2>
               <p className="text-xs text-muted-foreground">
-                Parametres du canal
+                Paramètres du canal
               </p>
             </div>
           </div>
@@ -194,7 +195,7 @@ export function ChannelSettingsModal({
                 : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
-            General
+            Général
           </button>
           <button
             onClick={() => setActiveTab("members")}
@@ -260,7 +261,7 @@ export function ChannelSettingsModal({
                   <span>{members.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Cree le</span>
+                  <span className="text-muted-foreground">Créé le</span>
                   <span className="text-xs">
                     {new Date(channel.created_at).toLocaleDateString("fr-FR", {
                       day: "numeric",
@@ -302,15 +303,41 @@ export function ChannelSettingsModal({
                   <LogOut className="mr-2 h-4 w-4" />
                   Quitter le canal
                 </Button>
-                {canEdit && (
+                {canEdit && !confirmDelete && (
                   <Button
                     variant="outline"
-                    onClick={onDeleteChannel}
+                    onClick={() => setConfirmDelete(true)}
                     className="w-full justify-start text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Supprimer le canal
                   </Button>
+                )}
+                {canEdit && confirmDelete && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+                    <p className="text-xs text-destructive font-medium">
+                      Êtes-vous sûr de vouloir supprimer ce canal ? Cette action est irréversible.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConfirmDelete(false)}
+                        className="flex-1"
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={onDeleteChannel}
+                        className="flex-1"
+                      >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        Confirmer
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

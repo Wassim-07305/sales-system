@@ -164,6 +164,7 @@ export function ChatHeader({
               : "hover:bg-muted text-muted-foreground hover:text-foreground",
           )}
           title="Rechercher"
+          aria-label="Rechercher dans les messages"
         >
           <Search className="h-4 w-4" />
         </button>
@@ -177,6 +178,7 @@ export function ChatHeader({
               : "hover:bg-muted text-muted-foreground hover:text-foreground",
           )}
           title="Membres"
+          aria-label="Voir les membres"
         >
           <Users className="h-4 w-4" />
         </button>
@@ -184,7 +186,8 @@ export function ChatHeader({
         <button
           onClick={onToggleMute}
           className="rounded-lg p-2 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          title={channel.isMuted ? "Reactiver" : "Muet"}
+          title={channel.isMuted ? "Réactiver les notifications" : "Mettre en sourdine"}
+          aria-label={channel.isMuted ? "Réactiver les notifications" : "Mettre en sourdine"}
         >
           {channel.isMuted ? (
             <BellOff className="h-4 w-4" />
@@ -196,7 +199,8 @@ export function ChatHeader({
         <button
           onClick={onToggleArchive}
           className="rounded-lg p-2 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          title={channel.is_archived ? "Desarchiver" : "Archiver"}
+          title={channel.is_archived ? "Désarchiver" : "Archiver"}
+          aria-label={channel.is_archived ? "Désarchiver" : "Archiver"}
         >
           <Archive className="h-4 w-4" />
         </button>
@@ -204,7 +208,8 @@ export function ChatHeader({
         <button
           onClick={onOpenSettings}
           className="rounded-lg p-2 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          title="Parametres"
+          title="Paramètres"
+          aria-label="Paramètres du canal"
         >
           <Settings className="h-4 w-4" />
         </button>

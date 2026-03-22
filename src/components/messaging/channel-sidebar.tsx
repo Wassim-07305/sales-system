@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -138,14 +138,16 @@ export function ChannelSidebar({
     return archivedChannels.filter((c) => c.name.toLowerCase().includes(q));
   }, [archivedChannels, search]);
 
-  // Etat de creation DM en cours
+  // Etat de creation DM en cours — reset quand la liste DM change
   const [creatingDMFor, setCreatingDMFor] = useState<string | null>(null);
+  useEffect(() => {
+    setCreatingDMFor(null);
+  }, [dmChannels.length]);
 
   const handleDMClick = (userId: string) => {
+    if (creatingDMFor) return;
     setCreatingDMFor(userId);
     onCreateDM(userId);
-    // Reset apres un delai (le container gere la navigation)
-    setTimeout(() => setCreatingDMFor(null), 3000);
   };
 
   return (
@@ -162,6 +164,7 @@ export function ChannelSidebar({
           onClick={onCreateChannel}
           className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           title="Nouveau canal"
+          aria-label="Nouveau canal"
         >
           <Plus className="h-4 w-4" />
         </button>
@@ -284,6 +287,7 @@ export function ChannelSidebar({
               <div className="w-full flex items-center justify-between px-4 py-1.5">
                 <button
                   onClick={() => setDmsOpen(!dmsOpen)}
+                  aria-expanded={dmsOpen}
                   className="flex items-center gap-1.5 text-[11px] font-bold text-primary/70 uppercase tracking-wider hover:text-primary transition-colors"
                 >
                   {dmsOpen ? (
@@ -298,7 +302,7 @@ export function ChannelSidebar({
                     setViewMode(viewMode === "list" ? "mosaic" : "list")
                   }
                   className="w-5 h-5 rounded-md flex items-center justify-center hover:bg-primary/10 text-primary/50 hover:text-primary transition-all"
-                  title={viewMode === "list" ? "Vue mosaique" : "Vue liste"}
+                  title={viewMode === "list" ? "Vue mosaïque" : "Vue liste"}
                 >
                   {viewMode === "list" ? (
                     <LayoutGrid className="w-3.5 h-3.5" />
@@ -533,6 +537,7 @@ function SectionHeader({
     <div className="mb-1">
       <button
         onClick={onToggle}
+        aria-expanded={open}
         className="w-full flex items-center justify-between px-4 py-1.5 text-[11px] font-bold text-primary/70 uppercase tracking-wider hover:text-primary transition-colors"
       >
         <div className="flex items-center gap-1.5">
