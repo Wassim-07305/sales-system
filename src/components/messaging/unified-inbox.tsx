@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import {
   MessageSquare,
   Phone,
@@ -16,6 +16,7 @@ import {
   Circle,
   UserPlus,
   Check,
+  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -27,12 +28,14 @@ import {
   generateUnipileAuthLink,
 } from "@/lib/actions/unipile";
 import { createProspect } from "@/lib/actions/prospects";
+import { sendUnipileMessage } from "@/lib/actions/unipile";
 import { toast } from "sonner";
 
 type Platform = "all" | "whatsapp" | "linkedin" | "instagram" | "email";
 
 interface Conversation {
   id: string;
+  accountId?: string;
   provider: string;
   participants: string[];
   pictureUrl?: string;
@@ -150,6 +153,9 @@ export function UnifiedInbox() {
   const [connectingAccount, setConnectingAccount] = useState(false);
   const [addedToCrm, setAddedToCrm] = useState<Set<string>>(new Set());
   const [addingToCrm, setAddingToCrm] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const isDesktop = useIsDesktop();
 
   const connectedProviders = new Set(
@@ -203,6 +209,51 @@ export function UnifiedInbox() {
     }
   }
 
+  async function handleSendMessage() {
+    if (!replyText.trim() || !selectedConv || sending) return;
+    const conv = conversations.find((c) => c.id === selectedConv);
+    if (!conv || !conv.accountId) {
+      toast.error("Impossible d'envoyer le message");
+      return;
+    }
+    setSending(true);
+    try {
+      const result = await sendUnipileMessage({
+        accountId: conv.accountId,
+        recipientId: "",
+        text: replyText.trim(),
+        channel: conv.provider,
+        chatId: conv.id,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        // Add message locally for instant feedback
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: result.messageId || `local-${Date.now()}`,
+            text: replyText.trim(),
+            sender: "Moi",
+            senderId: "self",
+            timestamp: new Date().toISOString(),
+            isFromMe: true,
+          },
+        ]);
+        setReplyText("");
+      }
+    } catch {
+      toast.error("Erreur lors de l'envoi");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   // Load status + conversations
   useEffect(() => {
     let cancelled = false;
@@ -246,6 +297,7 @@ export function UnifiedInbox() {
   // Load messages when selecting a conversation
   const handleSelectConv = useCallback(async (convId: string) => {
     setSelectedConv(convId);
+    setReplyText("");
     setLoadingMessages(true);
     try {
       const result = await getUnipileMessages(convId);
@@ -649,8 +701,39 @@ export function UnifiedInbox() {
                   </div>
                 ))
               )}
+              <div ref={messagesEndRef} />
             </div>
             )}
+            {/* Reply input */}
+            <div className="border-t px-4 py-3 shrink-0">
+              <div className="flex items-end gap-2">
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder="Écrire un message..."
+                  rows={1}
+                  className="flex-1 resize-none rounded-xl border bg-muted/50 px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <Button
+                  size="sm"
+                  className="h-10 w-10 shrink-0 rounded-xl p-0"
+                  disabled={!replyText.trim() || sending}
+                  onClick={handleSendMessage}
+                >
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
             </>
           )}
         </div>

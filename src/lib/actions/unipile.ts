@@ -246,6 +246,7 @@ export async function sendUnipileMessage(params: {
 export async function getUnipileConversations(accountId?: string): Promise<{
   conversations: Array<{
     id: string;
+    accountId?: string;
     provider: string;
     participants: string[];
     pictureUrl?: string;
@@ -279,6 +280,7 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     const conversations = (
       items as Array<{
         id: string;
+        account_id?: string;
         name?: string | null;
         provider?: string;
         account_type?: string;
@@ -328,6 +330,7 @@ export async function getUnipileConversations(accountId?: string): Promise<{
 
       return {
         id: chat.id,
+        accountId: chat.account_id,
         provider:
           UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
           "unknown",
