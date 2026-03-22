@@ -9,57 +9,75 @@ import { notifyMany } from "@/lib/actions/notifications";
 // Ensure default channels exist (Canal Général) + auto-join user
 // ---------------------------------------------------------------------------
 
-export async function ensureDefaultChannels(): Promise<void> {
+export async function ensureDefaultChannels(): Promise<{ channelId?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return {};
 
-  // Check if "Canal Général" already exists
-  const { data: existing } = await supabase
-    .from("channels")
-    .select("id")
-    .eq("name", "Canal Général")
-    .eq("type", "group")
-    .eq("is_archived", false)
-    .limit(1)
-    .maybeSingle();
+  try {
+    // Use admin client for reliable channel creation (bypass RLS)
+    const admin = createAdminClient();
 
-  let channelId: string;
-
-  if (existing) {
-    channelId = existing.id;
-  } else {
-    // Create the channel
-    const { data: created, error } = await supabase
+    // Check if "Canal Général" already exists
+    const { data: existing } = await admin
       .from("channels")
-      .insert({
-        name: "Canal Général",
-        description: "Canal de discussion pour toute l'équipe",
-        type: "group",
-        created_by: user.id,
-      })
       .select("id")
-      .single();
-    if (error || !created) return;
-    channelId = created.id;
-  }
+      .eq("name", "Canal Général")
+      .eq("type", "group")
+      .eq("is_archived", false)
+      .limit(1)
+      .maybeSingle();
 
-  // Ensure user is a member
-  const { data: membership } = await supabase
-    .from("channel_members")
-    .select("id")
-    .eq("channel_id", channelId)
-    .eq("profile_id", user.id)
-    .maybeSingle();
+    let channelId: string;
 
-  if (!membership) {
-    await supabase.from("channel_members").insert({
-      channel_id: channelId,
-      profile_id: user.id,
-      role: "member",
-    });
+    if (existing) {
+      channelId = existing.id;
+    } else {
+      // Create the channel
+      const { data: created, error } = await admin
+        .from("channels")
+        .insert({
+          name: "Canal Général",
+          description: "Canal de discussion pour toute l'équipe",
+          type: "group",
+          created_by: user.id,
+        })
+        .select("id")
+        .single();
+      if (error || !created) {
+        console.error("[ensureDefaultChannels] Create error:", error);
+        return {};
+      }
+      channelId = created.id;
+    }
+
+    // Ensure user is a member
+    const { data: membership } = await admin
+      .from("channel_members")
+      .select("id")
+      .eq("channel_id", channelId)
+      .eq("profile_id", user.id)
+      .maybeSingle();
+
+    if (!membership) {
+      const { error: memberErr } = await admin
+        .from("channel_members")
+        .insert({
+          channel_id: channelId,
+          profile_id: user.id,
+          role: "member",
+        });
+      if (memberErr) {
+        console.error("[ensureDefaultChannels] Member insert error:", memberErr);
+      }
+    }
+
+    return { channelId };
+  } catch (err) {
+    console.error("[ensureDefaultChannels] Error:", err);
+    return {};
   }
 }
 
