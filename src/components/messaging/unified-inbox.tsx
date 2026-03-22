@@ -161,14 +161,19 @@ export function UnifiedInbox() {
   const connectedProviders = new Set(
     accounts.map((a) => a.provider.toUpperCase()),
   );
+  const hasEmailConnected = connectedProviders.has("MAIL") || connectedProviders.has("GOOGLE") || connectedProviders.has("MICROSOFT");
   const missingProviders = [
-    { provider: "WHATSAPP" as const, label: "WhatsApp", icon: <Phone className="h-4 w-4 text-green-500" /> },
-    { provider: "LINKEDIN" as const, label: "LinkedIn", icon: <Linkedin className="h-4 w-4 text-blue-500" /> },
-    { provider: "INSTAGRAM" as const, label: "Instagram", icon: <Instagram className="h-4 w-4 text-pink-500" /> },
-    { provider: "MAIL" as const, label: "Email", icon: <Mail className="h-4 w-4 text-amber-500" /> },
-  ].filter((b) => !connectedProviders.has(b.provider));
+    { provider: "WHATSAPP" as const, label: "WhatsApp", icon: <Phone className="h-4 w-4 text-green-500" />, platform: "whatsapp" },
+    { provider: "LINKEDIN" as const, label: "LinkedIn", icon: <Linkedin className="h-4 w-4 text-blue-500" />, platform: "linkedin" },
+    { provider: "INSTAGRAM" as const, label: "Instagram", icon: <Instagram className="h-4 w-4 text-pink-500" />, platform: "instagram" },
+    { provider: "GOOGLE" as const, label: "Gmail", icon: <Mail className="h-4 w-4 text-red-500" />, platform: "email" },
+    { provider: "MICROSOFT" as const, label: "Outlook", icon: <Mail className="h-4 w-4 text-blue-400" />, platform: "email" },
+  ].filter((b) => {
+    if (b.platform === "email") return !hasEmailConnected;
+    return !connectedProviders.has(b.provider);
+  });
 
-  async function handleConnectAccount(provider: "WHATSAPP" | "LINKEDIN" | "INSTAGRAM" | "MAIL") {
+  async function handleConnectAccount(provider: "WHATSAPP" | "LINKEDIN" | "INSTAGRAM" | "GOOGLE" | "MICROSOFT") {
     setConnectingAccount(true);
     try {
       const result = await generateUnipileAuthLink(provider);
@@ -458,14 +463,10 @@ export function UnifiedInbox() {
                 </p>
                 {(() => {
                   // Show connect button only for the relevant platform filter
-                  const platformToProvider: Record<string, string> = {
-                    whatsapp: "WHATSAPP", linkedin: "LINKEDIN",
-                    instagram: "INSTAGRAM", email: "MAIL",
-                  };
                   const relevantMissing = activePlatform === "all"
                     ? missingProviders
                     : missingProviders.filter(
-                        (b) => b.provider === platformToProvider[activePlatform],
+                        (b) => b.platform === activePlatform,
                       );
                   return relevantMissing.length > 0 ? (
                     <div className="mt-4">

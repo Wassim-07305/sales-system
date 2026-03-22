@@ -9,6 +9,21 @@ import { getApiKey } from "@/lib/api-keys";
 // Helpers
 // ---------------------------------------------------------------------------
 
+/** Format a raw phone number like "33624895494" → "+33 6 24 89 54 94" */
+function formatPhone(raw: string): string {
+  // Remove any non-digit prefix
+  const digits = raw.replace(/\D/g, "");
+  // French numbers: 33XXXXXXXXX (11 digits)
+  if (digits.startsWith("33") && digits.length >= 11) {
+    const national = digits.slice(2); // e.g. "624895494"
+    const padded = national.length === 9 ? "0" + national : national;
+    // Format as +33 X XX XX XX XX
+    return `+33 ${padded[1]} ${padded.slice(2, 4)} ${padded.slice(4, 6)} ${padded.slice(6, 8)} ${padded.slice(8, 10)}`;
+  }
+  // Other international: just add + prefix
+  return `+${digits}`;
+}
+
 async function requireAuth() {
   const supabase = await createClient();
   const {
@@ -325,7 +340,7 @@ export async function getUnipileConversations(accountId?: string): Promise<{
         pictureUrl = chat.attendees[0].picture_url;
       } else if (chat.attendee_public_identifier) {
         const id = chat.attendee_public_identifier.replace(/@.*$/, "");
-        participantNames.push(id.startsWith("33") ? `+${id}` : id);
+        participantNames.push(/^\d+$/.test(id) ? formatPhone(id) : id);
       }
 
       return {
