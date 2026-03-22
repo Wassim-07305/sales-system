@@ -277,6 +277,19 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     const data = await res.json();
     const items = Array.isArray(data) ? data : (data as { items?: unknown[] }).items || [];
 
+    // Debug: log first 3 chats to see actual API structure
+    const rawItems = items as Array<Record<string, unknown>>;
+    for (const item of rawItems.slice(0, 3)) {
+      console.log("[Unipile Chat Debug]", JSON.stringify({
+        id: item.id,
+        name: item.name,
+        provider: item.provider,
+        account_type: item.account_type,
+        attendees: item.attendees,
+        attendee_public_identifier: item.attendee_public_identifier,
+      }, null, 2));
+    }
+
     const conversations = (
       items as Array<{
         id: string;
