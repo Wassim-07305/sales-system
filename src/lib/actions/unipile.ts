@@ -399,6 +399,9 @@ export async function getUnipileMessages(chatId: string): Promise<{
       isFromMe: msg.is_sender || false,
     }));
 
+    // API returns newest first — reverse to show oldest first (chronological)
+    messages.reverse();
+
     return { messages };
   } catch (err) {
     console.error("Unipile messages error:", err);
