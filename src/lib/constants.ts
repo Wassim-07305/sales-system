@@ -104,7 +104,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "client_b2b"],
   },
   {
-    label: "Prospection",
+    label: "Hub",
     href: "/prospecting",
     icon: Target,
     roles: ["admin", "manager", "setter", "closer"],

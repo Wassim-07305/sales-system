@@ -247,10 +247,10 @@ export function Sidebar({
             title={isCollapsed ? "Ouvrir le menu" : "Réduire le menu"}
           >
             {isCollapsed ? (
-              <PanelLeft className="h-[18px] w-[18px]" />
+              <PanelLeft className="h-4 w-4" />
             ) : (
               <>
-                <PanelLeftClose className="h-[18px] w-[18px]" />
+                <PanelLeftClose className="h-4 w-4" />
                 <span className="ml-3 text-[13px]">Réduire</span>
               </>
             )}
