@@ -56,24 +56,6 @@ function useEnrichedChannels(
   return useMemo(() => {
     if (!userId) return [];
 
-    // DEBUG — log sample channel shape to diagnose React #310
-    if (channels.length > 0) {
-      const s = channels[0];
-      console.log("[useEnrichedChannels] sample keys:", Object.keys(s));
-      console.log("[useEnrichedChannels] name:", typeof s.name, s.name);
-      console.log("[useEnrichedChannels] description:", typeof s.description, s.description);
-      console.log("[useEnrichedChannels] members isArray:", Array.isArray(s.members), "length:", s.members?.length);
-      if (s.members?.[0]) {
-        const m0 = s.members[0];
-        console.log("[useEnrichedChannels] member[0] keys:", Object.keys(m0));
-        console.log("[useEnrichedChannels] member[0].profile:", typeof m0.profile, Array.isArray(m0.profile), m0.profile);
-      }
-      // Check if members could be the UUID[] column instead of the join
-      if (s.members?.[0] && typeof s.members[0] === "string") {
-        console.error("[useEnrichedChannels] BUG: members is UUID[] column, not join result!");
-      }
-    }
-
     return channels.map((ch) => {
       // Guard: if members is UUID[] from the column instead of the join, skip
       const members = Array.isArray(ch.members)
@@ -173,6 +155,18 @@ export function MessagingContainer() {
         });
     }
   }, [user, queryClient]);
+
+  // Cmd+K to open quick switcher (listener lives here since QuickSwitcher is conditionally rendered)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowQuickSwitcher((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Auto-selection du premier canal
   useEffect(() => {
@@ -376,20 +370,22 @@ export function MessagingContainer() {
         )}
       </div>
 
-      {/* Quick Switcher (Cmd+K) */}
-      <QuickSwitcher
-        open={showQuickSwitcher}
-        onOpenChange={setShowQuickSwitcher}
-        publicChannels={publicChannels}
-        dmChannels={dmChannels}
-        archivedChannels={archivedChannels}
-        onSelectChannel={(id) => {
-          setActiveChannelId(id);
-          setMobileSidebarOpen(false);
-          setViewMode("messaging");
-        }}
-        aiAgentId={AI_AGENT_ID}
-      />
+      {/* Quick Switcher (Cmd+K) — only mount when open to avoid rendering objects */}
+      {showQuickSwitcher && (
+        <QuickSwitcher
+          open={showQuickSwitcher}
+          onOpenChange={setShowQuickSwitcher}
+          publicChannels={publicChannels}
+          dmChannels={dmChannels}
+          archivedChannels={archivedChannels}
+          onSelectChannel={(id) => {
+            setActiveChannelId(id);
+            setMobileSidebarOpen(false);
+            setViewMode("messaging");
+          }}
+          aiAgentId={AI_AGENT_ID}
+        />
+      )}
 
       {/* Modales */}
       <CreateChannelModal

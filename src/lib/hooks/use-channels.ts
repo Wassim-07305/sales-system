@@ -55,19 +55,16 @@ export function useChannels() {
         .from("channel_members")
         .select("channel_id")
         .eq("profile_id", user.id);
-      if (memberErr) {
-        console.error("[useChannels] channel_members query error:", memberErr);
-        throw memberErr;
-      }
+      if (memberErr) throw memberErr;
 
       const channelIds = (memberChannels ?? []).map((m) => m.channel_id);
-      console.log("[useChannels] Found", channelIds.length, "memberships for user", user.id);
       if (channelIds.length === 0) return [];
 
+      // Explicit columns to avoid pulling unknown object/array columns (e.g. members UUID[])
       const { data, error } = await supabase
         .from("channels")
         .select(
-          `*,
+          `id, name, description, type, created_by, is_archived, created_at, last_message_at,
           members:channel_members(
             id, channel_id, profile_id, role, last_read_at, notifications_muted, is_pinned, joined_at,
             profile:profiles(id, full_name, avatar_url, role)
@@ -75,50 +72,48 @@ export function useChannels() {
         )
         .in("id", channelIds)
         .order("last_message_at", { ascending: false, nullsFirst: false });
-      if (error) {
-        console.error("[useChannels] channels query error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("[useChannels] Loaded", data?.length ?? 0, "channels");
-
-      // DEBUG: dump raw channel data to diagnose React #310
-      if (data && data.length > 0) {
-        const raw = data[0] as Record<string, unknown>;
-        console.log("[useChannels] RAW channel[0] keys:", Object.keys(raw));
-        console.log("[useChannels] RAW channel[0].name:", typeof raw.name, raw.name);
-        console.log("[useChannels] RAW channel[0].description:", typeof raw.description, raw.description);
-        console.log("[useChannels] RAW channel[0].target_audience:", typeof raw.target_audience, raw.target_audience);
-        const rawMembers = raw.members;
-        console.log("[useChannels] RAW channel[0].members type:", typeof rawMembers, "isArray:", Array.isArray(rawMembers));
-        if (Array.isArray(rawMembers) && rawMembers.length > 0) {
-          console.log("[useChannels] RAW members[0] type:", typeof rawMembers[0], "value:", rawMembers[0]);
-        }
-        // Log ALL non-standard fields that could be objects
-        for (const [key, val] of Object.entries(raw)) {
-          if (val !== null && typeof val === "object" && key !== "members") {
-            console.warn("[useChannels] OBJECT field on channel:", key, "=", val);
-          }
-        }
-      }
-
-      // Sanitize: Supabase FK joins may return arrays instead of objects
-      return ((data ?? []) as Channel[]).map((ch) => ({
-        ...ch,
-        name: typeof ch.name === "string" ? ch.name : String(ch.name ?? ""),
-        description:
-          ch.description == null
-            ? null
-            : typeof ch.description === "string"
-              ? ch.description
-              : String(ch.description),
-        members: (Array.isArray(ch.members) ? ch.members : [])
-          .filter((m): m is NonNullable<typeof m> => typeof m === "object" && m !== null)
-          .map((m) => ({
-            ...m,
-            profile: Array.isArray(m.profile) ? m.profile[0] ?? undefined : m.profile,
-          })),
-      }));
+      // Sanitize: explicit field picking prevents unknown columns from leaking
+      // Cast through unknown because raw Supabase join types differ from our Channel type
+      return (data ?? []).map((raw): Channel => {
+        const ch = raw as Record<string, unknown>;
+        const rawMembers = Array.isArray(ch.members) ? ch.members : [];
+        return {
+          id: ch.id as string,
+          name: typeof ch.name === "string" ? ch.name : String(ch.name ?? ""),
+          description:
+            ch.description == null
+              ? null
+              : typeof ch.description === "string"
+                ? (ch.description as string)
+                : String(ch.description),
+          type: ch.type as string,
+          created_by: ch.created_by as string,
+          is_archived: !!(ch.is_archived as boolean),
+          created_at: ch.created_at as string,
+          last_message_at: (ch.last_message_at as string | null),
+          members: rawMembers
+            .filter((m): m is Record<string, unknown> => typeof m === "object" && m !== null)
+            .map((m) => {
+              const rawProfile = m.profile;
+              const profile = Array.isArray(rawProfile) ? rawProfile[0] : rawProfile;
+              return {
+                id: m.id as string,
+                channel_id: m.channel_id as string,
+                profile_id: m.profile_id as string,
+                role: m.role as string,
+                last_read_at: m.last_read_at as string | null,
+                notifications_muted: !!(m.notifications_muted as boolean),
+                is_pinned: !!(m.is_pinned as boolean),
+                joined_at: m.joined_at as string,
+                profile: profile && typeof profile === "object"
+                  ? (profile as ChannelMember["profile"])
+                  : undefined,
+              };
+            }),
+        };
+      });
     },
     enabled: !!user,
   });
@@ -520,17 +515,30 @@ export function useChannelMembers(channelId: string | null) {
       const { data, error } = await supabase
         .from("channel_members")
         .select(
-          `*,
+          `id, channel_id, profile_id, role, last_read_at, notifications_muted, is_pinned, joined_at,
           profile:profiles(id, full_name, avatar_url, role)`,
         )
         .eq("channel_id", channelId)
         .order("joined_at", { ascending: true });
       if (error) throw error;
-      // Sanitize: profile FK join may return array instead of object
-      return ((data ?? []) as ChannelMember[]).map((m) => ({
-        ...m,
-        profile: Array.isArray(m.profile) ? m.profile[0] ?? undefined : m.profile,
-      }));
+      return (data ?? []).map((raw): ChannelMember => {
+        const m = raw as Record<string, unknown>;
+        const rawProfile = m.profile;
+        const profile = Array.isArray(rawProfile) ? rawProfile[0] : rawProfile;
+        return {
+          id: m.id as string,
+          channel_id: m.channel_id as string,
+          profile_id: m.profile_id as string,
+          role: m.role as string,
+          last_read_at: m.last_read_at as string | null,
+          notifications_muted: !!(m.notifications_muted as boolean),
+          is_pinned: !!(m.is_pinned as boolean),
+          joined_at: m.joined_at as string,
+          profile: profile && typeof profile === "object"
+            ? (profile as ChannelMember["profile"])
+            : undefined,
+        };
+      });
     },
     enabled: !!channelId,
   });

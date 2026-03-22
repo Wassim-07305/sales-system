@@ -17,10 +17,13 @@ export function useMessages(channelId: string | null) {
     staleTime: 0,
     queryFn: async () => {
       if (!channelId) return [];
+      // Explicit columns to avoid pulling JSONB/object columns via select('*')
       const { data, error } = await supabase
         .from("messages")
         .select(
-          `*,
+          `id, channel_id, sender_id, content, content_type, message_type,
+          file_url, file_name, is_edited, is_pinned, is_urgent, reply_to,
+          reply_count, scheduled_at, deleted_at, created_at, updated_at, is_ai_generated,
           sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url, role),
           reactions:message_reactions(id, emoji, user_id),
           attachments:message_attachments(id, file_name, file_url, file_type, file_size)`,
@@ -31,36 +34,37 @@ export function useMessages(channelId: string | null) {
         .limit(200);
       if (error) throw error;
 
-      // DEBUG: dump raw message data to diagnose React #310
-      if (data && data.length > 0) {
-        const raw = data[0] as Record<string, unknown>;
-        console.log("[useMessages] RAW msg[0] keys:", Object.keys(raw));
-        for (const [key, val] of Object.entries(raw)) {
-          if (val !== null && typeof val === "object" && !Array.isArray(val)) {
-            console.warn("[useMessages] OBJECT field:", key, "=", JSON.stringify(val).slice(0, 200));
-          }
-        }
-      }
-
-      // Sanitize data from Supabase to prevent React #310:
-      // - content may be null (TEXT nullable) → coerce to string
-      // - sender may be an array if FK detection fails → unwrap
-      // - reactions/attachments must be arrays
-      // - metadata JSONB must not leak as renderable child
-      return ((data ?? []) as EnrichedMessage[]).map((msg) => ({
-        ...msg,
-        content:
-          typeof msg.content === "string"
-            ? msg.content
-            : String(msg.content ?? ""),
-        sender: Array.isArray(msg.sender)
-          ? msg.sender[0] ?? null
-          : msg.sender ?? null,
-        reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
-        attachments: Array.isArray(msg.attachments) ? msg.attachments : [],
-        // Ensure metadata stays as object (not rendered directly)
-        metadata: typeof msg.metadata === "object" && msg.metadata !== null ? msg.metadata : {},
-      }));
+      return (data ?? []).map((raw): EnrichedMessage => {
+        const msg = raw as Record<string, unknown>;
+        const rawSender = msg.sender;
+        const sender = Array.isArray(rawSender) ? rawSender[0] : rawSender;
+        return {
+          id: msg.id as string,
+          channel_id: msg.channel_id as string,
+          sender_id: msg.sender_id as string,
+          content: typeof msg.content === "string" ? msg.content : String(msg.content ?? ""),
+          content_type: (msg.content_type as string) ?? "text",
+          message_type: (msg.message_type as string) ?? "text",
+          file_url: (msg.file_url as string | null) ?? null,
+          file_name: (msg.file_name as string | null) ?? null,
+          is_edited: !!(msg.is_edited as boolean),
+          is_pinned: !!(msg.is_pinned as boolean),
+          is_urgent: !!(msg.is_urgent as boolean),
+          reply_to: (msg.reply_to as string | null) ?? null,
+          reply_count: (msg.reply_count as number) ?? 0,
+          scheduled_at: (msg.scheduled_at as string | null) ?? null,
+          deleted_at: (msg.deleted_at as string | null) ?? null,
+          created_at: msg.created_at as string,
+          updated_at: msg.updated_at as string,
+          is_ai_generated: !!(msg.is_ai_generated as boolean),
+          metadata: {},
+          sender: sender && typeof sender === "object"
+            ? (sender as EnrichedMessage["sender"])
+            : null,
+          reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
+          attachments: Array.isArray(msg.attachments) ? msg.attachments : [],
+        };
+      });
     },
     enabled: !!channelId,
   });
