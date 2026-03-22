@@ -14,6 +14,8 @@ import {
   Loader2,
   Clock,
   Circle,
+  UserPlus,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ import {
   getUnipileMessages,
   generateUnipileAuthLink,
 } from "@/lib/actions/unipile";
+import { createProspect } from "@/lib/actions/prospects";
 import { toast } from "sonner";
 
 type Platform = "all" | "whatsapp" | "linkedin" | "instagram" | "email";
@@ -145,6 +148,8 @@ export function UnifiedInbox() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [configured, setConfigured] = useState(false);
   const [connectingAccount, setConnectingAccount] = useState(false);
+  const [addedToCrm, setAddedToCrm] = useState<Set<string>>(new Set());
+  const [addingToCrm, setAddingToCrm] = useState(false);
   const isDesktop = useIsDesktop();
 
   const connectedProviders = new Set(
@@ -171,6 +176,30 @@ export function UnifiedInbox() {
       toast.error("Erreur lors de la connexion");
     } finally {
       setConnectingAccount(false);
+    }
+  }
+
+  async function handleAddToCrm(conv: Conversation) {
+    setAddingToCrm(true);
+    try {
+      const name = conv.participants.join(", ") || "Contact";
+      const profileUrl = conv.provider === "linkedin" && conv.participants[0]
+        ? `https://linkedin.com/in/${conv.participants[0]}`
+        : undefined;
+
+      await createProspect({
+        name,
+        platform: conv.provider,
+        profile_url: profileUrl,
+        notes: `Ajouté depuis la boîte unifiée (${conv.provider})`,
+      });
+
+      setAddedToCrm((prev) => new Set(prev).add(conv.id));
+      toast.success(`${name} ajouté au CRM`);
+    } catch {
+      toast.error("Erreur lors de l'ajout au CRM");
+    } finally {
+      setAddingToCrm(false);
     }
   }
 
@@ -517,28 +546,62 @@ export function UnifiedInbox() {
             </div>
           ) : (
             <>
-            {/* Mobile back button + conversation header */}
-            <div className={cn("flex items-center gap-3 px-4 py-3 border-b", isDesktop && "hidden")}>
-              <button
-                onClick={() => setSelectedConv(null)}
-                className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-              <div className="flex items-center gap-2 min-w-0">
-                {(() => {
-                  const conv = conversations.find((c) => c.id === selectedConv);
-                  return conv ? (
-                    <>
-                      {platformIcon(conv.provider)}
-                      <p className="text-sm font-medium truncate">
-                        {conv.participants.join(", ") || "Contact"}
-                      </p>
-                    </>
-                  ) : null;
-                })()}
-              </div>
-            </div>
+            {/* Conversation header */}
+            {(() => {
+              const conv = conversations.find((c) => c.id === selectedConv);
+              if (!conv) return null;
+              const contactName = conv.participants.join(", ") || "Contact";
+              const alreadyAdded = addedToCrm.has(conv.id);
+              return (
+                <div className="flex items-center gap-3 px-4 py-3 border-b">
+                  {/* Back button (mobile only) */}
+                  {!isDesktop && (
+                    <button
+                      onClick={() => setSelectedConv(null)}
+                      className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </button>
+                  )}
+                  {/* Contact info */}
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="relative shrink-0">
+                      {conv.pictureUrl ? (
+                        <img src={conv.pictureUrl} alt="" className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                          {contactName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{contactName}</p>
+                      <p className="text-[10px] text-muted-foreground capitalize">{conv.provider}</p>
+                    </div>
+                  </div>
+                  {/* Add to CRM button */}
+                  <Button
+                    size="sm"
+                    variant={alreadyAdded ? "ghost" : "outline"}
+                    className="text-xs h-8 gap-1.5 shrink-0"
+                    disabled={addingToCrm || alreadyAdded}
+                    onClick={() => handleAddToCrm(conv)}
+                  >
+                    {alreadyAdded ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 text-green-500" />
+                        Ajouté
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-3.5 w-3.5" />
+                        Ajouter au CRM
+                      </>
+                    )}
+                  </Button>
+                </div>
+              );
+            })()}
             {loadingMessages ? (
               <div className="flex-1 flex items-center justify-center">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
