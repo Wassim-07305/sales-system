@@ -88,7 +88,7 @@ export function MessageBubble({
     return (
       <div className="flex justify-center py-1">
         <span className="text-xs italic text-muted-foreground">
-          {message.content}
+          {typeof message.content === "string" ? message.content : String(message.content ?? "")}
         </span>
       </div>
     );
@@ -261,7 +261,7 @@ export function MessageBubble({
               {message.reply_message.sender?.full_name ?? "Inconnu"}
             </span>
             <p className="truncate text-xs text-muted-foreground">
-              {message.reply_message.content}
+              {typeof message.reply_message.content === "string" ? message.reply_message.content : String(message.reply_message.content ?? "")}
             </p>
           </div>
         </div>

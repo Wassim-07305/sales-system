@@ -742,7 +742,7 @@ export function UnifiedInbox() {
                           {msg.sender}
                         </p>
                       )}
-                      <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                      <p className="text-sm whitespace-pre-wrap">{typeof msg.text === "string" ? msg.text : String(msg.text ?? "")}</p>
                       <p className="text-[10px] text-muted-foreground mt-1 text-right">
                         {new Date(msg.timestamp).toLocaleString("fr-FR", {
                           hour: "2-digit",

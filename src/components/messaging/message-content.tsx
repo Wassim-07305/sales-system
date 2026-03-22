@@ -18,6 +18,12 @@ interface MessageContentProps {
 }
 
 export function MessageContent({ message }: MessageContentProps) {
+  // Defensive: ensure content is a string (React #310 guard)
+  const safeContent =
+    typeof message.content === "string"
+      ? message.content
+      : String(message.content ?? "");
+
   const editedBadge = message.is_edited ? (
     <span className="ml-1.5 text-[10px] text-muted-foreground">(modifié)</span>
   ) : null;
@@ -35,14 +41,14 @@ export function MessageContent({ message }: MessageContentProps) {
     case "system":
       return (
         <p className="text-xs italic text-muted-foreground">
-          {message.content}
+          {safeContent}
         </p>
       );
     case "text":
     default:
       return (
         <div>
-          <TextContent content={message.content} />
+          <TextContent content={safeContent} />
           {editedBadge}
           {/* Inline attachments on text messages */}
           {message.attachments?.length > 0 && (
@@ -79,6 +85,11 @@ export function MessageContent({ message }: MessageContentProps) {
 }
 
 function TextContent({ content }: { content: string }) {
+  // Defensive: ensure content is always a string (React #310 guard)
+  if (typeof content !== "string") {
+    console.warn("[TextContent] content is not a string:", content);
+    content = String(content ?? "");
+  }
   const lines = content.split("\n");
   type BlockType = "quote" | "text" | "ul" | "ol";
   const blocks: Array<{ type: BlockType; content: string; items?: string[] }> =
