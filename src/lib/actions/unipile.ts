@@ -4,11 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getUnipileClient, UNIPILE_PROVIDER_MAP } from "@/lib/unipile";
 
-// Extended provider map for chat contexts: GOOGLE/MICROSOFT are email, not calendar
+// Extended provider map for chat contexts: GOOGLE/MICROSOFT/OAuth variants are email
 const CHAT_PROVIDER_MAP: Record<string, string> = {
   ...UNIPILE_PROVIDER_MAP,
   GOOGLE: "email",
+  GOOGLE_OAUTH: "email",
   MICROSOFT: "email",
+  MICROSOFT_OAUTH: "email",
 };
 import { getApiKey } from "@/lib/api-keys";
 
@@ -299,13 +301,6 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     const data = await res.json();
     const items = Array.isArray(data) ? data : (data as { items?: unknown[] }).items || [];
 
-    // Debug: log first few raw chat items to see provider/account_type values
-    if (items.length > 0) {
-      console.log("[Unipile] Sample chats:", (items as Array<Record<string, unknown>>).slice(0, 3).map((c) => ({
-        id: c.id, provider: c.provider, account_type: c.account_type, type: c.type, name: c.name,
-      })));
-    }
-
     const conversations = (
       items as Array<{
         id: string;
@@ -413,6 +408,149 @@ export async function getUnipileConversations(accountId?: string): Promise<{
       conversations: [],
       error: err instanceof Error ? err.message : "Erreur de récupération",
     };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Get email conversations (threads) from /emails endpoint
+// ---------------------------------------------------------------------------
+
+export async function getUnipileEmailConversations(accountId: string): Promise<{
+  conversations: Array<{
+    id: string;
+    accountId?: string;
+    provider: string;
+    participants: string[];
+    pictureUrl?: string;
+    lastMessage?: string;
+    lastMessageAt?: string;
+    unreadCount: number;
+    isEmail?: boolean;
+  }>;
+  error?: string;
+}> {
+  try {
+    await requireAuth();
+    const dsn = process.env.UNIPILE_DSN;
+    const apiKey = process.env.UNIPILE_API_KEY;
+    if (!dsn || !apiKey) return { conversations: [], error: "Unipile non configuré" };
+
+    const res = await fetch(
+      `${dsn}/api/v1/emails?account_id=${accountId}&limit=50&role=inbox`,
+      { headers: { "X-API-KEY": apiKey } },
+    );
+    if (!res.ok) return { conversations: [], error: "Erreur récupération emails" };
+
+    const data = await res.json();
+    const items = (data as { items?: unknown[] }).items || [];
+
+    // Group emails by thread_id to create "conversations"
+    const threadMap = new Map<string, {
+      id: string;
+      subject: string;
+      from: string;
+      fromEmail: string;
+      date: string;
+      read: boolean;
+      body?: string;
+    }>();
+
+    for (const email of items as Array<{
+      id: string;
+      thread_id?: string;
+      subject?: string;
+      date?: string;
+      from_attendee?: { display_name?: string; identifier?: string };
+      body?: string;
+      read?: boolean;
+    }>) {
+      const threadId = email.thread_id || email.id;
+      // Keep the most recent email per thread (API returns newest first)
+      if (!threadMap.has(threadId)) {
+        threadMap.set(threadId, {
+          id: email.id,
+          subject: email.subject || "(Sans objet)",
+          from: email.from_attendee?.display_name || email.from_attendee?.identifier || "Inconnu",
+          fromEmail: email.from_attendee?.identifier || "",
+          date: email.date || "",
+          read: email.read !== false,
+          body: email.body,
+        });
+      }
+    }
+
+    const conversations = Array.from(threadMap.entries()).map(([threadId, thread]) => ({
+      id: `email_${thread.id}`,
+      accountId,
+      provider: "email",
+      participants: [thread.from],
+      lastMessage: thread.subject,
+      lastMessageAt: thread.date,
+      unreadCount: thread.read ? 0 : 1,
+      isEmail: true,
+    }));
+
+    return { conversations };
+  } catch (err) {
+    console.error("Unipile emails error:", err);
+    return { conversations: [], error: "Erreur récupération emails" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Get email thread messages
+// ---------------------------------------------------------------------------
+
+export async function getUnipileEmailMessages(emailId: string): Promise<{
+  messages: Array<{
+    id: string;
+    text: string;
+    sender: string;
+    senderId: string;
+    timestamp: string;
+    isFromMe: boolean;
+    subject?: string;
+  }>;
+  error?: string;
+}> {
+  try {
+    await requireAuth();
+    const dsn = process.env.UNIPILE_DSN;
+    const apiKey = process.env.UNIPILE_API_KEY;
+    if (!dsn || !apiKey) return { messages: [], error: "Unipile non configuré" };
+
+    const res = await fetch(`${dsn}/api/v1/emails/${emailId}`, {
+      headers: { "X-API-KEY": apiKey },
+    });
+    if (!res.ok) return { messages: [], error: "Erreur récupération email" };
+
+    const email = await res.json() as {
+      id: string;
+      subject?: string;
+      body?: string;
+      body_plain?: string;
+      date?: string;
+      from_attendee?: { display_name?: string; identifier?: string };
+      to_attendees?: Array<{ display_name?: string; identifier?: string }>;
+    };
+
+    // Strip HTML tags for plain text display
+    const bodyText = email.body_plain || (email.body || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+    return {
+      messages: [{
+        id: email.id,
+        text: bodyText,
+        sender: email.from_attendee?.display_name || email.from_attendee?.identifier || "",
+        senderId: email.from_attendee?.identifier || "",
+        timestamp: email.date || "",
+        isFromMe: false,
+        subject: email.subject,
+      }],
+    };
+  } catch (err) {
+    console.error("Unipile email message error:", err);
+    return { messages: [], error: "Erreur récupération email" };
   }
 }
 

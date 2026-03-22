@@ -25,10 +25,12 @@ import {
   getUnipileStatus,
   getUnipileConversations,
   getUnipileMessages,
+  getUnipileEmailConversations,
+  getUnipileEmailMessages,
   generateUnipileAuthLink,
+  sendUnipileMessage,
 } from "@/lib/actions/unipile";
 import { createProspect } from "@/lib/actions/prospects";
-import { sendUnipileMessage } from "@/lib/actions/unipile";
 import { toast } from "sonner";
 
 type Platform = "all" | "whatsapp" | "linkedin" | "instagram" | "email";
@@ -42,6 +44,7 @@ interface Conversation {
   lastMessage?: string;
   lastMessageAt?: string;
   unreadCount: number;
+  isEmail?: boolean;
 }
 
 interface Message {
@@ -281,11 +284,25 @@ export function UnifiedInbox() {
         setAccounts(status.accounts);
 
         if (status.configured && status.accounts.length > 0) {
-          const results = await Promise.all(
-            status.accounts.map((acc) => getUnipileConversations(acc.id)),
+          // Separate email accounts (GOOGLE_OAUTH, MICROSOFT_OAUTH) from chat accounts
+          const emailAccounts = status.accounts.filter(
+            (a) => a.channel === "email" || ["GOOGLE_OAUTH", "GOOGLE", "MICROSOFT_OAUTH", "MICROSOFT"].includes(a.provider.toUpperCase()),
           );
+          const chatAccounts = status.accounts.filter(
+            (a) => !emailAccounts.some((e) => e.id === a.id),
+          );
+
+          // Fetch chat conversations and email conversations in parallel
+          const [chatResults, emailResults] = await Promise.all([
+            Promise.all(chatAccounts.map((acc) => getUnipileConversations(acc.id))),
+            Promise.all(emailAccounts.map((acc) => getUnipileEmailConversations(acc.id))),
+          ]);
           if (cancelled) return;
-          const allConvs = results.flatMap((r) => r.conversations);
+
+          const allConvs = [
+            ...chatResults.flatMap((r) => r.conversations),
+            ...emailResults.flatMap((r) => r.conversations),
+          ];
           allConvs.sort((a, b) => {
             const ta = a.lastMessageAt
               ? new Date(a.lastMessageAt).getTime()
@@ -315,8 +332,15 @@ export function UnifiedInbox() {
     setReplyText("");
     setLoadingMessages(true);
     try {
-      const result = await getUnipileMessages(convId);
-      setMessages(result.messages);
+      if (convId.startsWith("email_")) {
+        // Email conversation — fetch via email endpoint
+        const emailId = convId.replace("email_", "");
+        const result = await getUnipileEmailMessages(emailId);
+        setMessages(result.messages);
+      } else {
+        const result = await getUnipileMessages(convId);
+        setMessages(result.messages);
+      }
     } catch {
       setMessages([]);
     } finally {
