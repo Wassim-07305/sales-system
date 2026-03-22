@@ -266,12 +266,15 @@ export function ChannelSidebar({
                       {ch.isMuted && (
                         <BellOff className="w-3 h-3 text-muted-foreground/40 shrink-0" />
                       )}
-                      {ch.unreadCount > 0 && !ch.isMuted && (
+                      {ch.unreadCount > 0 && (
                         <Badge
                           variant={
-                            ch.urgentUnreadCount > 0 ? "destructive" : "default"
+                            ch.urgentUnreadCount > 0 ? "destructive" : ch.isMuted ? "outline" : "default"
                           }
-                          className="h-[18px] min-w-[18px] px-1.5 text-[10px]"
+                          className={cn(
+                            "h-[18px] min-w-[18px] px-1.5 text-[10px]",
+                            ch.isMuted && "opacity-50",
+                          )}
                         >
                           {ch.unreadCount > 99 ? "99+" : ch.unreadCount}
                         </Badge>
@@ -429,8 +432,14 @@ export function ChannelSidebar({
                             {ch.isMuted && (
                               <BellOff className="w-3 h-3 text-muted-foreground/40 shrink-0" />
                             )}
-                            {ch.unreadCount > 0 && !ch.isMuted && (
-                              <Badge className="h-[18px] min-w-[18px] px-1.5 text-[10px]">
+                            {ch.unreadCount > 0 && (
+                              <Badge
+                                variant={ch.isMuted ? "outline" : "default"}
+                                className={cn(
+                                  "h-[18px] min-w-[18px] px-1.5 text-[10px]",
+                                  ch.isMuted && "opacity-50",
+                                )}
+                              >
                                 {ch.unreadCount > 99 ? "99+" : ch.unreadCount}
                               </Badge>
                             )}

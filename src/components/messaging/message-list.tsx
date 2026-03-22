@@ -78,7 +78,7 @@ export function MessageList({
   let lastDate: string | null = null;
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto">
+    <section ref={containerRef} className="flex-1 overflow-y-auto" role="log" aria-label="Messages" aria-live="polite">
       <div className="py-4">
         {groups.map((group, groupIdx) => {
           const firstMsg = group.messages[0];
@@ -113,7 +113,7 @@ export function MessageList({
         })}
         <div ref={bottomRef} />
       </div>
-    </div>
+    </section>
   );
   /* eslint-enable react-hooks/immutability */
 }

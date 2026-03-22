@@ -60,12 +60,10 @@ export function useUnreadCounts() {
         });
       }
 
-      // Compter les unread
+      // Compter les unread (y compris canaux mutés — le badge s'affiche, seules les notifications sont supprimées)
       for (const msg of messages ?? []) {
         const membership = lastReadMap.get(msg.channel_id);
         if (!membership) continue;
-        // Si mute, on ne compte pas
-        if (membership.muted) continue;
         // Si pas de last_read_at, tout est non lu
         if (membership.lastRead && msg.created_at <= membership.lastRead)
           continue;

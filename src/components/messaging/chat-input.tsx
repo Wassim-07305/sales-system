@@ -109,6 +109,9 @@ export function ChatInput({
   // Pick the right state based on mode
   const displayContent = editingMessageId ? editContent : content;
 
+  const MAX_MESSAGE_LENGTH = 5000;
+  const isOverLimit = displayContent.length > MAX_MESSAGE_LENGTH;
+
   const hasContent =
     displayContent.trim().length > 0 ||
     pendingFiles.length > 0 ||
@@ -413,8 +416,20 @@ export function ChatInput({
               "max-h-40 scrollbar-thin",
               isUrgent &&
                 "border-destructive/40 bg-destructive/5 animate-pulse",
+              isOverLimit && "border-destructive/60 ring-destructive/30",
             )}
+            maxLength={MAX_MESSAGE_LENGTH + 500}
           />
+          {displayContent.length > MAX_MESSAGE_LENGTH * 0.9 && (
+            <span
+              className={cn(
+                "absolute bottom-1 right-2 text-[10px]",
+                isOverLimit ? "text-destructive font-semibold" : "text-muted-foreground",
+              )}
+            >
+              {displayContent.length}/{MAX_MESSAGE_LENGTH}
+            </span>
+          )}
         </div>
 
         {/* Voice recorder */}
@@ -499,7 +514,7 @@ export function ChatInput({
         {/* Send button */}
         <Button
           onClick={handleSend}
-          disabled={disabled || isSending || !hasContent}
+          disabled={disabled || isSending || !hasContent || isOverLimit}
           size="icon"
           className={cn(
             "h-10 w-10 rounded-xl shrink-0",

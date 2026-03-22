@@ -300,7 +300,7 @@ export function MessageBubble({
         onMouseLeave={handleContainerLeave}
       >
         {actionsToolbar}
-        <div className="max-w-[70%]">{bubbleContent}</div>
+        <div className="max-w-[90%] md:max-w-[70%]">{bubbleContent}</div>
       </div>
     );
   }
@@ -327,7 +327,7 @@ export function MessageBubble({
         <div className="w-9 shrink-0" />
       )}
 
-      <div className="max-w-[70%] relative">
+      <div className="max-w-[90%] md:max-w-[70%] relative">
         {actionsToolbar}
         {bubbleContent}
       </div>

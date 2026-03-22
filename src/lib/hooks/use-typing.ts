@@ -47,6 +47,8 @@ export function useTyping(channelId: string | null) {
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      // Untrack presence before removing channel to avoid ghost typing indicators
+      ch.untrack().catch(() => {});
       supabase.removeChannel(ch);
       channelRef.current = null;
     };

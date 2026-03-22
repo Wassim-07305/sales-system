@@ -50,13 +50,38 @@ export async function deleteChannel(channelId: string) {
   await requireAdmin();
   const adminClient = createAdminClient();
 
-  // Supprimer les messages du channel d'abord
+  // Fetch message IDs for cascade cleanup
+  const { data: msgs } = await adminClient
+    .from("messages")
+    .select("id")
+    .eq("channel_id", channelId);
+  const messageIds = (msgs ?? []).map((m) => m.id);
+
+  // Delete reactions and attachments for those messages
+  if (messageIds.length > 0) {
+    await adminClient
+      .from("message_reactions")
+      .delete()
+      .in("message_id", messageIds);
+    await adminClient
+      .from("message_attachments")
+      .delete()
+      .in("message_id", messageIds);
+  }
+
+  // Delete messages
   await adminClient.from("messages").delete().eq("channel_id", channelId);
 
-  // Supprimer les lectures
+  // Delete reads
   await adminClient.from("channel_reads").delete().eq("channel_id", channelId);
 
-  // Supprimer le channel
+  // Delete members
+  await adminClient
+    .from("channel_members")
+    .delete()
+    .eq("channel_id", channelId);
+
+  // Delete channel
   const { error } = await adminClient
     .from("channels")
     .delete()

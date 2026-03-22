@@ -58,6 +58,26 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = JSON.parse(body);
+
+    // Idempotency: skip duplicate events based on event_id
+    const eventId = payload?.event_id ?? payload?.id;
+    if (eventId) {
+      const store = globalThis as Record<string, unknown>;
+      const processed = store.__webhookProcessed as Set<string> | undefined;
+      const cacheKey = `wh-${eventId}`;
+      if (processed?.has(cacheKey)) {
+        return NextResponse.json({ status: "duplicate_skipped" });
+      }
+      if (!processed) {
+        store.__webhookProcessed = new Set<string>();
+      }
+      (store.__webhookProcessed as Set<string>).add(cacheKey);
+      // Cap at 10k entries to prevent unbounded memory
+      if ((store.__webhookProcessed as Set<string>).size > 10000) {
+        store.__webhookProcessed = new Set<string>();
+      }
+    }
+
     await handleUnipileWebhook(payload);
 
     return NextResponse.json({ status: "ok" });

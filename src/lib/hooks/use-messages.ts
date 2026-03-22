@@ -81,6 +81,7 @@ export function useMessages(channelId: string | null) {
       isUrgent?: boolean;
     }) => {
       if (!channelId || !user) throw new Error("Missing channel or user");
+      if (content.length > 5000) throw new Error("Message trop long (max 5000 caractères)");
       const { data, error } = await supabase
         .from("messages")
         .insert({

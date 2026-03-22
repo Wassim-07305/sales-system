@@ -148,12 +148,17 @@ export async function searchMessages(
 
   if (!query || query.trim().length < 2) return [];
 
+  // Escape LIKE special characters to prevent injection
+  const sanitizedQuery = query
+    .trim()
+    .replace(/[%_\\]/g, (c) => `\\${c}`);
+
   let q = supabase
     .from("messages")
     .select(
       "id, content, channel_id, sender_id, created_at, sender:profiles!messages_sender_id_fkey(full_name), channel:channels!messages_channel_id_fkey(name)",
     )
-    .ilike("content", `%${query.trim()}%`)
+    .ilike("content", `%${sanitizedQuery}%`)
     .order("created_at", { ascending: false })
     .limit(30);
 

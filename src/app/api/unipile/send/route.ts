@@ -52,6 +52,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "chatId invalide" }, { status: 400 });
   }
 
+  // Enforce max message length
+  if (text.trim().length > 5000) {
+    return NextResponse.json(
+      { error: "Le message ne peut pas dépasser 5000 caractères" },
+      { status: 400 },
+    );
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
 

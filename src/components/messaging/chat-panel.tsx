@@ -153,6 +153,13 @@ export function ChatPanel({
     async (file: File) => {
       if (!user) return;
 
+      // Validate file size (max 50 MB)
+      const MAX_FILE_SIZE = 50 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error("Le fichier est trop volumineux (max 50 Mo)");
+        return;
+      }
+
       const ext = file.name.split(".").pop() ?? "bin";
       const path = `messaging/${channel.id}/${Date.now()}.${ext}`;
 
