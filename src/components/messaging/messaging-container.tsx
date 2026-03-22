@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { MessageSquare, Inbox, Menu, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,31 @@ import { UnifiedInbox } from "./unified-inbox";
 import { QuickSwitcher } from "./quick-switcher";
 import { ensureDefaultChannels } from "@/lib/actions/communication";
 import type { ChannelWithMeta } from "@/lib/types/messaging";
+
+/** Micro error boundary to isolate which section crashes */
+class SectionBoundary extends React.Component<
+  { name: string; children: React.ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error(`[SectionBoundary:${this.props.name}] CRASH:`, error.message);
+    console.error(`[SectionBoundary:${this.props.name}] Stack:`, info.componentStack);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="p-2 text-xs text-destructive bg-destructive/10 rounded m-1">
+          <strong>Crash in: {this.props.name}</strong>
+          <br />
+          {this.state.error.message}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const AI_AGENT_ID = "__ai_agent__";
 
@@ -275,6 +300,7 @@ export function MessagingContainer() {
   return (
     <div className="flex h-[calc(100dvh-4rem)] flex-col">
       {/* Toggle Messagerie / Boîte unifiée */}
+      <SectionBoundary name="ToggleBar">
       <div className="flex items-center justify-between border-b px-4 py-2 bg-background">
         <div className="flex items-center gap-2">
           <button
@@ -316,13 +342,16 @@ export function MessagingContainer() {
           </div>
         </div>
       </div>
+      </SectionBoundary>
 
       {/* Contenu principal */}
       <div className="flex flex-1 overflow-hidden min-h-0">
         {viewMode === "messaging" ? (
           <>
             {/* Sidebar desktop */}
+            <SectionBoundary name="Sidebar">
             <div className="hidden md:block">{sidebarContent}</div>
+            </SectionBoundary>
 
             {/* Sidebar mobile overlay */}
             {mobileSidebarOpen && (
@@ -338,6 +367,7 @@ export function MessagingContainer() {
             )}
 
             {/* Chat ou placeholder */}
+            <SectionBoundary name="ChatArea">
             {isAiAgent ? (
               <AiChatPanel onBack={() => setMobileSidebarOpen(true)} />
             ) : activeChannel ? (
@@ -362,16 +392,20 @@ export function MessagingContainer() {
                 </div>
               </div>
             )}
+            </SectionBoundary>
           </>
         ) : (
+          <SectionBoundary name="UnifiedInbox">
           <div className="flex-1 min-w-0 min-h-0 overflow-hidden">
             <UnifiedInbox />
           </div>
+          </SectionBoundary>
         )}
       </div>
 
       {/* Quick Switcher (Cmd+K) — only mount when open to avoid rendering objects */}
       {showQuickSwitcher && (
+        <SectionBoundary name="QuickSwitcher">
         <QuickSwitcher
           open={showQuickSwitcher}
           onOpenChange={setShowQuickSwitcher}
@@ -385,17 +419,21 @@ export function MessagingContainer() {
           }}
           aiAgentId={AI_AGENT_ID}
         />
+        </SectionBoundary>
       )}
 
       {/* Modales */}
+      <SectionBoundary name="CreateModal">
       <CreateChannelModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onCreate={handleCreateChannel}
         isCreating={createChannel.isPending}
       />
+      </SectionBoundary>
 
       {activeChannel && (
+        <SectionBoundary name="SettingsModal">
         <ChannelSettingsModal
           channel={activeChannel}
           open={showSettingsModal}
@@ -407,6 +445,7 @@ export function MessagingContainer() {
           onRemoveMember={(profileId) => removeMember.mutate(profileId)}
           isUpdating={updateChannel.isPending}
         />
+        </SectionBoundary>
       )}
     </div>
   );
