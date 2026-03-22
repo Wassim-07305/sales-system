@@ -270,24 +270,42 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     const conversations = (
       items as Array<{
         id: string;
+        name?: string | null;
         provider?: string;
         account_type?: string;
-        attendees?: Array<{ display_name?: string; id?: string }>;
+        attendees?: Array<{ display_name?: string; name?: string; id?: string }>;
+        attendee_public_identifier?: string;
         last_message?: { text?: string; timestamp?: string };
+        timestamp?: string;
         unread_count?: number;
       }>
-    ).map((chat) => ({
-      id: chat.id,
-      provider:
-        UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
-        "unknown",
-      participants: (chat.attendees || []).map(
-        (a) => a.display_name || a.id || "",
-      ),
-      lastMessage: chat.last_message?.text,
-      lastMessageAt: chat.last_message?.timestamp,
-      unreadCount: chat.unread_count || 0,
-    }));
+    ).map((chat) => {
+      // Build participant name: use chat.name, then attendees, then identifier
+      const participantNames: string[] = [];
+      if (chat.name) {
+        participantNames.push(chat.name);
+      } else if (chat.attendees && chat.attendees.length > 0) {
+        for (const a of chat.attendees) {
+          const n = a.display_name || a.name || a.id || "";
+          if (n) participantNames.push(n);
+        }
+      } else if (chat.attendee_public_identifier) {
+        // Format phone numbers nicely
+        const id = chat.attendee_public_identifier.replace(/@.*$/, "");
+        participantNames.push(id.startsWith("33") ? `+${id}` : id);
+      }
+
+      return {
+        id: chat.id,
+        provider:
+          UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
+          "unknown",
+        participants: participantNames,
+        lastMessage: chat.last_message?.text,
+        lastMessageAt: chat.last_message?.timestamp || chat.timestamp,
+        unreadCount: chat.unread_count || 0,
+      };
+    });
 
     return { conversations };
   } catch (err) {
