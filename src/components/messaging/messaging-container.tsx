@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { MessageSquare, Inbox, Menu, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -11,10 +11,14 @@ import { useUnreadCounts } from "@/lib/hooks/use-unread-counts";
 import { useMessagingStore } from "@/stores/messaging-store";
 import { ChannelSidebar } from "./channel-sidebar";
 import { ChatPanel } from "./chat-panel";
+import { AiChatPanel } from "./ai-chat-panel";
 import { CreateChannelModal } from "./create-channel-modal";
 import { ChannelSettingsModal } from "./channel-settings-modal";
 import { UnifiedInbox } from "./unified-inbox";
+import { ensureDefaultChannels } from "@/lib/actions/communication";
 import type { ChannelWithMeta } from "@/lib/types/messaging";
+
+const AI_AGENT_ID = "__ai_agent__";
 
 type ViewMode = "messaging" | "inbox";
 
@@ -104,6 +108,17 @@ export function MessagingContainer() {
     useChannelMembers(activeChannelId);
   const memberCount = members.length;
 
+  // Ensure "Canal Général" exists on first load
+  const defaultChannelsEnsured = useRef(false);
+  useEffect(() => {
+    if (user && !defaultChannelsEnsured.current) {
+      defaultChannelsEnsured.current = true;
+      ensureDefaultChannels().then(() => {
+        queryClient.invalidateQueries({ queryKey: ["channels"] });
+      });
+    }
+  }, [user, queryClient]);
+
   // Auto-selection du premier canal
   useEffect(() => {
     if (!activeChannelId && publicChannels.length > 0) {
@@ -112,6 +127,8 @@ export function MessagingContainer() {
       setActiveChannelId(dmChannels[0].id);
     }
   }, [activeChannelId, publicChannels, dmChannels, setActiveChannelId]);
+
+  const isAiAgent = activeChannelId === AI_AGENT_ID;
 
   // Handlers
   const handleCreateChannel = useCallback(
@@ -202,6 +219,7 @@ export function MessagingContainer() {
         setActiveChannelId(id);
         setMobileSidebarOpen(false);
       }}
+      aiAgentId={AI_AGENT_ID}
     />
   );
 
@@ -271,7 +289,9 @@ export function MessagingContainer() {
             )}
 
             {/* Chat ou placeholder */}
-            {activeChannel ? (
+            {isAiAgent ? (
+              <AiChatPanel onBack={() => setMobileSidebarOpen(true)} />
+            ) : activeChannel ? (
               <ChatPanel
                 channel={activeChannel}
                 memberCount={memberCount}

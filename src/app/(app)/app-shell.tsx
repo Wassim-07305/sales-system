@@ -13,7 +13,8 @@ import { Providers } from "@/components/providers";
 import dynamic from "next/dynamic";
 import type { UserRole } from "@/lib/types/database";
 
-const AiCoachWidget = dynamic(
+// AI Coach moved to messaging DMs (ai-chat-panel.tsx)
+const _AiCoachWidget = dynamic(
   () =>
     import("@/components/ai-coach-widget").then((m) => ({
       default: m.AiCoachWidget,
@@ -123,7 +124,6 @@ export function AppShell({
             onUnreadCountChange={handleUnreadCountChange}
           />
           <GlobalSearch />
-          <AiCoachWidget />
           <IncomingCallToast />
         </div>
       </ThemeProvider>

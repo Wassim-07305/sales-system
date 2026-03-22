@@ -6,6 +6,64 @@ import { aiComplete, aiJSON } from "@/lib/ai/client";
 import { notifyMany } from "@/lib/actions/notifications";
 
 // ---------------------------------------------------------------------------
+// Ensure default channels exist (Canal Général) + auto-join user
+// ---------------------------------------------------------------------------
+
+export async function ensureDefaultChannels(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Check if "Canal Général" already exists
+  const { data: existing } = await supabase
+    .from("channels")
+    .select("id")
+    .eq("name", "Canal Général")
+    .eq("type", "group")
+    .eq("is_archived", false)
+    .limit(1)
+    .maybeSingle();
+
+  let channelId: string;
+
+  if (existing) {
+    channelId = existing.id;
+  } else {
+    // Create the channel
+    const { data: created, error } = await supabase
+      .from("channels")
+      .insert({
+        name: "Canal Général",
+        description: "Canal de discussion pour toute l'équipe",
+        type: "group",
+        created_by: user.id,
+      })
+      .select("id")
+      .single();
+    if (error || !created) return;
+    channelId = created.id;
+  }
+
+  // Ensure user is a member
+  const { data: membership } = await supabase
+    .from("channel_members")
+    .select("id")
+    .eq("channel_id", channelId)
+    .eq("profile_id", user.id)
+    .maybeSingle();
+
+  if (!membership) {
+    await supabase.from("channel_members").insert({
+      channel_id: channelId,
+      profile_id: user.id,
+      role: "member",
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Search Messages (Full-text)
 // ---------------------------------------------------------------------------
 

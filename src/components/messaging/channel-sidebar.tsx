@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   List,
   Archive,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -52,6 +53,7 @@ interface ChannelSidebarProps {
   onCreateChannel: () => void;
   onCreateDM: (userId: string) => void;
   onSelectChannel: (channelId: string) => void;
+  aiAgentId?: string;
 }
 
 export function ChannelSidebar({
@@ -62,6 +64,7 @@ export function ChannelSidebar({
   onCreateChannel,
   onCreateDM,
   onSelectChannel,
+  aiAgentId,
 }: ChannelSidebarProps) {
   const supabase = useMemo(() => createClient(), []);
   const { user, profile } = useUser();
@@ -295,6 +298,30 @@ export function ChannelSidebar({
 
               {dmsOpen && (
                 <>
+                  {/* Assistant IA — always first in DMs */}
+                  {aiAgentId && (
+                    <div className="px-2 mb-0.5">
+                      <button
+                        onClick={() => onSelectChannel(aiAgentId)}
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-2.5 h-10 rounded-lg text-[13px] transition-all",
+                          activeChannelId === aiAgentId
+                            ? "bg-primary/10 text-primary ring-1 ring-primary/20 font-semibold"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                        )}
+                      >
+                        <div className={cn(
+                          "h-7 w-7 rounded-full flex items-center justify-center shrink-0",
+                          activeChannelId === aiAgentId ? "bg-brand/20" : "bg-brand/10",
+                        )}>
+                          <Bot className="h-4 w-4 text-brand" />
+                        </div>
+                        <span className="truncate flex-1 text-left">Assistant IA</span>
+                        <span className="h-2 w-2 rounded-full bg-brand animate-pulse shrink-0" />
+                      </button>
+                    </div>
+                  )}
+
                   {viewMode === "mosaic" ? (
                     <div className="px-2 grid grid-cols-3 gap-2">
                       {filteredDmChannels.map((ch) => {
