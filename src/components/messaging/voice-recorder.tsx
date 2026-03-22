@@ -56,7 +56,7 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
       const mimeType = getSupportedMimeType();
       if (!mimeType) {
         toast.error(
-          "L'enregistrement vocal n'est pas supporte par ce navigateur",
+          "L'enregistrement vocal n'est pas supporté par ce navigateur",
         );
         return;
       }
@@ -110,7 +110,7 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
       };
       updateLevels();
     } catch {
-      toast.error("Impossible d'acceder au microphone");
+      toast.error("Impossible d'accéder au microphone");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onRecordingComplete]);
@@ -161,6 +161,7 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
         onClick={startRecording}
         className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
         title="Message vocal"
+        aria-label="Enregistrer un message vocal"
       >
         <Mic className="w-4 h-4" />
       </button>
@@ -169,12 +170,13 @@ export function VoiceRecorder({ onRecordingComplete }: VoiceRecorderProps) {
 
   // Recording in progress — popup above input
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-80">
-      <div className="bg-surface border border-border rounded-2xl shadow-lg p-3 relative">
+    <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[60] w-80 max-w-[calc(100vw-2rem)]">
+      <div className="bg-background border border-border rounded-2xl shadow-lg p-3 relative">
         {/* Close button */}
         <button
           onClick={cancelRecording}
-          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-surface border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
+          aria-label="Annuler l'enregistrement"
+          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-red-500 transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>

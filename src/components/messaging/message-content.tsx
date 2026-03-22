@@ -19,7 +19,7 @@ interface MessageContentProps {
 
 export function MessageContent({ message }: MessageContentProps) {
   const editedBadge = message.is_edited ? (
-    <span className="ml-1.5 text-[10px] text-muted-foreground">(modifie)</span>
+    <span className="ml-1.5 text-[10px] text-muted-foreground">(modifié)</span>
   ) : null;
 
   switch (message.content_type) {
@@ -396,6 +396,7 @@ function AudioContent({ message }: { message: EnrichedMessage }) {
       />
       <button
         onClick={togglePlay}
+        aria-label={playing ? "Pause" : "Lecture"}
         className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center shrink-0 hover:bg-primary/90 transition-all active:scale-95"
       >
         {playing ? (
@@ -405,7 +406,7 @@ function AudioContent({ message }: { message: EnrichedMessage }) {
         )}
       </button>
 
-      <div className="flex-1 relative h-7 cursor-pointer" onClick={handleSeek}>
+      <div className="flex-1 relative h-7 cursor-pointer" onClick={handleSeek} role="slider" aria-label="Position de lecture" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
         <div className="absolute inset-0 flex items-center gap-px">
           {WAVEFORM_BARS.map((h, i) => (
             <div

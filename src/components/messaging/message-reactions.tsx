@@ -49,6 +49,8 @@ export function MessageReactions({
         <button
           key={group.emoji}
           onClick={() => onToggleReaction(group.emoji)}
+          aria-label={`${group.hasReacted ? "Retirer" : "Ajouter"} la réaction ${group.emoji} (${group.count})`}
+          aria-pressed={group.hasReacted}
           className={cn(
             "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors",
             "border hover:bg-muted",

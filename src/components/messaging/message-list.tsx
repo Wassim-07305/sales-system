@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { groupMessages, isSameDay } from "@/lib/messaging-utils";
 import { useMessagingStore } from "@/stores/messaging-store";
@@ -61,14 +61,18 @@ export function MessageList({
     );
   }
 
-  // Filter by search
-  const filteredMessages = searchQuery
-    ? messages.filter((m) =>
-        m.content.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : messages;
+  // Filter by search (memoized to avoid re-filtering on every render)
+  const filteredMessages = useMemo(
+    () =>
+      searchQuery
+        ? messages.filter((m) =>
+            m.content.toLowerCase().includes(searchQuery.toLowerCase()),
+          )
+        : messages,
+    [messages, searchQuery],
+  );
 
-  const groups = groupMessages(filteredMessages);
+  const groups = useMemo(() => groupMessages(filteredMessages), [filteredMessages]);
 
   /* eslint-disable react-hooks/immutability */
   let lastDate: string | null = null;

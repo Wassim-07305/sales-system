@@ -265,7 +265,7 @@ export function EmojiPicker({ onSelect, trigger, side = "top", align = "end" }: 
       <PopoverContent
         side={side}
         align={align}
-        className="w-[340px] p-0 overflow-hidden"
+        className="w-[340px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         {/* Search */}
@@ -298,6 +298,7 @@ export function EmojiPicker({ onSelect, trigger, side = "top", align = "end" }: 
                       : "text-muted-foreground hover:text-foreground hover:bg-muted",
                   )}
                   title={cat.label}
+                  aria-label={cat.label}
                 >
                   <Icon className="h-4 w-4" />
                 </button>
@@ -376,6 +377,7 @@ export function QuickReactionPicker({ onSelect, onOpenFull }: QuickReactionPicke
           onClick={onOpenFull}
           className="rounded p-1 text-sm hover:bg-muted transition-colors text-muted-foreground"
           title="Plus d'emojis"
+          aria-label="Plus d'emojis"
         >
           <Smile className="h-3.5 w-3.5" />
         </button>
