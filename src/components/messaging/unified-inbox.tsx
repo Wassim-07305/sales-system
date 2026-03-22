@@ -362,8 +362,16 @@ export function UnifiedInbox() {
     return true;
   });
 
-  // Not configured — show setup cards
+  // Not configured or no accounts — show connect buttons
   if (!loading && (!configured || accounts.length === 0)) {
+    const connectProviders = [
+      { provider: "WHATSAPP" as const, label: "WhatsApp Business", desc: "Connectez votre compte WhatsApp", icon: <Phone className="h-4 w-4 text-green-500" /> },
+      { provider: "LINKEDIN" as const, label: "LinkedIn", desc: "Synchronisez vos messages LinkedIn", icon: <Linkedin className="h-4 w-4 text-blue-500" /> },
+      { provider: "INSTAGRAM" as const, label: "Instagram", desc: "Connectez votre messagerie Instagram", icon: <Instagram className="h-4 w-4 text-pink-500" /> },
+      { provider: "GOOGLE" as const, label: "Gmail", desc: "Connectez votre boîte Gmail", icon: <Mail className="h-4 w-4 text-red-500" /> },
+      { provider: "MICROSOFT" as const, label: "Outlook", desc: "Connectez votre boîte Outlook", icon: <Mail className="h-4 w-4 text-blue-400" /> },
+    ];
+
     return (
       <div className="flex h-full flex-col">
         <div className="border-b px-6 py-4">
@@ -383,32 +391,12 @@ export function UnifiedInbox() {
               LinkedIn, Instagram et Email.
             </p>
             <div className="space-y-2 text-left">
-              {[
-                {
-                  icon: <Phone className="h-4 w-4 text-green-500" />,
-                  label: "WhatsApp Business",
-                  desc: "Connectez votre compte WhatsApp",
-                },
-                {
-                  icon: <Linkedin className="h-4 w-4 text-blue-500" />,
-                  label: "LinkedIn",
-                  desc: "Synchronisez vos messages LinkedIn",
-                },
-                {
-                  icon: <Instagram className="h-4 w-4 text-pink-500" />,
-                  label: "Instagram",
-                  desc: "Connectez votre messagerie Instagram",
-                },
-                {
-                  icon: <Mail className="h-4 w-4 text-amber-500" />,
-                  label: "Email",
-                  desc: "Intégrez votre boîte mail",
-                },
-              ].map((item) => (
-                <a
+              {connectProviders.map((item) => (
+                <button
                   key={item.label}
-                  href="/settings/integrations"
-                  className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                  onClick={() => handleConnectAccount(item.provider)}
+                  disabled={connectingAccount}
+                  className="w-full flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors text-left disabled:opacity-50"
                 >
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
                     {item.icon}
@@ -418,9 +406,15 @@ export function UnifiedInbox() {
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                </a>
+                </button>
               ))}
             </div>
+            {!configured && (
+              <p className="text-[11px] text-muted-foreground mt-4">
+                Si les boutons ne fonctionnent pas, vérifiez la configuration Unipile dans{" "}
+                <a href="/settings/integrations" className="text-primary underline">Paramètres &gt; Intégrations</a>.
+              </p>
+            )}
           </div>
         </div>
       </div>
