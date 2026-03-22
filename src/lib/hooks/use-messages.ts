@@ -31,10 +31,22 @@ export function useMessages(channelId: string | null) {
         .limit(200);
       if (error) throw error;
 
+      // DEBUG: dump raw message data to diagnose React #310
+      if (data && data.length > 0) {
+        const raw = data[0] as Record<string, unknown>;
+        console.log("[useMessages] RAW msg[0] keys:", Object.keys(raw));
+        for (const [key, val] of Object.entries(raw)) {
+          if (val !== null && typeof val === "object" && !Array.isArray(val)) {
+            console.warn("[useMessages] OBJECT field:", key, "=", JSON.stringify(val).slice(0, 200));
+          }
+        }
+      }
+
       // Sanitize data from Supabase to prevent React #310:
       // - content may be null (TEXT nullable) → coerce to string
       // - sender may be an array if FK detection fails → unwrap
       // - reactions/attachments must be arrays
+      // - metadata JSONB must not leak as renderable child
       return ((data ?? []) as EnrichedMessage[]).map((msg) => ({
         ...msg,
         content:
@@ -46,6 +58,8 @@ export function useMessages(channelId: string | null) {
           : msg.sender ?? null,
         reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
         attachments: Array.isArray(msg.attachments) ? msg.attachments : [],
+        // Ensure metadata stays as object (not rendered directly)
+        metadata: typeof msg.metadata === "object" && msg.metadata !== null ? msg.metadata : {},
       }));
     },
     enabled: !!channelId,

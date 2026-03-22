@@ -82,6 +82,26 @@ export function useChannels() {
 
       console.log("[useChannels] Loaded", data?.length ?? 0, "channels");
 
+      // DEBUG: dump raw channel data to diagnose React #310
+      if (data && data.length > 0) {
+        const raw = data[0] as Record<string, unknown>;
+        console.log("[useChannels] RAW channel[0] keys:", Object.keys(raw));
+        console.log("[useChannels] RAW channel[0].name:", typeof raw.name, raw.name);
+        console.log("[useChannels] RAW channel[0].description:", typeof raw.description, raw.description);
+        console.log("[useChannels] RAW channel[0].target_audience:", typeof raw.target_audience, raw.target_audience);
+        const rawMembers = raw.members;
+        console.log("[useChannels] RAW channel[0].members type:", typeof rawMembers, "isArray:", Array.isArray(rawMembers));
+        if (Array.isArray(rawMembers) && rawMembers.length > 0) {
+          console.log("[useChannels] RAW members[0] type:", typeof rawMembers[0], "value:", rawMembers[0]);
+        }
+        // Log ALL non-standard fields that could be objects
+        for (const [key, val] of Object.entries(raw)) {
+          if (val !== null && typeof val === "object" && key !== "members") {
+            console.warn("[useChannels] OBJECT field on channel:", key, "=", val);
+          }
+        }
+      }
+
       // Sanitize: Supabase FK joins may return arrays instead of objects
       return ((data ?? []) as Channel[]).map((ch) => ({
         ...ch,
@@ -92,10 +112,12 @@ export function useChannels() {
             : typeof ch.description === "string"
               ? ch.description
               : String(ch.description),
-        members: (ch.members ?? []).map((m) => ({
-          ...m,
-          profile: Array.isArray(m.profile) ? m.profile[0] ?? undefined : m.profile,
-        })),
+        members: (Array.isArray(ch.members) ? ch.members : [])
+          .filter((m): m is NonNullable<typeof m> => typeof m === "object" && m !== null)
+          .map((m) => ({
+            ...m,
+            profile: Array.isArray(m.profile) ? m.profile[0] ?? undefined : m.profile,
+          })),
       }));
     },
     enabled: !!user,

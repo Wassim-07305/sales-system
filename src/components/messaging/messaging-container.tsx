@@ -23,6 +23,14 @@ const AI_AGENT_ID = "__ai_agent__";
 
 type ViewMode = "messaging" | "inbox";
 
+/** Coerce any value to a safe string to prevent React #310 */
+function safeStr(val: unknown): string {
+  if (val == null) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "number" || typeof val === "boolean") return String(val);
+  try { return JSON.stringify(val); } catch { return "[object]"; }
+}
+
 /** Safely unwrap a Supabase FK join that may return an array instead of object */
 function unwrapProfile(
   raw: unknown,
@@ -32,10 +40,10 @@ function unwrapProfile(
   if (!obj || typeof obj !== "object") return null;
   const p = obj as Record<string, unknown>;
   return {
-    id: String(p.id ?? ""),
-    full_name: String(p.full_name ?? "Inconnu"),
+    id: safeStr(p.id),
+    full_name: safeStr(p.full_name) || "Inconnu",
     avatar_url: typeof p.avatar_url === "string" ? p.avatar_url : null,
-    role: String(p.role ?? ""),
+    role: safeStr(p.role),
   };
 }
 
@@ -47,32 +55,50 @@ function useEnrichedChannels(
 ): ChannelWithMeta[] {
   return useMemo(() => {
     if (!userId) return [];
+
+    // DEBUG — log sample channel shape to diagnose React #310
+    if (channels.length > 0) {
+      const s = channels[0];
+      console.log("[useEnrichedChannels] sample keys:", Object.keys(s));
+      console.log("[useEnrichedChannels] name:", typeof s.name, s.name);
+      console.log("[useEnrichedChannels] description:", typeof s.description, s.description);
+      console.log("[useEnrichedChannels] members isArray:", Array.isArray(s.members), "length:", s.members?.length);
+      if (s.members?.[0]) {
+        const m0 = s.members[0];
+        console.log("[useEnrichedChannels] member[0] keys:", Object.keys(m0));
+        console.log("[useEnrichedChannels] member[0].profile:", typeof m0.profile, Array.isArray(m0.profile), m0.profile);
+      }
+      // Check if members could be the UUID[] column instead of the join
+      if (s.members?.[0] && typeof s.members[0] === "string") {
+        console.error("[useEnrichedChannels] BUG: members is UUID[] column, not join result!");
+      }
+    }
+
     return channels.map((ch) => {
-      const myMembership = ch.members?.find((m) => m.profile_id === userId);
+      // Guard: if members is UUID[] from the column instead of the join, skip
+      const members = Array.isArray(ch.members)
+        ? ch.members.filter((m): m is NonNullable<typeof m> => typeof m === "object" && m !== null)
+        : [];
+      const myMembership = members.find((m) => m.profile_id === userId);
       const isDM = ch.type === "direct" || ch.type === "dm";
       const dmPartnerMember = isDM
-        ? ch.members?.find((m) => m.profile_id !== userId)
+        ? members.find((m) => m.profile_id !== userId)
         : null;
       const counts = unreadMap[ch.id];
 
       return {
-        id: ch.id,
-        name: typeof ch.name === "string" ? ch.name : String(ch.name ?? ""),
-        type: ch.type,
-        description:
-          ch.description == null
-            ? null
-            : typeof ch.description === "string"
-              ? ch.description
-              : String(ch.description),
+        id: safeStr(ch.id),
+        name: safeStr(ch.name) || "Sans nom",
+        type: safeStr(ch.type),
+        description: ch.description == null ? null : safeStr(ch.description),
         created_by: ch.created_by,
         created_at: ch.created_at,
-        is_archived: ch.is_archived,
+        is_archived: !!ch.is_archived,
         last_message_at: ch.last_message_at ?? ch.created_at,
         unreadCount: counts?.unread ?? 0,
         urgentUnreadCount: counts?.urgent ?? 0,
-        isMuted: myMembership?.notifications_muted ?? false,
-        isPinned: myMembership?.is_pinned ?? false,
+        isMuted: !!myMembership?.notifications_muted,
+        isPinned: !!myMembership?.is_pinned,
         myLastRead: myMembership?.last_read_at ?? null,
         dmPartner: unwrapProfile(dmPartnerMember?.profile),
       };
