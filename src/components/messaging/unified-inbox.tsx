@@ -78,31 +78,31 @@ const PLATFORMS: {
   {
     id: "all",
     label: "Tous",
-    icon: <MessageSquare className="h-4 w-4" />,
+    icon: <MessageSquare className="h-3.5 w-3.5" />,
     color: "text-foreground",
   },
   {
     id: "whatsapp",
     label: "WhatsApp",
-    icon: <Phone className="h-4 w-4" />,
+    icon: <Phone className="h-3.5 w-3.5" />,
     color: "text-green-500",
   },
   {
     id: "linkedin",
     label: "LinkedIn",
-    icon: <Linkedin className="h-4 w-4" />,
+    icon: <Linkedin className="h-3.5 w-3.5" />,
     color: "text-blue-500",
   },
   {
     id: "instagram",
     label: "Instagram",
-    icon: <Instagram className="h-4 w-4" />,
+    icon: <Instagram className="h-3.5 w-3.5" />,
     color: "text-pink-500",
   },
   {
     id: "email",
     label: "Email",
-    icon: <Mail className="h-4 w-4" />,
+    icon: <Mail className="h-3.5 w-3.5" />,
     color: "text-amber-500",
   },
 ];
@@ -348,13 +348,13 @@ export function UnifiedInbox() {
           style={{ width: isDesktop ? 320 : "100%" }}
         >
           {/* Platform tabs */}
-          <div className="flex items-center gap-1 border-b px-4 py-2 overflow-x-auto shrink-0">
+          <div className="flex items-center border-b px-2 py-1.5 shrink-0">
             {PLATFORMS.map((p) => (
               <button
                 key={p.id}
                 onClick={() => setActivePlatform(p.id)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap",
+                  "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors whitespace-nowrap",
                   activePlatform === p.id
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
