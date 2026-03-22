@@ -339,33 +339,33 @@ export function UnifiedInbox() {
         })()}
       </div>
 
+      {/* Platform tabs — full width */}
+      <div className="flex items-center gap-1 border-b px-4 py-2 shrink-0">
+        {PLATFORMS.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setActivePlatform(p.id)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap",
+              activePlatform === p.id
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <span className={p.color}>{p.icon}</span>
+            {p.label}
+          </button>
+        ))}
+      </div>
+
       {/* Two-column layout: sidebar (list) + message panel */}
       <div className="flex-1 overflow-hidden min-h-0 flex flex-row">
-        {/* LEFT COLUMN: tabs + search + conversation list */}
+        {/* LEFT COLUMN: search + conversation list */}
         {(isDesktop || !selectedConv) && (
         <div
           className="flex flex-col border-r overflow-hidden shrink-0"
           style={{ width: isDesktop ? 320 : "100%" }}
         >
-          {/* Platform tabs */}
-          <div className="flex items-center border-b px-2 py-1.5 shrink-0">
-            {PLATFORMS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setActivePlatform(p.id)}
-                className={cn(
-                  "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors whitespace-nowrap",
-                  activePlatform === p.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <span className={p.color}>{p.icon}</span>
-                {p.label}
-              </button>
-            ))}
-          </div>
-
           {/* Search */}
           <div className="flex items-center gap-2 px-4 py-3 border-b shrink-0">
             <div className="relative flex-1">
