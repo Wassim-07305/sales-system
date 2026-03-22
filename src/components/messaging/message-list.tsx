@@ -61,6 +61,19 @@ export function MessageList({
   const containerRef = useRef<HTMLDivElement>(null);
   const { searchQuery } = useMessagingStore();
 
+  // IMPORTANT: All hooks MUST be called before any conditional returns (Rules of Hooks)
+  const filteredMessages = useMemo(
+    () =>
+      searchQuery
+        ? messages.filter((m) =>
+            (m.content ?? "").toLowerCase().includes(searchQuery.toLowerCase()),
+          )
+        : messages,
+    [messages, searchQuery],
+  );
+
+  const groups = useMemo(() => groupMessages(filteredMessages), [filteredMessages]);
+
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -89,20 +102,6 @@ export function MessageList({
     );
   }
 
-  // Filter by search (memoized to avoid re-filtering on every render)
-  const filteredMessages = useMemo(
-    () =>
-      searchQuery
-        ? messages.filter((m) =>
-            (m.content ?? "").toLowerCase().includes(searchQuery.toLowerCase()),
-          )
-        : messages,
-    [messages, searchQuery],
-  );
-
-  const groups = useMemo(() => groupMessages(filteredMessages), [filteredMessages]);
-
-  /* eslint-disable react-hooks/immutability */
   let lastDate: string | null = null;
 
   return (
@@ -144,5 +143,4 @@ export function MessageList({
       </div>
     </section>
   );
-  /* eslint-enable react-hooks/immutability */
 }
