@@ -3,6 +3,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getUnipileClient, UNIPILE_PROVIDER_MAP } from "@/lib/unipile";
+
+// Extended provider map for chat contexts: GOOGLE/MICROSOFT are email, not calendar
+const CHAT_PROVIDER_MAP: Record<string, string> = {
+  ...UNIPILE_PROVIDER_MAP,
+  GOOGLE: "email",
+  MICROSOFT: "email",
+};
 import { getApiKey } from "@/lib/api-keys";
 
 // ---------------------------------------------------------------------------
@@ -90,7 +97,7 @@ export async function getUnipileStatus(): Promise<{
       id: acc.id,
       provider: acc.type || acc.provider || "unknown",
       channel:
-        UNIPILE_PROVIDER_MAP[acc.type || acc.provider || ""] || "unknown",
+        CHAT_PROVIDER_MAP[acc.type || acc.provider || ""] || "unknown",
       name: acc.name || acc.connection_params?.name || acc.id,
       status: acc.status || "connected",
     }));
@@ -136,7 +143,7 @@ export async function generateUnipileAuthLink(provider?: string): Promise<{
       expiresOn: new Date(Date.now() + 30 * 60 * 1000)
         .toISOString()
         .replace(/\.\d{3}Z$/, ".000Z"),
-      success_redirect_url: `${appUrl}/chat`,
+      success_redirect_url: `${appUrl}/chat/connected`,
       failure_redirect_url: `${appUrl}/chat`,
     };
     if (provider) {
@@ -292,6 +299,13 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     const data = await res.json();
     const items = Array.isArray(data) ? data : (data as { items?: unknown[] }).items || [];
 
+    // Debug: log first few raw chat items to see provider/account_type values
+    if (items.length > 0) {
+      console.log("[Unipile] Sample chats:", (items as Array<Record<string, unknown>>).slice(0, 3).map((c) => ({
+        id: c.id, provider: c.provider, account_type: c.account_type, type: c.type, name: c.name,
+      })));
+    }
+
     const conversations = (
       items as Array<{
         id: string;
@@ -347,7 +361,7 @@ export async function getUnipileConversations(accountId?: string): Promise<{
         id: chat.id,
         accountId: chat.account_id,
         provider:
-          UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
+          CHAT_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
           "unknown",
         participants: participantNames,
         pictureUrl,

@@ -180,8 +180,18 @@ export function UnifiedInbox() {
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
-        toast.info("Connectez votre compte, puis rechargez la page");
+        const popup = window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        toast.info("Connectez votre compte dans la fenêtre qui s'est ouverte");
+        // Poll to detect when popup is closed, then reload conversations
+        if (popup) {
+          const interval = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(interval);
+              toast.success("Rechargement de vos conversations…");
+              window.location.reload();
+            }
+          }, 1000);
+        }
       }
     } catch {
       toast.error("Erreur lors de la connexion");
