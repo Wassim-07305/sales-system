@@ -62,6 +62,7 @@ export function MessageBubble({
   onToggleReaction,
 }: MessageBubbleProps) {
   const [showQuickReact, setShowQuickReact] = useState(false);
+  const [showActions, setShowActions] = useState(false);
 
   const isStaff = message.sender
     ? STAFF_ROLES.includes(message.sender.role)
@@ -93,44 +94,54 @@ export function MessageBubble({
     );
   }
 
-  // Hover actions toolbar (shared between own and other)
+  // Hover/focus actions toolbar (shared between own and other)
   const actionsToolbar = (
     <div
       className={cn(
         "absolute -top-3 flex items-center gap-0.5 rounded-lg border bg-background px-1 py-0.5 shadow-sm",
-        "opacity-0 group-hover:opacity-100 transition-opacity z-10",
-        isOwn ? "left-4" : "right-4",
+        "opacity-0 transition-opacity z-10",
+        (showActions || showQuickReact) ? "opacity-100" : "group-hover:opacity-100 group-focus-within:opacity-100",
+        isOwn ? "left-2 right-auto" : "right-2 left-auto",
       )}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => { setShowActions(false); setShowQuickReact(false); }}
     >
-      {/* Quick react */}
+      {/* Quick react + full picker unified */}
       <div className="relative">
         <button
           onClick={() => setShowQuickReact(!showQuickReact)}
           className="rounded p-1 hover:bg-muted transition-colors"
           title="Réagir"
+          aria-label="Réagir avec un emoji"
+          aria-expanded={showQuickReact}
         >
           <SmilePlus className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
         {showQuickReact && (
-          <div className="absolute bottom-full right-0 mb-1 z-20">
+          <div
+            className={cn(
+              "absolute bottom-full mb-1 z-20",
+              isOwn ? "left-0" : "right-0",
+            )}
+          >
             <QuickReactionPicker
               onSelect={handleQuickReact}
-              onOpenFull={() => {
-                setShowQuickReact(false);
-              }}
+              onOpenFull={() => setShowQuickReact(false)}
             />
           </div>
         )}
       </div>
-      {/* Full emoji picker for reactions */}
+
+      {/* Full emoji picker (accessible via "+" in quick picker or directly) */}
       <EmojiPicker
         onSelect={handleFullPickerSelect}
         side="top"
-        align="end"
+        align={isOwn ? "start" : "end"}
         trigger={
           <button
             className="rounded p-1 hover:bg-muted transition-colors"
             title="Plus d'emojis"
+            aria-label="Choisir un emoji"
           >
             <Smile className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
@@ -152,7 +163,7 @@ export function MessageBubble({
             <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuContent align={isOwn ? "start" : "end"} className="w-44">
           <DropdownMenuItem onClick={onReply}>
             <Reply className="mr-2 h-4 w-4" />
             Répondre
@@ -273,15 +284,20 @@ export function MessageBubble({
     </div>
   );
 
+  const handleContainerLeave = useCallback(() => {
+    setShowQuickReact(false);
+    setShowActions(false);
+  }, []);
+
   // Own message: aligned right, no avatar
   if (isOwn) {
     return (
       <div
         className={cn(
-          "group relative flex gap-2.5 px-4 py-0.5 justify-end transition-colors",
+          "group relative flex gap-2.5 px-4 pt-1 pb-0.5 justify-end transition-colors",
           message.is_urgent && "border-l-2 border-destructive",
         )}
-        onMouseLeave={() => setShowQuickReact(false)}
+        onMouseLeave={handleContainerLeave}
       >
         {actionsToolbar}
         <div className="max-w-[70%]">{bubbleContent}</div>
@@ -293,10 +309,10 @@ export function MessageBubble({
   return (
     <div
       className={cn(
-        "group relative flex gap-2.5 px-4 py-0.5 transition-colors",
+        "group relative flex gap-2.5 px-4 pt-1 pb-0.5 transition-colors",
         message.is_urgent && "border-l-2 border-destructive",
       )}
-      onMouseLeave={() => setShowQuickReact(false)}
+      onMouseLeave={handleContainerLeave}
     >
       {showSender ? (
         <Avatar className="h-9 w-9 shrink-0 mt-0.5">
