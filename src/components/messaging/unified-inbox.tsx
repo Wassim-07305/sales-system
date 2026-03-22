@@ -307,48 +307,36 @@ export function UnifiedInbox() {
             {accounts.length > 1 ? "s" : ""}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
-            disabled={connectingAccount}
-            onClick={() => handleConnectAccount("WHATSAPP")}
-          >
-            <Phone className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-500" />
-            <span className="hidden sm:inline">WhatsApp</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
-            disabled={connectingAccount}
-            onClick={() => handleConnectAccount("LINKEDIN")}
-          >
-            <Linkedin className="h-3 w-3 md:h-3.5 md:w-3.5 text-blue-500" />
-            <span className="hidden sm:inline">LinkedIn</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
-            disabled={connectingAccount}
-            onClick={() => handleConnectAccount("INSTAGRAM")}
-          >
-            <Instagram className="h-3 w-3 md:h-3.5 md:w-3.5 text-pink-500" />
-            <span className="hidden sm:inline">Instagram</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
-            disabled={connectingAccount}
-            onClick={() => handleConnectAccount("MAIL")}
-          >
-            <Mail className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-500" />
-            <span className="hidden sm:inline">Email</span>
-          </Button>
-        </div>
+        {(() => {
+          const connectedProviders = new Set(
+            accounts.map((a) => a.provider.toUpperCase()),
+          );
+          const connectButtons = [
+            { provider: "WHATSAPP" as const, label: "WhatsApp", icon: <Phone className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-500" /> },
+            { provider: "LINKEDIN" as const, label: "LinkedIn", icon: <Linkedin className="h-3 w-3 md:h-3.5 md:w-3.5 text-blue-500" /> },
+            { provider: "INSTAGRAM" as const, label: "Instagram", icon: <Instagram className="h-3 w-3 md:h-3.5 md:w-3.5 text-pink-500" /> },
+            { provider: "MAIL" as const, label: "Email", icon: <Mail className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-500" /> },
+          ].filter((b) => !connectedProviders.has(b.provider));
+
+          return connectButtons.length > 0 ? (
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              <span className="text-[10px] md:text-xs text-muted-foreground shrink-0">Connecter :</span>
+              {connectButtons.map((b) => (
+                <Button
+                  key={b.provider}
+                  size="sm"
+                  variant="outline"
+                  className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
+                  disabled={connectingAccount}
+                  onClick={() => handleConnectAccount(b.provider)}
+                >
+                  {b.icon}
+                  <span className="hidden sm:inline">{b.label}</span>
+                </Button>
+              ))}
+            </div>
+          ) : null;
+        })()}
       </div>
 
       {/* Two-column layout: sidebar (list) + message panel */}
