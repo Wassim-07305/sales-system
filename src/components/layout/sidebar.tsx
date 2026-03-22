@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Loader2,
   LogOut,
   PanelLeftClose,
   PanelLeft,
@@ -51,14 +53,17 @@ export function Sidebar({
     setMobileSidebarOpen(false);
   }
 
+  const [loggingOut, setLoggingOut] = useState(false);
+
   async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
     const supabase = createClient();
     await supabase.auth.signOut();
     try {
       const { logout: serverLogout } = await import("@/lib/actions/auth");
       await serverLogout();
     } catch {
-      // Fallback: try clearing non-httpOnly cookies
       document.cookie = "x-user-role=; path=/; max-age=0";
       document.cookie = "x-onboarding-done=; path=/; max-age=0";
     }
@@ -71,8 +76,12 @@ export function Sidebar({
       {/* Mobile backdrop */}
       {sidebarMobileOpen && (
         <div
+          role="button"
+          aria-label="Fermer le menu"
+          tabIndex={-1}
           className="fixed inset-0 z-20 bg-black/60 backdrop-blur-sm md:hidden"
           onClick={closeMobile}
+          onKeyDown={(e) => e.key === "Escape" && closeMobile()}
         />
       )}
 
@@ -284,95 +293,108 @@ export function Sidebar({
           </div>
 
           {/* Settings (admin/manager) */}
-          {(role === "admin" || role === "manager") && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/settings"
-                  onClick={closeMobile}
+          {(role === "admin" || role === "manager") && (() => {
+            const settingsLink = (
+              <Link
+                href="/settings"
+                onClick={closeMobile}
+                className={cn(
+                  "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
+                  pathname.startsWith("/settings")
+                    ? "bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
+                  isCollapsed && "md:justify-center md:px-0",
+                )}
+              >
+                <Settings
                   className={cn(
-                    "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
-                    pathname.startsWith("/settings")
-                      ? "bg-emerald-500/10 text-emerald-400 font-semibold"
-                      : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
-                    isCollapsed && "md:justify-center md:px-0",
+                    "h-[18px] w-[18px] shrink-0",
+                    isCollapsed ? "" : "mr-3",
+                    pathname.startsWith("/settings") ? "text-emerald-400" : "",
                   )}
-                >
-                  <Settings
-                    className={cn(
-                      "h-[18px] w-[18px] shrink-0",
-                      isCollapsed ? "" : "mr-3",
-                      pathname.startsWith("/settings") ? "text-emerald-400" : "",
-                    )}
-                  />
-                  <span className={cn(isCollapsed && "md:hidden")}>
-                    Paramètres
-                  </span>
-                </Link>
-              </TooltipTrigger>
-              {isCollapsed && (
+                />
+                <span className={cn(isCollapsed && "md:hidden")}>
+                  Paramètres
+                </span>
+              </Link>
+            );
+            return isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>{settingsLink}</TooltipTrigger>
                 <TooltipContent
                   side="right"
                   className="bg-zinc-900 text-zinc-100 border-white/[0.06]"
                 >
                   Paramètres
                 </TooltipContent>
-              )}
-            </Tooltip>
-          )}
+              </Tooltip>
+            ) : settingsLink;
+          })()}
 
           {/* Profile (non-admin roles) */}
-          {!["admin", "manager"].includes(role) && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/profile"
-                  onClick={closeMobile}
+          {!["admin", "manager"].includes(role) && (() => {
+            const profileLink = (
+              <Link
+                href="/profile"
+                onClick={closeMobile}
+                className={cn(
+                  "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
+                  pathname === "/profile"
+                    ? "bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
+                  isCollapsed && "md:justify-center md:px-0",
+                )}
+              >
+                <UserCircle
                   className={cn(
-                    "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
-                    pathname === "/profile"
-                      ? "bg-emerald-500/10 text-emerald-400 font-semibold"
-                      : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
-                    isCollapsed && "md:justify-center md:px-0",
+                    "h-[18px] w-[18px] shrink-0",
+                    isCollapsed ? "" : "mr-3",
+                    pathname === "/profile" ? "text-emerald-400" : "",
                   )}
-                >
-                  <UserCircle
-                    className={cn(
-                      "h-[18px] w-[18px] shrink-0",
-                      isCollapsed ? "" : "mr-3",
-                      pathname === "/profile" ? "text-emerald-400" : "",
-                    )}
-                  />
-                  <span className={cn(isCollapsed && "md:hidden")}>Profil</span>
-                </Link>
-              </TooltipTrigger>
-              {isCollapsed && (
+                />
+                <span className={cn(isCollapsed && "md:hidden")}>Profil</span>
+              </Link>
+            );
+            return isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>{profileLink}</TooltipTrigger>
                 <TooltipContent
                   side="right"
                   className="bg-zinc-900 text-zinc-100 border-white/[0.06]"
                 >
                   Profil
                 </TooltipContent>
-              )}
-            </Tooltip>
-          )}
+              </Tooltip>
+            ) : profileLink;
+          })()}
 
           {/* Sign out */}
           <button
             onClick={handleLogout}
+            disabled={loggingOut}
             className={cn(
               "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400",
               isCollapsed && "md:justify-center md:px-0",
+              loggingOut && "pointer-events-none opacity-50",
             )}
           >
-            <LogOut
-              className={cn(
-                "h-[18px] w-[18px] shrink-0",
-                isCollapsed ? "" : "mr-3",
-              )}
-            />
+            {loggingOut ? (
+              <Loader2
+                className={cn(
+                  "h-[18px] w-[18px] shrink-0 animate-spin",
+                  isCollapsed ? "" : "mr-3",
+                )}
+              />
+            ) : (
+              <LogOut
+                className={cn(
+                  "h-[18px] w-[18px] shrink-0",
+                  isCollapsed ? "" : "mr-3",
+                )}
+              />
+            )}
             <span className={cn(isCollapsed && "md:hidden")}>
-              Déconnexion
+              {loggingOut ? "Déconnexion..." : "Déconnexion"}
             </span>
           </button>
         </div>
