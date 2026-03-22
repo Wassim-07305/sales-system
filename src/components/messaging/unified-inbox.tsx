@@ -10,6 +10,7 @@ import {
   Search,
   Filter,
   ArrowRight,
+  ArrowLeft,
   Loader2,
   Clock,
   Circle,
@@ -282,54 +283,54 @@ export function UnifiedInbox() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-b px-6 py-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">Boîte unifiée</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+      <div className="border-b px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-3">
+        <div className="shrink-0">
+          <h2 className="text-base md:text-lg font-semibold">Boîte unifiée</h2>
+          <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">
             {accounts.length} compte{accounts.length > 1 ? "s" : ""} connecté
             {accounts.length > 1 ? "s" : ""}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-8 gap-1.5"
+            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
             disabled={connectingAccount}
             onClick={() => handleConnectAccount("WHATSAPP")}
           >
-            <Phone className="h-3.5 w-3.5 text-green-500" />
-            WhatsApp
+            <Phone className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-500" />
+            <span className="hidden sm:inline">WhatsApp</span>
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-8 gap-1.5"
+            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
             disabled={connectingAccount}
             onClick={() => handleConnectAccount("LINKEDIN")}
           >
-            <Linkedin className="h-3.5 w-3.5 text-blue-500" />
-            LinkedIn
+            <Linkedin className="h-3 w-3 md:h-3.5 md:w-3.5 text-blue-500" />
+            <span className="hidden sm:inline">LinkedIn</span>
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-8 gap-1.5"
+            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
             disabled={connectingAccount}
             onClick={() => handleConnectAccount("INSTAGRAM")}
           >
-            <Instagram className="h-3.5 w-3.5 text-pink-500" />
-            Instagram
+            <Instagram className="h-3 w-3 md:h-3.5 md:w-3.5 text-pink-500" />
+            <span className="hidden sm:inline">Instagram</span>
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs h-8 gap-1.5"
+            className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
             disabled={connectingAccount}
             onClick={() => handleConnectAccount("MAIL")}
           >
-            <Mail className="h-3.5 w-3.5 text-amber-500" />
-            Email
+            <Mail className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-500" />
+            <span className="hidden sm:inline">Email</span>
           </Button>
         </div>
       </div>
@@ -371,8 +372,11 @@ export function UnifiedInbox() {
 
       {/* Content: conversation list + message panel */}
       <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* Conversation list */}
-        <div className="w-80 shrink-0 border-r overflow-y-auto">
+        {/* Conversation list — full width on mobile, fixed on desktop */}
+        <div className={cn(
+          "overflow-y-auto border-r",
+          selectedConv ? "hidden md:block md:w-80 md:shrink-0" : "w-full md:w-80 md:shrink-0",
+        )}>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -433,8 +437,11 @@ export function UnifiedInbox() {
           )}
         </div>
 
-        {/* Message panel */}
-        <div className="flex-1 flex flex-col min-w-0">
+        {/* Message panel — full width on mobile when conversation selected */}
+        <div className={cn(
+          "flex-1 flex flex-col min-w-0",
+          !selectedConv && "hidden md:flex",
+        )}>
           {!selectedConv ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
@@ -449,11 +456,35 @@ export function UnifiedInbox() {
                 </p>
               </div>
             </div>
-          ) : loadingMessages ? (
-            <div className="flex-1 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
           ) : (
+            <>
+            {/* Mobile back button + conversation header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b md:hidden">
+              <button
+                onClick={() => setSelectedConv(null)}
+                className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-2 min-w-0">
+                {(() => {
+                  const conv = conversations.find((c) => c.id === selectedConv);
+                  return conv ? (
+                    <>
+                      {platformIcon(conv.provider)}
+                      <p className="text-sm font-medium truncate">
+                        {conv.participants.join(", ") || "Contact"}
+                      </p>
+                    </>
+                  ) : null;
+                })()}
+              </div>
+            </div>
+            {loadingMessages ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 ? (
                 <div className="text-center py-12">
@@ -497,6 +528,8 @@ export function UnifiedInbox() {
                 ))
               )}
             </div>
+            )}
+            </>
           )}
         </div>
       </div>
