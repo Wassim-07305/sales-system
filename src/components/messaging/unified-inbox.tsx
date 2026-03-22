@@ -16,11 +16,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   getUnipileStatus,
   getUnipileConversations,
   getUnipileMessages,
+  generateUnipileAuthLink,
 } from "@/lib/actions/unipile";
+import { toast } from "sonner";
 
 type Platform = "all" | "whatsapp" | "linkedin" | "instagram" | "email";
 
@@ -124,6 +127,24 @@ export function UnifiedInbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [configured, setConfigured] = useState(false);
+  const [connectingAccount, setConnectingAccount] = useState(false);
+
+  async function handleConnectAccount(provider: "WHATSAPP" | "LINKEDIN" | "INSTAGRAM" | "MAIL") {
+    setConnectingAccount(true);
+    try {
+      const result = await generateUnipileAuthLink(provider);
+      if (result.error) {
+        toast.error(result.error);
+      } else if (result.url) {
+        window.open(result.url, "_blank", "width=600,height=700,scrollbars=yes");
+        toast.info("Connectez votre compte, puis rechargez la page");
+      }
+    } catch {
+      toast.error("Erreur lors de la connexion");
+    } finally {
+      setConnectingAccount(false);
+    }
+  }
 
   // Load status + conversations
   useEffect(() => {
@@ -261,12 +282,56 @@ export function UnifiedInbox() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-b px-6 py-4">
-        <h2 className="text-lg font-semibold">Boîte unifiée</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {accounts.length} compte{accounts.length > 1 ? "s" : ""} connecté
-          {accounts.length > 1 ? "s" : ""}
-        </p>
+      <div className="border-b px-6 py-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Boîte unifiée</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {accounts.length} compte{accounts.length > 1 ? "s" : ""} connecté
+            {accounts.length > 1 ? "s" : ""}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 gap-1.5"
+            disabled={connectingAccount}
+            onClick={() => handleConnectAccount("WHATSAPP")}
+          >
+            <Phone className="h-3.5 w-3.5 text-green-500" />
+            WhatsApp
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 gap-1.5"
+            disabled={connectingAccount}
+            onClick={() => handleConnectAccount("LINKEDIN")}
+          >
+            <Linkedin className="h-3.5 w-3.5 text-blue-500" />
+            LinkedIn
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 gap-1.5"
+            disabled={connectingAccount}
+            onClick={() => handleConnectAccount("INSTAGRAM")}
+          >
+            <Instagram className="h-3.5 w-3.5 text-pink-500" />
+            Instagram
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-8 gap-1.5"
+            disabled={connectingAccount}
+            onClick={() => handleConnectAccount("MAIL")}
+          >
+            <Mail className="h-3.5 w-3.5 text-amber-500" />
+            Email
+          </Button>
+        </div>
       </div>
 
       {/* Platform tabs */}

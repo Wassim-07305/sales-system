@@ -256,16 +256,24 @@ export async function getUnipileConversations(accountId?: string): Promise<{
 }> {
   try {
     await requireAuth();
-    const client = getUnipileClient();
-    if (!client) return { conversations: [], error: "Unipile non configuré" };
+    const dsn = process.env.UNIPILE_DSN;
+    const apiKey = process.env.UNIPILE_API_KEY;
+    if (!dsn || !apiKey) return { conversations: [], error: "Unipile non configuré" };
 
-    const params: { account_id?: string; limit?: number } = { limit: 50 };
-    if (accountId) params.account_id = accountId;
+    const url = new URL(`${dsn}/api/v1/chats`);
+    url.searchParams.set("limit", "50");
+    if (accountId) url.searchParams.set("account_id", accountId);
 
-    const response = await client.messaging.getAllChats(params);
-    const items = Array.isArray(response)
-      ? response
-      : (response as { items?: unknown[] }).items || [];
+    const res = await fetch(url.toString(), {
+      headers: { "X-API-KEY": apiKey },
+    });
+    if (!res.ok) {
+      console.error("Unipile chats error:", res.status);
+      return { conversations: [], error: "Erreur de récupération des conversations" };
+    }
+
+    const data = await res.json();
+    const items = Array.isArray(data) ? data : (data as { items?: unknown[] }).items || [];
 
     const conversations = (
       items as Array<{
