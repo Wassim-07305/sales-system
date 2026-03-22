@@ -335,112 +335,115 @@ export function UnifiedInbox() {
         </div>
       </div>
 
-      {/* Platform tabs */}
-      <div className="flex items-center gap-1 border-b px-4 py-2 overflow-x-auto">
-        {PLATFORMS.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setActivePlatform(p.id)}
-            className={cn(
-              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap",
-              activePlatform === p.id
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            <span className={p.color}>{p.icon}</span>
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Search */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher une conversation..."
-            className="h-8 pl-8 text-xs"
-          />
-        </div>
-        <button className="rounded-lg p-2 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-          <Filter className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* Content: conversation list + message panel */}
-      <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* Conversation list — full width on mobile, w-80 fixed on desktop */}
+      {/* Two-column layout: sidebar (list) + message panel */}
+      <div className="flex-1 overflow-hidden min-h-0 grid grid-cols-1 md:grid-cols-[320px_1fr]">
+        {/* LEFT COLUMN: tabs + search + conversation list */}
         <div className={cn(
-          "overflow-y-auto border-r md:w-80 md:min-w-[320px] md:max-w-[320px] md:shrink-0",
-          selectedConv && "hidden md:block",
+          "flex flex-col border-r overflow-hidden min-w-0",
+          selectedConv && "max-md:hidden",
         )}>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          {/* Platform tabs */}
+          <div className="flex items-center gap-1 border-b px-4 py-2 overflow-x-auto shrink-0">
+            {PLATFORMS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setActivePlatform(p.id)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap",
+                  activePlatform === p.id
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <span className={p.color}>{p.icon}</span>
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="flex items-center gap-2 px-4 py-3 border-b shrink-0">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher une conversation..."
+                className="h-8 pl-8 text-xs"
+              />
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12 px-4">
-              <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                Aucune conversation
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {filtered.map((conv) => (
-                <button
-                  key={conv.id}
-                  onClick={() => handleSelectConv(conv.id)}
-                  className={cn(
-                    "w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors",
-                    selectedConv === conv.id && "bg-muted/70",
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                      {platformIcon(conv.provider)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium truncate">
-                          {conv.participants.join(", ") || "Contact"}
-                        </p>
-                        {conv.lastMessageAt && (
-                          <span className="text-[10px] text-muted-foreground shrink-0 flex items-center gap-0.5">
-                            <Clock className="h-2.5 w-2.5" />
-                            {timeAgo(conv.lastMessageAt)}
-                          </span>
+            <button className="rounded-lg p-2 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+              <Filter className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Conversation list */}
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-12 px-4">
+                <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Aucune conversation
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {filtered.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => handleSelectConv(conv.id)}
+                    className={cn(
+                      "w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors",
+                      selectedConv === conv.id && "bg-muted/70",
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
+                        {platformIcon(conv.provider)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium truncate">
+                            {conv.participants.join(", ") || "Contact"}
+                          </p>
+                          {conv.lastMessageAt && (
+                            <span className="text-[10px] text-muted-foreground shrink-0 flex items-center gap-0.5">
+                              <Clock className="h-2.5 w-2.5" />
+                              {timeAgo(conv.lastMessageAt)}
+                            </span>
+                          )}
+                        </div>
+                        {conv.lastMessage && (
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {conv.lastMessage}
+                          </p>
+                        )}
+                        {conv.unreadCount > 0 && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <Circle className="h-2 w-2 fill-brand text-brand" />
+                            <span className="text-[10px] font-medium text-brand">
+                              {conv.unreadCount} non lu
+                              {conv.unreadCount > 1 ? "s" : ""}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      {conv.lastMessage && (
-                        <p className="text-xs text-muted-foreground truncate mt-0.5">
-                          {conv.lastMessage}
-                        </p>
-                      )}
-                      {conv.unreadCount > 0 && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <Circle className="h-2 w-2 fill-brand text-brand" />
-                          <span className="text-[10px] font-medium text-brand">
-                            {conv.unreadCount} non lu
-                            {conv.unreadCount > 1 ? "s" : ""}
-                          </span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Message panel — full width on mobile when conversation selected */}
+        {/* RIGHT COLUMN: message panel */}
         <div className={cn(
-          "flex-1 flex flex-col min-w-0",
-          !selectedConv && "hidden md:flex",
+          "flex flex-col min-w-0 overflow-hidden",
+          !selectedConv && "max-md:hidden",
         )}>
           {!selectedConv ? (
             <div className="flex-1 flex items-center justify-center">
