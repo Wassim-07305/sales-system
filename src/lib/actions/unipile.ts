@@ -74,17 +74,27 @@ export async function getUnipileStatus(): Promise<{
     process.env.UNIPILE_API_KEY || (await getApiKey("UNIPILE_API_KEY"));
 
   if (!dsn || !apiKey) {
+    console.error("[Unipile] Missing credentials — dsn:", !!dsn, "apiKey:", !!apiKey);
     return { configured: false, accounts: [] };
   }
 
   try {
-    const client = getUnipileClient();
-    if (!client) return { configured: false, accounts: [] };
+    // Use direct REST call instead of SDK singleton (more reliable in serverless)
+    const res = await fetch(`${dsn}/api/v1/accounts`, {
+      headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+    });
 
-    const response = await client.account.getAll();
-    const items = Array.isArray(response)
-      ? response
-      : (response as { items?: unknown[] }).items || [];
+    if (!res.ok) {
+      console.error("[Unipile] Accounts API error:", res.status, res.statusText);
+      return { configured: true, accounts: [] };
+    }
+
+    const data = await res.json();
+    const items = Array.isArray(data)
+      ? data
+      : (data as { items?: unknown[] }).items || [];
+
+    console.log("[Unipile] Found", items.length, "accounts");
 
     const accounts = (
       items as Array<{
@@ -106,7 +116,7 @@ export async function getUnipileStatus(): Promise<{
 
     return { configured: true, accounts };
   } catch (err) {
-    console.error("Unipile status error:", err);
+    console.error("[Unipile] Status error:", err instanceof Error ? err.message : err);
     return { configured: true, accounts: [] };
   }
 }
