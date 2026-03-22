@@ -55,9 +55,13 @@ export function useChannels() {
         .from("channel_members")
         .select("channel_id")
         .eq("profile_id", user.id);
-      if (memberErr) throw memberErr;
+      if (memberErr) {
+        console.error("[useChannels] channel_members query error:", memberErr);
+        throw memberErr;
+      }
 
       const channelIds = (memberChannels ?? []).map((m) => m.channel_id);
+      console.log("[useChannels] Found", channelIds.length, "memberships for user", user.id);
       if (channelIds.length === 0) return [];
 
       const { data, error } = await supabase
@@ -71,8 +75,12 @@ export function useChannels() {
         )
         .in("id", channelIds)
         .order("last_message_at", { ascending: false, nullsFirst: false });
-      if (error) throw error;
+      if (error) {
+        console.error("[useChannels] channels query error:", error);
+        throw error;
+      }
 
+      console.log("[useChannels] Loaded", data?.length ?? 0, "channels");
       return (data ?? []) as Channel[];
     },
     enabled: !!user,
