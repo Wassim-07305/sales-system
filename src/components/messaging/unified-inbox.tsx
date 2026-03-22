@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import {
   MessageSquare,
   Phone,
@@ -52,6 +52,21 @@ interface Account {
   channel: string;
   name: string;
   status: string;
+}
+
+/** Returns true when viewport is >= 768px (md breakpoint) */
+function useIsDesktop() {
+  const subscribe = useCallback((cb: () => void) => {
+    const mql = window.matchMedia("(min-width: 768px)");
+    mql.addEventListener("change", cb);
+    return () => mql.removeEventListener("change", cb);
+  }, []);
+  const getSnapshot = useCallback(
+    () => window.matchMedia("(min-width: 768px)").matches,
+    [],
+  );
+  const getServerSnapshot = useCallback(() => true, []);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 const PLATFORMS: {
@@ -129,6 +144,7 @@ export function UnifiedInbox() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [configured, setConfigured] = useState(false);
   const [connectingAccount, setConnectingAccount] = useState(false);
+  const isDesktop = useIsDesktop();
 
   async function handleConnectAccount(provider: "WHATSAPP" | "LINKEDIN" | "INSTAGRAM" | "MAIL") {
     setConnectingAccount(true);
@@ -336,12 +352,13 @@ export function UnifiedInbox() {
       </div>
 
       {/* Two-column layout: sidebar (list) + message panel */}
-      <div className="flex-1 overflow-hidden min-h-0 grid grid-cols-1 md:grid-cols-[320px_1fr]">
+      <div className="flex-1 overflow-hidden min-h-0 flex flex-row">
         {/* LEFT COLUMN: tabs + search + conversation list */}
-        <div className={cn(
-          "flex flex-col border-r overflow-hidden min-w-0",
-          selectedConv && "max-md:hidden",
-        )}>
+        {(isDesktop || !selectedConv) && (
+        <div
+          className="flex flex-col border-r overflow-hidden shrink-0"
+          style={{ width: isDesktop ? 320 : "100%" }}
+        >
           {/* Platform tabs */}
           <div className="flex items-center gap-1 border-b px-4 py-2 overflow-x-auto shrink-0">
             {PLATFORMS.map((p) => (
@@ -439,12 +456,12 @@ export function UnifiedInbox() {
             )}
           </div>
         </div>
+        )}
 
         {/* RIGHT COLUMN: message panel */}
-        <div className={cn(
-          "flex flex-col min-w-0 overflow-hidden",
-          !selectedConv && "max-md:hidden",
-        )}>
+        {(isDesktop || selectedConv) && (
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
           {!selectedConv ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
@@ -462,7 +479,7 @@ export function UnifiedInbox() {
           ) : (
             <>
             {/* Mobile back button + conversation header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b md:hidden">
+            <div className={cn("flex items-center gap-3 px-4 py-3 border-b", isDesktop && "hidden")}>
               <button
                 onClick={() => setSelectedConv(null)}
                 className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -535,6 +552,7 @@ export function UnifiedInbox() {
             </>
           )}
         </div>
+        )}
       </div>
     </div>
   );
