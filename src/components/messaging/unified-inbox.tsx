@@ -374,7 +374,7 @@ export function UnifiedInbox() {
       <div className="flex flex-1 overflow-hidden min-h-0">
         {/* Conversation list — full width on mobile, w-80 fixed on desktop */}
         <div className={cn(
-          "overflow-y-auto border-r w-full md:w-80 md:shrink-0",
+          "overflow-y-auto border-r md:w-80 md:min-w-[320px] md:max-w-[320px] md:shrink-0",
           selectedConv && "hidden md:block",
         )}>
           {loading ? (
