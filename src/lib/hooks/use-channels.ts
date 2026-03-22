@@ -81,7 +81,22 @@ export function useChannels() {
       }
 
       console.log("[useChannels] Loaded", data?.length ?? 0, "channels");
-      return (data ?? []) as Channel[];
+
+      // Sanitize: Supabase FK joins may return arrays instead of objects
+      return ((data ?? []) as Channel[]).map((ch) => ({
+        ...ch,
+        name: typeof ch.name === "string" ? ch.name : String(ch.name ?? ""),
+        description:
+          ch.description == null
+            ? null
+            : typeof ch.description === "string"
+              ? ch.description
+              : String(ch.description),
+        members: (ch.members ?? []).map((m) => ({
+          ...m,
+          profile: Array.isArray(m.profile) ? m.profile[0] ?? undefined : m.profile,
+        })),
+      }));
     },
     enabled: !!user,
   });
@@ -489,7 +504,11 @@ export function useChannelMembers(channelId: string | null) {
         .eq("channel_id", channelId)
         .order("joined_at", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as ChannelMember[];
+      // Sanitize: profile FK join may return array instead of object
+      return ((data ?? []) as ChannelMember[]).map((m) => ({
+        ...m,
+        profile: Array.isArray(m.profile) ? m.profile[0] ?? undefined : m.profile,
+      }));
     },
     enabled: !!channelId,
   });

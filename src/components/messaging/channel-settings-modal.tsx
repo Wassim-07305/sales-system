@@ -107,7 +107,11 @@ export function ChannelSettingsModal({
         )
         .eq("channel_id", channel.id);
       if (error) throw error;
-      return (data ?? []) as unknown as ChannelMember[];
+      // Sanitize: profile FK join may return array instead of object
+      return ((data ?? []) as unknown as ChannelMember[]).map((m) => ({
+        ...m,
+        profile: Array.isArray(m.profile) ? m.profile[0] : m.profile,
+      }));
     },
     enabled: open,
   });

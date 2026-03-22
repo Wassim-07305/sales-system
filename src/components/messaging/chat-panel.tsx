@@ -59,12 +59,12 @@ export function ChatPanel({
   // Mention users derived from channel members
   const mentionUsers: MentionUser[] = useMemo(() => {
     return channelMembers
-      .filter((m) => m.profile && m.profile_id !== user?.id)
+      .filter((m) => m.profile && typeof m.profile === "object" && !Array.isArray(m.profile) && m.profile_id !== user?.id)
       .map((m) => ({
-        id: m.profile!.id,
-        full_name: m.profile!.full_name,
-        avatar_url: m.profile!.avatar_url ?? null,
-        role: m.profile!.role,
+        id: String(m.profile!.id),
+        full_name: String(m.profile!.full_name ?? "Inconnu"),
+        avatar_url: typeof m.profile!.avatar_url === "string" ? m.profile!.avatar_url : null,
+        role: String(m.profile!.role ?? ""),
       }));
   }, [channelMembers, user?.id]);
 

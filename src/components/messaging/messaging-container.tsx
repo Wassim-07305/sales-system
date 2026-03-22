@@ -23,6 +23,22 @@ const AI_AGENT_ID = "__ai_agent__";
 
 type ViewMode = "messaging" | "inbox";
 
+/** Safely unwrap a Supabase FK join that may return an array instead of object */
+function unwrapProfile(
+  raw: unknown,
+): { id: string; full_name: string; avatar_url: string | null; role: string } | null {
+  if (!raw) return null;
+  const obj = Array.isArray(raw) ? raw[0] : raw;
+  if (!obj || typeof obj !== "object") return null;
+  const p = obj as Record<string, unknown>;
+  return {
+    id: String(p.id ?? ""),
+    full_name: String(p.full_name ?? "Inconnu"),
+    avatar_url: typeof p.avatar_url === "string" ? p.avatar_url : null,
+    role: String(p.role ?? ""),
+  };
+}
+
 /** Enrichit les channels bruts du hook en ChannelWithMeta pour les composants enfants */
 function useEnrichedChannels(
   channels: ReturnType<typeof useChannels>["channels"],
@@ -41,9 +57,14 @@ function useEnrichedChannels(
 
       return {
         id: ch.id,
-        name: ch.name,
+        name: typeof ch.name === "string" ? ch.name : String(ch.name ?? ""),
         type: ch.type,
-        description: ch.description,
+        description:
+          ch.description == null
+            ? null
+            : typeof ch.description === "string"
+              ? ch.description
+              : String(ch.description),
         created_by: ch.created_by,
         created_at: ch.created_at,
         is_archived: ch.is_archived,
@@ -53,7 +74,7 @@ function useEnrichedChannels(
         isMuted: myMembership?.notifications_muted ?? false,
         isPinned: myMembership?.is_pinned ?? false,
         myLastRead: myMembership?.last_read_at ?? null,
-        dmPartner: dmPartnerMember?.profile ?? null,
+        dmPartner: unwrapProfile(dmPartnerMember?.profile),
       };
     });
   }, [channels, userId, unreadMap]);
