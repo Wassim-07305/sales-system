@@ -32,6 +32,7 @@ interface Conversation {
   id: string;
   provider: string;
   participants: string[];
+  pictureUrl?: string;
   lastMessage?: string;
   lastMessageAt?: string;
   unreadCount: number;
@@ -110,15 +111,15 @@ const PLATFORMS: {
 function platformIcon(provider: string) {
   switch (provider) {
     case "whatsapp":
-      return <Phone className="h-3.5 w-3.5 text-green-500" />;
+      return <Phone className="h-2.5 w-2.5 text-green-500" />;
     case "linkedin":
-      return <Linkedin className="h-3.5 w-3.5 text-blue-500" />;
+      return <Linkedin className="h-2.5 w-2.5 text-blue-500" />;
     case "instagram":
-      return <Instagram className="h-3.5 w-3.5 text-pink-500" />;
+      return <Instagram className="h-2.5 w-2.5 text-pink-500" />;
     case "email":
-      return <Mail className="h-3.5 w-3.5 text-amber-500" />;
+      return <Mail className="h-2.5 w-2.5 text-amber-500" />;
     default:
-      return <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />;
+      return <MessageSquare className="h-2.5 w-2.5 text-muted-foreground" />;
   }
 }
 
@@ -421,8 +422,22 @@ export function UnifiedInbox() {
                     )}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                        {platformIcon(conv.provider)}
+                      <div className="relative shrink-0">
+                        {conv.pictureUrl ? (
+                          <img
+                            src={conv.pictureUrl}
+                            alt=""
+                            className="h-9 w-9 rounded-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
+                            {(conv.participants[0] || "?").charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-background">
+                          {platformIcon(conv.provider)}
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">

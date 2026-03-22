@@ -248,6 +248,7 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     id: string;
     provider: string;
     participants: string[];
+    pictureUrl?: string;
     lastMessage?: string;
     lastMessageAt?: string;
     unreadCount: number;
@@ -281,7 +282,13 @@ export async function getUnipileConversations(accountId?: string): Promise<{
         name?: string | null;
         provider?: string;
         account_type?: string;
-        attendees?: Array<{ display_name?: string; name?: string; id?: string }>;
+        attendees?: Array<{
+          display_name?: string;
+          name?: string;
+          id?: string;
+          picture_url?: string;
+          is_self?: number;
+        }>;
         attendee_public_identifier?: string;
         last_message?: { text?: string; timestamp?: string };
         timestamp?: string;
@@ -290,15 +297,31 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     ).map((chat) => {
       // Build participant name: use chat.name, then attendees, then identifier
       const participantNames: string[] = [];
+      let pictureUrl: string | undefined;
+
+      // Filter out "self" attendees to get the other person
+      const otherAttendees = (chat.attendees || []).filter((a) => a.is_self !== 1);
+
       if (chat.name) {
         participantNames.push(chat.name);
+        // Get picture from first non-self attendee
+        if (otherAttendees.length > 0) {
+          pictureUrl = otherAttendees[0].picture_url;
+        }
+      } else if (otherAttendees.length > 0) {
+        for (const a of otherAttendees) {
+          const n = a.display_name || a.name || a.id || "";
+          if (n) participantNames.push(n);
+        }
+        pictureUrl = otherAttendees[0].picture_url;
       } else if (chat.attendees && chat.attendees.length > 0) {
+        // Fallback: use all attendees if no non-self found
         for (const a of chat.attendees) {
           const n = a.display_name || a.name || a.id || "";
           if (n) participantNames.push(n);
         }
+        pictureUrl = chat.attendees[0].picture_url;
       } else if (chat.attendee_public_identifier) {
-        // Format phone numbers nicely
         const id = chat.attendee_public_identifier.replace(/@.*$/, "");
         participantNames.push(id.startsWith("33") ? `+${id}` : id);
       }
@@ -309,6 +332,7 @@ export async function getUnipileConversations(accountId?: string): Promise<{
           UNIPILE_PROVIDER_MAP[chat.provider || chat.account_type || ""] ||
           "unknown",
         participants: participantNames,
+        pictureUrl,
         lastMessage: chat.last_message?.text,
         lastMessageAt: chat.last_message?.timestamp || chat.timestamp,
         unreadCount: chat.unread_count || 0,
