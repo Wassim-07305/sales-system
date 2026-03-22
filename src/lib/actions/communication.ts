@@ -18,7 +18,10 @@ export async function ensureDefaultChannels(): Promise<{ channelId?: string }> {
 
   try {
     // Use admin client for reliable channel creation (bypass RLS)
-    const admin = createAdminClient();
+    // Fall back to regular client if service role key is not configured
+    const admin = process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? createAdminClient()
+      : supabase;
 
     // Check if "Canal Général" already exists
     const { data: existing } = await admin
