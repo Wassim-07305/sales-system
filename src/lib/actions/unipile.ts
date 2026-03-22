@@ -123,10 +123,10 @@ export async function generateUnipileAuthLink(provider?: string): Promise<{
 
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       (process.env.VERCEL_PROJECT_PRODUCTION_URL
         ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
         : null) ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       "http://localhost:3001";
 
     // Use REST API directly for connect link (more control over parameters)
@@ -136,8 +136,8 @@ export async function generateUnipileAuthLink(provider?: string): Promise<{
       expiresOn: new Date(Date.now() + 30 * 60 * 1000)
         .toISOString()
         .replace(/\.\d{3}Z$/, ".000Z"),
-      success_redirect_url: `${appUrl}/settings/integrations`,
-      failure_redirect_url: `${appUrl}/settings/integrations`,
+      success_redirect_url: `${appUrl}/chat`,
+      failure_redirect_url: `${appUrl}/chat`,
     };
     if (provider) {
       body.providers = [provider.toUpperCase()];
