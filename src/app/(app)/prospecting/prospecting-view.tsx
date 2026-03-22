@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useMemo, useTransition, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,11 +47,17 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  Inbox,
+  Upload,
+  Download,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   addProspect,
   updateProspectStatus,
   incrementDmsSent,
+  importProspectsCSV,
+  exportProspectsCSV,
 } from "@/lib/actions/prospecting";
 import { recalculateAllScores } from "@/lib/actions/hub-setting";
 import {
@@ -81,6 +87,7 @@ interface Prospect {
   created_at: string;
   computed_score: ComputedScore | null;
   relance_status?: string | null;
+  has_conversation?: boolean;
 }
 
 interface Quota {
@@ -156,6 +163,20 @@ export function ProspectingView({
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => setSearch(value), 300);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, []);
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterTemperature, setFilterTemperature] = useState<string>("all");
@@ -297,7 +318,7 @@ export function ProspectingView({
 
   async function handleDmIncrement() {
     await incrementDmsSent();
-    toast.success("+1 DM envoye !");
+    toast.success("+1 DM envoyé !");
     router.refresh();
   }
 
@@ -305,17 +326,17 @@ export function ProspectingView({
     try {
       const result = await sendAIMessage(prospectId, platform);
       if (result.error === "MODE_VALIDATION_REQUISE") {
-        toast.info("Message IA genere — Validation requise avant envoi", {
+        toast.info("Message IA généré — Validation requise avant envoi", {
           description: result.message?.slice(0, 100) + "...",
           duration: 6000,
         });
       } else if (result.error === "MODE_HUMAIN") {
-        toast.info("Suggestion IA generee (mode humain)", {
+        toast.info("Suggestion IA générée (mode humain)", {
           description: result.message?.slice(0, 100) + "...",
           duration: 6000,
         });
       } else if (result.success) {
-        toast.success("Message IA envoye avec succes");
+        toast.success("Message IA envoyé avec succès");
         router.refresh();
       } else {
         toast.error(result.error || "Erreur d'envoi IA");
@@ -331,30 +352,162 @@ export function ProspectingView({
         prospect_id: prospectId,
         platform: platform || "instagram",
         message_j2:
-          "Bonjour, je me permets de vous relancer suite a mon message precedent. Avez-vous eu le temps d'y jeter un oeil ?",
+          "Bonjour, je me permets de vous relancer suite à mon message précédent. Avez-vous eu le temps d'y jeter un œil ?",
         message_j3:
-          "Bonjour, je comprends que vous etes sans doute tres occupe(e). Je reste disponible si vous souhaitez en discuter. Belle journee !",
+          "Bonjour, je comprends que vous êtes sans doute très occupé(e). Je reste disponible si vous souhaitez en discuter. Belle journée !",
       });
-      toast.success("Relance automatique programmee (J+2 et J+3)");
+      toast.success("Relance automatique programmée (J+2 et J+3)");
       router.refresh();
     } catch {
-      toast.error("Erreur lors de la creation de la relance");
+      toast.error("Erreur lors de la création de la relance");
     }
   }
 
   async function handleCancelRelance(prospectId: string) {
     try {
       await cancelRelance(prospectId);
-      toast.success("Relance annulee");
+      toast.success("Relance annulée");
       router.refresh();
     } catch {
       toast.error("Erreur lors de l'annulation");
     }
   }
 
+  // Import / Export
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [isImporting, startImportTransition] = useTransition();
+  const [importResult, setImportResult] = useState<{ imported: number; errors: string[] } | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const csvText = evt.target?.result as string;
+      if (!csvText) return;
+      startImportTransition(async () => {
+        try {
+          const res = await importProspectsCSV(csvText);
+          setImportResult(res);
+          if (res.imported > 0) {
+            toast.success(`${res.imported} prospect(s) importé(s)`);
+            router.refresh();
+          }
+          if (res.errors.length > 0) {
+            toast.error(`${res.errors.length} erreur(s) lors de l'import`);
+          }
+        } catch {
+          toast.error("Erreur lors de l'import");
+        }
+      });
+    };
+    reader.readAsText(file);
+    if (importFileRef.current) importFileRef.current.value = "";
+  }
+
+  function handleExport() {
+    startImportTransition(async () => {
+      try {
+        const csv = await exportProspectsCSV();
+        if (!csv) {
+          toast.error("Aucune donnée à exporter");
+          return;
+        }
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "prospects_export.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Export prospects téléchargé");
+      } catch {
+        toast.error("Erreur lors de l'export");
+      }
+    });
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-2 flex-wrap">
+        {/* Import / Export Dialog */}
+        <Dialog open={importDialogOpen} onOpenChange={(o) => { setImportDialogOpen(o); if (!o) setImportResult(null); }}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="rounded-xl font-medium">
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Import / Export
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-lg rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>Import / Export de prospects</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Colonnes attendues : <code className="text-xs bg-muted px-1 py-0.5 rounded">nom, plateforme, url, notes</code>
+                </p>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer">
+                    <input
+                      ref={importFileRef}
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={handleImportFile}
+                      disabled={isImporting}
+                    />
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+                      {isImporting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      Importer un CSV
+                    </div>
+                  </label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={handleExport}
+                    disabled={isImporting}
+                  >
+                    {isImporting ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-2" />
+                    )}
+                    Exporter CSV
+                  </Button>
+                </div>
+              </div>
+              {importResult && (
+                <div className="rounded-xl border border-border/50 p-3 space-y-2">
+                  <p className="text-sm font-medium text-green-600">
+                    {importResult.imported} prospect(s) importé(s)
+                  </p>
+                  {importResult.errors.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-red-600">
+                        {importResult.errors.length} erreur(s) :
+                      </p>
+                      <ul className="text-xs text-red-500 max-h-32 overflow-y-auto space-y-0.5">
+                        {importResult.errors.map((err, i) => (
+                          <li key={i}>{err}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Button
           variant="outline"
           size="sm"
@@ -408,6 +561,8 @@ export function ProspectingView({
                   <SelectContent>
                     <SelectItem value="linkedin">LinkedIn</SelectItem>
                     <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -605,8 +760,8 @@ export function ProspectingView({
           <Input
             placeholder="Rechercher un prospect..."
             className="pl-9 h-11 rounded-xl"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <Select value={filterPlatform} onValueChange={setFilterPlatform}>
@@ -991,7 +1146,7 @@ export function ProspectingView({
                             className="bg-blue-500/10 text-blue-600 border-blue-500/20 gap-1"
                           >
                             <CheckCircle2 className="h-3 w-3" />
-                            Envoyee
+                            Envoyée
                           </Badge>
                         )}
                         {prospect.relance_status === "responded" && (
@@ -1000,7 +1155,7 @@ export function ProspectingView({
                             className="bg-brand/10 text-brand border-brand/20 gap-1"
                           >
                             <MessageCircle className="h-3 w-3" />
-                            Repondu
+                            Répondu
                           </Badge>
                         )}
                         {prospect.relance_status === "cancelled" && (
@@ -1009,7 +1164,7 @@ export function ProspectingView({
                             className="bg-muted/40 text-muted-foreground/60 border-border/30 gap-1"
                           >
                             <XCircle className="h-3 w-3" />
-                            Annulee
+                            Annulée
                           </Badge>
                         )}
                         {!prospect.relance_status && (
@@ -1025,6 +1180,19 @@ export function ProspectingView({
                               <Eye className="h-4 w-4" />
                             </Link>
                           </Button>
+                          {prospect.has_conversation && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              asChild
+                              title="Ouvrir la conversation"
+                              className="text-blue-500 hover:text-blue-600"
+                            >
+                              <Link href="/inbox">
+                                <Inbox className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          )}
                           {prospect.platform && (
                             <Button
                               variant="ghost"

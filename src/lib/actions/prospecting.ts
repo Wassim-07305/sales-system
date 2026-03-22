@@ -1,6 +1,5 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -15,7 +14,7 @@ export interface ProspectSegmentFilters {
 }
 
 export async function getProspects(filters?: ProspectSegmentFilters) {
-  const supabase = await createClient();
+  const { supabase } = await requireAuth();
   let query = supabase
     .from("prospects")
     .select("*, list:prospect_lists(id, name)")
@@ -85,7 +84,7 @@ export async function getProspects(filters?: ProspectSegmentFilters) {
 }
 
 export async function getProspectSegmentStats() {
-  const supabase = await createClient();
+  const { supabase } = await requireAuth();
 
   const { data: allProspects } = await supabase
     .from("prospects")
@@ -128,7 +127,12 @@ export async function addProspect(formData: {
   list_id?: string;
 }) {
   try {
-    const { supabase, user } = await requireAuth();
+    const { supabase, user, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     const { error } = await supabase.from("prospects").insert({
       name: formData.name,
@@ -147,28 +151,38 @@ export async function addProspect(formData: {
 }
 
 export async function updateProspectStatus(prospectId: string, status: string) {
-  const supabase = await createClient();
-  const validStatuses = [
-    "new",
-    "contacted",
-    "replied",
-    "hot",
-    "interested",
-    "qualified",
-    "booked",
-    "converted",
-    "lost",
-    "not_interested",
-  ];
-  if (!validStatuses.includes(status)) return { error: "Statut invalide" };
+  try {
+    const { supabase, profile } = await requireAuth();
 
-  const { error } = await supabase
-    .from("prospects")
-    .update({ status })
-    .eq("id", prospectId);
-  if (error) return { error: "Impossible de mettre à jour le statut." };
-  revalidatePath("/prospecting");
-  return { success: true };
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
+
+    const validStatuses = [
+      "new",
+      "contacted",
+      "replied",
+      "hot",
+      "interested",
+      "qualified",
+      "booked",
+      "converted",
+      "lost",
+      "not_interested",
+    ];
+    if (!validStatuses.includes(status)) return { error: "Statut invalide" };
+
+    const { error } = await supabase
+      .from("prospects")
+      .update({ status })
+      .eq("id", prospectId);
+    if (error) return { error: "Impossible de mettre à jour le statut." };
+    revalidatePath("/prospecting");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
 }
 
 export async function getDailyQuota() {
@@ -270,7 +284,7 @@ export async function incrementReplies() {
 }
 
 export async function getProspectLists() {
-  const supabase = await createClient();
+  const { supabase } = await requireAuth();
   const { data } = await supabase
     .from("prospect_lists")
     .select("*")
@@ -279,7 +293,7 @@ export async function getProspectLists() {
 }
 
 export async function getTemplates() {
-  const supabase = await createClient();
+  const { supabase } = await requireAuth();
   const { data } = await supabase
     .from("dm_templates")
     .select("*")
@@ -297,7 +311,12 @@ export async function createTemplate(formData: {
   variant: string;
 }) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     const { error } = await supabase.from("dm_templates").insert(formData);
     if (error) return { error: "Impossible de créer le template." };
@@ -320,7 +339,12 @@ export async function updateTemplate(
   },
 ) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     const { error } = await supabase
       .from("dm_templates")
@@ -336,7 +360,12 @@ export async function updateTemplate(
 
 export async function deleteTemplate(id: string) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     const { error } = await supabase.from("dm_templates").delete().eq("id", id);
     if (error) return { error: "Impossible de supprimer le template." };
@@ -349,7 +378,15 @@ export async function deleteTemplate(id: string) {
 
 export async function deleteProspect(id: string) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const allowedRoles = ["admin", "manager"];
+    if (!allowedRoles.includes(profile.role)) {
+      return { error: "Accès refusé — seuls les admins et managers peuvent supprimer" };
+    }
+
+    // Cascade: delete prospect scores first
+    await supabase.from("prospect_scores").delete().eq("prospect_id", id);
 
     const { error } = await supabase.from("prospects").delete().eq("id", id);
     if (error) return { error: "Impossible de supprimer le prospect." };
@@ -392,7 +429,7 @@ export async function getProspectById(prospectId: string) {
 }
 
 export async function getProspectScore(prospectId: string) {
-  const supabase = await createClient();
+  const { supabase } = await requireAuth();
   const { data } = await supabase
     .from("prospect_scores")
     .select("*")
@@ -415,7 +452,12 @@ export async function updateProspect(
   },
 ) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     const { error } = await supabase
       .from("prospects")
@@ -474,6 +516,27 @@ export async function addProspectMessage(
       await incrementDmsSent();
     } else {
       await incrementReplies();
+
+      // Notify the assigned setter when a prospect replies
+      try {
+        const { data: prospectInfo } = await supabase
+          .from("prospects")
+          .select("name, assigned_setter_id")
+          .eq("id", prospectId)
+          .single();
+
+        if (prospectInfo?.assigned_setter_id && prospectInfo.assigned_setter_id !== user.id) {
+          const { notify } = await import("@/lib/actions/notifications");
+          await notify(
+            prospectInfo.assigned_setter_id,
+            `${prospectInfo.name} a répondu`,
+            message.slice(0, 120),
+            { link: `/prospecting/${prospectId}`, type: "prospect_reply" },
+          );
+        }
+      } catch {
+        // Non-critical
+      }
     }
 
     revalidatePath(`/prospecting/${prospectId}`);
@@ -492,7 +555,12 @@ export async function convertProspectToDeal(
   },
 ) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     // Get prospect data
     const { data: prospect } = await supabase
@@ -541,7 +609,12 @@ export async function qualifyProspect(
   },
 ) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
 
     // Get prospect data
     const { data: prospect } = await supabase
@@ -598,8 +671,194 @@ export async function qualifyProspect(
   }
 }
 
+// ─── CSV Import / Export ────────────────────────────────────────────
+
+export async function importProspectsCSV(
+  csvText: string,
+  listId?: string,
+) {
+  const errors: string[] = [];
+  let imported = 0;
+
+  try {
+    const { supabase, user, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { imported: 0, errors: ["Accès refusé"] };
+    }
+
+    const lines = csvText.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lines.length < 2) {
+      return { imported: 0, errors: ["Le fichier CSV est vide ou ne contient pas d'en-tête."] };
+    }
+
+    const header = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+    const nameIdx = header.findIndex((h) => h === "name" || h === "nom");
+    const platformIdx = header.findIndex((h) => h === "platform" || h === "plateforme");
+    const urlIdx = header.findIndex((h) => h === "profile_url" || h === "url" || h === "lien");
+    const notesIdx = header.findIndex((h) => h === "notes" || h === "note");
+
+    if (nameIdx === -1) {
+      return { imported: 0, errors: ["Colonne 'name' ou 'nom' requise dans l'en-tête CSV."] };
+    }
+
+    const rows = lines.slice(1);
+    const batchSize = 50;
+
+    for (let i = 0; i < rows.length; i += batchSize) {
+      const batch = rows.slice(i, i + batchSize);
+      const inserts: {
+        name: string;
+        platform: string;
+        profile_url: string | null;
+        notes: string | null;
+        list_id: string | null;
+        status: string;
+        created_by: string;
+      }[] = [];
+
+      for (let j = 0; j < batch.length; j++) {
+        const lineNum = i + j + 2;
+        const cols = batch[j].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+        const name = cols[nameIdx]?.trim();
+
+        if (!name) {
+          errors.push(`Ligne ${lineNum}: nom manquant`);
+          continue;
+        }
+
+        inserts.push({
+          name,
+          platform: (platformIdx >= 0 ? cols[platformIdx] : null) || "linkedin",
+          profile_url: urlIdx >= 0 ? cols[urlIdx] || null : null,
+          notes: notesIdx >= 0 ? cols[notesIdx] || null : null,
+          list_id: listId || null,
+          status: "new",
+          created_by: user.id,
+        });
+      }
+
+      if (inserts.length > 0) {
+        const { error } = await supabase.from("prospects").insert(inserts);
+        if (error) {
+          errors.push(`Batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
+        } else {
+          imported += inserts.length;
+        }
+      }
+    }
+
+    revalidatePath("/prospecting");
+    return { imported, errors };
+  } catch {
+    return { imported, errors: [...errors, "Non authentifié"] };
+  }
+}
+
+export async function exportProspectsCSV() {
+  try {
+    const { supabase } = await requireAuth();
+
+    const { data: prospects } = await supabase
+      .from("prospects")
+      .select("name, platform, profile_url, status, notes, created_at")
+      .order("created_at", { ascending: false });
+
+    if (!prospects || prospects.length === 0) return null;
+
+    const header = "nom,plateforme,url,statut,notes,date_creation";
+    const rows = prospects.map((p) =>
+      [
+        `"${(p.name || "").replace(/"/g, '""')}"`,
+        p.platform || "",
+        p.profile_url || "",
+        p.status || "",
+        `"${(p.notes || "").replace(/"/g, '""')}"`,
+        p.created_at?.split("T")[0] || "",
+      ].join(","),
+    );
+
+    return [header, ...rows].join("\n");
+  } catch {
+    return null;
+  }
+}
+
+// ─── Reminders (Follow-up Tasks) ────────────────────────────────────
+
+export async function createProspectReminder(
+  prospectId: string,
+  data: { scheduledAt: string; message: string },
+) {
+  try {
+    const { supabase, user, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
+
+    const { error } = await supabase.from("follow_up_tasks").insert({
+      prospect_id: prospectId,
+      message_content: data.message,
+      scheduled_at: data.scheduledAt,
+      completed: false,
+      created_by: user.id,
+    });
+
+    if (error) return { error: "Impossible de créer le rappel." };
+
+    revalidatePath(`/prospecting/${prospectId}`);
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
+}
+
+export async function completeProspectReminder(taskId: string) {
+  try {
+    const { supabase, profile } = await requireAuth();
+
+    const blockedRoles = ["client_b2b", "client_b2c"];
+    if (blockedRoles.includes(profile.role)) {
+      return { error: "Accès refusé" };
+    }
+
+    const { error } = await supabase
+      .from("follow_up_tasks")
+      .update({ completed: true, completed_at: new Date().toISOString() })
+      .eq("id", taskId);
+
+    if (error) return { error: "Impossible de compléter le rappel." };
+
+    revalidatePath("/prospecting");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
+}
+
+export async function getProspectReminders(prospectId: string) {
+  try {
+    const { supabase } = await requireAuth();
+
+    const { data } = await supabase
+      .from("follow_up_tasks")
+      .select("id, message_content, scheduled_at, completed, completed_at")
+      .eq("prospect_id", prospectId)
+      .order("scheduled_at", { ascending: true });
+
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getSettersForAssignment() {
-  const supabase = await createClient();
+  const { supabase } = await requireAuth();
   const { data } = await supabase
     .from("profiles")
     .select("id, full_name, avatar_url")

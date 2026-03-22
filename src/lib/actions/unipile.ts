@@ -1162,6 +1162,39 @@ export async function handleUnipileWebhook(
             .update({ status: "replied" })
             .eq("id", prospectId)
             .eq("status", "contacted");
+
+          // Notify the assigned setter when a prospect replies
+          const { data: prospectData } = await supabase
+            .from("prospects")
+            .select("name, assigned_setter_id")
+            .eq("id", prospectId)
+            .single();
+
+          if (prospectData?.assigned_setter_id) {
+            const setterId = prospectData.assigned_setter_id;
+            // Only notify if setter is different from admin (avoid duplicate)
+            if (setterId !== adminProfile?.id) {
+              await supabase.from("notifications").insert({
+                user_id: setterId,
+                type: "prospect_reply",
+                title: `${prospectData.name} a répondu`,
+                body: text.slice(0, 120),
+                link: `/prospecting/${prospectId}`,
+              });
+              // Fire-and-forget push
+              try {
+                const { sendPush } = await import("@/lib/actions/push");
+                sendPush(
+                  setterId,
+                  `${prospectData.name} a répondu`,
+                  text.slice(0, 120),
+                  `/prospecting/${prospectId}`,
+                ).catch(() => {});
+              } catch {
+                // Non-critical
+              }
+            }
+          }
         } catch {
           // Non-critical — don't block webhook processing
         }

@@ -23,6 +23,11 @@ import {
   CheckCircle,
   Clock,
   BarChart3,
+  Users,
+  Inbox,
+  Snowflake,
+  Thermometer as ThermometerIcon,
+  Bell,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -35,6 +40,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { cn } from "@/lib/utils";
 import { SetterTasksWidget } from "./setter-tasks-widget";
 
 function formatCurrency(amount: number) {
@@ -90,6 +96,24 @@ interface SetterDashboardData {
     day: string;
     deals: number;
     revenue: number;
+  }>;
+  prospectingFunnel?: {
+    total: number;
+    new: number;
+    contacted: number;
+    replied: number;
+    booked: number;
+    converted: number;
+    hot: number;
+    warm: number;
+    cold: number;
+  };
+  upcomingReminders?: Array<{
+    id: string;
+    prospectName: string;
+    prospectId: string;
+    scheduledAt: string;
+    message: string;
   }>;
 }
 
@@ -525,6 +549,169 @@ export function SetterDashboard({
           </CardContent>
         </Card>
       </div>
+
+      {/* Prospecting Funnel + Reminders + Quick Actions */}
+      {data.prospectingFunnel && data.prospectingFunnel.total > 0 && (
+        <div className="grid lg:grid-cols-3 gap-4 mb-6">
+          {/* Prospecting Funnel */}
+          <Card className="border-border/50 hover:shadow-md transition-all lg:col-span-2">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                    <Users className="h-3.5 w-3.5 text-brand" />
+                  </div>
+                  Mon pipeline prospection
+                </CardTitle>
+                <Link href="/prospecting">
+                  <Button variant="ghost" size="sm" className="text-brand">
+                    Voir tout
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Funnel steps */}
+              <div className="flex items-center gap-1 mb-4">
+                {[
+                  { label: "Nouveaux", count: data.prospectingFunnel.new, color: "bg-muted" },
+                  { label: "Contactés", count: data.prospectingFunnel.contacted, color: "bg-blue-500/20" },
+                  { label: "Répondus", count: data.prospectingFunnel.replied, color: "bg-brand/20" },
+                  { label: "Bookés", count: data.prospectingFunnel.booked, color: "bg-purple-500/20" },
+                  { label: "Convertis", count: data.prospectingFunnel.converted, color: "bg-emerald-500/20" },
+                ].map((step, i) => {
+                  const width = data.prospectingFunnel!.total > 0
+                    ? Math.max(10, (step.count / data.prospectingFunnel!.total) * 100)
+                    : 20;
+                  return (
+                    <div key={step.label} className="flex-1 min-w-0">
+                      <div
+                        className={cn(
+                          "h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-all",
+                          step.color,
+                          step.count > 0 ? "opacity-100" : "opacity-40",
+                        )}
+                        style={{ width: `${width}%`, minWidth: "100%" }}
+                      >
+                        {step.count}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground text-center mt-1 truncate">
+                        {step.label}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Temperature breakdown */}
+              <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+                <div className="flex items-center gap-1.5">
+                  <Flame className="h-3.5 w-3.5 text-orange-400" />
+                  <span className="text-xs text-muted-foreground">
+                    Chaud: <span className="font-semibold text-foreground">{data.prospectingFunnel.hot}</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <ThermometerIcon className="h-3.5 w-3.5 text-amber-400" />
+                  <span className="text-xs text-muted-foreground">
+                    Tiède: <span className="font-semibold text-foreground">{data.prospectingFunnel.warm}</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Snowflake className="h-3.5 w-3.5 text-blue-400" />
+                  <span className="text-xs text-muted-foreground">
+                    Froid: <span className="font-semibold text-foreground">{data.prospectingFunnel.cold}</span>
+                  </span>
+                </div>
+                <div className="ml-auto text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">{data.prospectingFunnel.total}</span> prospects
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="border-border/50 hover:shadow-md transition-all">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
+                  <Target className="h-3.5 w-3.5 text-brand" />
+                </div>
+                Actions rapides
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Link href="/prospecting" className="block">
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                  <Users className="h-4 w-4" />
+                  Mes prospects
+                </Button>
+              </Link>
+              <Link href="/inbox" className="block">
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                  <Inbox className="h-4 w-4" />
+                  Messagerie
+                </Button>
+              </Link>
+              <Link href="/crm" className="block">
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Pipeline CRM
+                </Button>
+              </Link>
+              <Link href="/prospecting/templates" className="block">
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                  <Send className="h-4 w-4" />
+                  Templates DM
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Upcoming Reminders */}
+      {data.upcomingReminders && data.upcomingReminders.length > 0 && (
+        <Card className="border-border/50 hover:shadow-md transition-all mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/20">
+                <Bell className="h-3.5 w-3.5 text-amber-500" />
+              </div>
+              Prochains rappels
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-1">
+              {data.upcomingReminders.map((reminder) => (
+                <Link
+                  key={reminder.id}
+                  href={`/prospecting/${reminder.prospectId}`}
+                  className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 ring-1 ring-amber-500/20">
+                      <Bell className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{reminder.prospectName}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">
+                        {reminder.message || "Rappel programmé"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {format(new Date(reminder.scheduledAt), "EEE dd MMM HH:mm", {
+                      locale: fr,
+                    })}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tasks + Upcoming calls */}
       <div className="grid lg:grid-cols-2 gap-6">

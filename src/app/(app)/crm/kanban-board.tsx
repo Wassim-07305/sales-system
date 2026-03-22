@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useTransition, useMemo } from "react";
+import { useState, useCallback, useEffect, useTransition, useMemo, useRef } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -90,6 +90,8 @@ export function KanbanBoard({
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [tempFilter, setTempFilter] = useState<string>("all");
   const [selectedSetter, setSelectedSetter] = useState<string>("all");
 
@@ -109,6 +111,17 @@ export function KanbanBoard({
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [, startTransition] = useTransition();
+
+  // Debounce search input
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [searchQuery]);
 
   // Load sources, team members, and tags on mount
   useEffect(() => {
@@ -177,17 +190,17 @@ export function KanbanBoard({
 
   const filteredDeals = deals.filter((deal) => {
     const matchesSearch =
-      !searchQuery ||
-      deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      !debouncedSearch ||
+      deal.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
       deal.contact?.full_name
         ?.toLowerCase()
-        .includes(searchQuery.toLowerCase());
+        .includes(debouncedSearch.toLowerCase());
     const matchesTemp = tempFilter === "all" || deal.temperature === tempFilter;
     const matchesSetter =
       selectedSetter === "all" || deal.assigned_to === selectedSetter;
     const matchesTags =
       selectedTags.length === 0 ||
-      selectedTags.some(
+      selectedTags.every(
         (tag) =>
           (Array.isArray(deal.tags) && deal.tags.includes(tag)) ||
           (Array.isArray(deal.contact?.tags) &&
@@ -216,7 +229,10 @@ export function KanbanBoard({
     const { active, over } = event;
     setActiveDeal(null);
 
-    if (readOnly) return;
+    if (readOnly) {
+      toast.info("Mode lecture seule — vous ne pouvez pas déplacer les deals");
+      return;
+    }
     if (!over) return;
 
     const dealId = active.id as string;
@@ -346,9 +362,9 @@ export function KanbanBoard({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes</SelectItem>
-            <SelectItem value="hot">🔥 Hot</SelectItem>
-            <SelectItem value="warm">🌡️ Warm</SelectItem>
-            <SelectItem value="cold">❄️ Cold</SelectItem>
+            <SelectItem value="hot">🔥 Chaud</SelectItem>
+            <SelectItem value="warm">🌡️ Tiède</SelectItem>
+            <SelectItem value="cold">❄️ Froid</SelectItem>
           </SelectContent>
         </Select>
         {setterFilter && setterFilter.length > 0 && (

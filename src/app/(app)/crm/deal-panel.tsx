@@ -79,21 +79,21 @@ const TEMP_CONFIG = {
     color: "text-foreground",
     bg: "bg-foreground/10",
     border: "border-foreground/20",
-    label: "Hot",
+    label: "Chaud",
   },
   warm: {
     icon: Thermometer,
     color: "text-muted-foreground",
     bg: "bg-muted/60",
     border: "border-border/50",
-    label: "Warm",
+    label: "Tiède",
   },
   cold: {
     icon: Snowflake,
     color: "text-muted-foreground/60",
     bg: "bg-muted/40",
     border: "border-border/30",
-    label: "Cold",
+    label: "Froid",
   },
 };
 
@@ -371,21 +371,29 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
               Actions rapides
             </label>
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-10 gap-1.5"
-                onClick={() => {
-                  if (deal.contact?.phone) {
-                    window.open(`tel:${deal.contact.phone}`, "_self");
-                  } else {
-                    toast.error("Aucun numéro de téléphone");
-                  }
-                }}
-              >
-                <Phone className="h-3.5 w-3.5" />
-                Appeler
-              </Button>
+              {deal.contact?.phone ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 gap-1.5"
+                  asChild
+                >
+                  <a href={`tel:${deal.contact.phone}`}>
+                    <Phone className="h-3.5 w-3.5" />
+                    Appeler
+                  </a>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 gap-1.5"
+                  onClick={() => toast.error("Aucun numéro de téléphone")}
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  Appeler
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

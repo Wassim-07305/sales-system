@@ -130,9 +130,9 @@ export function NewDealDialog({ stages, onDealCreated }: NewDealDialogProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hot">Hot</SelectItem>
-                  <SelectItem value="warm">Warm</SelectItem>
-                  <SelectItem value="cold">Cold</SelectItem>
+                  <SelectItem value="hot">Chaud</SelectItem>
+                  <SelectItem value="warm">Tiède</SelectItem>
+                  <SelectItem value="cold">Froid</SelectItem>
                 </SelectContent>
               </Select>
             </div>

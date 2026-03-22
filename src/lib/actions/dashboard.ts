@@ -480,6 +480,83 @@ export async function getSetterDashboardData(userId: string) {
     .order("target_date", { ascending: true })
     .limit(3);
 
+  // Prospecting funnel stats for the setter
+  let prospectingFunnel = {
+    total: 0,
+    new: 0,
+    contacted: 0,
+    replied: 0,
+    booked: 0,
+    converted: 0,
+    hot: 0,
+    warm: 0,
+    cold: 0,
+  };
+  try {
+    const { data: myProspects } = await supabase
+      .from("prospects")
+      .select("id, status")
+      .eq("assigned_setter_id", userId);
+
+    if (myProspects && myProspects.length > 0) {
+      prospectingFunnel.total = myProspects.length;
+      for (const p of myProspects) {
+        const s = p.status as string;
+        if (s === "new") prospectingFunnel.new++;
+        else if (s === "contacted") prospectingFunnel.contacted++;
+        else if (s === "replied") prospectingFunnel.replied++;
+        else if (s === "booked") prospectingFunnel.booked++;
+        else if (s === "converted") prospectingFunnel.converted++;
+      }
+
+      // Get temperature breakdown
+      const prospectIds = myProspects.map((p) => p.id);
+      const { data: scores } = await supabase
+        .from("prospect_scores")
+        .select("temperature")
+        .in("prospect_id", prospectIds);
+
+      for (const sc of scores || []) {
+        if (sc.temperature === "hot") prospectingFunnel.hot++;
+        else if (sc.temperature === "warm") prospectingFunnel.warm++;
+        else prospectingFunnel.cold++;
+      }
+    }
+  } catch {
+    // prospect tables may not exist
+  }
+
+  // Upcoming reminders (follow_up_tasks) for the setter
+  let upcomingReminders: {
+    id: string;
+    prospectName: string;
+    prospectId: string;
+    scheduledAt: string;
+    message: string;
+  }[] = [];
+  try {
+    const { data: tasks } = await supabase
+      .from("follow_up_tasks")
+      .select("id, prospect_id, message_content, scheduled_at, prospects(name)")
+      .eq("completed", false)
+      .gte("scheduled_at", now.toISOString())
+      .order("scheduled_at", { ascending: true })
+      .limit(5);
+
+    upcomingReminders = (tasks || []).map((t) => {
+      const prospect = Array.isArray(t.prospects) ? t.prospects[0] : t.prospects;
+      return {
+        id: t.id,
+        prospectName: (prospect as { name: string } | null)?.name || "Prospect",
+        prospectId: t.prospect_id,
+        scheduledAt: t.scheduled_at,
+        message: t.message_content || "",
+      };
+    });
+  } catch {
+    // follow_up_tasks table may not exist
+  }
+
   // Weekly performance data (last 7 days)
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const { data: weekDeals } = await supabase
@@ -554,6 +631,8 @@ export async function getSetterDashboardData(userId: string) {
       progress: Math.round((o.current_value / (o.target_value || 1)) * 100),
     })),
     dailyPerformance,
+    prospectingFunnel,
+    upcomingReminders,
   };
 }
 

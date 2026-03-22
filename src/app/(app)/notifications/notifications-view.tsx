@@ -37,6 +37,8 @@ const typeIcons: Record<string, string> = {
   deal: "🤝",
   badge: "🏅",
   formation: "📚",
+  prospect_reply: "💬",
+  prospect_reminder: "⏰",
 };
 
 export function NotificationsView({

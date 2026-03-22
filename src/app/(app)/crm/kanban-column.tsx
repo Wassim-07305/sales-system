@@ -44,6 +44,8 @@ export const KanbanColumn = memo(function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
+      role="region"
+      aria-label={`Colonne ${stage.name} — ${deals.length} deal${deals.length > 1 ? "s" : ""}`}
       className={cn(
         "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-2xl transition-all duration-200 snap-center",
         "bg-muted/20 border border-border/50 shadow-sm",

@@ -58,13 +58,23 @@ import {
   Linkedin,
   Instagram,
   ArrowRightCircle,
+  Inbox,
+  BarChart3,
+  Bell,
+  Clock,
+  CheckCircle2,
+  Plus,
+  ListChecks,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   updateProspect,
   updateProspectStatus,
   addProspectMessage,
   deleteProspect,
   convertProspectToDeal,
+  createProspectReminder,
+  completeProspectReminder,
 } from "@/lib/actions/prospecting";
 
 interface ProspectDetailProps {
@@ -84,6 +94,22 @@ interface ProspectDetailProps {
     avatar_url: string | null;
   }>;
   stages: PipelineStage[];
+  inboxConversationId?: string | null;
+  linkedDeal?: { id: string; title: string } | null;
+  reminders?: Array<{
+    id: string;
+    message_content: string | null;
+    scheduled_at: string;
+    completed: boolean;
+    completed_at: string | null;
+  }>;
+  sequences?: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    steps: unknown[];
+    is_active: boolean;
+  }>;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -102,6 +128,18 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   booked: {
     label: "RDV pris",
     color: "bg-foreground/10 text-foreground border-foreground/20",
+  },
+  qualified: {
+    label: "Qualifié",
+    color: "bg-brand/15 text-brand border-brand/25",
+  },
+  converted: {
+    label: "Converti",
+    color: "bg-brand/10 text-brand border-brand/20",
+  },
+  lost: {
+    label: "Perdu",
+    color: "bg-muted/40 text-muted-foreground/60 border-border/30",
   },
   not_interested: {
     label: "Pas intéressé",
@@ -126,6 +164,10 @@ export function ProspectDetail({
   lists,
   setters,
   stages,
+  inboxConversationId,
+  linkedDeal,
+  reminders = [],
+  sequences = [],
 }: ProspectDetailProps) {
   const router = useRouter();
   const [currentProspect, setCurrentProspect] = useState(prospect);
@@ -135,7 +177,14 @@ export function ProspectDetail({
   const [convertOpen, setConvertOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+  const [messageDirection, setMessageDirection] = useState<"sent" | "received">("sent");
   const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Reminders state
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [reminderDate, setReminderDate] = useState("");
+  const [reminderMessage, setReminderMessage] = useState("");
+  const [savingReminder, setSavingReminder] = useState(false);
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -169,9 +218,9 @@ export function ProspectDetail({
         ...currentProspect,
         status: status as Prospect["status"],
       });
-      toast.success("Statut mis a jour");
+      toast.success("Statut mis à jour");
     } catch {
-      toast.error("Erreur lors de la mise a jour");
+      toast.error("Erreur lors de la mise à jour");
     }
   }
 
@@ -179,7 +228,7 @@ export function ProspectDetail({
     const result = await updateProspect(currentProspect.id, editForm);
 
     if (result.error) {
-      toast.error("Erreur lors de la mise a jour");
+      toast.error("Erreur lors de la mise à jour");
       return;
     }
 
@@ -188,7 +237,7 @@ export function ProspectDetail({
       ...editForm,
     });
     setEditOpen(false);
-    toast.success("Prospect mis a jour");
+    toast.success("Prospect mis à jour");
   }
 
   async function saveNotes() {
@@ -198,7 +247,7 @@ export function ProspectDetail({
       toast.error("Erreur");
     } else {
       setCurrentProspect({ ...currentProspect, notes });
-      toast.success("Notes enregistrees");
+      toast.success("Notes enregistrées");
     }
     setSavingNotes(false);
   }
@@ -210,7 +259,7 @@ export function ProspectDetail({
     const result = await addProspectMessage(
       currentProspect.id,
       newMessage,
-      "sent",
+      messageDirection,
     );
 
     if (result.error) {
@@ -223,14 +272,14 @@ export function ProspectDetail({
           {
             id: crypto.randomUUID(),
             content: newMessage,
-            direction: "sent",
+            direction: messageDirection,
             timestamp: new Date().toISOString(),
           },
         ],
         last_message_at: new Date().toISOString(),
       });
       setNewMessage("");
-      toast.success("Message enregistre");
+      toast.success("Message enregistré");
     }
     setSendingMessage(false);
   }
@@ -256,7 +305,7 @@ export function ProspectDetail({
     setDeleting(true);
     try {
       await deleteProspect(currentProspect.id);
-      toast.success("Prospect supprime");
+      toast.success("Prospect supprimé");
       router.push("/prospecting");
     } catch {
       toast.error("Erreur lors de la suppression");
@@ -264,11 +313,66 @@ export function ProspectDetail({
     }
   }
 
+  async function handleCreateReminder() {
+    if (!reminderDate) {
+      toast.error("Veuillez sélectionner une date");
+      return;
+    }
+    setSavingReminder(true);
+    try {
+      const result = await createProspectReminder(currentProspect.id, {
+        scheduledAt: new Date(reminderDate).toISOString(),
+        message: reminderMessage || `Relancer ${currentProspect.name}`,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Rappel programmé");
+        setReminderOpen(false);
+        setReminderDate("");
+        setReminderMessage("");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Erreur lors de la création du rappel");
+    }
+    setSavingReminder(false);
+  }
+
+  const [assigningSequence, setAssigningSequence] = useState(false);
+
+  async function handleAssignSequence(sequenceId: string) {
+    setAssigningSequence(true);
+    try {
+      const { assignFollowUpSequence } = await import("@/lib/actions/hub-setting");
+      await assignFollowUpSequence(currentProspect.id, sequenceId);
+      toast.success("Séquence de suivi assignée");
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de l'assignation de la séquence");
+    }
+    setAssigningSequence(false);
+  }
+
+  async function handleCompleteReminder(taskId: string) {
+    try {
+      const result = await completeProspectReminder(taskId);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Rappel complété");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Erreur");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title={currentProspect.name}
-        description={`Prospect ${currentProspect.platform || "inconnu"} - ajoute ${formatDistanceToNow(new Date(currentProspect.created_at), { addSuffix: true, locale: fr })}`}
+        description={`Prospect ${currentProspect.platform || "inconnu"} — ajouté ${formatDistanceToNow(new Date(currentProspect.created_at), { addSuffix: true, locale: fr })}`}
       >
         <div className="flex items-center gap-2">
           <Button
@@ -329,7 +433,7 @@ export function ProspectDetail({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selectionner un stage" />
+                      <SelectValue placeholder="Sélectionner une étape" />
                     </SelectTrigger>
                     <SelectContent>
                       {stages.map((stage) => (
@@ -344,11 +448,39 @@ export function ProspectDetail({
                   onClick={handleConvertToDeal}
                   className="w-full bg-brand text-brand-dark hover:bg-brand/90"
                 >
-                  Creer le deal
+                  Créer le deal
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
+
+          {inboxConversationId && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium"
+              asChild
+            >
+              <Link href="/inbox">
+                <Inbox className="h-4 w-4 mr-1" />
+                Messagerie
+              </Link>
+            </Button>
+          )}
+
+          {linkedDeal && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-medium text-brand hover:text-brand/80"
+              asChild
+            >
+              <Link href={`/crm/${linkedDeal.id}`}>
+                <BarChart3 className="h-4 w-4 mr-1" />
+                {linkedDeal.title}
+              </Link>
+            </Button>
+          )}
 
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
             <DialogTrigger asChild>
@@ -423,7 +555,7 @@ export function ProspectDetail({
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Assigne a</label>
+                  <label className="text-sm font-medium">Assigné à</label>
                   <Select
                     value={editForm.assigned_setter_id}
                     onValueChange={(v) =>
@@ -431,10 +563,10 @@ export function ProspectDetail({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Non assigne" />
+                      <SelectValue placeholder="Non assigné" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Non assigne</SelectItem>
+                      <SelectItem value="">Non assigné</SelectItem>
                       {setters.map((s) => (
                         <SelectItem key={s.id} value={s.id}>
                           {s.full_name || "Sans nom"}
@@ -478,7 +610,7 @@ export function ProspectDetail({
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer ce prospect ?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Cette action est irreversible. L&apos;historique des
+                  Cette action est irréversible. L&apos;historique des
                   conversations sera perdu.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -515,21 +647,21 @@ export function ProspectDetail({
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
                   <Thermometer className="h-3 w-3" />
-                  Temperature
+                  Température
                 </div>
                 {score ? (
                   <Badge
                     className={tempColors[score.temperature] || tempColors.cold}
                   >
                     {score.temperature === "hot"
-                      ? "Hot"
+                      ? "Chaud"
                       : score.temperature === "warm"
-                        ? "Warm"
-                        : "Cold"}
+                        ? "Tiède"
+                        : "Froid"}
                   </Badge>
                 ) : (
                   <span className="text-sm text-muted-foreground">
-                    Non calcule
+                    Non calculé
                   </span>
                 )}
               </CardContent>
@@ -594,7 +726,7 @@ export function ProspectDetail({
             <CardContent>
               {conversationHistory.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
-                  Aucun message enregistre
+                  Aucun message enregistré
                 </p>
               ) : (
                 <div className="space-y-3 max-h-80 overflow-y-auto mb-4">
@@ -622,6 +754,27 @@ export function ProspectDetail({
 
               <Separator className="my-4" />
 
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-muted-foreground">Direction :</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant={messageDirection === "sent" ? "default" : "outline"}
+                    size="sm"
+                    className={`rounded-xl text-xs h-7 ${messageDirection === "sent" ? "bg-brand text-brand-dark hover:bg-brand/90" : ""}`}
+                    onClick={() => setMessageDirection("sent")}
+                  >
+                    Envoyé
+                  </Button>
+                  <Button
+                    variant={messageDirection === "received" ? "default" : "outline"}
+                    size="sm"
+                    className={`rounded-xl text-xs h-7 ${messageDirection === "received" ? "bg-brand text-brand-dark hover:bg-brand/90" : ""}`}
+                    onClick={() => setMessageDirection("received")}
+                  >
+                    Reçu
+                  </Button>
+                </div>
+              </div>
               <div className="flex gap-2">
                 <Textarea
                   value={newMessage}
@@ -695,7 +848,7 @@ export function ProspectDetail({
           {currentProspect.assigned_setter && (
             <Card className="shadow-sm rounded-2xl">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Assigne a</CardTitle>
+                <CardTitle className="text-base">Assigné à</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
@@ -715,7 +868,7 @@ export function ProspectDetail({
           {score && (
             <Card className="shadow-sm rounded-2xl">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Details du score</CardTitle>
+                <CardTitle className="text-base">Détails du score</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
@@ -767,14 +920,153 @@ export function ProspectDetail({
             </CardContent>
           </Card>
 
+          {/* Séquences de suivi */}
+          {sequences.length > 0 && (
+            <Card className="shadow-sm rounded-2xl">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <ListChecks className="h-4 w-4 text-brand" />
+                    Séquences de suivi
+                  </CardTitle>
+                  <Link href="/prospecting/outreach/follow-ups">
+                    <Button variant="ghost" size="sm" className="text-brand h-7 text-xs">
+                      Gérer
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {sequences.filter((s) => s.is_active).map((seq) => (
+                  <div
+                    key={seq.id}
+                    className="flex items-center justify-between p-2 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{seq.name}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {(seq.steps as unknown[])?.length || 0} étape(s)
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs rounded-lg shrink-0"
+                      onClick={() => handleAssignSequence(seq.id)}
+                      disabled={assigningSequence}
+                    >
+                      Assigner
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Rappels */}
+          <Card className="shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-amber-500" />
+                  Rappels
+                </CardTitle>
+                <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md rounded-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Programmer un rappel</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-2">
+                      <div>
+                        <label className="text-sm font-medium">Date et heure</label>
+                        <Input
+                          type="datetime-local"
+                          value={reminderDate}
+                          onChange={(e) => setReminderDate(e.target.value)}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Message (optionnel)</label>
+                        <Input
+                          value={reminderMessage}
+                          onChange={(e) => setReminderMessage(e.target.value)}
+                          placeholder={`Relancer ${currentProspect.name}`}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleCreateReminder}
+                        disabled={savingReminder}
+                        className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                      >
+                        {savingReminder ? "Enregistrement..." : "Programmer le rappel"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {reminders.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-3">
+                  Aucun rappel programmé
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {reminders.map((r) => (
+                    <div
+                      key={r.id}
+                      className={cn(
+                        "flex items-start gap-2 p-2 rounded-lg border",
+                        r.completed
+                          ? "bg-muted/30 border-border/30 opacity-60"
+                          : new Date(r.scheduled_at) < new Date()
+                            ? "bg-red-500/5 border-red-500/20"
+                            : "bg-amber-500/5 border-amber-500/20",
+                      )}
+                    >
+                      <button
+                        onClick={() => !r.completed && handleCompleteReminder(r.id)}
+                        className="mt-0.5 shrink-0"
+                        disabled={r.completed}
+                      >
+                        {r.completed ? (
+                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-amber-500" />
+                        )}
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("text-sm", r.completed && "line-through")}>
+                          {r.message_content || "Rappel"}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {format(new Date(r.scheduled_at), "d MMM yyyy 'à' HH:mm", {
+                            locale: fr,
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Metadata */}
           <Card className="shadow-sm rounded-2xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Metadonnees</CardTitle>
+              <CardTitle className="text-base">Métadonnées</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Cree le</span>
+                <span className="text-muted-foreground">Créé le</span>
                 <span>
                   {format(new Date(currentProspect.created_at), "d MMM yyyy", {
                     locale: fr,

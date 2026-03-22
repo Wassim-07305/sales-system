@@ -27,6 +27,7 @@ import {
   Mic,
   MicOff,
   Instagram,
+  Linkedin,
   MessageSquare,
   Upload,
   Bot,
@@ -35,7 +36,13 @@ import {
   Sparkles,
   Loader2,
   AlertTriangle,
+  Flame,
+  Thermometer,
+  Snowflake,
+  Eye,
+  ArrowRightCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   sendMessage,
@@ -58,6 +65,11 @@ interface DmMessage {
   metadata?: { source?: string; ai_mode?: string; step?: string } | null;
 }
 
+interface ProspectScore {
+  total_score: number;
+  temperature: string;
+}
+
 interface Conversation {
   id: string;
   prospect_id: string | null;
@@ -70,6 +82,7 @@ interface Conversation {
     platform: string | null;
     status: string;
   } | null;
+  prospect_score: ProspectScore | null;
 }
 
 interface Prospect {
@@ -79,12 +92,47 @@ interface Prospect {
   status: string;
 }
 
+interface PipelineStage {
+  id: string;
+  name: string;
+}
+
+const statusLabels: Record<string, string> = {
+  new: "Nouveau",
+  contacted: "Contacté",
+  replied: "Répondu",
+  booked: "Booké",
+  qualified: "Qualifié",
+  converted: "Converti",
+  lost: "Perdu",
+  not_interested: "Pas intéressé",
+};
+
+const statusColors: Record<string, string> = {
+  new: "bg-muted/50 text-muted-foreground",
+  contacted: "bg-foreground/10 text-foreground",
+  replied: "bg-brand/10 text-brand",
+  booked: "bg-brand/15 text-brand",
+  qualified: "bg-brand/15 text-brand",
+  converted: "bg-brand/10 text-brand",
+  lost: "bg-muted/40 text-muted-foreground/60",
+  not_interested: "bg-muted/40 text-muted-foreground/60",
+};
+
+const tempConfig: Record<string, { icon: typeof Flame; color: string; label: string }> = {
+  hot: { icon: Flame, color: "text-red-500", label: "Chaud" },
+  warm: { icon: Thermometer, color: "text-orange-500", label: "Tiède" },
+  cold: { icon: Snowflake, color: "text-blue-400", label: "Froid" },
+};
+
 export function InboxView({
   conversations: initialConversations,
   prospects,
+  stages = [],
 }: {
   conversations: Conversation[];
   prospects: Prospect[];
+  stages?: PipelineStage[];
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -326,11 +374,11 @@ export function InboxView({
     try {
       const result = await escalateToHuman(
         selectedConv.id,
-        "Reponse complexe — intervention humaine requise",
+        "Réponse complexe — intervention humaine requise",
       );
       if (result.success) {
         toast.success(
-          "Conversation escaladee — notification envoyee au setter/manager",
+          "Conversation escaladée — notification envoyée au setter/manager",
         );
       } else {
         toast.error(result.error || "Erreur d'escalade");
@@ -392,33 +440,61 @@ export function InboxView({
                   className={`w-full text-left p-3 border-b hover:bg-muted/50 transition-colors ${selectedConv?.id === conv.id ? "bg-muted" : ""}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
+                    <div className="relative h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
                       {conv.prospect?.name?.charAt(0) || "?"}
+                      {conv.prospect_score?.temperature && (() => {
+                        const tc = tempConfig[conv.prospect_score.temperature];
+                        if (!tc) return null;
+                        const TIcon = tc.icon;
+                        return (
+                          <span className={`absolute -top-1 -right-1 ${tc.color}`} title={tc.label}>
+                            <TIcon className="h-3.5 w-3.5" />
+                          </span>
+                        );
+                      })()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-sm truncate">
                           {conv.prospect?.name || "Inconnu"}
                         </span>
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] shrink-0 ml-1"
-                        >
-                          <Instagram className="h-2.5 w-2.5 mr-0.5" />
-                          {conv.platform}
-                        </Badge>
+                        <div className="flex items-center gap-1 shrink-0 ml-1">
+                          {conv.prospect_score && (
+                            <span className="text-[10px] font-medium text-muted-foreground">
+                              {conv.prospect_score.total_score}
+                            </span>
+                          )}
+                          <Badge
+                            variant="outline"
+                            className="text-[10px]"
+                          >
+                            {conv.platform === "linkedin" ? (
+                              <Linkedin className="h-2.5 w-2.5 mr-0.5" />
+                            ) : (
+                              <Instagram className="h-2.5 w-2.5 mr-0.5" />
+                            )}
+                            {conv.platform}
+                          </Badge>
+                        </div>
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
                         {lastMsg?.content || "Aucun message"}
                       </p>
-                      {conv.last_message_at && (
-                        <p className="text-[10px] text-muted-foreground">
-                          {formatDistanceToNow(new Date(conv.last_message_at), {
-                            addSuffix: true,
-                            locale: fr,
-                          })}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {conv.prospect?.status && (
+                          <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0", statusColors[conv.prospect.status])}>
+                            {statusLabels[conv.prospect.status] || conv.prospect.status}
+                          </Badge>
+                        )}
+                        {conv.last_message_at && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(conv.last_message_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -465,16 +541,44 @@ export function InboxView({
                     </Badge>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleEscalate}
-                  className="rounded-xl font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 gap-1.5"
-                  title="Escalader vers un humain"
-                >
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline text-xs">Escalader</span>
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  {selectedConv.prospect && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="rounded-xl font-medium gap-1.5"
+                    >
+                      <Link href={`/prospecting/${selectedConv.prospect.id}`}>
+                        <Eye className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline text-xs">Prospect</span>
+                      </Link>
+                    </Button>
+                  )}
+                  {selectedConv.prospect && !["booked", "converted"].includes(selectedConv.prospect.status) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="rounded-xl font-medium gap-1.5 text-brand hover:text-brand/80"
+                    >
+                      <Link href={`/prospecting/${selectedConv.prospect.id}`}>
+                        <ArrowRightCircle className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline text-xs">Deal</span>
+                      </Link>
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEscalate}
+                    className="rounded-xl font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 gap-1.5"
+                    title="Escalader vers un humain"
+                  >
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline text-xs">Escalader</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Messages */}

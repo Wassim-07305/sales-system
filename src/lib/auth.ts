@@ -12,5 +12,12 @@ export async function requireAuth() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
-  return { supabase, user };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  return { supabase, user, profile: profile || { role: "client_b2c" } };
 }

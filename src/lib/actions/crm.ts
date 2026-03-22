@@ -233,12 +233,13 @@ export async function getRecentDeals(limit = 10) {
 
 export async function searchDeals(query: string) {
   const supabase = await createClient();
+  const sanitized = query.trim().replace(/[%_\\]/g, (c) => `\\${c}`);
   const { data } = await supabase
     .from("deals")
     .select(
       "id, title, value, stage_id, contact:profiles!deals_contact_id_fkey(full_name)",
     )
-    .ilike("title", `%${query}%`)
+    .ilike("title", `%${sanitized}%`)
     .limit(20);
   return data || [];
 }
@@ -328,7 +329,17 @@ export async function createDeal(params: {
 
 export async function bulkMoveDeals(dealIds: string[], stageId: string) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, user } = await requireAuth();
+
+    // Role-based permission
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role === "client_b2b" || profile?.role === "client_b2c") {
+      return { error: "Accès refusé : modification non autorisée" };
+    }
 
     if (!dealIds.length) return { error: "Aucun deal sélectionné" };
 
@@ -390,7 +401,17 @@ export async function getContactTags() {
 
 export async function updateDealStage(dealId: string, stageId: string) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, user } = await requireAuth();
+
+    // Role-based permission: B2B clients cannot mutate deals
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role === "client_b2b" || profile?.role === "client_b2c") {
+      return { error: "Accès refusé : modification non autorisée" };
+    }
 
     // Validate that stageId exists in pipeline_stages (prevent FK violation)
     const { data: stage } = await supabase
@@ -491,7 +512,22 @@ export async function updateDealTemperature(
   temperature: string,
 ) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, user } = await requireAuth();
+
+    // Role-based permission
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role === "client_b2b" || profile?.role === "client_b2c") {
+      return { error: "Accès refusé : modification non autorisée" };
+    }
+
+    // Validate temperature value
+    if (!["hot", "warm", "cold"].includes(temperature)) {
+      return { error: "Température invalide" };
+    }
 
     const { error } = await supabase
       .from("deals")
@@ -509,7 +545,17 @@ export async function updateDealTemperature(
 
 export async function updateDealNotes(dealId: string, notes: string) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, user } = await requireAuth();
+
+    // Role-based permission
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role === "client_b2b" || profile?.role === "client_b2c") {
+      return { error: "Accès refusé : modification non autorisée" };
+    }
 
     const { error } = await supabase
       .from("deals")
@@ -539,7 +585,22 @@ export async function updateDeal(
   },
 ) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, user } = await requireAuth();
+
+    // Role-based permission
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role === "client_b2b" || profile?.role === "client_b2c") {
+      return { error: "Accès refusé : modification non autorisée" };
+    }
+
+    // Validate probability range
+    if (data.probability !== undefined && (data.probability < 0 || data.probability > 100)) {
+      return { error: "La probabilité doit être entre 0 et 100" };
+    }
 
     const { error } = await supabase
       .from("deals")
@@ -588,7 +649,17 @@ export async function addDealActivity(
 
 export async function deleteDeal(dealId: string) {
   try {
-    const { supabase } = await requireAuth();
+    const { supabase, user } = await requireAuth();
+
+    // Role-based permission: only admin/manager can delete
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) {
+      return { error: "Accès refusé : seuls les admins et managers peuvent supprimer un deal" };
+    }
 
     // Unlink contracts from this deal (prevent orphans)
     await supabase

@@ -34,21 +34,21 @@ const TEMP_CONFIG = {
     color: "text-foreground",
     bg: "bg-foreground/10",
     border: "border-foreground/20",
-    label: "Hot",
+    label: "Chaud",
   },
   warm: {
     icon: Thermometer,
     color: "text-muted-foreground",
     bg: "bg-muted/60",
     border: "border-border/50",
-    label: "Warm",
+    label: "Tiède",
   },
   cold: {
     icon: Snowflake,
     color: "text-muted-foreground/60",
     bg: "bg-muted/40",
     border: "border-border/30",
-    label: "Cold",
+    label: "Froid",
   },
 };
 
@@ -135,6 +135,7 @@ export const DealCard = memo(function DealCard({
       ref={setNodeRef}
       style={style}
       {...(selectionMode ? {} : { ...attributes, ...listeners })}
+      aria-label={`Deal : ${deal.title}, ${deal.value?.toLocaleString("fr-FR")} €, ${temp.label}`}
       className={cn(
         "transition-all duration-200 border-border/50 rounded-xl",
         selectionMode ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
@@ -155,6 +156,7 @@ export const DealCard = memo(function DealCard({
                 onSelectionChange?.(checked === true)
               }
               onClick={(e) => e.stopPropagation()}
+              aria-label={`Sélectionner ${deal.title}`}
               className="mt-0.5 shrink-0"
             />
           )}

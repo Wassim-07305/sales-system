@@ -79,6 +79,7 @@ interface DealDetailProps {
   activities: DealActivity[];
   stages: PipelineStage[];
   teamMembers: Array<{ id: string; full_name: string | null; role: string }>;
+  linkedProspect?: { id: string; name: string; status: string } | null;
 }
 
 const tempColors = {
@@ -87,13 +88,14 @@ const tempColors = {
   cold: "bg-blue-500/10 text-blue-600 border-blue-500/20",
 };
 
-const activityIcons: Record<DealActivityType, typeof Phone> = {
+const activityIcons: Record<string, typeof Phone> = {
   call: Phone,
   message: MessageSquare,
   email: Mail,
   note: FileText,
   meeting: Calendar,
   status_change: TrendingUp,
+  auto_follow_up: Clock,
 };
 
 function formatCurrency(value: number): string {
@@ -109,6 +111,7 @@ export function DealDetail({
   activities,
   stages,
   teamMembers,
+  linkedProspect,
 }: DealDetailProps) {
   const router = useRouter();
   const [currentDeal, setCurrentDeal] = useState(deal);
@@ -138,11 +141,11 @@ export function DealDetail({
   async function handleStageChange(stageId: string) {
     const result = await updateDealStage(currentDeal.id, stageId);
     if (result.error) {
-      toast.error("Erreur lors de la mise a jour");
+      toast.error("Erreur lors de la mise à jour");
       return;
     }
     setCurrentDeal({ ...currentDeal, stage_id: stageId });
-    toast.success("Stage mis a jour");
+    toast.success("Stage mis à jour");
   }
 
   async function handleTempChange(temp: "hot" | "warm" | "cold") {
@@ -152,7 +155,7 @@ export function DealDetail({
       return;
     }
     setCurrentDeal({ ...currentDeal, temperature: temp });
-    toast.success("Temperature mise a jour");
+    toast.success("Température mise à jour");
   }
 
   async function saveNotes() {
@@ -162,7 +165,7 @@ export function DealDetail({
       toast.error("Erreur");
     } else {
       setCurrentDeal({ ...currentDeal, notes });
-      toast.success("Notes enregistrees");
+      toast.success("Notes enregistrées");
     }
     setSavingNotes(false);
   }
@@ -179,7 +182,7 @@ export function DealDetail({
     });
 
     if (result.error) {
-      toast.error("Erreur lors de la mise a jour");
+      toast.error("Erreur lors de la mise à jour");
       return;
     }
 
@@ -188,7 +191,7 @@ export function DealDetail({
       ...editForm,
     });
     setEditOpen(false);
-    toast.success("Deal mis a jour");
+    toast.success("Deal mis à jour");
   }
 
   async function handleAddActivity() {
@@ -222,7 +225,7 @@ export function DealDetail({
       setDeleting(false);
       return;
     }
-    toast.success("Deal supprime");
+    toast.success("Deal supprimé");
     router.push("/crm");
   }
 
@@ -277,7 +280,7 @@ export function DealDetail({
                   </div>
                   <div>
                     <label className="text-sm font-medium">
-                      Probabilite (%)
+                      Probabilité (%)
                     </label>
                     <Input
                       type="number"
@@ -304,7 +307,7 @@ export function DealDetail({
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Assigne a</label>
+                  <label className="text-sm font-medium">Assigné à</label>
                   <Select
                     value={editForm.assigned_to}
                     onValueChange={(v) =>
@@ -312,7 +315,7 @@ export function DealDetail({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selectionner un membre" />
+                      <SelectValue placeholder="Sélectionner un membre" />
                     </SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((m) => (
@@ -431,7 +434,7 @@ export function DealDetail({
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
                   <Target className="h-3.5 w-3.5 text-brand" />
-                  Probabilite
+                  Probabilité
                 </div>
                 <p className="text-xl font-bold">{currentDeal.probability}%</p>
               </CardContent>
@@ -440,7 +443,7 @@ export function DealDetail({
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-brand" />
-                  Valeur ponderee
+                  Valeur pondérée
                 </div>
                 <p className="text-xl font-bold">
                   {formatCurrency(
@@ -453,7 +456,7 @@ export function DealDetail({
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
                   <Thermometer className="h-3.5 w-3.5 text-brand" />
-                  Temperature
+                  Température
                 </div>
                 <div className="flex gap-1 mt-1">
                   {(["hot", "warm", "cold"] as const).map((temp) => (
@@ -468,10 +471,10 @@ export function DealDetail({
                       onClick={() => handleTempChange(temp)}
                     >
                       {temp === "hot"
-                        ? "Hot"
+                        ? "Chaud"
                         : temp === "warm"
-                          ? "Warm"
-                          : "Cold"}
+                          ? "Tiède"
+                          : "Froid"}
                     </Badge>
                   ))}
                 </div>
@@ -547,7 +550,7 @@ export function DealDetail({
                           <SelectItem value="call">Appel</SelectItem>
                           <SelectItem value="email">Email</SelectItem>
                           <SelectItem value="message">Message</SelectItem>
-                          <SelectItem value="meeting">Reunion</SelectItem>
+                          <SelectItem value="meeting">Réunion</SelectItem>
                           <SelectItem value="note">Note</SelectItem>
                         </SelectContent>
                       </Select>
@@ -593,7 +596,7 @@ export function DealDetail({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-medium">
-                              {activity.user?.full_name || "Systeme"}
+                              {activity.user?.full_name || "Système"}
                             </span>
                             <Badge variant="outline" className="text-xs">
                               {activity.type === "call"
@@ -603,10 +606,12 @@ export function DealDetail({
                                   : activity.type === "message"
                                     ? "Message"
                                     : activity.type === "meeting"
-                                      ? "Reunion"
+                                      ? "Réunion"
                                       : activity.type === "status_change"
                                         ? "Changement"
-                                        : "Note"}
+                                        : (activity.type as string) === "auto_follow_up"
+                                          ? "Relance auto"
+                                          : "Note"}
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
@@ -694,6 +699,36 @@ export function DealDetail({
             </Card>
           )}
 
+          {/* Linked prospect */}
+          {linkedProspect && (
+            <Card className="rounded-xl border-brand/20 bg-brand/5 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="h-4 w-4 text-brand" />
+                  Prospect d&apos;origine
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{linkedProspect.name}</p>
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {linkedProspect.status === "booked" ? "Booké" :
+                       linkedProspect.status === "qualified" ? "Qualifié" :
+                       linkedProspect.status === "converted" ? "Converti" :
+                       linkedProspect.status}
+                    </Badge>
+                  </div>
+                  <Button variant="outline" size="sm" asChild className="rounded-xl">
+                    <Link href={`/prospecting/${linkedProspect.id}`}>
+                      Voir le prospect
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Next action */}
           {currentDeal.next_action && (
             <Card className="border-brand/20 bg-brand/5">
@@ -724,7 +759,7 @@ export function DealDetail({
           {currentDeal.assigned_user && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Assigne a</CardTitle>
+                <CardTitle className="text-base">Assigné à</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
@@ -781,7 +816,7 @@ export function DealDetail({
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Cree le</span>
+                <span className="text-muted-foreground">Créé le</span>
                 <span>
                   {format(new Date(currentDeal.created_at), "d MMM yyyy", {
                     locale: fr,

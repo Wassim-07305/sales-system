@@ -74,10 +74,25 @@ export default async function ProspectingPage() {
     // relance_workflows table may not exist yet — continue without relance data
   }
 
+  // Fetch dm_conversation existence for each prospect
+  const convMap: Record<string, boolean> = {};
+  try {
+    const { data: convs } = await supabase
+      .from("dm_conversations")
+      .select("prospect_id")
+      .in("prospect_id", prospectIds.length > 0 ? prospectIds : ["__none__"]);
+    for (const c of convs || []) {
+      convMap[c.prospect_id as string] = true;
+    }
+  } catch {
+    // dm_conversations table may not exist
+  }
+
   const prospectsWithScores = prospects.map((p: Record<string, unknown>) => ({
     ...p,
     computed_score: scoresMap[p.id as string] ?? null,
     relance_status: relanceMap[p.id as string] ?? null,
+    has_conversation: convMap[p.id as string] ?? false,
   }));
 
   return (

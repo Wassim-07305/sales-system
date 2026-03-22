@@ -65,6 +65,7 @@ export async function GET(request: Request) {
     j2_sent: 0,
     j3_sent: 0,
     responded_cancelled: 0,
+    reminders_notified: 0,
     errors: 0,
     details: [] as string[],
   };
@@ -231,6 +232,44 @@ export async function GET(request: Request) {
           `Erreur relance ${relance.id}: ${err instanceof Error ? err.message : "Erreur inconnue"}`,
         );
       }
+    }
+    // 4. Process due reminders (follow_up_tasks)
+    try {
+      const now15min = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      const { data: dueReminders } = await supabase
+        .from("follow_up_tasks")
+        .select("id, prospect_id, message_content, scheduled_at, created_by, prospects(name)")
+        .eq("completed", false)
+        .lte("scheduled_at", now15min)
+        .is("notified_at", null);
+
+      for (const reminder of dueReminders || []) {
+        const prospect = Array.isArray(reminder.prospects)
+          ? reminder.prospects[0]
+          : reminder.prospects;
+        const prospectName = (prospect as { name: string } | null)?.name || "Prospect";
+        const createdBy = reminder.created_by;
+
+        if (createdBy) {
+          await supabase.from("notifications").insert({
+            user_id: createdBy,
+            type: "prospect_reminder",
+            title: `Rappel : ${prospectName}`,
+            body: reminder.message_content || "Il est temps de relancer ce prospect",
+            link: `/prospecting/${reminder.prospect_id}`,
+          });
+
+          await supabase
+            .from("follow_up_tasks")
+            .update({ notified_at: new Date().toISOString() })
+            .eq("id", reminder.id);
+
+          results.reminders_notified++;
+        }
+      }
+    } catch {
+      // follow_up_tasks table may not exist or notified_at column missing
+      results.details.push("Rappels: table non disponible");
     }
   } catch (globalErr) {
     return NextResponse.json(
