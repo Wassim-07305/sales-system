@@ -14,22 +14,23 @@ export function useUser() {
     const supabase = createClient();
 
     async function getUser() {
+      console.log("[useUser] Starting getUser...");
       try {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
-        console.log("[useUser] getUser result:", user?.id ?? "null", error?.message ?? "ok");
-        setUser(user);
+        // Try getSession first (reads from cookie, no network call)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log("[useUser] getSession:", session?.user?.id ?? "null", sessionError?.message ?? "ok");
 
-        if (user) {
-          const { data: profile, error: profileErr } = await supabase
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+
+        if (currentUser) {
+          const { data: profileData, error: profileErr } = await supabase
             .from("profiles")
             .select("*")
-            .eq("id", user.id)
+            .eq("id", currentUser.id)
             .single();
-          console.log("[useUser] profile:", profile?.role ?? "null", profileErr?.message ?? "ok");
-          setProfile(profile);
+          console.log("[useUser] profile:", profileData?.role ?? "null", profileErr?.message ?? "ok");
+          setProfile(profileData);
         }
       } catch (err) {
         console.error("[useUser] getUser error:", err);
@@ -43,6 +44,7 @@ export function useUser() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("[useUser] authStateChange:", _event, session?.user?.id ?? "null");
       setUser(session?.user ?? null);
       if (session?.user) {
         const { data: profile } = await supabase
