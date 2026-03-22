@@ -146,6 +146,16 @@ export function UnifiedInbox() {
   const [connectingAccount, setConnectingAccount] = useState(false);
   const isDesktop = useIsDesktop();
 
+  const connectedProviders = new Set(
+    accounts.map((a) => a.provider.toUpperCase()),
+  );
+  const missingProviders = [
+    { provider: "WHATSAPP" as const, label: "WhatsApp", icon: <Phone className="h-4 w-4 text-green-500" /> },
+    { provider: "LINKEDIN" as const, label: "LinkedIn", icon: <Linkedin className="h-4 w-4 text-blue-500" /> },
+    { provider: "INSTAGRAM" as const, label: "Instagram", icon: <Instagram className="h-4 w-4 text-pink-500" /> },
+    { provider: "MAIL" as const, label: "Email", icon: <Mail className="h-4 w-4 text-amber-500" /> },
+  ].filter((b) => !connectedProviders.has(b.provider));
+
   async function handleConnectAccount(provider: "WHATSAPP" | "LINKEDIN" | "INSTAGRAM" | "MAIL") {
     setConnectingAccount(true);
     try {
@@ -307,36 +317,6 @@ export function UnifiedInbox() {
             {accounts.length > 1 ? "s" : ""}
           </p>
         </div>
-        {(() => {
-          const connectedProviders = new Set(
-            accounts.map((a) => a.provider.toUpperCase()),
-          );
-          const connectButtons = [
-            { provider: "WHATSAPP" as const, label: "WhatsApp", icon: <Phone className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-500" /> },
-            { provider: "LINKEDIN" as const, label: "LinkedIn", icon: <Linkedin className="h-3 w-3 md:h-3.5 md:w-3.5 text-blue-500" /> },
-            { provider: "INSTAGRAM" as const, label: "Instagram", icon: <Instagram className="h-3 w-3 md:h-3.5 md:w-3.5 text-pink-500" /> },
-            { provider: "MAIL" as const, label: "Email", icon: <Mail className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-500" /> },
-          ].filter((b) => !connectedProviders.has(b.provider));
-
-          return connectButtons.length > 0 ? (
-            <div className="flex items-center gap-1.5 overflow-x-auto">
-              <span className="text-[10px] md:text-xs text-muted-foreground shrink-0">Connecter :</span>
-              {connectButtons.map((b) => (
-                <Button
-                  key={b.provider}
-                  size="sm"
-                  variant="outline"
-                  className="text-[10px] md:text-xs h-7 md:h-8 gap-1 px-2 md:px-3 shrink-0"
-                  disabled={connectingAccount}
-                  onClick={() => handleConnectAccount(b.provider)}
-                >
-                  {b.icon}
-                  <span className="hidden sm:inline">{b.label}</span>
-                </Button>
-              ))}
-            </div>
-          ) : null;
-        })()}
       </div>
 
       {/* Platform tabs — full width */}
@@ -394,6 +374,28 @@ export function UnifiedInbox() {
                 <p className="text-sm text-muted-foreground">
                   Aucune conversation
                 </p>
+                {missingProviders.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Connectez vos comptes pour voir vos conversations
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {missingProviders.map((b) => (
+                        <Button
+                          key={b.provider}
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-8 gap-2 w-full"
+                          disabled={connectingAccount}
+                          onClick={() => handleConnectAccount(b.provider)}
+                        >
+                          {b.icon}
+                          {b.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="divide-y">
@@ -462,6 +464,28 @@ export function UnifiedInbox() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Choisissez une conversation dans la liste
                 </p>
+                {missingProviders.length > 0 && (
+                  <div className="mt-5">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Connectez vos comptes pour accéder à vos conversations
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {missingProviders.map((b) => (
+                        <Button
+                          key={b.provider}
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-8 gap-2"
+                          disabled={connectingAccount}
+                          onClick={() => handleConnectAccount(b.provider)}
+                        >
+                          {b.icon}
+                          {b.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
