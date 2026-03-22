@@ -479,16 +479,25 @@ export async function getUnipileEmailConversations(accountId: string): Promise<{
       }
     }
 
-    const conversations = Array.from(threadMap.entries()).map(([threadId, thread]) => ({
-      id: `email_${thread.id}`,
-      accountId,
-      provider: "email",
-      participants: [thread.from],
-      lastMessage: thread.subject,
-      lastMessageAt: thread.date,
-      unreadCount: thread.read ? 0 : 1,
-      isEmail: true,
-    }));
+    const conversations = Array.from(threadMap.entries()).map(([threadId, thread]) => {
+      // Extract domain from email for favicon/logo
+      const emailDomain = thread.fromEmail.split("@")[1] || "";
+      const pictureUrl = emailDomain
+        ? `https://logo.clearbit.com/${emailDomain}`
+        : undefined;
+
+      return {
+        id: `email_${thread.id}`,
+        accountId,
+        provider: "email",
+        participants: [thread.from],
+        pictureUrl,
+        lastMessage: thread.subject,
+        lastMessageAt: thread.date,
+        unreadCount: thread.read ? 0 : 1,
+        isEmail: true,
+      };
+    });
 
     return { conversations };
   } catch (err) {

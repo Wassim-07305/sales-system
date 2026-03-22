@@ -540,12 +540,22 @@ export function UnifiedInbox() {
                     <div className="flex items-start gap-3">
                       <div className="relative shrink-0">
                         {conv.pictureUrl ? (
-                          <img
-                            src={conv.pictureUrl}
-                            alt=""
-                            className="h-9 w-9 rounded-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
+                          <>
+                            <img
+                              src={conv.pictureUrl}
+                              alt=""
+                              className="h-9 w-9 rounded-full object-cover"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = "none";
+                                target.nextElementSibling?.classList.remove("hidden");
+                              }}
+                            />
+                            <div className="hidden flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
+                              {(conv.participants[0] || "?").charAt(0).toUpperCase()}
+                            </div>
+                          </>
                         ) : (
                           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
                             {(conv.participants[0] || "?").charAt(0).toUpperCase()}
@@ -654,7 +664,22 @@ export function UnifiedInbox() {
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div className="relative shrink-0">
                       {conv.pictureUrl ? (
-                        <img src={conv.pictureUrl} alt="" className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+                        <>
+                          <img
+                            src={conv.pictureUrl}
+                            alt=""
+                            className="h-8 w-8 rounded-full object-cover"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.style.display = "none";
+                              target.nextElementSibling?.classList.remove("hidden");
+                            }}
+                          />
+                          <div className="hidden flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                            {contactName.charAt(0).toUpperCase()}
+                          </div>
+                        </>
                       ) : (
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                           {contactName.charAt(0).toUpperCase()}
