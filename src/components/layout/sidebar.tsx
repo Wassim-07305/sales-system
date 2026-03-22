@@ -83,9 +83,12 @@ export function Sidebar({
           "md:static",
           sidebarMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
-          "w-[75vw] max-w-60 shrink-0 md:max-w-none",
-          isCollapsed ? "md:w-[68px]" : "md:w-60",
+          "shrink-0",
         )}
+        style={{
+          width: isCollapsed ? 68 : 240,
+          maxWidth: "75vw",
+        }}
       >
         {/* Logo */}
         <div
@@ -165,7 +168,7 @@ export function Sidebar({
                         className={cn(
                           "group relative flex items-center rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200",
                           isActive
-                            ? "bg-emerald-500/10 text-white font-semibold"
+                            ? "bg-emerald-500/10 text-emerald-400 font-semibold"
                             : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
                           isCollapsed && "md:justify-center md:px-0",
                         )}
@@ -287,7 +290,7 @@ export function Sidebar({
                   className={cn(
                     "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
                     pathname.startsWith("/settings")
-                      ? "bg-emerald-500/10 text-white font-semibold"
+                      ? "bg-emerald-500/10 text-emerald-400 font-semibold"
                       : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
                     isCollapsed && "md:justify-center md:px-0",
                   )}
@@ -325,7 +328,7 @@ export function Sidebar({
                   className={cn(
                     "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
                     pathname === "/profile"
-                      ? "bg-emerald-500/10 text-white font-semibold"
+                      ? "bg-emerald-500/10 text-emerald-400 font-semibold"
                       : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300",
                     isCollapsed && "md:justify-center md:px-0",
                   )}
@@ -352,35 +355,23 @@ export function Sidebar({
           )}
 
           {/* Sign out */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleLogout}
-                className={cn(
-                  "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400",
-                  isCollapsed && "md:justify-center md:px-0",
-                )}
-              >
-                <LogOut
-                  className={cn(
-                    "h-[18px] w-[18px] shrink-0",
-                    isCollapsed ? "" : "mr-3",
-                  )}
-                />
-                <span className={cn(isCollapsed && "md:hidden")}>
-                  Déconnexion
-                </span>
-              </button>
-            </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent
-                side="right"
-                className="bg-zinc-900 text-zinc-100 border-white/[0.06]"
-              >
-                Déconnexion
-              </TooltipContent>
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400",
+              isCollapsed && "md:justify-center md:px-0",
             )}
-          </Tooltip>
+          >
+            <LogOut
+              className={cn(
+                "h-[18px] w-[18px] shrink-0",
+                isCollapsed ? "" : "mr-3",
+              )}
+            />
+            <span className={cn(isCollapsed && "md:hidden")}>
+              Déconnexion
+            </span>
+          </button>
         </div>
       </aside>
     </TooltipProvider>
