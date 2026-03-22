@@ -389,7 +389,7 @@ export function UnifiedInbox() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
       <div className="border-b px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-3">
         <div className="shrink-0">
@@ -558,7 +558,7 @@ export function UnifiedInbox() {
 
         {/* RIGHT COLUMN: message panel */}
         {(isDesktop || selectedConv) && (
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
 
           {!selectedConv ? (
             <div className="flex-1 flex items-center justify-center">
