@@ -30,7 +30,23 @@ export function useMessages(channelId: string | null) {
         .order("created_at", { ascending: true })
         .limit(200);
       if (error) throw error;
-      return (data ?? []) as EnrichedMessage[];
+
+      // Sanitize data from Supabase to prevent React #310:
+      // - content may be null (TEXT nullable) → coerce to string
+      // - sender may be an array if FK detection fails → unwrap
+      // - reactions/attachments must be arrays
+      return ((data ?? []) as EnrichedMessage[]).map((msg) => ({
+        ...msg,
+        content:
+          typeof msg.content === "string"
+            ? msg.content
+            : String(msg.content ?? ""),
+        sender: Array.isArray(msg.sender)
+          ? msg.sender[0] ?? null
+          : msg.sender ?? null,
+        reactions: Array.isArray(msg.reactions) ? msg.reactions : [],
+        attachments: Array.isArray(msg.attachments) ? msg.attachments : [],
+      }));
     },
     enabled: !!channelId,
   });

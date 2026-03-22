@@ -94,7 +94,7 @@ export function ChatPanel({
     (msg: EnrichedMessage) => {
       setReplyTo({
         id: msg.id,
-        content: msg.content,
+        content: msg.content ?? "",
         senderName: msg.sender?.full_name ?? "Inconnu",
       });
     },
@@ -106,7 +106,7 @@ export function ChatPanel({
       const msg = messages.find((m) => m.id === messageId);
       if (msg) {
         setEditingMessageId(messageId);
-        setEditingContent(msg.content);
+        setEditingContent(msg.content ?? "");
       }
     },
     [messages, setEditingMessageId],

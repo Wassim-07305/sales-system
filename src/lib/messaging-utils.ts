@@ -109,7 +109,8 @@ export function getMessagePreview(
   if (contentType === "file") return "Fichier";
   if (contentType === "video") return "Video";
   if (contentType === "audio") return "Message vocal";
-  if (contentType === "system") return content;
-  if (content.length > 50) return content.slice(0, 50) + "...";
-  return content;
+  const safe = typeof content === "string" ? content : String(content ?? "");
+  if (contentType === "system") return safe;
+  if (safe.length > 50) return safe.slice(0, 50) + "...";
+  return safe;
 }

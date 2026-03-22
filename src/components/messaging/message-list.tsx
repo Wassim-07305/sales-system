@@ -66,7 +66,7 @@ export function MessageList({
     () =>
       searchQuery
         ? messages.filter((m) =>
-            m.content.toLowerCase().includes(searchQuery.toLowerCase()),
+            (m.content ?? "").toLowerCase().includes(searchQuery.toLowerCase()),
           )
         : messages,
     [messages, searchQuery],
