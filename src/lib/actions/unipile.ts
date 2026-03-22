@@ -342,14 +342,10 @@ export async function getUnipileConversations(accountId?: string): Promise<{
       };
     });
 
-    // Enrich conversations missing names by fetching /chats/{id}/attendees
-    const toEnrich = conversations.filter(
-      (c) => c.participants.length === 0 ||
-        c.participants.every((p) => !p || p === "Contact"),
-    );
-    if (toEnrich.length > 0) {
+    // Enrich all conversations with attendee names & photos
+    if (conversations.length > 0) {
       await Promise.allSettled(
-        toEnrich.map(async (conv) => {
+        conversations.map(async (conv) => {
           try {
             const attRes = await fetch(
               `${dsn}/api/v1/chats/${conv.id}/attendees`,
@@ -366,13 +362,16 @@ export async function getUnipileConversations(accountId?: string): Promise<{
             };
             const others = (attData.items || []).filter((a) => a.is_self !== 1);
             if (others.length > 0) {
-              conv.participants = others
+              const names = others
                 .map((a) => a.display_name || a.name || "")
                 .filter(Boolean);
+              if (names.length > 0) {
+                conv.participants = names;
+              }
               conv.pictureUrl = conv.pictureUrl || others[0].picture_url;
             }
           } catch {
-            // Skip enrichment on error
+            // Keep existing participant data on error
           }
         }),
       );
