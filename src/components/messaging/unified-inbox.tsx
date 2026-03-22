@@ -374,28 +374,40 @@ export function UnifiedInbox() {
                 <p className="text-sm text-muted-foreground">
                   Aucune conversation
                 </p>
-                {missingProviders.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Connectez vos comptes pour voir vos conversations
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      {missingProviders.map((b) => (
-                        <Button
-                          key={b.provider}
-                          size="sm"
-                          variant="outline"
-                          className="text-xs h-8 gap-2 w-full"
-                          disabled={connectingAccount}
-                          onClick={() => handleConnectAccount(b.provider)}
-                        >
-                          {b.icon}
-                          {b.label}
-                        </Button>
-                      ))}
+                {(() => {
+                  // Show connect button only for the relevant platform filter
+                  const platformToProvider: Record<string, string> = {
+                    whatsapp: "WHATSAPP", linkedin: "LINKEDIN",
+                    instagram: "INSTAGRAM", email: "MAIL",
+                  };
+                  const relevantMissing = activePlatform === "all"
+                    ? missingProviders
+                    : missingProviders.filter(
+                        (b) => b.provider === platformToProvider[activePlatform],
+                      );
+                  return relevantMissing.length > 0 ? (
+                    <div className="mt-4">
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Connectez {activePlatform === "all" ? "vos comptes" : `votre compte ${activePlatform}`} pour voir vos conversations
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {relevantMissing.map((b) => (
+                          <Button
+                            key={b.provider}
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-8 gap-2 w-full"
+                            disabled={connectingAccount}
+                            onClick={() => handleConnectAccount(b.provider)}
+                          >
+                            {b.icon}
+                            {b.label}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : null;
+                })()}
               </div>
             ) : (
               <div className="divide-y">
@@ -480,7 +492,7 @@ export function UnifiedInbox() {
                           onClick={() => handleConnectAccount(b.provider)}
                         >
                           {b.icon}
-                          {b.label}
+                          Connecter {b.label}
                         </Button>
                       ))}
                     </div>
