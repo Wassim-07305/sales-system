@@ -372,10 +372,10 @@ export function UnifiedInbox() {
 
       {/* Content: conversation list + message panel */}
       <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* Conversation list — full width on mobile, fixed on desktop */}
+        {/* Conversation list — full width on mobile, w-80 fixed on desktop */}
         <div className={cn(
-          "overflow-y-auto border-r",
-          selectedConv ? "hidden md:block md:w-80 md:shrink-0" : "w-full md:w-80 md:shrink-0",
+          "overflow-y-auto border-r w-full md:w-80 md:shrink-0",
+          selectedConv && "hidden md:block",
         )}>
           {loading ? (
             <div className="flex items-center justify-center py-12">
