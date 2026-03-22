@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { Providers } from "@/components/providers";
+import { UserProvider } from "@/lib/hooks/user-context";
 import dynamic from "next/dynamic";
 import type { UserRole } from "@/lib/types/database";
 
@@ -68,8 +69,11 @@ export function AppShell({
   // Build white-label config only if active
   const wl = whiteLabelConfig?.is_active ? whiteLabelConfig : null;
 
+  const userCtx = { userId, role, userName, email, avatarUrl: avatarUrl ?? null };
+
   return (
     <Providers>
+      <UserProvider value={userCtx}>
       <ThemeProvider>
         <NavigationProgress />
         {wl?.primary_color && (
@@ -127,6 +131,7 @@ export function AppShell({
           <IncomingCallToast />
         </div>
       </ThemeProvider>
+      </UserProvider>
     </Providers>
   );
 }

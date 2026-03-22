@@ -2,40 +2,57 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useUserContext } from "@/lib/hooks/user-context";
 import type { Profile } from "@/lib/types/database";
 import type { User } from "@supabase/supabase-js";
 
 export function useUser() {
+  const serverCtx = useUserContext();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!serverCtx);
 
   useEffect(() => {
+    // If we have server context, build a minimal user + profile from it
+    // This avoids depending on the browser Supabase client for auth
+    if (serverCtx) {
+      setUser({
+        id: serverCtx.userId,
+        email: serverCtx.email,
+      } as User);
+      setProfile({
+        id: serverCtx.userId,
+        email: serverCtx.email,
+        full_name: serverCtx.userName,
+        avatar_url: serverCtx.avatarUrl,
+        role: serverCtx.role,
+      } as Profile);
+      setLoading(false);
+      return;
+    }
+
+    // Fallback: use browser Supabase client
     const supabase = createClient();
 
     async function getUser() {
-      console.log("[useUser] Starting getUser...");
       try {
-        // Try getSession first (reads from cookie, no network call)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log("[useUser] getSession:", session?.user?.id ?? "null", sessionError?.message ?? "ok");
-
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         const currentUser = session?.user ?? null;
         setUser(currentUser);
 
         if (currentUser) {
-          const { data: profileData, error: profileErr } = await supabase
+          const { data: profileData } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", currentUser.id)
             .single();
-          console.log("[useUser] profile:", profileData?.role ?? "null", profileErr?.message ?? "ok");
           setProfile(profileData);
         }
       } catch (err) {
         console.error("[useUser] getUser error:", err);
       }
-
       setLoading(false);
     }
 
@@ -44,7 +61,6 @@ export function useUser() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("[useUser] authStateChange:", _event, session?.user?.id ?? "null");
       setUser(session?.user ?? null);
       if (session?.user) {
         const { data: profile } = await supabase
@@ -60,7 +76,7 @@ export function useUser() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [serverCtx]);
 
   return { user, profile, loading };
 }
