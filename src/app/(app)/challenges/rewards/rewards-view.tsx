@@ -109,11 +109,11 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
       </PageHeader>
 
       {/* Points balance */}
-      <Card className="mb-6 rounded-2xl bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0 shadow-xl shadow-brand-dark/20">
+      <Card className="mb-6 rounded-2xl bg-gradient-to-r from-zinc-950 to-zinc-950/80 text-white border-0 shadow-xl shadow-zinc-950/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-brand/20 border-2 border-brand flex items-center justify-center">
-              <Star className="h-7 w-7 text-brand" />
+            <div className="h-14 w-14 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
+              <Star className="h-7 w-7 text-emerald-500" />
             </div>
             <div>
               <p className="text-white/60 text-sm">Votre solde actuel</p>
@@ -127,7 +127,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
 
       {/* Rewards grid */}
       <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-        <Gift className="h-5 w-5 text-brand" />
+        <Gift className="h-5 w-5 text-emerald-500" />
         Catalogue des récompenses
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -137,14 +137,14 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
           return (
             <Card
               key={reward.id}
-              className={`rounded-2xl border-border/40 transition-all duration-300 ${!canAfford ? "opacity-50 grayscale" : "hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5"}`}
+              className={`rounded-2xl border-border/40 transition-all duration-300 ${!canAfford ? "opacity-50 grayscale" : "hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5"}`}
             >
               <CardContent className="p-5">
                 <div className="flex items-start gap-3 mb-3">
                   <div
                     className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
                       canAfford
-                        ? "bg-brand/10 text-brand"
+                        ? "bg-emerald-500/10 text-emerald-500"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -162,7 +162,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
                 <div className="flex items-center justify-between">
                   <Badge
                     variant="outline"
-                    className={canAfford ? "text-brand border-brand/30" : ""}
+                    className={canAfford ? "text-emerald-500 border-emerald-500/30" : ""}
                   >
                     {reward.pointsCost.toLocaleString("fr-FR")} pts
                   </Badge>
@@ -184,7 +184,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <History className="h-5 w-5 text-brand" />
+            <History className="h-5 w-5 text-emerald-500" />
             Historique des échanges
           </CardTitle>
         </CardHeader>
@@ -245,7 +245,7 @@ export function RewardsView({ rewards, currentPoints, history }: Props) {
             <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
               {(() => {
                 const IC = ICON_MAP[confirmReward.icon] || Gift;
-                return <IC className="h-6 w-6 text-brand shrink-0" />;
+                return <IC className="h-6 w-6 text-emerald-500 shrink-0" />;
               })()}
               <div>
                 <p className="font-semibold">{confirmReward.name}</p>

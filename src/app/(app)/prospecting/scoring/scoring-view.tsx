@@ -124,7 +124,7 @@ const tierConfig: Record<
 // ─── Score factor definitions for the breakdown bars ────────────────
 
 const scoreFactors = [
-  { key: "statusScore" as const, label: "Statut", max: 30, color: "#7af17a" },
+  { key: "statusScore" as const, label: "Statut", max: 30, color: "#10b981" },
   {
     key: "engagementScore" as const,
     label: "Engagement",
@@ -328,10 +328,10 @@ export function ScoringView({ prospects }: Props) {
 
       {/* ── Scoring Rules Explanation Card ── */}
       {showRules && (
-        <Card className="border-brand/20 shadow-sm rounded-2xl">
+        <Card className="border-emerald-500/20 shadow-sm rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Info className="h-5 w-5 text-brand" />
+              <Info className="h-5 w-5 text-emerald-500" />
               Comment le score est calculé
             </CardTitle>
           </CardHeader>
@@ -341,7 +341,7 @@ export function ScoringView({ prospects }: Props) {
                 <div className="flex items-start gap-3">
                   <div
                     className="h-3 w-3 rounded-full mt-1.5 shrink-0"
-                    style={{ backgroundColor: "#7af17a" }}
+                    style={{ backgroundColor: "#10b981" }}
                   />
                   <div>
                     <p className="font-medium">
@@ -472,8 +472,8 @@ export function ScoringView({ prospects }: Props) {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-brand" />
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold">{avgScore}</p>
@@ -589,7 +589,7 @@ export function ScoringView({ prospects }: Props) {
                   >
                     {/* Name */}
                     <div className="sm:col-span-3 flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">
+                      <div className="h-9 w-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-sm">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -680,7 +680,7 @@ export function ScoringView({ prospects }: Props) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs h-7 px-2 border-brand/30 text-brand hover:bg-brand/10"
+                          className="text-xs h-7 px-2 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10"
                           disabled={qualifyingId === prospect.id}
                           onClick={(e) => {
                             e.stopPropagation();

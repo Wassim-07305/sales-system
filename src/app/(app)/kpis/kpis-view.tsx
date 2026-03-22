@@ -139,7 +139,7 @@ export function KpisView({
         <Button
           size="sm"
           variant={activeTab === "kpis" ? "default" : "outline"}
-          className={activeTab === "kpis" ? "bg-brand text-brand-dark" : ""}
+          className={activeTab === "kpis" ? "bg-emerald-500 text-black" : ""}
           onClick={() => setActiveTab("kpis")}
         >
           <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
@@ -149,7 +149,7 @@ export function KpisView({
           size="sm"
           variant={activeTab === "simulator" ? "default" : "outline"}
           className={
-            activeTab === "simulator" ? "bg-brand text-brand-dark" : ""
+            activeTab === "simulator" ? "bg-emerald-500 text-black" : ""
           }
           onClick={() => setActiveTab("simulator")}
         >
@@ -166,7 +166,7 @@ export function KpisView({
         <>
           {/* NPS Modal */}
           {npsShown && pendingNps && (
-            <Card className="mb-6 border-brand/20 bg-gradient-to-br from-brand/10 via-brand/5 to-transparent overflow-hidden relative">
+            <Card className="mb-6 border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent overflow-hidden relative">
               <CardContent className="p-6 relative z-10">
                 <h3 className="text-lg font-semibold mb-2">
                   Comment évaluez-vous votre expérience Sales System ?
@@ -181,8 +181,8 @@ export function KpisView({
                       onClick={() => setNpsScore(i)}
                       className={`h-10 w-10 rounded-xl border text-sm font-semibold transition-all duration-200 ${
                         npsScore === i
-                          ? "bg-brand text-brand-dark border-brand shadow-sm shadow-brand/20"
-                          : "hover:border-brand/50 hover:bg-brand/5"
+                          ? "bg-emerald-500 text-black border-emerald-500 shadow-sm shadow-emerald-500/20"
+                          : "hover:border-emerald-500/50 hover:bg-emerald-500/5"
                       }`}
                     >
                       {i}
@@ -201,7 +201,7 @@ export function KpisView({
                 />
                 <div className="flex gap-2">
                   <Button
-                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400"
                     onClick={handleNpsSubmit}
                     disabled={npsScore === null || npsSubmitting}
                   >
@@ -222,7 +222,7 @@ export function KpisView({
                 key={p}
                 size="sm"
                 variant={period === p ? "default" : "outline"}
-                className={period === p ? "bg-brand text-brand-dark" : ""}
+                className={period === p ? "bg-emerald-500 text-black" : ""}
                 onClick={() => setPeriod(p)}
               >
                 {p} jours
@@ -241,8 +241,8 @@ export function KpisView({
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                        <Icon className="h-4 w-4 text-brand" />
+                      <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                        <Icon className="h-4 w-4 text-emerald-500" />
                       </div>
                     </div>
                     <p className="text-2xl font-bold tracking-tight">
@@ -293,7 +293,7 @@ export function KpisView({
                           />
                           <Bar
                             dataKey="bookings"
-                            fill="#7af17a"
+                            fill="#10b981"
                             radius={[4, 4, 0, 0]}
                           />
                         </BarChart>
@@ -330,7 +330,7 @@ export function KpisView({
                           <Line
                             type="monotone"
                             dataKey="revenue"
-                            stroke="#7af17a"
+                            stroke="#10b981"
                             strokeWidth={3}
                           />
                         </LineChart>
@@ -369,7 +369,7 @@ export function KpisView({
                           <Line
                             type="monotone"
                             dataKey="closing"
-                            stroke="#7af17a"
+                            stroke="#10b981"
                             strokeWidth={2}
                             name="Closing"
                           />
@@ -383,8 +383,8 @@ export function KpisView({
           ) : (
             <Card className="border-border/50">
               <CardContent className="py-16 text-center">
-                <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="h-7 w-7 text-brand" />
+                <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-7 w-7 text-emerald-500" />
                 </div>
                 <p className="font-semibold text-lg">Pas encore de donnees</p>
                 <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">

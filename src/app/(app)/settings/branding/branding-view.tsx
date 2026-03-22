@@ -29,8 +29,8 @@ const COLOR_PALETTES = [
   {
     id: "default",
     name: "Sales System",
-    primary: "#7af17a",
-    secondary: "#14080e",
+    primary: "#10b981",
+    secondary: "#09090b",
     accent: "#22c55e",
   },
   {
@@ -112,15 +112,15 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
       <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <User className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <User className="h-4 w-4 text-emerald-500" />
             </div>
             Profil
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4 mb-4">
-            <div className="h-16 w-16 rounded-full bg-brand/10 border-2 border-brand flex items-center justify-center text-brand text-xl font-bold">
+            <div className="h-16 w-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center text-emerald-500 text-xl font-bold">
               {displayName?.charAt(0) || "?"}
             </div>
             <div className="flex-1">
@@ -185,13 +185,13 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
                 className={cn(
                   "relative p-4 rounded-xl border-2 transition-all text-left hover:shadow-sm",
                   selectedPalette === palette.id
-                    ? "border-brand ring-2 ring-brand/20"
+                    ? "border-emerald-500 ring-2 ring-emerald-500/20"
                     : "border-muted hover:border-muted-foreground/30",
                 )}
               >
                 {selectedPalette === palette.id && (
-                  <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-brand flex items-center justify-center">
-                    <Check className="h-3 w-3 text-brand-dark" />
+                  <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <Check className="h-3 w-3 text-black" />
                   </div>
                 )}
                 <div className="flex gap-1.5 mb-2">
@@ -219,7 +219,7 @@ export function BrandingView({ profile, initialPalette = "default" }: Props) {
       <Button
         onClick={handleSave}
         disabled={isPending}
-        className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+        className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
       >
         <Save className="h-4 w-4 mr-2" />
         {isPending ? "Enregistrement..." : "Enregistrer les modifications"}

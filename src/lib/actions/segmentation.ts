@@ -52,7 +52,7 @@ export async function getSegments() {
       name: row.name as string,
       description: (row.description as string) || null,
       filters: parseFilters(row.filters),
-      color: (row.color as string) || "#7af17a",
+      color: (row.color as string) || "#10b981",
       created_at: row.created_at as string,
       updated_at: (row.updated_at as string) || (row.created_at as string),
     }));
@@ -79,7 +79,7 @@ export async function createSegment(data: {
     name: data.name,
     description: data.description || null,
     filters: data.filters,
-    color: data.color || "#7af17a",
+    color: data.color || "#10b981",
     user_id: user.id,
   });
 

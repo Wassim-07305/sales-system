@@ -446,7 +446,7 @@ export function IntegrationsView({
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-brand/15 text-brand border-brand/20 text-[10px]">
+                        <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/20 text-[10px]">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Connecté
                         </Badge>
@@ -492,19 +492,19 @@ export function IntegrationsView({
                         disabled={isConnecting}
                         className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all text-center ${
                           isConnected
-                            ? "border-brand/30 bg-brand/5"
+                            ? "border-emerald-500/30 bg-emerald-500/5"
                             : "border-border hover:border-foreground/20 hover:bg-muted/50"
                         }`}
                       >
                         <div
                           className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                            isConnected ? "bg-brand/15" : "bg-muted"
+                            isConnected ? "bg-emerald-500/15" : "bg-muted"
                           }`}
                         >
                           {isConnecting ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : isConnected ? (
-                            <CheckCircle2 className="h-4 w-4 text-brand" />
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                           ) : (
                             provider.icon
                           )}
@@ -570,7 +570,7 @@ export function IntegrationsView({
                         </div>
                       </div>
                       {configured ? (
-                        <Badge className="bg-brand/15 text-brand border-brand/20">
+                        <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/20">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Connecté
                         </Badge>
@@ -598,7 +598,7 @@ export function IntegrationsView({
                         <Label className="text-xs font-medium">
                           {k.label}
                           {status[k.key] && (
-                            <span className="ml-2 text-brand text-[10px]">
+                            <span className="ml-2 text-emerald-500 text-[10px]">
                               (configuré)
                             </span>
                           )}

@@ -35,7 +35,7 @@ export default function OutreachLayout({
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors",
                 active
-                  ? "bg-brand/10 text-brand"
+                  ? "bg-emerald-500/10 text-emerald-500"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >

@@ -166,7 +166,7 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
       <div className="px-6 shrink-0">
         <div className="h-1 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-brand rounded-full transition-all duration-300"
+            className="h-full bg-emerald-500 rounded-full transition-all duration-300"
             style={{
               width: `${((currentStep + 1) / totalSteps) * 100}%`,
             }}
@@ -208,9 +208,9 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
             className={cn(
               "h-2 rounded-full transition-all duration-300",
               idx === currentStep
-                ? "w-6 bg-brand"
+                ? "w-6 bg-emerald-500"
                 : idx < currentStep
-                  ? "w-2 bg-brand/60"
+                  ? "w-2 bg-emerald-500/60"
                   : "w-2 bg-muted-foreground/20",
             )}
           />
@@ -234,7 +234,7 @@ export function PresentView({ presentation, slides }: PresentViewProps) {
           onClick={goNext}
           disabled={currentStep === totalSteps - 1}
           size="lg"
-          className="bg-brand text-brand-dark hover:bg-brand/90 disabled:opacity-30"
+          className="bg-emerald-500 text-black hover:bg-emerald-400 disabled:opacity-30"
         >
           Suivant
           <ArrowRight className="h-5 w-5 ml-2" />

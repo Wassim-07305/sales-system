@@ -115,7 +115,7 @@ export function BookingDashboard({
       label: "RDV créés",
       value: kpis.bookings,
       icon: CalendarCheck,
-      color: "bg-brand/10 text-brand",
+      color: "bg-emerald-500/10 text-emerald-500",
     },
     {
       label: "Vues → Contacts",
@@ -188,7 +188,7 @@ export function BookingDashboard({
         {/* Nouvelle page button */}
         <div className="ml-auto">
           <Button
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
             onClick={() => setShowCreateModal(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -268,7 +268,7 @@ export function BookingDashboard({
                     réservations.
                   </p>
                   <Button
-                    className="mt-4 bg-brand text-brand-dark hover:bg-brand/90"
+                    className="mt-4 bg-emerald-500 text-black hover:bg-emerald-400"
                     onClick={() => setShowCreateModal(true)}
                   >
                     <Plus className="mr-2 h-4 w-4" />
@@ -317,7 +317,7 @@ export function BookingDashboard({
                       className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-4 shadow-sm"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-sm font-bold text-brand">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-sm font-bold text-emerald-500">
                           {lead.name
                             .split(" ")
                             .map((w) => w[0])

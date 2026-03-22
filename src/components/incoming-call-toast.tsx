@@ -17,8 +17,8 @@ export function IncomingCallToast() {
     <div className="fixed top-4 right-4 z-[100] animate-in fade-in slide-in-from-top-2 duration-300">
       <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 shadow-2xl w-80">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#7af17a]/20 flex items-center justify-center flex-shrink-0 animate-pulse">
-            <Phone className="w-5 h-5 text-[#7af17a]" />
+          <div className="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center flex-shrink-0 animate-pulse">
+            <Phone className="w-5 h-5 text-[#10b981]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white">Appel entrant</p>
@@ -39,7 +39,7 @@ export function IncomingCallToast() {
               dismissIncoming();
               router.push(`/live/${incomingCallId}`);
             }}
-            className="flex-1 h-9 rounded-xl bg-[#7af17a] text-zinc-900 text-sm font-semibold hover:bg-[#6ae06a] transition-colors"
+            className="flex-1 h-9 rounded-xl bg-[#10b981] text-zinc-900 text-sm font-semibold hover:bg-[#6ae06a] transition-colors"
           >
             Rejoindre
           </button>

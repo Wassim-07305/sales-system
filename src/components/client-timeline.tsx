@@ -31,7 +31,7 @@ const EVENT_CONFIG: Record<
     bg: string;
   }
 > = {
-  signup: { icon: UserPlus, color: "text-brand", bg: "bg-brand/20" },
+  signup: { icon: UserPlus, color: "text-emerald-500", bg: "bg-emerald-500/20" },
   onboarding: {
     icon: ClipboardCheck,
     color: "text-blue-400",
@@ -65,7 +65,7 @@ const EVENT_CONFIG: Record<
     color: "text-orange-400",
     bg: "bg-orange-400/20",
   },
-  placement_ready: { icon: Trophy, color: "text-brand", bg: "bg-brand/20" },
+  placement_ready: { icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-500/20" },
   challenge_completed: {
     icon: Trophy,
     color: "text-amber-400",
@@ -125,7 +125,7 @@ export function ClientTimeline({ events }: { events: TimelineEvent[] }) {
               key={f.label}
               size="sm"
               variant={filter === f.label ? "default" : "outline"}
-              className={`h-7 text-xs ${filter === f.label ? "bg-brand text-brand-dark" : ""}`}
+              className={`h-7 text-xs ${filter === f.label ? "bg-emerald-500 text-black" : ""}`}
               onClick={() => {
                 setFilter(f.label);
                 setVisibleCount(20);

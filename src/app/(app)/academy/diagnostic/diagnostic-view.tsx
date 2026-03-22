@@ -91,7 +91,7 @@ const levelColors: Record<string, string> = {
   Débutant: "text-red-400 bg-red-400/10 border-red-400/20",
   Intermédiaire: "text-amber-400 bg-amber-400/10 border-amber-400/20",
   Avancé: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  Expert: "text-[#7af17a] bg-[#7af17a]/10 border-[#7af17a]/20",
+  Expert: "text-[#10b981] bg-[#10b981]/10 border-[#10b981]/20",
 };
 
 const priorityLabels: Record<string, { label: string; color: string }> = {
@@ -181,7 +181,7 @@ export function DiagnosticView({
         setResultCompletedAt(result.completedAt);
         setMode("results");
         toast.success("Diagnostic terminé !", {
-          style: { background: "#14080e", borderColor: "#7af17a" },
+          style: { background: "#09090b", borderColor: "#10b981" },
         });
       } catch {
         toast.error("Erreur lors de la soumission du diagnostic");
@@ -229,7 +229,7 @@ export function DiagnosticView({
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
-            className="gap-1.5 border-[#7af17a]/30 text-[#7af17a]"
+            className="gap-1.5 border-[#10b981]/30 text-[#10b981]"
           >
             {categoryIcons[currentQuestion.category]}
             {currentQuestion.categoryLabel}
@@ -252,9 +252,9 @@ export function DiagnosticView({
                     onClick={() => handleSelectOption(option)}
                     className={cn(
                       "w-full text-left p-4 rounded-lg border transition-all duration-200",
-                      "hover:border-[#7af17a]/50 hover:bg-[#7af17a]/5",
+                      "hover:border-[#10b981]/50 hover:bg-[#10b981]/5",
                       isSelected
-                        ? "border-[#7af17a] bg-[#7af17a]/10 text-foreground"
+                        ? "border-[#10b981] bg-[#10b981]/10 text-foreground"
                         : "border-border/50 bg-background/50 text-muted-foreground",
                     )}
                   >
@@ -263,7 +263,7 @@ export function DiagnosticView({
                         className={cn(
                           "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium border",
                           isSelected
-                            ? "bg-[#7af17a] text-[#14080e] border-[#7af17a]"
+                            ? "bg-[#10b981] text-[#09090b] border-[#10b981]"
                             : "border-border/50 text-muted-foreground",
                         )}
                       >
@@ -293,7 +293,7 @@ export function DiagnosticView({
             <Button
               onClick={handleNext}
               disabled={!selectedOption}
-              className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+              className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
             >
               Suivant
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -302,7 +302,7 @@ export function DiagnosticView({
             <Button
               onClick={handleSubmit}
               disabled={!allAnswered || isPending}
-              className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+              className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
             >
               {isPending ? (
                 "Analyse en cours..."
@@ -328,9 +328,9 @@ export function DiagnosticView({
               className={cn(
                 "w-2.5 h-2.5 rounded-full transition-all",
                 idx === currentIndex
-                  ? "bg-[#7af17a] w-6"
+                  ? "bg-[#10b981] w-6"
                   : answers[q.id]
-                    ? "bg-[#7af17a]/50"
+                    ? "bg-[#10b981]/50"
                     : "bg-border",
               )}
             />
@@ -370,13 +370,13 @@ export function DiagnosticView({
       </PageHeader>
 
       {/* Overall score */}
-      <Card className="border-[#7af17a]/20 bg-gradient-to-br from-[#7af17a]/5 to-transparent">
+      <Card className="border-[#10b981]/20 bg-gradient-to-br from-[#10b981]/5 to-transparent">
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
-              <div className="w-28 h-28 rounded-full border-4 border-[#7af17a]/30 flex items-center justify-center">
+              <div className="w-28 h-28 rounded-full border-4 border-[#10b981]/30 flex items-center justify-center">
                 <div className="text-center">
-                  <span className="text-3xl font-bold text-[#7af17a]">
+                  <span className="text-3xl font-bold text-[#10b981]">
                     {overallScore}
                   </span>
                   <span className="text-sm text-muted-foreground block">
@@ -416,7 +416,7 @@ export function DiagnosticView({
       <Card className="border-border/50">
         <CardContent className="pt-6">
           <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-[#7af17a]" />
+            <BarChart3 className="h-4 w-4 text-[#10b981]" />
             Cartographie des compétences
           </h3>
           <div className="h-[320px]">
@@ -435,14 +435,14 @@ export function DiagnosticView({
                 <Radar
                   name="Score"
                   dataKey="score"
-                  stroke="#7af17a"
-                  fill="#7af17a"
+                  stroke="#10b981"
+                  fill="#10b981"
                   fillOpacity={0.2}
                   strokeWidth={2}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#14080e",
+                    background: "#09090b",
                     border: "1px solid #333",
                     borderRadius: "8px",
                   }}
@@ -495,7 +495,7 @@ export function DiagnosticView({
       {courses.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-base font-semibold flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#7af17a]" />
+            <Sparkles className="h-4 w-4 text-[#10b981]" />
             Cours recommandés
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -505,7 +505,7 @@ export function DiagnosticView({
               return (
                 <Card
                   key={course.id}
-                  className="border-border/50 hover:border-[#7af17a]/30 transition-colors"
+                  className="border-border/50 hover:border-[#10b981]/30 transition-colors"
                 >
                   <CardContent className="pt-6 space-y-3">
                     <div className="flex items-start justify-between gap-2">
@@ -566,11 +566,11 @@ export function DiagnosticView({
       )}
 
       {/* Link to full path */}
-      <Card className="border-[#7af17a]/20 bg-[#7af17a]/5">
+      <Card className="border-[#10b981]/20 bg-[#10b981]/5">
         <CardContent className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#7af17a]/20 flex items-center justify-center">
-              <Compass className="h-5 w-5 text-[#7af17a]" />
+            <div className="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center">
+              <Compass className="h-5 w-5 text-[#10b981]" />
             </div>
             <div>
               <h4 className="font-medium text-sm">
@@ -583,7 +583,7 @@ export function DiagnosticView({
           </div>
           <Button
             asChild
-            className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+            className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
           >
             <Link href="/academy/path">
               Voir mon parcours

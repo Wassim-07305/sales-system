@@ -267,9 +267,9 @@ export function NpsAnalyticsView({ data }: { data: NpsAnalyticsResult }) {
                   <Line
                     type="monotone"
                     dataKey="nps"
-                    stroke="#7af17a"
+                    stroke="#10b981"
                     strokeWidth={2.5}
-                    dot={{ fill: "#7af17a", r: 4 }}
+                    dot={{ fill: "#10b981", r: 4 }}
                     name="nps"
                   />
                   <Line

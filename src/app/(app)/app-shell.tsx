@@ -89,7 +89,7 @@ export function AppShell({
             }}
           />
         )}
-        <div className="flex h-dvh overflow-hidden bg-background">
+        <div className="flex h-dvh overflow-hidden bg-background dark:bg-gradient-dark">
           {/* Sidebar */}
           <Sidebar
             role={role}
@@ -114,8 +114,10 @@ export function AppShell({
             />
 
             {/* Content */}
-            <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
-              <div className="mx-auto max-w-[1400px]">{children}</div>
+            <main className="relative flex-1 overflow-y-auto p-4 pb-24 md:p-8 md:pb-8">
+              {/* Subtle emerald glow at top */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-emerald-glow dark:block hidden" />
+              <div className="relative mx-auto max-w-[1400px]">{children}</div>
             </main>
           </div>
 

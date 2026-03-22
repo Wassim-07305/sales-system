@@ -110,9 +110,9 @@ export function PublicProfileView({
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <Avatar className="h-24 w-24 ring-2 ring-[#7af17a]/30">
+            <Avatar className="h-24 w-24 ring-2 ring-[#10b981]/30">
               <AvatarImage src={profile.avatar_url || undefined} />
-              <AvatarFallback className="text-2xl bg-[#7af17a]/20 text-[#7af17a]">
+              <AvatarFallback className="text-2xl bg-[#10b981]/20 text-[#10b981]">
                 {getInitials(profile.full_name)}
               </AvatarFallback>
             </Avatar>
@@ -123,7 +123,7 @@ export function PublicProfileView({
               <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                 <Badge
                   variant="outline"
-                  className="text-[#7af17a] border-[#7af17a]/30"
+                  className="text-[#10b981] border-[#10b981]/30"
                 >
                   {ROLE_LABELS[profile.role] || profile.role}
                 </Badge>

@@ -355,7 +355,7 @@ export function DealDetail({
                 </div>
                 <Button
                   onClick={handleEditSubmit}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   Enregistrer
                 </Button>
@@ -422,7 +422,7 @@ export function DealDetail({
             <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
-                  <DollarSign className="h-3.5 w-3.5 text-brand" />
+                  <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
                   Valeur
                 </div>
                 <p className="text-xl font-bold">
@@ -433,7 +433,7 @@ export function DealDetail({
             <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
-                  <Target className="h-3.5 w-3.5 text-brand" />
+                  <Target className="h-3.5 w-3.5 text-emerald-500" />
                   Probabilité
                 </div>
                 <p className="text-xl font-bold">{currentDeal.probability}%</p>
@@ -442,7 +442,7 @@ export function DealDetail({
             <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
-                  <TrendingUp className="h-3.5 w-3.5 text-brand" />
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
                   Valeur pondérée
                 </div>
                 <p className="text-xl font-bold">
@@ -455,7 +455,7 @@ export function DealDetail({
             <Card className="rounded-xl border-border/50 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1.5">
-                  <Thermometer className="h-3.5 w-3.5 text-brand" />
+                  <Thermometer className="h-3.5 w-3.5 text-emerald-500" />
                   Température
                 </div>
                 <div className="flex gap-1 mt-1">
@@ -499,7 +499,7 @@ export function DealDetail({
                     onClick={() => handleStageChange(stage.id)}
                     className={
                       currentDeal.stage_id === stage.id
-                        ? "bg-brand text-brand-dark hover:bg-brand/90"
+                        ? "bg-emerald-500 text-black hover:bg-emerald-400"
                         : ""
                     }
                   >
@@ -571,7 +571,7 @@ export function DealDetail({
                     </div>
                     <Button
                       onClick={handleAddActivity}
-                      className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                      className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                     >
                       Ajouter
                     </Button>
@@ -646,7 +646,7 @@ export function DealDetail({
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-lg">
+                  <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-lg">
                     {currentDeal.contact.full_name?.charAt(0) || "?"}
                   </div>
                   <div>
@@ -691,7 +691,7 @@ export function DealDetail({
                 <Separator className="my-4" />
                 <Link
                   href={`/utilisateurs/${currentDeal.contact.id}`}
-                  className="text-sm text-brand hover:underline"
+                  className="text-sm text-emerald-500 hover:underline"
                 >
                   Voir la fiche utilisateur
                 </Link>
@@ -701,10 +701,10 @@ export function DealDetail({
 
           {/* Linked prospect */}
           {linkedProspect && (
-            <Card className="rounded-xl border-brand/20 bg-brand/5 shadow-sm">
+            <Card className="rounded-xl border-emerald-500/20 bg-emerald-500/5 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Target className="h-4 w-4 text-brand" />
+                  <Target className="h-4 w-4 text-emerald-500" />
                   Prospect d&apos;origine
                 </CardTitle>
               </CardHeader>
@@ -731,7 +731,7 @@ export function DealDetail({
 
           {/* Next action */}
           {currentDeal.next_action && (
-            <Card className="border-brand/20 bg-brand/5">
+            <Card className="border-emerald-500/20 bg-emerald-500/5">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Clock className="h-4 w-4" />
@@ -796,7 +796,7 @@ export function DealDetail({
                 size="sm"
                 onClick={saveNotes}
                 disabled={savingNotes}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 {savingNotes ? "Enregistrement..." : "Enregistrer les notes"}
               </Button>

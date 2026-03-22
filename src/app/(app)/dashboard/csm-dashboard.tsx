@@ -185,7 +185,7 @@ export function CsmDashboard({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card className="rounded-xl border-border/50">
           <CardContent className="p-4 text-center">
-            <Users className="h-5 w-5 mx-auto text-brand mb-1" />
+            <Users className="h-5 w-5 mx-auto text-emerald-500 mb-1" />
             <p className="text-2xl font-bold">{clients.length}</p>
             <p className="text-xs text-muted-foreground">Clients actifs</p>
           </CardContent>
@@ -373,7 +373,7 @@ export function CsmDashboard({
                 size="sm"
                 onClick={handleCreateKickCase}
                 disabled={isPending}
-                className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
               >
                 {isPending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -416,7 +416,7 @@ export function CsmDashboard({
                     {kc.description}
                   </p>
                   {kc.action_entreprise && (
-                    <p className="text-xs text-brand mt-1">
+                    <p className="text-xs text-emerald-500 mt-1">
                       Action : {kc.action_entreprise}
                     </p>
                   )}
@@ -508,7 +508,7 @@ export function CsmDashboard({
                   size="sm"
                   onClick={handleCreateFeedback}
                   disabled={isPending}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
                 >
                   {isPending ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

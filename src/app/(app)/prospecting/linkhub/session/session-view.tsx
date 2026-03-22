@@ -210,8 +210,8 @@ export function SessionView({ feeds, posts }: Props) {
     return (
       <div className="max-w-lg mx-auto space-y-6 py-12">
         <div className="text-center">
-          <div className="h-16 w-16 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mx-auto mb-4">
-            <Play className="h-8 w-8 text-brand" />
+          <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+            <Play className="h-8 w-8 text-emerald-500" />
           </div>
           <h1 className="text-2xl font-bold mb-2">Session de commentaires</h1>
           <p className="text-muted-foreground">
@@ -261,7 +261,7 @@ export function SessionView({ feeds, posts }: Props) {
             <Button
               onClick={handleStart}
               disabled={filteredPosts.length === 0}
-              className="w-full rounded-xl bg-brand text-brand-dark hover:bg-brand/90 h-12 text-base"
+              className="w-full rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 h-12 text-base"
             >
               <Play className="h-5 w-5 mr-2" />
               Démarrer la session
@@ -284,8 +284,8 @@ export function SessionView({ feeds, posts }: Props) {
     return (
       <div className="max-w-lg mx-auto space-y-6 py-12">
         <div className="text-center">
-          <div className="h-16 w-16 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mx-auto mb-4">
-            <Check className="h-8 w-8 text-brand" />
+          <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+            <Check className="h-8 w-8 text-emerald-500" />
           </div>
           <h1 className="text-2xl font-bold mb-2">Session terminée !</h1>
           <p className="text-muted-foreground">Voici votre résumé</p>
@@ -295,7 +295,7 @@ export function SessionView({ feeds, posts }: Props) {
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-3xl font-bold text-brand">
+                <p className="text-3xl font-bold text-emerald-500">
                   {commentsPosted}
                 </p>
                 <p className="text-xs text-muted-foreground">Commentaires</p>
@@ -318,7 +318,7 @@ export function SessionView({ feeds, posts }: Props) {
               setState("setup");
               setAiComments([]);
             }}
-            className="flex-1 rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+            className="flex-1 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
           >
             Nouvelle session
           </Button>
@@ -371,7 +371,7 @@ export function SessionView({ feeds, posts }: Props) {
 
         <div className="flex items-center gap-4 text-sm">
           <span className="flex items-center gap-1">
-            <MessageCircle className="h-4 w-4 text-brand" />
+            <MessageCircle className="h-4 w-4 text-emerald-500" />
             <span className="font-bold">{commentsPosted}</span>
           </span>
           <span className="text-muted-foreground">
@@ -393,7 +393,7 @@ export function SessionView({ feeds, posts }: Props) {
                   className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center text-lg font-bold text-brand">
+                <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-lg font-bold text-emerald-500">
                   {(profileData?.full_name || "?")[0]}
                 </div>
               )}
@@ -435,7 +435,7 @@ export function SessionView({ feeds, posts }: Props) {
                     key={comment.id}
                     className={`p-3 rounded-xl border ${
                       comment.status === "published"
-                        ? "bg-brand/5 border-brand/20"
+                        ? "bg-emerald-500/5 border-emerald-500/20"
                         : "bg-muted/50"
                     }`}
                   >
@@ -448,7 +448,7 @@ export function SessionView({ feeds, posts }: Props) {
                             : "Témoignage"}
                       </Badge>
                       {comment.status === "published" && (
-                        <Badge className="bg-brand/10 text-brand border-brand/20 text-xs">
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-xs">
                           Publié
                         </Badge>
                       )}
@@ -460,7 +460,7 @@ export function SessionView({ feeds, posts }: Props) {
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
-                          className="rounded-lg bg-brand text-brand-dark hover:bg-brand/90 h-8"
+                          className="rounded-lg bg-emerald-500 text-black hover:bg-emerald-400 h-8"
                           disabled={publishingId === comment.id}
                           onClick={() => handlePublish(comment)}
                         >
@@ -485,7 +485,7 @@ export function SessionView({ feeds, posts }: Props) {
                           }}
                         >
                           {copiedId === comment.id ? (
-                            <Check className="h-3 w-3 mr-1 text-brand" />
+                            <Check className="h-3 w-3 mr-1 text-emerald-500" />
                           ) : (
                             <Copy className="h-3 w-3 mr-1" />
                           )}
@@ -499,7 +499,7 @@ export function SessionView({ feeds, posts }: Props) {
             ) : (
               <Button
                 onClick={() => autoGenerate(currentPost.id)}
-                className="w-full rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
                 Générer des commentaires

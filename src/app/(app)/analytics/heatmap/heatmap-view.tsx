@@ -36,13 +36,13 @@ const dayLabelsFull = [
 function getIntensityColor(value: number, maxValue: number): string {
   if (maxValue === 0 || value === 0) return "bg-muted/30";
   const ratio = value / maxValue;
-  if (ratio < 0.15) return "bg-brand/10";
-  if (ratio < 0.3) return "bg-brand/20";
-  if (ratio < 0.45) return "bg-brand/30";
-  if (ratio < 0.6) return "bg-brand/45";
-  if (ratio < 0.75) return "bg-brand/60";
-  if (ratio < 0.9) return "bg-brand/75";
-  return "bg-brand/90";
+  if (ratio < 0.15) return "bg-emerald-500/10";
+  if (ratio < 0.3) return "bg-emerald-500/20";
+  if (ratio < 0.45) return "bg-emerald-500/30";
+  if (ratio < 0.6) return "bg-emerald-500/45";
+  if (ratio < 0.75) return "bg-emerald-500/60";
+  if (ratio < 0.9) return "bg-emerald-500/75";
+  return "bg-emerald-500/90";
 }
 
 function formatHour(hour: number): string {
@@ -80,8 +80,8 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Calendar className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Calendar className="h-5 w-5 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">
@@ -127,8 +127,8 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Flame className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Flame className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Carte de chaleur
             </CardTitle>
@@ -176,8 +176,8 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
                         "flex-1 min-w-[28px] h-7 rounded-sm cursor-pointer transition-all border border-transparent",
                         colorClass,
                         hoveredCell?.day === day && hoveredCell?.hour === hour
-                          ? "ring-2 ring-brand ring-offset-1"
-                          : "hover:ring-1 hover:ring-brand/50",
+                          ? "ring-2 ring-emerald-500 ring-offset-1"
+                          : "hover:ring-1 hover:ring-emerald-500/50",
                       )}
                       onMouseEnter={() => setHoveredCell({ day, hour, value })}
                       onMouseLeave={() => setHoveredCell(null)}
@@ -193,13 +193,13 @@ export function HeatmapView({ data }: { data: HeatmapResult }) {
               <span className="text-xs text-muted-foreground">Moins</span>
               <div className="flex gap-0.5">
                 <div className="w-5 h-5 rounded-sm bg-muted/30" />
-                <div className="w-5 h-5 rounded-sm bg-brand/10" />
-                <div className="w-5 h-5 rounded-sm bg-brand/20" />
-                <div className="w-5 h-5 rounded-sm bg-brand/30" />
-                <div className="w-5 h-5 rounded-sm bg-brand/45" />
-                <div className="w-5 h-5 rounded-sm bg-brand/60" />
-                <div className="w-5 h-5 rounded-sm bg-brand/75" />
-                <div className="w-5 h-5 rounded-sm bg-brand/90" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/10" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/20" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/30" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/45" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/60" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/75" />
+                <div className="w-5 h-5 rounded-sm bg-emerald-500/90" />
               </div>
               <span className="text-xs text-muted-foreground">Plus</span>
             </div>

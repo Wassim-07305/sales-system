@@ -87,10 +87,10 @@ const statusLabels: Record<string, string> = {
 const statusColors: Record<string, string> = {
   new: "bg-muted text-muted-foreground",
   contacted: "bg-muted/40 text-muted-foreground/60 border border-border/30",
-  replied: "bg-brand/10 text-brand border border-brand/20",
+  replied: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
   interested: "bg-foreground/10 text-foreground border border-foreground/20",
-  booked: "bg-brand/20 text-brand-dark",
-  converted: "bg-brand/10 text-brand border border-brand/20",
+  booked: "bg-emerald-500/20 text-black",
+  converted: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
   lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
@@ -554,7 +554,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                   <Button
                     onClick={() => handleSearchLinkedIn()}
                     disabled={searching}
-                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                   >
                     {searching ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -672,7 +672,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                               )
                             )}
                             {isSaved ? (
-                              <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
+                              <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 gap-1">
                                 <Check className="h-3 w-3" />
                                 Ajouté
                               </Badge>
@@ -685,7 +685,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                                 size="sm"
                                 onClick={() => handleSaveProspect(result)}
                                 disabled={isSaving}
-                                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                                className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                               >
                                 {isSaving ? (
                                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -784,7 +784,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                   <Button
                     onClick={handleAnalyzeAndGenerate}
                     disabled={comboAnalyzing}
-                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                   >
                     {comboAnalyzing ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -822,7 +822,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                       <Badge
                         className={
                           (comboProfile.score as number) >= 70
-                            ? "bg-brand/10 text-brand border border-brand/20"
+                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                             : "bg-muted/60 text-muted-foreground border border-border/50"
                         }
                       >
@@ -876,7 +876,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                 <Button
                   onClick={handleSuggestComments}
                   disabled={suggestingComments}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {suggestingComments ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -949,7 +949,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                 <Button
                   onClick={handleGenerateDm}
                   disabled={generatingDm}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {generatingDm ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1164,7 +1164,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
             <div className="p-5">
               {prospectActionLoading && (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Loader2 className="h-8 w-8 animate-spin text-brand" />
+                  <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
                   <p className="text-sm text-muted-foreground">
                     {prospectAction === "analyze" && "Analyse du profil en cours..."}
                     {prospectAction === "dm" && "Génération du message..."}
@@ -1192,7 +1192,7 @@ export function LinkedinView({ prospects, unipileLinkedin, initialFeeds, initial
                     <span className="text-muted-foreground">Score</span>
                     <Badge className={
                       (prospectActionResult.score as number) >= 70
-                        ? "bg-brand/10 text-brand border border-brand/20"
+                        ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                         : "bg-muted/60 text-muted-foreground border border-border/50"
                     }>
                       {prospectActionResult.score as number}/100

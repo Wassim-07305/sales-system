@@ -49,14 +49,14 @@ import type {
 // ---------------------------------------------------------------------------
 
 function scoreColor(score: number): string {
-  if (score >= 8) return "text-brand";
+  if (score >= 8) return "text-emerald-500";
   if (score >= 6) return "text-muted-foreground";
   if (score >= 4) return "text-muted-foreground/60";
   return "text-foreground";
 }
 
 function scoreBg(score: number): string {
-  if (score >= 8) return "bg-brand/10 text-brand border-brand/20";
+  if (score >= 8) return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
   if (score >= 6) return "bg-muted/60 text-muted-foreground border-border";
   if (score >= 4) return "bg-muted/40 text-muted-foreground/60 border-border";
   return "bg-foreground/10 text-foreground border-border";
@@ -66,7 +66,7 @@ function sentimentBadge(sentiment: string) {
   switch (sentiment) {
     case "positif":
       return (
-        <Badge className="bg-brand/10 text-brand border-brand/20">
+        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
           Positif
         </Badge>
       );
@@ -94,7 +94,7 @@ function sentimentBadge(sentiment: string) {
 function sentimentColor(sentiment: string): string {
   switch (sentiment) {
     case "positif":
-      return "#7af17a";
+      return "#10b981";
     case "négatif":
       return "hsl(var(--foreground))";
     default:
@@ -121,7 +121,7 @@ function ScoreBreakdownCard({
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-        <Target className="h-4 w-4 text-[#7af17a]" />
+        <Target className="h-4 w-4 text-[#10b981]" />
         Score détaillé
       </h4>
       {items.map((item) => (
@@ -145,7 +145,7 @@ function TalkRatioBar({
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-        <Users className="h-4 w-4 text-[#7af17a]" />
+        <Users className="h-4 w-4 text-[#10b981]" />
         Ratio de parole
       </h4>
       <div className="flex rounded-full overflow-hidden h-6">
@@ -178,7 +178,7 @@ function SentimentTimeline({
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-[#7af17a]" />
+        <TrendingUp className="h-4 w-4 text-[#10b981]" />
         Évolution du sentiment
       </h4>
       <div className="flex items-end gap-1 h-16">
@@ -216,7 +216,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
       {/* Transcript */}
       <div className="space-y-2">
         <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-[#7af17a]" />
+          <MessageSquare className="h-4 w-4 text-[#10b981]" />
           Transcript
         </h4>
         <div className="bg-muted/30 rounded-lg p-4 text-sm text-muted-foreground max-h-60 overflow-y-auto whitespace-pre-wrap leading-relaxed">
@@ -240,7 +240,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
                           part.toLowerCase() === keyword.toLowerCase() ? (
                             <span
                               key={j}
-                              className="bg-[#7af17a]/20 text-[#7af17a] px-0.5 rounded font-medium"
+                              className="bg-[#10b981]/20 text-[#10b981] px-0.5 rounded font-medium"
                             >
                               {part}
                             </span>
@@ -272,7 +272,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
         {/* Keywords */}
         <div className="space-y-2">
           <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Hash className="h-4 w-4 text-[#7af17a]" />
+            <Hash className="h-4 w-4 text-[#10b981]" />
             Mots-clés
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -280,7 +280,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
               <Badge
                 key={kw}
                 variant="outline"
-                className="border-[#7af17a]/30 text-[#7af17a]"
+                className="border-[#10b981]/30 text-[#10b981]"
               >
                 {kw}
               </Badge>
@@ -313,7 +313,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
       {/* Key moments */}
       <div className="space-y-2">
         <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-[#7af17a]" />
+          <Sparkles className="h-4 w-4 text-[#10b981]" />
           Moments clés
         </h4>
         <ul className="space-y-1">
@@ -322,7 +322,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
               key={i}
               className="text-sm text-muted-foreground flex items-start gap-2"
             >
-              <span className="text-[#7af17a] mt-1">•</span>
+              <span className="text-[#10b981] mt-1">•</span>
               {moment}
             </li>
           ))}
@@ -332,7 +332,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
       {/* Strengths & improvements */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-brand flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-emerald-500 flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             Points forts
           </h4>
@@ -342,7 +342,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
                 key={i}
                 className="text-sm text-muted-foreground flex items-start gap-2"
               >
-                <span className="text-brand mt-1">+</span>
+                <span className="text-emerald-500 mt-1">+</span>
                 {s}
               </li>
             ))}
@@ -370,7 +370,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
       {/* AI Recommendations */}
       <div className="space-y-2">
         <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-          <Brain className="h-4 w-4 text-[#7af17a]" />
+          <Brain className="h-4 w-4 text-[#10b981]" />
           Recommandations IA
         </h4>
         <ul className="space-y-1">
@@ -379,7 +379,7 @@ function ReviewDetail({ review }: { review: CallReview }) {
               key={i}
               className="text-sm text-muted-foreground flex items-start gap-2"
             >
-              <span className="text-[#7af17a] mt-1">{i + 1}.</span>
+              <span className="text-[#10b981] mt-1">{i + 1}.</span>
               {rec}
             </li>
           ))}
@@ -446,8 +446,8 @@ export function ReviewsView({
                 <p className="text-sm text-muted-foreground">Appels analysés</p>
                 <p className="text-2xl font-bold">{stats.totalReviews}</p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
-                <Mic className="h-5 w-5 text-[#7af17a]" />
+              <div className="h-10 w-10 rounded-lg bg-[#10b981]/10 ring-1 ring-[#10b981]/20 flex items-center justify-center">
+                <Mic className="h-5 w-5 text-[#10b981]" />
               </div>
             </div>
           </CardContent>
@@ -478,7 +478,7 @@ export function ReviewsView({
                 <p className="text-sm text-muted-foreground">
                   Mot-clé fréquent
                 </p>
-                <p className="text-2xl font-bold text-[#7af17a]">
+                <p className="text-2xl font-bold text-[#10b981]">
                   {stats.commonKeywords[0]?.keyword || "-"}
                 </p>
               </div>
@@ -495,7 +495,7 @@ export function ReviewsView({
               <div>
                 <p className="text-sm text-muted-foreground">Tendance</p>
                 <p
-                  className={`text-2xl font-bold ${trendValue >= 0 ? "text-brand" : "text-foreground"}`}
+                  className={`text-2xl font-bold ${trendValue >= 0 ? "text-emerald-500" : "text-foreground"}`}
                 >
                   {trendValue >= 0 ? "+" : ""}
                   {trendValue.toFixed(1)}
@@ -616,7 +616,7 @@ export function ReviewsView({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-[#7af17a]" />
+                <MessageSquare className="h-5 w-5 text-[#10b981]" />
                 Coller un transcript
               </CardTitle>
             </CardHeader>
@@ -636,7 +636,7 @@ export function ReviewsView({
                 <Button
                   onClick={handleAnalyze}
                   disabled={isPending || !transcript.trim()}
-                  className="bg-[#7af17a] text-black hover:bg-[#7af17a]/80"
+                  className="bg-[#10b981] text-black hover:bg-[#10b981]/80"
                 >
                   {isPending ? (
                     <>
@@ -659,7 +659,7 @@ export function ReviewsView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-[#7af17a]" />
+                  <Sparkles className="h-5 w-5 text-[#10b981]" />
                   Résultats de l&apos;analyse
                 </CardTitle>
               </CardHeader>
@@ -705,7 +705,7 @@ export function ReviewsView({
                       <Badge
                         key={kw}
                         variant="outline"
-                        className="border-[#7af17a]/30 text-[#7af17a]"
+                        className="border-[#10b981]/30 text-[#10b981]"
                       >
                         {kw}
                       </Badge>
@@ -741,7 +741,7 @@ export function ReviewsView({
                 {/* Strengths & improvements */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-brand">
+                    <h4 className="text-sm font-semibold text-emerald-500">
                       Points forts
                     </h4>
                     <ul className="space-y-1">
@@ -750,7 +750,7 @@ export function ReviewsView({
                           key={i}
                           className="text-sm text-muted-foreground flex items-start gap-2"
                         >
-                          <span className="text-brand mt-1">+</span>
+                          <span className="text-emerald-500 mt-1">+</span>
                           {s}
                         </li>
                       ))}
@@ -782,7 +782,7 @@ export function ReviewsView({
                 {analysisResult.aiAnalysis?.recommendations?.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-                      <Brain className="h-4 w-4 text-[#7af17a]" />
+                      <Brain className="h-4 w-4 text-[#10b981]" />
                       Recommandations IA
                     </h4>
                     <ul className="space-y-1">
@@ -792,7 +792,7 @@ export function ReviewsView({
                             key={i}
                             className="text-sm text-muted-foreground flex items-start gap-2"
                           >
-                            <span className="text-[#7af17a] mt-1">
+                            <span className="text-[#10b981] mt-1">
                               {i + 1}.
                             </span>
                             {rec}
@@ -813,7 +813,7 @@ export function ReviewsView({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-[#7af17a]" />
+                <TrendingUp className="h-5 w-5 text-[#10b981]" />
                 Évolution des scores
               </CardTitle>
             </CardHeader>
@@ -838,9 +838,9 @@ export function ReviewsView({
                     <Line
                       type="monotone"
                       dataKey="score"
-                      stroke="#7af17a"
+                      stroke="#10b981"
                       strokeWidth={2}
-                      dot={{ fill: "#7af17a", r: 4 }}
+                      dot={{ fill: "#10b981", r: 4 }}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>
@@ -876,7 +876,7 @@ export function ReviewsView({
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#14080e",
+                          backgroundColor: "#09090b",
                           border: "1px solid #333",
                           borderRadius: "8px",
                         }}
@@ -913,7 +913,7 @@ export function ReviewsView({
                       <YAxis stroke="#888" fontSize={12} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#14080e",
+                          backgroundColor: "#09090b",
                           border: "1px solid #333",
                           borderRadius: "8px",
                         }}

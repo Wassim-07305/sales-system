@@ -177,7 +177,7 @@ function FeatureCard({
             className={cn(
               "flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 shrink-0 rounded-lg transition-colors",
               item.votedByUser
-                ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
+                ? "bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25"
                 : "hover:bg-white/5 text-muted-foreground hover:text-white",
             )}
           >
@@ -305,11 +305,11 @@ export function RoadmapView({
       try {
         await voteForFeature(featureId);
         toast.success("Vote enregistré !", {
-          style: { background: "#14080e", border: "1px solid #7af17a33" },
+          style: { background: "#09090b", border: "1px solid #10b98133" },
         });
       } catch {
         toast.error("Erreur lors du vote", {
-          style: { background: "#14080e", border: "1px solid #ef444433" },
+          style: { background: "#09090b", border: "1px solid #ef444433" },
         });
       }
     });
@@ -319,7 +319,7 @@ export function RoadmapView({
   function handleSuggest() {
     if (!sugTitle.trim() || !sugDescription.trim()) {
       toast.error("Veuillez remplir le titre et la description", {
-        style: { background: "#14080e", border: "1px solid #ef444433" },
+        style: { background: "#09090b", border: "1px solid #ef444433" },
       });
       return;
     }
@@ -335,11 +335,11 @@ export function RoadmapView({
         setSugDescription("");
         setSugCategory("CRM");
         toast.success("Suggestion envoyée ! Merci pour votre contribution.", {
-          style: { background: "#14080e", border: "1px solid #7af17a33" },
+          style: { background: "#09090b", border: "1px solid #10b98133" },
         });
       } catch {
         toast.error("Erreur lors de l'envoi", {
-          style: { background: "#14080e", border: "1px solid #ef444433" },
+          style: { background: "#09090b", border: "1px solid #ef444433" },
         });
       }
     });
@@ -354,7 +354,7 @@ export function RoadmapView({
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
-            className="border-[#7af17a]/30 text-[#7af17a] bg-[#7af17a]/10"
+            className="border-[#10b981]/30 text-[#10b981] bg-[#10b981]/10"
           >
             <Sparkles className="h-3 w-3 mr-1" />
             {roadmapItems.filter((i) => i.status === "in_progress").length} en
@@ -367,21 +367,21 @@ export function RoadmapView({
         <TabsList className="bg-card/80 border border-border">
           <TabsTrigger
             value="roadmap"
-            className="data-[state=active]:bg-[#7af17a]/15 data-[state=active]:text-[#7af17a]"
+            className="data-[state=active]:bg-[#10b981]/15 data-[state=active]:text-[#10b981]"
           >
             <Map className="h-4 w-4 mr-2" />
             Roadmap
           </TabsTrigger>
           <TabsTrigger
             value="suggestions"
-            className="data-[state=active]:bg-[#7af17a]/15 data-[state=active]:text-[#7af17a]"
+            className="data-[state=active]:bg-[#10b981]/15 data-[state=active]:text-[#10b981]"
           >
             <Lightbulb className="h-4 w-4 mr-2" />
             Suggestions
           </TabsTrigger>
           <TabsTrigger
             value="releases"
-            className="data-[state=active]:bg-[#7af17a]/15 data-[state=active]:text-[#7af17a]"
+            className="data-[state=active]:bg-[#10b981]/15 data-[state=active]:text-[#10b981]"
           >
             <Rocket className="h-4 w-4 mr-2" />
             Notes de version
@@ -409,7 +409,7 @@ export function RoadmapView({
                   className={cn(
                     "text-xs h-7 px-3 rounded-full transition-colors",
                     statusFilter === f.key
-                      ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
+                      ? "bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25"
                       : "text-muted-foreground hover:text-white hover:bg-white/5",
                   )}
                 >
@@ -473,7 +473,7 @@ export function RoadmapView({
           <Card className="bg-card/60 border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Plus className="h-4 w-4 text-[#7af17a]" />
+                <Plus className="h-4 w-4 text-[#10b981]" />
                 Suggérer une fonctionnalité
               </CardTitle>
               <CardDescription className="text-xs">
@@ -531,7 +531,7 @@ export function RoadmapView({
                 disabled={
                   isPending || !sugTitle.trim() || !sugDescription.trim()
                 }
-                className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-medium"
+                className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-medium"
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -584,7 +584,7 @@ export function RoadmapView({
                           className={cn(
                             "flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 shrink-0 rounded-lg transition-colors",
                             sug.votedByUser
-                              ? "bg-[#7af17a]/15 text-[#7af17a] hover:bg-[#7af17a]/25"
+                              ? "bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25"
                               : "hover:bg-white/5 text-muted-foreground hover:text-white",
                           )}
                         >
@@ -636,7 +636,7 @@ export function RoadmapView({
                       className={cn(
                         "h-10 w-10 rounded-full flex items-center justify-center border",
                         index === 0
-                          ? "bg-[#7af17a]/15 border-[#7af17a]/30 text-[#7af17a]"
+                          ? "bg-[#10b981]/15 border-[#10b981]/30 text-[#10b981]"
                           : "bg-card border-border text-muted-foreground",
                       )}
                     >
@@ -652,7 +652,7 @@ export function RoadmapView({
                           className={cn(
                             "w-fit font-mono text-xs",
                             index === 0
-                              ? "bg-[#7af17a]/15 text-[#7af17a] border-[#7af17a]/30"
+                              ? "bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30"
                               : "bg-white/5 text-muted-foreground border-border",
                           )}
                           variant="outline"
@@ -678,8 +678,8 @@ export function RoadmapView({
                           feature: {
                             icon: Sparkles,
                             label: "Nouveau",
-                            color: "text-[#7af17a]",
-                            bg: "bg-[#7af17a]/10",
+                            color: "text-[#10b981]",
+                            bg: "bg-[#10b981]/10",
                           },
                           improvement: {
                             icon: Rocket,

@@ -77,8 +77,8 @@ export function QuickSwitcher({
         {aiAgentId && (
           <CommandGroup heading="Assistant">
             <CommandItem onSelect={() => handleSelect(aiAgentId)}>
-              <div className="h-6 w-6 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
-                <Bot className="h-3.5 w-3.5 text-brand" />
+              <div className="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Bot className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               <span>Assistant IA</span>
               <span className="ml-auto text-[10px] text-muted-foreground">Coach</span>

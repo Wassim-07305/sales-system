@@ -110,7 +110,7 @@ const FILTER_OPERATORS: { value: string; label: string }[] = [
 const SEGMENT_COLORS = [
   "#ef4444",
   "#f59e0b",
-  "#7af17a",
+  "#10b981",
   "#3b82f6",
   "#8b5cf6",
   "#6b7280",
@@ -302,7 +302,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
           <DialogTrigger asChild>
             <Button
               onClick={openCreate}
-              className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium"
+              className="bg-emerald-500 text-black hover:bg-emerald-400/80 rounded-xl font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nouveau segment
@@ -373,7 +373,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
                     variant="ghost"
                     size="sm"
                     onClick={addFilterRow}
-                    className="text-brand hover:text-brand/80"
+                    className="text-emerald-500 hover:text-emerald-400/80"
                   >
                     <Plus className="h-3 w-3 mr-1" />
                     Ajouter
@@ -458,7 +458,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
               <Button
                 onClick={handleSave}
                 disabled={isPending}
-                className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium"
+                className="bg-emerald-500 text-black hover:bg-emerald-400/80 rounded-xl font-medium"
               >
                 {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {editingSegment ? "Mettre a jour" : "Creer"}
@@ -473,8 +473,8 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-brand/10">
-                <Filter className="h-5 w-5 text-brand" />
+              <div className="p-2 rounded-xl bg-emerald-500/10">
+                <Filter className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total segments</p>
@@ -684,7 +684,7 @@ export function SegmentsView({ initialSegments, initialStats }: Props) {
             </p>
             <Button
               onClick={openCreate}
-              className="bg-brand text-brand-dark hover:bg-brand/80 rounded-xl font-medium"
+              className="bg-emerald-500 text-black hover:bg-emerald-400/80 rounded-xl font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
               Creer un segment

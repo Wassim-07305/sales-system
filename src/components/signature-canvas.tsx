@@ -167,7 +167,7 @@ export function SignatureCanvas({
               className={cn(
                 "w-6 h-6 rounded-full border-2 transition-all",
                 color === c.value
-                  ? "border-[#7af17a] scale-110"
+                  ? "border-[#10b981] scale-110"
                   : "border-border hover:border-muted-foreground",
               )}
               style={{ backgroundColor: c.value }}
@@ -187,7 +187,7 @@ export function SignatureCanvas({
               className={cn(
                 "px-2 py-0.5 rounded text-xs border transition-all",
                 strokeWidth === w.value
-                  ? "border-[#7af17a] bg-[#7af17a]/10 text-foreground"
+                  ? "border-[#10b981] bg-[#10b981]/10 text-foreground"
                   : "border-border text-muted-foreground hover:border-muted-foreground",
               )}
             >
@@ -212,7 +212,7 @@ export function SignatureCanvas({
       {/* Validate button */}
       <Button
         type="button"
-        className="w-full bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-semibold"
+        className="w-full bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-semibold"
         onClick={handleValidate}
         disabled={!hasDrawn}
       >

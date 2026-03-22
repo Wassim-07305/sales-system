@@ -74,8 +74,8 @@ export function CohortView({ data }: { data: CohortData[] }) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Users className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Users className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">{totalCreated}</p>

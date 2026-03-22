@@ -575,7 +575,7 @@ export function CourseView({
           </div>
           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
             <div
-              className="h-full rounded-full bg-brand transition-all duration-500 ease-out"
+              className="h-full rounded-full bg-emerald-500 transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -587,7 +587,7 @@ export function CourseView({
             <Link href={`/academy/certificates`}>
               <Button
                 variant="outline"
-                className="w-full bg-[#7af17a]/10 text-[#7af17a] hover:bg-[#7af17a]/20 border-[#7af17a]/20 hover:border-[#7af17a]/40 transition-all"
+                className="w-full bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 border-[#10b981]/20 hover:border-[#10b981]/40 transition-all"
               >
                 <Award className="h-4 w-4 mr-2" />
                 Télécharger le certificat
@@ -633,7 +633,7 @@ export function CourseView({
                       modUnlocked
                         ? "hover:bg-muted/50"
                         : "opacity-50 hover:opacity-60",
-                      isJustUnlocked && "bg-brand/5",
+                      isJustUnlocked && "bg-emerald-500/5",
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -643,12 +643,12 @@ export function CourseView({
                           <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
                       ) : moduleAllComplete ? (
-                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-brand/15 border border-brand/20">
-                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         </div>
                       ) : isJustUnlocked ? (
-                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-brand/15 border border-brand/30 animate-in zoom-in duration-300">
-                          <Sparkles className="h-4 w-4 text-brand animate-pulse" />
+                        <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 animate-in zoom-in duration-300">
+                          <Sparkles className="h-4 w-4 text-emerald-500 animate-pulse" />
                         </div>
                       ) : (
                         <div className="relative shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-muted/50 dark:bg-muted/30 border border-border/30 group-hover:border-border/60 transition-colors">
@@ -667,7 +667,7 @@ export function CourseView({
                             modUnlocked
                               ? "text-foreground/70 group-hover:text-foreground"
                               : "text-muted-foreground",
-                            isJustUnlocked && "text-brand",
+                            isJustUnlocked && "text-emerald-500",
                           )}
                         >
                           {mod.title}
@@ -678,7 +678,7 @@ export function CourseView({
                             <div
                               className={cn(
                                 "h-full rounded-full transition-all duration-700 ease-out",
-                                moduleAllComplete ? "bg-brand" : "bg-brand/60",
+                                moduleAllComplete ? "bg-emerald-500" : "bg-emerald-500/60",
                               )}
                               style={{ width: `${moduleProgress}%` }}
                             />
@@ -688,12 +688,12 @@ export function CourseView({
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-3">
                       {moduleAllComplete ? (
-                        <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px] px-2 py-0.5 font-semibold gap-1">
-                          <Star className="h-2.5 w-2.5 fill-brand" />
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] px-2 py-0.5 font-semibold gap-1">
+                          <Star className="h-2.5 w-2.5 fill-emerald-500" />
                           Termine
                         </Badge>
                       ) : isJustUnlocked ? (
-                        <Badge className="bg-brand/10 text-brand border-brand/30 text-[10px] px-2 py-0.5 font-semibold animate-in fade-in duration-500 gap-1">
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] px-2 py-0.5 font-semibold animate-in fade-in duration-500 gap-1">
                           <Sparkles className="h-2.5 w-2.5" />
                           Debloque !
                         </Badge>
@@ -710,7 +710,7 @@ export function CourseView({
                         className={cn(
                           "text-[10px] tabular-nums",
                           moduleAllComplete
-                            ? "text-brand"
+                            ? "text-emerald-500"
                             : "text-muted-foreground",
                         )}
                       >
@@ -822,13 +822,13 @@ export function CourseView({
 
                   {/* Just unlocked celebration banner */}
                   {isJustUnlocked && isExpanded && (
-                    <div className="mx-4 mb-3 rounded-xl border border-brand/30 bg-gradient-to-br from-brand/5 to-green-50/50 dark:from-brand/5 dark:to-green-950/10 px-4 py-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="mx-4 mb-3 rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-green-50/50 dark:from-emerald-500/5 dark:to-green-950/10 px-4 py-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
                       <div className="flex items-center gap-3">
-                        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-brand/15 border border-brand/20">
-                          <Sparkles className="h-4 w-4 text-brand animate-pulse" />
+                        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/20">
+                          <Sparkles className="h-4 w-4 text-emerald-500 animate-pulse" />
                         </div>
                         <div>
-                          <p className="font-semibold text-sm text-brand">
+                          <p className="font-semibold text-sm text-emerald-500">
                             Module debloque !
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">
@@ -873,7 +873,7 @@ export function CourseView({
                             className={cn(
                               "w-full flex items-center gap-3 pl-7 pr-4 py-2.5 text-left transition-all duration-200 relative",
                               isActive &&
-                                "bg-brand/8 border-l-2 border-brand shadow-[inset_0_0_12px_rgba(122,241,122,0.04)]",
+                                "bg-emerald-500/8 border-l-2 border-emerald-500 shadow-[inset_0_0_12px_rgba(16, 185, 129,0.04)]",
                               !isActive &&
                                 unlocked &&
                                 "hover:bg-muted/40 hover:pl-8",
@@ -889,15 +889,15 @@ export function CourseView({
                               {completed ? (
                                 <CheckCircle2
                                   className={cn(
-                                    "h-[18px] w-[18px] text-brand",
+                                    "h-[18px] w-[18px] text-emerald-500",
                                     isJustUnlocked &&
                                       "animate-in zoom-in duration-300",
                                   )}
                                 />
                               ) : isActive ? (
                                 <div className="relative">
-                                  <Play className="h-4 w-4 text-brand" />
-                                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+                                  <Play className="h-4 w-4 text-emerald-500" />
+                                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 </div>
                               ) : unlocked ? (
                                 <Circle className="h-4 w-4 text-muted-foreground/60" />
@@ -1126,7 +1126,7 @@ export function CourseView({
                             <span className="flex-1 text-sm font-medium truncate">
                               {att.name}
                             </span>
-                            <span className="text-xs text-brand font-medium group-hover:underline flex items-center gap-1">
+                            <span className="text-xs text-emerald-500 font-medium group-hover:underline flex items-center gap-1">
                               <Download className="h-3.5 w-3.5" />
                               Ouvrir
                             </span>
@@ -1142,7 +1142,7 @@ export function CourseView({
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   {/* Mark complete or completed badge */}
                   {completedLessonIds.has(selectedLesson.id) ? (
-                    <Badge className="bg-brand/10 text-brand border-brand/20 gap-1.5 py-1.5 px-3">
+                    <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1.5 py-1.5 px-3">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Termine
                     </Badge>
@@ -1151,7 +1151,7 @@ export function CourseView({
                       <Button
                         onClick={handleMarkComplete}
                         disabled={markingComplete}
-                        className="bg-brand text-brand-dark hover:bg-brand/90 gap-2"
+                        className="bg-emerald-500 text-black hover:bg-emerald-400 gap-2"
                       >
                         {markingComplete ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1304,7 +1304,7 @@ export function CourseView({
                               className={cn(
                                 "w-full text-left p-3 rounded-lg border transition-colors text-sm",
                                 quizAnswers[qi] === oi
-                                  ? "border-brand bg-brand/5"
+                                  ? "border-emerald-500 bg-emerald-500/5"
                                   : "border-border hover:bg-muted/50",
                                 quizSubmitted &&
                                   oi === q.correct_index &&
@@ -1415,8 +1415,8 @@ export function CourseView({
                           </p>
                           {quizScore >= (activeQuiz.passing_score || 90) &&
                             (courseCompleted ? (
-                              <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-brand/10 to-emerald-500/10 border border-brand/20">
-                                <p className="text-sm font-bold text-brand flex items-center gap-2">
+                              <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/10 border border-emerald-500/20">
+                                <p className="text-sm font-bold text-emerald-500 flex items-center gap-2">
                                   <Sparkles className="h-4 w-4" />
                                   Formation terminee !
                                 </p>
@@ -1426,7 +1426,7 @@ export function CourseView({
                                 </p>
                                 <Link
                                   href="/academy"
-                                  className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-brand hover:underline"
+                                  className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-emerald-500 hover:underline"
                                 >
                                   Retour a l&apos;Academy
                                 </Link>
@@ -1486,7 +1486,7 @@ export function CourseView({
                       <>
                         <Button
                           onClick={handleQuizSubmit}
-                          className="bg-brand text-brand-dark hover:bg-brand/90"
+                          className="bg-emerald-500 text-black hover:bg-emerald-400"
                           disabled={
                             Object.keys(quizAnswers).length !==
                               activeQuiz.questions.length ||
@@ -1799,14 +1799,14 @@ function VideoPlayer({
       {/* Resume bar */}
       {showResumeBar && resumeTime && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-black/80 text-white rounded-lg px-4 py-2 flex items-center gap-3 text-sm backdrop-blur-sm">
-          <Clock className="h-4 w-4 text-brand" />
+          <Clock className="h-4 w-4 text-emerald-500" />
           <span>
             Reprendre à {Math.floor(resumeTime / 60)}:
             {String(Math.floor(resumeTime % 60)).padStart(2, "0")}
           </span>
           <button
             onClick={handleResume}
-            className="px-3 py-1 bg-brand text-brand-dark rounded-md text-xs font-medium hover:bg-brand/90"
+            className="px-3 py-1 bg-emerald-500 text-black rounded-md text-xs font-medium hover:bg-emerald-400"
           >
             Reprendre
           </button>
@@ -1864,7 +1864,7 @@ function VideoPlayer({
                   className={cn(
                     "block w-full text-left px-3 py-1.5 rounded text-xs transition-colors",
                     speed === playbackSpeed
-                      ? "bg-brand/10 text-brand font-medium"
+                      ? "bg-emerald-500/10 text-emerald-500 font-medium"
                       : "hover:bg-muted text-foreground",
                   )}
                 >

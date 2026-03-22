@@ -176,7 +176,7 @@ export function NotificationsPanel({
                   className={cn(
                     "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
                     !n.read
-                      ? "bg-brand/5 hover:bg-brand/10"
+                      ? "bg-emerald-500/5 hover:bg-emerald-500/10"
                       : "hover:bg-muted/50",
                   )}
                 >
@@ -196,7 +196,7 @@ export function NotificationsPanel({
                         {n.title}
                       </p>
                       {!n.read && (
-                        <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand" />
+                        <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
                       )}
                     </div>
                     {n.body && (

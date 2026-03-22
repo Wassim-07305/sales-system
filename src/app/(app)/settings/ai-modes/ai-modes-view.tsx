@@ -58,7 +58,7 @@ const AI_MODES: {
     label: "Full IA",
     description: "L'IA gere tout automatiquement",
     icon: <Bot className="h-6 w-6" />,
-    color: "text-brand",
+    color: "text-emerald-500",
   },
   {
     value: "critical_validation",
@@ -290,8 +290,8 @@ export function AiModesView({ config }: AiModesViewProps) {
       <Card className="mb-6">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-brand" />
+            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <CardTitle>Mode global</CardTitle>
@@ -313,20 +313,20 @@ export function AiModesView({ config }: AiModesViewProps) {
                   onClick={() => setGlobalMode(mode.value)}
                   className={`group relative flex items-start gap-4 rounded-xl border-2 p-4 text-left transition-all cursor-pointer ${
                     isSelected
-                      ? "border-brand bg-brand/5 shadow-[0_0_0_1px_rgba(122,241,122,0.1)]"
+                      ? "border-emerald-500 bg-emerald-500/5 shadow-[0_0_0_1px_rgba(16, 185, 129,0.1)]"
                       : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
                   }`}
                 >
                   {/* Selection indicator */}
                   {isSelected && (
-                    <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-brand flex items-center justify-center">
-                      <Check className="h-3 w-3 text-brand-foreground" />
+                    <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                      <Check className="h-3 w-3 text-black" />
                     </div>
                   )}
                   <div
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
                       isSelected
-                        ? "bg-brand/10"
+                        ? "bg-emerald-500/10"
                         : "bg-muted group-hover:bg-muted/80"
                     }`}
                   >
@@ -362,8 +362,8 @@ export function AiModesView({ config }: AiModesViewProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center">
-                <Send className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <Send className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <CardTitle>Envoi automatique IA</CardTitle>
@@ -417,7 +417,7 @@ export function AiModesView({ config }: AiModesViewProps) {
                         {p.label}
                       </span>
                       {isActive && (
-                        <Badge className="ml-1 bg-brand/10 text-brand border-brand/20 text-[10px]">
+                        <Badge className="ml-1 bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px]">
                           Actif
                         </Badge>
                       )}
@@ -444,7 +444,7 @@ export function AiModesView({ config }: AiModesViewProps) {
                 <SelectContent>
                   <SelectItem value="full_ai">
                     <div className="flex items-center gap-2">
-                      <Bot className="h-4 w-4 text-brand" />
+                      <Bot className="h-4 w-4 text-emerald-500" />
                       <span>Full IA — Envoi direct sans validation</span>
                     </div>
                   </SelectItem>
@@ -498,7 +498,7 @@ export function AiModesView({ config }: AiModesViewProps) {
                     <Badge
                       key={v.var}
                       variant="secondary"
-                      className="text-[10px] cursor-pointer font-mono px-2 py-0.5 hover:bg-brand/10 hover:text-brand transition-colors"
+                      className="text-[10px] cursor-pointer font-mono px-2 py-0.5 hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors"
                       title={v.tooltip}
                       onClick={() =>
                         setAutoSendTemplate((prev) => prev + " " + v.var)
@@ -564,7 +564,7 @@ export function AiModesView({ config }: AiModesViewProps) {
               {previewMessage ? (
                 <div className="rounded-xl border bg-muted/20 p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <Badge className="bg-brand/10 text-brand border-brand/20 gap-1.5 px-2.5 py-1">
+                    <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1.5 px-2.5 py-1">
                       <Bot className="h-3 w-3" />
                       Message IA
                     </Badge>
@@ -632,7 +632,7 @@ export function AiModesView({ config }: AiModesViewProps) {
                     onClick={() => setStoryReactionEmoji(e.value)}
                     className={`flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 transition-all cursor-pointer ${
                       storyReactionEmoji === e.value
-                        ? "border-brand bg-brand/5 shadow-sm"
+                        ? "border-emerald-500 bg-emerald-500/5 shadow-sm"
                         : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
                     }`}
                   >

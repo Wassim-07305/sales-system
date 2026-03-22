@@ -131,8 +131,8 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
         <Card className="bg-muted border-border rounded-xl shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#7af17a]/10">
-                <Users className="h-5 w-5 text-[#7af17a]" />
+              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#10b981]/10">
+                <Users className="h-5 w-5 text-[#10b981]" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{totalDuplicates}</p>
@@ -148,8 +148,8 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
         <Card className="bg-muted border-border rounded-xl shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#7af17a]/10">
-                <Merge className="h-5 w-5 text-[#7af17a]" />
+              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#10b981]/10">
+                <Merge className="h-5 w-5 text-[#10b981]" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{totalContacts}</p>
@@ -167,7 +167,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <CheckCircle2 className="h-12 w-12 text-[#7af17a]" />
+              <CheckCircle2 className="h-12 w-12 text-[#10b981]" />
               <div>
                 <p className="font-semibold text-lg">Aucun doublon détecté</p>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -243,7 +243,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                                 <span>
                                   Contact {idx + 1}
                                   {idx === 0 && (
-                                    <span className="text-[#7af17a] ml-1 text-xs font-normal">
+                                    <span className="text-[#10b981] ml-1 text-xs font-normal">
                                       (principal)
                                     </span>
                                   )}
@@ -311,7 +311,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                                               contact.id,
                                             )
                                           }
-                                          className="accent-[#7af17a]"
+                                          className="accent-[#10b981]"
                                         />
                                         <span
                                           className={cn(
@@ -348,7 +348,7 @@ export function DuplicatesView({ initialGroups, error }: DuplicatesViewProps) {
                       onClick={() => handleMerge(group)}
                       disabled={isPending}
                       size="sm"
-                      className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+                      className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
                     >
                       <Merge className="h-4 w-4" />
                       {isPending ? "Fusion en cours..." : "Fusionner"}

@@ -99,7 +99,7 @@ export function ThreadView({
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand text-sm font-bold">
+            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-sm font-bold">
               {post.author?.full_name?.charAt(0) || "?"}
             </div>
             <div>
@@ -156,7 +156,7 @@ export function ThreadView({
 
       {/* Comments section */}
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <MessageCircle className="h-5 w-5 text-brand" />
+        <MessageCircle className="h-5 w-5 text-emerald-500" />
         Commentaires ({comments.length})
       </h2>
 
@@ -204,7 +204,7 @@ export function ThreadView({
       <Card>
         <CardContent className="p-4">
           <div className="flex gap-3">
-            <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
+            <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold shrink-0">
               ?
             </div>
             <div className="flex-1 flex gap-2">
@@ -219,7 +219,7 @@ export function ThreadView({
                 size="sm"
                 onClick={handleAddComment}
                 disabled={isPending || !commentText.trim()}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 <Send className="h-4 w-4" />
               </Button>

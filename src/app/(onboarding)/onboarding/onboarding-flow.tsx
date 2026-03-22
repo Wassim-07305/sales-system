@@ -426,7 +426,7 @@ export function OnboardingFlow({
           particleCount: 150,
           spread: 100,
           origin: { y: 0.6 },
-          colors: ["#7af17a", "#4ade80", "#22c55e", "#16a34a", "#ffffff"],
+          colors: ["#10b981", "#4ade80", "#22c55e", "#16a34a", "#ffffff"],
         });
       }
       setTimeout(() => {
@@ -457,7 +457,7 @@ export function OnboardingFlow({
             delay: 0.2,
           }}
         >
-          <div className="w-28 h-28 rounded-full overflow-hidden border-3 border-[#7af17a]/40 shadow-xl shadow-[#7af17a]/20">
+          <div className="w-28 h-28 rounded-full overflow-hidden border-3 border-[#10b981]/40 shadow-xl shadow-[#10b981]/20">
             <Image
               src="/images/damien-reynaud.jpg"
               alt="Damien Reynaud"
@@ -480,7 +480,7 @@ export function OnboardingFlow({
         >
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
             Bienvenue{userName ? "," : ""}{" "}
-            <span className="text-[#7af17a]">{displayName}</span> !
+            <span className="text-[#10b981]">{displayName}</span> !
           </h1>
           <p className="text-white/50 text-lg max-w-md leading-relaxed">
             Je suis{" "}
@@ -499,7 +499,7 @@ export function OnboardingFlow({
           transition={{ delay: 0.8, duration: 0.3 }}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"
         >
-          <Sparkles className="h-4 w-4 text-[#7af17a]" />
+          <Sparkles className="h-4 w-4 text-[#10b981]" />
           <span className="text-sm text-white/50">
             5 étapes — quelques minutes
           </span>
@@ -510,7 +510,7 @@ export function OnboardingFlow({
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1 }}
           onClick={goNext}
-          className="mt-4 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200"
+          className="mt-4 px-8 py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-105 transition-all duration-200"
         >
           C&apos;est parti
         </motion.button>
@@ -596,7 +596,7 @@ export function OnboardingFlow({
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-sm font-medium transition-all duration-200",
                   objectifPrincipal === obj.value
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    ? "border-[#10b981]/60 bg-[#10b981]/10 text-white shadow-sm shadow-[#10b981]/10"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
@@ -607,7 +607,7 @@ export function OnboardingFlow({
                   </span>
                 </div>
                 {objectifPrincipal === obj.value && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#10b981] shrink-0" />
                 )}
               </button>
             ))}
@@ -624,7 +624,7 @@ export function OnboardingFlow({
             onChange={(e) => setWhyMotivation(e.target.value.slice(0, 500))}
             placeholder="Expliquez en quelques phrases pourquoi vous voulez faire du setting et ce que vous voulez accomplir."
             rows={3}
-            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-4 resize-none transition-colors duration-200"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#10b981]/50 outline-none rounded-xl p-4 resize-none transition-colors duration-200"
           />
           <p className="text-xs text-white/30 text-right">
             {whyMotivation.length}/500
@@ -635,7 +635,7 @@ export function OnboardingFlow({
         <div className="space-y-3">
           <label className="text-sm font-medium text-white/60">
             Disponibilité quotidienne :{" "}
-            <span className="text-[#7af17a] font-bold">
+            <span className="text-[#10b981] font-bold">
               {disponibilitesHeures}h
             </span>
           </label>
@@ -645,14 +645,14 @@ export function OnboardingFlow({
             max="8"
             value={disponibilitesHeures}
             onChange={(e) => setDisponibilitesHeures(e.target.value)}
-            className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#7af17a]"
+            className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#10b981]"
           />
           <div className="flex justify-between text-xs text-white/30">
             <span>1h</span>
             <span>4h</span>
             <span>8h</span>
           </div>
-          <p className="text-xs text-[#7af17a]/60 text-center">{dispoLabel}</p>
+          <p className="text-xs text-[#10b981]/60 text-center">{dispoLabel}</p>
         </div>
 
         {/* Secteurs préférés */}
@@ -677,7 +677,7 @@ export function OnboardingFlow({
                   className={cn(
                     "flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm transition-all duration-200",
                     selected
-                      ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a]"
+                      ? "border-[#10b981]/60 bg-[#10b981]/10 text-[#10b981]"
                       : "border-white/10 bg-white/5 text-white/50 hover:border-white/20",
                   )}
                 >
@@ -707,13 +707,13 @@ export function OnboardingFlow({
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-sm font-medium transition-all duration-200",
                   experienceCommerciale === exp.value
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    ? "border-[#10b981]/60 bg-[#10b981]/10 text-white shadow-sm shadow-[#10b981]/10"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
                 <span>{exp.label}</span>
                 {experienceCommerciale === exp.value && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#10b981] ml-auto shrink-0" />
                 )}
               </button>
             ))}
@@ -734,13 +734,13 @@ export function OnboardingFlow({
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left text-sm font-medium transition-all duration-200",
                   situationActuelle === sit.value
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    ? "border-[#10b981]/60 bg-[#10b981]/10 text-white shadow-sm shadow-[#10b981]/10"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
                 <span>{sit.label}</span>
                 {situationActuelle === sit.value && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#10b981] ml-auto shrink-0" />
                 )}
               </button>
             ))}
@@ -761,13 +761,13 @@ export function OnboardingFlow({
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left text-sm font-medium transition-all duration-200",
                   niveauExperience === niv.value
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white shadow-sm shadow-[#7af17a]/10"
+                    ? "border-[#10b981]/60 bg-[#10b981]/10 text-white shadow-sm shadow-[#10b981]/10"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70",
                 )}
               >
                 <span>{niv.label}</span>
                 {niveauExperience === niv.value && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#10b981] ml-auto shrink-0" />
                 )}
               </button>
             ))}
@@ -793,8 +793,8 @@ export function OnboardingFlow({
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#7af17a]/20 flex items-center justify-center">
-                <Play className="h-8 w-8 text-[#7af17a] ml-1" />
+              <div className="w-16 h-16 rounded-full bg-[#10b981]/20 flex items-center justify-center">
+                <Play className="h-8 w-8 text-[#10b981] ml-1" />
               </div>
               <p className="text-white/40 text-sm">Vidéo de présentation</p>
               <p className="text-white/30 text-xs">
@@ -810,10 +810,10 @@ export function OnboardingFlow({
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#7af17a]/10 border border-[#7af17a]/30"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#10b981]/10 border border-[#10b981]/30"
             >
-              <CheckCircle2 className="h-4 w-4 text-[#7af17a]" />
-              <span className="text-sm text-[#7af17a] font-medium">
+              <CheckCircle2 className="h-4 w-4 text-[#10b981]" />
+              <span className="text-sm text-[#10b981] font-medium">
                 Vidéo complétée — tu peux continuer
               </span>
             </motion.div>
@@ -835,7 +835,7 @@ export function OnboardingFlow({
         {!videoUnlocked && (
           <div className="w-full max-w-sm mx-auto h-1.5 bg-white/10 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#7af17a] to-[#4ade80]"
+              className="h-full bg-gradient-to-r from-[#10b981] to-[#4ade80]"
               animate={{ width: `${(videoWatchSeconds / 30) * 100}%` }}
               transition={{ duration: 0.3 }}
             />
@@ -860,7 +860,7 @@ export function OnboardingFlow({
         particleCount: 100,
         spread: 70,
         origin: { x: 0.2, y: 0.6 },
-        colors: ["#7af17a", "#4ade80", "#22c55e", "#ffffff", "#fbbf24"],
+        colors: ["#10b981", "#4ade80", "#22c55e", "#ffffff", "#fbbf24"],
       });
       // Right side
       setTimeout(() => {
@@ -868,7 +868,7 @@ export function OnboardingFlow({
           particleCount: 100,
           spread: 70,
           origin: { x: 0.8, y: 0.6 },
-          colors: ["#7af17a", "#4ade80", "#22c55e", "#ffffff", "#fbbf24"],
+          colors: ["#10b981", "#4ade80", "#22c55e", "#ffffff", "#fbbf24"],
         });
       }, 200);
     } catch {
@@ -886,8 +886,8 @@ export function OnboardingFlow({
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 12 }}
           >
-            <div className="w-24 h-24 rounded-full bg-[#7af17a]/20 border-2 border-[#7af17a]/40 flex items-center justify-center mx-auto shadow-xl shadow-[#7af17a]/20">
-              <Trophy className="h-12 w-12 text-[#7af17a]" />
+            <div className="w-24 h-24 rounded-full bg-[#10b981]/20 border-2 border-[#10b981]/40 flex items-center justify-center mx-auto shadow-xl shadow-[#10b981]/20">
+              <Trophy className="h-12 w-12 text-[#10b981]" />
             </div>
           </motion.div>
 
@@ -899,7 +899,7 @@ export function OnboardingFlow({
           >
             <h2 className="text-3xl font-bold text-white">
               Bienvenue dans la{" "}
-              <span className="text-[#7af17a]">S Academy</span> !
+              <span className="text-[#10b981]">S Academy</span> !
             </h2>
             <p className="text-white/50 text-base max-w-sm mx-auto">
               Ton contrat est signé. Tu as maintenant accès à toute la
@@ -913,7 +913,7 @@ export function OnboardingFlow({
             transition={{ delay: 0.8 }}
             onClick={handleComplete}
             disabled={completing}
-            className="mt-4 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
+            className="mt-4 px-8 py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-105 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
           >
             {completing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -934,10 +934,10 @@ export function OnboardingFlow({
         {/* Contract preview card */}
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
           {/* Contract header */}
-          <div className="p-6 border-b border-white/10 bg-[#7af17a]/5">
+          <div className="p-6 border-b border-white/10 bg-[#10b981]/5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#7af17a]/20 flex items-center justify-center">
-                <FileSignature className="h-5 w-5 text-[#7af17a]" />
+              <div className="w-10 h-10 rounded-xl bg-[#10b981]/20 flex items-center justify-center">
+                <FileSignature className="h-5 w-5 text-[#10b981]" />
               </div>
               <div>
                 <h3 className="text-white font-semibold">
@@ -980,8 +980,8 @@ export function OnboardingFlow({
             </ul>
 
             <p className="text-white font-medium mt-4">Article 5 — Tarif</p>
-            <div className="p-3 rounded-lg bg-[#7af17a]/5 border border-[#7af17a]/20">
-              <p className="text-[#7af17a] font-bold text-lg">2 000 € TTC</p>
+            <div className="p-3 rounded-lg bg-[#10b981]/5 border border-[#10b981]/20">
+              <p className="text-[#10b981] font-bold text-lg">2 000 € TTC</p>
               <p className="text-white/40 text-xs">
                 Formation complète + placement en entreprise
               </p>
@@ -1015,7 +1015,7 @@ export function OnboardingFlow({
               type="button"
               onClick={handleSignContract}
               disabled={signingContract}
-              className="w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {signingContract ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -1054,8 +1054,8 @@ export function OnboardingFlow({
     return (
       <div className="w-full max-w-md mx-auto space-y-8">
         <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-full bg-[#7af17a]/10 border border-[#7af17a]/30 flex items-center justify-center mx-auto">
-            <Users className="h-8 w-8 text-[#7af17a]" />
+          <div className="w-16 h-16 rounded-full bg-[#10b981]/10 border border-[#10b981]/30 flex items-center justify-center mx-auto">
+            <Users className="h-8 w-8 text-[#10b981]" />
           </div>
           <p className="text-white/50 text-base max-w-sm mx-auto leading-relaxed">
             Rejoins la communauté et présente-toi aux autres membres. On
@@ -1068,10 +1068,10 @@ export function OnboardingFlow({
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="p-6 rounded-2xl bg-[#7af17a]/10 border border-[#7af17a]/30 text-center space-y-3"
+            className="p-6 rounded-2xl bg-[#10b981]/10 border border-[#10b981]/30 text-center space-y-3"
           >
-            <CheckCircle2 className="h-10 w-10 text-[#7af17a] mx-auto" />
-            <p className="text-[#7af17a] font-medium">
+            <CheckCircle2 className="h-10 w-10 text-[#10b981] mx-auto" />
+            <p className="text-[#10b981] font-medium">
               Bienvenue dans la communauté !
             </p>
             <p className="text-white/40 text-sm">
@@ -1083,7 +1083,7 @@ export function OnboardingFlow({
             type="button"
             onClick={handleJoinCommunity}
             disabled={joiningCommunity}
-            className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50"
+            className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50"
           >
             {joiningCommunity ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -1135,7 +1135,7 @@ export function OnboardingFlow({
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             placeholder="Mon entreprise..."
-            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 transition-colors duration-200"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#10b981]/50 outline-none rounded-xl p-3 transition-colors duration-200"
           />
         </div>
 
@@ -1149,7 +1149,7 @@ export function OnboardingFlow({
             value={secteur}
             onChange={(e) => setSecteur(e.target.value)}
             placeholder="Coaching, SaaS, E-commerce..."
-            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 transition-colors duration-200"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#10b981]/50 outline-none rounded-xl p-3 transition-colors duration-200"
           />
         </div>
 
@@ -1163,7 +1163,7 @@ export function OnboardingFlow({
             onChange={(e) => setOffre(e.target.value)}
             placeholder="Quelle est ton offre et à quel prix ?"
             rows={2}
-            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 resize-none transition-colors duration-200"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#10b981]/50 outline-none rounded-xl p-3 resize-none transition-colors duration-200"
           />
         </div>
 
@@ -1177,7 +1177,7 @@ export function OnboardingFlow({
             value={cible}
             onChange={(e) => setCible(e.target.value)}
             placeholder="Qui est ton client idéal ?"
-            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 transition-colors duration-200"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#10b981]/50 outline-none rounded-xl p-3 transition-colors duration-200"
           />
         </div>
 
@@ -1195,13 +1195,13 @@ export function OnboardingFlow({
                 className={cn(
                   "w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left text-sm transition-all duration-200",
                   caMensuel === opt
-                    ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-white"
+                    ? "border-[#10b981]/60 bg-[#10b981]/10 text-white"
                     : "border-white/10 bg-white/5 text-white/50 hover:border-white/20",
                 )}
               >
                 <span>{opt}</span>
                 {caMensuel === opt && (
-                  <CheckCircle2 className="h-4 w-4 text-[#7af17a] ml-auto shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-[#10b981] ml-auto shrink-0" />
                 )}
               </button>
             ))}
@@ -1228,7 +1228,7 @@ export function OnboardingFlow({
                   className={cn(
                     "flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm transition-all duration-200",
                     selected
-                      ? "border-[#7af17a]/60 bg-[#7af17a]/10 text-[#7af17a]"
+                      ? "border-[#10b981]/60 bg-[#10b981]/10 text-[#10b981]"
                       : "border-white/10 bg-white/5 text-white/50 hover:border-white/20",
                   )}
                 >
@@ -1254,7 +1254,7 @@ export function OnboardingFlow({
             onChange={(e) => setObjectifB2B(e.target.value)}
             placeholder="Qu'est-ce que tu attends de la plateforme ?"
             rows={2}
-            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#7af17a]/50 outline-none rounded-xl p-3 resize-none transition-colors duration-200"
+            className="w-full bg-white/5 text-base text-white placeholder:text-white/20 border border-white/10 focus:border-[#10b981]/50 outline-none rounded-xl p-3 resize-none transition-colors duration-200"
           />
         </div>
       </div>
@@ -1294,8 +1294,8 @@ export function OnboardingFlow({
                 transition={{ delay: i * 0.08, duration: 0.3 }}
                 className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#7af17a]/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-4 w-4 text-[#7af17a]" />
+                <div className="w-8 h-8 rounded-lg bg-[#10b981]/10 flex items-center justify-center shrink-0">
+                  <Icon className="h-4 w-4 text-[#10b981]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-white/40">{item.label}</p>
@@ -1310,7 +1310,7 @@ export function OnboardingFlow({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="p-4 rounded-xl bg-[#7af17a]/5 border border-[#7af17a]/20 text-center"
+          className="p-4 rounded-xl bg-[#10b981]/5 border border-[#10b981]/20 text-center"
         >
           <p className="text-sm text-white/60">
             Ton workspace sera automatiquement configuré avec un SOP
@@ -1324,7 +1324,7 @@ export function OnboardingFlow({
           transition={{ delay: 0.7 }}
           onClick={handleComplete}
           disabled={completing}
-          className="w-full py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+          className="w-full py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
         >
           {completing ? (
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -1372,13 +1372,13 @@ export function OnboardingFlow({
     <div className="min-h-screen bg-[#0a0a0a] relative overflow-hidden">
       {/* Animated background blobs */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#7af17a]/[0.04] blur-3xl animate-pulse" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#10b981]/[0.04] blur-3xl animate-pulse" />
         <div
           className="absolute -top-12 -right-12 w-80 h-80 rounded-full bg-[#4ade80]/[0.03] blur-3xl animate-pulse"
           style={{ animationDuration: "4s", animationDelay: "1s" }}
         />
         <div
-          className="absolute -bottom-24 left-1/3 w-72 h-72 rounded-full bg-[#7af17a]/[0.03] blur-3xl animate-pulse"
+          className="absolute -bottom-24 left-1/3 w-72 h-72 rounded-full bg-[#10b981]/[0.03] blur-3xl animate-pulse"
           style={{ animationDuration: "5s", animationDelay: "2s" }}
         />
       </div>
@@ -1395,7 +1395,7 @@ export function OnboardingFlow({
       {currentStep.type !== "b2c_welcome" && (
         <div className="fixed left-0 right-0 top-0 z-50 h-1 bg-white/10">
           <motion.div
-            className="h-full bg-gradient-to-r from-[#7af17a] to-[#4ade80]"
+            className="h-full bg-gradient-to-r from-[#10b981] to-[#4ade80]"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           />
@@ -1465,9 +1465,9 @@ export function OnboardingFlow({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                  className="w-16 h-16 rounded-full bg-[#7af17a]/20 border border-[#7af17a]/30 flex items-center justify-center mx-auto mb-4"
+                  className="w-16 h-16 rounded-full bg-[#10b981]/20 border border-[#10b981]/30 flex items-center justify-center mx-auto mb-4"
                 >
-                  <CheckCircle2 className="h-8 w-8 text-[#7af17a]" />
+                  <CheckCircle2 className="h-8 w-8 text-[#10b981]" />
                 </motion.div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   {currentStep.title}
@@ -1492,7 +1492,7 @@ export function OnboardingFlow({
                     className={cn(
                       "group flex items-center gap-2 px-8 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200",
                       canProceed()
-                        ? "bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black shadow-lg shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105"
+                        ? "bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black shadow-lg shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-105"
                         : "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed",
                     )}
                   >

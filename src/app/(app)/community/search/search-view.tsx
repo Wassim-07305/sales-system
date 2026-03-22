@@ -128,7 +128,7 @@ export function CommunitySearchView() {
           <div className="space-y-3">
             {posts.map((post) => (
               <Link key={post.id} href={`/community/forum/${post.id}`}>
-                <Card className="hover:border-brand/30 transition-colors cursor-pointer mb-3">
+                <Card className="hover:border-emerald-500/30 transition-colors cursor-pointer mb-3">
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-1">
                       {post.title || "Sans titre"}
@@ -162,7 +162,7 @@ export function CommunitySearchView() {
                   comment.post ? `/community/forum/${comment.post.id}` : "#"
                 }
               >
-                <Card className="hover:border-brand/30 transition-colors cursor-pointer mb-3">
+                <Card className="hover:border-emerald-500/30 transition-colors cursor-pointer mb-3">
                   <CardContent className="p-4">
                     <p className="text-sm line-clamp-2 mb-2">
                       {comment.content}

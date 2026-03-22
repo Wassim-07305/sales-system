@@ -144,7 +144,7 @@ export function ResourcesView({ resources, categories }: Props) {
             onClick={() => setSelectedCategory(null)}
             className={
               selectedCategory === null
-                ? "bg-brand text-brand-dark hover:bg-brand/90"
+                ? "bg-emerald-500 text-black hover:bg-emerald-400"
                 : ""
             }
           >
@@ -162,7 +162,7 @@ export function ResourcesView({ resources, categories }: Props) {
               }
               className={
                 selectedCategory === category
-                  ? "bg-brand text-brand-dark hover:bg-brand/90"
+                  ? "bg-emerald-500 text-black hover:bg-emerald-400"
                   : ""
               }
             >
@@ -204,8 +204,8 @@ export function ResourcesView({ resources, categories }: Props) {
               >
                 <CardContent className="p-5">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center shrink-0 group-hover:bg-brand/20 transition-colors">
-                      <Icon className="h-6 w-6 text-brand" />
+                    <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
+                      <Icon className="h-6 w-6 text-emerald-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm leading-tight mb-1 line-clamp-2">
@@ -264,7 +264,7 @@ export function ResourcesView({ resources, categories }: Props) {
                         </Button>
                         <Button
                           size="sm"
-                          className="flex-1 bg-brand text-brand-dark hover:bg-brand/90"
+                          className="flex-1 bg-emerald-500 text-black hover:bg-emerald-400"
                           onClick={() => handleDownload(resource)}
                         >
                           <Download className="h-4 w-4 mr-1.5" />

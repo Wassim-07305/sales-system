@@ -49,7 +49,7 @@ function getDifficulty(nodeCount: number): {
   color: string;
 } {
   if (nodeCount <= 3)
-    return { label: "Facile", color: "bg-brand/20 text-brand" };
+    return { label: "Facile", color: "bg-emerald-500/20 text-emerald-500" };
   if (nodeCount <= 6)
     return {
       label: "Moyen",
@@ -105,8 +105,8 @@ export function TrainingView({
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#7af17a]/10">
-                <Target className="h-5 w-5 text-[#7af17a]" />
+              <div className="p-2 rounded-lg bg-[#10b981]/10">
+                <Target className="h-5 w-5 text-[#10b981]" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ export function TrainingView({
               Créez un flowchart avec au moins 2 noeuds pour commencer.
             </p>
             <Link href="/scripts">
-              <Button className="mt-4 bg-[#7af17a] text-black hover:bg-[#7af17a]/90">
+              <Button className="mt-4 bg-[#10b981] text-black hover:bg-[#10b981]/90">
                 Créer un script
               </Button>
             </Link>
@@ -175,7 +175,7 @@ export function TrainingView({
 
             return (
               <Link key={script.id} href={`/scripts/training/${script.id}`}>
-                <Card className="bg-card rounded-2xl border-border/40 hover:border-[#7af17a]/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer h-full">
+                <Card className="bg-card rounded-2xl border-border/40 hover:border-[#10b981]/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer h-full">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-base font-medium line-clamp-1">
@@ -210,8 +210,8 @@ export function TrainingView({
                     </div>
                     {best !== undefined && (
                       <div className="mt-3 flex items-center gap-1 text-xs">
-                        <CheckCircle className="h-3 w-3 text-[#7af17a]" />
-                        <span className="text-[#7af17a]">
+                        <CheckCircle className="h-3 w-3 text-[#10b981]" />
+                        <span className="text-[#10b981]">
                           Meilleur : {best}%
                         </span>
                       </div>
@@ -236,7 +236,7 @@ export function TrainingView({
                     <div
                       className={`p-1.5 rounded-lg ${
                         result.score >= 80
-                          ? "bg-brand/10"
+                          ? "bg-emerald-500/10"
                           : result.score >= 50
                             ? "bg-muted/60"
                             : "bg-muted/40"
@@ -245,7 +245,7 @@ export function TrainingView({
                       <Target
                         className={`h-4 w-4 ${
                           result.score >= 80
-                            ? "text-brand"
+                            ? "text-emerald-500"
                             : result.score >= 50
                               ? "text-muted-foreground"
                               : "text-muted-foreground/60"
@@ -280,7 +280,7 @@ export function TrainingView({
                     <Badge
                       className={`${
                         result.score >= 80
-                          ? "bg-brand/20 text-brand"
+                          ? "bg-emerald-500/20 text-emerald-500"
                           : result.score >= 50
                             ? "bg-muted-foreground/20 text-muted-foreground"
                             : "bg-foreground/20 text-foreground"

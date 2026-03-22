@@ -51,7 +51,7 @@ const statusColors: Record<string, string> = {
   failed: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
-const PIE_COLORS = ["#7af17a", "#60a5fa", "#ef4444"];
+const PIE_COLORS = ["#10b981", "#60a5fa", "#ef4444"];
 
 export function CashFlowView({ data }: { data: CashFlowData }) {
   const {
@@ -89,8 +89,8 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold">
@@ -135,8 +135,8 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold">
@@ -168,8 +168,8 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="5%" stopColor="#7af17a" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#7af17a" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient
                     id="colorExpected"
@@ -220,12 +220,12 @@ export function CashFlowView({ data }: { data: CashFlowData }) {
                 <Area
                   type="monotone"
                   dataKey="received"
-                  stroke="#7af17a"
+                  stroke="#10b981"
                   strokeWidth={2.5}
                   fill="url(#colorReceived)"
                   connectNulls={false}
                   name="received"
-                  dot={{ fill: "#7af17a", r: 4 }}
+                  dot={{ fill: "#10b981", r: 4 }}
                 />
                 <Area
                   type="monotone"

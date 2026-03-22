@@ -73,9 +73,9 @@ const nodeTypeConfig: Record<
 > = {
   opening: {
     label: "Accroche",
-    bg: "bg-brand/10",
-    border: "border-brand/20",
-    text: "text-brand",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20",
+    text: "text-emerald-500",
     icon: MessageSquare,
   },
   question: {
@@ -101,9 +101,9 @@ const nodeTypeConfig: Record<
   },
   closing: {
     label: "Closing",
-    bg: "bg-brand/8",
-    border: "border-brand/15",
-    text: "text-brand/80",
+    bg: "bg-emerald-500/8",
+    border: "border-emerald-500/15",
+    text: "text-emerald-500/80",
     icon: CheckCircle,
   },
 };
@@ -180,7 +180,7 @@ function ScriptNodeComponent({ data, id }: NodeProps) {
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           autoFocus
-          className="nodrag w-full text-sm font-medium text-foreground bg-transparent border border-brand/30 rounded-md px-2 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-brand/50"
+          className="nodrag w-full text-sm font-medium text-foreground bg-transparent border border-emerald-500/30 rounded-md px-2 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
           rows={Math.max(2, Math.ceil(label.length / 30))}
         />
       ) : (
@@ -344,10 +344,10 @@ export function FlowchartEditor({
               {onlineUsers.slice(0, 3).map((u) => (
                 <div
                   key={u.userId}
-                  className="h-6 w-6 rounded-full bg-brand/20 border-2 border-background flex items-center justify-center"
+                  className="h-6 w-6 rounded-full bg-emerald-500/20 border-2 border-background flex items-center justify-center"
                   title={u.userName}
                 >
-                  <span className="text-[10px] font-semibold text-brand">
+                  <span className="text-[10px] font-semibold text-emerald-500">
                     {u.userName.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -379,7 +379,7 @@ export function FlowchartEditor({
           onClick={handleSave}
           disabled={isPending}
           size="sm"
-          className="bg-brand text-brand-dark hover:bg-brand/90"
+          className="bg-emerald-500 text-black hover:bg-emerald-400"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 mr-1 animate-spin" />

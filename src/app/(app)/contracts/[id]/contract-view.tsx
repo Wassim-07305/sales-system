@@ -363,7 +363,7 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
             <CardContent className="p-4 space-y-3">
               {canSend && (
                 <Button
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
                   onClick={handleSend}
                   disabled={loading}
                 >
@@ -378,7 +378,7 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
 
               {canSign && (
                 <Button
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
                   onClick={() => {
                     setIsCountersigning(false);
                     setSignatureDialogOpen(true);
@@ -403,7 +403,7 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
                     </div>
                   </div>
                   <Button
-                    className="w-full bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                    className="w-full bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
                     onClick={() => {
                       setIsCountersigning(true);
                       setSignatureDialogOpen(true);

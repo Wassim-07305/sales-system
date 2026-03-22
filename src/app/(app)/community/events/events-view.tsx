@@ -202,17 +202,17 @@ export function EventsView({
 
     return (
       <Card
-        className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 ${isPast ? "opacity-70" : ""}`}
+        className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 ${isPast ? "opacity-70" : ""}`}
       >
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Date block */}
             <div className="flex sm:flex-col items-center gap-2 sm:gap-0 sm:w-16 shrink-0 sm:text-center">
-              <div className="h-12 w-12 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Calendar className="h-5 w-5 text-brand" />
+              <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Calendar className="h-5 w-5 text-emerald-500" />
               </div>
               <div className="sm:mt-1">
-                <p className="text-xs font-semibold text-brand">
+                <p className="text-xs font-semibold text-emerald-500">
                   {new Date(meta.event_date + "T00:00:00").toLocaleDateString(
                     "fr-FR",
                     { day: "numeric", month: "short" },
@@ -289,8 +289,8 @@ export function EventsView({
                   variant={isRegistered ? "outline" : "default"}
                   className={
                     isRegistered
-                      ? "border-brand text-brand hover:bg-brand/10"
-                      : "bg-brand text-brand-dark hover:bg-brand/90"
+                      ? "border-emerald-500 text-emerald-500 hover:bg-emerald-500/10"
+                      : "bg-emerald-500 text-black hover:bg-emerald-400"
                   }
                   disabled={
                     loadingRsvp === event.id || (isFull && !isRegistered)
@@ -333,7 +333,7 @@ export function EventsView({
           {isAdmin && (
             <Button
               onClick={() => setDialogOpen(true)}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               <Plus className="h-4 w-4 mr-2" />
               Créer un événement
@@ -345,7 +345,7 @@ export function EventsView({
       {/* Upcoming events */}
       <div className="space-y-4 mb-8">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-brand" />
+          <Calendar className="h-5 w-5 text-emerald-500" />
           Événements à venir
           <Badge variant="outline" className="ml-1">
             {upcoming.length}
@@ -489,7 +489,7 @@ export function EventsView({
             <Button
               onClick={handleCreate}
               disabled={creating}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {creating ? "Création..." : "Créer l'événement"}
             </Button>

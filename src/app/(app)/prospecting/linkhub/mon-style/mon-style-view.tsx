@@ -57,9 +57,9 @@ export function MonStyleView({ initialSamples }: Props) {
       />
 
       {/* Info card */}
-      <Card className="rounded-2xl border-brand/20 bg-brand/5">
+      <Card className="rounded-2xl border-emerald-500/20 bg-emerald-500/5">
         <CardContent className="p-5 flex items-start gap-3">
-          <Sparkles className="h-5 w-5 text-brand shrink-0 mt-0.5" />
+          <Sparkles className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium">
               Plus vous ajoutez d&apos;exemples, plus l&apos;IA s&apos;adapte à votre style
@@ -91,7 +91,7 @@ export function MonStyleView({ initialSamples }: Props) {
           <Button
             onClick={handleAdd}
             disabled={!newComment.trim() || isPending}
-            className="rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+            className="rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
           >
             {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Ajouter cet exemple

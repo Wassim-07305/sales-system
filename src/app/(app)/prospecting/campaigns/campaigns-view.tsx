@@ -205,7 +205,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
   function getStatusBadge(campaign: DripCampaign) {
     if (campaign.is_active) {
       return (
-        <Badge className="bg-brand/10 text-brand border border-brand/20">
+        <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
           Active
         </Badge>
       );
@@ -243,7 +243,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
       >
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium">
+            <Button className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle campagne
             </Button>
@@ -438,7 +438,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                 <Button
                   onClick={handleCreate}
                   disabled={isPending}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -463,7 +463,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
         </Card>
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-brand">
+            <p className="text-2xl font-bold text-emerald-500">
               {campaigns.filter((c) => c.is_active).length}
             </p>
             <p className="text-xs text-muted-foreground">Actives</p>
@@ -501,7 +501,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
             </p>
             <Button
               onClick={() => setCreateOpen(true)}
-              className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+              className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
               Creer une campagne
@@ -561,7 +561,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                           </div>
                           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-brand rounded-full transition-all"
+                              className="h-full bg-emerald-500 rounded-full transition-all"
                               style={{ width: `${getProgress(campaign)}%` }}
                             />
                           </div>
@@ -626,7 +626,7 @@ export function CampaignsView({ campaigns, lists, templates }: Props) {
                               <div
                                 className={`h-9 w-9 rounded-lg flex items-center justify-center text-sm font-medium shrink-0 ${
                                   campaign.is_active
-                                    ? "bg-brand/20 text-brand ring-1 ring-brand/30"
+                                    ? "bg-emerald-500/20 text-emerald-500 ring-1 ring-emerald-500/30"
                                     : "bg-muted text-muted-foreground ring-1 ring-border"
                                 }`}
                               >

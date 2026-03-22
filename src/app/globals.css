@@ -4,18 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@font-face {
-  font-family: "Plus Jakarta Sans";
-  font-style: normal;
-  font-weight: 200 800;
-  font-display: swap;
-  src: url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap");
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, ui-serif, serif;
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -47,10 +39,11 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-brand: #7af17a;
-  --color-brand-dark: #14080e;
+  /* Premium emerald brand */
+  --color-brand: var(--brand);
+  --color-brand-dark: #09090b;
   --color-brand-rose: #fdeef3;
-  --color-brand-gray: #6b6b6b;
+  --color-brand-gray: #a1a1aa;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -62,72 +55,75 @@
 
 :root {
   --radius: 0.625rem;
-  /* Brand: #f9f9f9 background, #14080e dark, #7af17a green, #fdeef3 rose, #6b6b6b gray */
-  --background: #f9f9f9;
-  --foreground: #14080e;
+  --brand: #10b981;
+
+  /* Light mode — clean, minimal */
+  --background: #fafafa;
+  --foreground: #09090b;
   --card: #ffffff;
-  --card-foreground: #14080e;
+  --card-foreground: #09090b;
   --popover: #ffffff;
-  --popover-foreground: #14080e;
-  --primary: #14080e;
-  --primary-foreground: #f9f9f9;
-  --secondary: #f0f0f0;
-  --secondary-foreground: #14080e;
-  --muted: #f0f0f0;
-  --muted-foreground: #6b6b6b;
-  --accent: #7af17a;
-  --accent-foreground: #14080e;
+  --popover-foreground: #09090b;
+  --primary: #09090b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #09090b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #7af17a;
-  --chart-1: #7af17a;
-  --chart-2: #3b82f6;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #10b981;
+  --chart-1: #10b981;
+  --chart-2: #06b6d4;
   --chart-3: #f59e0b;
   --chart-4: #8b5cf6;
   --chart-5: #ef4444;
-  --sidebar: #0a0a0a;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #7af17a;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: #161616;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1c1c1c;
-  --sidebar-ring: #7af17a;
+  /* Sidebar — always dark */
+  --sidebar: #09090b;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #09090b;
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #10b981;
 }
 
 .dark {
-  --background: #0c0c0c;
-  --foreground: #f0f0f0;
-  --card: #161616;
-  --card-foreground: #f0f0f0;
-  --popover: #161616;
-  --popover-foreground: #f0f0f0;
-  --primary: #f0f0f0;
-  --primary-foreground: #0c0c0c;
-  --secondary: #1c1c1c;
-  --secondary-foreground: #f0f0f0;
-  --muted: #1c1c1c;
-  --muted-foreground: #8b8b8b;
-  --accent: #7af17a;
-  --accent-foreground: #0c0c0c;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: rgba(255, 255, 255, 0.03);
+  --card-foreground: #fafafa;
+  --popover: #0c0c0e;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #09090b;
+  --secondary: rgba(255, 255, 255, 0.06);
+  --secondary-foreground: #fafafa;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #a1a1aa;
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --border: #2a2a2a;
-  --input: #2a2a2a;
-  --ring: #7af17a;
-  --chart-1: #7af17a;
-  --chart-2: #3b82f6;
-  --chart-3: #f59e0b;
-  --chart-4: #8b5cf6;
-  --chart-5: #ef4444;
-  --sidebar: #0a0a0a;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #7af17a;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: #161616;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1c1c1c;
-  --sidebar-ring: #7af17a;
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #10b981;
+  --chart-1: #34d399;
+  --chart-2: #22d3ee;
+  --chart-3: #fbbf24;
+  --chart-4: #a78bfa;
+  --chart-5: #f87171;
+  --sidebar: #050505;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #09090b;
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #10b981;
 }
 
 @layer base {
@@ -139,58 +135,51 @@
   }
 }
 
-/* Scrollbar styling */
+/* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d4;
+  background: rgba(161, 161, 170, 0.3);
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #a3a3a3;
+  background: rgba(161, 161, 170, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Navigation progress bar */
+/* ── Navigation progress ─────────────────────────────────── */
 @keyframes nav-progress {
-  0% {
-    width: 0;
-  }
-  20% {
-    width: 30%;
-  }
-  50% {
-    width: 60%;
-  }
-  80% {
-    width: 85%;
-  }
-  100% {
-    width: 97%;
-  }
+  0% { width: 0; }
+  20% { width: 30%; }
+  50% { width: 60%; }
+  80% { width: 85%; }
+  100% { width: 97%; }
 }
 
-/* Safe area support for notched devices */
+/* ── Safe area ───────────────────────────────────────────── */
 @supports (padding: env(safe-area-inset-bottom)) {
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
-/* Kanban drag styles */
+/* ── Kanban ───────────────────────────────────────────────── */
 .kanban-card-dragging {
   opacity: 0.5;
   transform: rotate(2deg);
 }
 
-/* Hide scrollbar for horizontal scroll containers on mobile */
+/* ── Hide scrollbar ──────────────────────────────────────── */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -199,38 +188,30 @@
   scrollbar-width: none;
 }
 
-/* Messaging animations */
+/* ── Animations ──────────────────────────────────────────── */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes typing-dot {
-  0%,
-  60%,
-  100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-shimmer {
@@ -244,4 +225,37 @@
 
 .animate-typing-dot {
   animation: typing-dot 1.2s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* ── Glassmorphism utility ───────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.02), 0 4px 24px -4px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Premium gradient backgrounds ────────────────────────── */
+.bg-gradient-dark {
+  background: linear-gradient(145deg, #09090b 0%, #0a0f0a 50%, #09090b 100%);
+}
+
+.bg-gradient-emerald-glow {
+  background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
 }

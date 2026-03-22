@@ -97,10 +97,10 @@ const statusLabels: Record<string, string> = {
 const statusColors: Record<string, string> = {
   new: "bg-muted text-muted-foreground",
   contacted: "bg-muted/40 text-muted-foreground/60 border border-border/30",
-  replied: "bg-brand/10 text-brand border border-brand/20",
+  replied: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
   interested: "bg-foreground/10 text-foreground border border-foreground/20",
-  booked: "bg-brand/20 text-brand-dark",
-  converted: "bg-brand/10 text-brand border border-brand/20",
+  booked: "bg-emerald-500/20 text-black",
+  converted: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
   lost: "bg-foreground/10 text-foreground border border-foreground/20",
 };
 
@@ -407,7 +407,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                   <Button
                     onClick={handleSearchInstagram}
                     disabled={searching}
-                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                   >
                     {searching ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -476,7 +476,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                           </div>
                           <div className="shrink-0 ml-3">
                             {isSaved ? (
-                              <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
+                              <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 gap-1">
                                 <Check className="h-3 w-3" />
                                 Ajouté
                               </Badge>
@@ -489,7 +489,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                                 size="sm"
                                 onClick={() => handleSaveInstagramProspect(result)}
                                 disabled={isSaving}
-                                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                                className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                               >
                                 {isSaving ? (
                                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -546,7 +546,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                 <Button
                   onClick={handleScrapeStories}
                   disabled={scrapingStories}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {scrapingStories ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -645,7 +645,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                 <Button
                   onClick={handleGenerateDm}
                   disabled={generatingDm}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {generatingDm ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -674,7 +674,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
             </Card>
 
             {/* Story Reaction Generator */}
-            <Card className="lg:col-span-2 shadow-sm rounded-2xl border-brand/20">
+            <Card className="lg:col-span-2 shadow-sm rounded-2xl border-emerald-500/20">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <MessageCircle className="h-4 w-4" />
@@ -696,7 +696,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                   <Button
                     onClick={handleGenerateStoryReaction}
                     disabled={generatingReaction}
-                    className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                   >
                     {generatingReaction ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -729,7 +729,7 @@ export function InstagramView({ prospects, unipileInstagram }: Props) {
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl"
+                        className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl"
                         onClick={() => {
                           copyToClipboard(storyReaction);
                           toast.success(

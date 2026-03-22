@@ -141,8 +141,8 @@ export const DealCard = memo(function DealCard({
         selectionMode ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
         "hover:shadow-md hover:border-border/80 hover:-translate-y-0.5",
         dragging &&
-          "opacity-60 shadow-xl rotate-1 scale-105 border-brand/30 ring-1 ring-brand/10",
-        isSelected && "ring-2 ring-brand/50 border-brand/40 bg-brand/5",
+          "opacity-60 shadow-xl rotate-1 scale-105 border-emerald-500/30 ring-1 ring-emerald-500/10",
+        isSelected && "ring-2 ring-emerald-500/50 border-emerald-500/40 bg-emerald-500/5",
       )}
       onClick={handleCardClick}
     >
@@ -204,7 +204,7 @@ export const DealCard = memo(function DealCard({
         {/* Value + Probability + Assigned */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <DollarSign className="h-3.5 w-3.5 text-brand" />
+            <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
             <span className="text-sm font-bold tabular-nums">
               {deal.value?.toLocaleString("fr-FR")} €
             </span>

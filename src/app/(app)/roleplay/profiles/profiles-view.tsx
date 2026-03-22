@@ -64,7 +64,7 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-brand/10 text-brand border-brand/20",
+  Facile: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   Moyen: "bg-muted/60 text-muted-foreground border-border",
   Difficile: "bg-foreground/10 text-foreground border-border",
 };
@@ -180,7 +180,7 @@ export function ProfilesView({ profiles }: Props) {
           </Link>
           <Button
             onClick={openNew}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Plus className="h-4 w-4 mr-2" />
             Ajouter un profil
@@ -358,7 +358,7 @@ export function ProfilesView({ profiles }: Props) {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {saving
                 ? "Enregistrement..."

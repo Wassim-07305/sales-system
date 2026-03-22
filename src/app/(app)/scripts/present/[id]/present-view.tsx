@@ -51,10 +51,10 @@ const nodeTypeConfig: Record<
 > = {
   opening: {
     label: "Accroche",
-    bg: "bg-brand",
-    border: "border-brand/20",
-    text: "text-brand",
-    lightBg: "bg-brand/10",
+    bg: "bg-emerald-500",
+    border: "border-emerald-500/20",
+    text: "text-emerald-500",
+    lightBg: "bg-emerald-500/10",
     icon: MessageSquare,
   },
   question: {
@@ -83,10 +83,10 @@ const nodeTypeConfig: Record<
   },
   closing: {
     label: "Closing",
-    bg: "bg-brand/80",
-    border: "border-brand/15",
-    text: "text-brand/80",
-    lightBg: "bg-brand/8",
+    bg: "bg-emerald-500/80",
+    border: "border-emerald-500/15",
+    text: "text-emerald-500/80",
+    lightBg: "bg-emerald-500/8",
     icon: CheckCircle,
   },
 };
@@ -157,7 +157,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
 
   if (totalSteps === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-dark">
+      <div className="min-h-screen flex items-center justify-center bg-emerald-500">
         <div className="text-center text-white">
           <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
             <MessageSquare className="h-6 w-6 text-muted-foreground" />
@@ -205,7 +205,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
       <div className="px-6">
         <div className="h-1 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-brand rounded-full transition-all duration-300"
+            className="h-full bg-emerald-500 rounded-full transition-all duration-300"
             style={{
               width: `${((currentStep + 1) / totalSteps) * 100}%`,
             }}
@@ -254,7 +254,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
                     idx === currentStep
                       ? `w-8 ${stepConfig.bg}`
                       : idx < currentStep
-                        ? "w-2.5 bg-brand/60"
+                        ? "w-2.5 bg-emerald-500/60"
                         : "w-2.5 bg-white/20"
                   }`}
                 />
@@ -281,7 +281,7 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
           onClick={goNext}
           disabled={currentStep === totalSteps - 1}
           size="lg"
-          className="bg-brand text-brand-dark hover:bg-brand/90 disabled:opacity-30"
+          className="bg-emerald-500 text-black hover:bg-emerald-400 disabled:opacity-30"
         >
           Suivant
           <ArrowRight className="h-5 w-5 ml-2" />

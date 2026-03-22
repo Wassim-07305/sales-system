@@ -117,7 +117,7 @@ export function WorkspacesAdmin({ workspaces }: { workspaces: Workspace[] }) {
           </Link>
           <Button
             size="sm"
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
             onClick={() => setDialogOpen(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -141,8 +141,8 @@ export function WorkspacesAdmin({ workspaces }: { workspaces: Workspace[] }) {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <Card className="border-border/50">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
-              <Building2 className="h-5 w-5 text-brand" />
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold">{workspaces.length}</p>
@@ -345,7 +345,7 @@ export function WorkspacesAdmin({ workspaces }: { workspaces: Workspace[] }) {
               </div>
             </div>
             <Button
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
               onClick={handleCreate}
               disabled={creating}
             >

@@ -233,7 +233,7 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
           </Button>
           <Button
             onClick={() => openNew()}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau post
@@ -269,13 +269,13 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
                 return (
                   <div
                     key={i}
-                    className={`min-h-[80px] p-1 border rounded-md ${day ? "cursor-pointer hover:bg-muted/50" : "bg-muted/20"} ${day === now.getDate() ? "border-brand" : ""}`}
+                    className={`min-h-[80px] p-1 border rounded-md ${day ? "cursor-pointer hover:bg-muted/50" : "bg-muted/20"} ${day === now.getDate() ? "border-emerald-500" : ""}`}
                     onClick={() => day && openNew(dateStr)}
                   >
                     {day && (
                       <>
                         <span
-                          className={`text-xs font-medium ${day === now.getDate() ? "text-brand" : ""}`}
+                          className={`text-xs font-medium ${day === now.getDate() ? "text-emerald-500" : ""}`}
                         >
                           {day}
                         </span>
@@ -424,7 +424,7 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
                     key={p.id}
                     className="flex items-center gap-3 p-3 rounded-lg border"
                   >
-                    <span className="text-lg font-bold text-brand">
+                    <span className="text-lg font-bold text-emerald-500">
                       #{i + 1}
                     </span>
                     <div className="flex-1">
@@ -540,7 +540,7 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
               </div>
               <Button
                 onClick={handleSave}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 {editingPost ? "Mettre à jour" : "Créer"}
               </Button>
@@ -552,7 +552,7 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
                 className={`border rounded-lg p-4 ${form.platform === "linkedin" ? "bg-white" : form.platform === "instagram" ? "bg-gradient-to-b from-purple-50 to-pink-50" : "bg-gray-50"}`}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="h-8 w-8 rounded-full bg-brand/20 flex items-center justify-center text-brand text-xs font-bold">
+                  <div className="h-8 w-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 text-xs font-bold">
                     D
                   </div>
                   <div>

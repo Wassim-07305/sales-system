@@ -206,7 +206,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
                 className={cn(
                   "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                   i === step
-                    ? "bg-brand text-brand-dark"
+                    ? "bg-emerald-500 text-black"
                     : i < step
                       ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
                       : "bg-muted text-muted-foreground",
@@ -229,8 +229,8 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Database className="h-4 w-4 text-brand" />
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Database className="h-4 w-4 text-emerald-500" />
                 </div>
                 Source CRM
               </CardTitle>
@@ -249,14 +249,14 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
                     className={cn(
                       "p-4 rounded-lg border-2 text-center transition-all",
                       source === key
-                        ? "border-brand bg-brand/5"
+                        ? "border-emerald-500 bg-emerald-500/5"
                         : "border-transparent bg-muted/50 hover:bg-muted",
                     )}
                   >
                     <Database
                       className={cn(
                         "h-6 w-6 mx-auto mb-2",
-                        source === key ? "text-brand" : "text-muted-foreground",
+                        source === key ? "text-emerald-500" : "text-muted-foreground",
                       )}
                     />
                     <p className="text-sm font-medium">{preset.label}</p>
@@ -308,7 +308,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
 
               <Button
                 onClick={() => setStep(1)}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 Continuer
                 <ArrowRight className="h-4 w-4 ml-1" />
@@ -451,7 +451,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
               <Button
                 onClick={handleExecute}
                 disabled={isPending}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -573,7 +573,7 @@ export function MigrationView({ history }: { history: MigrationLog[] }) {
               <Link href="/utilisateurs">
                 <Button
                   size="sm"
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   Voir les contacts
                 </Button>

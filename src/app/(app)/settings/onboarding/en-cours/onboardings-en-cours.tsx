@@ -181,7 +181,7 @@ export function OnboardingsEnCours({ users }: OnboardingsEnCoursProps) {
                       </span>
                       <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#7af17a] rounded-full transition-all"
+                          className="h-full bg-[#10b981] rounded-full transition-all"
                           style={{ width: `${progress}%` }}
                         />
                       </div>

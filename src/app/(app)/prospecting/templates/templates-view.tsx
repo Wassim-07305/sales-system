@@ -168,7 +168,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
           </Link>
           <Button
             onClick={openNew}
-            className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+            className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau template
@@ -188,7 +188,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
                   }
                   className={`px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
                     filterStep === s.step
-                      ? "bg-brand text-brand-dark border-brand"
+                      ? "bg-emerald-500 text-black border-emerald-500"
                       : "hover:bg-muted"
                   }`}
                 >
@@ -375,7 +375,7 @@ export function TemplatesView({ templates }: { templates: Template[] }) {
             </div>
             <Button
               onClick={handleSave}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
             >
               {editingTemplate ? "Mettre à jour" : "Créer"}
             </Button>

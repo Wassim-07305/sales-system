@@ -336,7 +336,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
           <TabsTrigger
             value="active"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Partenaires actifs
             <Badge variant="secondary" className="ml-2 text-xs">
@@ -345,7 +345,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
           </TabsTrigger>
           <TabsTrigger
             value="applications"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Candidatures
             {pendingPartners.length > 0 && (
@@ -359,7 +359,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
           </TabsTrigger>
           <TabsTrigger
             value="revenue"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Revenus
           </TabsTrigger>
@@ -611,7 +611,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                             size="sm"
                             onClick={() => handleApprove(partner.id)}
                             disabled={isPending}
-                            className="bg-[#7af17a] text-black hover:bg-[#6ae06a]"
+                            className="bg-[#10b981] text-black hover:bg-[#6ae06a]"
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
                             Approuver
@@ -669,7 +669,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#14080e",
+                        backgroundColor: "#09090b",
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                         color: "white",
@@ -694,7 +694,7 @@ export function PartnersView({ partners, revenueData }: PartnersViewProps) {
                     <Bar
                       dataKey="commission"
                       name="Commissions"
-                      fill="#7af17a"
+                      fill="#10b981"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>

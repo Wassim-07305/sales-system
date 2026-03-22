@@ -223,8 +223,8 @@ export function ReportsView({
             >
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-brand" />
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-emerald-500" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold tracking-tight">
@@ -257,8 +257,8 @@ export function ReportsView({
                     <PolarAngleAxis dataKey="axis" tick={{ fontSize: 12 }} />
                     <Radar
                       dataKey="value"
-                      stroke="#7af17a"
-                      fill="#7af17a"
+                      stroke="#10b981"
+                      fill="#10b981"
                       fillOpacity={0.2}
                       strokeWidth={2}
                     />
@@ -295,12 +295,12 @@ export function ReportsView({
                     <Legend />
                     <Bar
                       dataKey="Semaine actuelle"
-                      fill="#7af17a"
+                      fill="#10b981"
                       radius={[4, 4, 0, 0]}
                     />
                     <Bar
                       dataKey="Semaine précédente"
-                      fill="#7af17a50"
+                      fill="#10b98150"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>

@@ -213,14 +213,14 @@ export function CalendarSyncPanel({
       </Link>
 
       {/* Unipile connection — recommended */}
-      <Card className={unipileConnected ? "border-brand/30" : ""}>
+      <Card className={unipileConnected ? "border-emerald-500/30" : ""}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Unplug className="h-5 w-5" />
               Google Calendar via Unipile
             </CardTitle>
-            <Badge className="bg-brand/15 text-brand border-brand/20 text-[10px]">
+            <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/20 text-[10px]">
               Recommandé
             </Badge>
           </div>
@@ -231,9 +231,9 @@ export function CalendarSyncPanel({
         <CardContent>
           {unipileConnected ? (
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-brand" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               <div>
-                <p className="text-sm font-medium text-brand">
+                <p className="text-sm font-medium text-emerald-500">
                   Connecté via Unipile
                 </p>
                 {unipileName && (

@@ -220,7 +220,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <BookOpen className="h-12 w-12 text-[#7af17a]/30" />
+                      <BookOpen className="h-12 w-12 text-[#10b981]/30" />
                     </div>
                   )}
 
@@ -274,7 +274,7 @@ export function CourseList({ initialCourses }: CourseListProps) {
                     <Button
                       asChild
                       size="sm"
-                      className="w-full gap-1.5 bg-brand text-brand-dark hover:bg-brand/90"
+                      className="w-full gap-1.5 bg-emerald-500 text-black hover:bg-emerald-400"
                     >
                       <Link href={`/academy/admin/${course.id}`}>
                         <Layers className="h-3.5 w-3.5" />

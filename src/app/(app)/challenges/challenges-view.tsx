@@ -451,7 +451,7 @@ function AdminPanel({ adminChallenges }: { adminChallenges: Challenge[] }) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="h-5 w-5 text-brand" />
+            <Shield className="h-5 w-5 text-emerald-500" />
             Administration des défis
           </CardTitle>
           <Button size="sm" onClick={handleCreate}>
@@ -481,7 +481,7 @@ function AdminPanel({ adminChallenges }: { adminChallenges: Challenge[] }) {
                       variant="outline"
                       className={
                         challenge.is_active
-                          ? "text-brand border-brand/30 bg-brand/10"
+                          ? "text-emerald-500 border-emerald-500/30 bg-emerald-500/10"
                           : "text-muted-foreground"
                       }
                     >
@@ -606,7 +606,7 @@ function ChallengesHistory({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <History className="h-5 w-5 text-brand" />
+          <History className="h-5 w-5 text-emerald-500" />
           Historique des défis
         </h2>
         <Select
@@ -683,7 +683,7 @@ function ChallengesHistory({
                       </span>
                     </div>
                   </div>
-                  <Badge className="bg-brand/10 text-brand border-brand/20 shrink-0 ml-4">
+                  <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shrink-0 ml-4">
                     <Zap className="h-3 w-3 mr-1" />
                     {challenge.points_reward} pts
                   </Badge>
@@ -691,9 +691,9 @@ function ChallengesHistory({
 
                 {/* Gagnant */}
                 {challenge.winner && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-brand/5 border border-brand/20">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
                     <Crown className="h-5 w-5 text-yellow-500" />
-                    <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                    <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold">
                       {challenge.winner.full_name?.charAt(0) || "?"}
                     </div>
                     <div className="flex-1">
@@ -782,18 +782,18 @@ export function ChallengesView({
       </PageHeader>
 
       {/* Profile banner */}
-      <Card className="mb-6 rounded-2xl bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0 shadow-xl shadow-brand-dark/20">
+      <Card className="mb-6 rounded-2xl bg-gradient-to-r from-zinc-950 to-zinc-950/80 text-white border-0 shadow-xl shadow-zinc-950/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-6 flex-wrap">
-            <div className="h-16 w-16 rounded-2xl bg-brand/20 border-2 border-brand flex items-center justify-center">
-              <Star className="h-8 w-8 text-brand" />
+            <div className="h-16 w-16 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
+              <Star className="h-8 w-8 text-emerald-500" />
             </div>
             <div className="flex-1 min-w-[200px]">
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="text-xl font-bold">
                   {gamProfile?.level_name || "Setter Débutant"}
                 </h2>
-                <Badge className="bg-brand text-brand-dark">
+                <Badge className="bg-emerald-500 text-black">
                   Niv. {gamProfile?.level || 1}
                 </Badge>
               </div>
@@ -808,14 +808,14 @@ export function ChallengesView({
                   </div>
                   <Progress
                     value={levelProgress}
-                    className="h-2 [&>div]:bg-brand"
+                    className="h-2 [[&>div]:bg-brand>div]:bg-emerald-500"
                   />
                 </div>
               )}
             </div>
             <div className="flex gap-6 text-center">
               <div>
-                <div className="flex items-center justify-center gap-1 text-brand mb-1">
+                <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
                   <Flame className="h-5 w-5" />
                   <span className="text-2xl font-bold">
                     {gamProfile?.current_streak || 0}
@@ -824,7 +824,7 @@ export function ChallengesView({
                 <p className="text-xs text-white/50">Jours streak</p>
               </div>
               <div>
-                <div className="flex items-center justify-center gap-1 text-brand mb-1">
+                <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
                   <Trophy className="h-5 w-5" />
                   <span className="text-2xl font-bold">
                     {completedChallenges.length}
@@ -878,7 +878,7 @@ export function ChallengesView({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Target className="h-5 w-5 text-brand" />
+                <Target className="h-5 w-5 text-emerald-500" />
                 Défis en cours ({activeChallenges.length})
               </h2>
               {activeChallenges.map((challenge) => {
@@ -891,7 +891,7 @@ export function ChallengesView({
                 return (
                   <Card
                     key={challenge.id}
-                    className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+                    className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300"
                   >
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
@@ -903,7 +903,7 @@ export function ChallengesView({
                             {challenge.description}
                           </p>
                         </div>
-                        <Badge className="bg-brand/10 text-brand border-brand/20 shrink-0 ml-4">
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shrink-0 ml-4">
                           <Zap className="h-3 w-3 mr-1" />
                           {challenge.points_reward} pts
                         </Badge>
@@ -923,7 +923,7 @@ export function ChallengesView({
                       </div>
                       <Progress
                         value={percent}
-                        className="h-2.5 [&>div]:bg-brand"
+                        className="h-2.5 [[&>div]:bg-brand>div]:bg-emerald-500"
                       />
                     </CardContent>
                   </Card>
@@ -947,7 +947,7 @@ export function ChallengesView({
               {completedChallenges.length > 0 && (
                 <>
                   <h2 className="text-lg font-semibold flex items-center gap-2 mt-6">
-                    <CheckCircle2 className="h-5 w-5 text-brand" />
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                     Défis complétés ({completedChallenges.length})
                   </h2>
                   {completedChallenges.map((challenge) => (
@@ -956,13 +956,13 @@ export function ChallengesView({
                       className="rounded-2xl border-border/30 opacity-70"
                     >
                       <CardContent className="p-4 flex items-center gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-brand shrink-0" />
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium text-sm">
                             {challenge.title}
                           </p>
                         </div>
-                        <Badge variant="outline" className="text-brand">
+                        <Badge variant="outline" className="text-emerald-500">
                           +{challenge.points_reward} pts
                         </Badge>
                       </CardContent>
@@ -976,7 +976,7 @@ export function ChallengesView({
             <Card className="h-fit rounded-2xl border-border/40">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Medal className="h-5 w-5 text-brand" />
+                  <Medal className="h-5 w-5 text-emerald-500" />
                   Classement
                 </CardTitle>
               </CardHeader>
@@ -990,7 +990,7 @@ export function ChallengesView({
                         key={player.user_id}
                         className={`flex items-center gap-3 p-3 rounded-lg ${
                           isMe
-                            ? "bg-brand/10 ring-1 ring-brand/30"
+                            ? "bg-emerald-500/10 ring-1 ring-emerald-500/30"
                             : rank <= 3
                               ? "bg-muted/50"
                               : ""
@@ -1009,7 +1009,7 @@ export function ChallengesView({
                         >
                           {rank}
                         </span>
-                        <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                        <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold">
                           {player.user?.full_name?.charAt(0) || "?"}
                         </div>
                         <div className="flex-1 min-w-0">

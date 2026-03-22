@@ -19,7 +19,7 @@ export function TranscriptEntryLine({
         [{ts}]
       </span>
       <div>
-        <span className="text-[#7af17a] font-medium">{speaker}</span>
+        <span className="text-[#10b981] font-medium">{speaker}</span>
         <span className="text-zinc-400 mx-1">:</span>
         <span className="text-zinc-300">{text}</span>
       </div>

@@ -38,7 +38,7 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
     startTransition(async () => {
       const result = await checkAndUpdateStreak(userId);
       toast.success(`Streak actuel : ${result.streak} jour(s)`, {
-        style: { background: "#14080e", color: "#fff" },
+        style: { background: "#09090b", color: "#fff" },
       });
     });
   }
@@ -53,7 +53,7 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
           <div className="flex items-center gap-3">
             <div
               className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                currentStreak > 0 ? "bg-brand/20" : "bg-muted"
+                currentStreak > 0 ? "bg-emerald-500/20" : "bg-muted"
               }`}
             >
               <Flame
@@ -104,7 +104,7 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
                 <div
                   className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
                     isFilled
-                      ? "bg-brand text-brand-dark"
+                      ? "bg-emerald-500 text-black"
                       : "bg-muted/50 text-muted-foreground"
                   }`}
                 >
@@ -118,7 +118,7 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
 
         {currentStreak >= 7 && (
           <div className="mt-3 text-center">
-            <span className="text-xs text-brand font-medium">
+            <span className="text-xs text-emerald-500 font-medium">
               + {Math.floor(currentStreak / 7)} semaine
               {Math.floor(currentStreak / 7) > 1 ? "s" : ""} de streak !
             </span>

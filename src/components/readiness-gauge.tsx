@@ -68,7 +68,7 @@ export function ReadinessGauge({
           {readiness.isReady ? (
             <ShieldCheck className="h-5 w-5 text-green-500" />
           ) : (
-            <TrendingUp className="h-5 w-5 text-brand" />
+            <TrendingUp className="h-5 w-5 text-emerald-500" />
           )}
           Pret a etre place
           {readiness.isReady && (

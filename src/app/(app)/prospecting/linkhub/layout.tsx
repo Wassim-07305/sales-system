@@ -57,7 +57,7 @@ export default function LinkhubLayout({
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors",
                   active
-                    ? "bg-brand/10 text-brand"
+                    ? "bg-emerald-500/10 text-emerald-500"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                 )}
               >
@@ -76,7 +76,7 @@ export default function LinkhubLayout({
               className={cn(
                 "h-1.5 w-1.5",
                 linkedinConnected
-                  ? "fill-brand text-brand"
+                  ? "fill-emerald-500 text-emerald-500"
                   : "fill-muted-foreground/30 text-muted-foreground/30",
               )}
             />
@@ -87,7 +87,7 @@ export default function LinkhubLayout({
               className={cn(
                 "h-1.5 w-1.5",
                 instagramConnected
-                  ? "fill-brand text-brand"
+                  ? "fill-emerald-500 text-emerald-500"
                   : "fill-muted-foreground/30 text-muted-foreground/30",
               )}
             />

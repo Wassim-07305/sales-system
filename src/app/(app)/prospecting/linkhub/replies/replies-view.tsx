@@ -90,7 +90,7 @@ export function RepliesView({ comments }: Props) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-brand/10 text-brand border-brand/20 text-xs">
+                    <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-xs">
                       {comment.replies_count} réponse
                       {comment.replies_count > 1 ? "s" : ""}
                     </Badge>

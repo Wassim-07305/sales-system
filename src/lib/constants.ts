@@ -510,7 +510,7 @@ export const CALL_RESULT_OPTIONS = [
   {
     value: "vente_realisee",
     label: "Vente réalisée",
-    color: "bg-brand/10 text-brand border-brand/20",
+    color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   },
   {
     value: "non_realisee",
@@ -539,7 +539,7 @@ export const LEAD_STATUS_LABELS: Record<string, string> = {
 
 export const LEAD_STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  qualified: "bg-brand/10 text-brand border-brand/20",
+  qualified: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   booked: "bg-purple-500/10 text-purple-500 border-purple-500/20",
   disqualified: "bg-muted/40 text-muted-foreground border-border/30",
   lost: "bg-red-500/10 text-red-500 border-red-500/20",
@@ -550,7 +550,7 @@ export const PIPELINE_DEFAULT_STAGES = [
   { name: "Contacté", color: "#3b82f6", position: 1 },
   { name: "Relancé", color: "#f59e0b", position: 2 },
   { name: "Call booké", color: "#8b5cf6", position: 3 },
-  { name: "Fermé (gagné)", color: "#7af17a", position: 4 },
+  { name: "Fermé (gagné)", color: "#10b981", position: 4 },
   { name: "Fermé (perdu)", color: "#ef4444", position: 5 },
 ];
 

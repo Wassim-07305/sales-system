@@ -24,12 +24,12 @@ interface SlideRendererProps {
 // ─── Theme helpers ───────────────────────────────────────────────────────────
 
 const themeClasses: Record<PresentationTheme, string> = {
-  dark: "bg-[#14080e] text-white",
+  dark: "bg-[#09090b] text-white",
   light: "bg-white text-gray-900",
-  brand: "bg-gradient-to-br from-[#14080e] to-[#1a0f14] text-white",
+  brand: "bg-gradient-to-br from-[#09090b] to-[#1a0f14] text-white",
 };
 
-const accentColor = "#7af17a";
+const accentColor = "#10b981";
 
 function useThemeText(theme: PresentationTheme) {
   return {
@@ -76,7 +76,7 @@ function EditableText({
       className={cn(
         className,
         isEditable &&
-          "outline-none cursor-text hover:border hover:border-dashed hover:border-white/30 hover:rounded-md focus:border focus:border-dashed focus:border-[#7af17a]/50 focus:rounded-md transition-colors px-1 -mx-1",
+          "outline-none cursor-text hover:border hover:border-dashed hover:border-white/30 hover:rounded-md focus:border focus:border-dashed focus:border-[#10b981]/50 focus:rounded-md transition-colors px-1 -mx-1",
       )}
       contentEditable={isEditable}
       suppressContentEditableWarning

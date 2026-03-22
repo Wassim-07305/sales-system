@@ -124,7 +124,7 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
           </Link>
           <Button
             size="sm"
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
             onClick={openNew}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -259,7 +259,7 @@ export function OnboardingSettings({ steps }: { steps: Step[] }) {
               <Label htmlFor="required">Étape obligatoire</Label>
             </div>
             <Button
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
               onClick={handleSave}
             >
               {editingStep ? "Modifier" : "Ajouter"}

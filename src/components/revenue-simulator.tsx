@@ -134,7 +134,7 @@ export function RevenueSimulator({
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Calculator className="h-4 w-4 text-brand" />
+              <Calculator className="h-4 w-4 text-emerald-500" />
               Tes parametres
             </CardTitle>
           </CardHeader>
@@ -248,12 +248,12 @@ export function RevenueSimulator({
         {/* Results Panel */}
         <div className="space-y-4">
           {/* Revenue highlight */}
-          <Card className="bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
+          <Card className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border-emerald-500/20">
             <CardContent className="p-6 text-center">
               <p className="text-sm text-muted-foreground mb-1">
                 Tes revenus mensuels estimes
               </p>
-              <p className="text-4xl font-bold text-brand">
+              <p className="text-4xl font-bold text-emerald-500">
                 {results.monthlySetterCommission.toLocaleString("fr-FR")} €
               </p>
               <p className="text-xs text-muted-foreground mt-1">

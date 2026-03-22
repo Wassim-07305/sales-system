@@ -134,7 +134,7 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
               <div
                 className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                   isMe
-                    ? "bg-[#7af17a]/20 text-[#7af17a]"
+                    ? "bg-[#10b981]/20 text-[#10b981]"
                     : "bg-muted text-foreground/90"
                 }`}
               >
@@ -157,12 +157,12 @@ export function CallChatPanel({ sessionId, onClose }: CallChatPanelProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message..."
-            className="flex-1 h-9 rounded-xl bg-muted border border-border px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-[#7af17a]/50"
+            className="flex-1 h-9 rounded-xl bg-muted border border-border px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-[#10b981]/50"
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim()}
-            className="w-9 h-9 rounded-xl bg-[#7af17a] text-zinc-900 flex items-center justify-center hover:bg-[#6ae06a] transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            className="w-9 h-9 rounded-xl bg-[#10b981] text-zinc-900 flex items-center justify-center hover:bg-[#6ae06a] transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
             <Send className="w-4 h-4" />
           </button>

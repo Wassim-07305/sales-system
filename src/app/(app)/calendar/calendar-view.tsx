@@ -225,7 +225,7 @@ export function CalendarView() {
                             cell.day && "hover:bg-muted/50 cursor-pointer",
                             !cell.day && "bg-muted/20",
                             isSelected &&
-                              "bg-muted/70 ring-1 ring-[#7af17a]/50",
+                              "bg-muted/70 ring-1 ring-[#10b981]/50",
                           )}
                         >
                           {cell.day && (
@@ -234,7 +234,7 @@ export function CalendarView() {
                                 className={cn(
                                   "inline-flex items-center justify-center h-7 w-7 rounded-full text-sm",
                                   isToday &&
-                                    "bg-[#7af17a] text-black font-bold",
+                                    "bg-[#10b981] text-black font-bold",
                                 )}
                               >
                                 {cell.day}
@@ -281,7 +281,7 @@ export function CalendarView() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-[#7af17a]" />
+              <CalendarDays className="h-5 w-5 text-[#10b981]" />
               Événements du{" "}
               {new Date(selectedDate + "T00:00:00").toLocaleDateString(
                 "fr-FR",

@@ -271,7 +271,7 @@ export function TrainingSession({
       });
       toast.success("Résultat sauvegardé", {
         style: {
-          background: "#14080e",
+          background: "#09090b",
           border: "1px solid rgba(255,255,255,0.1)",
         },
       });
@@ -279,7 +279,7 @@ export function TrainingSession({
     } catch {
       toast.error("Erreur lors de la sauvegarde", {
         style: {
-          background: "#14080e",
+          background: "#09090b",
           border: "1px solid rgba(255,255,255,0.1)",
         },
       });
@@ -310,10 +310,10 @@ export function TrainingSession({
         </PageHeader>
 
         <div className="max-w-xl mx-auto">
-          <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+          <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
             <CardHeader className="text-center">
-              <div className="mx-auto h-14 w-14 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mb-2">
-                <Brain className="h-7 w-7 text-brand" />
+              <div className="mx-auto h-14 w-14 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center mb-2">
+                <Brain className="h-7 w-7 text-emerald-500" />
               </div>
               <CardTitle className="text-xl">
                 Prêt pour l&apos;entraînement ?
@@ -336,7 +336,7 @@ export function TrainingSession({
                 </span>
                 {bestScore !== null && (
                   <span className="flex items-center gap-1.5">
-                    <Trophy className="h-4 w-4 text-brand" />
+                    <Trophy className="h-4 w-4 text-emerald-500" />
                     Record : {bestScore}%
                   </span>
                 )}
@@ -348,7 +348,7 @@ export function TrainingSession({
               <div className="flex justify-center pt-2">
                 <Button
                   onClick={startTraining}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 px-8"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400 px-8"
                 >
                   Commencer
                 </Button>
@@ -393,10 +393,10 @@ export function TrainingSession({
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+          <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
             <CardHeader>
               <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-brand/10 text-brand border-brand/20 text-[11px] font-medium uppercase tracking-wider">
+                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[11px] font-medium uppercase tracking-wider">
                   {getNodeTypeLabel(question.nodeType)}
                 </Badge>
               </div>
@@ -405,11 +405,11 @@ export function TrainingSession({
             <CardContent className="space-y-3">
               {question.options.map((option, optIdx) => {
                 let optionStyle =
-                  "border-border/50 hover:border-brand/40 hover:bg-brand/5 cursor-pointer";
+                  "border-border/50 hover:border-emerald-500/40 hover:bg-emerald-500/5 cursor-pointer";
 
                 if (showFeedback) {
                   if (option === question.correctAnswer) {
-                    optionStyle = "border-brand/60 bg-brand/10 cursor-default";
+                    optionStyle = "border-emerald-500/60 bg-emerald-500/10 cursor-default";
                   } else if (option === selectedAnswer && !isCorrect) {
                     optionStyle =
                       "border-foreground/40 bg-foreground/5 cursor-default";
@@ -428,7 +428,7 @@ export function TrainingSession({
                     <div className="flex items-center justify-between">
                       <span className="text-sm">{option}</span>
                       {showFeedback && option === question.correctAnswer && (
-                        <CheckCircle className="h-5 w-5 text-brand shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
                       )}
                       {showFeedback &&
                         option === selectedAnswer &&
@@ -444,7 +444,7 @@ export function TrainingSession({
                 <div className="pt-4 flex justify-end">
                   <Button
                     onClick={handleNext}
-                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     {currentIndex < totalQuestions - 1 ? (
                       <>
@@ -480,19 +480,19 @@ export function TrainingSession({
 
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Score Card */}
-        <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+        <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
           <CardContent className="pt-8 pb-8 text-center">
             <div
               className={`mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-4 ring-1 ${
                 scorePercent >= 80
-                  ? "bg-brand/10 ring-brand/20"
+                  ? "bg-emerald-500/10 ring-emerald-500/20"
                   : scorePercent >= 50
                     ? "bg-muted/60 ring-muted-foreground/20"
                     : "bg-muted/40 ring-muted-foreground/20"
               }`}
             >
               {scorePercent >= 80 ? (
-                <Trophy className="h-8 w-8 text-brand" />
+                <Trophy className="h-8 w-8 text-emerald-500" />
               ) : scorePercent >= 50 ? (
                 <Target className="h-8 w-8 text-muted-foreground" />
               ) : (
@@ -509,7 +509,7 @@ export function TrainingSession({
                 {formatTime(elapsedSeconds)}
               </span>
               {bestScore !== null && scorePercent > bestScore && (
-                <Badge className="bg-brand/10 text-brand border-brand/20">
+                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                   Nouveau record !
                 </Badge>
               )}
@@ -518,7 +518,7 @@ export function TrainingSession({
         </Card>
 
         {/* Detailed Answers */}
-        <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+        <Card className="bg-card rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Détail des réponses
@@ -533,19 +533,19 @@ export function TrainingSession({
                   key={idx}
                   className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
                     correct
-                      ? "border-brand/20 bg-brand/5"
+                      ? "border-emerald-500/20 bg-emerald-500/5"
                       : "border-muted-foreground/20 bg-muted/30"
                   }`}
                 >
                   {correct ? (
-                    <CheckCircle className="h-5 w-5 text-brand shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                   ) : (
                     <XCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{q.prompt}</p>
                     {correct ? (
-                      <p className="text-xs text-brand mt-1">
+                      <p className="text-xs text-emerald-500 mt-1">
                         {q.correctAnswer}
                       </p>
                     ) : (
@@ -553,7 +553,7 @@ export function TrainingSession({
                         <p className="text-xs text-muted-foreground">
                           Votre réponse : {userAnswer}
                         </p>
-                        <p className="text-xs text-brand">
+                        <p className="text-xs text-emerald-500">
                           Bonne réponse : {q.correctAnswer}
                         </p>
                       </div>
@@ -578,7 +578,7 @@ export function TrainingSession({
           <Button
             onClick={handleSaveAndFinish}
             disabled={saving}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             {saving ? "Sauvegarde..." : "Sauvegarder le résultat"}
           </Button>

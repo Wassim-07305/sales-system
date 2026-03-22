@@ -145,7 +145,7 @@ export function FileUpload({
           className={cn(
             "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-8 transition-colors",
             dragActive
-              ? "border-brand bg-brand/5"
+              ? "border-emerald-500 bg-emerald-500/5"
               : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30",
             uploading && "pointer-events-none opacity-60",
           )}
@@ -159,13 +159,13 @@ export function FileUpload({
           />
           {uploading ? (
             <>
-              <Loader2 className="h-8 w-8 animate-spin text-brand mb-2" />
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-500 mb-2" />
               <p className="text-sm text-muted-foreground">
                 Upload en cours...
               </p>
               <div className="mt-2 h-1.5 w-32 rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full bg-brand transition-all duration-300 rounded-full"
+                  className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>

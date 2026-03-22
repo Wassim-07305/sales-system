@@ -5,7 +5,7 @@ export default function NotFound() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center px-6">
         <div className="mb-6">
-          <span className="text-8xl font-bold text-brand">404</span>
+          <span className="text-8xl font-bold text-emerald-500">404</span>
         </div>
         <h1 className="text-2xl font-bold mb-2">Page introuvable</h1>
         <p className="text-muted-foreground mb-8 max-w-md">
@@ -14,7 +14,7 @@ export default function NotFound() {
         <div className="flex items-center justify-center gap-4">
           <Link
             href="/dashboard"
-            className="inline-flex items-center justify-center rounded-md bg-brand text-brand-dark px-6 py-2.5 text-sm font-medium hover:bg-brand/90 transition-colors"
+            className="inline-flex items-center justify-center rounded-md bg-emerald-500 text-black px-6 py-2.5 text-sm font-medium hover:bg-emerald-400 transition-colors"
           >
             Retour au dashboard
           </Link>

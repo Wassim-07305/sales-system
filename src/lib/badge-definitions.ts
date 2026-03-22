@@ -17,7 +17,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     name: "Premier Deal",
     description: "Conclure votre premier deal",
     icon: "Handshake",
-    color: "#7af17a",
+    color: "#10b981",
     points: 50,
     category: "performance",
   },

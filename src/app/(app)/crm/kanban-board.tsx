@@ -390,7 +390,7 @@ export function KanbanBoard({
               onClick={toggleSelectionMode}
               className={cn(
                 "gap-2 h-11 rounded-xl",
-                selectionMode && "bg-brand text-brand-dark hover:bg-brand/90",
+                selectionMode && "bg-emerald-500 text-black hover:bg-emerald-400",
               )}
             >
               <CheckSquare className="h-3.5 w-3.5" />
@@ -414,7 +414,7 @@ export function KanbanBoard({
               className={cn(
                 "cursor-pointer text-[11px] transition-colors",
                 selectedTags.includes(tag)
-                  ? "bg-brand text-brand-dark hover:bg-brand/90"
+                  ? "bg-emerald-500 text-black hover:bg-emerald-400"
                   : "hover:bg-muted",
               )}
               onClick={() => toggleTag(tag)}
@@ -440,8 +440,8 @@ export function KanbanBoard({
       {deals.length === 0 && (
         <Card className="mb-6 border-border/50 bg-muted/10">
           <CardContent className="py-16 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
-              <BarChart3 className="h-7 w-7 text-brand" />
+            <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="h-7 w-7 text-emerald-500" />
             </div>
             <p className="font-semibold text-lg">Votre pipeline est vide</p>
             <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
@@ -474,7 +474,7 @@ export function KanbanBoard({
               setSearchQuery("");
               setTempFilter("all");
             }}
-            className="text-brand mt-1"
+            className="text-emerald-500 mt-1"
           >
             Réinitialiser les filtres
           </Button>

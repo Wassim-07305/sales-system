@@ -195,7 +195,7 @@ export function CustomFieldsForm({
                       setTimeout(() => doSave(), 0);
                     }
                   }}
-                  className="size-4 rounded border accent-[#7af17a]"
+                  className="size-4 rounded border accent-[#10b981]"
                 />
                 <label
                   htmlFor={`cf-${field.name}`}
@@ -212,7 +212,7 @@ export function CustomFieldsForm({
       {showSaveButton && (
         <Button
           size="sm"
-          className="gap-2 bg-[#7af17a] text-black hover:bg-[#5cd85c]"
+          className="gap-2 bg-[#10b981] text-black hover:bg-[#5cd85c]"
           onClick={doSave}
           disabled={saving || !dirty}
         >

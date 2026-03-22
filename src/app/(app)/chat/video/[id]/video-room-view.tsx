@@ -1000,7 +1000,7 @@ export function VideoRoomView({
               size="sm"
               onClick={handleStart}
               disabled={isPending}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               <Play className="h-3.5 w-3.5 mr-1" />
               Démarrer
@@ -1022,9 +1022,9 @@ export function VideoRoomView({
 
       {/* Lien Google Meet */}
       {room.meeting_link && (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b bg-brand/5">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b bg-emerald-500/5">
           <div className="flex items-center gap-2 min-w-0">
-            <Video className="h-5 w-5 text-brand shrink-0" />
+            <Video className="h-5 w-5 text-emerald-500 shrink-0" />
             <div className="min-w-0">
               <p className="text-sm font-medium">Lien Google Meet</p>
               <p className="text-xs text-muted-foreground truncate">
@@ -1046,7 +1046,7 @@ export function VideoRoomView({
             </Button>
             <Button
               size="sm"
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
               onClick={() =>
                 window.open(room.meeting_link!, "_blank", "noopener,noreferrer")
               }
@@ -1161,7 +1161,7 @@ export function VideoRoomView({
                     <Button
                       onClick={handleJoin}
                       disabled={isPending}
-                      className="mt-4 bg-brand text-brand-dark hover:bg-brand/90"
+                      className="mt-4 bg-emerald-500 text-black hover:bg-emerald-400"
                     >
                       Rejoindre la salle d&apos;attente
                     </Button>
@@ -1170,7 +1170,7 @@ export function VideoRoomView({
                     <Button
                       onClick={handleJoin}
                       disabled={isPending}
-                      className="mt-4 bg-brand text-brand-dark hover:bg-brand/90"
+                      className="mt-4 bg-emerald-500 text-black hover:bg-emerald-400"
                     >
                       <Play className="h-4 w-4 mr-2" />
                       Rejoindre
@@ -1208,7 +1208,7 @@ export function VideoRoomView({
 
             {/* Screen sharing indicator */}
             {screenSharing && (
-              <div className="absolute top-4 right-4 bg-brand/80 text-brand-dark rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5">
+              <div className="absolute top-4 right-4 bg-emerald-500/80 text-black rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5">
                 <MonitorUp className="h-3.5 w-3.5" />
                 Partage d&apos;écran actif
               </div>
@@ -1282,7 +1282,7 @@ export function VideoRoomView({
               onClick={() => setSidebarTab("participants")}
               className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
                 sidebarTab === "participants"
-                  ? "text-brand border-b-2 border-brand"
+                  ? "text-emerald-500 border-b-2 border-emerald-500"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -1293,7 +1293,7 @@ export function VideoRoomView({
               onClick={() => setSidebarTab("chat")}
               className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
                 sidebarTab === "chat"
-                  ? "text-brand border-b-2 border-brand"
+                  ? "text-emerald-500 border-b-2 border-emerald-500"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -1304,7 +1304,7 @@ export function VideoRoomView({
               onClick={handlePollsTab}
               className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
                 sidebarTab === "polls"
-                  ? "text-brand border-b-2 border-brand"
+                  ? "text-emerald-500 border-b-2 border-emerald-500"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -1319,8 +1319,8 @@ export function VideoRoomView({
               <div className="space-y-2">
                 {/* Host */}
                 {room.host && (
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-brand/5">
-                    <div className="h-8 w-8 rounded-full bg-brand/20 flex items-center justify-center text-brand text-xs font-bold">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/5">
+                    <div className="h-8 w-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 text-xs font-bold">
                       {room.host.full_name?.charAt(0) ||
                         room.host.email.charAt(0)}
                     </div>
@@ -1330,7 +1330,7 @@ export function VideoRoomView({
                       </p>
                       <p className="text-[10px] text-muted-foreground">Hôte</p>
                     </div>
-                    <div className="h-2 w-2 rounded-full bg-brand" />
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
                   </div>
                 )}
 
@@ -1362,7 +1362,7 @@ export function VideoRoomView({
                           )}
                         </div>
                         <div
-                          className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-brand"}`}
+                          className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-emerald-500"}`}
                         />
                       </div>
                     );
@@ -1432,7 +1432,7 @@ export function VideoRoomView({
               <div className="p-3 border-b">
                 <Button
                   size="sm"
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                   onClick={() => setPollDialogOpen(true)}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1" />
@@ -1459,7 +1459,7 @@ export function VideoRoomView({
                                 {poll.question}
                               </p>
                               {poll.is_active && (
-                                <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px]">
+                                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px]">
                                   Actif
                                 </Badge>
                               )}
@@ -1547,7 +1547,7 @@ export function VideoRoomView({
             <Button
               onClick={handleCreatePoll}
               disabled={isPending}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isPending ? "Création..." : "Créer le sondage"}
             </Button>

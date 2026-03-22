@@ -325,8 +325,8 @@ export function QuizFormDialog({
                             className={cn(
                               "shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors",
                               q.correct_index === oIdx
-                                ? "border-brand bg-brand text-brand-dark"
-                                : "border-muted-foreground/30 hover:border-brand/50",
+                                ? "border-emerald-500 bg-emerald-500 text-black"
+                                : "border-muted-foreground/30 hover:border-emerald-500/50",
                             )}
                           >
                             {q.correct_index === oIdx && (
@@ -342,7 +342,7 @@ export function QuizFormDialog({
                             className={cn(
                               "flex-1",
                               q.correct_index === oIdx &&
-                                "border-brand/50 bg-brand/5",
+                                "border-emerald-500/50 bg-emerald-500/5",
                             )}
                           />
                         </div>
@@ -382,7 +382,7 @@ export function QuizFormDialog({
             <Button
               type="submit"
               disabled={saving || deleting || questions.length === 0}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {existingQuiz ? "Mettre a jour" : "Creer le quiz"}

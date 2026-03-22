@@ -211,7 +211,7 @@ export function EnrichmentView({ prospects }: Props) {
   function getConfidenceBadge(confiance: number) {
     if (confiance >= 70)
       return (
-        <Badge className="bg-brand/10 text-brand border border-brand/20 gap-1">
+        <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 gap-1">
           <Check className="h-3 w-3" />
           {confiance}%
         </Badge>
@@ -245,7 +245,7 @@ export function EnrichmentView({ prospects }: Props) {
         <Button
           onClick={handleBatchEnrich}
           disabled={selectedIds.size === 0 || batchEnriching}
-          className="bg-brand hover:bg-brand/90 text-brand-foreground rounded-xl font-medium"
+          className="bg-emerald-500 hover:bg-emerald-400/90 text-black rounded-xl font-medium"
         >
           {batchEnriching ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -260,8 +260,8 @@ export function EnrichmentView({ prospects }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-              <Database className="h-5 w-5 text-brand" />
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+              <Database className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold">{stats.enriched}</p>
@@ -355,7 +355,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                     {/* Name */}
                     <div className="sm:col-span-2 flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand font-bold text-sm shrink-0">
+                      <div className="h-8 w-8 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center text-emerald-500 font-bold text-sm shrink-0">
                         {prospect.name.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-medium text-sm truncate">
@@ -387,7 +387,7 @@ export function EnrichmentView({ prospects }: Props) {
                         variant="outline"
                         className={
                           prospect.missing_count === 0
-                            ? "border-brand/30 text-brand"
+                            ? "border-emerald-500/30 text-emerald-500"
                             : "border-muted-foreground/30 text-muted-foreground"
                         }
                       >
@@ -398,7 +398,7 @@ export function EnrichmentView({ prospects }: Props) {
                     {/* Enrichment status */}
                     <div className="sm:col-span-1">
                       {hasEnrichment ? (
-                        <Badge className="bg-brand/10 text-brand gap-1">
+                        <Badge className="bg-emerald-500/10 text-emerald-500 gap-1">
                           <Check className="h-3 w-3" />
                           Enrichi
                         </Badge>
@@ -473,7 +473,7 @@ export function EnrichmentView({ prospects }: Props) {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {/* Secteur */}
                           <div className="flex items-start gap-2">
-                            <Building2 className="h-4 w-4 text-brand mt-0.5 shrink-0" />
+                            <Building2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Secteur
@@ -537,7 +537,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Meilleur moment */}
                           <div className="flex items-start gap-2">
-                            <Clock className="h-4 w-4 text-brand mt-0.5 shrink-0" />
+                            <Clock className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Meilleur moment de contact
@@ -553,7 +553,7 @@ export function EnrichmentView({ prospects }: Props) {
 
                           {/* Site web */}
                           <div className="flex items-start gap-2">
-                            <Globe className="h-4 w-4 text-brand mt-0.5 shrink-0" />
+                            <Globe className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
                             <div>
                               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                                 Site web probable
@@ -618,7 +618,7 @@ export function EnrichmentView({ prospects }: Props) {
                                     key={idx}
                                     className="text-sm flex items-start gap-2"
                                   >
-                                    <span className="text-brand mt-0.5">
+                                    <span className="text-emerald-500 mt-0.5">
                                       &bull;
                                     </span>
                                     {point}
@@ -667,7 +667,7 @@ export function EnrichmentView({ prospects }: Props) {
       <Card className="shadow-sm rounded-2xl">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-brand" />
+            <Building2 className="h-5 w-5 text-emerald-500" />
             Insights entreprise
           </CardTitle>
         </CardHeader>
@@ -688,7 +688,7 @@ export function EnrichmentView({ prospects }: Props) {
             <Button
               onClick={handleCompanyInsights}
               disabled={insightsLoading || !companyQuery.trim()}
-              className="bg-brand hover:bg-brand/90 text-brand-foreground rounded-xl font-medium"
+              className="bg-emerald-500 hover:bg-emerald-400/90 text-black rounded-xl font-medium"
             >
               {insightsLoading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -727,7 +727,7 @@ export function EnrichmentView({ prospects }: Props) {
               {/* Key info */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <Building2 className="h-4 w-4 text-brand shrink-0" />
+                  <Building2 className="h-4 w-4 text-emerald-500 shrink-0" />
                   <span className="text-muted-foreground">Secteur:</span>
                   <span className="font-medium">{companyInsights.secteur}</span>
                 </div>
@@ -786,7 +786,7 @@ export function EnrichmentView({ prospects }: Props) {
                   <ul className="space-y-1">
                     {companyInsights.opportunites.map((o, i) => (
                       <li key={i} className="text-xs flex items-start gap-1.5">
-                        <Lightbulb className="h-3 w-3 text-brand mt-0.5 shrink-0" />
+                        <Lightbulb className="h-3 w-3 text-emerald-500 mt-0.5 shrink-0" />
                         {o}
                       </li>
                     ))}
@@ -805,7 +805,7 @@ export function EnrichmentView({ prospects }: Props) {
                       <Badge
                         key={i}
                         variant="outline"
-                        className="text-xs border-brand/20 text-brand"
+                        className="text-xs border-emerald-500/20 text-emerald-500"
                       >
                         {t}
                       </Badge>
@@ -819,7 +819,7 @@ export function EnrichmentView({ prospects }: Props) {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   Approche recommandée
                 </p>
-                <p className="text-sm bg-brand/5 rounded-lg p-3 border border-brand/10">
+                <p className="text-sm bg-emerald-500/5 rounded-lg p-3 border border-emerald-500/10">
                   {companyInsights.approche_recommandee}
                 </p>
               </div>

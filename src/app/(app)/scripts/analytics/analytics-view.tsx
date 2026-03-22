@@ -56,7 +56,7 @@ interface AnalyticsData {
   recentlyUpdated: TopScript[];
 }
 
-const CHART_GREEN = "#7af17a";
+const CHART_GREEN = "#10b981";
 const CHART_SECONDARY = "#a1a1aa";
 
 function formatDate(dateStr: string) {
@@ -95,8 +95,8 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total scripts
             </CardTitle>
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center">
-              <FileText className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <FileText className="h-4 w-4 text-emerald-500" />
             </div>
           </CardHeader>
           <CardContent>
@@ -109,8 +109,8 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Flowcharts
             </CardTitle>
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center">
-              <GitBranch className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <GitBranch className="h-4 w-4 text-emerald-500" />
             </div>
           </CardHeader>
           <CardContent>
@@ -299,7 +299,7 @@ export function ScriptAnalyticsView({ data }: { data: AnalyticsData }) {
                         variant="outline"
                         className={
                           script.type === "flowchart"
-                            ? "border-brand/30 text-brand"
+                            ? "border-emerald-500/30 text-emerald-500"
                             : "border-muted-foreground/30 text-muted-foreground"
                         }
                       >

@@ -131,7 +131,7 @@ const STATUS_CONFIG: Record<
 > = {
   in_progress: {
     label: "En cours",
-    color: "bg-[#7af17a]/20 text-[#7af17a]",
+    color: "bg-[#10b981]/20 text-[#10b981]",
     icon: TrendingUp,
   },
   at_risk: {
@@ -199,12 +199,12 @@ export function SetterDashboard({
       {/* Gamification + Daily Quota Row */}
       <div className="grid lg:grid-cols-2 gap-4 mb-6">
         {/* Gamification banner */}
-        <Card className="bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
+        <Card className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border-emerald-500/20">
           <CardContent className="p-5">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-brand/20 flex items-center justify-center">
-                  <Trophy className="h-6 w-6 text-brand" />
+                <div className="h-12 w-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <Trophy className="h-6 w-6 text-emerald-500" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Niveau actuel</p>
@@ -226,7 +226,7 @@ export function SetterDashboard({
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Points</p>
-                  <p className="text-lg font-bold text-brand">
+                  <p className="text-lg font-bold text-emerald-500">
                     {data.gamification.points}
                   </p>
                 </div>
@@ -254,7 +254,7 @@ export function SetterDashboard({
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Send className="h-5 w-5 text-[#7af17a]" />
+                <Send className="h-5 w-5 text-[#10b981]" />
                 <h3 className="font-semibold text-foreground">Quota du jour</h3>
               </div>
               <Badge
@@ -263,7 +263,7 @@ export function SetterDashboard({
                   quotaProgress >= 100
                     ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                     : quotaProgress >= 70
-                      ? "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30"
+                      ? "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30"
                       : "bg-orange-500/20 text-orange-400 border-orange-500/30"
                 }
               >
@@ -310,8 +310,8 @@ export function SetterDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Phone className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Phone className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">
@@ -413,8 +413,8 @@ export function SetterDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <BarChart3 className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Performance 7 jours
             </CardTitle>
@@ -434,12 +434,12 @@ export function SetterDashboard({
                       >
                         <stop
                           offset="5%"
-                          stopColor="#7af17a"
+                          stopColor="#10b981"
                           stopOpacity={0.3}
                         />
                         <stop
                           offset="95%"
-                          stopColor="#7af17a"
+                          stopColor="#10b981"
                           stopOpacity={0}
                         />
                       </linearGradient>
@@ -458,7 +458,7 @@ export function SetterDashboard({
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#14080e",
+                        backgroundColor: "#09090b",
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "8px",
                       }}
@@ -468,7 +468,7 @@ export function SetterDashboard({
                       type="monotone"
                       dataKey="deals"
                       name="Deals"
-                      stroke="#7af17a"
+                      stroke="#10b981"
                       fill="url(#colorDeals)"
                       strokeWidth={2}
                     />
@@ -488,13 +488,13 @@ export function SetterDashboard({
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Target className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Target className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Mes objectifs
               </CardTitle>
               <Link href="/team/coaching">
-                <Button variant="ghost" size="sm" className="text-brand">
+                <Button variant="ghost" size="sm" className="text-emerald-500">
                   Voir tout
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
@@ -558,13 +558,13 @@ export function SetterDashboard({
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                    <Users className="h-3.5 w-3.5 text-brand" />
+                  <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                    <Users className="h-3.5 w-3.5 text-emerald-500" />
                   </div>
                   Mon pipeline prospection
                 </CardTitle>
                 <Link href="/prospecting">
-                  <Button variant="ghost" size="sm" className="text-brand">
+                  <Button variant="ghost" size="sm" className="text-emerald-500">
                     Voir tout
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
@@ -577,7 +577,7 @@ export function SetterDashboard({
                 {[
                   { label: "Nouveaux", count: data.prospectingFunnel.new, color: "bg-muted" },
                   { label: "Contactés", count: data.prospectingFunnel.contacted, color: "bg-blue-500/20" },
-                  { label: "Répondus", count: data.prospectingFunnel.replied, color: "bg-brand/20" },
+                  { label: "Répondus", count: data.prospectingFunnel.replied, color: "bg-emerald-500/20" },
                   { label: "Bookés", count: data.prospectingFunnel.booked, color: "bg-purple-500/20" },
                   { label: "Convertis", count: data.prospectingFunnel.converted, color: "bg-emerald-500/20" },
                 ].map((step, i) => {
@@ -635,8 +635,8 @@ export function SetterDashboard({
           <Card className="border-border/50 hover:shadow-md transition-all">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Target className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Target className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Actions rapides
               </CardTitle>
@@ -722,8 +722,8 @@ export function SetterDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Phone className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Phone className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Prochains appels
             </CardTitle>
@@ -749,7 +749,7 @@ export function SetterDashboard({
                     className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-xs font-bold ring-1 ring-brand/20">
+                      <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold ring-1 ring-emerald-500/20">
                         {call.name?.charAt(0) || "?"}
                       </div>
                       <div>

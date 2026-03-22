@@ -76,7 +76,7 @@ export function NewBookingDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+        <Button className="bg-emerald-500 text-black hover:bg-emerald-400">
           <Plus className="h-4 w-4 mr-2" />
           Nouveau RDV
         </Button>
@@ -175,7 +175,7 @@ export function NewBookingDialog() {
           </div>
           <Button
             type="submit"
-            className="w-full bg-brand text-brand-dark hover:bg-brand/90 h-11 rounded-xl"
+            className="w-full bg-emerald-500 text-black hover:bg-emerald-400 h-11 rounded-xl"
             disabled={isPending}
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

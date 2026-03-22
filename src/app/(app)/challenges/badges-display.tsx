@@ -79,13 +79,13 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
       const newBadges = await checkBadgeEligibility(userId);
       if (newBadges.length > 0) {
         toast.success(`${newBadges.length} nouveau(x) badge(s) debloque(s) !`, {
-          style: { background: "#14080e", color: "#fff" },
+          style: { background: "#09090b", color: "#fff" },
         });
       } else {
         toast.info(
           "Aucun nouveau badge pour le moment. Continuez vos efforts !",
           {
-            style: { background: "#14080e", color: "#fff" },
+            style: { background: "#09090b", color: "#fff" },
           },
         );
       }
@@ -93,10 +93,10 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
   }
 
   return (
-    <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300">
+    <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-brand" />
+          <Trophy className="h-5 w-5 text-emerald-500" />
           Badges ({earnedBadges.length}/{allBadges.length})
         </CardTitle>
         <Button
@@ -134,7 +134,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                             className={cn(
                               "relative flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all duration-300 w-[90px]",
                               isEarned
-                                ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5"
+                                ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5"
                                 : "border-border/50 bg-muted/30 opacity-50 grayscale",
                             )}
                           >
@@ -157,7 +157,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                               {badge.name}
                             </span>
                             {isEarned && (
-                              <span className="text-[10px] text-brand font-semibold">
+                              <span className="text-[10px] text-emerald-500 font-semibold">
                                 +{badge.points} pts
                               </span>
                             )}
@@ -170,7 +170,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                               {badge.description}
                             </p>
                             {isEarned && earned && (
-                              <p className="text-xs text-brand mt-1">
+                              <p className="text-xs text-emerald-500 mt-1">
                                 Obtenu le{" "}
                                 {new Date(earned.earned_at).toLocaleDateString(
                                   "fr-FR",

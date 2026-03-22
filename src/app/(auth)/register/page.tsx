@@ -4,7 +4,7 @@ export default function RegisterPage() {
   return (
     <>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold tracking-tight text-brand-dark">
+        <h2 className="text-2xl font-bold tracking-tight text-white">
           {"Créer un compte"}
         </h2>
         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">

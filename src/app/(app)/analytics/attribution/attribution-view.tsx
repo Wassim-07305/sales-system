@@ -63,7 +63,7 @@ function getChannelColor(type: string, channel: string | null): string {
     Email: "bg-purple-500/10 text-purple-600 border-purple-200",
     DM: "bg-cyan-500/10 text-cyan-600 border-cyan-200",
     Website: "bg-green-500/10 text-green-600 border-green-200",
-    Referral: "bg-brand/10 text-brand border-brand/20",
+    Referral: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     Contenu: "bg-yellow-500/10 text-yellow-600 border-yellow-200",
   };
   return colors[key] || "bg-muted text-muted-foreground border-border";
@@ -127,8 +127,8 @@ export function AttributionView({ data }: { data: DealAttribution[] }) {
         <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <MousePointerClick className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <MousePointerClick className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">{totalDeals}</p>
@@ -215,7 +215,7 @@ export function AttributionView({ data }: { data: DealAttribution[] }) {
                       {deal.prospectName}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 bg-brand/10 text-brand px-3 py-1.5 rounded-lg">
+                  <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-3 py-1.5 rounded-lg">
                     <DollarSign className="h-4 w-4" />
                     <span className="font-bold">
                       {deal.dealValue.toLocaleString("fr-FR")} &euro;

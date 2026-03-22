@@ -248,9 +248,9 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                 <Line
                   type="monotone"
                   dataKey="actual"
-                  stroke="#7af17a"
+                  stroke="#10b981"
                   strokeWidth={2.5}
-                  dot={{ fill: "#7af17a", r: 5 }}
+                  dot={{ fill: "#10b981", r: 5 }}
                   connectNulls={false}
                   name="actual"
                 />
@@ -334,7 +334,7 @@ export function ProjectionsView({ data, aiData }: ProjectionsViewProps) {
                 {aiData.globalInsights.recommendedActions.length > 0 && (
                   <div>
                     <div className="flex items-center gap-1.5 mb-2">
-                      <Sparkles className="h-4 w-4 text-brand" />
+                      <Sparkles className="h-4 w-4 text-emerald-500" />
                       <span className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider">
                         Actions
                       </span>

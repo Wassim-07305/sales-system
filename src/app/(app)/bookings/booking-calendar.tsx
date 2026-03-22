@@ -58,9 +58,9 @@ const statusConfig: Record<
 > = {
   confirmed: {
     label: "Confirmé",
-    bg: "bg-brand/10 border-brand/20",
-    text: "text-brand",
-    dot: "bg-brand",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    text: "text-emerald-500",
+    dot: "bg-emerald-500",
   },
   completed: {
     label: "Terminé",
@@ -106,7 +106,7 @@ const CALL_RESULT_LABELS: Record<CallResult, string> = {
 };
 
 const CALL_RESULT_COLORS: Record<CallResult, string> = {
-  vente_realisee: "bg-brand/10 text-brand border-brand/20",
+  vente_realisee: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   non_realisee: "bg-foreground/10 text-foreground border-foreground/20",
   suivi_prevu: "bg-muted/60 text-muted-foreground border-border/50",
   no_show: "bg-muted/40 text-muted-foreground/60 border-border/30",
@@ -244,7 +244,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
               className={cn(
                 "rounded-md px-4 py-1.5 text-sm font-medium transition-all",
                 period === tab.value
-                  ? "bg-brand text-brand-dark font-semibold shadow-sm"
+                  ? "bg-emerald-500 text-black font-semibold shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -261,31 +261,31 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
             label: "Total RDV",
             value: kpis.total,
             icon: CalendarDays,
-            color: "bg-brand/10 text-brand",
+            color: "bg-emerald-500/10 text-emerald-500",
           },
           {
             label: "Confirmés",
             value: kpis.confirmed,
             icon: CalendarCheck,
-            color: "bg-brand/10 text-brand",
+            color: "bg-emerald-500/10 text-emerald-500",
           },
           {
             label: "Terminés",
             value: kpis.completed,
             icon: CheckCircle2,
-            color: "bg-brand/10 text-brand",
+            color: "bg-emerald-500/10 text-emerald-500",
           },
           {
             label: "No-shows",
             value: kpis.noShow,
             icon: UserX,
-            color: "bg-brand/10 text-brand",
+            color: "bg-emerald-500/10 text-emerald-500",
           },
           {
             label: "Taux annulation",
             value: `${kpis.cancelRate}%`,
             icon: Percent,
-            color: "bg-brand/10 text-brand",
+            color: "bg-emerald-500/10 text-emerald-500",
           },
         ].map((kpi) => (
           <div
@@ -320,7 +320,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200",
               view === "week"
-                ? "bg-brand text-brand-dark font-semibold shadow-sm"
+                ? "bg-emerald-500 text-black font-semibold shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -332,7 +332,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200",
               view === "list"
-                ? "bg-brand text-brand-dark font-semibold shadow-sm"
+                ? "bg-emerald-500 text-black font-semibold shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -386,7 +386,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                 key={day.toISOString()}
                 className={cn(
                   "min-h-[220px] rounded-xl border border-border/40 bg-card p-3 shadow-sm transition-shadow hover:shadow-md",
-                  isToday(day) && "border-brand ring-1 ring-brand/20",
+                  isToday(day) && "border-emerald-500 ring-1 ring-emerald-500/20",
                 )}
               >
                 <div className="mb-3 text-center">
@@ -397,7 +397,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                     className={cn(
                       "mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold",
                       isToday(day)
-                        ? "bg-brand text-brand-dark"
+                        ? "bg-emerald-500 text-black"
                         : "text-foreground",
                     )}
                   >
@@ -482,7 +482,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                 >
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-sm font-bold text-brand">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-sm font-bold text-emerald-500">
                       {booking.prospect_name
                         .split(" ")
                         .map((w) => w[0])
@@ -648,7 +648,7 @@ export function BookingCalendar({ initialBookings }: BookingCalendarProps) {
                 Annuler
               </Button>
               <Button
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
                 onClick={handleCallResultSubmit}
                 disabled={!callResult || isPending}
               >

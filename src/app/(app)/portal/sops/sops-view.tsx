@@ -318,7 +318,7 @@ export function SopsView({ sopData, clientId, readOnly = false }: SopsViewProps)
           <Card key={i} className="rounded-xl border-border/50">
             <CardContent className="p-4 space-y-3">
               <h4 className="font-medium text-sm flex items-center gap-2">
-                <Search className="h-3.5 w-3.5 text-brand" />
+                <Search className="h-3.5 w-3.5 text-emerald-500" />
                 {canal.nom}
               </h4>
               {(
@@ -493,7 +493,7 @@ export function SopsView({ sopData, clientId, readOnly = false }: SopsViewProps)
           <Button
             onClick={handleSave}
             disabled={isPending}
-            className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+            className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
           >
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -517,7 +517,7 @@ export function SopsView({ sopData, clientId, readOnly = false }: SopsViewProps)
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
                 isActive
-                  ? "bg-brand/10 text-brand border border-brand/20"
+                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                   : "text-muted-foreground hover:bg-muted/50",
               )}
             >
@@ -580,7 +580,7 @@ export function SopsView({ sopData, clientId, readOnly = false }: SopsViewProps)
               size="sm"
               onClick={() => handleAddComment(activeSection)}
               disabled={isPending || !commentText.trim()}
-              className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+              className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
             >
               <Send className="h-3.5 w-3.5" />
             </Button>

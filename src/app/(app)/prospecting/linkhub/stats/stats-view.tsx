@@ -77,8 +77,8 @@ export function StatsView({
         <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                <MessageCircle className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.commentsThisMonth}</p>
@@ -169,7 +169,7 @@ export function StatsView({
                 />
                 <Bar
                   dataKey="commentaires"
-                  fill="#7af17a"
+                  fill="#10b981"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -219,7 +219,7 @@ export function StatsView({
                         }
                       >
                         {copiedId === c.id ? (
-                          <Check className="h-3 w-3 mr-1 text-brand" />
+                          <Check className="h-3 w-3 mr-1 text-emerald-500" />
                         ) : (
                           <Copy className="h-3 w-3 mr-1" />
                         )}

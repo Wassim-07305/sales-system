@@ -90,7 +90,7 @@ const MOOD_ICONS = [
   { value: 2, icon: Meh, label: "Moyen", color: "text-orange-400" },
   { value: 3, icon: Smile, label: "Correct", color: "text-yellow-400" },
   { value: 4, icon: ThumbsUp, label: "Bien", color: "text-green-400" },
-  { value: 5, icon: Heart, label: "Super", color: "text-brand" },
+  { value: 5, icon: Heart, label: "Super", color: "text-emerald-500" },
 ];
 
 function getEventIcon(type: string) {
@@ -174,7 +174,7 @@ function B2BClientDashboard({
       />
 
       {/* Welcome Card with quick stats */}
-      <Card className="mb-6 bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
+      <Card className="mb-6 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border-emerald-500/20">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
             Bonjour {userName.split(" ")[0]}, voici votre activité du mois
@@ -188,7 +188,7 @@ function B2BClientDashboard({
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
-              <Send className="h-4 w-4 text-brand shrink-0" />
+              <Send className="h-4 w-4 text-emerald-500 shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.messagesSent}
@@ -199,7 +199,7 @@ function B2BClientDashboard({
               </div>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
-              <MessageSquare className="h-4 w-4 text-brand shrink-0" />
+              <MessageSquare className="h-4 w-4 text-emerald-500 shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.responseRate}%
@@ -210,7 +210,7 @@ function B2BClientDashboard({
               </div>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
-              <Calendar className="h-4 w-4 text-brand shrink-0" />
+              <Calendar className="h-4 w-4 text-emerald-500 shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.bookingsBooked}
@@ -221,7 +221,7 @@ function B2BClientDashboard({
               </div>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-3">
-              <Target className="h-4 w-4 text-brand shrink-0" />
+              <Target className="h-4 w-4 text-emerald-500 shrink-0" />
               <div>
                 <p className="text-lg font-bold leading-tight">
                   {data.stats.closingRate}%
@@ -240,8 +240,8 @@ function B2BClientDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Users className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Users className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Performance Setter
             </CardTitle>
@@ -252,7 +252,7 @@ function B2BClientDashboard({
                 <AvatarImage
                   src={data.setterPerformance.avatarUrl || undefined}
                 />
-                <AvatarFallback className="bg-brand/20 text-brand font-semibold">
+                <AvatarFallback className="bg-emerald-500/20 text-emerald-500 font-semibold">
                   {data.setterPerformance.setterName
                     .split(" ")
                     .map((n) => n[0])
@@ -280,7 +280,7 @@ function B2BClientDashboard({
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-border/50 p-3.5 hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Send className="h-3.5 w-3.5 text-brand" />
+                  <Send className="h-3.5 w-3.5 text-emerald-500" />
                   <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
                     Messages / jour
                   </span>
@@ -330,8 +330,8 @@ function B2BClientDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <BarChart3 className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <BarChart3 className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Pipeline commercial
             </CardTitle>
@@ -386,8 +386,8 @@ function B2BClientDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Calendar className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Calendar className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Prochains rendez-vous
             </CardTitle>
@@ -410,7 +410,7 @@ function B2BClientDashboard({
                     className="flex items-start gap-3 py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="mt-0.5">
-                      <Calendar className="h-4 w-4 text-brand" />
+                      <Calendar className="h-4 w-4 text-emerald-500" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{booking.name}</p>
@@ -436,8 +436,8 @@ function B2BClientDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Activity className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Activity className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Activité récente
             </CardTitle>
@@ -493,8 +493,8 @@ function B2BClientDashboard({
         <Card className="mt-6 border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <BookOpen className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <BookOpen className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Derniers rapports EOD
             </CardTitle>
@@ -506,7 +506,7 @@ function B2BClientDashboard({
                   key={j.id}
                   className="flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="h-8 w-8 rounded-lg bg-brand/10 flex items-center justify-center text-xs font-bold text-brand shrink-0">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-xs font-bold text-emerald-500 shrink-0">
                     {j.setterName.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -592,7 +592,7 @@ function B2CClientDashboard({
       <PageHeader title="Mon Espace" description={`Bienvenue, ${userName}`} />
 
       {/* Welcome card */}
-      <Card className="mb-6 bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
+      <Card className="mb-6 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border-emerald-500/20">
         <CardContent className="p-6">
           <h2 className="text-xl font-bold mb-2">
             Continue sur ta lancée, {userName.split(" ")[0]} !
@@ -605,13 +605,13 @@ function B2CClientDashboard({
           </p>
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2">
-              <BookOpen className="h-4 w-4 text-brand" />
+              <BookOpen className="h-4 w-4 text-emerald-500" />
               <span className="text-sm">
                 {completedLessons}/{totalLessons} leçons
               </span>
             </div>
             <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2">
-              <Calendar className="h-4 w-4 text-brand" />
+              <Calendar className="h-4 w-4 text-emerald-500" />
               <span className="text-sm">
                 {data.upcomingEvents.length} événement
                 {data.upcomingEvents.length > 1 ? "s" : ""} à venir
@@ -619,7 +619,7 @@ function B2CClientDashboard({
             </div>
             {data.quizAttemptsToday > 0 && (
               <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2">
-                <Star className="h-4 w-4 text-brand" />
+                <Star className="h-4 w-4 text-emerald-500" />
                 <span className="text-sm">
                   {data.quizAttemptsToday} quiz aujourd&apos;hui
                 </span>
@@ -627,7 +627,7 @@ function B2CClientDashboard({
             )}
             {readiness && (
               <div className="flex items-center gap-2 bg-background/60 rounded-lg px-3 py-2">
-                <Star className="h-4 w-4 text-brand" />
+                <Star className="h-4 w-4 text-emerald-500" />
                 <span className="text-sm">
                   Placement : {readiness.overall}%
                 </span>
@@ -649,8 +649,8 @@ function B2CClientDashboard({
         <Card className="border-border/50 hover:shadow-md transition-all">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <BookOpen className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <BookOpen className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               Ma progression
             </CardTitle>
@@ -672,7 +672,7 @@ function B2CClientDashboard({
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {percent === 100 ? (
-                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         ) : (
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                         )}
@@ -720,7 +720,7 @@ function B2CClientDashboard({
                       className="flex items-start gap-3 py-2 border-b last:border-0"
                     >
                       <div className="mt-0.5">
-                        <Icon className="h-4 w-4 text-brand" />
+                        <Icon className="h-4 w-4 text-emerald-500" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">{event.title}</p>
@@ -816,7 +816,7 @@ function B2CClientDashboard({
                         type="button"
                         onClick={() => setMood(m.value)}
                         className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                          isSelected ? "bg-brand/10" : "hover:bg-muted"
+                          isSelected ? "bg-emerald-500/10" : "hover:bg-muted"
                         }`}
                       >
                         <MoodIcon
@@ -881,7 +881,7 @@ function B2CClientDashboard({
               <Button
                 onClick={handleSaveJournal}
                 disabled={isPending}
-                className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 font-semibold"
               >
                 {isPending ? "Sauvegarde..." : "Sauvegarder mon journal"}
               </Button>

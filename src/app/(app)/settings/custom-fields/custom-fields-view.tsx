@@ -288,7 +288,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
       >
         <Button
           size="sm"
-          className="gap-2 bg-[#7af17a] text-black hover:bg-[#5cd85c]"
+          className="gap-2 bg-[#10b981] text-black hover:bg-[#5cd85c]"
           onClick={openCreateDialog}
         >
           <Plus className="size-4" />
@@ -369,7 +369,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
                           </TableCell>
                           <TableCell>
                             {field.required ? (
-                              <Badge className="bg-[#7af17a]/15 text-[#7af17a] border-[#7af17a]/30">
+                              <Badge className="bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30">
                                 Oui
                               </Badge>
                             ) : (
@@ -565,7 +565,7 @@ export function CustomFieldsView({ initialFields }: CustomFieldsViewProps) {
               Annuler
             </Button>
             <Button
-              className="bg-[#7af17a] text-black hover:bg-[#5cd85c]"
+              className="bg-[#10b981] text-black hover:bg-[#5cd85c]"
               onClick={handleSave}
               disabled={saving}
             >

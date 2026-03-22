@@ -238,7 +238,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+              <Button className="bg-emerald-500 text-black hover:bg-emerald-400">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle règle
               </Button>
@@ -307,7 +307,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                 </div>
 
                 <Button
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                   onClick={handleCreate}
                   disabled={isPending}
                 >
@@ -323,8 +323,8 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="border-border/50">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-brand" />
+            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalRules}</p>
@@ -378,7 +378,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
       {/* Category cards linking to sub-pages */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Link href="/automation/nurturing">
-          <Card className="hover:border-brand transition-colors cursor-pointer">
+          <Card className="hover:border-emerald-500 transition-colors cursor-pointer">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-lg bg-pink-500/10 flex items-center justify-center">
                 <Heart className="h-6 w-6 text-pink-600" />
@@ -393,7 +393,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
           </Card>
         </Link>
         <Link href="/automation/upsell">
-          <Card className="hover:border-brand transition-colors cursor-pointer">
+          <Card className="hover:border-emerald-500 transition-colors cursor-pointer">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -408,7 +408,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
           </Card>
         </Link>
         <Link href="/automation/placement">
-          <Card className="hover:border-brand transition-colors cursor-pointer">
+          <Card className="hover:border-emerald-500 transition-colors cursor-pointer">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <Users className="h-6 w-6 text-blue-600" />
@@ -548,8 +548,8 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                   className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center">
-                      <Zap className="h-4 w-4 text-brand" />
+                    <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                      <Zap className="h-4 w-4 text-emerald-500" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">

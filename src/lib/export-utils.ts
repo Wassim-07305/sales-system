@@ -102,8 +102,8 @@ export function exportToXLSX(
   <Styles>
     <Style ss:ID="header">
       <Font ss:Bold="1" ss:Size="11"/>
-      <Interior ss:Color="#14080e" ss:Pattern="Solid"/>
-      <Font ss:Color="#7af17a" ss:Bold="1" ss:Size="11"/>
+      <Interior ss:Color="#09090b" ss:Pattern="Solid"/>
+      <Font ss:Color="#10b981" ss:Bold="1" ss:Size="11"/>
     </Style>
   </Styles>
   <Worksheet ss:Name="Export">
@@ -132,7 +132,7 @@ export function exportToPDF(
   const headerCells = columns
     .map(
       (c) =>
-        `<th style="background:#14080e;color:#7af17a;padding:8px 12px;text-align:left;font-size:12px;border-bottom:2px solid #7af17a;">${escapeXML(c.label)}</th>`,
+        `<th style="background:#09090b;color:#10b981;padding:8px 12px;text-align:left;font-size:12px;border-bottom:2px solid #10b981;">${escapeXML(c.label)}</th>`,
     )
     .join("");
 
@@ -161,11 +161,11 @@ export function exportToPDF(
     }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px; }
     table { border-collapse: collapse; width: 100%; }
-    h1 { font-size: 18px; color: #14080e; margin-bottom: 16px; }
+    h1 { font-size: 18px; color: #09090b; margin-bottom: 16px; }
     .info { font-size: 12px; color: #666; margin-bottom: 12px; }
     .actions { margin-bottom: 20px; }
     .actions button {
-      background: #14080e; color: #7af17a; border: none; padding: 8px 20px;
+      background: #09090b; color: #10b981; border: none; padding: 8px 20px;
       border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
     }
     .actions button:hover { opacity: 0.9; }

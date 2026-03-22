@@ -36,7 +36,7 @@ function formatCurrency(amount: number) {
 }
 
 const CHART_COLORS = [
-  "#7af17a",
+  "#10b981",
   "#60a5fa",
   "#f59e0b",
   "#a78bfa",
@@ -78,8 +78,8 @@ export function SourcesView({
           <Card className="border-border/50 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
             <CardContent className="p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-xl bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-[#7af17a]" />
+                <div className="h-10 w-10 rounded-xl bg-[#10b981]/10 ring-1 ring-[#10b981]/20 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-[#10b981]" />
                 </div>
               </div>
               <p className="text-2xl font-bold tracking-tight">

@@ -500,7 +500,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
             {/* Mic level indicator */}
             {previewMic && (
               <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-lg px-2.5 py-1.5">
-                <Mic className="w-3.5 h-3.5 text-[#7af17a]" />
+                <Mic className="w-3.5 h-3.5 text-[#10b981]" />
                 <div className="flex items-end gap-px h-3">
                   {[0.15, 0.3, 0.5, 0.7, 0.9].map((threshold, i) => (
                     <div
@@ -510,7 +510,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
                         height: `${40 + i * 15}%`,
                         backgroundColor:
                           previewAudioLevel >= threshold
-                            ? "#7af17a"
+                            ? "#10b981"
                             : "#3f3f46",
                       }}
                     />
@@ -562,7 +562,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
             <button
               onClick={handleJoin}
               disabled={isJoining}
-              className="h-12 px-8 rounded-full bg-[#7af17a] text-zinc-900 text-sm font-semibold hover:bg-[#6ae06a] transition-all active:scale-[0.97] flex items-center gap-2 ml-2 disabled:opacity-70 disabled:pointer-events-none"
+              className="h-12 px-8 rounded-full bg-[#10b981] text-zinc-900 text-sm font-semibold hover:bg-[#6ae06a] transition-all active:scale-[0.97] flex items-center gap-2 ml-2 disabled:opacity-70 disabled:pointer-events-none"
             >
               {isJoining ? (
                 <>
@@ -609,7 +609,7 @@ export function LiveRoomView({ session }: LiveRoomViewProps) {
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full rounded-full bg-brand/20 flex items-center justify-center text-[9px] font-semibold text-brand uppercase">
+                        <div className="w-full h-full rounded-full bg-emerald-500/20 flex items-center justify-center text-[9px] font-semibold text-emerald-500 uppercase">
                           {p.full_name.charAt(0)}
                         </div>
                       )}

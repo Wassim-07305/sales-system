@@ -72,7 +72,7 @@ const STATUS_CONFIG: Record<
   { color: string; icon: typeof CheckCircle }
 > = {
   in_progress: {
-    color: "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30",
+    color: "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30",
     icon: TrendingUp,
   },
   at_risk: {
@@ -106,7 +106,7 @@ export function PerformanceView({
   // Prepare radial chart data for goal progress
   const radialData = report.metrics.map((m, index) => {
     const progress = Math.min(100, Math.round((m.current / m.target) * 100));
-    const colors = ["#7af17a", "#60a5fa", "#f59e0b", "#a78bfa"];
+    const colors = ["#10b981", "#60a5fa", "#f59e0b", "#a78bfa"];
     return {
       name: m.label,
       value: progress,
@@ -228,7 +228,7 @@ export function PerformanceView({
                       progressPct >= 100
                         ? "text-emerald-500"
                         : progressPct >= 70
-                          ? "text-[#7af17a]"
+                          ? "text-[#10b981]"
                           : "text-orange-400"
                     }
                   >
@@ -268,7 +268,7 @@ export function PerformanceView({
                     <YAxis stroke="#888" />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#14080e",
+                        backgroundColor: "#09090b",
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "8px",
                       }}
@@ -277,7 +277,7 @@ export function PerformanceView({
                     <Bar
                       dataKey="revenue"
                       name="CA"
-                      fill="#7af17a"
+                      fill="#10b981"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
@@ -329,7 +329,7 @@ export function PerformanceView({
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#14080e",
+                        backgroundColor: "#09090b",
                         border: "1px solid rgba(255,255,255,0.1)",
                         borderRadius: "8px",
                       }}
@@ -426,7 +426,7 @@ export function PerformanceView({
                           obj.progress >= 100
                             ? "text-emerald-500"
                             : obj.progress >= 70
-                              ? "text-[#7af17a]"
+                              ? "text-[#10b981]"
                               : "text-orange-400"
                         }`}
                       >

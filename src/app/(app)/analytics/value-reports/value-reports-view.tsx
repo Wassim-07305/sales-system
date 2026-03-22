@@ -44,7 +44,7 @@ interface ValueReportResult {
 
 function getHealthColor(score: number): string {
   if (score >= 80) return "#22c55e";
-  if (score >= 60) return "#7af17a";
+  if (score >= 60) return "#10b981";
   if (score >= 40) return "#f59e0b";
   if (score >= 20) return "#f97316";
   return "#ef4444";
@@ -55,7 +55,7 @@ function getDistributionColor(range: string): string {
     "0-20": "#ef4444",
     "21-40": "#f97316",
     "41-60": "#f59e0b",
-    "61-80": "#7af17a",
+    "61-80": "#10b981",
     "81-100": "#22c55e",
   };
   return colors[range] || "#6b7280";
@@ -200,7 +200,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
               Ratio LTV / CAC
             </p>
-            <p className="text-3xl font-bold text-brand">{ltvCacRatio}x</p>
+            <p className="text-3xl font-bold text-emerald-500">{ltvCacRatio}x</p>
           </CardContent>
         </Card>
         <Card className="border-border/50 hover:shadow-md transition-all">
@@ -209,7 +209,7 @@ export function ValueReportsView({ data }: { data: ValueReportResult }) {
               Clients totaux
             </p>
             <div className="flex items-center justify-center gap-2">
-              <Users className="h-5 w-5 text-brand" />
+              <Users className="h-5 w-5 text-emerald-500" />
               <p className="text-3xl font-bold">{data.totalClients}</p>
             </div>
           </CardContent>

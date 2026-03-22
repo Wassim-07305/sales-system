@@ -262,7 +262,7 @@ export function EditorView({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={handleTitleBlur}
-            className="h-8 w-64 text-sm font-semibold border-transparent hover:border-border focus:border-brand"
+            className="h-8 w-64 text-sm font-semibold border-transparent hover:border-border focus:border-emerald-500"
           />
           {isPending && (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />

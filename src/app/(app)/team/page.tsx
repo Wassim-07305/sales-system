@@ -125,8 +125,8 @@ export default async function TeamPage() {
                   <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                     {stat.name}
                   </span>
-                  <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                    <Icon className="h-4 w-4 text-brand" />
+                  <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                    <Icon className="h-4 w-4 text-emerald-500" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold tracking-tight">
@@ -202,10 +202,10 @@ export default async function TeamPage() {
                           href={`/utilisateurs/${member.id}`}
                           className="flex items-center gap-3 group"
                         >
-                          <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-bold text-xs ring-1 ring-brand/20 group-hover:ring-brand/40 transition-all">
+                          <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-xs ring-1 ring-emerald-500/20 group-hover:ring-emerald-500/40 transition-all">
                             {member.fullName?.charAt(0) || "?"}
                           </div>
-                          <span className="font-medium group-hover:text-brand transition-colors">
+                          <span className="font-medium group-hover:text-emerald-500 transition-colors">
                             {member.fullName || "—"}
                           </span>
                         </Link>

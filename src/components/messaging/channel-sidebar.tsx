@@ -331,12 +331,12 @@ export function ChannelSidebar({
                       >
                         <div className={cn(
                           "h-7 w-7 rounded-full flex items-center justify-center shrink-0",
-                          activeChannelId === aiAgentId ? "bg-brand/20" : "bg-brand/10",
+                          activeChannelId === aiAgentId ? "bg-emerald-500/20" : "bg-emerald-500/10",
                         )}>
-                          <Bot className="h-4 w-4 text-brand" />
+                          <Bot className="h-4 w-4 text-emerald-500" />
                         </div>
                         <span className="truncate flex-1 text-left">Assistant IA</span>
-                        <span className="h-2 w-2 rounded-full bg-brand animate-pulse shrink-0" />
+                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                       </button>
                     </div>
                   )}

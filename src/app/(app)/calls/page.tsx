@@ -55,8 +55,8 @@ export default async function CallsPage() {
               >
                 <CardContent className="p-5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center">
-                      <Video className="h-6 w-6 text-brand" />
+                    <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                      <Video className="h-6 w-6 text-emerald-500" />
                     </div>
                     <div>
                       <h3 className="font-semibold">{call.title}</h3>
@@ -78,7 +78,7 @@ export default async function CallsPage() {
                   {call.meeting_link && (
                     <Button
                       size="sm"
-                      className="bg-brand text-brand-dark hover:bg-brand/90"
+                      className="bg-emerald-500 text-black hover:bg-emerald-400"
                       asChild
                     >
                       <a

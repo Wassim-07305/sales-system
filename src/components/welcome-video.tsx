@@ -25,8 +25,8 @@ export function WelcomeVideo({
   if (!videoUrl) {
     return (
       <div className="w-full max-w-2xl mx-auto flex flex-col items-center text-center gap-8 px-4">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#7af17a]/20 to-[#7af17a]/5 border border-[#7af17a]/30 flex items-center justify-center shadow-lg shadow-[#7af17a]/10">
-          <Sparkles className="h-10 w-10 text-[#7af17a]" />
+        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#10b981]/20 to-[#10b981]/5 border border-[#10b981]/30 flex items-center justify-center shadow-lg shadow-[#10b981]/10">
+          <Sparkles className="h-10 w-10 text-[#10b981]" />
         </div>
 
         <div className="space-y-3">
@@ -34,7 +34,7 @@ export function WelcomeVideo({
             {title || (
               <>
                 Bienvenue{userName ? "," : ""}{" "}
-                <span className="text-[#7af17a]">{userName || ""}</span>
+                <span className="text-[#10b981]">{userName || ""}</span>
               </>
             )}
           </h2>
@@ -46,7 +46,7 @@ export function WelcomeVideo({
 
         <button
           onClick={onContinue}
-          className="mt-4 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 flex items-center gap-2"
+          className="mt-4 px-8 py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-105 transition-all duration-200 flex items-center gap-2"
         >
           Continuer
           <ArrowRight className="h-5 w-5" />
@@ -80,13 +80,13 @@ export function WelcomeVideo({
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
             <div
               className={cn(
-                "relative z-10 w-20 h-20 rounded-full bg-[#7af17a]/20 border-2 border-[#7af17a]/50",
+                "relative z-10 w-20 h-20 rounded-full bg-[#10b981]/20 border-2 border-[#10b981]/50",
                 "flex items-center justify-center",
-                "group-hover:bg-[#7af17a]/30 group-hover:scale-110 transition-all duration-300",
-                "shadow-lg shadow-[#7af17a]/20",
+                "group-hover:bg-[#10b981]/30 group-hover:scale-110 transition-all duration-300",
+                "shadow-lg shadow-[#10b981]/20",
               )}
             >
-              <Play className="h-8 w-8 text-[#7af17a] ml-1" />
+              <Play className="h-8 w-8 text-[#10b981] ml-1" />
             </div>
           </button>
         ) : (
@@ -104,7 +104,7 @@ export function WelcomeVideo({
       {/* Continue button */}
       <button
         onClick={onContinue}
-        className="mt-2 px-8 py-4 bg-gradient-to-r from-[#7af17a] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#7af17a]/25 hover:shadow-[#7af17a]/40 hover:scale-105 transition-all duration-200 flex items-center gap-2"
+        className="mt-2 px-8 py-4 bg-gradient-to-r from-[#10b981] to-[#4ade80] text-black font-semibold rounded-2xl text-lg shadow-xl shadow-[#10b981]/25 hover:shadow-[#10b981]/40 hover:scale-105 transition-all duration-200 flex items-center gap-2"
       >
         Continuer
         <ArrowRight className="h-5 w-5" />

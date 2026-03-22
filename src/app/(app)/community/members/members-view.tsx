@@ -73,11 +73,11 @@ export function MembersView({
             {filtered.map((member) => (
               <Card
                 key={member.id}
-                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300"
               >
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">
+                    <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold">
                       {member.full_name?.charAt(0)?.toUpperCase() || "?"}
                     </div>
                     <div>

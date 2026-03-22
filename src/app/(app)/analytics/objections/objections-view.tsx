@@ -146,9 +146,9 @@ export function ObjectionsView({
                   </div>
 
                   {/* Suggestion */}
-                  <div className="flex items-start gap-2 bg-[#7af17a]/5 border border-[#7af17a]/20 rounded-lg p-3">
-                    <TrendingUp className="h-4 w-4 text-[#7af17a] mt-0.5 shrink-0" />
-                    <p className="text-sm text-[#7af17a]/90">
+                  <div className="flex items-start gap-2 bg-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3">
+                    <TrendingUp className="h-4 w-4 text-[#10b981] mt-0.5 shrink-0" />
+                    <p className="text-sm text-[#10b981]/90">
                       {objection.suggestion}
                     </p>
                   </div>

@@ -35,33 +35,33 @@ const STAT_CONFIG = [
     key: "deals",
     label: "Deals actifs",
     icon: Target,
-    color: "text-brand",
-    bg: "bg-brand/10",
-    ring: "ring-brand/20",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
   },
   {
     key: "value",
     label: "Valeur pipeline",
     icon: DollarSign,
-    color: "text-brand",
-    bg: "bg-brand/10",
-    ring: "ring-brand/20",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
   },
   {
     key: "weighted",
     label: "Valeur pondérée",
     icon: TrendingUp,
-    color: "text-brand",
-    bg: "bg-brand/10",
-    ring: "ring-brand/20",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
   },
   {
     key: "probability",
     label: "Probabilité moy.",
     icon: Gauge,
-    color: "text-brand",
-    bg: "bg-brand/10",
-    ring: "ring-brand/20",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
   },
 ] as const;
 
@@ -153,7 +153,7 @@ export function PipelineStats({ deals }: PipelineStatsProps) {
               {cfg.key === "probability" && (
                 <div className="w-full bg-muted rounded-full h-1.5 mt-2.5">
                   <div
-                    className="bg-brand/50 h-1.5 rounded-full transition-all duration-500"
+                    className="bg-emerald-500/50 h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${stats.avgProbability}%` }}
                   />
                 </div>

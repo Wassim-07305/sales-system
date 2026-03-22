@@ -45,7 +45,7 @@ export function InteractionsView({ recommendations, comments }: Props) {
           <MessageCircle className="h-3.5 w-3.5" />
           Réponses
           {comments.length > 0 && (
-            <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded-full">
               {comments.length}
             </span>
           )}

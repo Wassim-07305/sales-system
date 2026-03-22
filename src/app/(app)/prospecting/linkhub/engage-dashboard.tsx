@@ -44,8 +44,8 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
         <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                <MessageCircle className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">
@@ -61,7 +61,7 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
             </div>
             <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full rounded-full bg-brand transition-all duration-500"
+                className="h-full rounded-full bg-emerald-500 transition-all duration-500"
                 style={{ width: `${goalPercent}%` }}
               />
             </div>
@@ -124,10 +124,10 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link href="/prospecting/linkhub/session">
-          <Card className="cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow border-brand/20">
+          <Card className="cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow border-emerald-500/20">
             <CardContent className="p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                <Play className="h-6 w-6 text-brand" />
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                <Play className="h-6 w-6 text-emerald-500" />
               </div>
               <div>
                 <p className="font-semibold">Démarrer une session</p>
@@ -142,8 +142,8 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
         <Link href="/prospecting/linkhub/recommandations">
           <Card className="cursor-pointer rounded-2xl shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-brand" />
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-emerald-500" />
               </div>
               <div>
                 <p className="font-semibold">Recommandations du jour</p>
@@ -169,7 +169,7 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
                   </p>
                 </div>
                 {stats.unreadReplies > 0 && (
-                  <Badge className="bg-brand text-brand-dark">
+                  <Badge className="bg-emerald-500 text-black">
                     {stats.unreadReplies}
                   </Badge>
                 )}
@@ -238,8 +238,8 @@ export function LinkedInEngageDashboard({ stats, recentActivity }: Props) {
                   key={comment.id}
                   className="flex items-start gap-3 p-3 rounded-xl bg-muted/50"
                 >
-                  <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Linkedin className="h-4 w-4 text-brand" />
+                  <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Linkedin className="h-4 w-4 text-emerald-500" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">

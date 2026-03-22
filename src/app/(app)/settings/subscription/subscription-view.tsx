@@ -161,11 +161,11 @@ export function SubscriptionView({ currentTier }: Props) {
       </PageHeader>
 
       {/* Current plan card */}
-      <Card className="mb-8 bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
+      <Card className="mb-8 bg-gradient-to-r from-zinc-950 to-zinc-950/80 text-white border-0">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-brand/20 flex items-center justify-center">
-              <CreditCard className="h-6 w-6 text-brand" />
+            <div className="h-12 w-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+              <CreditCard className="h-6 w-6 text-emerald-500" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Plan actuel</p>
@@ -178,7 +178,7 @@ export function SubscriptionView({ currentTier }: Props) {
               </h2>
             </div>
             <div className="ml-auto flex items-center gap-3">
-              <Badge className="bg-brand text-brand-dark">Actif</Badge>
+              <Badge className="bg-emerald-500 text-black">Actif</Badge>
               {currentTier !== "free" && (
                 <Button
                   variant="outline"
@@ -211,21 +211,21 @@ export function SubscriptionView({ currentTier }: Props) {
               key={plan.id}
               className={cn(
                 "relative",
-                plan.popular && "border-brand ring-2 ring-brand/20",
+                plan.popular && "border-emerald-500 ring-2 ring-emerald-500/20",
                 isCurrent && "bg-muted/30",
               )}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-brand text-brand-dark">
+                  <Badge className="bg-emerald-500 text-black">
                     <Sparkles className="h-3 w-3 mr-1" />
                     Populaire
                   </Badge>
                 </div>
               )}
               <CardHeader className="text-center pb-4">
-                <div className="h-12 w-12 rounded-xl bg-brand/10 flex items-center justify-center mx-auto mb-3 ring-1 ring-brand/20">
-                  <Icon className="h-6 w-6 text-brand" />
+                <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3 ring-1 ring-emerald-500/20">
+                  <Icon className="h-6 w-6 text-emerald-500" />
                 </div>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -249,7 +249,7 @@ export function SubscriptionView({ currentTier }: Props) {
                       key={feature}
                       className="flex items-start gap-2 text-sm"
                     >
-                      <Check className="h-4 w-4 text-brand shrink-0 mt-0.5" />
+                      <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -262,7 +262,7 @@ export function SubscriptionView({ currentTier }: Props) {
                     isCurrent
                       ? "bg-muted text-muted-foreground"
                       : plan.popular
-                        ? "bg-brand text-brand-dark hover:bg-brand/90"
+                        ? "bg-emerald-500 text-black hover:bg-emerald-400"
                         : "",
                   )}
                   variant={isCurrent || plan.popular ? "default" : "outline"}
@@ -314,7 +314,7 @@ export function SubscriptionView({ currentTier }: Props) {
                       return (
                         <td key={tier} className="text-center py-3.5 px-4">
                           {val === true ? (
-                            <Check className="h-4 w-4 text-brand mx-auto" />
+                            <Check className="h-4 w-4 text-emerald-500 mx-auto" />
                           ) : val === false ? (
                             <span className="text-muted-foreground">
                               &mdash;

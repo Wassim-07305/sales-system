@@ -56,17 +56,17 @@ const colorCodeConfig: Record<
   green: {
     label: "Excellent",
     className: "bg-green-500 text-white",
-    bgGradient: "from-green-500/20 via-brand/10 to-transparent",
+    bgGradient: "from-green-500/20 via-emerald-500/10 to-transparent",
   },
   orange: {
     label: "Bon potentiel",
     className: "bg-orange-500 text-white",
-    bgGradient: "from-orange-500/20 via-brand/10 to-transparent",
+    bgGradient: "from-orange-500/20 via-emerald-500/10 to-transparent",
   },
   red: {
     label: "En progression",
     className: "bg-red-500 text-white",
-    bgGradient: "from-red-500/20 via-brand/10 to-transparent",
+    bgGradient: "from-red-500/20 via-emerald-500/10 to-transparent",
   },
 };
 
@@ -100,19 +100,19 @@ export function WelcomePackView({ data }: Props) {
         className={cn(
           "relative rounded-2xl p-8 md:p-10 mb-8 overflow-hidden bg-gradient-to-br",
           colorConfig.bgGradient,
-          "border border-brand/20 shadow-sm",
+          "border border-emerald-500/20 shadow-sm",
         )}
       >
-        <div className="absolute top-0 right-0 w-48 h-48 bg-brand/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand/20 to-transparent" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/8 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
 
         <div className="relative">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-brand/15">
-              <Sparkles className="h-4 w-4 text-brand" />
+            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-emerald-500/15">
+              <Sparkles className="h-4 w-4 text-emerald-500" />
             </div>
-            <span className="text-sm font-semibold text-brand tracking-wide">
+            <span className="text-sm font-semibold text-emerald-500 tracking-wide">
               Welcome Pack
             </span>
           </div>
@@ -130,7 +130,7 @@ export function WelcomePackView({ data }: Props) {
             {profile?.role && (
               <Badge
                 variant="outline"
-                className="text-xs px-3 py-1 rounded-lg border-brand/30 bg-white/50 backdrop-blur-sm"
+                className="text-xs px-3 py-1 rounded-lg border-emerald-500/30 bg-white/50 backdrop-blur-sm"
               >
                 {roleLabels[profile.role] || profile.role}
               </Badge>
@@ -138,7 +138,7 @@ export function WelcomePackView({ data }: Props) {
             {profile?.company && (
               <Badge
                 variant="outline"
-                className="text-xs px-3 py-1 rounded-lg border-brand/30 bg-white/50 backdrop-blur-sm"
+                className="text-xs px-3 py-1 rounded-lg border-emerald-500/30 bg-white/50 backdrop-blur-sm"
               >
                 {profile.company}
               </Badge>
@@ -149,15 +149,15 @@ export function WelcomePackView({ data }: Props) {
 
       {/* Quiz score card */}
       {quizResult && (
-        <Card className="mb-6 border-brand/20 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
+        <Card className="mb-6 border-emerald-500/20 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand/10">
-                  <Trophy className="h-7 w-7 text-brand" />
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/10">
+                  <Trophy className="h-7 w-7 text-emerald-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-brand-dark">
+                  <h3 className="font-semibold text-black">
                     R&eacute;sultat de votre quiz
                   </h3>
                   <p className="text-sm text-muted-foreground">
@@ -167,7 +167,7 @@ export function WelcomePackView({ data }: Props) {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-brand-dark">
+                <span className="text-3xl font-bold text-black">
                   {quizResult.score}%
                 </span>
                 <Badge
@@ -188,10 +188,10 @@ export function WelcomePackView({ data }: Props) {
       <Card className="mb-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-brand/10">
-              <Lightbulb className="h-5 w-5 text-brand" />
+            <div className="flex items-center justify-center h-9 w-9 rounded-xl bg-emerald-500/10">
+              <Lightbulb className="h-5 w-5 text-emerald-500" />
             </div>
-            <h3 className="font-semibold text-brand-dark">
+            <h3 className="font-semibold text-black">
               Conseils personnalis&eacute;s
             </h3>
           </div>
@@ -199,9 +199,9 @@ export function WelcomePackView({ data }: Props) {
             {personalizedTips.map((tip, i) => (
               <div
                 key={i}
-                className="flex items-start gap-3 p-3 rounded-xl bg-brand/5 hover:bg-brand/8 transition-colors duration-200"
+                className="flex items-start gap-3 p-3 rounded-xl bg-emerald-500/5 hover:bg-emerald-400/8 transition-colors duration-200"
               >
-                <CheckCircle2 className="h-5 w-5 text-brand shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                 <p className="text-sm leading-relaxed">{tip}</p>
               </div>
             ))}
@@ -213,7 +213,7 @@ export function WelcomePackView({ data }: Props) {
       {pack && (
         <Card className="mb-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-brand-dark mb-1">
+            <h3 className="font-semibold text-black mb-1">
               {pack.title || "Ressources"}
             </h3>
             {pack.description && (
@@ -230,11 +230,11 @@ export function WelcomePackView({ data }: Props) {
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-xl border border-border/60 hover:border-brand/50 hover:bg-brand/5 hover:shadow-sm transition-all duration-200 group"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-border/60 hover:border-emerald-500/50 hover:bg-emerald-500/5 hover:shadow-sm transition-all duration-200 group"
                   >
-                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-brand/10 shrink-0 group-hover:bg-brand/15 transition-colors duration-200">
+                    <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-emerald-500/10 shrink-0 group-hover:bg-emerald-500/15 transition-colors duration-200">
                       {resourceIcons[resource.type] || (
-                        <FileText className="h-4 w-4 text-brand" />
+                        <FileText className="h-4 w-4 text-emerald-500" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -247,7 +247,7 @@ export function WelcomePackView({ data }: Props) {
                         </p>
                       )}
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-brand group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all duration-200 shrink-0" />
                   </a>
                 ))}
               </div>
@@ -268,10 +268,10 @@ export function WelcomePackView({ data }: Props) {
         <Card className="mb-6 rounded-2xl shadow-sm">
           <CardContent className="p-6">
             <div className="text-center py-6">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand/10 mb-4">
-                <BookOpen className="h-7 w-7 text-brand" />
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/10 mb-4">
+                <BookOpen className="h-7 w-7 text-emerald-500" />
               </div>
-              <h3 className="font-semibold text-brand-dark mb-2">
+              <h3 className="font-semibold text-black mb-2">
                 Ressources en pr&eacute;paration
               </h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -286,10 +286,10 @@ export function WelcomePackView({ data }: Props) {
       {/* CTA buttons */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Button
-          className="bg-brand text-brand-dark hover:bg-brand/90 h-auto py-5 flex-col gap-2.5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="bg-emerald-500 text-black hover:bg-emerald-400 h-auto py-5 flex-col gap-2.5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           onClick={() => router.push("/formation")}
         >
-          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-brand-dark/10">
+          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-emerald-500/10">
             <BookOpen className="h-5 w-5" />
           </div>
           <span className="text-sm font-semibold">Commencer la formation</span>
@@ -297,11 +297,11 @@ export function WelcomePackView({ data }: Props) {
 
         <Button
           variant="outline"
-          className="h-auto py-5 flex-col gap-2.5 rounded-2xl border-border/60 hover:border-brand/50 hover:bg-brand/5 hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="h-auto py-5 flex-col gap-2.5 rounded-2xl border-border/60 hover:border-emerald-500/50 hover:bg-emerald-500/5 hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           onClick={() => router.push("/communaute")}
         >
-          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-brand/10">
-            <Users className="h-5 w-5 text-brand" />
+          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-emerald-500/10">
+            <Users className="h-5 w-5 text-emerald-500" />
           </div>
           <span className="text-sm font-semibold">
             Explorer la communaut&eacute;
@@ -310,11 +310,11 @@ export function WelcomePackView({ data }: Props) {
 
         <Button
           variant="outline"
-          className="h-auto py-5 flex-col gap-2.5 rounded-2xl border-border/60 hover:border-brand/50 hover:bg-brand/5 hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="h-auto py-5 flex-col gap-2.5 rounded-2xl border-border/60 hover:border-emerald-500/50 hover:bg-emerald-500/5 hover:shadow-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           onClick={() => router.push("/booking")}
         >
-          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-brand/10">
-            <CalendarPlus className="h-5 w-5 text-brand" />
+          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-emerald-500/10">
+            <CalendarPlus className="h-5 w-5 text-emerald-500" />
           </div>
           <span className="text-sm font-semibold">Booker un appel</span>
         </Button>

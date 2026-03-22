@@ -224,7 +224,7 @@ export function MarketplaceView({ listings, myApplications }: Props) {
                   {listing.niche && (
                     <Badge
                       variant="outline"
-                      className="bg-brand/10 text-brand shrink-0 ml-2"
+                      className="bg-emerald-500/10 text-emerald-500 shrink-0 ml-2"
                     >
                       <Tag className="h-3 w-3 mr-1" />
                       {listing.niche}
@@ -257,7 +257,7 @@ export function MarketplaceView({ listings, myApplications }: Props) {
                 {/* Commission */}
                 {commission && (
                   <div className="flex items-center gap-2 mb-3">
-                    <DollarSign className="h-4 w-4 text-brand" />
+                    <DollarSign className="h-4 w-4 text-emerald-500" />
                     <span className="text-sm font-medium">
                       Commission : {commission}
                       {listing.commission_type === "percentage"
@@ -292,7 +292,7 @@ export function MarketplaceView({ listings, myApplications }: Props) {
                     </div>
                   ) : (
                     <Button
-                      className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                      className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                       onClick={() => openApplyDialog(listing)}
                       disabled={isPending}
                     >
@@ -346,7 +346,7 @@ export function MarketplaceView({ listings, myApplications }: Props) {
               />
             </div>
             <Button
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
               onClick={handleApply}
               disabled={isPending || !message.trim()}
             >

@@ -61,7 +61,7 @@ interface Flowchart {
 
 const categoryColors: Record<string, string> = {
   prospection: "bg-foreground/10 text-foreground border-foreground/20",
-  closing: "bg-brand/10 text-brand border-brand/20",
+  closing: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   objection:
     "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   relance: "bg-foreground/8 text-foreground/80 border-foreground/15",
@@ -133,7 +133,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
       >
         <Button
           onClick={() => setShowAiDialog(true)}
-          className="bg-brand text-brand-dark hover:bg-brand/90"
+          className="bg-emerald-500 text-black hover:bg-emerald-400"
         >
           <Sparkles className="h-4 w-4 mr-2" />
           Générer avec l&apos;IA
@@ -182,7 +182,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
             {filteredFlowcharts.map((fc) => (
               <Card
                 key={fc.id}
-                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -284,7 +284,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
             <Button
               onClick={handleCreateFlowchart}
               disabled={isPending}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -299,7 +299,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
             {flowcharts.map((fc) => (
               <Card
                 key={fc.id}
-                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+                className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -472,7 +472,7 @@ function GenerateAiDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-brand" />
+            <Sparkles className="h-5 w-5 text-emerald-500" />
             Générer un script avec l&apos;IA
           </DialogTitle>
           <DialogDescription>
@@ -533,7 +533,7 @@ function GenerateAiDialog({
           <Button
             onClick={handleGenerate}
             disabled={isGenerating || !business.trim()}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             {isGenerating ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

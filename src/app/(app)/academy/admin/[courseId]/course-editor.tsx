@@ -424,7 +424,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
                           <div
                             className={cn(
                               "flex items-center gap-1 px-2 py-2 rounded-t-lg transition-colors cursor-pointer",
-                              isModuleSelected && "bg-brand/10",
+                              isModuleSelected && "bg-emerald-500/10",
                             )}
                           >
                             <button
@@ -508,7 +508,7 @@ export function CourseEditor({ course }: CourseEditorProps) {
                                               className={cn(
                                                 "flex items-center gap-1 px-3 py-1.5 ml-4 mr-2 rounded transition-colors",
                                                 isLessonSelected
-                                                  ? "bg-brand/10"
+                                                  ? "bg-emerald-500/10"
                                                   : "hover:bg-muted/50",
                                               )}
                                             >
@@ -781,7 +781,7 @@ function ModuleEditor({
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Enregistrer
@@ -973,7 +973,7 @@ function LessonEditor({
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Enregistrer
@@ -1117,7 +1117,7 @@ function LessonEditor({
                     href={att.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-brand hover:underline shrink-0"
+                    className="text-xs text-emerald-500 hover:underline shrink-0"
                   >
                     Ouvrir
                   </a>

@@ -140,7 +140,7 @@ export function ReplayView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Bot className="h-5 w-5 text-brand" />
+                  <Bot className="h-5 w-5 text-emerald-500" />
                   Résumé IA
                 </CardTitle>
               </CardHeader>
@@ -160,7 +160,7 @@ export function ReplayView({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <ListOrdered className="h-5 w-5 text-brand" />
+                  <ListOrdered className="h-5 w-5 text-emerald-500" />
                   Chapitres
                 </CardTitle>
               </CardHeader>
@@ -172,7 +172,7 @@ export function ReplayView({
                       onClick={() => setSelectedChapter(index)}
                       className={`w-full text-left flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
                         selectedChapter === index
-                          ? "bg-brand/10 text-brand"
+                          ? "bg-emerald-500/10 text-emerald-500"
                           : "hover:bg-muted/50"
                       }`}
                     >
@@ -180,7 +180,7 @@ export function ReplayView({
                         variant="outline"
                         className={`shrink-0 font-mono text-[11px] ${
                           selectedChapter === index
-                            ? "border-brand text-brand"
+                            ? "border-emerald-500 text-emerald-500"
                             : ""
                         }`}
                       >

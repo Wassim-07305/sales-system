@@ -308,7 +308,7 @@ export function NewContractForm({
               {loading ? "Sauvegarde..." : "Sauvegarder brouillon"}
             </Button>
             <Button
-              className="flex-1 h-11 rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+              className="flex-1 h-11 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
               onClick={() => handleSave(true)}
               disabled={loading}
             >

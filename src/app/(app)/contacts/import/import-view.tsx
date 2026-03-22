@@ -346,9 +346,9 @@ export function ImportView({ importHistory }: ImportViewProps) {
             <div
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 step === s
-                  ? "bg-[#7af17a]/20 text-[#7af17a] border border-[#7af17a]/30"
+                  ? "bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30"
                   : step > s
-                    ? "bg-[#7af17a]/10 text-[#7af17a]/60"
+                    ? "bg-[#10b981]/10 text-[#10b981]/60"
                     : "bg-muted text-muted-foreground"
               }`}
             >
@@ -382,7 +382,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-2xl p-12 text-center cursor-pointer hover:border-[#7af17a]/50 hover:bg-[#7af17a]/5 transition-colors duration-200"
+              className="border-2 border-dashed border-border rounded-2xl p-12 text-center cursor-pointer hover:border-[#10b981]/50 hover:bg-[#10b981]/5 transition-colors duration-200"
             >
               <FileSpreadsheet className="size-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-base font-medium mb-1">
@@ -539,12 +539,12 @@ export function ImportView({ importHistory }: ImportViewProps) {
           <CardContent className="space-y-4">
             {/* Summary */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border bg-[#7af17a]/5 border-[#7af17a]/20">
+              <div className="p-4 rounded-xl border bg-[#10b981]/5 border-[#10b981]/20">
                 <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle2 className="size-4 text-[#7af17a]" />
+                  <CheckCircle2 className="size-4 text-[#10b981]" />
                   <span className="text-sm font-medium">Valides</span>
                 </div>
-                <p className="text-2xl font-bold text-[#7af17a]">
+                <p className="text-2xl font-bold text-[#10b981]">
                   {validRows.length}
                 </p>
               </div>
@@ -755,7 +755,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                   <Button
                     onClick={runImport}
                     disabled={importing}
-                    className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+                    className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
                   >
                     {importing ? (
                       <>
@@ -775,16 +775,16 @@ export function ImportView({ importHistory }: ImportViewProps) {
               <>
                 {/* Results */}
                 <div className="text-center py-6 space-y-4">
-                  <CheckCircle2 className="size-16 mx-auto text-[#7af17a]" />
+                  <CheckCircle2 className="size-16 mx-auto text-[#10b981]" />
                   <h2 className="text-xl font-bold">Import terminé</h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border bg-[#7af17a]/5 border-[#7af17a]/20 text-center">
+                  <div className="p-4 rounded-xl border bg-[#10b981]/5 border-[#10b981]/20 text-center">
                     <p className="text-sm text-muted-foreground mb-1">
                       Importés
                     </p>
-                    <p className="text-3xl font-bold text-[#7af17a]">
+                    <p className="text-3xl font-bold text-[#10b981]">
                       {importResult.imported}
                     </p>
                   </div>
@@ -858,7 +858,7 @@ export function ImportView({ importHistory }: ImportViewProps) {
                         {log.type === "contacts" ? "Contacts" : "Deals"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-[#7af17a]">
+                    <TableCell className="text-right text-[#10b981]">
                       {log.imported}
                     </TableCell>
                     <TableCell className="text-right text-amber-500">

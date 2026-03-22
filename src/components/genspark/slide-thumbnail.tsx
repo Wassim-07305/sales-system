@@ -15,9 +15,9 @@ interface SlideThumbnailProps {
 }
 
 const themeBg: Record<string, string> = {
-  dark: "bg-[#14080e]",
+  dark: "bg-[#09090b]",
   light: "bg-white",
-  brand: "bg-gradient-to-br from-[#14080e] to-[#1a0f14]",
+  brand: "bg-gradient-to-br from-[#09090b] to-[#1a0f14]",
 };
 
 const themeText: Record<string, string> = {
@@ -42,7 +42,7 @@ export function SlideThumbnail({
       className={cn(
         "w-full text-left rounded-lg border transition-all overflow-hidden group",
         isActive
-          ? "border-brand ring-1 ring-brand/30 shadow-lg shadow-brand/10"
+          ? "border-emerald-500 ring-1 ring-emerald-500/30 shadow-lg shadow-emerald-500/10"
           : "border-border/40 hover:border-border/80",
       )}
     >

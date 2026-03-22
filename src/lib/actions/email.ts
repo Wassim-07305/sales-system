@@ -32,11 +32,11 @@ export async function sendWelcomeEmail(email: string, name: string) {
     to: email,
     subject: "Bienvenue sur Sales System !",
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Bienvenue ${name} !</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Bienvenue ${name} !</h1>
       <p>Ton compte a ete cree avec succes. Tu peux maintenant acceder a toutes les fonctionnalites de la plateforme.</p>
       <div style="text-align:center;margin:32px 0">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/dashboard"
-           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+           style="background:#10b981;color:#09090b;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
           Acceder a mon espace
         </a>
       </div>
@@ -58,7 +58,7 @@ export async function sendBookingConfirmation(params: {
     to: params.email,
     subject: "Confirmation de votre rendez-vous",
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Rendez-vous confirme</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Rendez-vous confirme</h1>
       <p>Bonjour ${params.name},</p>
       <p>Votre rendez-vous a ete confirme :</p>
       <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0">
@@ -83,7 +83,7 @@ export async function sendPaymentConfirmation(params: {
     to: params.email,
     subject: "Confirmation de paiement",
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Paiement recu</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Paiement recu</h1>
       <p>Bonjour ${params.name},</p>
       <p>Nous confirmons la reception de votre paiement :</p>
       <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0">
@@ -108,13 +108,13 @@ export async function sendContractExpiryReminder(params: {
     to: params.email,
     subject: `Votre accompagnement se termine dans ${params.daysLeft} jours`,
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Renouvellement a venir</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Renouvellement a venir</h1>
       <p>Bonjour ${params.name},</p>
       <p>Votre accompagnement <strong>"${params.contractTitle}"</strong> se termine dans <strong>${params.daysLeft} jours</strong>.</p>
       <p>Decouvrez nos offres pour continuer votre progression :</p>
       <div style="text-align:center;margin:32px 0">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/settings/subscription"
-           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+           style="background:#10b981;color:#09090b;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
           Voir les offres
         </a>
       </div>
@@ -161,13 +161,13 @@ export async function sendNotificationDigest(userId: string) {
     to: profile.email,
     subject: `${notifications.length} notification${notifications.length > 1 ? "s" : ""} en attente`,
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Tes notifications</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Tes notifications</h1>
       <p>Bonjour ${profile.full_name || ""},</p>
       <p>Tu as ${notifications.length} notification${notifications.length > 1 ? "s" : ""} non lue${notifications.length > 1 ? "s" : ""} :</p>
       <div style="margin:24px 0">${notifHtml}</div>
       <div style="text-align:center;margin:32px 0">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/notifications"
-           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+           style="background:#10b981;color:#09090b;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
           Voir toutes mes notifications
         </a>
       </div>
@@ -189,17 +189,17 @@ export async function sendDealStageEmail(params: {
     to: params.email,
     subject: `Deal "${params.dealTitle}" — ${params.newStage}`,
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Mise a jour de deal</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Mise a jour de deal</h1>
       <p>Bonjour ${params.name},</p>
       <p>Le deal <strong>"${params.dealTitle}"</strong> a change de stage :</p>
       <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0;text-align:center">
         <span style="color:#666;text-decoration:line-through">${params.oldStage}</span>
-        <span style="margin:0 12px;color:#14080e">→</span>
-        <span style="color:#14080e;font-weight:700">${params.newStage}</span>
+        <span style="margin:0 12px;color:#09090b">→</span>
+        <span style="color:#09090b;font-weight:700">${params.newStage}</span>
       </div>
       <div style="text-align:center;margin:32px 0">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/crm"
-           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+           style="background:#10b981;color:#09090b;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
           Voir le pipeline
         </a>
       </div>
@@ -221,7 +221,7 @@ export async function sendBookingReminder(params: {
     to: params.email,
     subject: `Rappel : rendez-vous demain avec ${params.prospectName}`,
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Rappel de rendez-vous</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Rappel de rendez-vous</h1>
       <p>Bonjour ${params.name},</p>
       <p>Vous avez un rendez-vous demain :</p>
       <div style="background:#f5f5f5;border-radius:8px;padding:20px;margin:24px 0">
@@ -232,7 +232,7 @@ export async function sendBookingReminder(params: {
       <p>Preparez vos notes et soyez pret !</p>
       <div style="text-align:center;margin:32px 0">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/bookings"
-           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+           style="background:#10b981;color:#09090b;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
           Voir mes rendez-vous
         </a>
       </div>
@@ -253,17 +253,17 @@ export async function sendChallengeAchievedEmail(params: {
     to: params.email,
     subject: `Challenge reussi : ${params.challengeTitle}`,
     html: emailLayout(`
-      <h1 style="color:#14080e;margin:0 0 16px">Felicitations !</h1>
+      <h1 style="color:#09090b;margin:0 0 16px">Felicitations !</h1>
       <p>Bonjour ${params.name},</p>
       <p>Tu as complete le challenge <strong>"${params.challengeTitle}"</strong> et gagne <strong>${params.points} points</strong> !</p>
       <div style="text-align:center;margin:32px 0">
-        <div style="display:inline-block;background:#7af17a;color:#14080e;padding:16px 32px;border-radius:50%;font-size:32px;font-weight:700">
+        <div style="display:inline-block;background:#10b981;color:#09090b;padding:16px 32px;border-radius:50%;font-size:32px;font-weight:700">
           +${params.points}
         </div>
       </div>
       <div style="text-align:center;margin:32px 0">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"}/challenges"
-           style="background:#7af17a;color:#14080e;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+           style="background:#10b981;color:#09090b;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
           Voir mes challenges
         </a>
       </div>
@@ -340,7 +340,7 @@ function emailLayout(content: string): string {
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
   <div style="max-width:600px;margin:0 auto;padding:40px 20px">
     <div style="text-align:center;margin-bottom:32px">
-      <span style="font-size:24px;font-weight:700;color:#14080e">Sales System</span>
+      <span style="font-size:24px;font-weight:700;color:#09090b">Sales System</span>
     </div>
     <div style="background:#ffffff;border-radius:12px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
       ${content}

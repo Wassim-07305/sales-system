@@ -45,7 +45,7 @@ const STATUS_CLASS: Record<string, string> = {
   new: "bg-muted text-muted-foreground",
   contacted: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   replied: "bg-green-500/20 text-green-400 border-green-500/30",
-  booked: "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30",
+  booked: "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30",
   not_interested: "bg-red-500/20 text-red-400 border-red-500/30",
 };
 
@@ -176,7 +176,7 @@ export function ProspectsView({
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-[#7af17a]">{booked}</div>
+            <div className="text-2xl font-bold text-[#10b981]">{booked}</div>
             <div className="text-sm text-muted-foreground">RDV fixés</div>
           </CardContent>
         </Card>

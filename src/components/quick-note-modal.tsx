@@ -175,7 +175,7 @@ export function QuickNoteModal({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Icon className="h-5 w-5 text-brand" />
+            <Icon className="h-5 w-5 text-emerald-500" />
             {step === "select"
               ? "Sélectionner un deal"
               : "Ajouter une note rapide"}
@@ -260,7 +260,7 @@ export function QuickNoteModal({
                     size="sm"
                     onClick={() => setNoteType(type.value)}
                     className={
-                      noteType === type.value ? "bg-brand text-brand-dark" : ""
+                      noteType === type.value ? "bg-emerald-500 text-black" : ""
                     }
                   >
                     <TypeIcon className="h-3.5 w-3.5 mr-1.5" />
@@ -292,7 +292,7 @@ export function QuickNoteModal({
               <Button
                 onClick={handleSubmit}
                 disabled={isPending || !content.trim()}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

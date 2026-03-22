@@ -316,7 +316,7 @@ export function SlideEditorPanel({
         <Button
           onClick={handleRegenerate}
           disabled={isRegenerating || !aiInstruction.trim()}
-          className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+          className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
           size="sm"
         >
           {isRegenerating ? (

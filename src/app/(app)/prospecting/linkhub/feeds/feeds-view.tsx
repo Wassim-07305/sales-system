@@ -399,7 +399,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
             <h3 className="text-sm font-semibold">Mes feeds</h3>
             <Dialog open={showCreateFeed} onOpenChange={setShowCreateFeed}>
               <DialogTrigger asChild>
-                <Button size="sm" className="rounded-lg bg-brand text-brand-dark hover:bg-brand/90">
+                <Button size="sm" className="rounded-lg bg-emerald-500 text-black hover:bg-emerald-400">
                   <Plus className="h-4 w-4 mr-1" /> Créer
                 </Button>
               </DialogTrigger>
@@ -423,7 +423,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                   <Button
                     onClick={handleCreateFeed}
                     disabled={!newFeedName.trim() || isPending}
-                    className="w-full rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+                    className="w-full rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Créer le feed
@@ -437,13 +437,13 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
           <Card
             className={`cursor-pointer rounded-xl transition-all ${
               !selectedFeedId
-                ? "ring-2 ring-brand shadow-md"
+                ? "ring-2 ring-emerald-500 shadow-md"
                 : "hover:shadow-sm"
             }`}
             onClick={() => setSelectedFeedId(null)}
           >
             <CardContent className="p-3 flex items-center gap-2">
-              <Linkedin className="h-4 w-4 text-brand" />
+              <Linkedin className="h-4 w-4 text-emerald-500" />
               <span className="text-sm font-medium">Tous les posts</span>
               <Badge variant="outline" className="ml-auto text-xs">
                 {posts.length}
@@ -456,7 +456,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
               <Card
                 className={`cursor-pointer rounded-xl transition-all ${
                   selectedFeedId === feed.id
-                    ? "ring-2 ring-brand shadow-md"
+                    ? "ring-2 ring-emerald-500 shadow-md"
                     : "hover:shadow-sm"
                 }`}
                 onClick={() => setSelectedFeedId(feed.id)}
@@ -464,7 +464,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Linkedin className="h-4 w-4 text-brand shrink-0" />
+                      <Linkedin className="h-4 w-4 text-emerald-500 shrink-0" />
                       <span className="text-sm font-medium truncate">
                         {feed.name}
                       </span>
@@ -651,7 +651,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                             className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-sm font-bold text-brand">
+                          <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-sm font-bold text-emerald-500">
                             {(profileData?.full_name || "?")[0]}
                           </div>
                         )}
@@ -710,7 +710,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                       <div className="flex items-center gap-2 flex-wrap">
                         <Button
                           size="sm"
-                          className="rounded-lg bg-brand text-brand-dark hover:bg-brand/90"
+                          className="rounded-lg bg-emerald-500 text-black hover:bg-emerald-400"
                           disabled={generatingForPost === post.id}
                           onClick={() => handleGenerateComments(post.id)}
                         >
@@ -751,7 +751,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                                 key={comment.id}
                                 className={`p-3 rounded-xl border ${
                                   comment.status === "published"
-                                    ? "bg-brand/5 border-brand/20"
+                                    ? "bg-emerald-500/5 border-emerald-500/20"
                                     : comment.status === "ignored"
                                       ? "opacity-50"
                                       : "bg-muted/50"
@@ -769,7 +769,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                                         : "Témoignage"}
                                   </Badge>
                                   {comment.status === "published" && (
-                                    <Badge className="bg-brand/10 text-brand border-brand/20 text-xs">
+                                    <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-xs">
                                       Publié
                                     </Badge>
                                   )}
@@ -800,7 +800,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                                     <div className="flex gap-2">
                                       <Button
                                         size="sm"
-                                        className="rounded-lg bg-brand text-brand-dark hover:bg-brand/90"
+                                        className="rounded-lg bg-emerald-500 text-black hover:bg-emerald-400"
                                         onClick={() =>
                                           handleSaveEdit(comment.id)
                                         }
@@ -864,7 +864,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                                     {comment.status !== "published" && (
                                       <Button
                                         size="sm"
-                                        className="rounded-lg bg-brand text-brand-dark hover:bg-brand/90 h-8"
+                                        className="rounded-lg bg-emerald-500 text-black hover:bg-emerald-400 h-8"
                                         disabled={
                                           publishingComment === comment.id
                                         }
@@ -892,7 +892,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
                                       }
                                     >
                                       {copiedId === comment.id ? (
-                                        <Check className="h-3 w-3 mr-1 text-brand" />
+                                        <Check className="h-3 w-3 mr-1 text-emerald-500" />
                                       ) : (
                                         <Copy className="h-3 w-3 mr-1" />
                                       )}
@@ -963,7 +963,7 @@ export function FeedsView({ initialFeeds, initialPosts }: Props) {
             <Button
               onClick={handleAddProfile}
               disabled={!profileUrl.trim() || addingProfile}
-              className="w-full rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {addingProfile && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Ajouter le profil

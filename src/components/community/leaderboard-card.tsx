@@ -46,7 +46,7 @@ export function LeaderboardCard({ entries }: { entries: LeaderboardEntry[] }) {
               >
                 {idx + 1}
               </span>
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center text-brand text-xs font-bold shrink-0 ring-1 ring-brand/15">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center text-emerald-500 text-xs font-bold shrink-0 ring-1 ring-emerald-500/15">
                 {entry.full_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
               <div className="flex-1 min-w-0">

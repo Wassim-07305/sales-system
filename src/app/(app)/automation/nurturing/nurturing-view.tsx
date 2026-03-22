@@ -155,7 +155,7 @@ export function NurturingView({ rules, executions }: Props) {
       >
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+            <Button className="bg-emerald-500 text-black hover:bg-emerald-400">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle règle
             </Button>
@@ -219,13 +219,13 @@ export function NurturingView({ rules, executions }: Props) {
                         key={action.value}
                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                           isSelected
-                            ? "border-brand bg-brand/5"
+                            ? "border-emerald-500 bg-emerald-500/5"
                             : "hover:bg-muted/50"
                         }`}
                         onClick={() => toggleAction(action.value)}
                       >
                         <Icon
-                          className={`h-4 w-4 ${isSelected ? "text-brand" : "text-muted-foreground"}`}
+                          className={`h-4 w-4 ${isSelected ? "text-emerald-500" : "text-muted-foreground"}`}
                         />
                         <span className="text-sm">{action.label}</span>
                       </div>
@@ -235,7 +235,7 @@ export function NurturingView({ rules, executions }: Props) {
               </div>
 
               <Button
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 onClick={handleCreate}
                 disabled={isPending}
               >
@@ -338,7 +338,7 @@ export function NurturingView({ rules, executions }: Props) {
                   className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
-                    <Zap className="h-4 w-4 text-brand" />
+                    <Zap className="h-4 w-4 text-emerald-500" />
                     <div>
                       <p className="text-sm font-medium">
                         {exec.rule?.name || "Règle"}

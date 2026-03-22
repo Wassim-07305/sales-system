@@ -273,7 +273,7 @@ export function AnalyticsView({
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
                 activePeriod === opt.key
-                  ? "bg-brand text-brand-dark shadow-sm"
+                  ? "bg-emerald-500 text-black shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -322,8 +322,8 @@ export function AnalyticsView({
         analytics.activeClients === 0 && (
           <Card className="mb-6 border-border/50 bg-muted/10">
             <CardContent className="py-16 text-center">
-              <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="h-7 w-7 text-brand" />
+              <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-7 w-7 text-emerald-500" />
               </div>
               <p className="font-semibold text-lg">
                 Bienvenue dans vos Analytics
@@ -335,7 +335,7 @@ export function AnalyticsView({
               <Link href="/crm">
                 <Button
                   size="sm"
-                  className="mt-5 bg-brand text-brand-dark hover:bg-brand/90"
+                  className="mt-5 bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   Accéder au CRM
                 </Button>
@@ -427,12 +427,12 @@ export function AnalyticsView({
                       >
                         <stop
                           offset="5%"
-                          stopColor="#7af17a"
+                          stopColor="#10b981"
                           stopOpacity={0.2}
                         />
                         <stop
                           offset="95%"
-                          stopColor="#7af17a"
+                          stopColor="#10b981"
                           stopOpacity={0}
                         />
                       </linearGradient>
@@ -467,7 +467,7 @@ export function AnalyticsView({
                     <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="#7af17a"
+                      stroke="#10b981"
                       fill="url(#caGradient)"
                       strokeWidth={2}
                     />
@@ -718,7 +718,7 @@ export function AnalyticsView({
         <Card className="overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-brand" />
+              <div className="h-2 w-2 rounded-full bg-emerald-500" />
               Performance Équipe
             </CardTitle>
           </CardHeader>

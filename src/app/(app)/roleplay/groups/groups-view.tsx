@@ -127,7 +127,7 @@ const nicheColors: Record<string, string> = {
 const sessionTypeLabels: Record<string, { label: string; color: string }> = {
   roleplay: {
     label: "Role-Play",
-    color: "bg-brand/10 text-brand border-brand/20",
+    color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   },
   workshop: {
     label: "Workshop",
@@ -170,7 +170,7 @@ function formatDate(dateStr: string) {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 80) return "text-brand";
+  if (score >= 80) return "text-emerald-500";
   if (score >= 60) return "text-muted-foreground";
   return "text-foreground";
 }
@@ -300,7 +300,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
               setGroupForm(emptyGroupForm);
               setCreateDialogOpen(true);
             }}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau groupe
@@ -312,8 +312,8 @@ export function GroupsView({ groups, teamMembers }: Props) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-brand/10">
-              <Users className="h-5 w-5 text-brand" />
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <Users className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totalGroups}</p>
@@ -377,9 +377,9 @@ export function GroupsView({ groups, teamMembers }: Props) {
               {groups.map((group) => (
                 <Card
                   key={group.id}
-                  className={`cursor-pointer transition-all hover:border-brand/50 ${
+                  className={`cursor-pointer transition-all hover:border-emerald-500/50 ${
                     selectedGroupId === group.id
-                      ? "border-brand ring-1 ring-brand/30"
+                      ? "border-emerald-500 ring-1 ring-emerald-500/30"
                       : ""
                   }`}
                   onClick={() =>
@@ -486,7 +486,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                     </div>
                     <div className="flex items-center gap-4 mt-4">
                       <div className="flex items-center gap-1.5 text-sm">
-                        <Target className="h-4 w-4 text-brand" />
+                        <Target className="h-4 w-4 text-emerald-500" />
                         <span
                           className={`font-semibold ${getScoreColor(groupDetail.avg_score)}`}
                         >
@@ -496,7 +496,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                           score moyen
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm text-brand">
+                      <div className="flex items-center gap-1.5 text-sm text-emerald-500">
                         <TrendingUp className="h-4 w-4" />
                         <span>+5% ce mois</span>
                       </div>
@@ -508,7 +508,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-brand" />
+                      <Trophy className="h-4 w-4 text-emerald-500" />
                       Classement du groupe
                     </CardTitle>
                   </CardHeader>
@@ -535,7 +535,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                                 <span
                                   className={
                                     entry.rank === 1
-                                      ? "text-brand"
+                                      ? "text-emerald-500"
                                       : entry.rank === 2
                                         ? "text-muted-foreground"
                                         : "text-muted-foreground/60"
@@ -553,7 +553,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[10px] font-bold">
+                                <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-[10px] font-bold">
                                   {getInitials(entry.name)}
                                 </div>
                                 <span className="font-medium text-sm">
@@ -573,7 +573,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                             </TableCell>
                             <TableCell className="text-right">
                               <span
-                                className={`text-sm ${entry.progress >= 0 ? "text-brand" : "text-foreground"}`}
+                                className={`text-sm ${entry.progress >= 0 ? "text-emerald-500" : "text-foreground"}`}
                               >
                                 {entry.progress >= 0 ? "+" : ""}
                                 {entry.progress}%
@@ -614,7 +614,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                           <TableRow key={member.user_id}>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[10px] font-bold">
+                                <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-[10px] font-bold">
                                   {getInitials(
                                     member.profile?.full_name || "?",
                                   )}
@@ -644,7 +644,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                             </TableCell>
                             <TableCell className="text-right">
                               <span
-                                className={`text-sm ${member.progress >= 0 ? "text-brand" : "text-foreground"}`}
+                                className={`text-sm ${member.progress >= 0 ? "text-emerald-500" : "text-foreground"}`}
                               >
                                 {member.progress >= 0 ? "+" : ""}
                                 {member.progress}%
@@ -810,7 +810,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
                         onCheckedChange={() => toggleMember(member.id)}
                       />
                       <div className="flex items-center gap-2 flex-1">
-                        <div className="w-6 h-6 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[9px] font-bold">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-[9px] font-bold">
                           {getInitials(member.full_name || "?")}
                         </div>
                         <span className="text-sm font-medium">
@@ -838,7 +838,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
             <Button
               onClick={handleCreateGroup}
               disabled={saving}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {saving ? "Création..." : "Créer le groupe"}
             </Button>
@@ -900,7 +900,7 @@ export function GroupsView({ groups, teamMembers }: Props) {
             <Button
               onClick={handleAddSession}
               disabled={savingSession}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {savingSession ? "Ajout..." : "Ajouter la session"}
             </Button>

@@ -71,14 +71,14 @@ export function ResetPasswordForm() {
   if (success) {
     return (
       <div className="space-y-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-2xl bg-brand/10 shadow-sm">
-          <CheckCircle2 className="h-9 w-9 text-brand" />
+        <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-2xl bg-emerald-500/10 shadow-sm">
+          <CheckCircle2 className="h-9 w-9 text-emerald-400" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-brand-dark">
+          <h3 className="text-xl font-bold text-white">
             {"Mot de passe mis à jour"}
           </h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+          <p className="text-zinc-400 text-sm leading-relaxed">
             {
               "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
             }
@@ -86,7 +86,7 @@ export function ResetPasswordForm() {
         </div>
         <div className="pt-2">
           <Button
-            className="w-full h-12 rounded-xl bg-brand-dark hover:bg-brand-dark/90 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200"
+            className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-medium shadow-sm hover:shadow-md transition-all duration-200"
             onClick={() => {
               router.push("/dashboard");
               router.refresh();
@@ -103,7 +103,7 @@ export function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium">
+        <Label htmlFor="password" className="text-sm font-medium text-zinc-300">
           Nouveau mot de passe
         </Label>
         <div className="relative">
@@ -116,7 +116,7 @@ export function ResetPasswordForm() {
             required
             minLength={8}
             autoComplete="new-password"
-            className="h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
+            className="h-11 rounded-xl pr-11 bg-white/[0.04] border-white/[0.08] text-white focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200 placeholder:text-zinc-600"
           />
           <button
             type="button"
@@ -150,7 +150,7 @@ export function ResetPasswordForm() {
                         ? "bg-destructive"
                         : passwordStrength.level <= 2
                           ? "bg-amber-500"
-                          : "bg-brand"
+                          : "bg-emerald-500"
                       : "bg-border/40",
                   )}
                 />
@@ -163,7 +163,7 @@ export function ResetPasswordForm() {
                   ? "text-destructive"
                   : passwordStrength.level <= 2
                     ? "text-amber-500"
-                    : "text-brand",
+                    : "text-emerald-400",
               )}
             >
               {passwordStrength.label}
@@ -177,7 +177,7 @@ export function ResetPasswordForm() {
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-sm font-medium">
+        <Label htmlFor="confirmPassword" className="text-sm font-medium text-zinc-300">
           Confirmer le mot de passe
         </Label>
         <div className="relative">
@@ -191,8 +191,8 @@ export function ResetPasswordForm() {
             minLength={8}
             autoComplete="new-password"
             className={cn(
-              "h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50",
-              passwordsMatch && "border-brand/60 focus-visible:border-brand",
+              "h-11 rounded-xl pr-11 bg-white/[0.04] border-white/[0.08] text-white focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200 placeholder:text-zinc-600",
+              passwordsMatch && "border-emerald-500/60 focus-visible:border-emerald-500",
               passwordsMismatch &&
                 "border-destructive/60 focus-visible:border-destructive",
             )}
@@ -221,7 +221,7 @@ export function ResetPasswordForm() {
           </p>
         )}
         {passwordsMatch && (
-          <p className="text-xs text-brand font-medium animate-in fade-in duration-300">
+          <p className="text-xs text-emerald-400 font-medium animate-in fade-in duration-300">
             Les mots de passe correspondent
           </p>
         )}
@@ -231,7 +231,7 @@ export function ResetPasswordForm() {
         <Button
           type="submit"
           size="lg"
-          className="w-full h-12 rounded-xl bg-brand-dark hover:bg-brand-dark/90 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+          className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           disabled={loading}
         >
           {loading ? (
@@ -245,14 +245,14 @@ export function ResetPasswordForm() {
 
       <div className="relative py-5">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border/50" />
+          <div className="w-full border-t border-white/[0.06]" />
         </div>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
+          className="inline-flex items-center gap-1.5 text-white font-medium hover:text-emerald-300 transition-colors duration-200 underline-offset-4 hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {"Retour à la connexion"}

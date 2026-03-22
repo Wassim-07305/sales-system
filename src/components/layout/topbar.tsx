@@ -136,7 +136,7 @@ export function Topbar({ title, userId }: TopbarProps) {
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-brand text-brand-dark text-[10px] font-bold">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-emerald-500 text-black text-[10px] font-bold">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </Badge>
               )}
@@ -173,7 +173,7 @@ export function Topbar({ title, userId }: TopbarProps) {
               notifications.slice(0, 10).map((notif) => (
                 <DropdownMenuItem
                   key={notif.id}
-                  className={`p-3 cursor-pointer ${!notif.read ? "bg-brand/5" : ""}`}
+                  className={`p-3 cursor-pointer ${!notif.read ? "bg-emerald-500/5" : ""}`}
                   onClick={() => {
                     if (!notif.read) handleMarkRead(notif.id);
                     if (notif.link) window.location.href = notif.link;
@@ -202,7 +202,7 @@ export function Topbar({ title, userId }: TopbarProps) {
                       </p>
                     </div>
                     {!notif.read && (
-                      <div className="h-2 w-2 rounded-full bg-brand shrink-0 mt-1.5" />
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
                     )}
                   </div>
                 </DropdownMenuItem>

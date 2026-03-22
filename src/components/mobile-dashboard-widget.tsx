@@ -34,8 +34,8 @@ export function MobileDashboardWidget({
       label: "CA du mois",
       value: formatter.format(caDuMois),
       icon: DollarSign,
-      color: "text-[#7af17a]",
-      bg: "bg-[#7af17a]/10",
+      color: "text-[#10b981]",
+      bg: "bg-[#10b981]/10",
     },
     {
       label: "Tâches du jour",

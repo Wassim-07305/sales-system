@@ -26,8 +26,8 @@ function getDefaultConfig(userId: string) {
     brand_name: null,
     app_name: null,
     logo_url: null,
-    primary_color: "#7af17a",
-    secondary_color: "#14080e",
+    primary_color: "#10b981",
+    secondary_color: "#09090b",
     custom_domain: null,
     enabled_modules: ALL_MODULES,
     is_active: false,
@@ -65,8 +65,8 @@ export async function getWhiteLabelConfig() {
       .from("white_label_configs")
       .insert({
         entrepreneur_id: user.id,
-        primary_color: "#7af17a",
-        secondary_color: "#14080e",
+        primary_color: "#10b981",
+        secondary_color: "#09090b",
         enabled_modules: ALL_MODULES,
         is_active: false,
       })

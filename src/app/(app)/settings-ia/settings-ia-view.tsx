@@ -203,7 +203,7 @@ export function SettingsIAView({
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <RefreshCw className="h-4 w-4 text-[#7af17a]" />
+              <RefreshCw className="h-4 w-4 text-[#10b981]" />
               Synchronisation automatique
             </CardTitle>
             <CardDescription>

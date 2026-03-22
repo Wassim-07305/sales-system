@@ -213,7 +213,7 @@ export function AvailabilityEditor({
               <Button
                 onClick={handleAdd}
                 disabled={isPending}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 size="sm"
               >
                 {isPending ? (

@@ -162,7 +162,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
               disabled={contracts.length === 0}
               title={
                 contracts.length === 0
@@ -210,7 +210,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
                 />
               </div>
               <Button
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90 h-11 rounded-xl"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400 h-11 rounded-xl"
                 onClick={handleGenerateInvoice}
                 disabled={isPending}
               >
@@ -265,7 +265,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
                   <TableCell>{invoice.client?.full_name || "—"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <DollarSign className="h-3.5 w-3.5 text-brand" />
+                      <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
                       {invoice.amount.toLocaleString("fr-FR")} &euro;
                     </div>
                   </TableCell>

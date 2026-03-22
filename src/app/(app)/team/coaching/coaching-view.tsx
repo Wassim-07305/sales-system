@@ -101,7 +101,7 @@ const STATUS_CONFIG: Record<
 > = {
   in_progress: {
     label: "En cours",
-    color: "bg-[#7af17a]/20 text-[#7af17a] border-[#7af17a]/30",
+    color: "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/30",
     icon: TrendingUp,
   },
   completed: {
@@ -193,21 +193,21 @@ export function CoachingView({
         <TabsList className="bg-muted border border-border">
           <TabsTrigger
             value="objectives"
-            className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]"
+            className="data-[state=active]:bg-[#10b981]/20 data-[state=active]:text-[#10b981]"
           >
             <Target className="w-4 h-4 mr-2" />
             Objectifs SMART
           </TabsTrigger>
           <TabsTrigger
             value="development"
-            className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]"
+            className="data-[state=active]:bg-[#10b981]/20 data-[state=active]:text-[#10b981]"
           >
             <TrendingUp className="w-4 h-4 mr-2" />
             Plan de developpement
           </TabsTrigger>
           <TabsTrigger
             value="notes"
-            className="data-[state=active]:bg-[#7af17a]/20 data-[state=active]:text-[#7af17a]"
+            className="data-[state=active]:bg-[#10b981]/20 data-[state=active]:text-[#10b981]"
           >
             <BookOpen className="w-4 h-4 mr-2" />
             Notes de coaching
@@ -266,12 +266,12 @@ function SummaryCard({
             className={`h-9 w-9 rounded-xl flex items-center justify-center ring-1 ${
               variant === "warning"
                 ? "bg-orange-500/10 ring-orange-500/20"
-                : "bg-brand/10 ring-brand/20"
+                : "bg-emerald-500/10 ring-emerald-500/20"
             }`}
           >
             <Icon
               className={`w-4 h-4 ${
-                variant === "warning" ? "text-orange-400" : "text-brand"
+                variant === "warning" ? "text-orange-400" : "text-emerald-500"
               }`}
             />
           </div>
@@ -418,7 +418,7 @@ function ObjectivesTab({
         </div>
         <Button
           onClick={() => setDialogOpen(true)}
-          className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-semibold"
+          className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-semibold"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nouvel objectif
@@ -522,7 +522,7 @@ function ObjectivesTab({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-muted-foreground hover:text-[#7af17a] hover:bg-[#7af17a]/10 h-8 text-xs"
+                              className="text-muted-foreground hover:text-[#10b981] hover:bg-[#10b981]/10 h-8 text-xs"
                               onClick={() => {
                                 setEditingProgress(isEditing ? null : obj.id);
                                 setProgressValue(String(obj.currentValue));
@@ -582,7 +582,7 @@ function ObjectivesTab({
                           size="sm"
                           onClick={() => handleUpdateProgress(obj.id)}
                           disabled={isPending}
-                          className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 h-9"
+                          className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 h-9"
                         >
                           {isPending ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -720,7 +720,7 @@ function ObjectivesTab({
               <Button
                 onClick={handleCreate}
                 disabled={isPending}
-                className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-semibold"
+                className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-semibold"
               >
                 {isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -746,7 +746,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="text-foreground flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-[#7af17a]" />
+            <BarChart3 className="w-5 h-5 text-[#10b981]" />
             Évaluation des compétences
           </CardTitle>
         </CardHeader>
@@ -767,7 +767,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                         <span className="text-foreground/80">{skill.name}</span>
                         <span className="text-muted-foreground">
                           {skill.level}/10{" "}
-                          <span className="text-[#7af17a]">
+                          <span className="text-[#10b981]">
                             (objectif : {skill.target})
                           </span>
                         </span>
@@ -775,7 +775,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                       <div className="relative h-3 bg-muted rounded-full overflow-hidden">
                         {/* Target marker */}
                         <div
-                          className="absolute top-0 h-full border-r-2 border-dashed border-[#7af17a]/50 z-10"
+                          className="absolute top-0 h-full border-r-2 border-dashed border-[#10b981]/50 z-10"
                           style={{ left: `${targetPct}%` }}
                         />
                         {/* Current level bar */}
@@ -784,7 +784,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                             skill.level >= skill.target
                               ? "bg-emerald-500"
                               : skill.level >= skill.target - 2
-                                ? "bg-[#7af17a]"
+                                ? "bg-[#10b981]"
                                 : "bg-orange-400"
                           }`}
                           style={{ width: `${levelPct}%` }}
@@ -796,11 +796,11 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
               </div>
               <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-2 rounded bg-[#7af17a]" />
+                  <div className="w-3 h-2 rounded bg-[#10b981]" />
                   <span>Niveau actuel</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-2 rounded border-r-2 border-dashed border-[#7af17a]/50" />
+                  <div className="w-3 h-2 rounded border-r-2 border-dashed border-[#10b981]/50" />
                   <span>Objectif</span>
                 </div>
               </div>
@@ -813,7 +813,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="text-foreground flex items-center gap-2">
-            <Target className="w-5 h-5 text-[#7af17a]" />
+            <Target className="w-5 h-5 text-[#10b981]" />
             Actions recommandees
           </CardTitle>
         </CardHeader>
@@ -883,7 +883,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-[#7af17a]" />
+              <BookOpen className="w-5 h-5 text-[#10b981]" />
               Ressources recommandees
             </CardTitle>
           </CardHeader>
@@ -893,10 +893,10 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                 <a
                   key={i}
                   href={resource.url}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-muted border border-border hover:border-[#7af17a]/30 hover:bg-[#7af17a]/5 transition-colors group"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted border border-border hover:border-[#10b981]/30 hover:bg-[#10b981]/5 transition-colors group"
                 >
-                  <div className="p-2 rounded-lg bg-[#7af17a]/10 group-hover:bg-[#7af17a]/20">
-                    <GraduationCap className="w-4 h-4 text-[#7af17a]" />
+                  <div className="p-2 rounded-lg bg-[#10b981]/10 group-hover:bg-[#10b981]/20">
+                    <GraduationCap className="w-4 h-4 text-[#10b981]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
@@ -906,7 +906,7 @@ function DevelopmentTab({ plan }: { plan: DevelopmentPlan }) {
                       {resource.type}
                     </p>
                   </div>
-                  <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-[#7af17a] shrink-0" />
+                  <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-[#10b981] shrink-0" />
                 </a>
               ))}
             </div>
@@ -969,7 +969,7 @@ function NotesTab({
         <div className="flex justify-end">
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-semibold"
+            className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-semibold"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle note
@@ -1148,7 +1148,7 @@ function NotesTab({
               <Button
                 onClick={handleCreateNote}
                 disabled={isPending}
-                className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-semibold"
+                className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-semibold"
               >
                 {isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />

@@ -358,7 +358,7 @@ export function JournalView({ todayJournal, history }: Props) {
                 <Button
                   onClick={handleSubmit}
                   disabled={isPending}
-                  className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+                  className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
                 >
                   {isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

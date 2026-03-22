@@ -123,7 +123,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   },
   replied: {
     label: "A répondu",
-    color: "bg-brand/10 text-brand border-brand/20",
+    color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   },
   booked: {
     label: "RDV pris",
@@ -131,11 +131,11 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   },
   qualified: {
     label: "Qualifié",
-    color: "bg-brand/15 text-brand border-brand/25",
+    color: "bg-emerald-500/15 text-emerald-500 border-emerald-500/25",
   },
   converted: {
     label: "Converti",
-    color: "bg-brand/10 text-brand border-brand/20",
+    color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   },
   lost: {
     label: "Perdu",
@@ -391,7 +391,7 @@ export function ProspectDetail({
             <DialogTrigger asChild>
               <Button
                 size="sm"
-                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
               >
                 <ArrowRightCircle className="h-4 w-4 mr-1" />
                 Convertir en deal
@@ -446,7 +446,7 @@ export function ProspectDetail({
                 </div>
                 <Button
                   onClick={handleConvertToDeal}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   Créer le deal
                 </Button>
@@ -472,7 +472,7 @@ export function ProspectDetail({
             <Button
               variant="outline"
               size="sm"
-              className="rounded-xl font-medium text-brand hover:text-brand/80"
+              className="rounded-xl font-medium text-emerald-500 hover:text-emerald-400/80"
               asChild
             >
               <Link href={`/crm/${linkedDeal.id}`}>
@@ -588,7 +588,7 @@ export function ProspectDetail({
                 </div>
                 <Button
                   onClick={handleEditSubmit}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   Enregistrer
                 </Button>
@@ -705,7 +705,7 @@ export function ProspectDetail({
                     onClick={() => handleStatusChange(status)}
                     className={`rounded-xl font-medium ${
                       currentProspect.status === status
-                        ? "bg-brand text-brand-dark hover:bg-brand/90"
+                        ? "bg-emerald-500 text-black hover:bg-emerald-400"
                         : ""
                     }`}
                   >
@@ -735,7 +735,7 @@ export function ProspectDetail({
                       key={msg.id as string}
                       className={`p-3 rounded-lg max-w-[80%] ${
                         msg.direction === "sent"
-                          ? "bg-brand/10 ml-auto"
+                          ? "bg-emerald-500/10 ml-auto"
                           : "bg-muted"
                       }`}
                     >
@@ -760,7 +760,7 @@ export function ProspectDetail({
                   <Button
                     variant={messageDirection === "sent" ? "default" : "outline"}
                     size="sm"
-                    className={`rounded-xl text-xs h-7 ${messageDirection === "sent" ? "bg-brand text-brand-dark hover:bg-brand/90" : ""}`}
+                    className={`rounded-xl text-xs h-7 ${messageDirection === "sent" ? "bg-emerald-500 text-black hover:bg-emerald-400" : ""}`}
                     onClick={() => setMessageDirection("sent")}
                   >
                     Envoyé
@@ -768,7 +768,7 @@ export function ProspectDetail({
                   <Button
                     variant={messageDirection === "received" ? "default" : "outline"}
                     size="sm"
-                    className={`rounded-xl text-xs h-7 ${messageDirection === "received" ? "bg-brand text-brand-dark hover:bg-brand/90" : ""}`}
+                    className={`rounded-xl text-xs h-7 ${messageDirection === "received" ? "bg-emerald-500 text-black hover:bg-emerald-400" : ""}`}
                     onClick={() => setMessageDirection("received")}
                   >
                     Reçu
@@ -786,7 +786,7 @@ export function ProspectDetail({
                 <Button
                   onClick={handleSendMessage}
                   disabled={sendingMessage || !newMessage.trim()}
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -804,8 +804,8 @@ export function ProspectDetail({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center">
-                  <PlatformIcon className="h-6 w-6 text-brand" />
+                <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <PlatformIcon className="h-6 w-6 text-emerald-500" />
                 </div>
                 <div>
                   <p className="font-medium">{currentProspect.name}</p>
@@ -822,7 +822,7 @@ export function ProspectDetail({
                     href={currentProspect.profile_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-brand hover:underline"
+                    className="flex items-center gap-2 text-sm text-emerald-500 hover:underline"
                   >
                     <ExternalLink className="h-4 w-4" />
                     Voir le profil
@@ -913,7 +913,7 @@ export function ProspectDetail({
                 size="sm"
                 onClick={saveNotes}
                 disabled={savingNotes}
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
               >
                 {savingNotes ? "Enregistrement..." : "Enregistrer"}
               </Button>
@@ -926,11 +926,11 @@ export function ProspectDetail({
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <ListChecks className="h-4 w-4 text-brand" />
+                    <ListChecks className="h-4 w-4 text-emerald-500" />
                     Séquences de suivi
                   </CardTitle>
                   <Link href="/prospecting/outreach/follow-ups">
-                    <Button variant="ghost" size="sm" className="text-brand h-7 text-xs">
+                    <Button variant="ghost" size="sm" className="text-emerald-500 h-7 text-xs">
                       Gérer
                     </Button>
                   </Link>
@@ -1003,7 +1003,7 @@ export function ProspectDetail({
                       <Button
                         onClick={handleCreateReminder}
                         disabled={savingReminder}
-                        className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                        className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                       >
                         {savingReminder ? "Enregistrement..." : "Programmer le rappel"}
                       </Button>
@@ -1037,7 +1037,7 @@ export function ProspectDetail({
                         disabled={r.completed}
                       >
                         {r.completed ? (
-                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                         ) : (
                           <Clock className="h-4 w-4 text-amber-500" />
                         )}

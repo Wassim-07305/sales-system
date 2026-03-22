@@ -410,7 +410,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 </div>
                 <Button
                   onClick={handleEditSubmit}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                   disabled={saving}
                 >
                   {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -456,7 +456,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                 </div>
                 <Button
                   onClick={handleReschedule}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                   disabled={saving}
                 >
                   {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -648,7 +648,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
           {/* Convert to deal */}
           {currentBooking.status === "completed" && (
-            <Card className="border-brand/20 bg-brand/5">
+            <Card className="border-emerald-500/20 bg-emerald-500/5">
               <CardContent className="p-4 flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-sm">Booking terminé</p>
@@ -660,7 +660,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                   size="sm"
                   onClick={handleConvertToDeal}
                   disabled={convertingToDeal}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
                 >
                   {convertingToDeal ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

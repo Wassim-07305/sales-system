@@ -205,25 +205,25 @@ export function MonetizationView({
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Vue d&apos;ensemble
           </TabsTrigger>
           <TabsTrigger
             value="pricing"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Tarification
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Historique
           </TabsTrigger>
           <TabsTrigger
             value="commissions"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Commissions
           </TabsTrigger>
@@ -248,7 +248,7 @@ export function MonetizationView({
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#14080e",
+                        backgroundColor: "#09090b",
                         border: "1px solid #333",
                         borderRadius: "8px",
                         color: "#fff",
@@ -265,8 +265,8 @@ export function MonetizationView({
                     <Area
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#7af17a"
-                      fill="#7af17a"
+                      stroke="#10b981"
+                      fill="#10b981"
                       fillOpacity={0.15}
                       strokeWidth={2}
                     />
@@ -356,14 +356,14 @@ export function MonetizationView({
                       key={tier.name}
                       className={`rounded-lg border p-4 ${
                         tier.name === "Pro"
-                          ? "border-[#7af17a] bg-[#7af17a]/5"
+                          ? "border-[#10b981] bg-[#10b981]/5"
                           : "border-border"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold">{tier.name}</h4>
                         {tier.name === "Pro" && (
-                          <Badge className="bg-[#7af17a] text-black text-xs">
+                          <Badge className="bg-[#10b981] text-black text-xs">
                             Populaire
                           </Badge>
                         )}
@@ -386,7 +386,7 @@ export function MonetizationView({
                             key={feature}
                             className="flex items-center gap-2 text-sm"
                           >
-                            <Check className="h-3.5 w-3.5 text-[#7af17a] shrink-0" />
+                            <Check className="h-3.5 w-3.5 text-[#10b981] shrink-0" />
                             {feature}
                           </li>
                         ))}
@@ -417,7 +417,7 @@ export function MonetizationView({
                 <Button
                   onClick={handleRequestPayout}
                   disabled={isPending}
-                  className="bg-[#7af17a] text-black hover:bg-[#7af17a]/80"
+                  className="bg-[#10b981] text-black hover:bg-[#10b981]/80"
                 >
                   {isPending ? "En cours..." : "Demander un versement"}
                 </Button>
@@ -589,7 +589,7 @@ export function MonetizationView({
                     <div className="border-t pt-3 mt-3">
                       <div className="flex items-center justify-between">
                         <p className="font-semibold">Total estimé / mois</p>
-                        <p className="text-2xl font-bold text-[#7af17a]">
+                        <p className="text-2xl font-bold text-[#10b981]">
                           {estimatedEarnings.total.toLocaleString("fr-FR")} €
                         </p>
                       </div>

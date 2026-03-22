@@ -10,8 +10,8 @@ interface CertificatePDFProps {
   certificateId: string;
 }
 
-const GREEN = "#7af17a";
-const DARK = "#14080e";
+const GREEN = "#10b981";
+const DARK = "#09090b";
 
 function formatDateFR(dateStr: string): string {
   const date = new Date(dateStr);

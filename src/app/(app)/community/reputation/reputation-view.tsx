@@ -191,8 +191,8 @@ export function ReputationView({
           {/* Breakdown */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border/50">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#7af17a]/10">
-                <FileText size={18} className="text-[#7af17a]" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#10b981]/10">
+                <FileText size={18} className="text-[#10b981]" />
               </div>
               <div>
                 <p className="text-lg font-bold">
@@ -253,7 +253,7 @@ export function ReputationView({
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp size={20} className="text-[#7af17a]" />
+                <TrendingUp size={20} className="text-[#10b981]" />
                 Classement
               </CardTitle>
             </CardHeader>
@@ -351,7 +351,7 @@ export function ReputationView({
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Zap size={18} className="text-[#7af17a]" />
+                <Zap size={18} className="text-[#10b981]" />
                 Activité récente
               </CardTitle>
             </CardHeader>
@@ -375,7 +375,7 @@ export function ReputationView({
                       </div>
                       <Badge
                         variant="outline"
-                        className="shrink-0 text-[#7af17a] border-[#7af17a]/30"
+                        className="shrink-0 text-[#10b981] border-[#10b981]/30"
                       >
                         +{event.points} pts
                       </Badge>
@@ -390,7 +390,7 @@ export function ReputationView({
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Star size={18} className="text-[#7af17a]" />
+                <Star size={18} className="text-[#10b981]" />
                 Rangs
               </CardTitle>
             </CardHeader>

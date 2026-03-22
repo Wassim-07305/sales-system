@@ -120,7 +120,7 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
                 className={cn(
                   "text-center overflow-hidden transition-all hover:shadow-lg",
                   rank === 1 && "ring-2 ring-amber-400/30 -mt-4",
-                  isMe && "bg-brand/5 border-brand/20",
+                  isMe && "bg-emerald-500/5 border-emerald-500/20",
                 )}
               >
                 <CardContent className="p-6 pt-5">
@@ -197,7 +197,7 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
                   key={player.user_id}
                   className={cn(
                     "flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-muted/30",
-                    isMe && "bg-brand/5",
+                    isMe && "bg-emerald-500/5",
                   )}
                 >
                   <span
@@ -231,7 +231,7 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
                     <p className="text-sm font-medium truncate">
                       {player.user?.full_name || "Anonyme"}
                       {isMe && (
-                        <span className="text-brand ml-1.5 text-xs">
+                        <span className="text-emerald-500 ml-1.5 text-xs">
                           (vous)
                         </span>
                       )}

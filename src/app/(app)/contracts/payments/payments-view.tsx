@@ -282,7 +282,7 @@ export function PaymentsView({ installments, overdue }: Props) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <DollarSign className="h-3.5 w-3.5 text-brand" />
+                      <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
                       {installment.amount.toLocaleString("fr-FR")} &euro;
                     </div>
                   </TableCell>
@@ -313,7 +313,7 @@ export function PaymentsView({ installments, overdue }: Props) {
                           size="sm"
                           onClick={() => handlePayOnline(installment.id)}
                           disabled={isPending}
-                          className="bg-brand text-brand-dark hover:bg-brand/90"
+                          className="bg-emerald-500 text-black hover:bg-emerald-400"
                         >
                           {isPending ? (
                             <Loader2 className="h-3 w-3 mr-1 animate-spin" />

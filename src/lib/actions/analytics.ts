@@ -224,7 +224,7 @@ export async function getSourceData() {
   const sourceColors: Record<string, string> = {
     LinkedIn: "#0077b5",
     Instagram: "#e4405f",
-    Referral: "#7af17a",
+    Referral: "#10b981",
     Contenu: "#f59e0b",
     Autre: "#6b7280",
   };

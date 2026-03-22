@@ -69,7 +69,7 @@ interface Props {
 function ScoreCircle({ score }: { score: number }) {
   const color =
     score >= 80
-      ? "text-brand border-brand/20 bg-brand/10"
+      ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/10"
       : score >= 60
         ? "text-muted-foreground border-border bg-muted/60"
         : "text-foreground border-border bg-foreground/10";
@@ -98,7 +98,7 @@ function MetricBar({
 }) {
   const color =
     value >= 80
-      ? "[&>div]:bg-brand"
+      ? "[[&>div]:bg-brand>div]:bg-emerald-500"
       : value >= 60
         ? "[&>div]:bg-muted-foreground"
         : "[&>div]:bg-foreground";
@@ -151,7 +151,7 @@ export function DebriefView({ session }: Props) {
           <Link href="/roleplay">
             <Button
               size="sm"
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Nouvelle session
@@ -167,7 +167,7 @@ export function DebriefView({ session }: Props) {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Trophy className="h-5 w-5 text-brand" />
+                <Trophy className="h-5 w-5 text-emerald-500" />
                 <h3 className="font-semibold">Score global</h3>
               </div>
               <ScoreCircle score={score} />
@@ -214,7 +214,7 @@ export function DebriefView({ session }: Props) {
               <CardContent className="space-y-4">
                 {feedback.strengths.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-brand mb-2 flex items-center gap-1.5">
+                    <h4 className="text-sm font-medium text-emerald-500 mb-2 flex items-center gap-1.5">
                       <CheckCircle2 className="h-4 w-4" />
                       Points forts
                     </h4>
@@ -224,7 +224,7 @@ export function DebriefView({ session }: Props) {
                           key={i}
                           className="flex items-start gap-2 text-sm text-muted-foreground"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-brand mt-0.5 shrink-0" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                           {s}
                         </li>
                       ))}
@@ -261,7 +261,7 @@ export function DebriefView({ session }: Props) {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-brand" />
+                    <TrendingUp className="h-4 w-4 text-emerald-500" />
                     Progression
                   </CardTitle>
                 </CardHeader>
@@ -283,7 +283,7 @@ export function DebriefView({ session }: Props) {
                         diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
                       const trendColor =
                         diff > 0
-                          ? "text-brand"
+                          ? "text-emerald-500"
                           : diff < 0
                             ? "text-foreground"
                             : "text-muted-foreground";
@@ -333,7 +333,7 @@ export function DebriefView({ session }: Props) {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-brand" />
+                  <Lightbulb className="h-4 w-4 text-emerald-500" />
                   Exercices recommandes
                 </CardTitle>
               </CardHeader>
@@ -406,7 +406,7 @@ export function DebriefView({ session }: Props) {
                           className={cn(
                             "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
                             isUser
-                              ? "bg-brand/10 text-brand"
+                              ? "bg-emerald-500/10 text-emerald-500"
                               : "bg-muted text-muted-foreground",
                           )}
                         >
@@ -423,7 +423,7 @@ export function DebriefView({ session }: Props) {
                             className={cn(
                               "inline-block rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                               isUser
-                                ? "bg-brand-dark text-white rounded-br-md"
+                                ? "bg-emerald-500 text-white rounded-br-md"
                                 : "bg-muted rounded-bl-md",
                             )}
                           >

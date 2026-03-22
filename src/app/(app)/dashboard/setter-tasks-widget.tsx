@@ -96,8 +96,8 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <ListTodo className="h-3.5 w-3.5 text-brand" />
+            <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <ListTodo className="h-3.5 w-3.5 text-emerald-500" />
             </div>
             Mes taches
           </CardTitle>
@@ -116,7 +116,7 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="h-9 text-sm bg-muted/30 border-border focus-visible:ring-brand/40"
+            className="h-9 text-sm bg-muted/30 border-border focus-visible:ring-emerald-500/40"
             disabled={isPending}
           />
           <Button
@@ -124,7 +124,7 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
             variant="ghost"
             onClick={handleAdd}
             disabled={!newTitle.trim() || isPending}
-            className="h-9 w-9 p-0 shrink-0 text-brand hover:bg-brand/10"
+            className="h-9 w-9 p-0 shrink-0 text-emerald-500 hover:bg-emerald-500/10"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -159,7 +159,7 @@ export function SetterTasksWidget({ initialTasks }: { initialTasks: Task[] }) {
                   className={cn(
                     "shrink-0 border-border",
                     task.completed &&
-                      "border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground",
+                      "border-emerald-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-black",
                   )}
                 />
                 <span

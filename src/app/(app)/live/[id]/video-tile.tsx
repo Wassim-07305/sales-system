@@ -81,7 +81,7 @@ export function VideoTile({
       )}
 
       {isScreenShare && (
-        <div className="absolute top-3 left-3 bg-[#7af17a]/80 backdrop-blur-sm rounded-lg px-2 py-0.5">
+        <div className="absolute top-3 left-3 bg-[#10b981]/80 backdrop-blur-sm rounded-lg px-2 py-0.5">
           <span className="text-[10px] text-zinc-900 font-medium">
             Partage d&apos;ecran
           </span>

@@ -178,7 +178,7 @@ export function EsopForm({ esop }: EsopFormProps) {
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5"
               >
                 <Send className="h-3.5 w-3.5" />
                 Soumettre
@@ -210,7 +210,7 @@ export function EsopForm({ esop }: EsopFormProps) {
         <Card className="rounded-xl border-border/50">
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <FileText className="h-4 w-4 text-brand" />
+              <FileText className="h-4 w-4 text-emerald-500" />
               Votre offre
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -293,7 +293,7 @@ export function EsopForm({ esop }: EsopFormProps) {
         <Card className="rounded-xl border-border/50">
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <Target className="h-4 w-4 text-brand" />
+              <Target className="h-4 w-4 text-emerald-500" />
               Votre cible
             </h3>
             <div className="space-y-1.5">
@@ -376,7 +376,7 @@ export function EsopForm({ esop }: EsopFormProps) {
         <Card className="rounded-xl border-border/50">
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-brand" />
+              <MessageSquare className="h-4 w-4 text-emerald-500" />
               Votre contexte
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -440,7 +440,7 @@ export function EsopForm({ esop }: EsopFormProps) {
         <Card className="rounded-xl border-border/50">
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <Camera className="h-4 w-4 text-brand" />
+              <Camera className="h-4 w-4 text-emerald-500" />
               Exemples de conversations
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -471,7 +471,7 @@ export function EsopForm({ esop }: EsopFormProps) {
         <Card className="rounded-xl border-border/50">
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-brand" />
+              <BarChart3 className="h-4 w-4 text-emerald-500" />
               Objectifs setting
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

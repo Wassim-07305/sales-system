@@ -109,10 +109,10 @@ interface SegmentStats {
 const statusColors: Record<string, string> = {
   new: "bg-muted/50 text-muted-foreground border-border/50",
   contacted: "bg-foreground/10 text-foreground border-foreground/20",
-  replied: "bg-brand/10 text-brand border-brand/20",
-  booked: "bg-brand/15 text-brand border-brand/25",
+  replied: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  booked: "bg-emerald-500/15 text-emerald-500 border-emerald-500/25",
   qualified: "bg-foreground/10 text-foreground border-foreground/20",
-  converted: "bg-brand/10 text-brand border-brand/20",
+  converted: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   lost: "bg-muted/40 text-muted-foreground/60 border-border/30",
   not_interested: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
@@ -191,7 +191,7 @@ export function ProspectingView({
   const [isRecalculating, startRecalcTransition] = useTransition();
 
   function getScoreBadgeStyle(score: number) {
-    if (score >= 75) return "bg-brand/10 text-brand border-brand/20";
+    if (score >= 75) return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     if (score >= 45)
       return "bg-foreground/10 text-foreground border-foreground/20";
     return "bg-muted/40 text-muted-foreground/60 border-border/30";
@@ -533,7 +533,7 @@ export function ProspectingView({
         </Link>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90">
+            <Button className="rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400">
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un prospect
             </Button>
@@ -577,7 +577,7 @@ export function ProspectingView({
               </div>
               <Button
                 onClick={handleAdd}
-                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 Ajouter
               </Button>
@@ -590,10 +590,10 @@ export function ProspectingView({
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <Card
           className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
             filterTemperature === "all" &&
               !hasActiveSegmentFilters &&
-              "ring-2 ring-brand/50",
+              "ring-2 ring-emerald-500/50",
           )}
           onClick={() => {
             setFilterTemperature("all");
@@ -601,8 +601,8 @@ export function ProspectingView({
           }}
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Users className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold leading-none">
@@ -616,16 +616,16 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "hot" && "ring-2 ring-brand/50",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
+            filterTemperature === "hot" && "ring-2 ring-emerald-500/50",
           )}
           onClick={() =>
             setFilterTemperature(filterTemperature === "hot" ? "all" : "hot")
           }
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Flame className="h-5 w-5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Flame className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold leading-none">
@@ -637,16 +637,16 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "warm" && "ring-2 ring-brand/50",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
+            filterTemperature === "warm" && "ring-2 ring-emerald-500/50",
           )}
           onClick={() =>
             setFilterTemperature(filterTemperature === "warm" ? "all" : "warm")
           }
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Thermometer className="h-5 w-5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Thermometer className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold leading-none">
@@ -658,16 +658,16 @@ export function ProspectingView({
         </Card>
         <Card
           className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-brand/30 hover:shadow-md",
-            filterTemperature === "cold" && "ring-2 ring-brand/50",
+            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
+            filterTemperature === "cold" && "ring-2 ring-emerald-500/50",
           )}
           onClick={() =>
             setFilterTemperature(filterTemperature === "cold" ? "all" : "cold")
           }
         >
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <Snowflake className="h-5 w-5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Snowflake className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold leading-none">
@@ -679,8 +679,8 @@ export function ProspectingView({
         </Card>
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-              <TrendingUp className="h-5 w-5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <TrendingUp className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <p className="text-2xl font-bold leading-none">
@@ -697,8 +697,8 @@ export function ProspectingView({
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
-                <Send className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Send className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <h3 className="font-semibold">Quota journalier</h3>
@@ -732,21 +732,21 @@ export function ProspectingView({
       <div className="grid grid-cols-3 gap-4">
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
-            <Send className="h-5 w-5 text-brand mx-auto mb-2" />
+            <Send className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
             <p className="text-2xl font-bold">{dmsSent}</p>
             <p className="text-xs text-muted-foreground">DMs envoyés</p>
           </CardContent>
         </Card>
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
-            <MessageCircle className="h-5 w-5 text-brand mx-auto mb-2" />
+            <MessageCircle className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
             <p className="text-2xl font-bold">{replies}</p>
             <p className="text-xs text-muted-foreground">Réponses reçues</p>
           </CardContent>
         </Card>
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="p-4 text-center">
-            <Target className="h-5 w-5 text-brand mx-auto mb-2" />
+            <Target className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
             <p className="text-2xl font-bold">{bookings}</p>
             <p className="text-xs text-muted-foreground">RDV bookés</p>
           </CardContent>
@@ -803,7 +803,7 @@ export function ProspectingView({
             <SlidersHorizontal className="h-4 w-4" />
             Segmentation avancée
             {activeFilterCount > 0 && (
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-brand-dark text-xs font-bold">
+              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-black text-xs font-bold">
                 {activeFilterCount}
               </span>
             )}
@@ -1020,7 +1020,7 @@ export function ProspectingView({
                       <td className="p-4 font-medium">
                         <Link
                           href={`/prospecting/${prospect.id}`}
-                          className="hover:text-brand hover:underline"
+                          className="hover:text-emerald-500 hover:underline"
                         >
                           {prospect.name}
                         </Link>
@@ -1048,7 +1048,7 @@ export function ProspectingView({
                                 className={cn(
                                   "h-full rounded-full transition-all",
                                   prospect.computed_score.total_score >= 75
-                                    ? "bg-brand"
+                                    ? "bg-emerald-500"
                                     : prospect.computed_score.total_score >= 45
                                       ? "bg-muted-foreground"
                                       : "bg-muted-foreground/40",
@@ -1152,7 +1152,7 @@ export function ProspectingView({
                         {prospect.relance_status === "responded" && (
                           <Badge
                             variant="outline"
-                            className="bg-brand/10 text-brand border-brand/20 gap-1"
+                            className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1"
                           >
                             <MessageCircle className="h-3 w-3" />
                             Répondu
@@ -1204,7 +1204,7 @@ export function ProspectingView({
                                 )
                               }
                               title="Envoyer un message IA"
-                              className="text-brand hover:text-brand/80"
+                              className="text-emerald-500 hover:text-emerald-400/80"
                             >
                               <Bot className="h-4 w-4" />
                             </Button>

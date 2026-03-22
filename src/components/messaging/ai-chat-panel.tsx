@@ -268,8 +268,8 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
             <ArrowLeft className="h-4 w-4" />
           </button>
         )}
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 shrink-0">
-          <Bot className="h-5 w-5 text-brand" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 shrink-0">
+          <Bot className="h-5 w-5 text-emerald-500" />
         </div>
         <div className="min-w-0">
           <h3 className="text-sm font-semibold truncate">Assistant IA</h3>
@@ -278,8 +278,8 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <span className="flex items-center gap-1.5 text-[11px] text-brand">
-            <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
+          <span className="flex items-center gap-1.5 text-[11px] text-emerald-500">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             En ligne
           </span>
           {messages.length > 0 && (
@@ -307,8 +307,8 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
         {/* Empty state with suggestions */}
         {!historyLoading && messages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
-            <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mb-4">
-              <Bot className="h-8 w-8 text-brand" />
+            <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-4">
+              <Bot className="h-8 w-8 text-emerald-500" />
             </div>
             <h3 className="text-sm font-semibold mb-1">Assistant IA</h3>
             <p className="text-xs text-muted-foreground max-w-xs mb-6">
@@ -325,7 +325,7 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
                   onClick={() => handleSend(q)}
                   className="w-full text-left rounded-xl border px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-primary/30 transition-all flex items-center gap-3"
                 >
-                  <Sparkles className="h-4 w-4 text-brand shrink-0" />
+                  <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
                   <span className="truncate">{q}</span>
                 </button>
               ))}
@@ -344,8 +344,8 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
             >
               <div className="flex items-end gap-2 max-w-[80%]">
                 {msg.role === "assistant" && (
-                  <div className="h-7 w-7 rounded-full bg-brand/10 flex items-center justify-center shrink-0 mb-0.5">
-                    <Bot className="h-3.5 w-3.5 text-brand" />
+                  <div className="h-7 w-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mb-0.5">
+                    <Bot className="h-3.5 w-3.5 text-emerald-500" />
                   </div>
                 )}
                 <div
@@ -371,7 +371,7 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
                   className={cn(
                     "rounded-lg p-1 transition-colors",
                     msg.feedback === "positive"
-                      ? "text-brand bg-brand/10"
+                      ? "text-emerald-500 bg-emerald-500/10"
                       : "text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted",
                   )}
                   title="Utile"
@@ -412,8 +412,8 @@ export function AiChatPanel({ onBack }: AiChatPanelProps) {
         {loading && (
           <div className="flex justify-start">
             <div className="flex items-end gap-2">
-              <div className="h-7 w-7 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
-                <Bot className="h-3.5 w-3.5 text-brand" />
+              <div className="h-7 w-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Bot className="h-3.5 w-3.5 text-emerald-500" />
               </div>
               <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" />

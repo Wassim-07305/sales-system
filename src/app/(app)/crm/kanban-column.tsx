@@ -50,7 +50,7 @@ export const KanbanColumn = memo(function KanbanColumn({
         "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-2xl transition-all duration-200 snap-center",
         "bg-muted/20 border border-border/50 shadow-sm",
         isOver &&
-          "bg-brand/5 border-brand/30 ring-2 ring-brand/20 scale-[1.01] shadow-md",
+          "bg-emerald-500/5 border-emerald-500/30 ring-2 ring-emerald-500/20 scale-[1.01] shadow-md",
       )}
     >
       {/* Column header */}

@@ -61,8 +61,8 @@ export function RetentionView({ data }: Props) {
         <Card className="shadow-sm rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center">
-                <Users className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Users className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.activeClients}</p>
@@ -137,7 +137,7 @@ export function RetentionView({ data }: Props) {
                   {
                     name: "Actifs",
                     value: data.activeClients,
-                    fill: "#7af17a",
+                    fill: "#10b981",
                   },
                   {
                     name: "Inactifs",
@@ -190,9 +190,9 @@ export function RetentionView({ data }: Props) {
                   <Line
                     type="monotone"
                     dataKey="rate"
-                    stroke="#7af17a"
+                    stroke="#10b981"
                     strokeWidth={2}
-                    dot={{ fill: "#7af17a", r: 4 }}
+                    dot={{ fill: "#10b981", r: 4 }}
                   />
                 </LineChart>
               </ResponsiveContainer>

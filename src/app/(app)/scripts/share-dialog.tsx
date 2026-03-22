@@ -113,8 +113,8 @@ export function ShareDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
-              <Share2 className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-lg ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
+              <Share2 className="h-4 w-4 text-emerald-500" />
             </div>
             Partager le script
           </DialogTitle>
@@ -196,7 +196,7 @@ export function ShareDialog({
                       variant="outline"
                       className={
                         share.permission === "edit"
-                          ? "bg-brand/10 text-brand border-brand/20"
+                          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                           : "bg-muted/60 text-muted-foreground border-border/50"
                       }
                     >

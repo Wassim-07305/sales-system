@@ -100,8 +100,8 @@ export function EsopValidationList({ esops }: { esops: EsopSubmission[] }) {
           {/* Header */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
-                <FileText className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <FileText className="h-5 w-5 text-emerald-500" />
               </div>
               <div className="min-w-0">
                 <p className="font-medium text-sm truncate">

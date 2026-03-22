@@ -216,7 +216,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
           </Link>
           <Button
             onClick={openCreate}
-            className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+            className="rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle séquence
@@ -468,7 +468,7 @@ export function SequencesView({ sequences }: { sequences: Sequence[] }) {
 
             <Button
               onClick={handleSave}
-              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
               disabled={isPending}
             >
               {editingSequence ? "Mettre à jour" : "Créer la séquence"}

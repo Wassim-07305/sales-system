@@ -274,19 +274,19 @@ export function WaSettingsView({
       <div className="grid gap-6 max-w-2xl">
         {/* Unipile Connection — Recommended */}
         <Card
-          className={`shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-brand/30" : ""}`}
+          className={`shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all ${unipileConnected ? "ring-1 ring-emerald-500/30" : ""}`}
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl ring-1 ring-brand/20 bg-brand/10 flex items-center justify-center">
-                <Unplug className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl ring-1 ring-emerald-500/20 bg-emerald-500/10 flex items-center justify-center">
+                <Unplug className="h-4 w-4 text-emerald-500" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   Connexion via Unipile
                   <Badge
                     variant="outline"
-                    className="text-[10px] bg-brand/10 text-brand border-brand/20"
+                    className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                   >
                     Recommandé
                   </Badge>
@@ -300,11 +300,11 @@ export function WaSettingsView({
           </CardHeader>
           <CardContent className="space-y-4">
             {unipileConnected ? (
-              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-brand/5 border border-brand/20">
+              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-brand" />
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                   <div>
-                    <p className="text-sm font-medium text-brand">
+                    <p className="text-sm font-medium text-emerald-500">
                       WhatsApp connecté
                     </p>
                     {unipileName && (
@@ -328,7 +328,7 @@ export function WaSettingsView({
                 <Button
                   onClick={handleConnectUnipile}
                   disabled={connectingUnipile}
-                  className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   {connectingUnipile ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -436,7 +436,7 @@ export function WaSettingsView({
               <Button
                 onClick={handleConnect}
                 disabled={isPending}
-                className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 <Wifi className="h-4 w-4 mr-2" />
                 Connecter

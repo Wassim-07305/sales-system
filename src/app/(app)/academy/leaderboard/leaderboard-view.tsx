@@ -55,8 +55,8 @@ export function LeaderboardView({ leaderboard }: LeaderboardViewProps) {
           Retour a l&apos;Academy
         </Link>
         <div className="flex items-center gap-3">
-          <div className="rounded-full bg-brand/10 p-2.5">
-            <Trophy className="h-6 w-6 text-brand" />
+          <div className="rounded-full bg-emerald-500/10 p-2.5">
+            <Trophy className="h-6 w-6 text-emerald-500" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Classement Academy</h1>
@@ -146,7 +146,7 @@ export function LeaderboardView({ leaderboard }: LeaderboardViewProps) {
                       }
                       className={cn(
                         "text-base font-bold px-3 py-1",
-                        entry.successRate >= 80 && "bg-brand text-brand-dark",
+                        entry.successRate >= 80 && "bg-emerald-500 text-black",
                       )}
                     >
                       {entry.successRate}%

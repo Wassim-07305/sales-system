@@ -200,8 +200,8 @@ export function PrivacyView({
       <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <Shield className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <Shield className="h-4 w-4 text-emerald-500" />
             </div>
             Gestion des consentements
           </CardTitle>

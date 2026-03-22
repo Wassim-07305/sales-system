@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<
     icon: "loading",
     color: "text-yellow-500",
   },
-  connected: { label: "Connecte", icon: "ok", color: "text-[#7af17a]" },
+  connected: { label: "Connecte", icon: "ok", color: "text-[#10b981]" },
   reconnecting: {
     label: "Reconnexion...",
     icon: "loading",
@@ -51,8 +51,8 @@ const QUALITY_CONFIG: Record<
     Icon: React.ComponentType<{ className?: string }>;
   }
 > = {
-  excellent: { label: "Excellent", color: "text-[#7af17a]", Icon: SignalHigh },
-  good: { label: "Bon", color: "text-[#7af17a]", Icon: SignalHigh },
+  excellent: { label: "Excellent", color: "text-[#10b981]", Icon: SignalHigh },
+  good: { label: "Bon", color: "text-[#10b981]", Icon: SignalHigh },
   fair: { label: "Moyen", color: "text-yellow-400", Icon: SignalMedium },
   poor: { label: "Faible", color: "text-red-400", Icon: SignalLow },
   unknown: { label: "", color: "text-zinc-500", Icon: Signal },

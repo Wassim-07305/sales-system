@@ -318,7 +318,7 @@ function ReportedMessageCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="text-brand hover:text-brand hover:bg-brand/10"
+                className="text-emerald-500 hover:text-emerald-500 hover:bg-emerald-500/10"
                 onClick={() => onAction(message.id, "resolve", "approved")}
                 disabled={isPending}
               >
@@ -452,7 +452,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
   const roleBadge = (role: string) => {
     const colors: Record<string, string> = {
       admin: "bg-foreground/10 text-foreground",
-      manager: "bg-brand/10 text-brand",
+      manager: "bg-emerald-500/10 text-emerald-500",
       setter: "bg-muted/60 text-muted-foreground",
       closer: "bg-muted/60 text-muted-foreground",
       client_b2b: "bg-muted/40 text-muted-foreground/80",
@@ -567,7 +567,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-brand hover:bg-brand/10"
+                        className="text-emerald-500 hover:bg-emerald-500/10"
                         onClick={() => handleUnmute(u.id)}
                         disabled={isPending}
                       >
@@ -579,7 +579,7 @@ function UsersTab({ users }: { users: ModeratedUser[] }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-brand hover:bg-brand/10"
+                        className="text-emerald-500 hover:bg-emerald-500/10"
                         onClick={() => handleUnban(u.id)}
                         disabled={isPending}
                       >
@@ -679,7 +679,7 @@ function SettingsTab({ settings }: { settings: ModerationSettings }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="size-4 text-[#7af17a]" />
+            <Shield className="size-4 text-[#10b981]" />
             Filtre de mots
           </CardTitle>
         </CardHeader>
@@ -717,7 +717,7 @@ function SettingsTab({ settings }: { settings: ModerationSettings }) {
               max={30}
               value={floodLimit}
               onChange={(e) => setFloodLimit(parseInt(e.target.value))}
-              className="w-full accent-[#7af17a]"
+              className="w-full accent-[#10b981]"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>1</span>
@@ -773,7 +773,7 @@ function SettingsTab({ settings }: { settings: ModerationSettings }) {
       <Button
         onClick={handleSave}
         disabled={isPending}
-        className="bg-[#7af17a] text-[#14080e] hover:bg-[#6ae06a]"
+        className="bg-[#10b981] text-[#09090b] hover:bg-[#6ae06a]"
       >
         {isPending ? "Sauvegarde..." : "Sauvegarder les paramètres"}
       </Button>

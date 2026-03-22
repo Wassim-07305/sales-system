@@ -37,9 +37,9 @@ interface PresentationCardProps {
 }
 
 const themeColors: Record<string, string> = {
-  dark: "bg-[#14080e]",
+  dark: "bg-[#09090b]",
   light: "bg-gray-100",
-  brand: "bg-gradient-to-br from-[#14080e] to-[#1a0f14]",
+  brand: "bg-gradient-to-br from-[#09090b] to-[#1a0f14]",
 };
 
 export function PresentationCard({
@@ -75,13 +75,13 @@ export function PresentationCard({
   }
 
   return (
-    <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 group">
+    <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 group">
       {/* Miniature */}
       <div
         className={`relative h-36 rounded-t-2xl ${themeColors[presentation.theme] || themeColors.dark} flex items-center justify-center overflow-hidden`}
       >
         <div className="text-center px-4">
-          <Presentation className="h-8 w-8 mx-auto mb-2 text-brand/40" />
+          <Presentation className="h-8 w-8 mx-auto mb-2 text-emerald-500/40" />
           <p className="text-xs text-white/50 font-medium truncate max-w-[200px]">
             {presentation.title}
           </p>
@@ -97,7 +97,7 @@ export function PresentationCard({
           <Link href={`/genspark/${presentation.id}/present`}>
             <Button
               size="sm"
-              className="h-8 text-xs bg-brand text-brand-dark hover:bg-brand/90"
+              className="h-8 text-xs bg-emerald-500 text-black hover:bg-emerald-400"
             >
               <Play className="h-3.5 w-3.5 mr-1" />
               Présenter

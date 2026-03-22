@@ -190,7 +190,7 @@ export function UpsellView({ rules, executions }: Props) {
           }}
         >
           <DialogTrigger asChild>
-            <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+            <Button className="bg-emerald-500 text-black hover:bg-emerald-400">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle règle
             </Button>
@@ -254,7 +254,7 @@ export function UpsellView({ rules, executions }: Props) {
               </div>
 
               <Button
-                className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 onClick={handleSave}
                 disabled={isPending}
               >

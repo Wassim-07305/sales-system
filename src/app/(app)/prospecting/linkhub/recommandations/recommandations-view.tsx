@@ -51,7 +51,7 @@ export function RecommandationsView({ initialRecommendations }: Props) {
         <Button
           onClick={handleRefresh}
           disabled={isPending}
-          className="rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+          className="rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -74,7 +74,7 @@ export function RecommandationsView({ initialRecommendations }: Props) {
             <Button
               onClick={handleRefresh}
               disabled={isPending}
-              className="rounded-xl bg-brand text-brand-dark hover:bg-brand/90"
+              className="rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -98,8 +98,8 @@ export function RecommandationsView({ initialRecommendations }: Props) {
                       className="h-12 w-12 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="h-12 w-12 rounded-full bg-brand/10 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-brand" />
+                    <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-emerald-500" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ export function RecommandationsView({ initialRecommendations }: Props) {
                         href={rec.profile_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-brand hover:underline mt-2"
+                        className="inline-flex items-center gap-1 text-xs text-emerald-500 hover:underline mt-2"
                       >
                         <ExternalLink className="h-3 w-3" />
                         Voir le profil

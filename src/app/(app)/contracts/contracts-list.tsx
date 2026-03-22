@@ -168,7 +168,7 @@ export function ContractsList({ contracts }: { contracts: ContractPdfData[] }) {
                   <TableCell>{contract.client?.full_name || "—"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <DollarSign className="h-3.5 w-3.5 text-brand" />
+                      <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
                       {contract.amount?.toLocaleString("fr-FR") || "0"} €
                     </div>
                   </TableCell>

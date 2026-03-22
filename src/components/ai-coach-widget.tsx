@@ -92,7 +92,7 @@ export function AiCoachWidget() {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 h-12 w-12 rounded-full bg-brand text-brand-dark flex items-center justify-center shadow-lg hover:bg-brand/90 transition-all",
+          "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 h-12 w-12 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-lg hover:bg-emerald-400 transition-all",
           open && "rotate-90 scale-90",
         )}
         aria-label="Assistant IA"
@@ -106,8 +106,8 @@ export function AiCoachWidget() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-full bg-brand/10 flex items-center justify-center">
-                <Bot className="h-4 w-4 text-brand" />
+              <div className="h-7 w-7 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <Bot className="h-4 w-4 text-emerald-500" />
               </div>
               <div>
                 <p className="text-sm font-semibold">Assistant IA</p>
@@ -147,7 +147,7 @@ export function AiCoachWidget() {
                   className={cn(
                     "max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap",
                     msg.role === "user"
-                      ? "bg-brand text-brand-dark rounded-br-md"
+                      ? "bg-emerald-500 text-black rounded-br-md"
                       : "bg-muted rounded-bl-md",
                   )}
                 >
@@ -183,7 +183,7 @@ export function AiCoachWidget() {
               size="sm"
               onClick={handleSend}
               disabled={loading || !input.trim()}
-              className="bg-brand text-brand-dark hover:bg-brand/90 h-9 w-9 p-0"
+              className="bg-emerald-500 text-black hover:bg-emerald-400 h-9 w-9 p-0"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

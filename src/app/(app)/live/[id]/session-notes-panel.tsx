@@ -177,7 +177,7 @@ export function SessionNotesPanel({
                   onClick={() => toggleActionItem(i)}
                   className={`w-5 h-5 rounded flex-shrink-0 flex items-center justify-center border transition-colors ${
                     item.done
-                      ? "bg-[#7af17a]/20 border-[#7af17a]/50 text-[#7af17a]"
+                      ? "bg-[#10b981]/20 border-[#10b981]/50 text-[#10b981]"
                       : "border-muted-foreground/60 hover:border-muted-foreground"
                   }`}
                 >
@@ -214,7 +214,7 @@ export function SessionNotesPanel({
                 }
               }}
               placeholder="Nouvelle action..."
-              className="flex-1 h-8 rounded-lg bg-muted border border-border px-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-[#7af17a]/50"
+              className="flex-1 h-8 rounded-lg bg-muted border border-border px-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-[#10b981]/50"
             />
             <button
               onClick={addActionItem}

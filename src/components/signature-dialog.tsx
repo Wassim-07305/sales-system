@@ -113,7 +113,7 @@ export function SignatureDialog({
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileSignature className="h-5 w-5 text-[#7af17a]" />
+            <FileSignature className="h-5 w-5 text-[#10b981]" />
             Signature electronique
           </DialogTitle>
           <DialogDescription>
@@ -250,7 +250,7 @@ export function SignatureDialog({
             Annuler
           </Button>
           <Button
-            className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 font-semibold"
+            className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 font-semibold"
             onClick={handleSubmit}
             disabled={!canSubmit || loading}
           >

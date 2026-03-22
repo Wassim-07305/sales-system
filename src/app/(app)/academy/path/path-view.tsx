@@ -69,7 +69,7 @@ const levelColors: Record<string, string> = {
   Débutant: "text-red-400 bg-red-400/10 border-red-400/20",
   Intermédiaire: "text-amber-400 bg-amber-400/10 border-amber-400/20",
   Avancé: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  Expert: "text-[#7af17a] bg-[#7af17a]/10 border-[#7af17a]/20",
+  Expert: "text-[#10b981] bg-[#10b981]/10 border-[#10b981]/20",
 };
 
 const priorityConfig: Record<
@@ -124,8 +124,8 @@ export function PathView({
 
         <Card className="border-border/50">
           <CardContent className="pt-12 pb-12 flex flex-col items-center text-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#7af17a]/10 flex items-center justify-center">
-              <Compass className="h-8 w-8 text-[#7af17a]" />
+            <div className="w-16 h-16 rounded-full bg-[#10b981]/10 flex items-center justify-center">
+              <Compass className="h-8 w-8 text-[#10b981]" />
             </div>
             <div className="space-y-2">
               <h2 className="text-lg font-semibold">
@@ -139,7 +139,7 @@ export function PathView({
             </div>
             <Button
               asChild
-              className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 mt-2"
+              className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 mt-2"
             >
               <Link href="/academy/diagnostic">
                 <Brain className="h-4 w-4 mr-2" />
@@ -175,11 +175,11 @@ export function PathView({
       </PageHeader>
 
       {/* Summary card */}
-      <Card className="border-[#7af17a]/20 bg-gradient-to-br from-[#7af17a]/5 to-transparent">
+      <Card className="border-[#10b981]/20 bg-gradient-to-br from-[#10b981]/5 to-transparent">
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-20 h-20 rounded-full border-4 border-[#7af17a]/30 flex items-center justify-center">
-              <span className="text-2xl font-bold text-[#7af17a]">
+            <div className="w-20 h-20 rounded-full border-4 border-[#10b981]/30 flex items-center justify-center">
+              <span className="text-2xl font-bold text-[#10b981]">
                 {overallScore}%
               </span>
             </div>
@@ -244,7 +244,7 @@ export function PathView({
       {courses.length > 0 ? (
         <div className="space-y-4">
           <h3 className="text-base font-semibold flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#7af17a]" />
+            <Sparkles className="h-4 w-4 text-[#10b981]" />
             Votre parcours recommandé
             <Badge variant="outline" className="text-xs ml-2">
               {courses.length} cours
@@ -272,14 +272,14 @@ export function PathView({
                         className={cn(
                           "w-12 h-12 rounded-full flex items-center justify-center border-2 flex-shrink-0 z-10 bg-background",
                           isCompleted
-                            ? "border-[#7af17a] bg-[#7af17a]/10"
+                            ? "border-[#10b981] bg-[#10b981]/10"
                             : isStarted
                               ? "border-amber-400 bg-amber-400/10"
                               : "border-border/50",
                         )}
                       >
                         {isCompleted ? (
-                          <CheckCircle2 className="h-5 w-5 text-[#7af17a]" />
+                          <CheckCircle2 className="h-5 w-5 text-[#10b981]" />
                         ) : (
                           <span className="text-sm font-bold text-muted-foreground">
                             {idx + 1}
@@ -291,7 +291,7 @@ export function PathView({
                     {/* Course card */}
                     <Card
                       className={cn(
-                        "flex-1 border-border/50 hover:border-[#7af17a]/30 transition-colors",
+                        "flex-1 border-border/50 hover:border-[#10b981]/30 transition-colors",
                         isCompleted && "opacity-70",
                       )}
                     >
@@ -303,7 +303,7 @@ export function PathView({
                                 Étape {idx + 1}
                               </span>
                               {isCompleted && (
-                                <CheckCircle2 className="h-3.5 w-3.5 text-[#7af17a]" />
+                                <CheckCircle2 className="h-3.5 w-3.5 text-[#10b981]" />
                               )}
                             </div>
                             <h4 className="font-medium">{course.title}</h4>
@@ -357,7 +357,7 @@ export function PathView({
                           className={cn(
                             "w-full sm:w-auto",
                             !isCompleted &&
-                              "hover:bg-[#7af17a]/10 hover:text-[#7af17a] hover:border-[#7af17a]/30",
+                              "hover:bg-[#10b981]/10 hover:text-[#10b981] hover:border-[#10b981]/30",
                           )}
                           asChild
                         >

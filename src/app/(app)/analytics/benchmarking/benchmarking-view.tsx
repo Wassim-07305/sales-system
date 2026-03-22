@@ -90,7 +90,7 @@ function ChangeIndicator({ value }: { value: number }) {
     return (
       <span
         className="flex items-center gap-1 text-xs font-medium"
-        style={{ color: "#7af17a" }}
+        style={{ color: "#10b981" }}
       >
         <ArrowUpRight className="h-3 w-3" />+{value.toFixed(1)}%
       </span>
@@ -112,7 +112,7 @@ function CompareIndicator({ value, avg }: { value: number; avg: number }) {
   }
   if (diff > 0) {
     return (
-      <span className="text-xs font-medium" style={{ color: "#7af17a" }}>
+      <span className="text-xs font-medium" style={{ color: "#10b981" }}>
         +{diff.toFixed(0)}%
       </span>
     );
@@ -181,7 +181,7 @@ export function BenchmarkingView({
     },
   ];
 
-  const radarColors = ["#7af17a", "#3b82f6", "#f59e0b", "#a855f7", "#ef4444"];
+  const radarColors = ["#10b981", "#3b82f6", "#f59e0b", "#a855f7", "#ef4444"];
 
   // Bar chart data: revenue per member
   const barData = members.map((m) => ({
@@ -258,8 +258,8 @@ export function BenchmarkingView({
             >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                    <Icon className="h-5 w-5 text-brand" />
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                    <Icon className="h-5 w-5 text-emerald-500" />
                   </div>
                   {card.change !== null && (
                     <ChangeIndicator value={card.change} />
@@ -469,7 +469,7 @@ export function BenchmarkingView({
                   />
                   <Bar
                     dataKey="revenue"
-                    fill="#7af17a"
+                    fill="#10b981"
                     radius={[4, 4, 0, 0]}
                     name="CA"
                   />
@@ -490,7 +490,7 @@ export function BenchmarkingView({
 
       {isPending && (
         <div className="fixed inset-0 bg-background/50 flex items-center justify-center z-50">
-          <div className="animate-spin h-8 w-8 border-4 border-brand border-t-transparent rounded-full" />
+          <div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full" />
         </div>
       )}
     </div>

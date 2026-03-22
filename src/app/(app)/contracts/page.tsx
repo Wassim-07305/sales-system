@@ -60,7 +60,7 @@ export default async function ContractsPage() {
               </Button>
             </Link>
             <Link href="/contracts/new">
-              <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+              <Button className="bg-emerald-500 text-black hover:bg-emerald-400">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau contrat
               </Button>

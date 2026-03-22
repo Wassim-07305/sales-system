@@ -52,7 +52,7 @@ export function NavigationProgress() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[9999] h-[3px] pointer-events-none">
       <div
-        className="h-full bg-brand rounded-r-full"
+        className="h-full bg-emerald-500 rounded-r-full"
         style={{
           animation: "nav-progress 2s ease-out forwards",
         }}

@@ -87,7 +87,7 @@ export function FilterPanel({
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filtres avancés
           {activeCount > 0 && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-brand-dark text-[10px] font-bold">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-black text-[10px] font-bold">
               {activeCount}
             </span>
           )}
@@ -258,7 +258,7 @@ export function FilterPanel({
                     className={cn(
                       "cursor-pointer text-[11px] transition-colors",
                       selectedTags.includes(tag)
-                        ? "bg-brand text-brand-dark hover:bg-brand/90"
+                        ? "bg-emerald-500 text-black hover:bg-emerald-400"
                         : "hover:bg-muted",
                     )}
                     onClick={() => onToggleTag?.(tag)}

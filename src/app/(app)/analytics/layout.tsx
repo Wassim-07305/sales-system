@@ -65,7 +65,7 @@ export default function AnalyticsLayout({
               className={cn(
                 "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors",
                 active
-                  ? "bg-brand/10 text-brand"
+                  ? "bg-emerald-500/10 text-emerald-500"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >

@@ -29,11 +29,11 @@ export function ArticleView({ article, relatedArticles }: ArticleViewProps) {
       await submitFeedback(article.id, helpful);
       setFeedbackGiven(helpful);
       toast.success("Merci pour votre retour !", {
-        style: { background: "#14080e", border: "1px solid #333" },
+        style: { background: "#09090b", border: "1px solid #333" },
       });
     } catch {
       toast.error("Une erreur est survenue", {
-        style: { background: "#14080e", border: "1px solid #333" },
+        style: { background: "#09090b", border: "1px solid #333" },
       });
     }
   }
@@ -75,7 +75,7 @@ export function ArticleView({ article, relatedArticles }: ArticleViewProps) {
               prose-headings:font-semibold prose-headings:tracking-tight
               prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3
               prose-p:text-muted-foreground prose-p:leading-relaxed
-              prose-a:text-[#7af17a] prose-a:no-underline hover:prose-a:underline
+              prose-a:text-[#10b981] prose-a:no-underline hover:prose-a:underline
               prose-strong:text-foreground"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
@@ -83,7 +83,7 @@ export function ArticleView({ article, relatedArticles }: ArticleViewProps) {
       </Card>
 
       {/* Feedback */}
-      <Card className="border-[#7af17a]/20">
+      <Card className="border-[#10b981]/20">
         <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-5">
           <p className="font-medium text-sm">
             Cet article vous a-t-il été utile ?
@@ -121,15 +121,15 @@ export function ArticleView({ article, relatedArticles }: ArticleViewProps) {
       {relatedArticles.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <BookOpen className="size-5 text-[#7af17a]" />
+            <BookOpen className="size-5 text-[#10b981]" />
             Articles connexes
           </h2>
           <div className="grid gap-3">
             {relatedArticles.map((related) => (
               <Link key={related.id} href={`/help/${related.id}`}>
-                <Card className="hover:border-[#7af17a]/50 transition-colors cursor-pointer">
+                <Card className="hover:border-[#10b981]/50 transition-colors cursor-pointer">
                   <CardContent className="flex items-center gap-3 py-4">
-                    <BookOpen className="size-4 text-[#7af17a] shrink-0" />
+                    <BookOpen className="size-4 text-[#10b981] shrink-0" />
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-medium truncate">
                         {related.title}

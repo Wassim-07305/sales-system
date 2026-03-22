@@ -66,7 +66,7 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-brand/10 text-brand border-brand/20",
+  Facile: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   Moyen: "bg-muted/60 text-muted-foreground border-border",
   Difficile: "bg-foreground/10 text-foreground border-border",
 };
@@ -175,8 +175,8 @@ export function SessionView({ session }: Props) {
       <Card className="mb-4 shrink-0">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <Bot className="h-5 w-5 text-brand" />
+            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <Bot className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
               <h2 className="font-semibold">
@@ -249,7 +249,7 @@ export function SessionView({ session }: Props) {
                     size="sm"
                     onClick={handleFeedback}
                     disabled={isFeedbackLoading || isEnding}
-                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     {isFeedbackLoading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -294,7 +294,7 @@ export function SessionView({ session }: Props) {
                     className={cn(
                       "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
                       isUser
-                        ? "bg-brand/10 text-brand"
+                        ? "bg-emerald-500/10 text-emerald-500"
                         : "bg-muted text-muted-foreground",
                     )}
                   >
@@ -309,7 +309,7 @@ export function SessionView({ session }: Props) {
                       className={cn(
                         "inline-block rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                         isUser
-                          ? "bg-brand-dark text-white rounded-br-md"
+                          ? "bg-emerald-500 text-white rounded-br-md"
                           : "bg-muted rounded-bl-md",
                       )}
                     >
@@ -362,7 +362,7 @@ export function SessionView({ session }: Props) {
               <Button
                 onClick={handleSend}
                 disabled={!input.trim() || isSending}
-                className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 shrink-0"
                 size="icon"
               >
                 {isSending ? (
@@ -386,7 +386,7 @@ export function SessionView({ session }: Props) {
                 className={cn(
                   "h-16 w-16 rounded-full border-3 flex flex-col items-center justify-center shrink-0",
                   feedback.score >= 80
-                    ? "text-brand border-brand/20 bg-brand/10"
+                    ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/10"
                     : feedback.score >= 60
                       ? "text-muted-foreground border-border bg-muted/60"
                       : "text-foreground border-border bg-foreground/10",
@@ -397,7 +397,7 @@ export function SessionView({ session }: Props) {
               </div>
               <div>
                 <h3 className="font-semibold flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-brand" />
+                  <Trophy className="h-5 w-5 text-emerald-500" />
                   Feedback de la session
                 </h3>
                 <p className="text-sm text-muted-foreground mt-0.5">
@@ -413,7 +413,7 @@ export function SessionView({ session }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Strengths */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-brand flex items-center gap-1.5">
+                <h4 className="text-sm font-medium text-emerald-500 flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4" />
                   Points forts
                 </h4>
@@ -423,7 +423,7 @@ export function SessionView({ session }: Props) {
                       key={i}
                       className="flex items-start gap-2 text-sm text-muted-foreground"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5 text-brand mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                       {s}
                     </li>
                   ))}

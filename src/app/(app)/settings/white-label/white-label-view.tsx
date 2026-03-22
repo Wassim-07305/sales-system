@@ -140,10 +140,10 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
   const [appName, setAppName] = useState(config?.app_name || "");
   const [logoUrl, setLogoUrl] = useState(config?.logo_url || "");
   const [primaryColor, setPrimaryColor] = useState(
-    config?.primary_color || "#7af17a",
+    config?.primary_color || "#10b981",
   );
   const [secondaryColor, setSecondaryColor] = useState(
-    config?.secondary_color || "#14080e",
+    config?.secondary_color || "#09090b",
   );
   const [customDomain, setCustomDomain] = useState(config?.custom_domain || "");
   const [isActive, setIsActive] = useState(config?.is_active || false);
@@ -292,7 +292,7 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
                 <Input
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
-                  placeholder="#7af17a"
+                  placeholder="#10b981"
                   className="flex-1"
                 />
               </div>
@@ -309,7 +309,7 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
                 <Input
                   value={secondaryColor}
                   onChange={(e) => setSecondaryColor(e.target.value)}
-                  placeholder="#14080e"
+                  placeholder="#09090b"
                   className="flex-1"
                 />
               </div>
@@ -340,8 +340,8 @@ export function WhiteLabelView({ config }: { config: WhiteLabelConfig }) {
       <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <ToggleRight className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <ToggleRight className="h-4 w-4 text-emerald-500" />
             </div>
             Fonctionnalités actives
           </CardTitle>

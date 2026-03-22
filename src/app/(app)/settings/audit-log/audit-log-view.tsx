@@ -33,7 +33,7 @@ const entityTypeBadgeColors: Record<string, string> = {
   contact: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   contract: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   booking: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  profile: "bg-brand/10 text-brand-dark border-brand/20",
+  profile: "bg-emerald-500/10 text-black border-emerald-500/20",
 };
 
 export function AuditLogView({ logs }: AuditLogViewProps) {
@@ -72,8 +72,8 @@ export function AuditLogView({ logs }: AuditLogViewProps) {
       <Card className="overflow-hidden border-border/50">
         <CardHeader className="border-b border-border/30 bg-muted/20">
           <CardTitle className="text-base flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <History className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <History className="h-4 w-4 text-emerald-500" />
             </div>
             {filtered.length} entrée(s)
           </CardTitle>

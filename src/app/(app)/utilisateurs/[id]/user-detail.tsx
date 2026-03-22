@@ -164,7 +164,7 @@ export function UserDetail({
       <Card className="mb-6 border-border/50 rounded-xl shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center text-brand text-2xl font-bold shrink-0">
+            <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center text-emerald-500 text-2xl font-bold shrink-0">
               {user.full_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div className="flex-1">
@@ -254,7 +254,7 @@ export function UserDetail({
               </Button>
               <Button
                 size="sm"
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
                 asChild
               >
                 <Link href={`/contracts/new?contact_id=${user.id}`}>
@@ -373,7 +373,7 @@ export function UserDetail({
                         </p>
                       </div>
                       <div className="flex items-center gap-1 font-semibold">
-                        <DollarSign className="h-4 w-4 text-brand" />
+                        <DollarSign className="h-4 w-4 text-emerald-500" />
                         {deal.value?.toLocaleString("fr-FR")} €
                       </div>
                     </div>

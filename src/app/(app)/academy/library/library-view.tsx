@@ -122,7 +122,7 @@ export function LibraryView({ resources }: LibraryViewProps) {
                 className={cn(
                   "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
                   activeTab === tab.value
-                    ? "bg-brand text-brand-dark shadow-sm"
+                    ? "bg-emerald-500 text-black shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -152,7 +152,7 @@ export function LibraryView({ resources }: LibraryViewProps) {
               return (
                 <Card
                   key={resource.id}
-                  className="group rounded-2xl hover:shadow-lg hover:shadow-brand/5 hover:-translate-y-0.5 transition-all duration-300 border-border/40"
+                  className="group rounded-2xl hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5 transition-all duration-300 border-border/40"
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">

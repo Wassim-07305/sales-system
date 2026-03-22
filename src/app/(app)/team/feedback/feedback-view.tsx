@@ -224,7 +224,7 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
         {isManager && (
           <Button
             onClick={() => setDialogOpen(true)}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Send className="h-4 w-4 mr-2" />
             Nouveau feedback
@@ -240,8 +240,8 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
               <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Total feedback
               </span>
-              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <MessageCircle className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <MessageCircle className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">{stats.total}</p>
@@ -446,7 +446,7 @@ export function FeedbackView({ stats, members, userRole, userId }: Props) {
             <Button
               onClick={handleCreate}
               disabled={isPending}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isPending ? (
                 <>

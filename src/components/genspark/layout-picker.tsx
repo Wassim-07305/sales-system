@@ -45,7 +45,7 @@ export function LayoutPicker({ value, onChange }: LayoutPickerProps) {
             className={cn(
               "flex flex-col items-center gap-1 rounded-lg border p-2 text-[10px] transition-all hover:bg-muted/50",
               value === layout.value
-                ? "border-brand bg-brand/10 text-brand"
+                ? "border-emerald-500 bg-emerald-500/10 text-emerald-500"
                 : "border-border/50 text-muted-foreground",
             )}
           >

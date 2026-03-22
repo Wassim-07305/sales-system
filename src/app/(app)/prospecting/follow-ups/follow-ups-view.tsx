@@ -239,7 +239,7 @@ export function FollowUpsView({
     const date = new Date(dateStr);
     if (isPast(date) && !isToday(date))
       return "bg-foreground/10 text-foreground border-foreground/20";
-    if (isToday(date)) return "bg-brand/20 text-brand-dark border-brand/30";
+    if (isToday(date)) return "bg-emerald-500/20 text-black border-emerald-500/30";
     return "bg-muted/50 text-muted-foreground border-border/50";
   }
 
@@ -309,7 +309,7 @@ export function FollowUpsView({
                 <Button
                   onClick={handleAssignSequence}
                   disabled={assigning}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {assigning ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -325,7 +325,7 @@ export function FollowUpsView({
           <Dialog open={showCreateSeq} onOpenChange={setShowCreateSeq}>
             <DialogTrigger asChild>
               <Button
-                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -455,7 +455,7 @@ export function FollowUpsView({
                 <Button
                   onClick={handleCreateSequence}
                   disabled={creatingSeq}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {creatingSeq ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -494,8 +494,8 @@ export function FollowUpsView({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-brand" />
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-emerald-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{todayTasks.length}</p>
@@ -518,8 +518,8 @@ export function FollowUpsView({
             </Card>
             <Card className="shadow-sm rounded-2xl">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-brand" />
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completedTasks.length}</p>
@@ -539,7 +539,7 @@ export function FollowUpsView({
                     className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">
+                      <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold">
                         {task.prospect?.name?.charAt(0)?.toUpperCase() || "?"}
                       </div>
                       <div>
@@ -573,7 +573,7 @@ export function FollowUpsView({
                       size="sm"
                       onClick={() => handleCompleteTask(task.id)}
                       disabled={isPending}
-                      className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                      className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                     >
                       {isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -683,7 +683,7 @@ export function FollowUpsView({
                               <div className="flex items-center gap-1">
                                 <Badge
                                   variant="outline"
-                                  className="text-xs bg-brand/10"
+                                  className="text-xs bg-emerald-500/10"
                                 >
                                   J+{step.day_offset}
                                 </Badge>
@@ -746,8 +746,8 @@ export function FollowUpsView({
 
               <Card className="shadow-sm rounded-2xl">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                    <MessageSquare className="h-5 w-5 text-brand" />
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-emerald-500" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold">
@@ -817,7 +817,7 @@ export function FollowUpsView({
                     <span className="text-sm text-muted-foreground">
                       Prospects ayant répondu
                     </span>
-                    <Badge variant="outline" className="bg-brand/10">
+                    <Badge variant="outline" className="bg-emerald-500/10">
                       {relanceStats.responded}
                     </Badge>
                   </div>

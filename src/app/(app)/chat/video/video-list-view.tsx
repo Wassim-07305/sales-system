@@ -56,7 +56,7 @@ function getStatusBadge(status: string) {
       return (
         <Badge
           variant="outline"
-          className="bg-brand/10 text-brand border-brand/20"
+          className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
         >
           <Radio className="h-3 w-3 mr-1 animate-pulse" />
           En direct
@@ -113,7 +113,7 @@ function ElapsedTimer({ startedAt }: { startedAt: string }) {
   }, [startedAt]);
 
   return (
-    <div className="flex items-center gap-1 text-brand">
+    <div className="flex items-center gap-1 text-emerald-500">
       <Clock className="h-3.5 w-3.5" />
       <span className="font-mono text-xs">{formatElapsed(elapsed)}</span>
     </div>
@@ -224,7 +224,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
               (room.status === "live" || room.status === "scheduled") && (
                 <Button
                   size="sm"
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400"
                   onClick={() =>
                     window.open(
                       room.meeting_link!,
@@ -245,7 +245,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                 className={
                   room.meeting_link
                     ? ""
-                    : "bg-brand text-brand-dark hover:bg-brand/90"
+                    : "bg-emerald-500 text-black hover:bg-emerald-400"
                 }
               >
                 <Link href={`/chat/video/${room.id}`}>
@@ -298,7 +298,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-brand text-brand-dark hover:bg-brand/90">
+              <Button className="bg-emerald-500 text-black hover:bg-emerald-400">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle visio
               </Button>
@@ -348,7 +348,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
                 <Button
                   onClick={handleCreate}
                   disabled={isPending}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   <Video className="h-4 w-4 mr-2" />
                   {isPending ? "Création..." : "Créer la visioconférence"}
@@ -363,14 +363,14 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
           <TabsTrigger
             value="live"
-            className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="gap-1.5 data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             <Radio className="h-3.5 w-3.5" />
             En cours
             {live.length > 0 && (
               <Badge
                 variant="outline"
-                className="ml-1 h-5 w-5 p-0 justify-center bg-brand/10 text-brand border-brand/20 text-[10px]"
+                className="ml-1 h-5 w-5 p-0 justify-center bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px]"
               >
                 {live.length}
               </Badge>
@@ -378,7 +378,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
           </TabsTrigger>
           <TabsTrigger
             value="scheduled"
-            className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="gap-1.5 data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             <Clock className="h-3.5 w-3.5" />
             Planifiées
@@ -393,7 +393,7 @@ export function VideoListView({ rooms }: { rooms: VideoRoom[] }) {
           </TabsTrigger>
           <TabsTrigger
             value="ended"
-            className="gap-1.5 data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="gap-1.5 data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Terminées
             {ended.length > 0 && (

@@ -16,8 +16,8 @@ import { X, Download, Loader2 } from "lucide-react";
 /* ------------------------------------------------------------------ */
 /*  Styles                                                             */
 /* ------------------------------------------------------------------ */
-const accent = "#7af17a";
-const dark = "#14080e";
+const accent = "#10b981";
+const dark = "#09090b";
 
 const styles = StyleSheet.create({
   page: {
@@ -536,7 +536,7 @@ export function ContractPdf({ contract, onClose }: Props) {
           </div>
         </div>
         <Button
-          className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+          className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
           onClick={handleDownload}
           disabled={generating}
         >

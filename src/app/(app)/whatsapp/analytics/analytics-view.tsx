@@ -121,8 +121,8 @@ export function WhatsAppAnalyticsView({
         <Card className="shadow-sm rounded-2xl border-border/50 hover:shadow-md transition-all">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                <Send className="h-5 w-5 text-brand" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                <Send className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{totalSent}</p>
@@ -220,7 +220,7 @@ export function WhatsAppAnalyticsView({
                 <Bar
                   dataKey="sent"
                   name="Envoyés"
-                  fill="#7af17a"
+                  fill="#10b981"
                   radius={[4, 4, 0, 0]}
                 />
                 <Bar
@@ -284,7 +284,7 @@ export function WhatsAppAnalyticsView({
                       <span
                         className={
                           seq.response_rate >= 50
-                            ? "text-brand font-semibold"
+                            ? "text-emerald-500 font-semibold"
                             : seq.response_rate >= 25
                               ? "text-amber-500 font-semibold"
                               : "text-muted-foreground"

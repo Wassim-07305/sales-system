@@ -299,7 +299,7 @@ function ReactionPills({
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-200 border",
                     hasReacted
-                      ? "bg-[#7af17a]/10 border-[#7af17a]/25 text-[#7af17a] shadow-[0_0_8px_rgba(122,241,122,0.1)]"
+                      ? "bg-[#10b981]/10 border-[#10b981]/25 text-[#10b981] shadow-[0_0_8px_rgba(16, 185, 129,0.1)]"
                       : "bg-secondary/50 border-transparent text-muted-foreground hover:bg-secondary hover:border-border",
                   )}
                 >
@@ -420,12 +420,12 @@ function VoicePlayer({ url, duration }: { url: string; duration?: number }) {
     <div className="flex items-center gap-2.5 bg-muted/30 rounded-2xl px-3 py-2 min-w-[180px] max-w-[260px]">
       <button
         onClick={toggle}
-        className="h-8 w-8 shrink-0 rounded-full bg-[#7af17a]/10 flex items-center justify-center hover:bg-[#7af17a]/20 transition-colors"
+        className="h-8 w-8 shrink-0 rounded-full bg-[#10b981]/10 flex items-center justify-center hover:bg-[#10b981]/20 transition-colors"
       >
         {playing ? (
-          <Pause className="h-3.5 w-3.5 text-[#7af17a]" />
+          <Pause className="h-3.5 w-3.5 text-[#10b981]" />
         ) : (
-          <Play className="h-3.5 w-3.5 text-[#7af17a] ml-0.5" />
+          <Play className="h-3.5 w-3.5 text-[#10b981] ml-0.5" />
         )}
       </button>
       <div className="flex-1 flex flex-col gap-1">
@@ -434,7 +434,7 @@ function VoicePlayer({ url, duration }: { url: string; duration?: number }) {
           onClick={handleSeek}
         >
           <div
-            className="h-full bg-[#7af17a] rounded-full transition-[width] duration-100"
+            className="h-full bg-[#10b981] rounded-full transition-[width] duration-100"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -473,7 +473,7 @@ function SocialConvRow({
       className={cn(
         "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
         isActive
-          ? "bg-[#7af17a]/8 ring-1 ring-[#7af17a]/20"
+          ? "bg-[#10b981]/8 ring-1 ring-[#10b981]/20"
           : "hover:bg-secondary/60",
       )}
       onClick={onClick}
@@ -508,7 +508,7 @@ function SocialConvRow({
               className={cn(
                 "text-[10px] shrink-0",
                 unread > 0
-                  ? "text-[#7af17a] font-semibold"
+                  ? "text-[#10b981] font-semibold"
                   : "text-muted-foreground/60",
               )}
             >
@@ -528,7 +528,7 @@ function SocialConvRow({
         )}
       </div>
       {unread > 0 && (
-        <span className="bg-[#7af17a] text-[#14080e] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#7af17a]/30">
+        <span className="bg-[#10b981] text-[#09090b] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#10b981]/30">
           {unread > 99 ? "99+" : unread}
         </span>
       )}
@@ -1326,8 +1326,8 @@ export function ChatLayout({
       const el = document.getElementById(`msg-${result.id}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.classList.add("bg-[#7af17a]/10");
-        setTimeout(() => el.classList.remove("bg-[#7af17a]/10"), 2000);
+        el.classList.add("bg-[#10b981]/10");
+        setTimeout(() => el.classList.remove("bg-[#10b981]/10"), 2000);
       }
     }, 600);
   }
@@ -1638,15 +1638,15 @@ export function ChatLayout({
         {/* Sidebar header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#7af17a] to-[#4ade80] flex items-center justify-center shadow-sm shadow-[#7af17a]/20">
-              <MessageSquare className="h-4 w-4 text-[#14080e]" />
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#10b981] to-[#4ade80] flex items-center justify-center shadow-sm shadow-[#10b981]/20">
+              <MessageSquare className="h-4 w-4 text-[#09090b]" />
             </div>
             <div>
               <h1 className="text-[15px] font-bold text-foreground leading-tight">
                 Messages
               </h1>
               {totalUnread > 0 && (
-                <p className="text-[10px] text-[#7af17a] font-semibold">
+                <p className="text-[10px] text-[#10b981] font-semibold">
                   {totalUnread} non lu{totalUnread > 1 ? "s" : ""}
                 </p>
               )}
@@ -1658,7 +1658,7 @@ export function ChatLayout({
               className={cn(
                 "h-8 w-8 rounded-xl flex items-center justify-center transition-all duration-200",
                 msgSearchOpen
-                  ? "bg-[#7af17a]/15 text-[#7af17a]"
+                  ? "bg-[#10b981]/15 text-[#10b981]"
                   : "bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary",
               )}
               title="Rechercher dans les messages"
@@ -1687,7 +1687,7 @@ export function ChatLayout({
                 placeholder="Rechercher dans les messages..."
                 value={msgSearchQuery}
                 onChange={(e) => handleMsgSearchInput(e.target.value)}
-                className="pl-10 pr-8 h-9 text-[13px] bg-secondary/50 border-0 rounded-xl placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-[#7af17a]/30 focus-visible:bg-background transition-all"
+                className="pl-10 pr-8 h-9 text-[13px] bg-secondary/50 border-0 rounded-xl placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-[#10b981]/30 focus-visible:bg-background transition-all"
                 autoFocus
               />
               {msgSearchQuery && (
@@ -1753,7 +1753,7 @@ export function ChatLayout({
               placeholder="Rechercher une conversation..."
               value={channelSearch}
               onChange={(e) => setChannelSearch(e.target.value)}
-              className="pl-10 h-9 text-[13px] bg-secondary/50 border-0 rounded-xl placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-[#7af17a]/30 focus-visible:bg-background transition-all"
+              className="pl-10 h-9 text-[13px] bg-secondary/50 border-0 rounded-xl placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-[#10b981]/30 focus-visible:bg-background transition-all"
             />
             {channelSearch && (
               <button
@@ -1776,7 +1776,7 @@ export function ChatLayout({
                 className={cn(
                   "flex-1 text-[11px] font-medium py-1.5 rounded-lg transition-all",
                   audienceFilter === f
-                    ? "bg-[#7af17a]/15 text-[#7af17a] border border-[#7af17a]/30"
+                    ? "bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30"
                     : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50",
                 )}
               >
@@ -1793,7 +1793,7 @@ export function ChatLayout({
               label="Channels"
               isOpen={channelsOpen}
               onToggle={() => setChannelsOpen((v) => !v)}
-              dotColor="bg-[#7af17a]"
+              dotColor="bg-[#10b981]"
               action={
                 isAdmin ? (
                   <button
@@ -1819,7 +1819,7 @@ export function ChatLayout({
                         className={cn(
                           "flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-200",
                           isActive
-                            ? "bg-[#7af17a]/8 text-foreground font-semibold ring-1 ring-[#7af17a]/20"
+                            ? "bg-[#10b981]/8 text-foreground font-semibold ring-1 ring-[#10b981]/20"
                             : unread > 0
                               ? "text-foreground font-semibold hover:bg-secondary/60"
                               : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
@@ -1834,7 +1834,7 @@ export function ChatLayout({
                           className={cn(
                             "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 transition-colors",
                             isActive
-                              ? "bg-[#7af17a]/15 text-[#7af17a]"
+                              ? "bg-[#10b981]/15 text-[#10b981]"
                               : "bg-secondary/80 text-muted-foreground",
                           )}
                         >
@@ -1844,7 +1844,7 @@ export function ChatLayout({
                           {channel.name}
                         </span>
                         {unread > 0 && (
-                          <span className="bg-[#7af17a] text-[#14080e] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#7af17a]/30">
+                          <span className="bg-[#10b981] text-[#09090b] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#10b981]/30">
                             {unread > 99 ? "99+" : unread}
                           </span>
                         )}
@@ -1928,7 +1928,7 @@ export function ChatLayout({
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
                         isActive
-                          ? "bg-[#7af17a]/8 ring-1 ring-[#7af17a]/20"
+                          ? "bg-[#10b981]/8 ring-1 ring-[#10b981]/20"
                           : "hover:bg-secondary/60",
                       )}
                       onClick={() => {
@@ -1947,7 +1947,7 @@ export function ChatLayout({
                           {getInitials(partner?.full_name)}
                         </div>
                         {isOnline && (
-                          <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#7af17a] border-[2.5px] border-background shadow-sm shadow-[#7af17a]/40" />
+                          <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-[#10b981] border-[2.5px] border-background shadow-sm shadow-[#10b981]/40" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1966,7 +1966,7 @@ export function ChatLayout({
                         </p>
                       </div>
                       {unread > 0 && (
-                        <span className="bg-[#7af17a] text-[#14080e] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#7af17a]/30">
+                        <span className="bg-[#10b981] text-[#09090b] text-[10px] font-bold h-5 min-w-5 flex items-center justify-center px-1.5 rounded-full shadow-sm shadow-[#10b981]/30">
                           {unread > 99 ? "99+" : unread}
                         </span>
                       )}
@@ -2408,7 +2408,7 @@ export function ChatLayout({
                         className={cn(
                           "max-w-[70%] rounded-2xl px-4 py-2.5 text-[13px] shadow-sm",
                           isOutbound
-                            ? "bg-gradient-to-br from-[#7af17a]/15 to-[#7af17a]/8 text-foreground rounded-br-md"
+                            ? "bg-gradient-to-br from-[#10b981]/15 to-[#10b981]/8 text-foreground rounded-br-md"
                             : "bg-secondary/60 rounded-bl-md",
                         )}
                       >
@@ -2419,7 +2419,7 @@ export function ChatLayout({
                           className={cn(
                             "text-[10px] mt-1.5 font-medium",
                             isOutbound
-                              ? "text-[#7af17a]/50 text-right"
+                              ? "text-[#10b981]/50 text-right"
                               : "text-muted-foreground/40",
                           )}
                         >
@@ -2455,7 +2455,7 @@ export function ChatLayout({
                     }
                   }}
                   placeholder={`Message à ${activeWA.prospect?.name || "prospect"}...`}
-                  className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
+                  className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#10b981]/30 placeholder:text-muted-foreground/40"
                   rows={1}
                 />
                 <Button
@@ -2548,7 +2548,7 @@ export function ChatLayout({
                         className={cn(
                           "max-w-[70%] rounded-2xl px-4 py-2.5 text-[13px] shadow-sm",
                           isMe
-                            ? "bg-gradient-to-br from-[#7af17a]/15 to-[#7af17a]/8 text-foreground rounded-br-md"
+                            ? "bg-gradient-to-br from-[#10b981]/15 to-[#10b981]/8 text-foreground rounded-br-md"
                             : "bg-secondary/60 rounded-bl-md",
                         )}
                       >
@@ -2598,7 +2598,7 @@ export function ChatLayout({
                     }
                   }}
                   placeholder={`Message à ${activeSocial.prospect?.name || "prospect"}...`}
-                  className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
+                  className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#10b981]/30 placeholder:text-muted-foreground/40"
                   rows={1}
                 />
                 <Button
@@ -2607,7 +2607,7 @@ export function ChatLayout({
                   className={cn(
                     "absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200",
                     socialMessage.trim()
-                      ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30"
+                      ? "bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 shadow-sm shadow-[#10b981]/30"
                       : "bg-secondary text-muted-foreground/40",
                   )}
                   disabled={!socialMessage.trim() || sendingSocial}
@@ -2664,7 +2664,7 @@ export function ChatLayout({
                       "h-10 w-10 rounded-xl flex items-center justify-center",
                       activeChannel.type === "announcement"
                         ? "bg-amber-500/10 text-amber-600"
-                        : "bg-[#7af17a]/10 text-[#7af17a]",
+                        : "bg-[#10b981]/10 text-[#10b981]",
                     )}
                   >
                     {activeChannel.type === "announcement" ? (
@@ -2688,7 +2688,7 @@ export function ChatLayout({
               <div className="ml-auto flex items-center gap-2">
                 {onlineUsers.length > 0 && activeChannel.type !== "direct" && (
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 mr-2 bg-secondary/50 px-2.5 py-1 rounded-full">
-                    <div className="h-1.5 w-1.5 rounded-full bg-[#7af17a] animate-pulse" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-[#10b981] animate-pulse" />
                     {onlineUsers.length} en ligne
                   </div>
                 )}
@@ -2730,8 +2730,8 @@ export function ChatLayout({
                   <>
                     {messages.length === 0 && !hasMore && (
                       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                        <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-[#7af17a]/10 to-[#7af17a]/5 flex items-center justify-center mb-5 shadow-inner">
-                          <Sparkles className="h-9 w-9 text-[#7af17a]/40" />
+                        <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/5 flex items-center justify-center mb-5 shadow-inner">
+                          <Sparkles className="h-9 w-9 text-[#10b981]/40" />
                         </div>
                         <p className="font-semibold text-base text-foreground/80">
                           {activeChannel.type === "direct"
@@ -2810,7 +2810,7 @@ export function ChatLayout({
                                 className={cn(
                                   "max-w-[70%] rounded-2xl px-4 py-2.5 text-[13px] shadow-sm",
                                   isOwn
-                                    ? "bg-gradient-to-br from-[#7af17a]/15 to-[#7af17a]/8 text-foreground rounded-br-md"
+                                    ? "bg-gradient-to-br from-[#10b981]/15 to-[#10b981]/8 text-foreground rounded-br-md"
                                     : "bg-secondary/60 rounded-bl-md",
                                 )}
                               >
@@ -2878,20 +2878,20 @@ export function ChatLayout({
                                                   block: "center",
                                                 });
                                                 el.classList.add(
-                                                  "bg-[#7af17a]/10",
+                                                  "bg-[#10b981]/10",
                                                 );
                                                 setTimeout(
                                                   () =>
                                                     el.classList.remove(
-                                                      "bg-[#7af17a]/10",
+                                                      "bg-[#10b981]/10",
                                                     ),
                                                   2000,
                                                 );
                                               }
                                             }}
-                                            className="w-full text-left mb-2 pl-3 border-l-2 border-[#7af17a]/40 bg-background/30 rounded-r-lg py-1.5 pr-2"
+                                            className="w-full text-left mb-2 pl-3 border-l-2 border-[#10b981]/40 bg-background/30 rounded-r-lg py-1.5 pr-2"
                                           >
-                                            <p className="text-[10px] font-semibold text-[#7af17a]/70 mb-0.5">
+                                            <p className="text-[10px] font-semibold text-[#10b981]/70 mb-0.5">
                                               {quoted.sender_id ===
                                               currentUserId
                                                 ? "Moi"
@@ -3137,20 +3137,20 @@ export function ChatLayout({
                                                   block: "center",
                                                 });
                                                 el.classList.add(
-                                                  "bg-[#7af17a]/10",
+                                                  "bg-[#10b981]/10",
                                                 );
                                                 setTimeout(
                                                   () =>
                                                     el.classList.remove(
-                                                      "bg-[#7af17a]/10",
+                                                      "bg-[#10b981]/10",
                                                     ),
                                                   2000,
                                                 );
                                               }
                                             }}
-                                            className="w-full text-left mb-1.5 pl-3 border-l-2 border-[#7af17a]/40 bg-secondary/30 rounded-r-lg py-1.5 pr-2"
+                                            className="w-full text-left mb-1.5 pl-3 border-l-2 border-[#10b981]/40 bg-secondary/30 rounded-r-lg py-1.5 pr-2"
                                           >
-                                            <p className="text-[10px] font-semibold text-[#7af17a]/70 mb-0.5">
+                                            <p className="text-[10px] font-semibold text-[#10b981]/70 mb-0.5">
                                               {quoted.sender_id ===
                                               currentUserId
                                                 ? "Moi"
@@ -3296,9 +3296,9 @@ export function ChatLayout({
 
             {replyTo && (
               <div className="px-5 pt-3 pb-1">
-                <div className="flex items-center gap-3 pl-3 border-l-2 border-[#7af17a]/50 bg-secondary/30 rounded-r-xl py-2 pr-2">
+                <div className="flex items-center gap-3 pl-3 border-l-2 border-[#10b981]/50 bg-secondary/30 rounded-r-xl py-2 pr-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold text-[#7af17a]/80 mb-0.5 flex items-center gap-1.5">
+                    <p className="text-[11px] font-semibold text-[#10b981]/80 mb-0.5 flex items-center gap-1.5">
                       <Reply className="h-3 w-3" />
                       Réponse à{" "}
                       {replyTo.sender_id === currentUserId
@@ -3362,7 +3362,7 @@ export function ChatLayout({
                   <Button
                     type="button"
                     size="icon"
-                    className="shrink-0 h-9 w-9 rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30"
+                    className="shrink-0 h-9 w-9 rounded-xl bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 shadow-sm shadow-[#10b981]/30"
                     onClick={stopRecording}
                     title="Envoyer"
                     disabled={uploadingVoice}
@@ -3410,7 +3410,7 @@ export function ChatLayout({
                           ? `Message à ${activePartner?.full_name || "utilisateur"}...`
                           : `Message dans #${activeChannel.name}...`
                       }
-                      className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#7af17a]/30 placeholder:text-muted-foreground/40"
+                      className="min-h-[44px] max-h-[120px] resize-none text-[13px] py-3 pr-12 rounded-2xl bg-secondary/40 border-border/50 focus-visible:ring-[#10b981]/30 placeholder:text-muted-foreground/40"
                       rows={1}
                     />
                     <Button
@@ -3419,7 +3419,7 @@ export function ChatLayout({
                       className={cn(
                         "absolute right-2 bottom-2 h-8 w-8 rounded-xl transition-all duration-200",
                         newMessage.trim() || imageUrl
-                          ? "bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90 shadow-sm shadow-[#7af17a]/30"
+                          ? "bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90 shadow-sm shadow-[#10b981]/30"
                           : "bg-secondary text-muted-foreground/40",
                       )}
                       disabled={!newMessage.trim() && !imageUrl}
@@ -3445,8 +3445,8 @@ export function ChatLayout({
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-4">
-            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-[#7af17a]/10 to-[#7af17a]/5 flex items-center justify-center shadow-inner">
-              <MessageSquare className="h-10 w-10 text-[#7af17a]/30" />
+            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/5 flex items-center justify-center shadow-inner">
+              <MessageSquare className="h-10 w-10 text-[#10b981]/30" />
             </div>
             <div className="text-center">
               <p className="font-semibold text-base text-foreground/70">
@@ -3569,7 +3569,7 @@ export function ChatLayout({
             <Button
               onClick={handleCreateChannel}
               disabled={saving}
-              className="rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+              className="rounded-xl bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}{" "}
               Créer
@@ -3703,7 +3703,7 @@ export function ChatLayout({
             <Button
               onClick={handleUpdateMembers}
               disabled={saving}
-              className="rounded-xl bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90"
+              className="rounded-xl bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}{" "}
               Enregistrer

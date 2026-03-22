@@ -160,8 +160,8 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
         <div className="max-w-lg mx-auto">
           <Card className="rounded-2xl border-border/40 shadow-lg">
             <CardContent className="p-8 text-center">
-              <div className="h-20 w-20 rounded-2xl bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mx-auto mb-4">
-                <Trophy className="h-10 w-10 text-brand" />
+              <div className="h-20 w-20 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                <Trophy className="h-10 w-10 text-emerald-500" />
               </div>
               <h2 className="text-2xl font-bold mb-2">Session terminee !</h2>
               <p className="text-muted-foreground mb-6">
@@ -184,7 +184,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-brand">
+                  <div className="text-3xl font-bold text-emerald-500">
                     {scores.correct + scores.incorrect > 0
                       ? Math.round(
                           (scores.correct /
@@ -200,7 +200,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
 
               <Button
                 onClick={handleRestart}
-                className="bg-brand text-brand-dark hover:bg-brand/90 gap-2"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 gap-2"
               >
                 <RotateCcw className="h-4 w-4" />
                 Recommencer
@@ -280,7 +280,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
                 }}
               >
                 <CardContent className="p-10 min-h-[300px] flex flex-col items-center justify-center text-center">
-                  <Badge className="mb-4 text-xs bg-brand/10 text-brand border-brand/20">
+                  <Badge className="mb-4 text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                     Reponse
                   </Badge>
                   <p className="text-lg leading-relaxed">
@@ -339,7 +339,7 @@ export function RevisionView({ cards, courses }: RevisionViewProps) {
 
             <Button
               onClick={handleNext}
-              className="gap-2 bg-brand text-brand-dark hover:bg-brand/90"
+              className="gap-2 bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {currentIndex === totalCards - 1 ? "Terminer" : "Suivante"}
               <ChevronRight className="h-4 w-4" />

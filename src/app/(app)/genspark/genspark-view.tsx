@@ -99,7 +99,7 @@ export function GensparkView({ presentations, templates }: GensparkViewProps) {
         </Button>
         <Button
           onClick={() => setShowAiDialog(true)}
-          className="bg-brand text-brand-dark hover:bg-brand/90"
+          className="bg-emerald-500 text-black hover:bg-emerald-400"
         >
           <Sparkles className="h-4 w-4 mr-2" />
           Générer avec l&apos;IA
@@ -188,7 +188,7 @@ export function GensparkView({ presentations, templates }: GensparkViewProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-brand" />
+              <Plus className="h-5 w-5 text-emerald-500" />
               Nouvelle présentation
             </DialogTitle>
             <DialogDescription>
@@ -233,7 +233,7 @@ export function GensparkView({ presentations, templates }: GensparkViewProps) {
             <Button
               onClick={handleCreate}
               disabled={isPending || !newTitle.trim()}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

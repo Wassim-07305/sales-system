@@ -40,7 +40,7 @@ interface MindMapData {
 }
 
 const branchColors = [
-  { bg: "bg-brand/10", border: "border-brand", text: "text-brand" },
+  { bg: "bg-emerald-500/10", border: "border-emerald-500", text: "text-emerald-500" },
   {
     bg: "bg-foreground/10",
     border: "border-foreground/40",
@@ -56,7 +56,7 @@ const branchColors = [
     border: "border-muted-foreground/30",
     text: "text-muted-foreground/80",
   },
-  { bg: "bg-brand/8", border: "border-brand/60", text: "text-brand/80" },
+  { bg: "bg-emerald-500/8", border: "border-emerald-500/60", text: "text-emerald-500/80" },
   {
     bg: "bg-foreground/8",
     border: "border-foreground/30",
@@ -77,7 +77,7 @@ const branchColors = [
 function RootNodeComponent({ data }: NodeProps) {
   const nodeData = data as { label: string; type: string };
   return (
-    <div className="px-6 py-4 rounded-2xl border-2 border-brand bg-brand/10 shadow-md min-w-[200px] text-center">
+    <div className="px-6 py-4 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 shadow-md min-w-[200px] text-center">
       <Handle
         type="source"
         position={Position.Right}
@@ -101,7 +101,7 @@ function RootNodeComponent({ data }: NodeProps) {
         id="bottom"
         className="!bg-brand !w-3 !h-3"
       />
-      <p className="text-base font-bold text-brand-dark">{nodeData.label}</p>
+      <p className="text-base font-bold text-black">{nodeData.label}</p>
     </div>
   );
 }
@@ -326,10 +326,10 @@ export function MindMapEditor({
               {onlineUsers.slice(0, 3).map((u) => (
                 <div
                   key={u.userId}
-                  className="h-6 w-6 rounded-full bg-brand/20 border-2 border-background flex items-center justify-center"
+                  className="h-6 w-6 rounded-full bg-emerald-500/20 border-2 border-background flex items-center justify-center"
                   title={u.userName}
                 >
-                  <span className="text-[10px] font-semibold text-brand">
+                  <span className="text-[10px] font-semibold text-emerald-500">
                     {u.userName.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -354,7 +354,7 @@ export function MindMapEditor({
           onClick={handleSave}
           disabled={isPending}
           size="sm"
-          className="bg-brand text-brand-dark hover:bg-brand/90"
+          className="bg-emerald-500 text-black hover:bg-emerald-400"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -400,7 +400,7 @@ export function MindMapEditor({
               </p>
               <button
                 onClick={addBranch}
-                className="flex items-center gap-2 w-full px-3 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-brand/10 border-brand text-brand"
+                className="flex items-center gap-2 w-full px-3 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-emerald-500/10 border-emerald-500 text-emerald-500"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Ajouter branche

@@ -41,7 +41,7 @@ const categoryLabels: Record<string, string> = {
 
 const categoryColors: Record<string, string> = {
   prospection: "bg-foreground/10 text-foreground border-foreground/20",
-  closing: "bg-brand/10 text-brand border-brand/20",
+  closing: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   objection:
     "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   relance: "bg-foreground/8 text-foreground/80 border-foreground/15",
@@ -187,7 +187,7 @@ export function TemplatesView({ templates }: { templates: ScriptTemplate[] }) {
         {filtered.map((template) => (
           <Card
             key={template.id}
-            className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 flex flex-col"
+            className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col"
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-base line-clamp-2">

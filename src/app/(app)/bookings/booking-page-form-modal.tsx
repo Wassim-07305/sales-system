@@ -57,7 +57,7 @@ export function BookingPageFormModal({
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
-  const [brandColor, setBrandColor] = useState("#7af17a");
+  const [brandColor, setBrandColor] = useState("#10b981");
   const [slotDuration, setSlotDuration] = useState("30");
   const [bufferMinutes, setBufferMinutes] = useState("0");
   const [minNoticeHours, setMinNoticeHours] = useState("2");
@@ -86,7 +86,7 @@ export function BookingPageFormModal({
       setTitle("");
       setSlug("");
       setDescription("");
-      setBrandColor("#7af17a");
+      setBrandColor("#10b981");
       setSlotDuration("30");
       setBufferMinutes("0");
       setMinNoticeHours("2");
@@ -313,7 +313,7 @@ export function BookingPageFormModal({
             </Button>
             <Button
               type="submit"
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
               disabled={isPending}
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

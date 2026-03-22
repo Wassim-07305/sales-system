@@ -38,7 +38,7 @@ export default function GlobalError({
         <div className="flex items-center justify-center gap-4">
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center rounded-md bg-brand text-brand-dark px-6 py-2.5 text-sm font-medium hover:bg-brand/90 transition-colors"
+            className="inline-flex items-center justify-center rounded-md bg-emerald-500 text-black px-6 py-2.5 text-sm font-medium hover:bg-emerald-400 transition-colors"
           >
             Réessayer
           </button>

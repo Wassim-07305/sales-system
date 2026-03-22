@@ -227,8 +227,8 @@ export function VoiceSettings({
       <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <Mic className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <Mic className="h-4 w-4 text-emerald-500" />
             </div>
             Profil vocal
           </CardTitle>
@@ -237,8 +237,8 @@ export function VoiceSettings({
           <div className="space-y-4">
             {/* Status indicator */}
             <div className="flex items-center gap-4 p-4 rounded-lg border">
-              <div className="h-12 w-12 rounded-lg bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center">
-                <Mic className="h-6 w-6 text-brand" />
+              <div className="h-12 w-12 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                <Mic className="h-6 w-6 text-emerald-500" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold">Echantillon audio</h3>

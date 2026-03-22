@@ -86,7 +86,7 @@ export function ExercisesView({ exercises }: Props) {
   }
 
   function scoreColor(score: number) {
-    if (score >= 75) return "text-brand";
+    if (score >= 75) return "text-emerald-500";
     if (score >= 50) return "text-amber-500";
     return "text-red-500";
   }
@@ -128,7 +128,7 @@ export function ExercisesView({ exercises }: Props) {
                 key={ex.id}
                 className={`cursor-pointer transition-shadow hover:shadow-md rounded-2xl ${
                   selectedExercise?.id === ex.id
-                    ? "ring-2 ring-brand shadow-md"
+                    ? "ring-2 ring-emerald-500 shadow-md"
                     : ""
                 }`}
                 onClick={() => {
@@ -139,8 +139,8 @@ export function ExercisesView({ exercises }: Props) {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <BookOpen className="h-4 w-4 text-brand" />
+                    <div className="h-9 w-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <BookOpen className="h-4 w-4 text-emerald-500" />
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium text-sm leading-tight truncate">
@@ -167,7 +167,7 @@ export function ExercisesView({ exercises }: Props) {
               <Card className="rounded-2xl shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <FileText className="h-4 w-4 text-brand" />
+                    <FileText className="h-4 w-4 text-emerald-500" />
                     Consigne
                   </CardTitle>
                 </CardHeader>
@@ -199,7 +199,7 @@ export function ExercisesView({ exercises }: Props) {
                     <Button
                       onClick={handleSubmit}
                       disabled={submitting || submission.trim().length < 20}
-                      className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+                      className="rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
                     >
                       {submitting ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -217,7 +217,7 @@ export function ExercisesView({ exercises }: Props) {
                 <Card className="rounded-2xl shadow-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <Sparkles className="h-4 w-4 text-brand" />
+                      <Sparkles className="h-4 w-4 text-emerald-500" />
                       Correction IA
                     </CardTitle>
                   </CardHeader>
@@ -263,7 +263,7 @@ export function ExercisesView({ exercises }: Props) {
                     {result.strengths.length > 0 && (
                       <div>
                         <p className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                          <CheckCircle2 className="h-4 w-4 text-brand" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                           Points forts
                         </p>
                         <div className="space-y-1.5">
@@ -272,7 +272,7 @@ export function ExercisesView({ exercises }: Props) {
                               key={i}
                               className="flex items-start gap-2 text-sm"
                             >
-                              <span className="text-brand mt-0.5">+</span>
+                              <span className="text-emerald-500 mt-0.5">+</span>
                               <span>{s}</span>
                             </div>
                           ))}
@@ -307,7 +307,7 @@ export function ExercisesView({ exercises }: Props) {
                         <p className="text-sm font-medium mb-2">
                           Version améliorée
                         </p>
-                        <Card className="bg-brand/5 border-brand/20">
+                        <Card className="bg-emerald-500/5 border-emerald-500/20">
                           <CardContent className="p-4">
                             <p className="text-sm whitespace-pre-wrap leading-relaxed">
                               {result.correctedVersion}

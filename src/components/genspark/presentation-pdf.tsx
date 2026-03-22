@@ -16,17 +16,17 @@ interface PresentationPDFProps {
 }
 
 const themeStyles = {
-  dark: { bg: "#14080e", text: "#ffffff", accent: "#7af17a", muted: "#a0a0a0" },
+  dark: { bg: "#09090b", text: "#ffffff", accent: "#10b981", muted: "#a0a0a0" },
   light: {
     bg: "#ffffff",
     text: "#111827",
-    accent: "#7af17a",
+    accent: "#10b981",
     muted: "#6b7280",
   },
   brand: {
-    bg: "#14080e",
+    bg: "#09090b",
     text: "#ffffff",
-    accent: "#7af17a",
+    accent: "#10b981",
     muted: "#a0a0a0",
   },
 };

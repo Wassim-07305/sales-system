@@ -110,7 +110,7 @@ export function MatchingMatrixView() {
             label: "Duos actifs",
             value: duos.length,
             icon: Users,
-            color: "text-[#7af17a]",
+            color: "text-[#10b981]",
           },
           {
             label: "Deals totaux",

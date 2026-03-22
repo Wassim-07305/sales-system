@@ -578,8 +578,8 @@ export function UnifiedInbox() {
                         )}
                         {conv.unreadCount > 0 && (
                           <div className="flex items-center gap-1 mt-1">
-                            <Circle className="h-2 w-2 fill-brand text-brand" />
-                            <span className="text-[10px] font-medium text-brand">
+                            <Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
+                            <span className="text-[10px] font-medium text-emerald-500">
                               {conv.unreadCount} non lu
                               {conv.unreadCount > 1 ? "s" : ""}
                             </span>
@@ -733,7 +733,7 @@ export function UnifiedInbox() {
                       className={cn(
                         "max-w-[70%] rounded-2xl px-4 py-2.5",
                         msg.isFromMe
-                          ? "bg-brand/10 text-foreground"
+                          ? "bg-emerald-500/10 text-foreground"
                           : "bg-muted",
                       )}
                     >

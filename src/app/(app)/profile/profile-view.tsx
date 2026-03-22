@@ -112,9 +112,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
       {/* Avatar & Identity Card */}
       <Card className="rounded-2xl shadow-sm border-border/60 mb-6 overflow-hidden">
         {/* Gradient header strip */}
-        <div className="h-24 bg-gradient-to-r from-brand-dark via-brand-dark/95 to-brand-dark relative">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(122,241,122,0.15)_0%,_transparent_60%)]" />
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" />
+        <div className="h-24 bg-gradient-to-r from-zinc-950 via-zinc-950/95 to-zinc-950 relative">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(16, 185, 129,0.15)_0%,_transparent_60%)]" />
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
         </div>
         <CardContent className="px-6 pb-6 -mt-10 relative z-10">
           <div className="flex items-end gap-5">
@@ -126,7 +126,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
                   className="h-24 w-24 rounded-2xl object-cover border-4 border-white shadow-md"
                 />
               ) : (
-                <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center text-brand text-3xl font-bold border-4 border-white shadow-md">
+                <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 flex items-center justify-center text-emerald-500 text-3xl font-bold border-4 border-white shadow-md">
                   {initials}
                 </div>
               )}
@@ -134,7 +134,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingAvatar}
-                className="absolute -bottom-1 -right-1 h-8 w-8 rounded-xl bg-brand flex items-center justify-center text-brand-dark hover:bg-brand/90 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+                className="absolute -bottom-1 -right-1 h-8 w-8 rounded-xl bg-emerald-500 flex items-center justify-center text-black hover:bg-emerald-400 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
               >
                 {uploadingAvatar ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -151,13 +151,13 @@ export function ProfileView({ profile }: { profile: Profile }) {
               />
             </div>
             <div className="pb-1">
-              <h2 className="text-xl font-bold text-brand-dark">
+              <h2 className="text-xl font-bold text-black">
                 {fullName || "Votre nom"}
               </h2>
               <p className="text-sm text-muted-foreground">{profile.email}</p>
               <Badge
                 variant="outline"
-                className="mt-2 text-xs px-3 py-0.5 rounded-lg border-brand/30 bg-brand/5 text-brand-dark font-medium"
+                className="mt-2 text-xs px-3 py-0.5 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-black font-medium"
               >
                 {roleLabels[profile.role] || profile.role}
               </Badge>
@@ -169,9 +169,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
       {/* Edit form */}
       <Card className="rounded-2xl shadow-sm border-border/60">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold text-brand-dark flex items-center gap-2.5">
-            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-brand/10">
-              <User className="h-4 w-4 text-brand" />
+          <CardTitle className="text-lg font-semibold text-black flex items-center gap-2.5">
+            <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-emerald-500/10">
+              <User className="h-4 w-4 text-emerald-500" />
             </div>
             Informations personnelles
           </CardTitle>
@@ -186,7 +186,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
               <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="h-11 rounded-xl border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200"
+                className="h-11 rounded-xl border-border/60 focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200"
               />
             </div>
             <div className="space-y-2">
@@ -198,7 +198,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="06 12 34 56 78"
-                className="h-11 rounded-xl border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
+                className="h-11 rounded-xl border-border/60 focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200 placeholder:text-muted-foreground/50"
               />
             </div>
           </div>
@@ -211,7 +211,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
               <Input
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                className="h-11 rounded-xl border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200"
+                className="h-11 rounded-xl border-border/60 focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200"
               />
             </div>
             <div className="space-y-2">
@@ -222,7 +222,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
               <Input
                 value={niche}
                 onChange={(e) => setNiche(e.target.value)}
-                className="h-11 rounded-xl border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200"
+                className="h-11 rounded-xl border-border/60 focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200"
               />
             </div>
           </div>
@@ -236,7 +236,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
               onChange={(e) => setGoals(e.target.value)}
               placeholder="Décrivez vos objectifs..."
               rows={3}
-              className="rounded-xl border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 resize-none placeholder:text-muted-foreground/50"
+              className="rounded-xl border-border/60 focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200 resize-none placeholder:text-muted-foreground/50"
             />
           </div>
 
@@ -244,7 +244,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl h-11 px-6 font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
             >
               {isSaving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

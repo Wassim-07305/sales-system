@@ -228,7 +228,7 @@ function CourseCard({
 
   return (
     <Link href={`/academy/${course.id}`} className="group">
-      <Card className="h-full gap-0 overflow-hidden rounded-2xl border border-border/50 p-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-brand/5">
+      <Card className="h-full gap-0 overflow-hidden rounded-2xl border border-border/50 p-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/5">
         {/* ---- Thumbnail ---- */}
         <div className="relative aspect-video overflow-hidden rounded-t-2xl">
           {course.thumbnail_url ? (
@@ -241,14 +241,14 @@ function CourseCard({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted/80 to-muted/40">
-              <BookOpen className="size-14 text-brand/20" />
+              <BookOpen className="size-14 text-emerald-500/20" />
             </div>
           )}
 
           {/* Terminé badge overlay */}
           {isComplete && (
             <div className="absolute right-3 top-3">
-              <Badge className="bg-brand text-brand-dark font-semibold">
+              <Badge className="bg-emerald-500 text-black font-semibold">
                 <CheckCircle2 className="size-3" />
                 Terminé
               </Badge>
@@ -258,7 +258,7 @@ function CourseCard({
 
         {/* ---- Content ---- */}
         <CardContent className="flex flex-1 flex-col p-4">
-          <h3 className="line-clamp-1 text-lg font-semibold transition-colors group-hover:text-brand">
+          <h3 className="line-clamp-1 text-lg font-semibold transition-colors group-hover:text-emerald-500">
             {course.title}
           </h3>
 
@@ -306,8 +306,8 @@ function CourseCard({
                 className={cn(
                   "h-full rounded-full transition-all duration-700 ease-out",
                   isComplete
-                    ? "bg-brand shadow-[0_0_8px_rgba(122,241,122,0.3)]"
-                    : "bg-brand/80",
+                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16, 185, 129,0.3)]"
+                    : "bg-emerald-500/80",
                 )}
                 style={{ width: `${stats.percent}%` }}
               />

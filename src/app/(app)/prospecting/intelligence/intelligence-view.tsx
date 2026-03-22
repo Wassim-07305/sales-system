@@ -121,7 +121,7 @@ interface Props {
 // ─── Constants ──────────────────────────────────────────────────────
 
 const RELEVANCE_COLORS: Record<string, string> = {
-  forte: "bg-brand/10 text-brand border-brand/20",
+  forte: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   moyenne: "bg-muted/60 text-muted-foreground border-border/50",
   faible: "bg-muted/40 text-muted-foreground/60 border-border/30",
 };
@@ -133,7 +133,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 const IMPACT_COLORS: Record<string, string> = {
-  positif: "bg-brand/10 text-brand border-brand/20",
+  positif: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   neutre: "bg-muted/40 text-muted-foreground/60 border-border/30",
   negatif: "bg-foreground/10 text-foreground border-foreground/20",
 };
@@ -242,7 +242,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
         title="Hunting Intelligence"
         description="IA de prospection, veille concurrentielle et insights marché"
       >
-        <Badge variant="outline" className="border-brand/30 text-brand gap-1">
+        <Badge variant="outline" className="border-emerald-500/30 text-emerald-500 gap-1">
           <Sparkles className="size-3 mr-1" />
           IA
         </Badge>
@@ -269,8 +269,8 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
           {!recommendations ? (
             <Card className="shadow-sm rounded-2xl">
               <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
-                <div className="rounded-2xl bg-brand/10 p-4">
-                  <Radar className="size-8 text-brand" />
+                <div className="rounded-2xl bg-emerald-500/10 p-4">
+                  <Radar className="size-8 text-emerald-500" />
                 </div>
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-semibold">
@@ -285,7 +285,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                 <Button
                   onClick={handleLoadRecommendations}
                   disabled={loadingRecommendations || isPending}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {loadingRecommendations ? (
                     <Loader2 className="size-4 mr-2 animate-spin" />
@@ -302,7 +302,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card className="shadow-sm rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Crosshair className="size-4 text-brand" />
+                    <Crosshair className="size-4 text-emerald-500" />
                     Profil prospect idéal
                   </CardTitle>
                 </CardHeader>
@@ -323,7 +323,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                               key={i}
                               className="text-sm flex items-start gap-2"
                             >
-                              <span className="text-brand mt-0.5">•</span>
+                              <span className="text-emerald-500 mt-0.5">•</span>
                               {c}
                             </li>
                           ),
@@ -367,7 +367,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                               key={i}
                               className="text-sm flex items-start gap-2"
                             >
-                              <span className="text-brand mt-0.5">•</span>
+                              <span className="text-emerald-500 mt-0.5">•</span>
                               {c}
                             </li>
                           ),
@@ -382,7 +382,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card className="shadow-sm rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Target className="size-4 text-brand" />
+                    <Target className="size-4 text-emerald-500" />
                     Stratégies de chasse
                   </CardTitle>
                 </CardHeader>
@@ -392,7 +392,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                       <Card key={i} className="bg-muted/50">
                         <CardContent className="pt-4 space-y-2">
                           <div className="flex items-center gap-2">
-                            <ArrowUpRight className="size-4 text-brand" />
+                            <ArrowUpRight className="size-4 text-emerald-500" />
                             <p className="text-sm font-medium">
                               {strategy.channel}
                             </p>
@@ -414,7 +414,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card className="shadow-sm rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Signal className="size-4 text-brand" />
+                    <Signal className="size-4 text-emerald-500" />
                     Signaux d&apos;intention détectés
                   </CardTitle>
                 </CardHeader>
@@ -594,7 +594,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                 </CardHeader>
                 <CardContent className="flex-1 space-y-3">
                   <div>
-                    <p className="text-xs font-medium text-brand mb-1">
+                    <p className="text-xs font-medium text-emerald-500 mb-1">
                       Forces
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -658,7 +658,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                   <div className="border-t px-6 py-4 space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-brand flex items-center gap-1">
+                        <p className="text-xs font-semibold text-emerald-500 flex items-center gap-1">
                           <ShieldAlert className="size-3" /> Forces
                         </p>
                         {analyses[comp.id].swot.strengths.map((s, i) => (
@@ -716,7 +716,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-brand">
+                      <p className="text-xs font-semibold text-emerald-500">
                         Nos différenciateurs
                       </p>
                       {analyses[comp.id].keyDifferentiators.map((d, i) => (
@@ -726,8 +726,8 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                       ))}
                     </div>
 
-                    <div className="p-3 rounded-xl bg-brand/5 border border-brand/20">
-                      <p className="text-xs font-semibold text-brand mb-1">
+                    <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                      <p className="text-xs font-semibold text-emerald-500 mb-1">
                         Recommandation
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -786,8 +786,8 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
           {!insights ? (
             <Card className="shadow-sm rounded-2xl">
               <CardContent className="flex flex-col items-center justify-center py-16 gap-4">
-                <div className="rounded-2xl bg-brand/10 p-4">
-                  <TrendingUp className="size-8 text-brand" />
+                <div className="rounded-2xl bg-emerald-500/10 p-4">
+                  <TrendingUp className="size-8 text-emerald-500" />
                 </div>
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-semibold">Insights Marché</h3>
@@ -799,7 +799,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
                 <Button
                   onClick={handleLoadInsights}
                   disabled={loadingInsights || isPending}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
                 >
                   {loadingInsights ? (
                     <Loader2 className="size-4 mr-2 animate-spin" />
@@ -816,7 +816,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card className="shadow-sm rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Radar className="size-4 text-brand" />
+                    <Radar className="size-4 text-emerald-500" />
                     Vue d&apos;ensemble du marché
                   </CardTitle>
                 </CardHeader>
@@ -831,7 +831,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card className="shadow-sm rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <TrendingUp className="size-4 text-brand" />
+                    <TrendingUp className="size-4 text-emerald-500" />
                     Tendances identifiées
                   </CardTitle>
                 </CardHeader>
@@ -864,7 +864,7 @@ export function IntelligenceView({ competitors: initialCompetitors }: Props) {
               <Card className="shadow-sm rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Lightbulb className="size-4 text-brand" />
+                    <Lightbulb className="size-4 text-emerald-500" />
                     Opportunités
                   </CardTitle>
                 </CardHeader>

@@ -52,7 +52,7 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-brand/10 text-brand border-brand/20",
+  Facile: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   Moyen: "bg-muted/60 text-muted-foreground border-border",
   Difficile: "bg-foreground/10 text-foreground border-border",
 };
@@ -125,7 +125,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="h-4 w-4 text-brand" />
+              <BarChart3 className="h-4 w-4 text-emerald-500" />
               <span className="text-xs text-muted-foreground">
                 Total sessions
               </span>
@@ -136,7 +136,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Star className="h-4 w-4 text-brand" />
+              <Star className="h-4 w-4 text-emerald-500" />
               <span className="text-xs text-muted-foreground">Score moyen</span>
             </div>
             <p className="text-2xl font-bold">
@@ -150,7 +150,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Trophy className="h-4 w-4 text-brand" />
+              <Trophy className="h-4 w-4 text-emerald-500" />
               <span className="text-xs text-muted-foreground">
                 Meilleure session
               </span>
@@ -167,7 +167,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
 
       {/* Available profiles */}
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <User className="h-5 w-5 text-brand" />
+        <User className="h-5 w-5 text-emerald-500" />
         Profils disponibles
       </h2>
 
@@ -186,7 +186,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
           {profiles.map((profile) => (
             <Card
               key={profile.id}
-              className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+              className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300"
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -219,7 +219,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
                 <Button
                   onClick={() => handleStart(profile.id)}
                   disabled={isPending}
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   {isPending && startingId === profile.id ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -238,7 +238,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
       {sessions.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-brand" />
+            <Clock className="h-5 w-5 text-emerald-500" />
             Sessions récentes
           </h2>
           <div className="space-y-2">
@@ -281,7 +281,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
                           variant="outline"
                           className={`text-xs ${
                             session.score >= 80
-                              ? "bg-brand/10 text-brand border-brand/20"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                               : session.score >= 60
                                 ? "bg-muted/60 text-muted-foreground border-border"
                                 : "bg-foreground/10 text-foreground border-border"
@@ -306,7 +306,7 @@ export function RoleplayView({ profiles, sessions }: Props) {
                         <Link href={`/roleplay/session/${session.id}`}>
                           <Button
                             size="sm"
-                            className="bg-brand text-brand-dark hover:bg-brand/90"
+                            className="bg-emerald-500 text-black hover:bg-emerald-400"
                           >
                             Reprendre
                           </Button>

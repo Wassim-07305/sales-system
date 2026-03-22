@@ -133,7 +133,7 @@ export function LessonFormDialog({
             <Button
               type="submit"
               disabled={saving || !title.trim()}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Creer

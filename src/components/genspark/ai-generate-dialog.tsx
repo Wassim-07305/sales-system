@@ -169,7 +169,7 @@ export function AiGenerateDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-brand" />
+            <Sparkles className="h-5 w-5 text-emerald-500" />
             Générer avec l&apos;IA
           </DialogTitle>
           <DialogDescription>
@@ -244,7 +244,7 @@ export function AiGenerateDialog({
               <Button
                 onClick={handleRapidGenerate}
                 disabled={!prompt.trim()}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
                 Générer
@@ -281,7 +281,7 @@ export function AiGenerateDialog({
                   <Button
                     onClick={handleLoadQuestions}
                     disabled={isLoadingQuestions || !guideTopic.trim()}
-                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     {isLoadingQuestions ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -322,7 +322,7 @@ export function AiGenerateDialog({
                   </Button>
                   <Button
                     onClick={handleGuideGenerate}
-                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Générer la présentation

@@ -161,8 +161,8 @@ function CustomWidgetCard({
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <Icon className="h-4.5 w-4.5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <Icon className="h-4.5 w-4.5 text-emerald-500" />
             </div>
             <p className="text-sm font-semibold">{data.label}</p>
           </div>
@@ -191,8 +191,8 @@ function CustomWidgetCard({
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-5">
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <Icon className="h-4.5 w-4.5 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <Icon className="h-4.5 w-4.5 text-emerald-500" />
             </div>
             <p className="text-sm font-semibold">{data.label}</p>
           </div>
@@ -296,10 +296,10 @@ export function AdminDashboard({
 
       {/* Welcome banner */}
       {isEmpty && (
-        <Card className="border-brand/20 bg-gradient-to-br from-brand/5 via-brand/3 to-transparent overflow-hidden relative">
+        <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-emerald-500/3 to-transparent overflow-hidden relative">
           <CardContent className="p-8 relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <div className="h-14 w-14 rounded-2xl bg-brand/15 flex items-center justify-center shrink-0">
+              <div className="h-14 w-14 rounded-2xl bg-emerald-500/15 flex items-center justify-center shrink-0">
                 <Sparkles className="h-7 w-7 text-muted-foreground" />
               </div>
               <div className="flex-1">
@@ -312,14 +312,14 @@ export function AdminDashboard({
                 </p>
               </div>
               <Link href="/crm">
-                <Button className="bg-brand text-brand-dark hover:bg-brand/90 gap-2">
+                <Button className="bg-emerald-500 text-black hover:bg-emerald-400 gap-2">
                   Accéder au CRM
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
           </CardContent>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
         </Card>
       )}
 
@@ -332,8 +332,8 @@ export function AdminDashboard({
               <Card className="h-full transition-all duration-200 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 group-hover:border-foreground/10 border-border/50">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                      <Icon className="h-5 w-5 text-brand" />
+                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                      <Icon className="h-5 w-5 text-emerald-500" />
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
                   </div>
@@ -356,8 +356,8 @@ export function AdminDashboard({
           <Card className="border-border/50">
             <CardContent className="p-5">
               <div className="flex items-center gap-2.5 mb-3">
-                <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <FileText className="h-4 w-4 text-brand" />
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <FileText className="h-4 w-4 text-emerald-500" />
                 </div>
                 <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                   Contrats ce mois
@@ -396,8 +396,8 @@ export function AdminDashboard({
             <Card className="border-border/50 h-full hover:shadow-md transition-all">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                    <DollarSign className="h-4 w-4 text-brand" />
+                  <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                    <DollarSign className="h-4 w-4 text-emerald-500" />
                   </div>
                   <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                     CA contrats signés
@@ -419,8 +419,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Zap className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Zap className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Deals récents
               </CardTitle>
@@ -497,8 +497,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Calendar className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Calendar className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Prochains RDV
               </CardTitle>
@@ -592,8 +592,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Users className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Users className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Pipeline Setters B2C
               </CardTitle>
@@ -674,8 +674,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <Trophy className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <Trophy className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Performance équipe
               </CardTitle>
@@ -720,7 +720,7 @@ export function AdminDashboard({
                     2: "text-orange-400",
                     3: "text-yellow-400",
                     4: "text-green-400",
-                    5: "text-brand",
+                    5: "text-emerald-500",
                   };
                   const noJournalToday =
                     setter.daysSinceJournal === null ||
@@ -791,7 +791,7 @@ export function AdminDashboard({
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-brand/50 rounded-full transition-all duration-500"
+                              className="h-full bg-emerald-500/50 rounded-full transition-all duration-500"
                               style={{ width: `${percent}%` }}
                             />
                           </div>
@@ -858,8 +858,8 @@ export function AdminDashboard({
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                  <AlertTriangle className="h-3.5 w-3.5 text-brand" />
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                  <AlertTriangle className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 Alertes
                 {data.alerts.length > 0 && (
@@ -873,8 +873,8 @@ export function AdminDashboard({
           <CardContent className="pt-0">
             {data.alerts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="h-12 w-12 rounded-2xl bg-brand/10 flex items-center justify-center mb-3">
-                  <Sparkles className="h-6 w-6 text-brand/60" />
+                <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-3">
+                  <Sparkles className="h-6 w-6 text-emerald-500/60" />
                 </div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Tout est à jour

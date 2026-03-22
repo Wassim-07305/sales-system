@@ -66,8 +66,8 @@ const BREAKDOWN_ITEMS = [
 function getScoreColor(score: number) {
   if (score < 40) return "#ef4444"; // red
   if (score < 70) return "#f97316"; // orange
-  if (score < 90) return "#7af17a"; // brand green
-  return "#7af17a"; // brand green with glow
+  if (score < 90) return "#10b981"; // brand green
+  return "#10b981"; // brand green with glow
 }
 
 function CircularGauge({
@@ -166,7 +166,7 @@ export function PlacementReadiness({ data, compact }: Props) {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-[#7af17a]" />
+          <Sparkles className="h-5 w-5 text-[#10b981]" />
           Indicateur de Placement
         </CardTitle>
       </CardHeader>

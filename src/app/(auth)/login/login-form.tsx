@@ -57,7 +57,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleLogin} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">
+        <Label htmlFor="email" className="text-sm font-medium text-zinc-300">
           Email
         </Label>
         <Input
@@ -68,17 +68,17 @@ export function LoginForm() {
           onChange={(e) => { setEmail(e.target.value); setError(null); }}
           required
           autoComplete="email"
-          className="h-11 rounded-xl bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
+          className="h-11 rounded-xl bg-white/[0.04] border-white/[0.08] text-white focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200 placeholder:text-zinc-600"
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-sm font-medium">
+          <Label htmlFor="password" className="text-sm font-medium text-zinc-300">
             Mot de passe
           </Label>
           <Link
             href="/forgot-password"
-            className="text-xs text-muted-foreground hover:text-brand transition-colors duration-200"
+            className="text-xs text-zinc-500 hover:text-emerald-400 transition-colors duration-200"
           >
             {"Mot de passe oublié ?"}
           </Link>
@@ -92,12 +92,12 @@ export function LoginForm() {
             onChange={(e) => { setPassword(e.target.value); setError(null); }}
             required
             autoComplete="current-password"
-            className="h-11 rounded-xl pr-11 bg-white border-border/60 focus:border-brand/50 focus:ring-brand/20 transition-all duration-200 placeholder:text-muted-foreground/50"
+            className="h-11 rounded-xl pr-11 bg-white/[0.04] border-white/[0.08] text-white focus:border-emerald-500/50 focus:ring-emerald-500/20 transition-all duration-200 placeholder:text-zinc-600"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
+            className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-xl text-zinc-600 hover:text-zinc-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors duration-200"
             tabIndex={-1}
             aria-label={
               showPassword
@@ -115,7 +115,7 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -124,7 +124,7 @@ export function LoginForm() {
         <Button
           type="submit"
           size="lg"
-          className="w-full h-12 rounded-xl bg-brand-dark hover:bg-brand-dark/90 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+          className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
           disabled={loading}
         >
           {loading ? (
@@ -138,15 +138,15 @@ export function LoginForm() {
 
       <div className="relative py-5">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border/50" />
+          <div className="w-full border-t border-white/[0.06]" />
         </div>
       </div>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-zinc-500">
         {"Pas encore de compte ? "}
         <Link
           href="/register"
-          className="text-brand-dark font-medium hover:text-brand transition-colors duration-200 underline-offset-4 hover:underline"
+          className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors duration-200 underline-offset-4 hover:underline"
         >
           {"Créer un compte"}
         </Link>

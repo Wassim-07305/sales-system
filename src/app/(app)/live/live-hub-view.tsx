@@ -143,7 +143,7 @@ export function LiveHubView({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-              <Radio className="w-7 h-7 text-brand" />
+              <Radio className="w-7 h-7 text-emerald-500" />
               Appels & Live
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -153,7 +153,7 @@ export function LiveHubView({
           {isAdmin && (
             <button
               onClick={() => setShowCreate(true)}
-              className="h-10 px-4 rounded-xl bg-brand text-zinc-900 text-sm font-semibold hover:bg-brand/90 transition-all flex items-center gap-2"
+              className="h-10 px-4 rounded-xl bg-emerald-500 text-zinc-900 text-sm font-semibold hover:bg-emerald-400 transition-all flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Nouvelle session
@@ -297,7 +297,7 @@ export function LiveHubView({
                     className={cn(
                       "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all text-center",
                       sessionType === opt.value
-                        ? "border-brand/50 bg-brand/10 text-brand"
+                        ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-500"
                         : "border-border bg-muted/50 text-muted-foreground hover:border-border",
                     )}
                   >
@@ -317,7 +317,7 @@ export function LiveHubView({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex: Session coaching"
-                  className="w-full h-10 px-3 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-brand/50"
+                  className="w-full h-10 px-3 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-emerald-500/50"
                 />
               </div>
 
@@ -331,7 +331,7 @@ export function LiveHubView({
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Details de la session..."
-                  className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-brand/50 resize-none"
+                  className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-emerald-500/50 resize-none"
                 />
               </div>
 
@@ -344,7 +344,7 @@ export function LiveHubView({
                   <select
                     value={guestId}
                     onChange={(e) => setGuestId(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl bg-muted border border-border text-foreground text-sm focus:outline-none focus:border-brand/50"
+                    className="w-full h-10 px-3 rounded-xl bg-muted border border-border text-foreground text-sm focus:outline-none focus:border-emerald-500/50"
                   >
                     <option value="">Choisir un participant...</option>
                     {profiles
@@ -369,7 +369,7 @@ export function LiveHubView({
               <button
                 onClick={handleCreate}
                 disabled={creating || !title.trim()}
-                className="flex-1 h-10 rounded-xl bg-brand text-zinc-900 text-sm font-semibold hover:bg-brand/90 transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                className="flex-1 h-10 rounded-xl bg-emerald-500 text-zinc-900 text-sm font-semibold hover:bg-emerald-400 transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               >
                 {creating ? (
                   <>
@@ -481,7 +481,7 @@ function SessionCard({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-brand/20 flex items-center justify-center text-[10px] font-semibold text-brand uppercase">
+                    <div className="w-full h-full rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px] font-semibold text-emerald-500 uppercase">
                       {p.full_name.charAt(0)}
                     </div>
                   )}
@@ -517,7 +517,7 @@ function SessionCard({
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full rounded-full bg-brand/20 flex items-center justify-center text-[9px] font-semibold text-brand uppercase">
+                        <div className="w-full h-full rounded-full bg-emerald-500/20 flex items-center justify-center text-[9px] font-semibold text-emerald-500 uppercase">
                           {p.full_name.charAt(0)}
                         </div>
                       )}
@@ -547,7 +547,7 @@ function SessionCard({
           onClick={onJoin}
           className={cn(
             "flex-1 h-9 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5",
-            "bg-brand text-zinc-900 hover:bg-brand/90",
+            "bg-emerald-500 text-zinc-900 hover:bg-emerald-400",
           )}
         >
           {isLive ? (

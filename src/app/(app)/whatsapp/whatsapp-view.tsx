@@ -266,7 +266,7 @@ export function WhatsAppView({
             <Link href="/whatsapp/settings">
               <Button
                 size="sm"
-                className="bg-brand text-brand-dark hover:bg-brand/90 rounded-xl font-medium"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl font-medium"
               >
                 Connecter
               </Button>
@@ -337,7 +337,7 @@ export function WhatsAppView({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold shrink-0">
                       {conv.prospect?.name?.charAt(0) || "?"}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -346,7 +346,7 @@ export function WhatsAppView({
                           {conv.prospect?.name || "Inconnu"}
                         </span>
                         {conv.unread_count > 0 && (
-                          <Badge className="bg-brand text-brand-dark text-[10px] h-5 min-w-5 flex items-center justify-center">
+                          <Badge className="bg-emerald-500 text-black text-[10px] h-5 min-w-5 flex items-center justify-center">
                             {conv.unread_count}
                           </Badge>
                         )}
@@ -396,7 +396,7 @@ export function WhatsAppView({
                   >
                     <X className="h-5 w-5" />
                   </button>
-                  <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                  <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold">
                     {selectedConv.prospect?.name?.charAt(0) || "?"}
                   </div>
                   <div>
@@ -429,7 +429,7 @@ export function WhatsAppView({
                     <div
                       className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
                         msg.direction === "outbound"
-                          ? "bg-brand text-brand-dark rounded-br-md"
+                          ? "bg-emerald-500 text-black rounded-br-md"
                           : "bg-muted rounded-bl-md"
                       }`}
                     >
@@ -441,7 +441,7 @@ export function WhatsAppView({
                       <p
                         className={`text-[10px] mt-1 ${
                           msg.direction === "outbound"
-                            ? "text-brand-dark/60"
+                            ? "text-black/60"
                             : "text-muted-foreground"
                         }`}
                       >
@@ -471,7 +471,7 @@ export function WhatsAppView({
                 <Button
                   size="sm"
                   onClick={handleSend}
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400"
                   disabled={isPending || !messageText.trim()}
                 >
                   <Send className="h-4 w-4" />

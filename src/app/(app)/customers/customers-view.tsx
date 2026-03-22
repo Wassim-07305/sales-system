@@ -223,7 +223,7 @@ export function CustomersView({ clients, testimonials }: Props) {
                     onClick={() => setSelectedClient(client)}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold">
+                      <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold">
                         {client.full_name?.charAt(0) || "?"}
                       </div>
                       <div>
@@ -318,7 +318,7 @@ export function CustomersView({ clients, testimonials }: Props) {
                     {(t.status === "pending" || t.status === "approved") && (
                       <Button
                         size="sm"
-                        className="bg-brand text-brand-dark hover:bg-brand/90"
+                        className="bg-emerald-500 text-black hover:bg-emerald-400"
                         onClick={() =>
                           handleTestimonialAction(t.id, "published")
                         }
@@ -364,7 +364,7 @@ export function CustomersView({ clients, testimonials }: Props) {
               </SheetHeader>
               <div className="mt-6 space-y-6">
                 <div className="text-center">
-                  <div className="h-16 w-16 rounded-full bg-brand/10 flex items-center justify-center text-brand text-2xl font-bold mx-auto mb-3">
+                  <div className="h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-2xl font-bold mx-auto mb-3">
                     {selectedClient.full_name?.charAt(0) || "?"}
                   </div>
                   <p className="text-sm text-muted-foreground">

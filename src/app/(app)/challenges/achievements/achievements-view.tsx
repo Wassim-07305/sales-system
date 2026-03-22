@@ -113,11 +113,11 @@ export function AchievementsView({ achievements, totalPoints }: Props) {
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card className="bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
+        <Card className="bg-gradient-to-r from-zinc-950 to-zinc-950/80 text-white border-0">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-full bg-brand/20 border-2 border-brand flex items-center justify-center">
-                <Trophy className="h-5 w-5 text-brand" />
+              <div className="h-11 w-11 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
+                <Trophy className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-white/60 text-xs">Achievements debloques</p>
@@ -132,11 +132,11 @@ export function AchievementsView({ achievements, totalPoints }: Props) {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
+        <Card className="bg-gradient-to-r from-zinc-950 to-zinc-950/80 text-white border-0">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-full bg-brand/20 border-2 border-brand flex items-center justify-center">
-                <Star className="h-5 w-5 text-brand" />
+              <div className="h-11 w-11 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
+                <Star className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-white/60 text-xs">Points gagnes</p>
@@ -148,11 +148,11 @@ export function AchievementsView({ achievements, totalPoints }: Props) {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-brand-dark to-brand-dark/80 text-white border-0">
+        <Card className="bg-gradient-to-r from-zinc-950 to-zinc-950/80 text-white border-0">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-full bg-brand/20 border-2 border-brand flex items-center justify-center">
-                <Medal className="h-5 w-5 text-brand" />
+              <div className="h-11 w-11 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
+                <Medal className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
                 <p className="text-white/60 text-xs">Points totaux</p>
@@ -169,7 +169,7 @@ export function AchievementsView({ achievements, totalPoints }: Props) {
       {recentlyUnlocked.length > 0 && (
         <div className="mb-6">
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-            <Star className="h-5 w-5 text-brand" />
+            <Star className="h-5 w-5 text-emerald-500" />
             Recemment debloques
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">

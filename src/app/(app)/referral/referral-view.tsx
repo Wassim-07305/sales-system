@@ -154,11 +154,11 @@ export function ReferralView({
       />
 
       {/* Referral link card */}
-      <Card className="mb-6 bg-gradient-to-br from-brand/20 to-brand/5 border-brand/20">
+      <Card className="mb-6 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border-emerald-500/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-lg bg-brand/20 flex items-center justify-center ring-1 ring-brand/20">
-              <Gift className="h-6 w-6 text-brand" />
+            <div className="h-12 w-12 rounded-lg bg-emerald-500/20 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <Gift className="h-6 w-6 text-emerald-500" />
             </div>
             <div>
               <h3 className="text-lg font-bold">Votre lien de parrainage</h3>
@@ -175,7 +175,7 @@ export function ReferralView({
             />
             <Button
               onClick={copyLink}
-              className="bg-brand text-brand-dark hover:bg-brand/90 shrink-0"
+              className="bg-emerald-500 text-black hover:bg-emerald-400 shrink-0"
             >
               <Copy className="h-4 w-4 mr-1" />
               Copier
@@ -260,8 +260,8 @@ export function ReferralView({
               <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                 Recompenses
               </span>
-              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <DollarSign className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <DollarSign className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
             <p className="text-2xl font-bold tracking-tight">
@@ -275,8 +275,8 @@ export function ReferralView({
       <Card className="mb-6 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-              <UserPlus className="h-4 w-4 text-brand" />
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <UserPlus className="h-4 w-4 text-emerald-500" />
             </div>
             Inviter un contact
           </CardTitle>

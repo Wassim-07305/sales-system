@@ -101,7 +101,7 @@ export function AIScriptsView({
       {isGenerating && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <RefreshCw className="mb-4 h-10 w-10 animate-spin text-[#7af17a]" />
+            <RefreshCw className="mb-4 h-10 w-10 animate-spin text-[#10b981]" />
             <p className="text-lg font-medium">Génération en cours...</p>
             <p className="text-sm text-muted-foreground">
               L&apos;IA analyse votre profil et crée votre script personnalisé
@@ -129,10 +129,10 @@ export function AIScriptsView({
       {!isGenerating && script && (
         <div className="space-y-4">
           {/* Accroche */}
-          <Card className="border-[#7af17a]/20">
+          <Card className="border-[#10b981]/20">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="h-4 w-4 text-[#7af17a]" />
+                <Sparkles className="h-4 w-4 text-[#10b981]" />
                 Accroche
               </CardTitle>
             </CardHeader>
@@ -144,7 +144,7 @@ export function AIScriptsView({
                   className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {copiedKey === "accroche" ? (
-                    <Check className="h-4 w-4 text-[#7af17a]" />
+                    <Check className="h-4 w-4 text-[#10b981]" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
@@ -258,7 +258,7 @@ export function AIScriptsView({
                   className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {copiedKey === "cta" ? (
-                    <Check className="h-4 w-4 text-[#7af17a]" />
+                    <Check className="h-4 w-4 text-[#10b981]" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}

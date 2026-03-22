@@ -108,11 +108,11 @@ export function MicroLearningView({
         await completeMicroLesson(lessonId);
         setLocalProgress((prev) => ({ ...prev, [lessonId]: true }));
         toast.success("Micro-lecon terminee !", {
-          style: { background: "#14080e", color: "#fff" },
+          style: { background: "#09090b", color: "#fff" },
         });
       } catch {
         toast.error("Erreur lors de la validation", {
-          style: { background: "#14080e", color: "#fff" },
+          style: { background: "#09090b", color: "#fff" },
         });
       }
     });
@@ -182,9 +182,9 @@ export function MicroLearningView({
 
       {/* Daily lesson hero card */}
       {dailyLesson && !localProgress[dailyLesson.id] && (
-        <Card className="mb-8 overflow-hidden rounded-2xl border-brand/30 bg-gradient-to-br from-brand/5 to-transparent shadow-lg shadow-brand/5">
+        <Card className="mb-8 overflow-hidden rounded-2xl border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent shadow-lg shadow-emerald-500/5">
           <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-brand mb-3">
+            <div className="flex items-center gap-2 text-emerald-500 mb-3">
               <Sparkles className="size-5" />
               <span className="text-sm font-semibold uppercase tracking-wider">
                 Lecon du jour
@@ -223,7 +223,7 @@ export function MicroLearningView({
                   <Button
                     onClick={() => handleComplete(dailyLesson.id)}
                     disabled={isPending}
-                    className="bg-brand text-brand-dark hover:bg-brand/90"
+                    className="bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     <CheckCircle2 className="size-4" />
                     Marquer comme terminee
@@ -239,7 +239,7 @@ export function MicroLearningView({
             ) : (
               <Button
                 onClick={() => setExpandedLessonId(dailyLesson.id)}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
               >
                 <Zap className="size-4" />
                 Commencer
@@ -293,7 +293,7 @@ export function MicroLearningView({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             {isCompleted && (
-                              <CheckCircle2 className="size-4 shrink-0 text-brand" />
+                              <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
                             )}
                             <h5
                               className={cn(
@@ -335,7 +335,7 @@ export function MicroLearningView({
                               size="sm"
                               onClick={() => handleComplete(lesson.id)}
                               disabled={isPending}
-                              className="bg-brand text-brand-dark hover:bg-brand/90"
+                              className="bg-emerald-500 text-black hover:bg-emerald-400"
                             >
                               <CheckCircle2 className="size-4" />
                               Marquer comme terminee

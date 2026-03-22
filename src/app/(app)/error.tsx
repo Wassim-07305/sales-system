@@ -36,7 +36,7 @@ export default function AppError({
           <div className="flex items-center justify-center gap-3">
             <Button
               onClick={reset}
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Réessayer

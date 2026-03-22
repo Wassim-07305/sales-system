@@ -91,8 +91,8 @@ export function SettingsView({
         <Card className="border-border/50">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                <Settings className="h-4 w-4 text-brand" />
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                <Settings className="h-4 w-4 text-emerald-500" />
               </div>
               Général
             </CardTitle>
@@ -118,7 +118,7 @@ export function SettingsView({
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isSaving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

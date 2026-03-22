@@ -419,13 +419,13 @@ export function TeamJournalView({ journals, missingSetters, setters }: Props) {
             <p className="text-2xl font-bold">{stats.totalDeals}</p>
           </CardContent>
         </Card>
-        <Card className="border-brand/20 bg-brand/5">
+        <Card className="border-emerald-500/20 bg-emerald-500/5">
           <CardContent className="p-4">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-              <DollarSign className="h-3.5 w-3.5 text-brand" />
+              <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
               CA généré
             </div>
-            <p className="text-2xl font-bold text-brand">
+            <p className="text-2xl font-bold text-emerald-500">
               {stats.totalRevenue.toLocaleString("fr-FR")} €
             </p>
           </CardContent>
@@ -461,7 +461,7 @@ export function TeamJournalView({ journals, missingSetters, setters }: Props) {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center text-sm font-bold text-brand ring-1 ring-brand/20">
+                      <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-sm font-bold text-emerald-500 ring-1 ring-emerald-500/20">
                         {(journal.profile?.full_name || "?")
                           .charAt(0)
                           .toUpperCase()}

@@ -147,7 +147,7 @@ function ControlButton({
         !active && dangerWhenInactive
           ? "bg-red-600/20 text-red-400 hover:bg-red-600/30"
           : active && highlightWhenActive
-            ? "bg-[#7af17a]/20 text-[#7af17a] hover:bg-[#7af17a]/30"
+            ? "bg-[#10b981]/20 text-[#10b981] hover:bg-[#10b981]/30"
             : "bg-muted text-foreground hover:bg-muted/80",
       )}
     >

@@ -143,9 +143,9 @@ export function HelpView({
             <div className="grid gap-3">
               {filteredArticles.map((article) => (
                 <Link key={article.id} href={`/help/${article.id}`}>
-                  <Card className="hover:border-[#7af17a]/50 transition-colors cursor-pointer">
+                  <Card className="hover:border-[#10b981]/50 transition-colors cursor-pointer">
                     <CardContent className="flex items-start gap-4 py-4">
-                      <BookOpen className="size-5 text-[#7af17a] mt-0.5 shrink-0" />
+                      <BookOpen className="size-5 text-[#10b981] mt-0.5 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-medium truncate">
@@ -177,15 +177,15 @@ export function HelpView({
         <>
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <BookOpen className="size-5 text-[#7af17a]" />
+              <BookOpen className="size-5 text-[#10b981]" />
               Articles populaires
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {popularArticles.map((article) => (
                 <Link key={article.id} href={`/help/${article.id}`}>
-                  <Card className="hover:border-[#7af17a]/50 transition-colors cursor-pointer h-full">
+                  <Card className="hover:border-[#10b981]/50 transition-colors cursor-pointer h-full">
                     <CardContent className="flex items-start gap-3 py-4">
-                      <BookOpen className="size-5 text-[#7af17a] mt-0.5 shrink-0" />
+                      <BookOpen className="size-5 text-[#10b981] mt-0.5 shrink-0" />
                       <div className="min-w-0">
                         <h3 className="font-medium text-sm leading-snug mb-1">
                           {article.title}
@@ -210,7 +210,7 @@ export function HelpView({
                 return (
                   <Card
                     key={category.id}
-                    className="hover:border-[#7af17a]/50 transition-colors cursor-pointer"
+                    className="hover:border-[#10b981]/50 transition-colors cursor-pointer"
                     onClick={() => {
                       setSelectedCategory(category.id);
                       setSearch("");
@@ -218,8 +218,8 @@ export function HelpView({
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center size-10 rounded-lg bg-[#7af17a]/10">
-                          <Icon className="size-5 text-[#7af17a]" />
+                        <div className="flex items-center justify-center size-10 rounded-lg bg-[#10b981]/10">
+                          <Icon className="size-5 text-[#10b981]" />
                         </div>
                         <div>
                           <CardTitle className="text-sm">
@@ -245,7 +245,7 @@ export function HelpView({
           {/* FAQ section */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <HelpCircle className="size-5 text-[#7af17a]" />
+              <HelpCircle className="size-5 text-[#10b981]" />
               Questions fréquentes
             </h2>
             <Card>
@@ -267,10 +267,10 @@ export function HelpView({
           </div>
 
           {/* Contact support */}
-          <Card className="border-[#7af17a]/30 bg-[#7af17a]/5">
+          <Card className="border-[#10b981]/30 bg-[#10b981]/5">
             <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-6">
-              <div className="flex items-center justify-center size-12 rounded-full bg-[#7af17a]/10">
-                <Mail className="size-6 text-[#7af17a]" />
+              <div className="flex items-center justify-center size-12 rounded-full bg-[#10b981]/10">
+                <Mail className="size-6 text-[#10b981]" />
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <h3 className="font-semibold mb-1">
@@ -282,7 +282,7 @@ export function HelpView({
                   heures.
                 </p>
               </div>
-              <Button className="bg-[#7af17a] text-[#14080e] hover:bg-[#7af17a]/90">
+              <Button className="bg-[#10b981] text-[#09090b] hover:bg-[#10b981]/90">
                 <Mail className="size-4" />
                 Contacter le support
               </Button>

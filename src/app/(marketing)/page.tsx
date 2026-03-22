@@ -141,7 +141,7 @@ function FloatingParticles() {
       {PARTICLE_DATA.map((p, i) => (
         <div
           key={i}
-          className="absolute rounded-full bg-[#7af17a]/30"
+          className="absolute rounded-full bg-[#10b981]/30"
           style={{
             width: `${p.width}px`,
             height: `${p.height}px`,
@@ -164,7 +164,7 @@ function FloatingParticles() {
 function GlowCard({
   children,
   className = "",
-  glowColor = "rgba(122, 241, 122, 0.08)",
+  glowColor = "rgba(16, 185, 129, 0.08)",
 }: {
   children: ReactNode;
   className?: string;
@@ -227,7 +227,7 @@ function GradientBorderCard({
           className="absolute inset-0 rounded-2xl opacity-60"
           style={{
             background:
-              "conic-gradient(from var(--gradient-angle, 0deg), #7af17a, #3b82f6, #8b5cf6, #7af17a)",
+              "conic-gradient(from var(--gradient-angle, 0deg), #10b981, #3b82f6, #8b5cf6, #10b981)",
             animation: "rotateGradient 4s linear infinite",
           }}
         />
@@ -473,9 +473,9 @@ function DashboardMockup() {
   return (
     <div className="relative">
       {/* Outer glow */}
-      <div className="absolute -inset-4 rounded-3xl bg-gradient-to-b from-[#7af17a]/[0.06] via-transparent to-transparent blur-xl" />
+      <div className="absolute -inset-4 rounded-3xl bg-gradient-to-b from-[#10b981]/[0.06] via-transparent to-transparent blur-xl" />
 
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent p-px shadow-[0_0_80px_rgba(122,241,122,0.06)]">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent p-px shadow-[0_0_80px_rgba(16, 185, 129,0.06)]">
         <div className="overflow-hidden rounded-[15px] bg-[#0F0F11]">
           {/* Top bar */}
           <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
@@ -493,13 +493,13 @@ function DashboardMockup() {
           <div className="grid grid-cols-12 gap-3 p-4">
             {/* Sidebar mock */}
             <div className="col-span-2 hidden space-y-2 lg:block">
-              <div className="h-3 w-16 rounded bg-[#7af17a]/20" />
+              <div className="h-3 w-16 rounded bg-[#10b981]/20" />
               <div className="mt-4 space-y-2">
                 {[...Array(6)].map((_, i) => (
                   <div
                     key={i}
                     className={`h-2.5 rounded transition-all duration-1000 ${
-                      i === 0 ? "w-full bg-[#7af17a]/15" : "w-3/4 bg-white/[0.04]"
+                      i === 0 ? "w-full bg-[#10b981]/15" : "w-3/4 bg-white/[0.04]"
                     }`}
                     style={{ animationDelay: `${i * 100}ms` }}
                   />
@@ -525,7 +525,7 @@ function DashboardMockup() {
                     <div className="mt-1 flex items-center gap-1">
                       <div className="h-1 flex-1 rounded-full bg-white/[0.04]">
                         <div
-                          className="h-1 rounded-full bg-[#7af17a]/40 transition-all duration-1000"
+                          className="h-1 rounded-full bg-[#10b981]/40 transition-all duration-1000"
                           style={{ width: `${[72, 58, 82, 65][i]}%` }}
                         />
                       </div>
@@ -539,7 +539,7 @@ function DashboardMockup() {
                 <div className="mb-2 flex items-center justify-between">
                   <div className="text-[10px] font-medium text-white/40">Performance</div>
                   <div className="flex gap-2">
-                    <div className="h-1.5 w-6 rounded bg-[#7af17a]/30" />
+                    <div className="h-1.5 w-6 rounded bg-[#10b981]/30" />
                     <div className="h-1.5 w-6 rounded bg-blue-500/30" />
                   </div>
                 </div>
@@ -548,7 +548,7 @@ function DashboardMockup() {
                     (h, i) => (
                       <div key={i} className="flex flex-1 flex-col gap-0.5">
                         <div
-                          className="rounded-t bg-gradient-to-t from-[#7af17a]/10 to-[#7af17a]/30 transition-all duration-1000"
+                          className="rounded-t bg-gradient-to-t from-[#10b981]/10 to-[#10b981]/30 transition-all duration-1000"
                           style={{
                             height: `${h}%`,
                             animationDelay: `${i * 50}ms`,
@@ -621,7 +621,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white antialiased selection:bg-[#7af17a]/20 selection:text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white antialiased selection:bg-[#10b981]/20 selection:text-white">
       {/* ── Global CSS animations ── */}
       <style>{`
         @keyframes floatParticle {
@@ -719,7 +719,7 @@ export default function LandingPage() {
               alt="Sales System"
               width={32}
               height={32}
-              className="rounded-lg shadow-[0_0_12px_rgba(122,241,122,0.3)] transition-shadow duration-300 group-hover:shadow-[0_0_20px_rgba(122,241,122,0.5)]"
+              className="rounded-lg shadow-[0_0_12px_rgba(16, 185, 129,0.3)] transition-shadow duration-300 group-hover:shadow-[0_0_20px_rgba(16, 185, 129,0.5)]"
             />
             <span className="font-serif text-lg font-bold tracking-tight">
               Sales System
@@ -752,9 +752,9 @@ export default function LandingPage() {
             <Link href="/register" className="hidden sm:inline-flex">
               <button
                 type="button"
-                className="group relative flex h-9 items-center gap-1.5 overflow-hidden rounded-lg bg-[#7af17a] px-4 text-[13px] font-semibold text-[#0a0a0a] transition-all duration-300 hover:shadow-[0_0_25px_rgba(122,241,122,0.3)]"
+                className="group relative flex h-9 items-center gap-1.5 overflow-hidden rounded-lg bg-[#10b981] px-4 text-[13px] font-semibold text-[#0a0a0a] transition-all duration-300 hover:shadow-[0_0_25px_rgba(16, 185, 129,0.3)]"
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-[#7af17a] via-[#b0f4b0] to-[#7af17a] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="absolute inset-0 bg-gradient-to-r from-[#10b981] via-[#b0f4b0] to-[#10b981] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <span className="relative flex items-center gap-1.5">
                   Commencer
                   <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
@@ -812,7 +812,7 @@ export default function LandingPage() {
               <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#7af17a] py-2.5 text-[15px] font-semibold text-[#0a0a0a] transition-colors hover:bg-[#8ff58f]"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#10b981] py-2.5 text-[15px] font-semibold text-[#0a0a0a] transition-colors hover:bg-[#8ff58f]"
                 >
                   Commencer
                   <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -834,7 +834,7 @@ export default function LandingPage() {
             aria-hidden="true"
           >
             <div
-              className="absolute left-1/2 top-0 h-[700px] w-[1000px] -translate-x-1/2 rounded-full bg-[#7af17a]/[0.04] blur-[160px]"
+              className="absolute left-1/2 top-0 h-[700px] w-[1000px] -translate-x-1/2 rounded-full bg-[#10b981]/[0.04] blur-[160px]"
               style={{ animation: "pulseGlow 6s ease-in-out infinite" }}
             />
             <div
@@ -847,7 +847,7 @@ export default function LandingPage() {
             />
             {/* Extra orb for depth */}
             <div
-              className="absolute right-1/3 bottom-1/4 h-[200px] w-[200px] rounded-full bg-[#7af17a]/[0.02] blur-[100px]"
+              className="absolute right-1/3 bottom-1/4 h-[200px] w-[200px] rounded-full bg-[#10b981]/[0.02] blur-[100px]"
               style={{ animation: "pulseGlow 7s ease-in-out infinite 3s" }}
             />
           </div>
@@ -863,8 +863,8 @@ export default function LandingPage() {
                   heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
               >
-                <Sparkles className="size-3.5 text-[#7af17a]" aria-hidden="true" />
-                <span className="flex size-1.5 rounded-full bg-[#7af17a] shadow-[0_0_6px_rgba(122,241,122,0.6)]" style={{ animation: "pulseGlow 2s ease-in-out infinite" }} />
+                <Sparkles className="size-3.5 text-[#10b981]" aria-hidden="true" />
+                <span className="flex size-1.5 rounded-full bg-[#10b981] shadow-[0_0_6px_rgba(16, 185, 129,0.6)]" style={{ animation: "pulseGlow 2s ease-in-out infinite" }} />
                 Plateforme n&deg;1 pour les équipes de vente
               </div>
 
@@ -878,13 +878,13 @@ export default function LandingPage() {
                 La plateforme{" "}
                 <span className="relative inline-block">
                   <span
-                    className="text-shimmer bg-gradient-to-r from-[#7af17a] via-[#b0f4b0] via-[#7af17a] to-[#b0f4b0] bg-clip-text text-transparent"
+                    className="text-shimmer bg-gradient-to-r from-[#10b981] via-[#b0f4b0] via-[#10b981] to-[#b0f4b0] bg-clip-text text-transparent"
                     style={{ backgroundSize: "200% auto" }}
                   >
                     tout-en-un
                   </span>
                   <span
-                    className="absolute -bottom-1 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#7af17a]/50 to-transparent"
+                    className="absolute -bottom-1 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent"
                     aria-hidden="true"
                     style={{ animation: "borderPulse 3s ease-in-out infinite" }}
                   />
@@ -914,7 +914,7 @@ export default function LandingPage() {
                 <Link href="/register">
                   <button
                     type="button"
-                    className="group relative flex h-12 items-center gap-2 overflow-hidden rounded-xl bg-[#7af17a] px-7 text-[15px] font-semibold text-[#0a0a0a] shadow-[0_0_40px_rgba(122,241,122,0.15),0_1px_2px_rgba(0,0,0,0.2)] transition-all duration-300 hover:shadow-[0_0_60px_rgba(122,241,122,0.3)] active:scale-[0.98]"
+                    className="group relative flex h-12 items-center gap-2 overflow-hidden rounded-xl bg-[#10b981] px-7 text-[15px] font-semibold text-[#0a0a0a] shadow-[0_0_40px_rgba(16, 185, 129,0.15),0_1px_2px_rgba(0,0,0,0.2)] transition-all duration-300 hover:shadow-[0_0_60px_rgba(16, 185, 129,0.3)] active:scale-[0.98]"
                   >
                     {/* Shine effect */}
                     <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
@@ -946,17 +946,17 @@ export default function LandingPage() {
                 style={{ transitionDelay: "800ms" }}
               >
                 <span className="flex items-center gap-1.5">
-                  <Shield className="size-3.5 text-[#7af17a]/60" aria-hidden="true" />
+                  <Shield className="size-3.5 text-[#10b981]/60" aria-hidden="true" />
                   Sans engagement
                 </span>
                 <span className="h-3 w-px bg-white/10" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
-                  <Clock className="size-3.5 text-[#7af17a]/60" aria-hidden="true" />
+                  <Clock className="size-3.5 text-[#10b981]/60" aria-hidden="true" />
                   Setup en 5 min
                 </span>
                 <span className="h-3 w-px bg-white/10" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
-                  <Zap className="size-3.5 text-[#7af17a]/60" aria-hidden="true" />
+                  <Zap className="size-3.5 text-[#10b981]/60" aria-hidden="true" />
                   Accès immédiat
                 </span>
               </div>
@@ -1023,8 +1023,8 @@ export default function LandingPage() {
                     className="p-8 text-center"
                     style={{ transitionDelay: `${i * 150}ms` }}
                   >
-                    <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#7af17a]/[0.08]">
-                      <stat.icon className="size-5 text-[#7af17a]/70" aria-hidden="true" />
+                    <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#10b981]/[0.08]">
+                      <stat.icon className="size-5 text-[#10b981]/70" aria-hidden="true" />
                     </div>
                     <div className="font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl">
                       <AnimatedCounter
@@ -1057,7 +1057,7 @@ export default function LandingPage() {
               isInView={featuresSection.isInView}
               className="mx-auto max-w-2xl text-center"
             >
-              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
+              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#10b981]/70">
                 Fonctionnalités
               </p>
               <h2
@@ -1110,7 +1110,7 @@ export default function LandingPage() {
                       </p>
                       {feature.size === "large" && (
                         <div className="mt-5">
-                          <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#7af17a]/70 transition-colors group-hover:text-[#7af17a]">
+                          <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#10b981]/70 transition-colors group-hover:text-[#10b981]">
                             En savoir plus
                             <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
                           </span>
@@ -1135,7 +1135,7 @@ export default function LandingPage() {
         >
           {/* Background decoration */}
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div className="absolute left-1/2 top-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#7af17a]/[0.02] blur-[160px]" />
+            <div className="absolute left-1/2 top-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#10b981]/[0.02] blur-[160px]" />
           </div>
 
           <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -1143,7 +1143,7 @@ export default function LandingPage() {
               isInView={howSection.isInView}
               className="mx-auto max-w-2xl text-center"
             >
-              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
+              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#10b981]/70">
                 Comment ça marche
               </p>
               <h2
@@ -1163,10 +1163,10 @@ export default function LandingPage() {
                 className="pointer-events-none absolute top-16 left-[16.66%] hidden h-px w-[66.66%] md:block"
                 aria-hidden="true"
               >
-                <div className="h-full w-full bg-gradient-to-r from-[#7af17a]/30 via-[#7af17a]/15 to-[#7af17a]/30" />
+                <div className="h-full w-full bg-gradient-to-r from-[#10b981]/30 via-[#10b981]/15 to-[#10b981]/30" />
                 {/* Animated dot on the line */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-[#7af17a] shadow-[0_0_10px_rgba(122,241,122,0.5)]"
+                  className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-[#10b981] shadow-[0_0_10px_rgba(16, 185, 129,0.5)]"
                   style={{
                     animation: "marquee 4s ease-in-out infinite alternate",
                     left: "0%",
@@ -1183,13 +1183,13 @@ export default function LandingPage() {
                 >
                   <GlowCard className="hover-lift">
                     <div className="p-8">
-                      <div className="mx-auto mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7af17a]/10 to-[#7af17a]/[0.02] border border-[#7af17a]/10">
+                      <div className="mx-auto mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/[0.02] border border-[#10b981]/10">
                         <step.icon
-                          className="size-6 text-[#7af17a]/80"
+                          className="size-6 text-[#10b981]/80"
                           aria-hidden="true"
                         />
                       </div>
-                      <div className="mb-3 text-[12px] font-bold tracking-[0.2em] text-[#7af17a]/50">
+                      <div className="mb-3 text-[12px] font-bold tracking-[0.2em] text-[#10b981]/50">
                         {step.number}
                       </div>
                       <h3 className="text-lg font-semibold tracking-tight">
@@ -1220,7 +1220,7 @@ export default function LandingPage() {
               isInView={pricingSection.isInView}
               className="mx-auto max-w-2xl text-center"
             >
-              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
+              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#10b981]/70">
                 Tarifs
               </p>
               <h2
@@ -1256,7 +1256,7 @@ export default function LandingPage() {
                   }`}
                 >
                   Annuel
-                  <span className="rounded-full bg-[#7af17a]/15 px-2 py-0.5 text-[11px] font-semibold text-[#7af17a]">
+                  <span className="rounded-full bg-[#10b981]/15 px-2 py-0.5 text-[11px] font-semibold text-[#10b981]">
                     -20%
                   </span>
                 </button>
@@ -1281,8 +1281,8 @@ export default function LandingPage() {
                     {plan.highlighted && (
                       <>
                         {/* Top glow */}
-                        <div className="absolute -top-20 left-1/2 h-40 w-80 -translate-x-1/2 rounded-full bg-[#7af17a]/[0.06] blur-[60px]" />
-                        <div className="mb-5 inline-flex items-center rounded-full bg-[#7af17a]/10 px-3 py-1 text-[12px] font-semibold text-[#7af17a]">
+                        <div className="absolute -top-20 left-1/2 h-40 w-80 -translate-x-1/2 rounded-full bg-[#10b981]/[0.06] blur-[60px]" />
+                        <div className="mb-5 inline-flex items-center rounded-full bg-[#10b981]/10 px-3 py-1 text-[12px] font-semibold text-[#10b981]">
                           <Sparkles className="mr-1.5 size-3" aria-hidden="true" />
                           {plan.badge}
                         </div>
@@ -1330,7 +1330,7 @@ export default function LandingPage() {
                           <Check
                             className={`mt-0.5 size-4 shrink-0 ${
                               plan.highlighted
-                                ? "text-[#7af17a]/70"
+                                ? "text-[#10b981]/70"
                                 : "text-white/25"
                             }`}
                             aria-hidden="true"
@@ -1345,7 +1345,7 @@ export default function LandingPage() {
                         type="button"
                         className={`group/btn relative flex h-11 w-full items-center justify-center gap-1.5 overflow-hidden rounded-xl text-[14px] font-semibold transition-all duration-300 active:scale-[0.98] ${
                           plan.highlighted
-                            ? "bg-[#7af17a] text-[#0a0a0a] shadow-[0_0_20px_rgba(122,241,122,0.15)] hover:shadow-[0_0_40px_rgba(122,241,122,0.25)]"
+                            ? "bg-[#10b981] text-[#0a0a0a] shadow-[0_0_20px_rgba(16, 185, 129,0.15)] hover:shadow-[0_0_40px_rgba(16, 185, 129,0.25)]"
                             : "bg-white/[0.06] text-white/70 hover:bg-white/[0.1] hover:text-white"
                         }`}
                       >
@@ -1385,7 +1385,7 @@ export default function LandingPage() {
         >
           {/* Background blobs */}
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div className="absolute left-1/4 top-1/4 h-[300px] w-[300px] rounded-full bg-[#7af17a]/[0.02] blur-[120px]" />
+            <div className="absolute left-1/4 top-1/4 h-[300px] w-[300px] rounded-full bg-[#10b981]/[0.02] blur-[120px]" />
             <div className="absolute right-1/4 bottom-1/4 h-[300px] w-[300px] rounded-full bg-blue-500/[0.02] blur-[120px]" />
           </div>
 
@@ -1394,7 +1394,7 @@ export default function LandingPage() {
               isInView={testimonialsSection.isInView}
               className="mx-auto max-w-2xl text-center"
             >
-              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#7af17a]/70">
+              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em] text-[#10b981]/70">
                 Témoignages
               </p>
               <h2
@@ -1423,7 +1423,7 @@ export default function LandingPage() {
                     style={{ transitionDelay: `${i * 100}ms` }}
                   >
                     {/* Result badge */}
-                    <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#7af17a]/10 bg-[#7af17a]/[0.06] px-3 py-1 text-[12px] font-medium text-[#7af17a]/80">
+                    <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#10b981]/10 bg-[#10b981]/[0.06] px-3 py-1 text-[12px] font-medium text-[#10b981]/80">
                       <TrendingUp className="size-3" aria-hidden="true" />
                       {t.metric}
                     </div>
@@ -1447,7 +1447,7 @@ export default function LandingPage() {
                     </blockquote>
 
                     <div className="mt-6 flex items-center gap-3 border-t border-white/[0.06] pt-5">
-                      <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-[#7af17a]/20 to-[#7af17a]/[0.05] text-[13px] font-semibold text-[#7af17a]/70">
+                      <div className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-[#10b981]/20 to-[#10b981]/[0.05] text-[13px] font-semibold text-[#10b981]/70">
                         {t.name.charAt(0)}
                       </div>
                       <div>
@@ -1474,7 +1474,7 @@ export default function LandingPage() {
         >
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">
             <div
-              className="absolute left-1/2 bottom-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-[#7af17a]/[0.04] blur-[180px]"
+              className="absolute left-1/2 bottom-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-[#10b981]/[0.04] blur-[180px]"
               style={{ animation: "pulseGlow 6s ease-in-out infinite" }}
             />
             <div
@@ -1489,7 +1489,7 @@ export default function LandingPage() {
             isInView={ctaSection.isInView}
             className="relative mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8"
           >
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#7af17a]/10 bg-[#7af17a]/[0.04] px-4 py-1.5 text-[13px] font-medium text-[#7af17a]/70 backdrop-blur-sm">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#10b981]/10 bg-[#10b981]/[0.04] px-4 py-1.5 text-[13px] font-medium text-[#10b981]/70 backdrop-blur-sm">
               <Rocket className="size-3.5" aria-hidden="true" />
               Lancez-vous maintenant
             </div>
@@ -1500,7 +1500,7 @@ export default function LandingPage() {
             >
               Prêt à transformer
               <br />
-              <span className="text-shimmer bg-gradient-to-r from-[#7af17a] via-[#b0f4b0] to-[#7af17a] bg-clip-text text-transparent" style={{ backgroundSize: "200% auto" }}>
+              <span className="text-shimmer bg-gradient-to-r from-[#10b981] via-[#b0f4b0] to-[#10b981] bg-clip-text text-transparent" style={{ backgroundSize: "200% auto" }}>
                 votre équipe commerciale
               </span>{" "}
               ?
@@ -1513,7 +1513,7 @@ export default function LandingPage() {
               <Link href="/register">
                 <button
                   type="button"
-                  className="group relative flex h-14 items-center gap-2 overflow-hidden rounded-xl bg-[#7af17a] px-10 text-[15px] font-semibold text-[#0a0a0a] shadow-[0_0_50px_rgba(122,241,122,0.2)] transition-all duration-300 hover:shadow-[0_0_80px_rgba(122,241,122,0.35)] active:scale-[0.98]"
+                  className="group relative flex h-14 items-center gap-2 overflow-hidden rounded-xl bg-[#10b981] px-10 text-[15px] font-semibold text-[#0a0a0a] shadow-[0_0_50px_rgba(16, 185, 129,0.2)] transition-all duration-300 hover:shadow-[0_0_80px_rgba(16, 185, 129,0.35)] active:scale-[0.98]"
                 >
                   {/* Shine sweep */}
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
@@ -1527,7 +1527,7 @@ export default function LandingPage() {
                 </button>
               </Link>
               <span className="flex items-center gap-1.5 text-[13px] text-white/45">
-                <Shield className="size-3.5 text-[#7af17a]/50" aria-hidden="true" />
+                <Shield className="size-3.5 text-[#10b981]/50" aria-hidden="true" />
                 Pas de carte bancaire requise
               </span>
             </div>
@@ -1556,7 +1556,7 @@ export default function LandingPage() {
                   alt="Sales System"
                   width={28}
                   height={28}
-                  className="rounded-md transition-shadow duration-300 group-hover:shadow-[0_0_15px_rgba(122,241,122,0.3)]"
+                  className="rounded-md transition-shadow duration-300 group-hover:shadow-[0_0_15px_rgba(16, 185, 129,0.3)]"
                 />
                 <span className="font-serif text-[15px] font-bold">
                   Sales System

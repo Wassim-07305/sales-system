@@ -14,13 +14,13 @@ const themes: {
   bg: string;
   ring: string;
 }[] = [
-  { value: "dark", label: "Sombre", bg: "bg-[#14080e]", ring: "ring-white/20" },
+  { value: "dark", label: "Sombre", bg: "bg-[#09090b]", ring: "ring-white/20" },
   { value: "light", label: "Clair", bg: "bg-white", ring: "ring-gray-300" },
   {
     value: "brand",
     label: "Brand",
-    bg: "bg-gradient-to-br from-[#14080e] to-[#1a0f14]",
-    ring: "ring-brand/30",
+    bg: "bg-gradient-to-br from-[#09090b] to-[#1a0f14]",
+    ring: "ring-emerald-500/30",
   },
 ];
 
@@ -34,7 +34,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
           className={cn(
             "flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all",
             value === theme.value
-              ? "ring-2 ring-brand"
+              ? "ring-2 ring-emerald-500"
               : "ring-1 ring-border/50 hover:ring-border",
           )}
         >

@@ -132,14 +132,14 @@ export function BuilderView({ initialWidgets }: { initialWidgets: Widget[] }) {
           return (
             <Card
               key={widget.type}
-              className={`cursor-pointer transition-all duration-200 border-border/50 ${isEnabled ? "border-brand ring-1 ring-brand/20 hover:shadow-md" : "opacity-70 hover:opacity-90"}`}
+              className={`cursor-pointer transition-all duration-200 border-border/50 ${isEnabled ? "border-emerald-500 ring-1 ring-emerald-500/20 hover:shadow-md" : "opacity-70 hover:opacity-90"}`}
               onClick={() => toggleWidget(widget.type)}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`h-9 w-9 rounded-xl flex items-center justify-center ring-1 ${isEnabled ? "bg-brand/10 text-brand ring-brand/20" : "bg-muted text-muted-foreground ring-border/50"}`}
+                      className={`h-9 w-9 rounded-xl flex items-center justify-center ring-1 ${isEnabled ? "bg-emerald-500/10 text-emerald-500 ring-emerald-500/20" : "bg-muted text-muted-foreground ring-border/50"}`}
                     >
                       <Icon className="h-4 w-4" />
                     </div>
@@ -192,8 +192,8 @@ export function BuilderView({ initialWidgets }: { initialWidgets: Widget[] }) {
                       key={widget.type}
                       className="rounded-xl border border-dashed border-border/50 p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
                     >
-                      <div className="h-9 w-9 rounded-xl bg-brand/10 flex items-center justify-center ring-1 ring-brand/20">
-                        <Icon className="h-4 w-4 text-brand" />
+                      <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center ring-1 ring-emerald-500/20">
+                        <Icon className="h-4 w-4 text-emerald-500" />
                       </div>
                       <div>
                         <p className="text-sm font-medium">{widget.title}</p>

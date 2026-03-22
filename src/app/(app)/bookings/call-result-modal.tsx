@@ -159,7 +159,7 @@ export function CallResultModal({ booking, onClose }: CallResultModalProps) {
               Annuler
             </Button>
             <Button
-              className="bg-brand text-brand-dark hover:bg-brand/90"
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
               onClick={handleSubmit}
               disabled={!callResult || isPending}
             >

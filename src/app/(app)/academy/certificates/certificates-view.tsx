@@ -65,7 +65,7 @@ export function CertificatesView({
       >
         <Badge
           variant="secondary"
-          className="text-sm px-3 py-1 bg-[#7af17a]/10 text-[#7af17a] border-[#7af17a]/20"
+          className="text-sm px-3 py-1 bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20"
         >
           <Award className="w-4 h-4 mr-1" />
           {certificates.length} certificat{certificates.length !== 1 ? "s" : ""}{" "}
@@ -76,8 +76,8 @@ export function CertificatesView({
       {certificates.length === 0 ? (
         <Card className="bg-card border-border/40 rounded-2xl">
           <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center mb-4">
-              <GraduationCap className="w-8 h-8 text-[#7af17a]" />
+            <div className="w-16 h-16 rounded-2xl bg-[#10b981]/10 ring-1 ring-[#10b981]/20 flex items-center justify-center mb-4">
+              <GraduationCap className="w-8 h-8 text-[#10b981]" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
               Aucun certificat pour le moment
@@ -93,12 +93,12 @@ export function CertificatesView({
           {certificates.map((cert) => (
             <Card
               key={cert.courseId}
-              className="bg-card border-border/40 rounded-2xl hover:border-[#7af17a]/30 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+              className="bg-card border-border/40 rounded-2xl hover:border-[#10b981]/30 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300"
             >
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-start justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-[#7af17a]/10 ring-1 ring-[#7af17a]/20 flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5 text-[#7af17a]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#10b981]/10 ring-1 ring-[#10b981]/20 flex items-center justify-center shrink-0">
+                    <Award className="w-5 h-5 text-[#10b981]" />
                   </div>
                   {cert.score !== null && (
                     <Badge
@@ -148,7 +148,7 @@ export function CertificatesView({
                     }
                     return (
                       <Button
-                        className="w-full bg-[#7af17a]/10 text-[#7af17a] hover:bg-[#7af17a]/20 border border-[#7af17a]/20"
+                        className="w-full bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 border border-[#10b981]/20"
                         variant="outline"
                         disabled={loading}
                       >

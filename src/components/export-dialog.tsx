@@ -197,7 +197,7 @@ export function ExportDialog({ type, open, onOpenChange }: ExportDialogProps) {
                   size="sm"
                   className={
                     format === opt.value
-                      ? "bg-brand text-brand-dark hover:bg-brand/90"
+                      ? "bg-emerald-500 text-black hover:bg-emerald-400"
                       : ""
                   }
                   onClick={() => setFormat(opt.value)}
@@ -219,7 +219,7 @@ export function ExportDialog({ type, open, onOpenChange }: ExportDialogProps) {
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-xs text-brand hover:underline"
+                  className="text-xs text-emerald-500 hover:underline"
                 >
                   Tout
                 </button>
@@ -311,7 +311,7 @@ export function ExportDialog({ type, open, onOpenChange }: ExportDialogProps) {
           <Button
             onClick={handleExport}
             disabled={isPending || selectedKeys.size === 0}
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
           >
             {isPending ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -134,7 +134,7 @@ export function PlacementView({ rules, executions }: Props) {
       >
         <div className="flex gap-2">
           <Button
-            className="bg-brand text-brand-dark hover:bg-brand/90"
+            className="bg-emerald-500 text-black hover:bg-emerald-400"
             onClick={handleRunPlacement}
             disabled={isPending}
           >
@@ -182,7 +182,7 @@ export function PlacementView({ rules, executions }: Props) {
                   </ul>
                 </div>
                 <Button
-                  className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+                  className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
                   onClick={handleCreateRule}
                   disabled={isPending}
                 >

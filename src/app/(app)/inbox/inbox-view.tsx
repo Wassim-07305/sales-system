@@ -111,10 +111,10 @@ const statusLabels: Record<string, string> = {
 const statusColors: Record<string, string> = {
   new: "bg-muted/50 text-muted-foreground",
   contacted: "bg-foreground/10 text-foreground",
-  replied: "bg-brand/10 text-brand",
-  booked: "bg-brand/15 text-brand",
-  qualified: "bg-brand/15 text-brand",
-  converted: "bg-brand/10 text-brand",
+  replied: "bg-emerald-500/10 text-emerald-500",
+  booked: "bg-emerald-500/15 text-emerald-500",
+  qualified: "bg-emerald-500/15 text-emerald-500",
+  converted: "bg-emerald-500/10 text-emerald-500",
   lost: "bg-muted/40 text-muted-foreground/60",
   not_interested: "bg-muted/40 text-muted-foreground/60",
 };
@@ -403,7 +403,7 @@ export function InboxView({
           </Button>
           <Button
             onClick={() => setNewConvDialogOpen(true)}
-            className="rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+            className="rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle conversation
@@ -440,7 +440,7 @@ export function InboxView({
                   className={`w-full text-left p-3 border-b hover:bg-muted/50 transition-colors ${selectedConv?.id === conv.id ? "bg-muted" : ""}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="relative h-9 w-9 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold shrink-0">
+                    <div className="relative h-9 w-9 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold shrink-0">
                       {conv.prospect?.name?.charAt(0) || "?"}
                       {conv.prospect_score?.temperature && (() => {
                         const tc = tempConfig[conv.prospect_score.temperature];
@@ -529,7 +529,7 @@ export function InboxView({
                   >
                     <X className="h-5 w-5" />
                   </button>
-                  <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                  <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold">
                     {selectedConv.prospect?.name?.charAt(0) || "?"}
                   </div>
                   <div>
@@ -560,7 +560,7 @@ export function InboxView({
                       variant="outline"
                       size="sm"
                       asChild
-                      className="rounded-xl font-medium gap-1.5 text-brand hover:text-brand/80"
+                      className="rounded-xl font-medium gap-1.5 text-emerald-500 hover:text-emerald-400/80"
                     >
                       <Link href={`/prospecting/${selectedConv.prospect.id}`}>
                         <ArrowRightCircle className="h-3.5 w-3.5" />
@@ -596,7 +596,7 @@ export function InboxView({
                         {isAiSent && msg.sender === "damien" && (
                           <Badge
                             variant="outline"
-                            className="bg-brand/10 text-brand border-brand/20 gap-0.5 text-[9px] px-1.5 py-0"
+                            className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-0.5 text-[9px] px-1.5 py-0"
                           >
                             <Bot className="h-2.5 w-2.5" />
                             IA
@@ -608,7 +608,7 @@ export function InboxView({
                         <div
                           className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
                             msg.sender === "damien"
-                              ? "bg-brand text-brand-dark rounded-br-md"
+                              ? "bg-emerald-500 text-black rounded-br-md"
                               : "bg-muted rounded-bl-md"
                           }`}
                         >
@@ -621,7 +621,7 @@ export function InboxView({
                             msg.content
                           )}
                           <p
-                            className={`text-[10px] mt-1 ${msg.sender === "damien" ? "text-brand-dark/60" : "text-muted-foreground"}`}
+                            className={`text-[10px] mt-1 ${msg.sender === "damien" ? "text-black/60" : "text-muted-foreground"}`}
                           >
                             {new Date(msg.timestamp).toLocaleTimeString(
                               "fr-FR",
@@ -646,7 +646,7 @@ export function InboxView({
                         setMessageText(s);
                         setSuggestions([]);
                       }}
-                      className="text-xs bg-brand/10 text-brand-dark hover:bg-brand/20 rounded-full px-3 py-1.5 text-left max-w-[300px] truncate transition-colors"
+                      className="text-xs bg-emerald-500/10 text-black hover:bg-emerald-500/20 rounded-full px-3 py-1.5 text-left max-w-[300px] truncate transition-colors"
                     >
                       {s}
                     </button>
@@ -684,7 +684,7 @@ export function InboxView({
                   onClick={
                     isRecording ? handleStopRecording : handleStartRecording
                   }
-                  className={isRecording ? "text-brand border-brand" : ""}
+                  className={isRecording ? "text-emerald-500 border-emerald-500" : ""}
                 >
                   {isRecording ? (
                     <MicOff className="h-4 w-4" />
@@ -706,7 +706,7 @@ export function InboxView({
                 <Button
                   size="sm"
                   onClick={handleSend}
-                  className="bg-brand text-brand-dark hover:bg-brand/90"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -765,7 +765,7 @@ export function InboxView({
             </div>
             <Button
               onClick={handleImport}
-              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
             >
               Importer
             </Button>
@@ -800,7 +800,7 @@ export function InboxView({
             </div>
             <Button
               onClick={handleNewConversation}
-              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
             >
               Créer
             </Button>
@@ -839,7 +839,7 @@ export function InboxView({
             </div>
             <Button
               onClick={handleVoiceAi}
-              className="w-full rounded-xl font-medium bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
             >
               Programmer le vocal
             </Button>

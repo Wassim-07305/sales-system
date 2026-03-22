@@ -92,7 +92,7 @@ export function NotificationsView({
             className={cn(
               "cursor-pointer transition-all hover:shadow-sm",
               !notif.read
-                ? "border-brand/20 bg-brand/5 hover:bg-brand/8"
+                ? "border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-400/8"
                 : "hover:bg-muted/30",
             )}
             onClick={() => handleClick(notif)}
@@ -119,14 +119,14 @@ export function NotificationsView({
                   </p>
                 )}
                 {notif.link && (
-                  <p className="text-[11px] text-brand mt-1.5 flex items-center gap-1 font-medium">
+                  <p className="text-[11px] text-emerald-500 mt-1.5 flex items-center gap-1 font-medium">
                     <ExternalLink className="h-3 w-3" />
                     Voir les détails
                   </p>
                 )}
               </div>
               {!notif.read && (
-                <div className="h-2 w-2 rounded-full bg-brand shrink-0 mt-2" />
+                <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0 mt-2" />
               )}
             </CardContent>
           </Card>

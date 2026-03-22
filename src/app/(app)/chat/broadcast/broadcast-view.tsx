@@ -59,7 +59,7 @@ function getRoleBadgeColor(role: string) {
     case "admin":
       return "bg-foreground/10 text-foreground border-foreground/20";
     case "manager":
-      return "bg-brand/10 text-brand border-brand/20";
+      return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     case "setter":
       return "bg-muted/60 text-muted-foreground border-border/50";
     case "closer":
@@ -134,7 +134,7 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Send className="h-5 w-5 text-brand" />
+              <Send className="h-5 w-5 text-emerald-500" />
               Nouveau message
             </CardTitle>
           </CardHeader>
@@ -150,7 +150,7 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
                     onClick={() => toggleRole(role.value)}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                       selectedRoles.includes(role.value)
-                        ? "bg-brand text-brand-dark border-brand"
+                        ? "bg-emerald-500 text-black border-emerald-500"
                         : "bg-muted border-transparent hover:border-border"
                     }`}
                   >
@@ -202,7 +202,7 @@ export function BroadcastView({ broadcasts }: { broadcasts: Broadcast[] }) {
             <Button
               onClick={handleSend}
               disabled={isPending}
-              className="w-full bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
             >
               <Megaphone className="h-4 w-4 mr-2" />
               {isPending ? "Envoi en cours..." : "Envoyer la diffusion"}

@@ -245,9 +245,9 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
 
           {/* KPI Grid */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl bg-brand/5 border border-brand/10">
+            <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
               <div className="flex items-center gap-1.5 mb-1">
-                <DollarSign className="h-3.5 w-3.5 text-brand" />
+                <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
                 <span className="text-[11px] text-muted-foreground">
                   Valeur
                 </span>
@@ -256,9 +256,9 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 {deal.value?.toLocaleString("fr-FR")} €
               </p>
             </div>
-            <div className="p-3.5 rounded-xl bg-brand/5 border border-brand/10">
+            <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
               <div className="flex items-center gap-1.5 mb-1">
-                <Percent className="h-3.5 w-3.5 text-brand" />
+                <Percent className="h-3.5 w-3.5 text-emerald-500" />
                 <span className="text-[11px] text-muted-foreground">
                   Probabilité
                 </span>
@@ -266,9 +266,9 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
               <p className="text-xl font-bold tabular-nums">
                 {deal.probability}%
               </p>
-              <div className="w-full bg-brand/10 rounded-full h-1 mt-2">
+              <div className="w-full bg-emerald-500/10 rounded-full h-1 mt-2">
                 <div
-                  className="bg-brand/50 h-1 rounded-full transition-all duration-300"
+                  className="bg-emerald-500/50 h-1 rounded-full transition-all duration-300"
                   style={{ width: `${deal.probability || 0}%` }}
                 />
               </div>
@@ -440,7 +440,7 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             <Button
               variant="outline"
               size="sm"
-              className="w-full h-10 gap-1.5 mt-2 border-brand/30 text-brand hover:bg-brand/10"
+              className="w-full h-10 gap-1.5 mt-2 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10"
               asChild
             >
               <Link
@@ -454,10 +454,10 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
 
           {/* Next action */}
           {deal.next_action && (
-            <div className="p-4 bg-brand/5 rounded-xl border border-brand/10">
+            <div className="p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="h-6 w-6 rounded-md bg-brand/10 flex items-center justify-center">
-                  <ArrowRight className="h-3.5 w-3.5 text-brand" />
+                <div className="h-6 w-6 rounded-md bg-emerald-500/10 flex items-center justify-center">
+                  <ArrowRight className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
                 <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                   Prochaine action
@@ -505,7 +505,7 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 size="sm"
                 onClick={addNote}
                 disabled={saving || !noteText.trim()}
-                className="bg-brand text-brand-dark hover:bg-brand/90 gap-1.5 shrink-0"
+                className="bg-emerald-500 text-black hover:bg-emerald-400 gap-1.5 shrink-0"
               >
                 <Send className="h-3.5 w-3.5" />
               </Button>

@@ -12,7 +12,7 @@ export function OnlineStatus({ isOnline, className }: OnlineStatusProps) {
   return (
     <span
       className={cn(
-        "absolute -bottom-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-[#7af17a] ring-2 ring-card",
+        "absolute -bottom-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-[#10b981] ring-2 ring-card",
         className,
       )}
       title="En ligne"

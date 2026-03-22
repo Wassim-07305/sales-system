@@ -56,8 +56,8 @@ export function ProgressView({ progress }: ProgressViewProps) {
           Retour admin Academy
         </Link>
         <div className="flex items-center gap-3">
-          <div className="rounded-full bg-brand/10 p-2.5">
-            <Users className="h-6 w-6 text-brand" />
+          <div className="rounded-full bg-emerald-500/10 p-2.5">
+            <Users className="h-6 w-6 text-emerald-500" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Progression des setters</h1>
@@ -183,7 +183,7 @@ export function ProgressView({ progress }: ProgressViewProps) {
                               className={cn(
                                 "h-full rounded-full transition-all",
                                 p.progressPercent >= 80
-                                  ? "bg-brand"
+                                  ? "bg-emerald-500"
                                   : p.progressPercent >= 40
                                     ? "bg-amber-500"
                                     : "bg-muted-foreground/40",
@@ -205,7 +205,7 @@ export function ProgressView({ progress }: ProgressViewProps) {
                             }
                             className={cn(
                               p.bestQuizScore >= 90 &&
-                                "bg-brand text-brand-dark",
+                                "bg-emerald-500 text-black",
                             )}
                           >
                             {p.bestQuizScore}%

@@ -24,7 +24,7 @@ interface Props {
 }
 
 const difficultyColors: Record<string, string> = {
-  Facile: "bg-brand/10 text-brand border-brand/20",
+  Facile: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   Moyen: "bg-muted/60 text-muted-foreground border-border",
   Difficile: "bg-foreground/10 text-foreground border-border",
 };
@@ -72,11 +72,11 @@ export function SpectateView({ sessions }: Props) {
               href={`/roleplay/debrief/${session.id}`}
               className="block"
             >
-              <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 h-full">
+              <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 h-full">
                 <CardContent className="p-5">
                   {/* User */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="h-9 w-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand text-sm font-bold ring-1 ring-brand/20">
+                    <div className="h-9 w-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-sm font-bold ring-1 ring-emerald-500/20">
                       {session.user?.full_name?.charAt(0) || (
                         <User className="h-4 w-4" />
                       )}
@@ -122,13 +122,13 @@ export function SpectateView({ sessions }: Props) {
                   {/* Score & Duration */}
                   <div className="flex items-center justify-between pt-3 border-t">
                     <div className="flex items-center gap-1.5">
-                      <Trophy className="h-4 w-4 text-brand" />
+                      <Trophy className="h-4 w-4 text-emerald-500" />
                       {session.score !== null ? (
                         <Badge
                           variant="outline"
                           className={`text-xs ${
                             session.score >= 80
-                              ? "bg-brand/10 text-brand border-brand/20"
+                              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                               : session.score >= 60
                                 ? "bg-muted/60 text-muted-foreground border-border"
                                 : "bg-foreground/10 text-foreground border-border"

@@ -164,7 +164,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           <Button
             onClick={() => setDialogOpen(true)}
             size="sm"
-            className="h-9 bg-brand text-brand-dark hover:bg-brand/90"
+            className="h-9 bg-emerald-500 text-black hover:bg-emerald-400"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau sujet
@@ -182,7 +182,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           <div className="space-y-2">
             {pinnedPosts.map((post) => (
               <Link key={post.id} href={`/community/forum/${post.id}`}>
-                <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer">
+                <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
                       <Pin className="h-4 w-4 text-amber-600" />
@@ -246,7 +246,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
           <div className="space-y-3">
             {filtered.map((post) => (
               <Link key={post.id} href={`/community/forum/${post.id}`}>
-                <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-brand/5 transition-all duration-300 cursor-pointer mb-3">
+                <Card className="rounded-2xl border-border/40 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer mb-3">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
                       <div
@@ -371,7 +371,7 @@ export function ForumView({ posts, modules, userId, reputations = {} }: Props) {
             <Button
               onClick={handleCreate}
               disabled={isPending}
-              className="w-full h-9 bg-brand text-brand-dark hover:bg-brand/90"
+              className="w-full h-9 bg-emerald-500 text-black hover:bg-emerald-400"
             >
               {isPending ? "Publication..." : "Publier"}
             </Button>

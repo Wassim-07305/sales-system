@@ -265,7 +265,7 @@ export function SupportView({
       !newDescription.trim()
     ) {
       toast.error("Veuillez remplir tous les champs", {
-        style: { background: "#14080e", borderColor: "#333" },
+        style: { background: "#09090b", borderColor: "#333" },
       });
       return;
     }
@@ -280,7 +280,7 @@ export function SupportView({
 
       if (result.error) {
         toast.error(result.error, {
-          style: { background: "#14080e", borderColor: "#333" },
+          style: { background: "#09090b", borderColor: "#333" },
         });
         return;
       }
@@ -306,7 +306,7 @@ export function SupportView({
       setNewDescription("");
 
       toast.success("Ticket créé avec succès", {
-        style: { background: "#14080e", borderColor: "#333" },
+        style: { background: "#09090b", borderColor: "#333" },
       });
     });
   }
@@ -319,7 +319,7 @@ export function SupportView({
 
       if (result.error) {
         toast.error(result.error, {
-          style: { background: "#14080e", borderColor: "#333" },
+          style: { background: "#09090b", borderColor: "#333" },
         });
         return;
       }
@@ -342,7 +342,7 @@ export function SupportView({
 
       setReplyText("");
       toast.success("Réponse envoyée", {
-        style: { background: "#14080e", borderColor: "#333" },
+        style: { background: "#09090b", borderColor: "#333" },
       });
     });
   }
@@ -353,7 +353,7 @@ export function SupportView({
 
       if (result.error) {
         toast.error(result.error, {
-          style: { background: "#14080e", borderColor: "#333" },
+          style: { background: "#09090b", borderColor: "#333" },
         });
         return;
       }
@@ -385,7 +385,7 @@ export function SupportView({
       }
 
       toast.success("Statut mis à jour", {
-        style: { background: "#14080e", borderColor: "#333" },
+        style: { background: "#09090b", borderColor: "#333" },
       });
     });
   }
@@ -508,7 +508,7 @@ export function SupportView({
                             className={`max-w-[70%] rounded-lg p-3 ${
                               isUser
                                 ? "bg-muted"
-                                : "bg-[#7af17a]/10 border border-[#7af17a]/20"
+                                : "bg-[#10b981]/10 border border-[#10b981]/20"
                             }`}
                           >
                             <div className="flex items-center gap-2 mb-1">
@@ -516,7 +516,7 @@ export function SupportView({
                                 className={`size-6 rounded-full flex items-center justify-center text-xs font-medium ${
                                   isUser
                                     ? "bg-primary/20 text-primary"
-                                    : "bg-[#7af17a]/20 text-[#7af17a]"
+                                    : "bg-[#10b981]/20 text-[#10b981]"
                                 }`}
                               >
                                 {msg.sender_name.charAt(0).toUpperCase()}
@@ -558,7 +558,7 @@ export function SupportView({
                         handleSendReply();
                       }}
                       disabled={!replyText.trim() || isPending}
-                      className="self-end bg-[#7af17a] text-black hover:bg-[#7af17a]/80"
+                      className="self-end bg-[#10b981] text-black hover:bg-[#10b981]/80"
                     >
                       <Send className="size-4 mr-1" />
                       Envoyer
@@ -598,7 +598,7 @@ export function SupportView({
         title="Support"
         description="Gérez vos tickets de support et contactez notre équipe"
       >
-        <LifeBuoy className="size-5 text-[#7af17a]" />
+        <LifeBuoy className="size-5 text-[#10b981]" />
       </PageHeader>
 
       {/* Stats cards */}
@@ -667,13 +667,13 @@ export function SupportView({
         <TabsList className="bg-muted/30 rounded-lg p-0.5">
           <TabsTrigger
             value="my-tickets"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             Mes tickets
           </TabsTrigger>
           <TabsTrigger
             value="new-ticket"
-            className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
           >
             <Plus className="size-4 mr-1" />
             Nouveau ticket
@@ -681,7 +681,7 @@ export function SupportView({
           {isAdmin && (
             <TabsTrigger
               value="all-tickets"
-              className="data-[state=active]:bg-brand data-[state=active]:text-brand-dark data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-emerald-500 data-[state=active]:text-black data-[state=active]:shadow-sm"
               onClick={() => {
                 if (!allTicketsLoaded) handleLoadAllTickets();
               }}
@@ -822,7 +822,7 @@ export function SupportView({
               <Button
                 onClick={handleSubmitTicket}
                 disabled={isPending}
-                className="bg-[#7af17a] text-black hover:bg-[#7af17a]/80"
+                className="bg-[#10b981] text-black hover:bg-[#10b981]/80"
               >
                 {isPending ? (
                   <Loader2 className="size-4 mr-2 animate-spin" />

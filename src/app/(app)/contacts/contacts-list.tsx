@@ -58,7 +58,7 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string }> = {
   },
   manager: {
     label: "Manager",
-    color: "bg-brand/10 text-brand border-brand/20",
+    color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   },
   setter: {
     label: "Setter",
@@ -107,7 +107,7 @@ type SortDir = "asc" | "desc";
 
 // Tag colors (cycling through them for visual variety)
 const TAG_COLORS = [
-  "bg-brand/10 text-brand border-brand/20",
+  "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
   "bg-blue-500/10 text-blue-400 border-blue-500/20",
   "bg-amber-500/10 text-amber-400 border-amber-500/20",
   "bg-purple-500/10 text-purple-400 border-purple-500/20",
@@ -319,7 +319,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
         )}
       >
         {label}
-        <ArrowUpDown className={cn("h-3 w-3", active && "text-brand")} />
+        <ArrowUpDown className={cn("h-3 w-3", active && "text-emerald-500")} />
       </button>
     );
   };
@@ -470,13 +470,13 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                   const healthScore = contact.health_score || 0;
                   const healthColor =
                     healthScore >= 70
-                      ? "text-brand"
+                      ? "text-emerald-500"
                       : healthScore >= 40
                         ? "text-muted-foreground"
                         : "text-muted-foreground/60";
                   const healthBg =
                     healthScore >= 70
-                      ? "bg-brand"
+                      ? "bg-emerald-500"
                       : healthScore >= 40
                         ? "bg-muted-foreground"
                         : "bg-muted-foreground/40";
@@ -505,7 +505,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                               .toUpperCase() || "?"}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium truncate group-hover/link:text-brand transition-colors">
+                            <p className="text-sm font-medium truncate group-hover/link:text-emerald-500 transition-colors">
                               {contact.full_name || "Sans nom"}
                             </p>
                             {contact.phone && (
@@ -666,7 +666,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                       size="icon"
                       className={cn(
                         "h-7 w-7 text-xs",
-                        pageNum === page && "bg-brand text-brand-dark",
+                        pageNum === page && "bg-emerald-500 text-black",
                       )}
                       onClick={() => setPage(pageNum)}
                     >

@@ -118,8 +118,8 @@ const CHANNELS: ChannelDef[] = [
     icon: <Hash className="h-4 w-4" />,
     color: "text-foreground",
     bgColor: "bg-muted",
-    borderColor: "border-brand",
-    activeBg: "bg-brand/8",
+    borderColor: "border-emerald-500",
+    activeBg: "bg-emerald-500/8",
   },
   {
     id: "questions",
@@ -166,7 +166,7 @@ const CHANNELS: ChannelDef[] = [
 ];
 
 const typeColors: Record<string, string> = {
-  win: "bg-brand/10 text-brand-dark border-brand/30",
+  win: "bg-emerald-500/10 text-black border-emerald-500/30",
   question: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   discussion: "bg-muted/50 text-muted-foreground border-border",
 };
@@ -373,12 +373,12 @@ export function CommunityView({
     );
     return (
       <Card
-        className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand/5 ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}
+        className={`rounded-2xl border-border/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 ${post.type === "win" && isWinGrid ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent" : ""}`}
       >
         <CardContent className="px-5 py-5 sm:px-6 sm:py-6">
           {/* Author row */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand/20 to-brand/5 flex items-center justify-center text-brand font-semibold text-sm ring-1 ring-brand/20 shrink-0">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center text-emerald-500 font-semibold text-sm ring-1 ring-emerald-500/20 shrink-0">
               {post.author?.full_name?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div className="min-w-0 flex-1">
@@ -461,7 +461,7 @@ export function CommunityView({
             </button>
             <button
               onClick={() => handleExpandComments(post.id)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-brand hover:bg-brand/5 transition-all"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/5 transition-all"
             >
               <MessageCircle className="h-4 w-4" />
               <span className="font-medium">Commenter</span>
@@ -521,7 +521,7 @@ export function CommunityView({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-9 px-3 hover:bg-brand/10 hover:text-brand hover:border-brand/30"
+                  className="h-9 px-3 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30"
                   onClick={() => handleAddComment(post.id)}
                 >
                   <Send className="h-3.5 w-3.5" />
@@ -583,7 +583,7 @@ export function CommunityView({
               );
               setDialogOpen(true);
             }}
-            className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
+            className="bg-emerald-500 text-black hover:bg-emerald-400 font-semibold"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouveau post
@@ -731,7 +731,7 @@ export function CommunityView({
                   setNewChannel(activeChannel);
                   setDialogOpen(true);
                 }}
-                className="relative bg-brand text-brand-dark hover:bg-brand/90 font-semibold hidden sm:flex"
+                className="relative bg-emerald-500 text-black hover:bg-emerald-400 font-semibold hidden sm:flex"
               >
                 <Plus className="h-4 w-4 mr-1.5" />
                 Publier
@@ -787,8 +787,8 @@ export function CommunityView({
           {filtered.length === 0 && (
             <Card className="mt-4">
               <CardContent className="px-6 py-16 text-center">
-                <div className="h-16 w-16 rounded-2xl bg-brand/10 flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-8 w-8 text-brand" />
+                <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-8 w-8 text-emerald-500" />
                 </div>
                 <p className="font-semibold text-base mb-1">
                   Aucun post dans ce canal
@@ -803,7 +803,7 @@ export function CommunityView({
                     );
                     setDialogOpen(true);
                   }}
-                  className="bg-brand text-brand-dark hover:bg-brand/90 font-semibold"
+                  className="bg-emerald-500 text-black hover:bg-emerald-400 font-semibold"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Créer un post
@@ -939,7 +939,7 @@ export function CommunityView({
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-6 text-sm text-muted-foreground hover:border-brand/50 hover:text-brand hover:bg-brand/5 transition-all"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-6 text-sm text-muted-foreground hover:border-emerald-500/50 hover:text-emerald-500 hover:bg-emerald-500/5 transition-all"
                 >
                   {uploadingImage ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -961,7 +961,7 @@ export function CommunityView({
             <Button
               onClick={handleCreate}
               disabled={isPosting || !newContent.trim()}
-              className="w-full h-11 bg-brand text-brand-dark hover:bg-brand/90 font-semibold text-sm"
+              className="w-full h-11 bg-emerald-500 text-black hover:bg-emerald-400 font-semibold text-sm"
             >
               {isPosting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1095,7 +1095,7 @@ export function CommunityView({
               </Button>
               <Button
                 disabled={callPosting || !callTitle.trim() || !callDesc.trim()}
-                className="bg-brand text-brand-dark hover:bg-brand/90"
+                className="bg-emerald-500 text-black hover:bg-emerald-400"
                 onClick={async () => {
                   setCallPosting(true);
                   try {
