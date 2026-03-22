@@ -85,10 +85,13 @@ export function Sidebar({
           "md:translate-x-0",
           "shrink-0",
         )}
-        style={{
-          width: isCollapsed ? 68 : 240,
-          maxWidth: "75vw",
-        }}
+        style={
+          {
+            "--sidebar-w": isCollapsed ? "68px" : "240px",
+            width: "var(--sidebar-w)",
+            maxWidth: "75vw",
+          } as React.CSSProperties
+        }
       >
         {/* Logo */}
         <div

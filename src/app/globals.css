@@ -157,6 +157,13 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* ── Sidebar: force full width on mobile even when collapsed ── */
+@media (max-width: 767px) {
+  aside[style] {
+    --sidebar-w: 240px !important;
+  }
+}
+
 /* ── Navigation progress ─────────────────────────────────── */
 @keyframes nav-progress {
   0% { width: 0; }
