@@ -15,6 +15,7 @@ import { AiChatPanel } from "./ai-chat-panel";
 import { CreateChannelModal } from "./create-channel-modal";
 import { ChannelSettingsModal } from "./channel-settings-modal";
 import { UnifiedInbox } from "./unified-inbox";
+import { QuickSwitcher } from "./quick-switcher";
 import { ensureDefaultChannels } from "@/lib/actions/communication";
 import type { ChannelWithMeta } from "@/lib/types/messaging";
 
@@ -84,6 +85,7 @@ export function MessagingContainer() {
   const [viewMode, setViewMode] = useState<ViewMode>("messaging");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showQuickSwitcher, setShowQuickSwitcher] = useState(false);
 
   // Enrichir les channels pour les composants qui attendent ChannelWithMeta
   const publicChannels = useEnrichedChannels(rawPublic, user?.id, unreadMap);
@@ -113,9 +115,15 @@ export function MessagingContainer() {
   useEffect(() => {
     if (user && !defaultChannelsEnsured.current) {
       defaultChannelsEnsured.current = true;
-      ensureDefaultChannels().then(() => {
-        queryClient.invalidateQueries({ queryKey: ["channels"] });
-      });
+      ensureDefaultChannels()
+        .then((result) => {
+          if (result.channelId) {
+            queryClient.invalidateQueries({ queryKey: ["channels"] });
+          }
+        })
+        .catch((err) => {
+          console.error("[MessagingContainer] ensureDefaultChannels failed:", err);
+        });
     }
   }, [user, queryClient]);
 
@@ -320,6 +328,21 @@ export function MessagingContainer() {
           </div>
         )}
       </div>
+
+      {/* Quick Switcher (Cmd+K) */}
+      <QuickSwitcher
+        open={showQuickSwitcher}
+        onOpenChange={setShowQuickSwitcher}
+        publicChannels={publicChannels}
+        dmChannels={dmChannels}
+        archivedChannels={archivedChannels}
+        onSelectChannel={(id) => {
+          setActiveChannelId(id);
+          setMobileSidebarOpen(false);
+          setViewMode("messaging");
+        }}
+        aiAgentId={AI_AGENT_ID}
+      />
 
       {/* Modales */}
       <CreateChannelModal

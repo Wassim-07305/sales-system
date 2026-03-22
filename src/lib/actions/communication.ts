@@ -17,14 +17,18 @@ export async function ensureDefaultChannels(): Promise<{ channelId?: string }> {
   if (!user) return {};
 
   try {
-    // Use admin client for reliable channel creation (bypass RLS)
-    // Fall back to regular client if service role key is not configured
-    const admin = process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? createAdminClient()
-      : supabase;
+    // Try admin client first, then fall back to regular client
+    let client = supabase;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        client = createAdminClient();
+      } catch {
+        console.warn("[ensureDefaultChannels] Admin client unavailable, using regular client");
+      }
+    }
 
-    // Check if "Canal Général" already exists
-    const { data: existing } = await admin
+    // Check if "Canal Général" already exists (use regular client for SELECT — RLS allows it)
+    const { data: existing } = await supabase
       .from("channels")
       .select("id")
       .eq("name", "Canal Général")
@@ -38,8 +42,8 @@ export async function ensureDefaultChannels(): Promise<{ channelId?: string }> {
     if (existing) {
       channelId = existing.id;
     } else {
-      // Create the channel
-      const { data: created, error } = await admin
+      // Create the channel — try with admin client first, then regular
+      const { data: created, error } = await client
         .from("channels")
         .insert({
           name: "Canal Général",
@@ -49,15 +53,36 @@ export async function ensureDefaultChannels(): Promise<{ channelId?: string }> {
         })
         .select("id")
         .single();
+
       if (error || !created) {
-        console.error("[ensureDefaultChannels] Create error:", error);
-        return {};
+        // Fallback: try with regular client if admin failed
+        if (client !== supabase) {
+          const { data: created2, error: error2 } = await supabase
+            .from("channels")
+            .insert({
+              name: "Canal Général",
+              description: "Canal de discussion pour toute l'équipe",
+              type: "group",
+              created_by: user.id,
+            })
+            .select("id")
+            .single();
+          if (error2 || !created2) {
+            console.error("[ensureDefaultChannels] Create error (both clients):", error, error2);
+            return {};
+          }
+          channelId = created2.id;
+        } else {
+          console.error("[ensureDefaultChannels] Create error:", error);
+          return {};
+        }
+      } else {
+        channelId = created.id;
       }
-      channelId = created.id;
     }
 
     // Ensure user is a member
-    const { data: membership } = await admin
+    const { data: membership } = await client
       .from("channel_members")
       .select("id")
       .eq("channel_id", channelId)
@@ -65,14 +90,27 @@ export async function ensureDefaultChannels(): Promise<{ channelId?: string }> {
       .maybeSingle();
 
     if (!membership) {
-      const { error: memberErr } = await admin
+      // Try with admin, then regular
+      const { error: memberErr } = await client
         .from("channel_members")
         .insert({
           channel_id: channelId,
           profile_id: user.id,
           role: "member",
         });
-      if (memberErr) {
+      if (memberErr && client !== supabase) {
+        // Fallback to regular client
+        const { error: memberErr2 } = await supabase
+          .from("channel_members")
+          .insert({
+            channel_id: channelId,
+            profile_id: user.id,
+            role: "member",
+          });
+        if (memberErr2) {
+          console.error("[ensureDefaultChannels] Member insert error (both):", memberErr, memberErr2);
+        }
+      } else if (memberErr) {
         console.error("[ensureDefaultChannels] Member insert error:", memberErr);
       }
     }

@@ -7,12 +7,14 @@ import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
 import { useMessages } from "@/lib/hooks/use-messages";
 import { useTyping } from "@/lib/hooks/use-typing";
+import { useChannelMembers } from "@/lib/hooks/use-channels";
 import { useMessagingStore } from "@/stores/messaging-store";
 import { ChatHeader } from "./chat-header";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 import type { ChannelWithMeta, EnrichedMessage } from "@/lib/types/messaging";
+import type { MentionUser } from "./mention-autocomplete";
 
 interface ChatPanelProps {
   channel: ChannelWithMeta;
@@ -40,6 +42,7 @@ export function ChatPanel({
     addAttachment,
     markAsRead,
   } = useMessages(channel.id);
+  const { members: channelMembers } = useChannelMembers(channel.id);
   const { typingUsers, broadcastTyping, stopTyping } = useTyping(channel.id);
   const {
     replyToMessage,
@@ -52,6 +55,18 @@ export function ChatPanel({
   const [editingContent, setEditingContent] = useState("");
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
+
+  // Mention users derived from channel members
+  const mentionUsers: MentionUser[] = useMemo(() => {
+    return channelMembers
+      .filter((m) => m.profile && m.profile_id !== user?.id)
+      .map((m) => ({
+        id: m.profile!.id,
+        full_name: m.profile!.full_name,
+        avatar_url: m.profile!.avatar_url ?? null,
+        role: m.profile!.role,
+      }));
+  }, [channelMembers, user?.id]);
 
   // Mark as read when viewing or switching channels
   useEffect(() => {
@@ -320,6 +335,7 @@ export function ChatPanel({
         channelName={channel.dmPartner?.full_name ?? channel.name}
         droppedFile={droppedFile}
         onClearDroppedFile={() => setDroppedFile(null)}
+        members={mentionUsers}
       />
     </div>
   );

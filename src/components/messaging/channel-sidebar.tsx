@@ -158,15 +158,13 @@ export function ChannelSidebar({
           </div>
           <h2 className="text-sm font-bold tracking-tight">Messagerie</h2>
         </div>
-        {isStaff && (
-          <button
-            onClick={onCreateChannel}
-            className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-            title="Nouveau canal"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        )}
+        <button
+          onClick={onCreateChannel}
+          className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          title="Nouveau canal"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Recherche */}
@@ -201,6 +199,20 @@ export function ChannelSidebar({
 
             {channelsOpen && (
               <div className="px-2 space-y-0.5">
+                {filteredPublicChannels.length === 0 && !search.trim() && (
+                  <div className="px-2.5 py-3 text-center">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Aucun canal
+                    </p>
+                    <button
+                      onClick={onCreateChannel}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Créer un canal
+                    </button>
+                  </div>
+                )}
                 {filteredPublicChannels.map((ch) => {
                   const isActive = ch.id === activeChannelId;
                   const isAnnouncement = ch.type === "announcement";

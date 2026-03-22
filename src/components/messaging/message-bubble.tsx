@@ -8,6 +8,7 @@ import {
   Trash2,
   Pin,
   SmilePlus,
+  Smile,
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,16 +23,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MessageContent } from "./message-content";
 import { MessageReactions } from "./message-reactions";
+import { QuickReactionPicker } from "./emoji-picker";
+import { EmojiPicker } from "./emoji-picker";
 import type { EnrichedMessage } from "@/lib/types/messaging";
-
-const QUICK_REACTIONS = [
-  "\u{1F44D}",
-  "\u{2764}\u{FE0F}",
-  "\u{1F602}",
-  "\u{1F389}",
-  "\u{1F525}",
-  "\u{2705}",
-];
 
 const STAFF_ROLES = ["admin", "manager"];
 
@@ -81,6 +75,13 @@ export function MessageBubble({
     [onToggleReaction],
   );
 
+  const handleFullPickerSelect = useCallback(
+    (emoji: string) => {
+      onToggleReaction(emoji);
+    },
+    [onToggleReaction],
+  );
+
   // System messages
   if (message.content_type === "system") {
     return (
@@ -106,24 +107,35 @@ export function MessageBubble({
         <button
           onClick={() => setShowQuickReact(!showQuickReact)}
           className="rounded p-1 hover:bg-muted transition-colors"
-          title="Reagir"
+          title="Réagir"
         >
           <SmilePlus className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
         {showQuickReact && (
-          <div className="absolute bottom-full right-0 mb-1 flex items-center gap-0.5 rounded-lg border bg-background p-1 shadow-md">
-            {QUICK_REACTIONS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => handleQuickReact(emoji)}
-                className="rounded p-1 text-sm hover:bg-muted transition-colors"
-              >
-                {emoji}
-              </button>
-            ))}
+          <div className="absolute bottom-full right-0 mb-1 z-20">
+            <QuickReactionPicker
+              onSelect={handleQuickReact}
+              onOpenFull={() => {
+                setShowQuickReact(false);
+              }}
+            />
           </div>
         )}
       </div>
+      {/* Full emoji picker for reactions */}
+      <EmojiPicker
+        onSelect={handleFullPickerSelect}
+        side="top"
+        align="end"
+        trigger={
+          <button
+            className="rounded p-1 hover:bg-muted transition-colors"
+            title="Plus d'emojis"
+          >
+            <Smile className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        }
+      />
 
       <button
         onClick={onReply}

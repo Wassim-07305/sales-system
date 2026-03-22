@@ -26,33 +26,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { VoiceRecorder, VoicePreview } from "./voice-recorder";
-
-const EMOJI_LIST = [
-  "\u{1F44D}",
-  "\u{1F44E}",
-  "\u{2764}\u{FE0F}",
-  "\u{1F602}",
-  "\u{1F622}",
-  "\u{1F389}",
-  "\u{1F525}",
-  "\u{1F4AF}",
-  "\u{2705}",
-  "\u{274C}",
-  "\u{1F64F}",
-  "\u{1F44B}",
-  "\u{1F914}",
-  "\u{1F440}",
-  "\u{1F680}",
-  "\u{2B50}",
-  "\u{1F381}",
-  "\u{1F3C6}",
-  "\u{1F4AA}",
-  "\u{1F64C}",
-  "\u{1F60D}",
-  "\u{1F609}",
-  "\u{1F60E}",
-  "\u{1F92D}",
-];
+import { EmojiPicker } from "./emoji-picker";
+import { MentionAutocomplete, type MentionUser } from "./mention-autocomplete";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} o`;
@@ -82,6 +57,7 @@ interface ChatInputProps {
   channelName?: string;
   droppedFile?: File | null;
   onClearDroppedFile?: () => void;
+  members?: MentionUser[];
 }
 
 export function ChatInput({
@@ -100,6 +76,7 @@ export function ChatInput({
   channelName,
   droppedFile,
   onClearDroppedFile,
+  members = [],
 }: ChatInputProps) {
   const [content, setContent] = useState("");
   const [editContent, setEditContent] = useState("");
@@ -271,6 +248,33 @@ export function ChatInput({
     }
   };
 
+  const handleInsertMention = useCallback(
+    (user: MentionUser, startPos: number, endPos: number) => {
+      const mentionText =
+        user.id === "__tous__" ? "@tous " : `@${user.full_name} `;
+      const newContent =
+        displayContent.slice(0, startPos) +
+        mentionText +
+        displayContent.slice(endPos);
+      if (editingMessageId) {
+        setEditContent(newContent);
+      } else {
+        setContent(newContent);
+      }
+      // Move cursor after mention
+      setTimeout(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+          const newPos = startPos + mentionText.length;
+          textarea.selectionStart = newPos;
+          textarea.selectionEnd = newPos;
+          textarea.focus();
+        }
+      }, 0);
+    },
+    [displayContent, editingMessageId],
+  );
+
   // Auto-resize textarea
   const autoResize = (el: HTMLTextAreaElement) => {
     el.style.height = "auto";
@@ -378,6 +382,13 @@ export function ChatInput({
 
         {/* Textarea */}
         <div className="flex-1 relative">
+          {/* @mention autocomplete */}
+          <MentionAutocomplete
+            users={members}
+            textareaRef={textareaRef}
+            content={displayContent}
+            onInsertMention={handleInsertMention}
+          />
           <textarea
             ref={textareaRef}
             value={displayContent}
@@ -413,8 +424,9 @@ export function ChatInput({
         />
 
         {/* Emoji picker */}
-        <Popover>
-          <PopoverTrigger asChild>
+        <EmojiPicker
+          onSelect={insertEmoji}
+          trigger={
             <button
               disabled={disabled}
               className="rounded-lg p-2 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
@@ -422,21 +434,8 @@ export function ChatInput({
             >
               <Smile className="h-5 w-5" />
             </button>
-          </PopoverTrigger>
-          <PopoverContent side="top" align="end" className="w-72 p-2">
-            <div className="grid grid-cols-8 gap-1">
-              {EMOJI_LIST.map((emoji) => (
-                <button
-                  key={emoji}
-                  onClick={() => insertEmoji(emoji)}
-                  className="rounded p-1.5 text-lg hover:bg-muted transition-colors"
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
+          }
+        />
 
         {/* Urgent toggle */}
         {!editingMessageId && (
