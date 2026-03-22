@@ -277,19 +277,6 @@ export async function getUnipileConversations(accountId?: string): Promise<{
     const data = await res.json();
     const items = Array.isArray(data) ? data : (data as { items?: unknown[] }).items || [];
 
-    // Debug: log first 3 chats to see actual API structure
-    const rawItems = items as Array<Record<string, unknown>>;
-    for (const item of rawItems.slice(0, 3)) {
-      console.log("[Unipile Chat Debug]", JSON.stringify({
-        id: item.id,
-        name: item.name,
-        provider: item.provider,
-        account_type: item.account_type,
-        attendees: item.attendees,
-        attendee_public_identifier: item.attendee_public_identifier,
-      }, null, 2));
-    }
-
     const conversations = (
       items as Array<{
         id: string;
@@ -354,6 +341,42 @@ export async function getUnipileConversations(accountId?: string): Promise<{
         unreadCount: chat.unread_count || 0,
       };
     });
+
+    // Enrich conversations missing names by fetching /chats/{id}/attendees
+    const toEnrich = conversations.filter(
+      (c) => c.participants.length === 0 ||
+        c.participants.every((p) => !p || p === "Contact"),
+    );
+    if (toEnrich.length > 0) {
+      await Promise.allSettled(
+        toEnrich.map(async (conv) => {
+          try {
+            const attRes = await fetch(
+              `${dsn}/api/v1/chats/${conv.id}/attendees`,
+              { headers: { "X-API-KEY": apiKey! } },
+            );
+            if (!attRes.ok) return;
+            const attData = (await attRes.json()) as {
+              items?: Array<{
+                name?: string;
+                display_name?: string;
+                picture_url?: string;
+                is_self?: number;
+              }>;
+            };
+            const others = (attData.items || []).filter((a) => a.is_self !== 1);
+            if (others.length > 0) {
+              conv.participants = others
+                .map((a) => a.display_name || a.name || "")
+                .filter(Boolean);
+              conv.pictureUrl = conv.pictureUrl || others[0].picture_url;
+            }
+          } catch {
+            // Skip enrichment on error
+          }
+        }),
+      );
+    }
 
     return { conversations };
   } catch (err) {
