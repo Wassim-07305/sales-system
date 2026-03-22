@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -15,28 +15,6 @@ import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 import type { ChannelWithMeta, EnrichedMessage } from "@/lib/types/messaging";
 import type { MentionUser } from "./mention-autocomplete";
-
-/** Micro error boundary */
-class SubBoundary extends React.Component<
-  { name: string; children: React.ReactNode },
-  { error: Error | null }
-> {
-  state: { error: Error | null } = { error: null };
-  static getDerivedStateFromError(error: Error) { return { error }; }
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error(`[SubBoundary:${this.props.name}]`, error.message, info.componentStack);
-  }
-  render() {
-    if (this.state.error) {
-      return (
-        <div className="p-2 text-xs text-destructive bg-destructive/10 rounded m-1">
-          <strong>Crash in: {this.props.name}</strong><br />{this.state.error.message}
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 interface ChatPanelProps {
   channel: ChannelWithMeta;
@@ -326,7 +304,6 @@ export function ChatPanel({
         </div>
       )}
 
-      <SubBoundary name="ChatHeader">
       <ChatHeader
         channel={channel}
         memberCount={memberCount}
@@ -335,9 +312,7 @@ export function ChatPanel({
         onOpenSettings={onOpenSettings}
         onBack={onBack}
       />
-      </SubBoundary>
 
-      <SubBoundary name="MessageList">
       <MessageList
         messages={messages}
         isLoading={isLoading}
@@ -348,13 +323,9 @@ export function ChatPanel({
         onTogglePin={handleTogglePin}
         onToggleReaction={handleToggleReaction}
       />
-      </SubBoundary>
 
-      <SubBoundary name="TypingIndicator">
       <TypingIndicator typingUsers={typingUsers} />
-      </SubBoundary>
 
-      <SubBoundary name="ChatInput">
       <ChatInput
         onSend={handleSend}
         onUploadFile={handleUploadFile}
@@ -373,7 +344,6 @@ export function ChatPanel({
         onClearDroppedFile={() => setDroppedFile(null)}
         members={mentionUsers}
       />
-      </SubBoundary>
     </div>
   );
 }
