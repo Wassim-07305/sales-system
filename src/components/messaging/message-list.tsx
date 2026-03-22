@@ -1,12 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { groupMessages, isSameDay } from "@/lib/messaging-utils";
 import { useMessagingStore } from "@/stores/messaging-store";
 import { DateSeparator } from "./date-separator";
 import { MessageBubble } from "./message-bubble";
 import type { EnrichedMessage } from "@/lib/types/messaging";
+
+/** Error boundary for individual messages — logs offending data */
+class MsgBoundary extends React.Component<
+  { msgId: string; msgData: unknown; children: React.ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error) {
+    // Log the raw message data to console so we can see what field is an object
+    console.error(`[MsgBoundary] Message ${this.props.msgId} crashed:`, error.message);
+    console.error(`[MsgBoundary] Raw data:`, JSON.stringify(this.props.msgData, null, 2));
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="p-2 text-xs text-destructive bg-destructive/10 rounded m-1">
+          <strong>Message crash: {this.props.msgId}</strong>
+          <br />{this.state.error.message}
+          <pre className="mt-1 text-[9px] max-h-32 overflow-auto whitespace-pre-wrap">
+            {JSON.stringify(this.props.msgData, null, 2)}
+          </pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 interface MessageListProps {
   messages: EnrichedMessage[];
@@ -95,8 +123,8 @@ export function MessageList({
             >
               {showDateSep && <DateSeparator date={firstMsg.created_at} />}
               {group.messages.map((msg, msgIdx) => (
+                <MsgBoundary key={msg.id} msgId={msg.id} msgData={msg}>
                 <MessageBubble
-                  key={msg.id}
                   message={msg}
                   isOwn={msg.sender_id === currentUserId}
                   showSender={msgIdx === 0}
@@ -107,6 +135,7 @@ export function MessageList({
                   onTogglePin={() => onTogglePin(msg.id, msg.is_pinned)}
                   onToggleReaction={(emoji) => onToggleReaction(msg.id, emoji)}
                 />
+                </MsgBoundary>
               ))}
             </div>
           );
