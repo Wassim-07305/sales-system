@@ -1174,9 +1174,6 @@ Réponds avec ce format JSON exact :
       .replace(/\n?```$/i, "")
       .trim();
 
-    console.log("[AI Script] Raw response length:", rawResult.length);
-    console.log("[AI Script] Cleaned JSON preview:", cleaned.substring(0, 200));
-
     const aiResult = JSON.parse(cleaned) as AIFlowchartResponse;
 
     title = aiResult.title || `Script IA — ${params.business}`;
@@ -1217,9 +1214,7 @@ Réponds avec ce format JSON exact :
         y += 180;
       }
     }
-  } catch (err) {
-    // Log l'erreur pour debug
-    console.error("[AI Script] Erreur generation:", err);
+  } catch {
     // Fallback : créer un flowchart basique si l'IA échoue
     title = `Script — ${params.business}`;
     nodes = [

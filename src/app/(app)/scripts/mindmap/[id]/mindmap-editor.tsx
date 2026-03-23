@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Save, Loader2, Plus, Share2, Users } from "lucide-react";
 import Link from "next/link";
 import { updateMindMap } from "@/lib/actions/scripts-v2";
+import { toast } from "sonner";
 import { ShareDialog } from "../../share-dialog";
 import { usePresence } from "@/lib/hooks/use-presence";
 import { useRealtimeSync } from "@/lib/hooks/use-realtime-sync";
@@ -227,7 +228,7 @@ export function MindMapEditor({
         });
         broadcastChanges(nodes, edges);
       } catch {
-        // Silently fail
+        toast.error("Impossible de sauvegarder le mindmap");
       }
     });
   }

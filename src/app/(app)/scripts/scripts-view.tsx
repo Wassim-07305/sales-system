@@ -96,7 +96,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
         });
         router.push(`/scripts/flowchart/${flowchart.id}`);
       } catch {
-        // Silently fail
+        toast.error("Impossible de créer le flowchart");
       }
     });
   }

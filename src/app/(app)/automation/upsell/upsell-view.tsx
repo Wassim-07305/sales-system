@@ -165,6 +165,7 @@ export function UpsellView({ rules, executions }: Props) {
   }
 
   function handleDelete(id: string) {
+    if (!confirm("Supprimer cette règle d'upsell ?")) return;
     startTransition(async () => {
       try {
         await deleteAutomationRule(id);
@@ -290,7 +291,7 @@ export function UpsellView({ rules, executions }: Props) {
                       </Badge>
                       {rule.trigger_conditions?.event ? (
                         <span className="text-xs text-muted-foreground">
-                          Trigger:{" "}
+                          Déclencheur :{" "}
                           {triggerConditions.find(
                             (tc) =>
                               tc.value ===

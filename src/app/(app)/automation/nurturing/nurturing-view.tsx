@@ -128,6 +128,7 @@ export function NurturingView({ rules, executions }: Props) {
   }
 
   function handleDelete(id: string) {
+    if (!confirm("Supprimer cette règle de nurturing ?")) return;
     startTransition(async () => {
       try {
         await deleteAutomationRule(id);
@@ -267,7 +268,7 @@ export function NurturingView({ rules, executions }: Props) {
                       </Badge>
                       {rule.trigger_conditions?.event ? (
                         <span className="text-xs text-muted-foreground">
-                          Trigger:{" "}
+                          Déclencheur :{" "}
                           {triggerEvents.find(
                             (e) =>
                               e.value === String(rule.trigger_conditions.event),

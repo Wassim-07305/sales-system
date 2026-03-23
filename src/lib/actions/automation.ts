@@ -750,7 +750,7 @@ export async function createRelanceWorkflow(config: RelanceConfig) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   const { data, error } = await supabase
     .from("relance_workflows")
@@ -794,7 +794,7 @@ export async function processRelances(): Promise<{
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   let processed = 0;
   let sent = 0;
@@ -992,7 +992,7 @@ export async function cancelRelance(prospectId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   try {
     const { error } = await supabase
@@ -1019,7 +1019,7 @@ export async function getRelanceWorkflows(prospectId?: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   try {
     let query = supabase
@@ -1063,7 +1063,7 @@ export async function getRelanceStats(): Promise<{
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   try {
     const { data: all, error } = await supabase
@@ -1224,7 +1224,7 @@ export async function sendAIMessage(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   // 1. Get prospect data
   const { data: prospect } = await supabase
@@ -1382,7 +1382,7 @@ export async function escalateToHuman(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   // 1. Mark the conversation as needing human attention
   const { error: updateError } = await supabase
@@ -1480,7 +1480,7 @@ export async function reactToInstagramStory(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifie");
+  if (!user) throw new Error("Non authentifié");
 
   // Get AI mode config for story reaction settings
   const { data: config } = await supabase

@@ -79,7 +79,7 @@ export function ShareDialog({
           sharedWithEmail: email.trim(),
           permission,
         });
-        toast.success("Script partage avec succes");
+        toast.success("Script partagé avec succès");
         setEmail("");
         // Refresh shares
         const updated = await getScriptShares(scriptId);
@@ -97,7 +97,7 @@ export function ShareDialog({
       try {
         await removeScriptShare(shareId);
         setShares((prev) => prev.filter((s) => s.id !== shareId));
-        toast.success("Partage supprime");
+        toast.success("Partage supprimé");
       } catch (error) {
         toast.error(
           error instanceof Error

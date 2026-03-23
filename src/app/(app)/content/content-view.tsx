@@ -92,6 +92,7 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
   const [editingPost, setEditingPost] = useState<ContentPost | null>(null);
   const [filterPlatform, setFilterPlatform] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -151,21 +152,25 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
   }
 
   async function handleSave() {
+    if (!form.title?.trim()) {
+      toast.error("Le titre est requis");
+      return;
+    }
+    setSaving(true);
     try {
+      const scheduledIso = form.scheduled_at
+        ? new Date(form.scheduled_at + "T00:00:00").toISOString()
+        : undefined;
       if (editingPost) {
         await updateContentPost(editingPost.id, {
           ...form,
-          scheduled_at: form.scheduled_at
-            ? new Date(form.scheduled_at).toISOString()
-            : undefined,
+          scheduled_at: scheduledIso,
         });
         toast.success("Post mis à jour");
       } else {
         await createContentPost({
           ...form,
-          scheduled_at: form.scheduled_at
-            ? new Date(form.scheduled_at).toISOString()
-            : undefined,
+          scheduled_at: scheduledIso,
         });
         toast.success("Post créé");
       }
@@ -173,6 +178,8 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -543,9 +550,10 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
               </div>
               <Button
                 onClick={handleSave}
+                disabled={saving}
                 className="w-full bg-emerald-500 text-black hover:bg-emerald-400"
               >
-                {editingPost ? "Mettre à jour" : "Créer"}
+                {saving ? "Enregistrement..." : editingPost ? "Mettre à jour" : "Créer"}
               </Button>
             </div>
             {/* Preview */}

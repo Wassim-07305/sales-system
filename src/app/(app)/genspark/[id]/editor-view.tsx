@@ -242,8 +242,10 @@ export function EditorView({
       a.click();
       URL.revokeObjectURL(url);
       toast.success("PDF exporté");
-    } catch {
-      toast.error("Erreur lors de l'export PDF");
+    } catch (err) {
+      toast.error(
+        `Erreur lors de l'export PDF : ${err instanceof Error ? err.message : "format invalide ou données manquantes"}`,
+      );
     }
   }
 

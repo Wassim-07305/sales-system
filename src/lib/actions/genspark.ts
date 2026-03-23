@@ -150,7 +150,8 @@ export async function updatePresentation(
   const { error } = await supabase
     .from("presentations")
     .update(updateData)
-    .eq("id", id);
+    .eq("id", id)
+    .eq("created_by", user.id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/genspark");
@@ -163,7 +164,11 @@ export async function deletePresentation(id: string) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  const { error } = await supabase.from("presentations").delete().eq("id", id);
+  const { error } = await supabase
+    .from("presentations")
+    .delete()
+    .eq("id", id)
+    .eq("created_by", user.id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/genspark");
@@ -407,13 +412,6 @@ export async function generatePresentation(params: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifié");
 
-  console.log(
-    "[GenSpark] Starting generation for user:",
-    user.id,
-    "prompt:",
-    params.prompt.substring(0, 50),
-  );
-
   const slideCount = params.slideCount || 8;
   const audienceHint = params.audience
     ? `\nPublic cible : ${params.audience}`
@@ -456,7 +454,6 @@ Contenu en français.`,
       },
     );
   } catch (err) {
-    console.error("[GenSpark AI] Erreur generation:", err);
     throw new Error(
       `Erreur IA : ${err instanceof Error ? err.message : "Impossible de générer la présentation"}`,
     );
@@ -492,7 +489,11 @@ Contenu en français.`,
     .from("presentation_slides")
     .insert(slidesData);
 
-  if (slidesError) throw new Error(slidesError.message);
+  if (slidesError) {
+    // Rollback: supprimer la présentation orpheline
+    await supabase.from("presentations").delete().eq("id", presentation.id);
+    throw new Error(slidesError.message);
+  }
 
   revalidatePath("/genspark");
   return { id: presentation.id };

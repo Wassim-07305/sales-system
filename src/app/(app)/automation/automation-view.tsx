@@ -499,7 +499,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">
-                          {rule.is_active ? "Active" : "Inactive"}
+                          {rule.is_active ? "Activée" : "Désactivée"}
                         </span>
                         <Switch
                           checked={rule.is_active}

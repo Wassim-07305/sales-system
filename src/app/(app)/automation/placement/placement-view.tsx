@@ -115,6 +115,7 @@ export function PlacementView({ rules, executions }: Props) {
   }
 
   function handleDelete(id: string) {
+    if (!confirm("Supprimer cette règle de placement ?")) return;
     startTransition(async () => {
       try {
         await deleteAutomationRule(id);
