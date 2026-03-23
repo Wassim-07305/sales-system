@@ -18,8 +18,8 @@ export function ProspectingKPIBanner() {
   const [data, setData] = useState<KPIData | null>(null);
 
   useEffect(() => {
-    Promise.all([getProspectSegmentStats(), getDailyQuota()]).then(
-      ([stats, quota]) => {
+    Promise.all([getProspectSegmentStats(), getDailyQuota()])
+      .then(([stats, quota]) => {
         setData({
           total: stats.total ?? 0,
           hot: stats.hot ?? 0,
@@ -28,8 +28,10 @@ export function ProspectingKPIBanner() {
           replies: quota?.replies_received ?? 0,
           bookings: quota?.bookings_from_dms ?? 0,
         });
-      },
-    );
+      })
+      .catch(() => {
+        setData({ total: 0, hot: 0, dmsSent: 0, dmsTarget: 20, replies: 0, bookings: 0 });
+      });
   }, []);
 
   if (!data) {

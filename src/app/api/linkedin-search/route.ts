@@ -52,11 +52,14 @@ export async function POST(req: NextRequest) {
     .filter(Boolean)
     .join(" ");
 
+  console.log("[LinkedIn Search] keyword:", keyword);
+
   // --- Tier 1: Unipile (3s timeout per request) ---
   try {
     const dsn = process.env.UNIPILE_DSN;
     const apiKey = process.env.UNIPILE_API_KEY;
     if (dsn && apiKey) {
+      console.log("[LinkedIn Search] Tier 1: trying Unipile...");
       const accountsRes = await fetchWithTimeout(
         `${dsn}/api/v1/accounts`,
         { headers: { "X-API-KEY": apiKey }, timeoutMs: 3000 },
@@ -67,20 +70,36 @@ export async function POST(req: NextRequest) {
             id: string;
             type?: string;
             provider?: string;
+            name?: string;
           }>;
         };
+        console.log(
+          "[LinkedIn Search] Unipile accounts:",
+          (accountsData.items || []).map((a) => ({
+            id: a.id,
+            type: a.type,
+            provider: a.provider,
+            name: a.name,
+          })),
+        );
         const liAccount = (accountsData.items || []).find(
           (a) =>
             (a.type || a.provider || "").toUpperCase() === "LINKEDIN",
         );
 
         if (liAccount) {
-          const searchRes = await fetchWithTimeout(
-            `${dsn}/api/v1/linkedin/search/people?account_id=${liAccount.id}&keyword=${encodeURIComponent(keyword)}&limit=20`,
-            { headers: { "X-API-KEY": apiKey }, timeoutMs: 3000 },
-          );
+          const searchUrl = `${dsn}/api/v1/linkedin/search/people?account_id=${liAccount.id}&keyword=${encodeURIComponent(keyword)}&limit=20`;
+          console.log("[LinkedIn Search] Unipile search URL:", searchUrl);
+          const searchRes = await fetchWithTimeout(searchUrl, {
+            headers: { "X-API-KEY": apiKey },
+            timeoutMs: 3000,
+          });
+          console.log("[LinkedIn Search] Unipile search status:", searchRes.status);
+
           if (searchRes.ok) {
-            const data = (await searchRes.json()) as {
+            const raw = await searchRes.text();
+            console.log("[LinkedIn Search] Unipile raw response (first 500):", raw.slice(0, 500));
+            const data = JSON.parse(raw) as {
               items?: Array<{
                 id?: string;
                 first_name?: string;
@@ -88,6 +107,7 @@ export async function POST(req: NextRequest) {
                 headline?: string;
                 public_identifier?: string;
                 profile_url?: string;
+                profile_picture_url?: string;
               }>;
             };
             const results = (data.items || []).map((p) => ({
@@ -100,21 +120,32 @@ export async function POST(req: NextRequest) {
                 (p.public_identifier
                   ? `https://linkedin.com/in/${p.public_identifier}`
                   : null),
+              avatar_url: p.profile_picture_url || null,
               source: "unipile" as const,
             }));
+            console.log("[LinkedIn Search] Unipile results:", results.length);
             if (results.length > 0) {
               return NextResponse.json({ data: results });
             }
+          } else {
+            const errBody = await searchRes.text().catch(() => "");
+            console.error("[LinkedIn Search] Unipile search error:", searchRes.status, errBody.slice(0, 300));
           }
+        } else {
+          console.warn("[LinkedIn Search] No LinkedIn account found in Unipile");
         }
+      } else {
+        console.error("[LinkedIn Search] Unipile accounts fetch failed:", accountsRes.status);
       }
+    } else {
+      console.warn("[LinkedIn Search] Unipile not configured (missing DSN or API_KEY)");
     }
   } catch (err) {
-    // Timeout or network error — skip to next tier
     console.error("[LinkedIn Search] Unipile error:", err instanceof Error ? err.message : err);
   }
 
   // --- Tier 2: Local DB (instant) ---
+  console.log("[LinkedIn Search] Tier 2: trying local DB...");
   if (query.trim()) {
     const { data: prospects } = await supabase
       .from("prospects")
@@ -122,6 +153,8 @@ export async function POST(req: NextRequest) {
       .eq("platform", "linkedin")
       .ilike("name", `%${query}%`)
       .limit(20);
+
+    console.log("[LinkedIn Search] Local DB results:", prospects?.length ?? 0);
 
     if (prospects && prospects.length > 0) {
       const results = prospects.map((p) => ({
@@ -138,33 +171,31 @@ export async function POST(req: NextRequest) {
   // --- Tier 3: Start search actor ASYNC (returns immediately with runId) ---
   const apifyToken = process.env.APIFY_TOKEN;
   if (!apifyToken) {
+    console.warn("[LinkedIn Search] No APIFY_TOKEN configured, returning empty");
     return NextResponse.json({
       data: [],
-      error: "Aucun résultat trouvé. Clé API de recherche non configurée.",
+      error: "Aucun résultat trouvé via Unipile. Recherche Apify non configurée.",
     });
   }
 
+  console.log("[LinkedIn Search] Tier 3: starting Apify actor...");
   try {
-    // Build structured input for the search actor
     const actorInput: Record<string, unknown> = {
       max_profiles: 20,
       include_email: false,
     };
-    // Map filters to actor fields
     if (filters?.jobTitle?.trim()) {
       actorInput.current_job_title = filters.jobTitle.trim();
     }
     if (filters?.location?.trim()) {
       actorInput.location = filters.location.trim();
     }
-    // Use query as name search (split into first/last if possible)
     if (query.trim()) {
       const parts = query.trim().split(/\s+/);
       if (parts.length >= 2) {
         actorInput.firstname = parts[0];
         actorInput.lastname = parts.slice(1).join(" ");
       } else {
-        // Single word — use as job title if no job title filter, otherwise as lastname
         if (!actorInput.current_job_title) {
           actorInput.current_job_title = parts[0];
         } else {
@@ -173,7 +204,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Start the actor WITHOUT waiting for finish (instant response)
+    console.log("[LinkedIn Search] Apify input:", JSON.stringify(actorInput));
+
     const runRes = await fetchWithTimeout(
       `https://api.apify.com/v2/acts/apimaestro~linkedin-profile-search-scraper/runs?token=${apifyToken}`,
       {
@@ -185,10 +217,11 @@ export async function POST(req: NextRequest) {
     );
 
     if (!runRes.ok) {
-      console.error("[LinkedIn Search] Search start error:", runRes.status);
+      const errText = await runRes.text().catch(() => "");
+      console.error("[LinkedIn Search] Apify start error:", runRes.status, errText.slice(0, 300));
       return NextResponse.json({
         data: [],
-        error: "Erreur lors du lancement de la recherche.",
+        error: "Recherche Apify indisponible. Vérifiez vos crédits Apify.",
       });
     }
 
@@ -198,6 +231,7 @@ export async function POST(req: NextRequest) {
 
     const runId = run.data?.id;
     const datasetId = run.data?.defaultDatasetId;
+    console.log("[LinkedIn Search] Apify run started:", { runId, datasetId });
 
     if (!runId) {
       return NextResponse.json({
@@ -206,14 +240,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Return immediately — client will poll /api/linkedin-search/status
     return NextResponse.json({
       pending: true,
       runId,
       datasetId,
     });
   } catch (err) {
-    console.error("[LinkedIn Search] Search start error:", err instanceof Error ? err.message : err);
+    console.error("[LinkedIn Search] Apify error:", err instanceof Error ? err.message : err);
     return NextResponse.json({
       data: [],
       error: "Erreur lors de la recherche.",
