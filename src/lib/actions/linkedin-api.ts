@@ -469,9 +469,19 @@ export async function searchLinkedInProfiles(
       const dsn = process.env.UNIPILE_DSN;
       const apiKey = process.env.UNIPILE_API_KEY;
       if (dsn && apiKey) {
-        const url = `${dsn}/api/v1/linkedin/search/people?account_id=${unipileAccountId}&keyword=${encodeURIComponent(keyword)}&limit=20`;
-        console.log("[LinkedIn Search] Unipile URL:", url);
-        const res = await fetch(url, { headers: { "X-API-KEY": apiKey } });
+        // Correct Unipile endpoint: POST /api/v1/linkedin/search?account_id=XXX
+        const url = `${dsn}/api/v1/linkedin/search?account_id=${unipileAccountId}`;
+        const searchBody = { api: "classic", category: "people", keywords: keyword };
+        console.log("[LinkedIn Search] Unipile POST:", url, JSON.stringify(searchBody));
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "X-API-KEY": apiKey,
+            "Content-Type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify(searchBody),
+        });
         console.log("[LinkedIn Search] Unipile status:", res.status);
 
         if (res.ok) {
@@ -479,25 +489,33 @@ export async function searchLinkedInProfiles(
           console.log("[LinkedIn Search] Unipile raw response (first 500):", raw.slice(0, 500));
           const data = JSON.parse(raw) as {
             items?: Array<{
+              type?: string;
               id?: string;
+              name?: string | null;
               first_name?: string;
               last_name?: string;
               headline?: string;
-              public_identifier?: string;
-              profile_url?: string;
+              location?: string | null;
+              public_identifier?: string | null;
+              public_profile_url?: string | null;
+              profile_url?: string | null;
+              profile_picture_url?: string | null;
             }>;
           };
-          const results = (data.items || []).map((p) => ({
-            id: p.id || p.public_identifier || "",
-            name: [p.first_name, p.last_name].filter(Boolean).join(" ") || "",
-            headline: p.headline || null,
-            profile_url:
-              p.profile_url ||
-              (p.public_identifier
-                ? `https://linkedin.com/in/${p.public_identifier}`
-                : null),
-            source: "unipile" as const,
-          }));
+          const results = (data.items || [])
+            .filter((p) => p.type === "PEOPLE" || !p.type)
+            .map((p) => ({
+              id: p.id || p.public_identifier || "",
+              name: p.name || [p.first_name, p.last_name].filter(Boolean).join(" ") || "",
+              headline: p.headline || null,
+              profile_url:
+                p.public_profile_url ||
+                p.profile_url ||
+                (p.public_identifier
+                  ? `https://linkedin.com/in/${p.public_identifier}`
+                  : null),
+              source: "unipile" as const,
+            }));
           if (results.length > 0) {
             console.log("[LinkedIn Search] Unipile returned", results.length, "results");
             return { data: results };
