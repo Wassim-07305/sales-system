@@ -3,10 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
-  Loader2,
-  LogOut,
   PanelLeftClose,
   PanelLeft,
   Settings,
@@ -17,7 +15,6 @@ import { NAV_SECTIONS } from "@/lib/constants";
 import type { UserRole } from "@/lib/types/database";
 import { useUIStore } from "@/stores/ui-store";
 import { useUnreadCounts } from "@/lib/hooks/use-unread-counts";
-import { createClient } from "@/lib/supabase/client";
 import {
   Tooltip,
   TooltipContent,
@@ -40,7 +37,6 @@ export function Sidebar({
   whiteLabelConfig,
 }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const {
     sidebarCollapsed: isCollapsed,
     toggleSidebar,
@@ -53,23 +49,7 @@ export function Sidebar({
     setMobileSidebarOpen(false);
   }
 
-  const [loggingOut, setLoggingOut] = useState(false);
 
-  async function handleLogout() {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    try {
-      const { logout: serverLogout } = await import("@/lib/actions/auth");
-      await serverLogout();
-    } catch {
-      document.cookie = "x-user-role=; path=/; max-age=0";
-      document.cookie = "x-onboarding-done=; path=/; max-age=0";
-    }
-    router.push("/login");
-    router.refresh();
-  }
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -368,35 +348,6 @@ export function Sidebar({
             ) : profileLink;
           })()}
 
-          {/* Sign out */}
-          <button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className={cn(
-              "mt-0.5 flex w-full items-center rounded-lg px-3 py-2 text-[13px] text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400",
-              isCollapsed && "md:justify-center md:px-0",
-              loggingOut && "pointer-events-none opacity-50",
-            )}
-          >
-            {loggingOut ? (
-              <Loader2
-                className={cn(
-                  "h-[18px] w-[18px] shrink-0 animate-spin",
-                  isCollapsed ? "" : "mr-3",
-                )}
-              />
-            ) : (
-              <LogOut
-                className={cn(
-                  "h-[18px] w-[18px] shrink-0",
-                  isCollapsed ? "" : "mr-3",
-                )}
-              />
-            )}
-            <span className={cn(isCollapsed && "md:hidden")}>
-              {loggingOut ? "Déconnexion..." : "Déconnexion"}
-            </span>
-          </button>
         </div>
       </aside>
     </TooltipProvider>
