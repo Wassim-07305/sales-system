@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
+import { OutilsNav } from "@/components/layout/outils-nav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,8 +91,8 @@ export function GensparkView({ presentations, templates }: GensparkViewProps) {
   return (
     <div>
       <PageHeader
-        title="GenSpark"
-        description="Créez des présentations commerciales avec l'IA"
+        title="Outils"
+        description="Scripts, flowcharts, présentations et automatisation"
       >
         <Button variant="outline" onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -105,6 +106,8 @@ export function GensparkView({ presentations, templates }: GensparkViewProps) {
           Générer avec l&apos;IA
         </Button>
       </PageHeader>
+
+      <OutilsNav active="presentation" />
 
       <Tabs defaultValue="presentations">
         <TabsList className="mb-6">

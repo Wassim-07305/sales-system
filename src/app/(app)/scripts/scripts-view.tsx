@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { OutilsNav, type OutilsTab } from "@/components/layout/outils-nav";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -75,6 +76,7 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
   const [showAiDialog, setShowAiDialog] = useState(false);
   const [sheetFlowchart, setSheetFlowchart] = useState<Flowchart | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<OutilsTab>("scripts");
 
   const filteredFlowcharts = flowcharts.filter((fc) => {
     const query = scriptSearch.toLowerCase();
@@ -128,8 +130,8 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
   return (
     <div>
       <PageHeader
-        title="Scripts & Outils"
-        description="Gérez vos scripts et flowcharts de vente"
+        title="Outils"
+        description="Scripts, flowcharts, présentations et automatisation"
       >
         <Button
           onClick={() => setShowAiDialog(true)}
@@ -152,17 +154,9 @@ export function ScriptsView({ flowcharts }: { flowcharts: Flowchart[] }) {
         </Link>
       </PageHeader>
 
-      <Tabs defaultValue="scripts">
-        <TabsList className="mb-6">
-          <TabsTrigger value="scripts" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Scripts
-          </TabsTrigger>
-          <TabsTrigger value="flowcharts" className="gap-2">
-            <GitBranch className="h-4 w-4" />
-            Flowcharts
-          </TabsTrigger>
-        </TabsList>
+      <OutilsNav active={activeTab} onTabChange={setActiveTab} />
+
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as OutilsTab)}>
 
         {/* Scripts Tab — flowcharts as text documents */}
         <TabsContent value="scripts">

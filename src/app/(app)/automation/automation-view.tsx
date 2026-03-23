@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { PageHeader } from "@/components/layout/page-header";
+import { OutilsNav } from "@/components/layout/outils-nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -216,7 +217,7 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
 
   return (
     <div>
-      <PageHeader title="Automation" description="Workflows automatisés">
+      <PageHeader title="Outils" description="Scripts, flowcharts, présentations et automatisation">
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -318,6 +319,8 @@ export function AutomationView({ rules, executions, todayExecutions }: Props) {
           </Dialog>
         </div>
       </PageHeader>
+
+      <OutilsNav active="automation" />
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

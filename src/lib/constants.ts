@@ -25,14 +25,12 @@ import {
   Bot,
   Bell,
   Building2,
-  Zap,
   Store,
   SlidersHorizontal,
   Code,
   Plug,
   Sparkles,
   Radio,
-  Presentation,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/database";
@@ -134,22 +132,10 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
-    label: "Scripts",
+    label: "Outils",
     href: "/scripts",
     icon: ScrollText,
     roles: ["admin", "manager", "setter", "closer"],
-  },
-  {
-    label: "Présentation",
-    href: "/genspark",
-    icon: Presentation,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-  {
-    label: "Automatisation",
-    href: "/automation",
-    icon: Zap,
-    roles: ["admin", "manager"],
   },
   {
     label: "Marketplace",
@@ -331,7 +317,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/content", "/marketplace", "/utilisateurs", "/genspark", "/scripts", "/automation"].includes(i.href),
+      ["/content", "/marketplace", "/utilisateurs", "/scripts"].includes(i.href),
     ),
   },
   {
@@ -389,7 +375,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   sequences: "Séquences",
   roleplay: "Role-Play",
   reviews: "Analyse d'appels",
-  scripts: "Scripts",
+  scripts: "Outils",
   training: "Entraînement",
   automation: "Automatisation",
   marketplace: "Marketplace",
