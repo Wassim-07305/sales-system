@@ -41,7 +41,7 @@ export default async function ScoringPage() {
   );
 
   return (
-    <div className="px-6 pb-8">
+    <div className="pb-8">
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <ScoringView prospects={prospectsWithBreakdown as any} />
     </div>

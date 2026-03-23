@@ -24,7 +24,7 @@ export default async function CampaignsPage() {
     ]);
 
   return (
-    <div className="px-6 pb-8">
+    <div className="pb-8">
       <CampaignsPageView
         templates={templates ?? []}
         campaigns={campaigns ?? []}

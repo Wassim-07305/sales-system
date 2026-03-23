@@ -36,7 +36,7 @@ export default async function EngagePage() {
     ]);
 
   return (
-    <div className="px-6 pb-8">
+    <div className="pb-8">
       <EngageView
         initialFeeds={feeds}
         initialPosts={posts}

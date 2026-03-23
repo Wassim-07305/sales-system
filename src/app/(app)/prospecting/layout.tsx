@@ -75,16 +75,12 @@ export default function ProspectingLayout({
       />
 
       {/* KPI banner */}
-      <div className="px-6">
-        <div className="rounded-lg border border-border/50 bg-muted/20 px-4">
-          <ProspectingKPIBanner />
-        </div>
+      <div className="rounded-lg border border-border/50 bg-muted/20 px-4">
+        <ProspectingKPIBanner />
       </div>
 
       {/* Navigation tabs */}
-      <div className="px-6">
-        <UnifiedTabs tabs={TABS} />
-      </div>
+      <UnifiedTabs tabs={TABS} />
 
       {/* Page content */}
       {children}

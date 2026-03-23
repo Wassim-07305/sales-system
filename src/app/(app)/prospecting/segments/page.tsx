@@ -17,7 +17,7 @@ export default async function SegmentsPage() {
   ]);
 
   return (
-    <div className="px-6 pb-8">
+    <div className="pb-8">
       <SegmentsPageView
         segments={segments ?? []}
         segmentStats={segmentStats}

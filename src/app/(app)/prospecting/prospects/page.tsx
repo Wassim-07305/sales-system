@@ -69,7 +69,7 @@ export default async function ProspectsPage() {
     : { connected: false };
 
   return (
-    <div className="px-6 pb-8">
+    <div className="pb-8">
       <ProspectsPageWrapper
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         prospects={(prospects ?? []) as any}

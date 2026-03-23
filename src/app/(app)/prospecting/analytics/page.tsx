@@ -25,7 +25,7 @@ export default async function AnalyticsPage() {
     ]);
 
   return (
-    <div className="px-6 pb-8">
+    <div className="pb-8">
       <AnalyticsView
         stats={stats}
         topComments={topComments}
