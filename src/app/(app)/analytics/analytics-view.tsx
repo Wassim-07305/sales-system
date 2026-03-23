@@ -128,6 +128,7 @@ const NAV_LINKS = [
   { href: "/analytics/projections", icon: TrendingUp, label: "Projections" },
   { href: "/analytics/benchmarking", icon: BarChart3, label: "Benchmarking" },
   { href: "/analytics/nps", icon: SmilePlus, label: "NPS & CSAT" },
+  { href: "/team/journal", icon: CalendarDays, label: "EOD Équipe" },
 ];
 
 const AVATAR_COLORS = [

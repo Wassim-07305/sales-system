@@ -98,12 +98,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["setter", "closer"],
   },
   {
-    label: "EOD Équipe",
-    href: "/team/journal",
-    icon: BookOpen,
-    roles: ["admin", "manager", "client_b2b"],
-  },
-  {
     label: "Planificateur",
     href: "/content",
     icon: Newspaper,
@@ -323,7 +317,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Ventes",
     items: NAV_ITEMS.filter((i) =>
-      ["/crm", "/bookings", "/contracts", "/analytics", "/journal", "/team/journal"].includes(
+      ["/crm", "/bookings", "/contracts", "/analytics", "/journal"].includes(
         i.href,
       ),
     ),
