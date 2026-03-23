@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { KanbanBoard } from "./kanban-board";
 import { PageHeader } from "@/components/layout/page-header";
 import { CrmExportButton } from "./crm-export-button";
@@ -84,7 +85,7 @@ export default async function CRMPage() {
   return (
     <div>
       <PageHeader
-        title={isB2B ? "Pipeline de vos setters" : "Pipeline CRM"}
+        title={isB2B ? "Pipeline de vos setters" : "HubCRM"}
         description={
           isB2B
             ? "Suivez les deals de tous vos setters assignés en temps réel"
@@ -93,6 +94,23 @@ export default async function CRMPage() {
       >
         <CrmExportButton />
       </PageHeader>
+
+      {/* Tabs Pipeline / Prospection */}
+      {!isB2B && (
+        <div className="flex items-center gap-1 px-6 mb-4">
+          <div className="inline-flex items-center rounded-lg bg-muted/40 border border-border/50 p-1">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-background text-foreground shadow-sm rounded-md">
+              Pipeline
+            </span>
+            <Link
+              href="/prospecting"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors"
+            >
+              Prospection
+            </Link>
+          </div>
+        </div>
+      )}
 
       <KanbanBoard
         initialStages={stages || []}

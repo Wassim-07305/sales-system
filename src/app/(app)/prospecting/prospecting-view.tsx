@@ -432,6 +432,21 @@ export function ProspectingView({
 
   return (
     <div className="space-y-6">
+      {/* Tabs Pipeline / Prospection */}
+      <div className="flex items-center gap-1">
+        <div className="inline-flex items-center rounded-lg bg-muted/40 border border-border/50 p-1">
+          <a
+            href="/crm"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors"
+          >
+            Pipeline
+          </a>
+          <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-background text-foreground shadow-sm rounded-md">
+            Prospection
+          </span>
+        </div>
+      </div>
+
       <div className="flex items-center justify-end gap-2 flex-wrap">
         {/* Import / Export Dialog */}
         <Dialog open={importDialogOpen} onOpenChange={(o) => { setImportDialogOpen(o); if (!o) setImportResult(null); }}>

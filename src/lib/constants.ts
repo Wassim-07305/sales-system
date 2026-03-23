@@ -54,17 +54,9 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "csm", "setter", "closer", "client_b2b", "client_b2c"],
   },
 
-  // Hub (prospection) — above CRM
+  // HubCRM — unified prospecting + pipeline
   {
-    label: "Hub",
-    href: "/prospecting",
-    icon: Target,
-    roles: ["admin", "manager", "setter", "closer"],
-  },
-
-  // Admin/Manager + B2B (lecture seule pour B2B)
-  {
-    label: "CRM",
+    label: "HubCRM",
     href: "/crm",
     icon: Kanban,
     roles: ["admin", "manager", "csm", "setter", "closer", "client_b2b"],
@@ -331,7 +323,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Ventes",
     items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/crm", "/bookings", "/contracts", "/analytics", "/journal", "/team/journal"].includes(
+      ["/crm", "/bookings", "/contracts", "/analytics", "/journal", "/team/journal"].includes(
         i.href,
       ),
     ),
@@ -372,7 +364,7 @@ export const NAV_SECTIONS: NavSection[] = [
 // Breadcrumb labels pour les segments d'URL
 export const BREADCRUMB_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
-  crm: "CRM",
+  crm: "HubCRM",
   contacts: "Contacts",
   utilisateurs: "Utilisateurs",
   bookings: "Bookings",
