@@ -54,6 +54,14 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "csm", "setter", "closer", "client_b2b", "client_b2c"],
   },
 
+  // Hub (prospection) — above CRM
+  {
+    label: "Hub",
+    href: "/prospecting",
+    icon: Target,
+    roles: ["admin", "manager", "setter", "closer"],
+  },
+
   // Admin/Manager + B2B (lecture seule pour B2B)
   {
     label: "CRM",
@@ -102,12 +110,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/team/journal",
     icon: BookOpen,
     roles: ["admin", "manager", "client_b2b"],
-  },
-  {
-    label: "Hub",
-    href: "/prospecting",
-    icon: Target,
-    roles: ["admin", "manager", "setter", "closer"],
   },
   {
     label: "Planificateur",
