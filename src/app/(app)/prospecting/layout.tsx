@@ -1,23 +1,30 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Linkedin, Instagram, Star, Send } from "lucide-react";
+import {
+  Users,
+  Zap,
+  Star,
+  Megaphone,
+  Layers,
+  BarChart3,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { UnifiedTabs, type UnifiedTab } from "@/components/ui/unified-tabs";
 import { ProspectingKPIBanner } from "./prospecting-kpi-banner";
 
 const TABS: UnifiedTab[] = [
   {
-    label: "LinkedIn",
-    value: "linkedin",
-    icon: Linkedin,
-    href: "/prospecting/linkedin",
+    label: "Prospects",
+    value: "prospects",
+    icon: Users,
+    href: "/prospecting/prospects",
   },
   {
-    label: "Instagram",
-    value: "instagram",
-    icon: Instagram,
-    href: "/prospecting/instagram",
+    label: "Engage",
+    value: "engage",
+    icon: Zap,
+    href: "/prospecting/engage",
   },
   {
     label: "Scoring",
@@ -26,11 +33,23 @@ const TABS: UnifiedTab[] = [
     href: "/prospecting/scoring",
   },
   {
-    label: "Outreach",
-    value: "outreach",
-    icon: Send,
-    href: "/prospecting/outreach",
+    label: "Campagnes",
+    value: "campaigns",
+    icon: Megaphone,
+    href: "/prospecting/campaigns",
     exact: false,
+  },
+  {
+    label: "Segments",
+    value: "segments",
+    icon: Layers,
+    href: "/prospecting/segments",
+  },
+  {
+    label: "Analytics",
+    value: "analytics",
+    icon: BarChart3,
+    href: "/prospecting/analytics",
   },
 ];
 
@@ -42,8 +61,7 @@ export default function ProspectingLayout({
   const pathname = usePathname();
 
   // Hide layout on prospect detail pages (/prospecting/[uuid])
-  const isDetailPage =
-    /^\/prospecting\/[0-9a-f-]{36}/.test(pathname);
+  const isDetailPage = /^\/prospecting\/[0-9a-f-]{36}/.test(pathname);
 
   if (isDetailPage) {
     return <>{children}</>;
@@ -56,19 +74,19 @@ export default function ProspectingLayout({
         description="Recherchez, qualifiez et engagez vos prospects"
       />
 
-      {/* KPI banner — compact stats always visible */}
+      {/* KPI banner */}
       <div className="px-6">
         <div className="rounded-lg border border-border/50 bg-muted/20 px-4">
           <ProspectingKPIBanner />
         </div>
       </div>
 
-      {/* Unified tabs */}
+      {/* Navigation tabs */}
       <div className="px-6">
         <UnifiedTabs tabs={TABS} />
       </div>
 
-      {/* Tab content */}
+      {/* Page content */}
       {children}
     </div>
   );

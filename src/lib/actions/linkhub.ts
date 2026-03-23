@@ -182,7 +182,7 @@ export async function scrapeLinkedInPosts(profileUrl: string) {
     throw new Error("Erreur lors de l'enregistrement des posts.");
   }
 
-  revalidatePath("/prospecting/linkhub");
+  revalidatePath("/prospecting/engage");
   return {
     scraped: newPosts.length,
     message: `${newPosts.length} post(s) LinkedIn importé(s).`,
@@ -269,7 +269,7 @@ export async function scrapeInstagramPosts(username: string) {
     throw new Error("Erreur lors de l'enregistrement des posts.");
   }
 
-  revalidatePath("/prospecting/linkhub");
+  revalidatePath("/prospecting/engage");
   return {
     scraped: newPosts.length,
     message: `${newPosts.length} post(s) Instagram importé(s).`,
@@ -350,7 +350,7 @@ Règles :
       console.error("[LinkHub] Erreur sauvegarde suggestions:", error);
     }
 
-    revalidatePath("/prospecting/linkhub");
+    revalidatePath("/prospecting/engage");
     return suggestions;
   } catch {
     // Fallback avec des commentaires génériques contextualisés
@@ -378,7 +378,7 @@ Règles :
       .eq("id", postId)
       .eq("user_id", user.id);
 
-    revalidatePath("/prospecting/linkhub");
+    revalidatePath("/prospecting/engage");
     return fallback;
   }
 }
@@ -417,7 +417,7 @@ export async function markPostEngaged(
     throw new Error("Erreur lors de la mise à jour.");
   }
 
-  revalidatePath("/prospecting/linkhub");
+  revalidatePath("/prospecting/engage");
 }
 
 // ─── Scraper les posts de tous les prospects ────────────────────────────────
@@ -461,7 +461,7 @@ export async function scrapeAllProspectPosts() {
     }
   }
 
-  revalidatePath("/prospecting/linkhub");
+  revalidatePath("/prospecting/engage");
   return {
     total: totalScraped,
     prospects: prospects.length,
@@ -490,5 +490,5 @@ export async function deleteProspectPost(postId: string) {
     throw new Error("Erreur lors de la suppression.");
   }
 
-  revalidatePath("/prospecting/linkhub");
+  revalidatePath("/prospecting/engage");
 }

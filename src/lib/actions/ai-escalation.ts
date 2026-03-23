@@ -95,6 +95,6 @@ export async function notifySetterForEscalation(
     setterId,
     `Mode Duo: ${labels[escalationType || "objection"]}`,
     `${prospectName}: "${messagePreview.substring(0, 80)}..."`,
-    { link: "/prospecting/hub", type: "ai_escalation" },
+    { link: "/prospecting/prospects", type: "ai_escalation" },
   );
 }

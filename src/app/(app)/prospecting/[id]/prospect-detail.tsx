@@ -929,7 +929,7 @@ export function ProspectDetail({
                     <ListChecks className="h-4 w-4 text-emerald-500" />
                     Séquences de suivi
                   </CardTitle>
-                  <Link href="/prospecting/outreach/follow-ups">
+                  <Link href="/prospecting/campaigns">
                     <Button variant="ghost" size="sm" className="text-emerald-500 h-7 text-xs">
                       Gérer
                     </Button>

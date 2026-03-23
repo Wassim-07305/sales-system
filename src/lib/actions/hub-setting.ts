@@ -619,7 +619,7 @@ export async function calculateProspectScore(prospectId: string) {
 
   revalidatePath("/prospecting");
   revalidatePath("/prospecting/scoring");
-  revalidatePath("/prospecting/hub");
+  revalidatePath("/prospecting/prospects");
 
   return breakdown.total;
 }
@@ -650,7 +650,7 @@ export async function recalculateAllScores() {
 
   revalidatePath("/prospecting");
   revalidatePath("/prospecting/scoring");
-  revalidatePath("/prospecting/hub");
+  revalidatePath("/prospecting/prospects");
 
   return count;
 }
@@ -1237,7 +1237,7 @@ export async function runAutoSettingCampaign(profileUrls: string[]) {
     }
   }
 
-  revalidatePath("/prospecting/hub");
+  revalidatePath("/prospecting/prospects");
   revalidatePath("/prospecting");
 
   return {

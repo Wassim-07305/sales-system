@@ -98,7 +98,7 @@ export async function runSmartAlerts() {
           title: "Objectif DM en retard",
           body: `Tu as envoye ${quota.dms_sent}/${quota.dms_target} DMs aujourd'hui. Accelere pour atteindre ton objectif !`,
           type: "low_quota",
-          link: "/prospecting/hub",
+          link: "/prospecting/prospects",
         });
       }
     }

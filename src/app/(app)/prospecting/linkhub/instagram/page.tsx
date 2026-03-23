@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function InstagramHubPage() {
-  redirect("/prospecting/instagram");
+  redirect("/prospecting/prospects");
 }

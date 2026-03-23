@@ -123,7 +123,7 @@ export async function connectLinkedInAccount(accessToken: string) {
       });
     }
 
-    revalidatePath("/prospecting/linkedin");
+    revalidatePath("/prospecting/prospects");
     return {
       data: {
         id: profile.sub,
@@ -419,7 +419,7 @@ export async function sendLinkedInMessage(profileId: string, message: string) {
   });
 
   revalidatePath("/inbox");
-  revalidatePath("/prospecting/linkedin");
+  revalidatePath("/prospecting/prospects");
 
   if (!token) {
     return {

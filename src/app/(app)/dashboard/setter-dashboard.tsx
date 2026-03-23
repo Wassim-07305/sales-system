@@ -660,7 +660,7 @@ export function SetterDashboard({
                   Pipeline CRM
                 </Button>
               </Link>
-              <Link href="/prospecting/templates" className="block">
+              <Link href="/prospecting/campaigns" className="block">
                 <Button variant="outline" size="sm" className="w-full justify-start gap-2">
                   <Send className="h-4 w-4" />
                   Templates DM

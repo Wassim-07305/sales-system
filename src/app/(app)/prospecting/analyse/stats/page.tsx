@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function StatsSubPage() {
-  redirect("/prospecting/linkedin");
+  redirect("/prospecting/analytics");
 }

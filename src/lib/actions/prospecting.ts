@@ -320,7 +320,7 @@ export async function createTemplate(formData: {
 
     const { error } = await supabase.from("dm_templates").insert(formData);
     if (error) return { error: "Impossible de créer le template." };
-    revalidatePath("/prospecting/templates");
+    revalidatePath("/prospecting/campaigns");
     return { success: true };
   } catch {
     return { error: "Non authentifié" };
@@ -351,7 +351,7 @@ export async function updateTemplate(
       .update(formData)
       .eq("id", id);
     if (error) return { error: "Impossible de mettre à jour le template." };
-    revalidatePath("/prospecting/templates");
+    revalidatePath("/prospecting/campaigns");
     return { success: true };
   } catch {
     return { error: "Non authentifié" };
@@ -369,7 +369,7 @@ export async function deleteTemplate(id: string) {
 
     const { error } = await supabase.from("dm_templates").delete().eq("id", id);
     if (error) return { error: "Impossible de supprimer le template." };
-    revalidatePath("/prospecting/templates");
+    revalidatePath("/prospecting/campaigns");
     return { success: true };
   } catch {
     return { error: "Non authentifié" };

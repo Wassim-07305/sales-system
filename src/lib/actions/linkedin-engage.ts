@@ -135,7 +135,7 @@ async function requireAuth() {
   return { supabase, user };
 }
 
-const REVALIDATE_PATH = "/prospecting/linkhub";
+const REVALIDATE_PATH = "/prospecting/engage";
 
 // ---------------------------------------------------------------------------
 // FEEDS — CRUD

@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -24,9 +23,6 @@ import { Label } from "@/components/ui/label";
 import {
   Plus,
   Search,
-  Send,
-  MessageCircle,
-  Target,
   Linkedin,
   Instagram,
   RefreshCw,
@@ -51,11 +47,12 @@ import {
   Upload,
   Download,
   FileSpreadsheet,
+  MessageCircle,
+  Target,
 } from "lucide-react";
 import {
   addProspect,
   updateProspectStatus,
-  incrementDmsSent,
   importProspectsCSV,
   exportProspectsCSV,
 } from "@/lib/actions/prospecting";
@@ -90,20 +87,20 @@ interface Prospect {
   has_conversation?: boolean;
 }
 
-interface Quota {
-  id: string;
-  dms_sent: number;
-  dms_target: number;
-  replies_received: number;
-  bookings_from_dms: number;
-}
-
 interface SegmentStats {
   total: number;
   hot: number;
   warm: number;
   cold: number;
   avgScore: number;
+}
+
+interface Quota {
+  id: string;
+  dms_sent: number;
+  dms_target: number;
+  replies_received: number;
+  bookings_from_dms: number;
 }
 
 const statusColors: Record<string, string> = {
@@ -149,17 +146,15 @@ const temperatureConfig: Record<
   },
 };
 
-export function ProspectingView({
+export function ProspectsView({
   prospects,
-  quota,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  lists,
   segmentStats,
+  quota,
 }: {
   prospects: Prospect[];
-  quota: Quota | null;
   lists: { id: string; name: string }[];
   segmentStats: SegmentStats;
+  quota: Quota | null;
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -177,6 +172,7 @@ export function ProspectingView({
       if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     };
   }, []);
+
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterTemperature, setFilterTemperature] = useState<string>("all");
@@ -190,8 +186,18 @@ export function ProspectingView({
   const [newUrl, setNewUrl] = useState("");
   const [isRecalculating, startRecalcTransition] = useTransition();
 
+  // Import / Export
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [isImporting, startImportTransition] = useTransition();
+  const [importResult, setImportResult] = useState<{
+    imported: number;
+    errors: string[];
+  } | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+
   function getScoreBadgeStyle(score: number) {
-    if (score >= 75) return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+    if (score >= 75)
+      return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     if (score >= 45)
       return "bg-foreground/10 text-foreground border-foreground/20";
     return "bg-muted/40 text-muted-foreground/60 border-border/30";
@@ -211,10 +217,7 @@ export function ProspectingView({
 
   const dmsSent = quota?.dms_sent || 0;
   const dmsTarget = quota?.dms_target || 20;
-  const replies = quota?.replies_received || 0;
-  const bookings = quota?.bookings_from_dms || 0;
 
-  // Client-side filtering
   const filtered = useMemo(
     () =>
       prospects.filter((p) => {
@@ -223,14 +226,10 @@ export function ProspectingView({
         if (filterPlatform !== "all" && p.platform !== filterPlatform)
           return false;
         if (filterStatus !== "all" && p.status !== filterStatus) return false;
-
-        // Temperature filter
         if (filterTemperature !== "all") {
           if (!p.computed_score) return false;
           if (p.computed_score.temperature !== filterTemperature) return false;
         }
-
-        // Score range filter
         const minScore = scoreMin !== "" ? Number(scoreMin) : null;
         const maxScore = scoreMax !== "" ? Number(scoreMax) : null;
         if (minScore !== null || maxScore !== null) {
@@ -240,8 +239,6 @@ export function ProspectingView({
           if (maxScore !== null && p.computed_score.total_score > maxScore)
             return false;
         }
-
-        // Recency filter
         if (filterRecency === "recent") {
           if (!p.last_message_at) return false;
           const sevenDaysAgo = new Date();
@@ -253,9 +250,7 @@ export function ProspectingView({
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             if (new Date(p.last_message_at) >= thirtyDaysAgo) return false;
           }
-          // null last_message_at counts as inactive
         }
-
         return true;
       }),
     [
@@ -316,12 +311,6 @@ export function ProspectingView({
     }
   }
 
-  async function handleDmIncrement() {
-    await incrementDmsSent();
-    toast.success("+1 DM envoyé !");
-    router.refresh();
-  }
-
   async function handleAISend(prospectId: string, platform: string) {
     try {
       const result = await sendAIMessage(prospectId, platform);
@@ -372,12 +361,6 @@ export function ProspectingView({
       toast.error("Erreur lors de l'annulation");
     }
   }
-
-  // Import / Export
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [isImporting, startImportTransition] = useTransition();
-  const [importResult, setImportResult] = useState<{ imported: number; errors: string[] } | null>(null);
-  const importFileRef = useRef<HTMLInputElement>(null);
 
   function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -431,356 +414,258 @@ export function ProspectingView({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Tabs Pipeline / Prospection */}
-      <div className="flex items-center gap-1">
-        <div className="inline-flex items-center rounded-lg bg-muted/40 border border-border/50 p-1">
-          <a
-            href="/pipeline"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors"
+    <div className="space-y-5">
+      {/* Action buttons */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm text-muted-foreground">
+          {dmsSent}/{dmsTarget} DMs envoyés aujourd&apos;hui
+        </p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Dialog
+            open={importDialogOpen}
+            onOpenChange={(o) => {
+              setImportDialogOpen(o);
+              if (!o) setImportResult(null);
+            }}
           >
-            Pipeline
-          </a>
-          <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-background text-foreground shadow-sm rounded-md">
-            Prospection
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-end gap-2 flex-wrap">
-        {/* Import / Export Dialog */}
-        <Dialog open={importDialogOpen} onOpenChange={(o) => { setImportDialogOpen(o); if (!o) setImportResult(null); }}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="rounded-xl font-medium">
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Import / Export
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-lg rounded-2xl">
-            <DialogHeader>
-              <DialogTitle>Import / Export de prospects</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Colonnes attendues : <code className="text-xs bg-muted px-1 py-0.5 rounded">nom, plateforme, url, notes</code>
-                </p>
-                <div className="flex items-center gap-3">
-                  <label className="cursor-pointer">
-                    <input
-                      ref={importFileRef}
-                      type="file"
-                      accept=".csv"
-                      className="hidden"
-                      onChange={handleImportFile}
-                      disabled={isImporting}
-                    />
-                    <div className="inline-flex items-center gap-2 rounded-xl border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-                      {isImporting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Upload className="h-4 w-4" />
-                      )}
-                      Importer un CSV
-                    </div>
-                  </label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl"
-                    onClick={handleExport}
-                    disabled={isImporting}
-                  >
-                    {isImporting ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4 mr-2" />
-                    )}
-                    Exporter CSV
-                  </Button>
-                </div>
-              </div>
-              {importResult && (
-                <div className="rounded-xl border border-border/50 p-3 space-y-2">
-                  <p className="text-sm font-medium text-green-600">
-                    {importResult.imported} prospect(s) importé(s)
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl font-medium"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Import / Export
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg rounded-2xl">
+              <DialogHeader>
+                <DialogTitle>Import / Export de prospects</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Colonnes attendues :{" "}
+                    <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                      nom, plateforme, url, notes
+                    </code>
                   </p>
-                  {importResult.errors.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-red-600">
-                        {importResult.errors.length} erreur(s) :
-                      </p>
-                      <ul className="text-xs text-red-500 max-h-32 overflow-y-auto space-y-0.5">
-                        {importResult.errors.map((err, i) => (
-                          <li key={i}>{err}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer">
+                      <input
+                        ref={importFileRef}
+                        type="file"
+                        accept=".csv"
+                        className="hidden"
+                        onChange={handleImportFile}
+                        disabled={isImporting}
+                      />
+                      <div className="inline-flex items-center gap-2 rounded-xl border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+                        {isImporting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4" />
+                        )}
+                        Importer un CSV
+                      </div>
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={handleExport}
+                      disabled={isImporting}
+                    >
+                      {isImporting ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      Exporter CSV
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+                {importResult && (
+                  <div className="rounded-xl border border-border/50 p-3 space-y-2">
+                    <p className="text-sm font-medium text-green-600">
+                      {importResult.imported} prospect(s) importé(s)
+                    </p>
+                    {importResult.errors.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-red-600">
+                          {importResult.errors.length} erreur(s) :
+                        </p>
+                        <ul className="text-xs text-red-500 max-h-32 overflow-y-auto space-y-0.5">
+                          {importResult.errors.map((err, i) => (
+                            <li key={i}>{err}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-xl font-medium"
-          onClick={handleRecalculateAll}
-          disabled={isRecalculating}
-        >
-          {isRecalculating ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          Recalculer les scores
-        </Button>
-        <Link href="/prospecting/templates">
           <Button
             variant="outline"
             size="sm"
             className="rounded-xl font-medium"
+            onClick={handleRecalculateAll}
+            disabled={isRecalculating}
           >
-            Templates DM
+            {isRecalculating ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Recalculer les scores
           </Button>
-        </Link>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400">
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un prospect
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nouveau prospect</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Nom</Label>
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Jean Dupont"
-                  className="h-11 rounded-xl"
-                />
-              </div>
-              <div>
-                <Label>Plateforme</Label>
-                <Select value={newPlatform} onValueChange={setNewPlatform}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="linkedin">LinkedIn</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>URL du profil (optionnel)</Label>
-                <Input
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="h-11 rounded-xl"
-                />
-              </div>
-              <Button
-                onClick={handleAdd}
-                className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
-              >
-                Ajouter
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400">
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter un prospect
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Segment summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <Card
-          className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
-            filterTemperature === "all" &&
-              !hasActiveSegmentFilters &&
-              "ring-2 ring-emerald-500/50",
-          )}
-          onClick={() => {
-            setFilterTemperature("all");
-            setFiltersOpen(false);
-          }}
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold leading-none">
-                {segmentStats.total}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Total prospects
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
-            filterTemperature === "hot" && "ring-2 ring-emerald-500/50",
-          )}
-          onClick={() =>
-            setFilterTemperature(filterTemperature === "hot" ? "all" : "hot")
-          }
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <Flame className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold leading-none">
-                {segmentStats.hot}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Chauds</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
-            filterTemperature === "warm" && "ring-2 ring-emerald-500/50",
-          )}
-          onClick={() =>
-            setFilterTemperature(filterTemperature === "warm" ? "all" : "warm")
-          }
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <Thermometer className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold leading-none">
-                {segmentStats.warm}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Tièdes</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card
-          className={cn(
-            "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30 hover:shadow-md",
-            filterTemperature === "cold" && "ring-2 ring-emerald-500/50",
-          )}
-          onClick={() =>
-            setFilterTemperature(filterTemperature === "cold" ? "all" : "cold")
-          }
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <Snowflake className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold leading-none">
-                {segmentStats.cold}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Froids</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm rounded-2xl">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <TrendingUp className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold leading-none">
-                {segmentStats.avgScore}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Score moyen</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Daily quota */}
-      <Card className="shadow-sm rounded-2xl">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <Send className="h-5 w-5 text-emerald-500" />
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Nouveau prospect</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Nom</Label>
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Jean Dupont"
+                    className="h-11 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <Label>Plateforme</Label>
+                  <Select value={newPlatform} onValueChange={setNewPlatform}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>URL du profil (optionnel)</Label>
+                  <Input
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="h-11 rounded-xl"
+                  />
+                </div>
+                <Button
+                  onClick={handleAdd}
+                  className="w-full rounded-xl font-medium bg-emerald-500 text-black hover:bg-emerald-400"
+                >
+                  Ajouter
+                </Button>
               </div>
-              <div>
-                <h3 className="font-semibold">Quota journalier</h3>
-                <p className="text-sm text-muted-foreground">
-                  {dmsSent}/{dmsTarget} DMs envoyés aujourd&apos;hui
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl font-bold">
-                {dmsTarget > 0 ? Math.round((dmsSent / dmsTarget) * 100) : 0}%
-              </span>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-xl font-medium"
-                onClick={handleDmIncrement}
-              >
-                +1 DM
-              </Button>
-            </div>
-          </div>
-          <Progress
-            value={dmsTarget > 0 ? (dmsSent / dmsTarget) * 100 : 0}
-            className="h-3"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="shadow-sm rounded-2xl">
-          <CardContent className="p-4 text-center">
-            <Send className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{dmsSent}</p>
-            <p className="text-xs text-muted-foreground">DMs envoyés</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm rounded-2xl">
-          <CardContent className="p-4 text-center">
-            <MessageCircle className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{replies}</p>
-            <p className="text-xs text-muted-foreground">Réponses reçues</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm rounded-2xl">
-          <CardContent className="p-4 text-center">
-            <Target className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{bookings}</p>
-            <p className="text-xs text-muted-foreground">RDV bookés</p>
-          </CardContent>
-        </Card>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      {/* Basic filters row */}
+      {/* Quick filter cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          {
+            key: "all",
+            label: "Total",
+            value: segmentStats.total,
+            icon: Users,
+          },
+          {
+            key: "hot",
+            label: "Chauds",
+            value: segmentStats.hot,
+            icon: Flame,
+          },
+          {
+            key: "warm",
+            label: "Tièdes",
+            value: segmentStats.warm,
+            icon: Thermometer,
+          },
+          {
+            key: "cold",
+            label: "Froids",
+            value: segmentStats.cold,
+            icon: Snowflake,
+          },
+          {
+            key: "score",
+            label: "Score moy.",
+            value: segmentStats.avgScore,
+            icon: TrendingUp,
+          },
+        ].map((item) => {
+          const isActive =
+            item.key === "score"
+              ? false
+              : item.key === "all"
+                ? filterTemperature === "all" && !hasActiveSegmentFilters
+                : filterTemperature === item.key;
+          return (
+            <Card
+              key={item.key}
+              className={cn(
+                "cursor-pointer transition-all shadow-sm rounded-2xl hover:ring-2 hover:ring-emerald-500/30",
+                isActive && "ring-2 ring-emerald-500/50",
+              )}
+              onClick={() => {
+                if (item.key === "score") return;
+                setFilterTemperature(
+                  filterTemperature === item.key || item.key === "all"
+                    ? "all"
+                    : item.key,
+                );
+              }}
+            >
+              <CardContent className="p-3 flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <item.icon className="h-4 w-4 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold leading-none">
+                    {item.value}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {item.label}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher un prospect..."
-            className="pl-9 h-11 rounded-xl"
+            className="pl-9 h-10 rounded-xl"
             value={searchInput}
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <Select value={filterPlatform} onValueChange={setFilterPlatform}>
-          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs">
+          <SelectTrigger className="w-[140px] h-10 rounded-xl text-xs">
             <SelectValue placeholder="Plateforme" />
           </SelectTrigger>
           <SelectContent>
@@ -792,7 +677,7 @@ export function ProspectingView({
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px] h-11 rounded-xl text-xs">
+          <SelectTrigger className="w-[140px] h-10 rounded-xl text-xs">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
@@ -804,119 +689,104 @@ export function ProspectingView({
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      {/* Collapsible segmentation filter panel */}
-      <div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className="gap-2"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Segmentation avancée
-            {activeFilterCount > 0 && (
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-black text-xs font-bold">
-                {activeFilterCount}
-              </span>
-            )}
-            {filtersOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
-
-          {hasActiveSegmentFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetSegmentFilters}
-              className="gap-1 text-muted-foreground"
-            >
-              <X className="h-4 w-4" />
-              Réinitialiser
-            </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className="h-10 gap-2 rounded-xl"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filtres
+          {activeFilterCount > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-black text-xs font-bold">
+              {activeFilterCount}
+            </span>
           )}
-        </div>
-
-        {filtersOpen && (
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-2xl border border-border/50 bg-muted/20">
-            {/* Temperature */}
-            <div className="space-y-2">
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                Température
-              </Label>
-              <Select
-                value={filterTemperature}
-                onValueChange={setFilterTemperature}
-              >
-                <SelectTrigger className="text-sm h-11 rounded-xl">
-                  <SelectValue placeholder="Toutes" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes</SelectItem>
-                  {Object.entries(temperatureConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      <span className="flex items-center gap-2">
-                        {config.label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Score range */}
-            <div className="space-y-2">
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                Score (0-100)
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  placeholder="Min"
-                  value={scoreMin}
-                  onChange={(e) => setScoreMin(e.target.value)}
-                  className="text-sm h-11 rounded-xl"
-                  min={0}
-                  max={100}
-                />
-                <Input
-                  type="number"
-                  placeholder="Max"
-                  value={scoreMax}
-                  onChange={(e) => setScoreMax(e.target.value)}
-                  className="text-sm h-11 rounded-xl"
-                  min={0}
-                  max={100}
-                />
-              </div>
-            </div>
-
-            {/* Recency */}
-            <div className="space-y-2">
-              <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                Activité récente
-              </Label>
-              <Select value={filterRecency} onValueChange={setFilterRecency}>
-                <SelectTrigger className="text-sm h-11 rounded-xl">
-                  <SelectValue placeholder="Tous" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous</SelectItem>
-                  <SelectItem value="recent">
-                    Actifs récemment (7 jours)
-                  </SelectItem>
-                  <SelectItem value="inactive">Inactifs (30+ jours)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {filtersOpen ? (
+            <ChevronUp className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )}
+        </Button>
+        {hasActiveSegmentFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetSegmentFilters}
+            className="h-10 gap-1 text-muted-foreground"
+          >
+            <X className="h-4 w-4" />
+            Réinitialiser
+          </Button>
         )}
       </div>
+
+      {/* Advanced filters */}
+      {filtersOpen && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl border border-border/50 bg-muted/20">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Température
+            </Label>
+            <Select
+              value={filterTemperature}
+              onValueChange={setFilterTemperature}
+            >
+              <SelectTrigger className="text-sm h-10 rounded-xl">
+                <SelectValue placeholder="Toutes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes</SelectItem>
+                {Object.entries(temperatureConfig).map(([key, config]) => (
+                  <SelectItem key={key} value={key}>
+                    {config.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Score (0-100)
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={scoreMin}
+                onChange={(e) => setScoreMin(e.target.value)}
+                className="text-sm h-10 rounded-xl"
+                min={0}
+                max={100}
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={scoreMax}
+                onChange={(e) => setScoreMax(e.target.value)}
+                className="text-sm h-10 rounded-xl"
+                min={0}
+                max={100}
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Activité récente
+            </Label>
+            <Select value={filterRecency} onValueChange={setFilterRecency}>
+              <SelectTrigger className="text-sm h-10 rounded-xl">
+                <SelectValue placeholder="Tous" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="recent">Actifs (7 jours)</SelectItem>
+                <SelectItem value="inactive">Inactifs (30+ jours)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
 
       {/* Active filter badges */}
       {(filterTemperature !== "all" ||
@@ -945,7 +815,14 @@ export function ProspectingView({
               className="gap-1 cursor-pointer"
               onClick={() => setFilterPlatform("all")}
             >
-              {{ linkedin: "LinkedIn", instagram: "Instagram", whatsapp: "WhatsApp", email: "Email" }[filterPlatform] || filterPlatform}
+              {
+                {
+                  linkedin: "LinkedIn",
+                  instagram: "Instagram",
+                  whatsapp: "WhatsApp",
+                  email: "Email",
+                }[filterPlatform]
+              }
               <X className="h-3 w-3" />
             </Badge>
           )}
@@ -1107,7 +984,7 @@ export function ProspectingView({
                             handleStatusChange(prospect.id, v)
                           }
                         >
-                          <SelectTrigger className="w-[140px] h-8">
+                          <SelectTrigger className="w-[130px] h-8">
                             <Badge
                               variant="outline"
                               className={statusColors[prospect.status]}
@@ -1126,7 +1003,7 @@ export function ProspectingView({
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="p-4 text-muted-foreground">
+                      <td className="p-4 text-muted-foreground text-xs">
                         {prospect.last_message_at
                           ? formatDistanceToNow(
                               new Date(prospect.last_message_at),
@@ -1235,7 +1112,7 @@ export function ProspectingView({
                                     prospect.platform || "instagram",
                                   )
                                 }
-                                title="Programmer une relance automatique"
+                                title="Programmer une relance"
                                 className="text-amber-600 hover:text-amber-700"
                               >
                                 <RotateCcw className="h-4 w-4" />
@@ -1271,7 +1148,7 @@ export function ProspectingView({
                 filterPlatform !== "all" ||
                 filterStatus !== "all" ||
                 search
-                  ? "Aucun prospect ne correspond aux filtres sélectionnés."
+                  ? "Aucun prospect ne correspond aux filtres."
                   : "Ajoutez votre premier prospect pour commencer."}
               </p>
             </div>

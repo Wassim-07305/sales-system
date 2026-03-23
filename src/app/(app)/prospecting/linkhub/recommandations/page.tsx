@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function RecommandationsPage() {
-  redirect("/prospecting/linkedin");
+  redirect("/prospecting/engage");
 }

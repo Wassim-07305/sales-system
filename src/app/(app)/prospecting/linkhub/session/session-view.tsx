@@ -324,7 +324,7 @@ export function SessionView({ feeds, posts }: Props) {
           </Button>
           <Button
             variant="outline"
-            onClick={() => router.push("/prospecting/linkhub")}
+            onClick={() => router.push("/prospecting/engage")}
             className="flex-1 rounded-xl"
           >
             Retour au dashboard

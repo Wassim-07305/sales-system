@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function FeedsPage() {
-  redirect("/prospecting/linkedin");
+  redirect("/prospecting/engage");
 }

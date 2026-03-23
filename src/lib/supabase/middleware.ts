@@ -134,7 +134,7 @@ export async function updateSession(request: NextRequest) {
     // Role-based route restrictions
     // Client roles can only access their specific routes
     if (role && ["client_b2b", "client_b2c"].includes(role)) {
-      // Block LinkedIn Engage sub-pages for clients (under /prospecting/linkhub but gated by role)
+      // Block prospecting sub-pages for clients (gated by role)
       // Note: /prospecting is already handled by clientAllowedRoutes below
       const clientAllowedRoutes = [
         "/dashboard",
@@ -193,7 +193,8 @@ export async function updateSession(request: NextRequest) {
         "/pipeline",
         "/inbox",
         "/help",
-        "/prospecting/linkedin",
+        "/prospecting/prospects",
+        "/prospecting/engage",
       ];
       const isAllowed = csmAllowedRoutes.some((route) =>
         pathname.startsWith(route),

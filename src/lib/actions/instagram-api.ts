@@ -121,7 +121,7 @@ export async function connectInstagramAccount(accessToken: string) {
       });
     }
 
-    revalidatePath("/prospecting/instagram");
+    revalidatePath("/prospecting/prospects");
     return { data: { id: profile.id, username: profile.username } };
   } catch (err) {
     console.error("Instagram connect error:", err);
@@ -392,7 +392,7 @@ export async function sendInstagramDM(recipientId: string, message: string) {
   });
 
   revalidatePath("/inbox");
-  revalidatePath("/prospecting/instagram");
+  revalidatePath("/prospecting/prospects");
 
   if (!token || !pageId) {
     return {
