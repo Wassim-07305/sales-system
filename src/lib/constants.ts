@@ -110,7 +110,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
-    label: "Content",
+    label: "Planificateur",
     href: "/content",
     icon: Newspaper,
     roles: ["admin", "manager"],
@@ -417,7 +417,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   kpis: "KPIs",
   referral: "Parrainage",
   profile: "Profil",
-  content: "Contenus",
+  content: "Planificateur",
   customers: "Clients",
   notifications: "Notifications",
   "ai-modes": "Modes IA",
