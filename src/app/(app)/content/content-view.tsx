@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
+import { OutilsNav } from "@/components/layout/outils-nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -213,8 +214,8 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
   return (
     <div>
       <PageHeader
-        title="Content Planner"
-        description="Planifiez et suivez votre contenu"
+        title="Outils"
+        description="Scripts, flowcharts, présentations et automatisation"
       >
         <div className="flex gap-2">
           <Button
@@ -240,6 +241,8 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
           </Button>
         </div>
       </PageHeader>
+
+      <OutilsNav active="planificateur" />
 
       {viewMode === "calendar" ? (
         <Card className="mb-6">

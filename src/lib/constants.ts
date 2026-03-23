@@ -8,7 +8,6 @@ import {
   MessageSquare,
   BarChart3,
   Target,
-  Newspaper,
   Trophy,
   UserCircle,
   Settings,
@@ -94,12 +93,6 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/journal",
     icon: BookOpen,
     roles: ["setter", "closer"],
-  },
-  {
-    label: "Planificateur",
-    href: "/content",
-    icon: Newspaper,
-    roles: ["admin", "manager"],
   },
   // Messages (unified: team channels, DMs, WhatsApp, Inbox)
   {
@@ -317,7 +310,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/content", "/marketplace", "/utilisateurs", "/scripts"].includes(i.href),
+      ["/marketplace", "/utilisateurs", "/scripts"].includes(i.href),
     ),
   },
   {

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, GitBranch, Presentation, Zap } from "lucide-react";
+import { FileText, GitBranch, Newspaper, Presentation, Zap } from "lucide-react";
 
 const OUTILS_TABS = [
   { label: "Scripts", href: "/scripts", value: "scripts", icon: FileText },
   { label: "Flowcharts", href: "/scripts", value: "flowcharts", icon: GitBranch },
   { label: "Présentation", href: "/genspark", value: "presentation", icon: Presentation },
   { label: "Automatisation", href: "/automation", value: "automation", icon: Zap },
+  { label: "Planificateur", href: "/content", value: "planificateur", icon: Newspaper },
 ] as const;
 
 export type OutilsTab = (typeof OUTILS_TABS)[number]["value"];
