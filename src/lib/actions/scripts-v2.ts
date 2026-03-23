@@ -19,14 +19,16 @@ export async function getFlowcharts() {
     .from("script_flowcharts")
     .select("*")
     .eq("created_by", user.id)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .limit(100);
 
   // Also fetch flowcharts shared with the user
   const { data: shares } = await supabase
     .from("script_shares")
     .select("script_id, permission")
     .eq("shared_with", user.id)
-    .eq("script_type", "flowchart");
+    .eq("script_type", "flowchart")
+    .limit(100);
 
   let sharedFlowcharts: typeof ownFlowcharts = [];
   if (shares && shares.length > 0) {
@@ -35,7 +37,8 @@ export async function getFlowcharts() {
       .from("script_flowcharts")
       .select("*")
       .in("id", sharedIds)
-      .order("updated_at", { ascending: false });
+      .order("updated_at", { ascending: false })
+      .limit(100);
     sharedFlowcharts = data || [];
   }
 
@@ -51,11 +54,41 @@ export async function getFlowcharts() {
 
 export async function getFlowchart(id: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data } = await supabase
     .from("script_flowcharts")
     .select("*")
     .eq("id", id)
     .single();
+
+  if (!data) return null;
+
+  // Vérifier que l'utilisateur est propriétaire ou a un partage
+  if (data.created_by !== user.id) {
+    const { data: share } = await supabase
+      .from("script_shares")
+      .select("id")
+      .eq("script_id", id)
+      .eq("shared_with", user.id)
+      .eq("script_type", "flowchart")
+      .maybeSingle();
+
+    // Vérifier si admin/manager
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!share && profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
   return data;
 }
 
@@ -123,9 +156,53 @@ export async function updateFlowchart(
     nodes?: unknown[];
     edges?: unknown[];
     category?: string;
+    expectedUpdatedAt?: string;
   },
 ) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Vérifier propriété ou permission d'édition
+  const { data: flowchart } = await supabase
+    .from("script_flowcharts")
+    .select("created_by, updated_at")
+    .eq("id", id)
+    .single();
+
+  if (!flowchart) throw new Error("Flowchart introuvable");
+
+  if (flowchart.created_by !== user.id) {
+    const { data: share } = await supabase
+      .from("script_shares")
+      .select("permission")
+      .eq("script_id", id)
+      .eq("shared_with", user.id)
+      .eq("script_type", "flowchart")
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (
+      profile?.role !== "admin" &&
+      profile?.role !== "manager" &&
+      share?.permission !== "edit"
+    ) {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
+  // Optimistic locking : vérifier que updated_at n'a pas changé
+  if (data.expectedUpdatedAt && flowchart.updated_at !== data.expectedUpdatedAt) {
+    throw new Error("Ce script a été modifié par un autre utilisateur. Veuillez recharger la page.");
+  }
+
   const updateData: Record<string, unknown> = {};
   if (data.title !== undefined) updateData.title = data.title;
   if (data.description !== undefined) updateData.description = data.description;
@@ -145,6 +222,32 @@ export async function updateFlowchart(
 
 export async function deleteFlowchart(id: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Vérifier propriété
+  const { data: flowchart } = await supabase
+    .from("script_flowcharts")
+    .select("created_by")
+    .eq("id", id)
+    .single();
+
+  if (!flowchart) throw new Error("Flowchart introuvable");
+
+  if (flowchart.created_by !== user.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
   const { error } = await supabase
     .from("script_flowcharts")
     .delete()
@@ -169,14 +272,16 @@ export async function getMindMaps() {
     .from("mind_maps")
     .select("*")
     .eq("created_by", user.id)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .limit(100);
 
   // Also fetch mind maps shared with the user
   const { data: shares } = await supabase
     .from("script_shares")
     .select("script_id, permission")
     .eq("shared_with", user.id)
-    .eq("script_type", "mindmap");
+    .eq("script_type", "mindmap")
+    .limit(100);
 
   let sharedMindMaps: typeof ownMindMaps = [];
   if (shares && shares.length > 0) {
@@ -185,7 +290,8 @@ export async function getMindMaps() {
       .from("mind_maps")
       .select("*")
       .in("id", sharedIds)
-      .order("updated_at", { ascending: false });
+      .order("updated_at", { ascending: false })
+      .limit(100);
     sharedMindMaps = data || [];
   }
 
@@ -201,11 +307,40 @@ export async function getMindMaps() {
 
 export async function getMindMap(id: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data } = await supabase
     .from("mind_maps")
     .select("*")
     .eq("id", id)
     .single();
+
+  if (!data) return null;
+
+  // Vérifier que l'utilisateur est propriétaire ou a un partage
+  if (data.created_by !== user.id) {
+    const { data: share } = await supabase
+      .from("script_shares")
+      .select("id")
+      .eq("script_id", id)
+      .eq("shared_with", user.id)
+      .eq("script_type", "mindmap")
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!share && profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
   return data;
 }
 
@@ -257,9 +392,53 @@ export async function updateMindMap(
     nodes?: unknown[];
     edges?: unknown[];
     category?: string;
+    expectedUpdatedAt?: string;
   },
 ) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Vérifier propriété ou permission d'édition
+  const { data: mindMap } = await supabase
+    .from("mind_maps")
+    .select("created_by, updated_at")
+    .eq("id", id)
+    .single();
+
+  if (!mindMap) throw new Error("Mind map introuvable");
+
+  if (mindMap.created_by !== user.id) {
+    const { data: share } = await supabase
+      .from("script_shares")
+      .select("permission")
+      .eq("script_id", id)
+      .eq("shared_with", user.id)
+      .eq("script_type", "mindmap")
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (
+      profile?.role !== "admin" &&
+      profile?.role !== "manager" &&
+      share?.permission !== "edit"
+    ) {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
+  // Optimistic locking : vérifier que updated_at n'a pas changé
+  if (data.expectedUpdatedAt && mindMap.updated_at !== data.expectedUpdatedAt) {
+    throw new Error("Ce script a été modifié par un autre utilisateur. Veuillez recharger la page.");
+  }
+
   const updateData: Record<string, unknown> = {};
   if (data.title !== undefined) updateData.title = data.title;
   if (data.description !== undefined) updateData.description = data.description;
@@ -279,6 +458,32 @@ export async function updateMindMap(
 
 export async function deleteMindMap(id: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Vérifier propriété
+  const { data: mindMap } = await supabase
+    .from("mind_maps")
+    .select("created_by")
+    .eq("id", id)
+    .single();
+
+  if (!mindMap) throw new Error("Mind map introuvable");
+
+  if (mindMap.created_by !== user.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
   const { error } = await supabase.from("mind_maps").delete().eq("id", id);
 
   if (error) throw new Error(error.message);
@@ -295,7 +500,8 @@ export async function getScriptTemplates() {
     .from("script_templates")
     .select("*")
     .eq("is_public", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
   return data || [];
 }
 
@@ -380,13 +586,39 @@ export async function createFlowchartFromTemplate(templateId: string) {
  */
 export async function generateScriptFromMindMap(mindMapId: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
   const { data: mindMap } = await supabase
     .from("mind_maps")
-    .select("title, description, nodes, edges")
+    .select("title, description, nodes, edges, created_by")
     .eq("id", mindMapId)
     .single();
 
   if (!mindMap) throw new Error("Mind map non trouvee");
+
+  // Vérifier accès
+  if (mindMap.created_by !== user.id) {
+    const { data: share } = await supabase
+      .from("script_shares")
+      .select("id")
+      .eq("script_id", mindMapId)
+      .eq("shared_with", user.id)
+      .eq("script_type", "mindmap")
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!share && profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
 
   const nodes = (mindMap.nodes || []) as Array<{
     id: string;
@@ -476,6 +708,29 @@ export async function shareScript(params: {
   if (targetUser.id === user.id)
     throw new Error("Vous ne pouvez pas partager avec vous-meme");
 
+  // Vérifier que l'utilisateur est propriétaire du script
+  const table =
+    params.scriptType === "flowchart" ? "script_flowcharts" : "mind_maps";
+  const { data: script } = await supabase
+    .from(table)
+    .select("created_by")
+    .eq("id", params.scriptId)
+    .single();
+
+  if (!script) throw new Error("Script introuvable");
+
+  if (script.created_by !== user.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
   // Check if share already exists
   const { data: existing } = await supabase
     .from("script_shares")
@@ -504,10 +759,10 @@ export async function shareScript(params: {
   }
 
   // Set is_shared flag on the script
-  const table =
+  const scriptTable =
     params.scriptType === "flowchart" ? "script_flowcharts" : "mind_maps";
   await supabase
-    .from(table)
+    .from(scriptTable)
     .update({ is_shared: true })
     .eq("id", params.scriptId);
 
@@ -524,7 +779,8 @@ export async function getScriptShares(scriptId: string) {
   const { data } = await supabase
     .from("script_shares")
     .select("id, script_id, script_type, permission, created_at, shared_with")
-    .eq("script_id", scriptId);
+    .eq("script_id", scriptId)
+    .limit(100);
 
   if (!data || data.length === 0) return [];
 
@@ -560,6 +816,27 @@ export async function removeScriptShare(shareId: string) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
 
+  // Vérifier que l'utilisateur est celui qui a partagé (propriétaire)
+  const { data: share } = await supabase
+    .from("script_shares")
+    .select("shared_by")
+    .eq("id", shareId)
+    .single();
+
+  if (!share) throw new Error("Partage introuvable");
+
+  if (share.shared_by !== user.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
   const { error } = await supabase
     .from("script_shares")
     .delete()
@@ -579,7 +856,8 @@ export async function getSharedWithMe() {
   const { data: shares } = await supabase
     .from("script_shares")
     .select("script_id, script_type, permission")
-    .eq("shared_with", user.id);
+    .eq("shared_with", user.id)
+    .limit(100);
 
   if (!shares || shares.length === 0) return { flowcharts: [], mindmaps: [] };
 
@@ -597,7 +875,8 @@ export async function getSharedWithMe() {
     const { data } = await supabase
       .from("script_flowcharts")
       .select("*")
-      .in("id", flowchartIds);
+      .in("id", flowchartIds)
+      .limit(100);
     flowcharts = data || [];
   }
 
@@ -605,7 +884,8 @@ export async function getSharedWithMe() {
     const { data } = await supabase
       .from("mind_maps")
       .select("*")
-      .in("id", mindmapIds);
+      .in("id", mindmapIds)
+      .limit(100);
     mindmaps = data || [];
   }
 
@@ -1074,14 +1354,37 @@ export async function getScriptForTraining(scriptId: string) {
   const { data: flowchart } = await supabase
     .from("script_flowcharts")
     .select(
-      "id, title, description, category, nodes, edges, created_at, updated_at",
+      "id, title, description, category, nodes, edges, created_at, updated_at, created_by",
     )
     .eq("id", scriptId)
     .single();
 
   if (!flowchart) throw new Error("Script introuvable");
 
-  return flowchart;
+  // Vérifier accès (propriétaire ou partagé)
+  if (flowchart.created_by !== user.id) {
+    const { data: share } = await supabase
+      .from("script_shares")
+      .select("id")
+      .eq("script_id", scriptId)
+      .eq("shared_with", user.id)
+      .eq("script_type", "flowchart")
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!share && profile?.role !== "admin" && profile?.role !== "manager") {
+      throw new Error("Accès non autorisé");
+    }
+  }
+
+  // Ne pas exposer created_by au client
+  const { created_by: _, ...rest } = flowchart;
+  return rest;
 }
 
 export async function getScriptsForTraining() {
@@ -1098,14 +1401,16 @@ export async function getScriptsForTraining() {
       "id, title, description, category, nodes, edges, created_at, updated_at",
     )
     .eq("created_by", user.id)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .limit(100);
 
   // Shared flowcharts
   const { data: shares } = await supabase
     .from("script_shares")
     .select("script_id")
     .eq("shared_with", user.id)
-    .eq("script_type", "flowchart");
+    .eq("script_type", "flowchart")
+    .limit(100);
 
   let sharedFlowcharts: typeof ownFlowcharts = [];
   if (shares && shares.length > 0) {
@@ -1116,7 +1421,8 @@ export async function getScriptsForTraining() {
         "id, title, description, category, nodes, edges, created_at, updated_at",
       )
       .in("id", sharedIds)
-      .order("updated_at", { ascending: false });
+      .order("updated_at", { ascending: false })
+      .limit(100);
     sharedFlowcharts = data || [];
   }
 

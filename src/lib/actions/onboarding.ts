@@ -70,6 +70,18 @@ export async function saveOnboardingStep(step: {
   is_required: boolean;
 }) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role))
+    throw new Error("Accès refusé");
 
   if (step.id) {
     await supabase
@@ -100,6 +112,19 @@ export async function saveOnboardingStep(step: {
 
 export async function deleteOnboardingStep(stepId: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role))
+    throw new Error("Accès refusé");
+
   await supabase.from("onboarding_steps").delete().eq("id", stepId);
   revalidatePath("/settings/onboarding");
 }

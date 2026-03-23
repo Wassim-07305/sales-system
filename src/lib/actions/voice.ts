@@ -31,22 +31,13 @@ export async function createOrUpdateVoiceProfile(sampleUrl: string) {
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { data: existing } = await supabase
+  // Use upsert to avoid race condition when creating voice profiles
+  await supabase
     .from("voice_profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (existing) {
-    await supabase
-      .from("voice_profiles")
-      .update({ sample_url: sampleUrl, status: "pending" })
-      .eq("id", existing.id);
-  } else {
-    await supabase
-      .from("voice_profiles")
-      .insert({ user_id: user.id, sample_url: sampleUrl, status: "pending" });
-  }
+    .upsert(
+      { user_id: user.id, sample_url: sampleUrl, status: "pending" },
+      { onConflict: "user_id" },
+    );
 
   revalidatePath("/settings/voice");
 }
@@ -284,10 +275,36 @@ export async function generateVoiceMessage(
 
 export async function getVoiceMessages() {
   const supabase = await createClient();
-  const { data } = await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Admin/manager can see all voice messages, others only their own
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  let query = supabase
     .from("voice_messages")
-    .select("*")
+    .select("*, voice_profile:voice_profiles!voice_profile_id(user_id)")
     .order("created_at", { ascending: false });
+
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    // Get user's voice profile id to filter messages
+    const { data: voiceProfile } = await supabase
+      .from("voice_profiles")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!voiceProfile) return [];
+    query = query.eq("voice_profile_id", voiceProfile.id);
+  }
+
+  const { data } = await query;
 
   return (data || []).map((d: Record<string, unknown>) => ({
     ...d,

@@ -99,6 +99,13 @@ export async function saveWhiteLabelConfig(data: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || profile.role !== "admin") return { error: "Accès refusé" };
+
   const updateData: Record<string, unknown> = {};
   if (data.brandName !== undefined) updateData.brand_name = data.brandName;
   if (data.logoUrl !== undefined) updateData.logo_url = data.logoUrl;
@@ -144,6 +151,13 @@ export async function updateWhiteLabelConfig(data: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || profile.role !== "admin") return { error: "Accès refusé" };
 
   const updateData: Record<string, unknown> = {};
   if (data.appName !== undefined) updateData.app_name = data.appName;
@@ -203,6 +217,13 @@ export async function updateFeatureToggles(toggles: string[]) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || profile.role !== "admin") return { error: "Accès refusé" };
 
   try {
     const { error } = await supabase

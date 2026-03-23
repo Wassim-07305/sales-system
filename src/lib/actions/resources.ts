@@ -84,14 +84,5 @@ export async function deleteResource(id: string) {
 
 export async function incrementDownload(id: string) {
   const supabase = await createClient();
-  const { data: item } = await supabase
-    .from("resource_items")
-    .select("download_count")
-    .eq("id", id)
-    .single();
-
-  await supabase
-    .from("resource_items")
-    .update({ download_count: (item?.download_count || 0) + 1 })
-    .eq("id", id);
+  await supabase.rpc("increment_download_count", { item_id: id });
 }

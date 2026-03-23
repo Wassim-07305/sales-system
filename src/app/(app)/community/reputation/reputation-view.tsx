@@ -111,10 +111,13 @@ export function ReputationView({
   const currentRank = getReputationRank(userReputation.points);
   const nextRank = getNextRank(userReputation.points);
 
+  const rankDelta = nextRank
+    ? nextRank.minPoints - currentRank.minPoints
+    : 0;
   const progressPercent = nextRank
-    ? ((userReputation.points - currentRank.minPoints) /
-        (nextRank.minPoints - currentRank.minPoints)) *
-      100
+    ? rankDelta > 0
+      ? ((userReputation.points - currentRank.minPoints) / rankDelta) * 100
+      : 0
     : 100;
 
   return (

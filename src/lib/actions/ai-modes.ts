@@ -70,6 +70,14 @@ export async function updateAiModeConfig(data: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role))
+    return { error: "Accès refusé" };
+
   const updatePayload: Record<string, unknown> = {
     global_mode: data.global_mode,
     network_overrides: data.network_overrides,

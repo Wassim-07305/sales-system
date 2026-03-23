@@ -123,22 +123,40 @@ export async function submitQuizAttempt(
     .eq("lesson_id", lessonId)
     .gte("attempted_at", `${today}T00:00:00.000Z`);
 
-  if ((todayAttempts || []).length >= maxAttempts) {
+  const attemptCount = (todayAttempts || []).length;
+  if (attemptCount >= maxAttempts) {
     throw new Error(`Maximum ${maxAttempts} tentatives par jour atteint`);
   }
 
-  await supabase.from("quiz_attempts").insert({
-    user_id: user.id,
-    quiz_id: quizId,
-    lesson_id: lessonId,
-    answers,
-    score: verifiedScore,
-    passed: verifiedPassed,
-  });
+  const { data: inserted } = await supabase
+    .from("quiz_attempts")
+    .insert({
+      user_id: user.id,
+      quiz_id: quizId,
+      lesson_id: lessonId,
+      answers,
+      score: verifiedScore,
+      passed: verifiedPassed,
+    })
+    .select("id")
+    .single();
+
+  // Re-check count after insert to close race window
+  const { data: postInsertAttempts } = await supabase
+    .from("quiz_attempts")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("lesson_id", lessonId)
+    .gte("attempted_at", `${today}T00:00:00.000Z`);
+
+  if ((postInsertAttempts || []).length > maxAttempts && inserted?.id) {
+    await supabase.from("quiz_attempts").delete().eq("id", inserted.id);
+    throw new Error(`Maximum ${maxAttempts} tentatives par jour atteint`);
+  }
 
   revalidatePath("/academy");
   return {
-    attemptsLeft: maxAttempts - (todayAttempts || []).length - 1,
+    attemptsLeft: maxAttempts - (postInsertAttempts || []).length,
     score: verifiedScore,
     passed: verifiedPassed,
   };
@@ -187,13 +205,35 @@ export async function getQuizAttemptsToday(quizId: string): Promise<number> {
 export async function getResourceLibrary() {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Get user role for target_roles filtering
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const userRole = profile?.role ?? null;
+
   const { data: resources } = await supabase
     .from("resource_library")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(500);
 
-  return resources || [];
+  // Filter by target_roles
+  const filtered = (resources || []).filter(
+    (r: Record<string, unknown>) => {
+      const roles = r.target_roles as string[] | null;
+      if (!roles || roles.length === 0) return true;
+      return userRole ? roles.includes(userRole) : false;
+    },
+  );
+
+  return filtered;
 }
 
 export async function getRevisionCards(courseId?: string) {
@@ -298,7 +338,26 @@ export async function getCoursesWithModules() {
     }
   }
 
-  const sortedCourses = (courses || []).map((c: Record<string, unknown>) => ({
+  // Filter courses by target_roles
+  let userRole: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    userRole = profile?.role ?? null;
+  }
+
+  const filteredCourses = (courses || []).filter(
+    (c: Record<string, unknown>) => {
+      const roles = c.target_roles as string[] | null;
+      if (!roles || roles.length === 0) return true;
+      return userRole ? roles.includes(userRole) : false;
+    },
+  );
+
+  const sortedCourses = filteredCourses.map((c: Record<string, unknown>) => ({
     ...c,
     modules: Array.isArray(c.modules)
       ? (c.modules as Record<string, unknown>[])
@@ -476,35 +535,51 @@ export async function getCourseDetail(courseId: string) {
     .eq("course_id", courseId);
 
   let allPrereqsMet = true;
-  const prerequisites = await Promise.all(
-    (prereqs || []).map(async (p: Record<string, unknown>) => {
+
+  // Batch fetch all prerequisite lessons in a single query (avoids N+1)
+  const prereqCourseIds = (prereqs || []).map(
+    (p: Record<string, unknown>) => p.prerequisite_course_id as string,
+  );
+  let allPrereqLessons: Array<{ id: string; course_id: string }> = [];
+  let allCompletedLessonIds = new Set<string>();
+
+  if (prereqCourseIds.length > 0) {
+    const { data: lessons } = await supabase
+      .from("lessons")
+      .select("id, course_id")
+      .in("course_id", prereqCourseIds);
+    allPrereqLessons = lessons || [];
+
+    const allLessonIds = allPrereqLessons.map((l) => l.id);
+    if (allLessonIds.length > 0) {
+      const { data: completedLessons } = await supabase
+        .from("lesson_progress")
+        .select("lesson_id")
+        .eq("user_id", user.id)
+        .eq("completed", true)
+        .in("lesson_id", allLessonIds);
+      allCompletedLessonIds = new Set(
+        (completedLessons || []).map((l) => l.lesson_id),
+      );
+    }
+  }
+
+  const prerequisites = (prereqs || []).map(
+    (p: Record<string, unknown>) => {
       const prereqCourseId = p.prerequisite_course_id as string;
-
-      // Fetch all lessons of the prerequisite course
-      const { data: prereqLessons } = await supabase
-        .from("lessons")
-        .select("id")
-        .eq("course_id", prereqCourseId);
-
-      const prereqLessonIds = (prereqLessons || []).map((l) => l.id);
+      const prereqLessonIds = allPrereqLessons
+        .filter((l) => l.course_id === prereqCourseId)
+        .map((l) => l.id);
 
       if (prereqLessonIds.length === 0) {
         return { ...p, completed: true };
       }
 
-      // Check if ALL lessons of the prerequisite course are completed
-      const { data: completedLessons } = await supabase
-        .from("lesson_progress")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("completed", true)
-        .in("lesson_id", prereqLessonIds);
-
       const completed =
-        (completedLessons || []).length >= prereqLessonIds.length;
+        prereqLessonIds.every((id) => allCompletedLessonIds.has(id));
       if (!completed) allPrereqsMet = false;
       return { ...p, completed };
-    }),
+    },
   );
 
   // Check roleplay prerequisite
@@ -834,6 +909,16 @@ export async function setRoleplayRequirement(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Non authentifie");
+
+  // Only admin or manager can set roleplay requirements
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (!profile || !["admin", "manager"].includes(profile.role)) {
+    throw new Error("Accès réservé aux administrateurs et managers");
+  }
 
   const { data: course } = await supabase
     .from("courses")
@@ -2245,7 +2330,8 @@ export async function getAcademyLeaderboard(): Promise<
     .select(
       "user_id, score, passed, profiles!user_id(full_name, avatar_url, role)",
     )
-    .order("attempted_at", { ascending: false });
+    .order("attempted_at", { ascending: false })
+    .limit(5000);
 
   if (!attempts || attempts.length === 0) return [];
 

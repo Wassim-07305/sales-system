@@ -14,7 +14,8 @@ export async function getPaymentInstallments(contractId?: string) {
   let query = supabase
     .from("payment_installments")
     .select("*, contract:contracts(id, client_id, amount, status)")
-    .order("due_date", { ascending: true });
+    .order("due_date", { ascending: true })
+    .limit(500);
 
   if (contractId) {
     query = query.eq("contract_id", contractId);
@@ -40,7 +41,7 @@ export async function createInstallmentPlan(data: {
   // Vérifier que le contrat est signé avant de créer des échéances
   const { data: contract } = await supabase
     .from("contracts")
-    .select("status")
+    .select("status, assigned_to, client_id")
     .eq("id", data.contractId)
     .single();
 
@@ -50,6 +51,32 @@ export async function createInstallmentPlan(data: {
       error:
         "Impossible de créer un plan de paiement pour un contrat non signé",
     };
+  }
+
+  // Vérifier ownership : admin/manager OU assigned_to
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrManager =
+    profile && ["admin", "manager"].includes(profile.role);
+  const isAssignedTo = contract.assigned_to === user.id;
+
+  if (!isAdminOrManager && !isAssignedTo) {
+    return {
+      error:
+        "Vous n'avez pas la permission de créer un plan de paiement pour ce contrat.",
+    };
+  }
+
+  if (data.installmentCount <= 0) {
+    return { error: "Le nombre d'échéances doit être supérieur à zéro." };
+  }
+
+  if (data.totalAmount <= 0) {
+    return { error: "Le montant total doit être supérieur à zéro." };
   }
 
   const amountPerInstallment =
@@ -93,11 +120,31 @@ export async function recordPayment(installmentId: string) {
   // Récupérer les détails de l'échéance
   const { data: installment } = await supabase
     .from("payment_installments")
-    .select("*, contract:contracts(id, client_id, amount)")
+    .select("*, contract:contracts(id, client_id, amount, assigned_to)")
     .eq("id", installmentId)
     .single();
 
   if (!installment) return { error: "Échéance introuvable" };
+
+  // Vérifier ownership : admin/manager OU assigned_to du contrat parent
+  const contract = Array.isArray(installment.contract)
+    ? installment.contract[0]
+    : installment.contract;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrManager =
+    profile && ["admin", "manager"].includes(profile.role);
+  const isAssignedTo = contract?.assigned_to === user.id;
+  const isClient = contract?.client_id === user.id;
+
+  if (!isAdminOrManager && !isAssignedTo && !isClient) {
+    return { error: "Vous n'avez pas la permission d'enregistrer ce paiement." };
+  }
 
   // Empêcher le double paiement
   if (installment.status === "paid") {
@@ -195,11 +242,29 @@ export async function generateInvoice(contractId: string, amount: number) {
   // Get client from contract
   const { data: contract } = await supabase
     .from("contracts")
-    .select("client_id")
+    .select("client_id, assigned_to")
     .eq("id", contractId)
     .single();
 
   if (!contract) return { error: "Contrat introuvable", data: null };
+
+  // Vérifier ownership : admin/manager OU assigned_to
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrManager =
+    profile && ["admin", "manager"].includes(profile.role);
+  const isAssignedTo = contract.assigned_to === user.id;
+
+  if (!isAdminOrManager && !isAssignedTo) {
+    return {
+      error: "Vous n'avez pas la permission de générer une facture pour ce contrat.",
+      data: null,
+    };
+  }
 
   // Generate invoice number atomically via RPC to avoid race conditions
   const year = new Date().getFullYear();
@@ -274,7 +339,8 @@ export async function getInvoices() {
     .select(
       "*, contract:contracts(id, amount, status), client:profiles(id, full_name, email)",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(200);
 
   return data || [];
 }
@@ -380,7 +446,8 @@ export async function getOverduePayments() {
     .select("*, contract:contracts(id, client_id, amount)")
     .lt("due_date", today)
     .neq("status", "paid")
-    .order("due_date", { ascending: true });
+    .order("due_date", { ascending: true })
+    .limit(200);
 
   return data || [];
 }

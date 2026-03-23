@@ -4,12 +4,44 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { aiChat, aiJSON, type AIMessage } from "@/lib/ai/client";
 
+// Helper: verify the current user owns/participates in a session, or is admin/manager
+async function verifySessionAccess(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  sessionId: string,
+  userId: string,
+) {
+  const { data: session } = await supabase
+    .from("roleplay_sessions")
+    .select("user_id, partner_id, status")
+    .eq("id", sessionId)
+    .single();
+
+  if (!session) throw new Error("Session non trouvée");
+
+  const isParticipant =
+    session.user_id === userId || session.partner_id === userId;
+
+  if (!isParticipant) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) {
+      throw new Error("Accès non autorisé à cette session");
+    }
+  }
+
+  return session;
+}
+
 export async function getRoleplayProfiles() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("roleplay_prospect_profiles")
     .select("*")
-    .order("name");
+    .order("name")
+    .limit(200);
   return (data || []).map((p: Record<string, unknown>) => ({
     ...p,
     objections: p.objection_types || [],
@@ -77,6 +109,16 @@ export async function startSession(profileId: string) {
 
 export async function sendRoleplayMessage(sessionId: string, content: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Verify ownership and session is still active
+  const sessionMeta = await verifySessionAccess(supabase, sessionId, user.id);
+  if (sessionMeta.status !== "active")
+    throw new Error("Cette session est déjà terminée");
+
   const { data: session } = await supabase
     .from("roleplay_sessions")
     .select("conversation")
@@ -164,6 +206,16 @@ RÈGLES :
 
 export async function endSession(sessionId: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Verify ownership and check not already ended
+  const sessionMeta = await verifySessionAccess(supabase, sessionId, user.id);
+  if (sessionMeta.status === "completed")
+    throw new Error("Cette session est déjà terminée");
+
   const { data: session } = await supabase
     .from("roleplay_sessions")
     .select("*")
@@ -256,6 +308,15 @@ export async function getRoleplayFeedback(
   sessionId: string,
   conversation: { role: string; content: string }[],
 ) {
+  const supabaseAuth = await createClient();
+  const {
+    data: { user },
+  } = await supabaseAuth.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Verify ownership before generating feedback
+  await verifySessionAccess(supabaseAuth, sessionId, user.id);
+
   const transcript = conversation
     .map((m) => `${m.role === "user" ? "SETTER" : "PROSPECT"}: ${m.content}`)
     .join("\n");
@@ -318,14 +379,15 @@ Criteres d'evaluation :
   }
 }
 
-export async function getUserSessions(userId?: string) {
+export async function getUserSessions(userId?: string, limit = 100) {
   const supabase = await createClient();
   let query = supabase
     .from("roleplay_sessions")
     .select(
       "*, profile:roleplay_prospect_profiles(name, niche, difficulty), user:profiles(full_name, avatar_url)",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (userId) query = query.eq("user_id", userId);
 
@@ -340,6 +402,14 @@ export async function getUserSessions(userId?: string) {
 
 export async function getSession(sessionId: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Non authentifié");
+
+  // Verify ownership before returning session data
+  await verifySessionAccess(supabase, sessionId, user.id);
+
   const { data } = await supabase
     .from("roleplay_sessions")
     .select(

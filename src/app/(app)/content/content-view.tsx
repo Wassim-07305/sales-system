@@ -170,8 +170,8 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
       }
       setDialogOpen(false);
       router.refresh();
-    } catch {
-      toast.error("Erreur");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
     }
   }
 
@@ -186,8 +186,8 @@ export function ContentView({ posts }: { posts: ContentPost[] }) {
       await deleteContentPost(id);
       toast.success("Post supprimé");
       router.refresh();
-    } catch {
-      toast.error("Erreur");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
     }
   }
 

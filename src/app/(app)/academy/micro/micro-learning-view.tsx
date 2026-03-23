@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeHtml } from "@/lib/utils";
 import { completeMicroLesson } from "@/lib/actions/academy";
 import {
   ArrowLeft,
@@ -216,7 +216,7 @@ export function MicroLearningView({
                 {dailyLesson.content && (
                   <div
                     className="prose prose-sm prose-invert max-w-none rounded-lg bg-muted/50 p-4"
-                    dangerouslySetInnerHTML={{ __html: dailyLesson.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(dailyLesson.content) }}
                   />
                 )}
                 <div className="flex gap-2">
@@ -321,7 +321,7 @@ export function MicroLearningView({
                             <div
                               className="prose prose-sm prose-invert max-w-none rounded-lg bg-muted/50 p-4"
                               dangerouslySetInnerHTML={{
-                                __html: lesson.content,
+                                __html: sanitizeHtml(lesson.content),
                               }}
                             />
                           )}

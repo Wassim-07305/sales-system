@@ -17,7 +17,7 @@ import {
   submitQuizAttempt,
   notifyCourseCompletion,
 } from "@/lib/actions/academy";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeHtml } from "@/lib/utils";
 import { toast } from "sonner";
 import Link from "next/link";
 import {
@@ -421,7 +421,7 @@ export function CourseView({
       if (quizAnswers[i] === q.correct_index) correct++;
     });
 
-    const score = Math.round((correct / quiz.questions.length) * 100);
+    const score = quiz.questions.length > 0 ? Math.round((correct / quiz.questions.length) * 100) : 0;
     const passed = score >= (quiz.passing_score || 90);
 
     setSubmitting(true);
@@ -1094,12 +1094,12 @@ export function CourseView({
                 </p>
               )}
 
-              {/* ---- HTML content (admin-authored, sanitized on server) ---- */}
+              {/* ---- HTML content (admin-authored, sanitized) ---- */}
               {selectedLesson.content_html && (
                 <div
                   className="prose prose-sm dark:prose-invert max-w-none mt-6"
                   dangerouslySetInnerHTML={{
-                    __html: selectedLesson.content_html,
+                    __html: sanitizeHtml(selectedLesson.content_html),
                   }}
                 />
               )}

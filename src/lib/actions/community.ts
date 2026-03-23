@@ -107,6 +107,13 @@ export async function createCommunityPost(formData: {
       "Vous êtes banni de la communauté et ne pouvez pas publier",
     );
 
+  // Validate channel
+  const ALLOWED_CHANNELS = ["general", "questions", "wins", "team_interne"];
+  const channel = formData.channel || "general";
+  if (!ALLOWED_CHANNELS.includes(channel)) {
+    throw new Error("Canal invalide");
+  }
+
   // If posting to team_interne, verify role
   if (formData.channel === "team_interne") {
     const { data: profile } = await supabase
@@ -126,9 +133,47 @@ export async function createCommunityPost(formData: {
     content: formData.content,
     image_url: formData.image_url || null,
     target_audience: formData.target_audience || "all",
-    channel: formData.channel || "general",
+    channel,
     likes_count: 0,
   });
+  if (error) throw new Error(error.message);
+  revalidatePath("/community");
+}
+
+export async function updateCommunityPost(
+  postId: string,
+  formData: { title?: string; content: string; type: string },
+) {
+  const { supabase, user } = await requireAuth();
+
+  // Fetch post to check ownership
+  const { data: post } = await supabase
+    .from("community_posts")
+    .select("author_id")
+    .eq("id", postId)
+    .single();
+  if (!post) throw new Error("Post introuvable");
+
+  // Allow edit if author, admin or manager
+  if (post.author_id !== user.id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (!profile || !["admin", "manager"].includes(profile.role)) {
+      throw new Error("Vous ne pouvez modifier que vos propres posts");
+    }
+  }
+
+  const { error } = await supabase
+    .from("community_posts")
+    .update({
+      title: formData.title || null,
+      content: formData.content,
+      type: formData.type,
+    })
+    .eq("id", postId);
   if (error) throw new Error(error.message);
   revalidatePath("/community");
 }
@@ -137,6 +182,9 @@ export async function toggleLike(postId: string, increment: boolean) {
   try {
     const { supabase } = await requireAuth();
 
+    // NOTE: read-modify-write has a small race window, acceptable for likes.
+    // A concurrent toggle could cause the count to drift by ±1, which is
+    // non-critical for a social like counter. We floor at 0 to prevent negatives.
     const { data: post } = await supabase
       .from("community_posts")
       .select("likes_count")
@@ -356,6 +404,17 @@ export async function deleteComment(commentId: string) {
   try {
     const { supabase, user } = await requireAuth();
 
+    // Verify the comment exists
+    const { data: comment } = await supabase
+      .from("community_comments")
+      .select("id, author_id")
+      .eq("id", commentId)
+      .single();
+
+    if (!comment) {
+      return { error: "Commentaire introuvable" };
+    }
+
     // Only allow deleting own comments or admin/manager
     const { data: profile } = await supabase
       .from("profiles")
@@ -364,15 +423,11 @@ export async function deleteComment(commentId: string) {
       .single();
     const isAdmin = profile && ["admin", "manager"].includes(profile.role);
 
-    if (isAdmin) {
-      await supabase.from("community_comments").delete().eq("id", commentId);
-    } else {
-      await supabase
-        .from("community_comments")
-        .delete()
-        .eq("id", commentId)
-        .eq("author_id", user.id);
+    if (!isAdmin && comment.author_id !== user.id) {
+      return { error: "Vous ne pouvez supprimer que vos propres commentaires" };
     }
+
+    await supabase.from("community_comments").delete().eq("id", commentId);
     revalidatePath("/community");
     return { success: true };
   } catch {
@@ -544,17 +599,19 @@ export async function getReputationLeaderboard() {
   const supabase = await createClient();
 
   try {
-    // Get all posts with authors
+    // Get posts with authors (capped to prevent excessive memory usage)
     const { data: posts } = await supabase
       .from("community_posts")
       .select("author_id, likes_count, type")
-      .eq("hidden", false);
+      .eq("hidden", false)
+      .limit(1000);
 
-    // Get all comments (excluding RSVPs)
+    // Get comments excluding RSVPs (capped to prevent excessive memory usage)
     const { data: comments } = await supabase
       .from("community_comments")
       .select("author_id")
-      .neq("content", "__RSVP__");
+      .neq("content", "__RSVP__")
+      .limit(1000);
 
     if (
       (!posts || posts.length === 0) &&
@@ -953,6 +1010,9 @@ export async function registerForEvent(eventId: string) {
   }
 
   // Check capacity
+  // NOTE: There is a small race window between the capacity check and the insert.
+  // A unique constraint on (post_id, author_id) where content='__RSVP__' would
+  // prevent duplicate registrations at the DB level.
   const { data: post } = await supabase
     .from("community_posts")
     .select("content")
@@ -1081,7 +1141,8 @@ export async function getAllPostsForModeration() {
     const { data } = await supabase
       .from("community_posts")
       .select("*, author:profiles(id, full_name, avatar_url)")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(200);
     return (data || []).map((d: Record<string, unknown>) => ({
       ...d,
       author: Array.isArray(d.author) ? d.author[0] || null : d.author,
@@ -1226,8 +1287,10 @@ export async function isUserBanned(userId: string): Promise<boolean> {
       .is("lifted_at", null)
       .limit(1);
     return (data || []).length > 0;
-  } catch {
-    return false;
+  } catch (err) {
+    // Fail closed: if we can't check ban status, assume banned for safety
+    console.error("isUserBanned: erreur lors de la vérification", err);
+    return true;
   }
 }
 
@@ -1502,9 +1565,10 @@ export async function announceGroupCall(data: {
     .from("profiles")
     .select("id")
     .in("role", channelRoles)
-    .neq("id", user.id);
+    .neq("id", user.id)
+    .limit(100);
 
-  for (const m of (members || []).slice(0, 100)) {
+  for (const m of members || []) {
     await notify(
       m.id,
       "Appel de groupe annoncé",

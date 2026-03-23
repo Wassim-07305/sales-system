@@ -86,10 +86,7 @@ export async function createContract(formData: {
     .eq("id", formData.clientId)
     .single();
 
-  const contractNumber = await generateContractNumber(supabase);
-
-  const variables: Record<string, string> = {
-    contract_number: contractNumber,
+  const baseVariables: Record<string, string> = {
     client_name: clientProfile?.full_name || "",
     client_email: clientProfile?.email || "",
     client_company: clientProfile?.company || "",
@@ -108,32 +105,56 @@ export async function createContract(formData: {
     echeances: formData.paymentSchedule,
   };
 
-  const processedContent = replaceContractVariables(
-    formData.content,
-    variables,
-  );
+  // Retry loop to handle concurrent contract number generation (unique constraint)
+  let data;
+  let lastError;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const contractNumber = await generateContractNumber(supabase);
 
-  const { data, error } = await supabase
-    .from("contracts")
-    .insert({
-      contract_number: contractNumber,
-      template_id: formData.templateId,
-      client_id: formData.clientId,
-      deal_id: formData.dealId || null,
-      content: processedContent,
-      amount: formData.amount,
-      payment_schedule: formData.paymentSchedule,
-      installment_count: formData.installmentCount || 1,
-      status: "draft",
-    })
-    .select()
-    .single();
+    const variables = { ...baseVariables, contract_number: contractNumber };
+    const processedContent = replaceContractVariables(
+      formData.content,
+      variables,
+    );
 
-  if (error) {
-    console.error("[createContract] Supabase error:", error.message, error.code);
+    const result = await supabase
+      .from("contracts")
+      .insert({
+        contract_number: contractNumber,
+        template_id: formData.templateId,
+        client_id: formData.clientId,
+        deal_id: formData.dealId || null,
+        content: processedContent,
+        amount: formData.amount,
+        payment_schedule: formData.paymentSchedule,
+        installment_count: formData.installmentCount || 1,
+        status: "draft",
+      })
+      .select()
+      .single();
+
+    if (!result.error) {
+      data = result.data;
+      lastError = null;
+      break;
+    }
+
+    // If unique constraint violation, retry with next number
+    if (result.error.code === "23505") {
+      lastError = result.error;
+      continue;
+    }
+
+    // Other error — stop retrying
+    lastError = result.error;
+    break;
+  }
+
+  if (lastError) {
+    console.error("[createContract] Supabase error:", lastError.message, lastError.code);
     return {
       error:
-        error.code === "42501"
+        lastError.code === "42501"
           ? "Permissions insuffisantes. Contactez l'administrateur pour vérifier les politiques de sécurité (RLS)."
           : "Impossible de créer le contrat. Vérifiez les informations saisies.",
       data: null,
@@ -150,19 +171,35 @@ export async function sendContract(contractId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Vérifier ownership : admin/manager OU assigned_to
+  const { data: contract } = await supabase
+    .from("contracts")
+    .select("*, client:profiles(*)")
+    .eq("id", contractId)
+    .single();
+
+  if (!contract) return { error: "Contrat introuvable" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrManager =
+    profile && ["admin", "manager"].includes(profile.role);
+  const isAssignedTo = contract.assigned_to === user.id;
+
+  if (!isAdminOrManager && !isAssignedTo) {
+    return { error: "Vous n'avez pas la permission d'envoyer ce contrat." };
+  }
+
   const { error } = await supabase
     .from("contracts")
     .update({ status: "sent" })
     .eq("id", contractId);
 
   if (error) return { error: "Impossible d'envoyer le contrat." };
-
-  // Get contract details for notification
-  const { data: contract } = await supabase
-    .from("contracts")
-    .select("*, client:profiles(*)")
-    .eq("id", contractId)
-    .single();
 
   if (contract?.client_id) {
     notify(
@@ -267,6 +304,31 @@ export async function savePdfUrl(contractId: string, pdfUrl: string) {
 
   if (!pdfUrl || pdfUrl.trim().length === 0) {
     return { error: "URL du PDF invalide" };
+  }
+
+  // Vérifier ownership : admin/manager OU assigned_to
+  const { data: contract } = await supabase
+    .from("contracts")
+    .select("assigned_to")
+    .eq("id", contractId)
+    .single();
+
+  if (!contract) return { error: "Contrat introuvable" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrManager =
+    profile && ["admin", "manager"].includes(profile.role);
+  const isAssignedTo = contract.assigned_to === user.id;
+
+  if (!isAdminOrManager && !isAssignedTo) {
+    return {
+      error: "Vous n'avez pas la permission de modifier ce contrat.",
+    };
   }
 
   const { error } = await supabase
@@ -516,6 +578,14 @@ export async function expireStaleContracts() {
 
   if (updateError) return { error: updateError.message, count: 0 };
 
+  // Récupérer les admins/managers une seule fois (évite N+1)
+  const { data: admins } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", ["admin", "manager"]);
+
+  const adminIds = admins?.map((a) => a.id) || [];
+
   // Notifier pour chaque contrat expiré
   for (const contract of staleContracts) {
     if (contract.client_id) {
@@ -530,15 +600,9 @@ export async function expireStaleContracts() {
       );
     }
 
-    // Notifier les admins/managers
-    const { data: admins } = await supabase
-      .from("profiles")
-      .select("id")
-      .in("role", ["admin", "manager"]);
-
-    if (admins && admins.length > 0) {
+    if (adminIds.length > 0) {
       notifyMany(
-        admins.map((a) => a.id),
+        adminIds,
         "Contrat expiré automatiquement",
         `Le contrat #${contract.id.slice(0, 8)} (était "${contract.status}") a expiré après 30 jours sans signature.`,
         {
@@ -730,8 +794,6 @@ export async function ensureAcademyContract(userId: string) {
     .eq("id", userId)
     .single();
 
-  const contractNumber = await generateContractNumber(supabase);
-
   const variables: Record<string, string> = {
     client_name: clientProfile?.full_name || "",
     client_address: "",
@@ -752,21 +814,42 @@ export async function ensureAcademyContract(userId: string) {
     variables,
   );
 
-  const { data, error } = await supabase
-    .from("contracts")
-    .insert({
-      contract_number: contractNumber,
-      client_id: userId,
-      content: processedContent,
-      amount: 2000,
-      payment_schedule: "À définir",
-      installment_count: 1,
-      status: "sent",
-    })
-    .select()
-    .single();
+  // Retry loop to handle concurrent contract number generation (unique constraint)
+  let data;
+  let lastError;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const contractNumber = await generateContractNumber(supabase);
 
-  if (error) {
+    const result = await supabase
+      .from("contracts")
+      .insert({
+        contract_number: contractNumber,
+        client_id: userId,
+        content: processedContent,
+        amount: 2000,
+        payment_schedule: "À définir",
+        installment_count: 1,
+        status: "sent",
+      })
+      .select()
+      .single();
+
+    if (!result.error) {
+      data = result.data;
+      lastError = null;
+      break;
+    }
+
+    if (result.error.code === "23505") {
+      lastError = result.error;
+      continue;
+    }
+
+    lastError = result.error;
+    break;
+  }
+
+  if (lastError || !data) {
     return {
       error: "Impossible de créer le contrat Academy.",
       data: null,
