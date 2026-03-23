@@ -158,7 +158,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
-    label: "Automation",
+    label: "Automatisation",
     href: "/automation",
     icon: Zap,
     roles: ["admin", "manager"],
@@ -329,27 +329,21 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Ventes",
     items: NAV_ITEMS.filter((i) =>
-      ["/crm", "/bookings", "/contracts", "/analytics", "/journal", "/team/journal"].includes(
+      ["/prospecting", "/crm", "/bookings", "/contracts", "/analytics", "/journal", "/team/journal"].includes(
         i.href,
       ),
     ),
   },
   {
-    label: "Prospection",
-    items: NAV_ITEMS.filter((i) =>
-      ["/prospecting", "/roleplay", "/scripts", "/automation"].includes(i.href),
-    ),
-  },
-  {
     label: "Formation",
     items: NAV_ITEMS.filter((i) =>
-      ["/academy", "/community", "/challenges"].includes(i.href),
+      ["/academy", "/roleplay", "/community", "/challenges"].includes(i.href),
     ),
   },
   {
     label: "Gestion",
     items: NAV_ITEMS.filter((i) =>
-      ["/content", "/marketplace", "/utilisateurs", "/genspark"].includes(i.href),
+      ["/content", "/marketplace", "/utilisateurs", "/genspark", "/scripts", "/automation"].includes(i.href),
     ),
   },
   {
@@ -409,7 +403,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   reviews: "Analyse d'appels",
   scripts: "Scripts",
   training: "Entraînement",
-  automation: "Automation",
+  automation: "Automatisation",
   marketplace: "Marketplace",
   monetization: "Monétisation",
   challenges: "Défis",
