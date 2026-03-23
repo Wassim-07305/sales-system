@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/hooks/use-user";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 interface ChannelMember {
   id: string;
@@ -209,66 +209,79 @@ export function useChannels() {
     },
   });
 
+  // Track in-flight DM creations to prevent duplicates from concurrent clicks
+  const dmCreatingForRef = useRef<Set<string>>(new Set());
+
   // Create DM channel
   const createDMChannel = useMutation({
     mutationFn: async ({ targetUserId }: { targetUserId: string }) => {
       if (!user) throw new Error("Non authentifie");
 
-      // Check if DM already exists between these two users
-      const { data: existingMembers } = await supabase
-        .from("channel_members")
-        .select("channel_id")
-        .eq("profile_id", user.id);
+      // Prevent concurrent creation for the same user
+      if (dmCreatingForRef.current.has(targetUserId)) {
+        throw new Error("Création en cours");
+      }
+      dmCreatingForRef.current.add(targetUserId);
 
-      const myChannelIds = (existingMembers ?? []).map((m) => m.channel_id);
-
-      if (myChannelIds.length > 0) {
-        const { data: targetMembers } = await supabase
+      try {
+        // Check if DM already exists between these two users
+        const { data: existingMembers } = await supabase
           .from("channel_members")
           .select("channel_id")
-          .eq("profile_id", targetUserId)
-          .in("channel_id", myChannelIds);
+          .eq("profile_id", user.id);
 
-        const sharedChannelIds = (targetMembers ?? []).map((m) => m.channel_id);
+        const myChannelIds = (existingMembers ?? []).map((m) => m.channel_id);
 
-        if (sharedChannelIds.length > 0) {
-          const { data: existingDM } = await supabase
-            .from("channels")
-            .select("id")
-            .in("id", sharedChannelIds)
-            .in("type", ["direct", "dm"])
-            .limit(1)
-            .maybeSingle();
+        if (myChannelIds.length > 0) {
+          const { data: targetMembers } = await supabase
+            .from("channel_members")
+            .select("channel_id")
+            .eq("profile_id", targetUserId)
+            .in("channel_id", myChannelIds);
 
-          if (existingDM) return existingDM;
+          const sharedChannelIds = (targetMembers ?? []).map((m) => m.channel_id);
+
+          if (sharedChannelIds.length > 0) {
+            const { data: existingDM } = await supabase
+              .from("channels")
+              .select("id")
+              .in("id", sharedChannelIds)
+              .in("type", ["direct", "dm"])
+              .limit(1)
+              .maybeSingle();
+
+            if (existingDM) return existingDM;
+          }
         }
+
+        // Create new DM channel
+        const { data: channel, error } = await supabase
+          .from("channels")
+          .insert({
+            name: "DM",
+            type: "direct",
+            created_by: user.id,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+
+        const { error: membersErr } = await supabase
+          .from("channel_members")
+          .insert([
+            { channel_id: channel.id, profile_id: user.id, role: "member" },
+            {
+              channel_id: channel.id,
+              profile_id: targetUserId,
+              role: "member",
+            },
+          ]);
+        if (membersErr) throw membersErr;
+
+        return channel;
+      } finally {
+        dmCreatingForRef.current.delete(targetUserId);
       }
-
-      // Create new DM channel
-      const { data: channel, error } = await supabase
-        .from("channels")
-        .insert({
-          name: "DM",
-          type: "direct",
-          created_by: user.id,
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
-
-      const { error: membersErr } = await supabase
-        .from("channel_members")
-        .insert([
-          { channel_id: channel.id, profile_id: user.id, role: "member" },
-          {
-            channel_id: channel.id,
-            profile_id: targetUserId,
-            role: "member",
-          },
-        ]);
-      if (membersErr) throw membersErr;
-
-      return channel;
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["channels"] });

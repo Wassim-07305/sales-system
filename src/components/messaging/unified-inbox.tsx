@@ -164,7 +164,10 @@ export function UnifiedInbox() {
   const connectedProviders = new Set(
     accounts.map((a) => a.provider.toUpperCase()),
   );
-  const hasEmailConnected = connectedProviders.has("MAIL") || connectedProviders.has("GOOGLE") || connectedProviders.has("MICROSOFT");
+  const connectedChannels = new Set(
+    accounts.map((a) => a.channel?.toUpperCase()).filter(Boolean),
+  );
+  const hasEmailConnected = connectedProviders.has("MAIL") || connectedProviders.has("GOOGLE") || connectedProviders.has("GOOGLE_OAUTH") || connectedProviders.has("MICROSOFT") || connectedProviders.has("MICROSOFT_OAUTH") || connectedChannels.has("EMAIL");
   const missingProviders = [
     { provider: "WHATSAPP" as const, label: "WhatsApp", icon: <Phone className="h-4 w-4 text-green-500" />, platform: "whatsapp" },
     { provider: "LINKEDIN" as const, label: "LinkedIn", icon: <Linkedin className="h-4 w-4 text-blue-500" />, platform: "linkedin" },

@@ -12,7 +12,6 @@ import {
   ChevronRight,
   BellOff,
   Pin,
-  MessageSquare,
   LayoutGrid,
   List,
   Archive,
@@ -97,11 +96,14 @@ export function ChannelSidebar({
     enabled: !!user,
   });
 
-  // IDs des partenaires DM existants
-  const dmPartnerIds = useMemo(
-    () => new Set(dmChannels.map((ch) => ch.dmPartner?.id).filter(Boolean)),
-    [dmChannels],
-  );
+  // IDs des partenaires DM existants — check both dmPartner and channel name for robustness
+  const dmPartnerIds = useMemo(() => {
+    const ids = new Set<string>();
+    dmChannels.forEach((ch) => {
+      if (ch.dmPartner?.id) ids.add(ch.dmPartner.id);
+    });
+    return ids;
+  }, [dmChannels]);
 
   const usersWithoutDM = useMemo(
     () => (allProfiles ?? []).filter((p) => !dmPartnerIds.has(p.id)),
@@ -146,20 +148,20 @@ export function ChannelSidebar({
 
   const handleDMClick = (userId: string) => {
     if (creatingDMFor) return;
+    // Check if a DM already exists with this user (safety net against duplicates)
+    const existingDM = dmChannels.find((ch) => ch.dmPartner?.id === userId);
+    if (existingDM) {
+      onSelectChannel(existingDM.id);
+      return;
+    }
     setCreatingDMFor(userId);
     onCreateDM(userId);
   };
 
   return (
     <div className="flex h-full w-[272px] flex-col border-r bg-background">
-      {/* Header avec icone gradient */}
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
-            <MessageSquare className="h-4 w-4 text-primary" />
-          </div>
-          <h2 className="text-sm font-bold tracking-tight">Messagerie</h2>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-end border-b px-4 py-3">
         <button
           onClick={onCreateChannel}
           className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"

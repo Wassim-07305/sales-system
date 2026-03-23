@@ -152,7 +152,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "manager", "setter", "closer"],
   },
   {
-    label: "GenSpark",
+    label: "Présentation",
     href: "/genspark",
     icon: Presentation,
     roles: ["admin", "manager", "setter", "closer"],
@@ -461,7 +461,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   "ai-scripts": "Scripts IA",
   api: "API REST",
   integrations: "Intégrations",
-  genspark: "GenSpark",
+  genspark: "Présentation",
   live: "Live",
   coaching: "Coaching",
   partners: "Partenaires",
