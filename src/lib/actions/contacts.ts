@@ -85,6 +85,144 @@ export async function createContact(params: {
   }
 }
 
+// ─── Modifier un contact ──────────────────────────────────────────
+
+export async function updateContact(
+  contactId: string,
+  params: {
+    full_name?: string;
+    email?: string;
+    phone?: string | null;
+    company?: string | null;
+    niche?: string | null;
+    role?: string;
+  },
+) {
+  try {
+    const { supabase } = await requireAuth();
+
+    if (!contactId) return { error: "ID du contact requis" };
+
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (params.full_name !== undefined) updateData.full_name = params.full_name;
+    if (params.email !== undefined) updateData.email = params.email;
+    if (params.phone !== undefined) updateData.phone = params.phone || null;
+    if (params.company !== undefined) updateData.company = params.company || null;
+    if (params.niche !== undefined) updateData.niche = params.niche || null;
+    if (params.role !== undefined) updateData.role = params.role;
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(updateData)
+      .eq("id", contactId)
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/contacts");
+    revalidatePath(`/contacts/${contactId}`);
+    return { contact: data };
+  } catch {
+    return { error: "Non authentifié" };
+  }
+}
+
+// ─── Supprimer un contact ─────────────────────────────────────────
+
+export async function deleteContact(contactId: string) {
+  try {
+    const { supabase } = await requireAuth();
+
+    if (!contactId) return { error: "ID du contact requis" };
+
+    // Delete related deal_activities first, then deals, then the profile
+    const { data: deals } = await supabase
+      .from("deals")
+      .select("id")
+      .eq("contact_id", contactId);
+
+    if (deals && deals.length > 0) {
+      const dealIds = deals.map((d) => d.id);
+      await supabase.from("deal_activities").delete().in("deal_id", dealIds);
+      await supabase.from("deals").delete().eq("contact_id", contactId);
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", contactId);
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/contacts");
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
+}
+
+// ─── Ajouter une note à un contact ───────────────────────────────
+
+export async function addContactNote(contactId: string, content: string) {
+  try {
+    const { supabase, user } = await requireAuth();
+
+    if (!contactId || !content.trim()) {
+      return { error: "Le contenu de la note est requis" };
+    }
+
+    // Find the first deal for this contact to attach the activity
+    const { data: deal } = await supabase
+      .from("deals")
+      .select("id")
+      .eq("contact_id", contactId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (deal) {
+      // Attach note to existing deal
+      const { error } = await supabase.from("deal_activities").insert({
+        deal_id: deal.id,
+        user_id: user.id,
+        type: "note",
+        content: content.trim(),
+      });
+      if (error) return { error: error.message };
+    } else {
+      // No deal exists — create a placeholder deal for the note
+      const { data: newDeal, error: dealError } = await supabase
+        .from("deals")
+        .insert({
+          title: `Note — ${content.trim().slice(0, 40)}`,
+          contact_id: contactId,
+          assigned_to: user.id,
+          value: 0,
+        })
+        .select("id")
+        .single();
+
+      if (dealError) return { error: dealError.message };
+
+      const { error } = await supabase.from("deal_activities").insert({
+        deal_id: newDeal.id,
+        user_id: user.id,
+        type: "note",
+        content: content.trim(),
+      });
+      if (error) return { error: error.message };
+    }
+
+    revalidatePath(`/contacts/${contactId}`);
+    return { success: true };
+  } catch {
+    return { error: "Non authentifié" };
+  }
+}
+
 // ─── Tags sur les contacts ───────────────────────────────────────
 
 export async function addContactTag(contactId: string, tag: string) {

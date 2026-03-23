@@ -30,6 +30,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ArrowLeft,
   Save,
   Loader2,
@@ -41,6 +47,9 @@ import {
   Presentation,
   Share2,
   Users,
+  Pencil,
+  Copy,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -112,13 +121,42 @@ function ScriptNodeComponent({ data, id }: NodeProps) {
   const nodeData = data as { label: string; type: string };
   const config = nodeTypeConfig[nodeData.type] || nodeTypeConfig.opening;
   const Icon = config.icon;
-  const { setNodes } = useReactFlow();
+  const { setNodes, setEdges, getNodes } = useReactFlow();
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(nodeData.label);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   function handleDoubleClick(e: React.MouseEvent) {
     e.stopPropagation();
     setEditing(true);
+  }
+
+  function handleContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuOpen(true);
+  }
+
+  function handleDuplicate() {
+    const currentNodes = getNodes();
+    const sourceNode = currentNodes.find((n) => n.id === id);
+    if (!sourceNode) return;
+    const newId = `${nodeData.type}-${Date.now()}`;
+    const newNode: Node = {
+      id: newId,
+      type: sourceNode.type,
+      position: {
+        x: sourceNode.position.x + 40,
+        y: sourceNode.position.y + 60,
+      },
+      data: { ...sourceNode.data },
+    };
+    setNodes((nds) => [...nds, newNode]);
+  }
+
+  function handleDelete() {
+    setNodes((nds) => nds.filter((n) => n.id !== id));
+    setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
   }
 
   function handleBlur() {
@@ -156,44 +194,71 @@ function ScriptNodeComponent({ data, id }: NodeProps) {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
-    <div
-      className={`px-4 py-3 rounded-xl border shadow-sm min-w-[180px] max-w-[280px] ${config.bg} ${config.border} hover:shadow-lg transition-all duration-300`}
-      onDoubleClick={handleDoubleClick}
-    >
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="!bg-gray-400 !w-3 !h-3"
-      />
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className={`h-3.5 w-3.5 ${config.text}`} />
-        <span
-          className={`text-[10px] font-medium uppercase tracking-wider ${config.text}`}
+    <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
+      <DropdownMenuTrigger asChild>
+        <div
+          className={`px-4 py-3 rounded-xl border shadow-sm min-w-[180px] max-w-[280px] ${config.bg} ${config.border} hover:shadow-lg transition-all duration-300`}
+          onDoubleClick={handleDoubleClick}
+          onContextMenu={handleContextMenu}
         >
-          {config.label}
-        </span>
-      </div>
-      {editing ? (
-        <textarea
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          className="nodrag w-full text-sm font-medium text-foreground bg-transparent border border-emerald-500/30 rounded-md px-2 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
-          rows={Math.max(2, Math.ceil(label.length / 30))}
-        />
-      ) : (
-        <p className="text-sm font-medium text-foreground cursor-text whitespace-pre-wrap">
-          {nodeData.label}
-        </p>
-      )}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="!bg-gray-400 !w-3 !h-3"
-      />
-    </div>
+          <Handle
+            type="target"
+            position={Position.Top}
+            className="!bg-gray-400 !w-3 !h-3"
+          />
+          <div className="flex items-center gap-2 mb-1">
+            <Icon className={`h-3.5 w-3.5 ${config.text}`} />
+            <span
+              className={`text-[10px] font-medium uppercase tracking-wider ${config.text}`}
+            >
+              {config.label}
+            </span>
+          </div>
+          {editing ? (
+            <textarea
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="nodrag w-full text-sm font-medium text-foreground bg-transparent border border-emerald-500/30 rounded-md px-2 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              rows={Math.max(2, Math.ceil(label.length / 30))}
+            />
+          ) : (
+            <p className="text-sm font-medium text-foreground cursor-text whitespace-pre-wrap">
+              {nodeData.label}
+            </p>
+          )}
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            className="!bg-gray-400 !w-3 !h-3"
+          />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="min-w-[160px]">
+        <DropdownMenuItem
+          onClick={() => {
+            setContextMenuOpen(false);
+            setEditing(true);
+          }}
+        >
+          <Pencil className="h-4 w-4 mr-2" />
+          Modifier
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleDuplicate}>
+          <Copy className="h-4 w-4 mr-2" />
+          Dupliquer
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleDelete}
+          className="text-red-500 focus:text-red-500"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Supprimer
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

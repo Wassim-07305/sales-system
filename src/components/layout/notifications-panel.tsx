@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Check } from "lucide-react";
+import { Bell, Check, Settings } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { useUIStore } from "@/stores/ui-store";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -161,8 +162,16 @@ export function NotificationsPanel({
             <div className="py-16 text-center">
               <Bell className="mx-auto h-8 w-8 text-muted-foreground/40" />
               <p className="mt-3 text-sm text-muted-foreground">
-                Aucune notification
+                Vous êtes à jour ! Aucune notification pour le moment.
               </p>
+              <Link
+                href="/settings"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+                onClick={() => setNotificationsPanelOpen(false)}
+              >
+                <Settings className="h-3.5 w-3.5" />
+                Configurer les notifications
+              </Link>
             </div>
           ) : (
             <div className="space-y-1">

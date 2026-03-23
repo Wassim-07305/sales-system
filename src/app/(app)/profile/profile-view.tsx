@@ -100,7 +100,13 @@ export function ProfileView({ profile }: { profile: Profile }) {
     });
   }
 
-  const initials = fullName?.charAt(0)?.toUpperCase() || "?";
+  const initials = (() => {
+    const parts = (fullName || "").trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return parts[0]?.charAt(0)?.toUpperCase() || "?";
+  })();
 
   return (
     <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -149,6 +155,9 @@ export function ProfileView({ profile }: { profile: Profile }) {
                 onChange={handleAvatarUpload}
                 className="hidden"
               />
+              <p className="absolute -bottom-6 left-0 right-0 text-center text-[10px] text-muted-foreground/60">
+                Max 5 Mo
+              </p>
             </div>
             <div className="pb-1">
               <h2 className="text-xl font-bold text-black">

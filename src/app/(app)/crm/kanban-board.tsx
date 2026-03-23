@@ -95,6 +95,25 @@ export function KanbanBoard({
   const [tempFilter, setTempFilter] = useState<string>("all");
   const [selectedSetter, setSelectedSetter] = useState<string>("all");
 
+  // Restore filters from localStorage on mount
+  const filtersRestoredRef = useRef(false);
+  useEffect(() => {
+    if (filtersRestoredRef.current) return;
+    filtersRestoredRef.current = true;
+    try {
+      const saved = localStorage.getItem("crm_filters");
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (parsed.search) setSearchQuery(parsed.search);
+      if (parsed.temperature) setTempFilter(parsed.temperature);
+      if (parsed.assigned) setSelectedSetter(parsed.assigned);
+      if (parsed.tags) setSelectedTags(parsed.tags);
+      if (parsed.advancedFilters) setAdvancedFilters(parsed.advancedFilters);
+    } catch {
+      // ignore corrupted localStorage
+    }
+  }, []);
+
   // Selection mode (bulk actions)
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(
@@ -122,6 +141,31 @@ export function KanbanBoard({
       if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     };
   }, [searchQuery]);
+
+  // Persist filters to localStorage
+  useEffect(() => {
+    if (!filtersRestoredRef.current) return;
+    try {
+      const payload: Record<string, unknown> = {};
+      if (searchQuery) payload.search = searchQuery;
+      if (tempFilter !== "all") payload.temperature = tempFilter;
+      if (selectedSetter !== "all") payload.assigned = selectedSetter;
+      if (selectedTags.length > 0) payload.tags = selectedTags;
+      const hasAdvanced =
+        advancedFilters.dateFrom ||
+        advancedFilters.dateTo ||
+        advancedFilters.source ||
+        advancedFilters.assignedTo;
+      if (hasAdvanced) payload.advancedFilters = advancedFilters;
+      if (Object.keys(payload).length > 0) {
+        localStorage.setItem("crm_filters", JSON.stringify(payload));
+      } else {
+        localStorage.removeItem("crm_filters");
+      }
+    } catch {
+      // ignore
+    }
+  }, [searchQuery, tempFilter, selectedSetter, selectedTags, advancedFilters]);
 
   // Load sources, team members, and tags on mount
   useEffect(() => {
@@ -473,6 +517,10 @@ export function KanbanBoard({
             onClick={() => {
               setSearchQuery("");
               setTempFilter("all");
+              setSelectedSetter("all");
+              setSelectedTags([]);
+              setAdvancedFilters({ sortBy: "created_at_desc" });
+              try { localStorage.removeItem("crm_filters"); } catch {}
             }}
             className="text-emerald-500 mt-1"
           >

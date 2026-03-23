@@ -154,6 +154,16 @@ export async function createAvailability(params: {
 }) {
   const { supabase } = await requireAuth();
 
+  // Validate start_time < end_time
+  if (params.start_time >= params.end_time) {
+    return { error: "L'heure de début doit être avant l'heure de fin" };
+  }
+
+  // Validate day_of_week range
+  if (params.day_of_week < 0 || params.day_of_week > 6) {
+    return { error: "Jour de la semaine invalide" };
+  }
+
   const { data, error } = await supabase
     .from("booking_availability")
     .insert(params)
@@ -605,13 +615,17 @@ export async function saveCallResult(
 
   const status = statusMap[params.call_result] || "completed";
 
+  // Only store follow_up_date for "suivi_prevu" results
+  const followUpDate =
+    params.call_result === "suivi_prevu" ? params.follow_up_date || null : null;
+
   const { error } = await supabase
     .from("bookings")
     .update({
       call_result: params.call_result,
       objections: params.objections || null,
       follow_up_notes: params.follow_up_notes || null,
-      follow_up_date: params.follow_up_date || null,
+      follow_up_date: followUpDate,
       status,
     })
     .eq("id", bookingId);

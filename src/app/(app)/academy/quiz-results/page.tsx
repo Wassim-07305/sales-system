@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { QuizResultsView } from "./quiz-results-view";
 
 interface Props {
-  searchParams: Promise<{ attemptId?: string }>;
+  searchParams: Promise<{ attemptId?: string; courseId?: string; nextLessonId?: string }>;
 }
 
 export default async function QuizResultsPage({ searchParams }: Props) {
-  const { attemptId } = await searchParams;
+  const { attemptId, courseId, nextLessonId } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,5 +16,11 @@ export default async function QuizResultsPage({ searchParams }: Props) {
 
   if (!attemptId) redirect("/academy");
 
-  return <QuizResultsView attemptId={attemptId} />;
+  return (
+    <QuizResultsView
+      attemptId={attemptId}
+      courseId={courseId}
+      nextLessonId={nextLessonId}
+    />
+  );
 }

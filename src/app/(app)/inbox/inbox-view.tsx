@@ -139,6 +139,7 @@ export function InboxView({
   const [conversations, setConversations] =
     useState<Conversation[]>(initialConversations);
   const [search, setSearch] = useState("");
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(
     initialConversations[0] || null,
   );
@@ -270,10 +271,22 @@ export function InboxView({
     };
   }, [supabase, router]);
 
-  const filteredConvs = conversations.filter(
-    (c) =>
-      !search || c.prospect?.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const platformFilters = [
+    { value: "all", label: "Tous" },
+    { value: "email", label: "Email" },
+    { value: "whatsapp", label: "WhatsApp" },
+    { value: "linkedin", label: "LinkedIn" },
+    { value: "instagram", label: "Instagram" },
+  ];
+
+  const filteredConvs = conversations.filter((c) => {
+    const matchesSearch =
+      !search || c.prospect?.name.toLowerCase().includes(search.toLowerCase());
+    const matchesPlatform =
+      platformFilter === "all" ||
+      c.platform.toLowerCase() === platformFilter.toLowerCase();
+    return matchesSearch && matchesPlatform;
+  });
 
   async function handleSend() {
     if (!messageText.trim() || !selectedConv) return;
@@ -419,7 +432,7 @@ export function InboxView({
             selectedConv ? "hidden md:flex" : "flex",
           )}
         >
-          <div className="p-3 border-b">
+          <div className="p-3 border-b space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -428,6 +441,22 @@ export function InboxView({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+            </div>
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+              {platformFilters.map((pf) => (
+                <button
+                  key={pf.value}
+                  onClick={() => setPlatformFilter(pf.value)}
+                  className={cn(
+                    "shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors border",
+                    platformFilter === pf.value
+                      ? "bg-emerald-500 text-black border-emerald-500"
+                      : "bg-muted/50 text-muted-foreground border-border/50 hover:bg-muted",
+                  )}
+                >
+                  {pf.label}
+                </button>
+              ))}
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">

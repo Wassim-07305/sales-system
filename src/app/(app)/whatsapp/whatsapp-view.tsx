@@ -25,8 +25,9 @@ import {
 } from "@/lib/actions/whatsapp";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isToday, isYesterday, format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Check, CheckCheck } from "lucide-react";
 import Link from "next/link";
 
 interface WhatsAppConnection {
@@ -145,6 +146,13 @@ export function WhatsAppView({
         toast.error("Erreur lors de l'envoi du message");
       }
     });
+  }
+
+  function getDateLabel(dateStr: string): string {
+    const date = new Date(dateStr);
+    if (isToday(date)) return "Aujourd\u2019hui";
+    if (isYesterday(date)) return "Hier";
+    return format(date, "EEEE d MMMM", { locale: fr });
   }
 
   async function handleDisconnect() {
@@ -417,42 +425,79 @@ export function WhatsAppView({
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {selectedConv.messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.direction === "outbound"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
-                        msg.direction === "outbound"
-                          ? "bg-emerald-500 text-black rounded-br-md"
-                          : "bg-muted rounded-bl-md"
-                      }`}
-                    >
-                      {msg.content || (
-                        <span className="italic text-muted-foreground">
-                          [Média]
-                        </span>
+                {selectedConv.messages.map((msg, idx) => {
+                  const msgDate = new Date(msg.created_at).toDateString();
+                  const prevDate =
+                    idx > 0
+                      ? new Date(
+                          selectedConv.messages[idx - 1].created_at,
+                        ).toDateString()
+                      : null;
+                  const showDateSeparator = idx === 0 || msgDate !== prevDate;
+
+                  return (
+                    <div key={msg.id}>
+                      {showDateSeparator && (
+                        <div className="flex items-center gap-3 my-4">
+                          <div className="flex-1 h-px bg-border" />
+                          <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+                            {getDateLabel(msg.created_at)}
+                          </span>
+                          <div className="flex-1 h-px bg-border" />
+                        </div>
                       )}
-                      <p
-                        className={`text-[10px] mt-1 ${
+                      <div
+                        className={`flex ${
                           msg.direction === "outbound"
-                            ? "text-black/60"
-                            : "text-muted-foreground"
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
-                        {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
+                        <div
+                          className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
+                            msg.direction === "outbound"
+                              ? "bg-emerald-500 text-black rounded-br-md"
+                              : "bg-muted rounded-bl-md"
+                          }`}
+                        >
+                          {msg.content || (
+                            <span className="italic text-muted-foreground">
+                              [Média]
+                            </span>
+                          )}
+                          <div
+                            className={`flex items-center justify-end gap-1 mt-1 ${
+                              msg.direction === "outbound"
+                                ? "text-black/60"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            <span className="text-[10px]">
+                              {new Date(msg.created_at).toLocaleTimeString(
+                                "fr-FR",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )}
+                            </span>
+                            {msg.direction === "outbound" && (
+                              <span className="inline-flex items-center">
+                                {msg.status === "read" ? (
+                                  <CheckCheck className="h-3.5 w-3.5 text-emerald-700" />
+                                ) : msg.status === "delivered" ? (
+                                  <CheckCheck className="h-3.5 w-3.5" />
+                                ) : (
+                                  <Check className="h-3.5 w-3.5" />
+                                )}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 

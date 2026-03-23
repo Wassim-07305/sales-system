@@ -89,16 +89,26 @@ export function FunnelView({ data }: { data: FunnelStage[] }) {
                       <ArrowDown
                         className={`h-4 w-4 ${i + 1 === worstDropIndex ? "text-red-500" : "text-muted-foreground/50"}`}
                       />
-                      {sorted[i].value > 0 && (
-                        <span
-                          className={`text-xs font-medium ${i + 1 === worstDropIndex ? "text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full" : "text-muted-foreground"}`}
-                        >
-                          {(
-                            (sorted[i + 1].value / sorted[i].value) *
-                            100
-                          ).toFixed(0)}
-                          % passent à l&apos;étape suivante
-                        </span>
+                      {sorted[i].value > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-sm font-bold tabular-nums ${i + 1 === worstDropIndex ? "text-red-500" : "text-emerald-600"}`}
+                          >
+                            &darr;{" "}
+                            {(
+                              (sorted[i + 1].value / sorted[i].value) *
+                              100
+                            ).toFixed(0)}
+                            %
+                          </span>
+                          <span
+                            className={`text-[11px] ${i + 1 === worstDropIndex ? "text-red-500/70" : "text-muted-foreground"}`}
+                          >
+                            de conversion ({sorted[i + 1].value}/{sorted[i].value})
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">—</span>
                       )}
                     </div>
                   )}

@@ -91,11 +91,20 @@ export function BookingDashboard({
     });
   }, [period, scope, userId]);
 
+  const LEADS_PER_PAGE = 20;
+  const [leadsPage, setLeadsPage] = useState(1);
+
   const filteredLeads = leads.filter(
     (l) =>
       l.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
       l.email?.toLowerCase().includes(leadSearch.toLowerCase()) ||
       l.phone?.includes(leadSearch),
+  );
+
+  const totalLeadPages = Math.ceil(filteredLeads.length / LEADS_PER_PAGE);
+  const paginatedLeads = filteredLeads.slice(
+    (leadsPage - 1) * LEADS_PER_PAGE,
+    leadsPage * LEADS_PER_PAGE,
   );
 
   const kpiCards = [
@@ -293,7 +302,10 @@ export function BookingDashboard({
                 <Input
                   placeholder="Rechercher un lead..."
                   value={leadSearch}
-                  onChange={(e) => setLeadSearch(e.target.value)}
+                  onChange={(e) => {
+                    setLeadSearch(e.target.value);
+                    setLeadsPage(1);
+                  }}
                   className="pl-10"
                 />
               </div>
@@ -311,7 +323,7 @@ export function BookingDashboard({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {filteredLeads.map((lead) => (
+                  {paginatedLeads.map((lead) => (
                     <div
                       key={lead.id}
                       className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-4 shadow-sm"
@@ -364,6 +376,37 @@ export function BookingDashboard({
                       </div>
                     </div>
                   ))}
+
+                  {/* Pagination */}
+                  {totalLeadPages > 1 && (
+                    <div className="flex items-center justify-between pt-3">
+                      <p className="text-xs text-muted-foreground">
+                        {filteredLeads.length} lead
+                        {filteredLeads.length > 1 ? "s" : ""} — page{" "}
+                        {leadsPage}/{totalLeadPages}
+                      </p>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          disabled={leadsPage <= 1}
+                          onClick={() => setLeadsPage((p) => p - 1)}
+                        >
+                          Précédent
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          disabled={leadsPage >= totalLeadPages}
+                          onClick={() => setLeadsPage((p) => p + 1)}
+                        >
+                          Suivant
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

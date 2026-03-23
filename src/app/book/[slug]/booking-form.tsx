@@ -97,10 +97,10 @@ export function BookingForm({ slug, pageConfig }: BookingFormProps) {
     if (!lastName.trim()) newErrors.lastName = "Le nom est requis";
     if (emailVisible && emailRequired) {
       if (!email.trim()) newErrors.email = "L'email est requis";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      else if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email))
         newErrors.email = "Email invalide";
     } else if (emailVisible && email.trim()) {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email))
         newErrors.email = "Email invalide";
     }
 
@@ -129,11 +129,17 @@ export function BookingForm({ slug, pageConfig }: BookingFormProps) {
     setCapturingLead(true);
     setErrors({});
 
+    // Normalize French phone: 0612345678 → +33612345678
+    let normalizedPhone = phone.trim();
+    if (normalizedPhone.startsWith("0") && normalizedPhone.length === 10) {
+      normalizedPhone = "+33" + normalizedPhone.slice(1);
+    }
+
     const { leadId: id, error } = await captureBookingLead({
       pageSlug: slug,
       name: `${firstName} ${lastName}`.trim(),
       email: email || undefined,
-      phone: phone || undefined,
+      phone: normalizedPhone || undefined,
       qualification: qualificationAnswers,
     });
 
@@ -199,10 +205,10 @@ export function BookingForm({ slug, pageConfig }: BookingFormProps) {
       }).catch(() => {});
     }
 
-    // Calculate end time
+    // Calculate end time (handle midnight wraparound)
     const duration = pageConfig?.slot_duration || 30;
     const [h, m] = slot.start_time.split(":").map(Number);
-    const endMinutes = h * 60 + m + duration;
+    const endMinutes = (h * 60 + m + duration) % (24 * 60);
     const endTime = `${Math.floor(endMinutes / 60)
       .toString()
       .padStart(2, "0")}:${(endMinutes % 60).toString().padStart(2, "0")}`;
@@ -472,7 +478,11 @@ export function BookingForm({ slug, pageConfig }: BookingFormProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4 shrink-0 text-gray-400" />
-                    <span>France Time</span>
+                    <span>
+                      {pageConfig?.timezone
+                        ? pageConfig.timezone.replace("_", " ")
+                        : "Europe/Paris"}
+                    </span>
                   </div>
                 </div>
               </div>

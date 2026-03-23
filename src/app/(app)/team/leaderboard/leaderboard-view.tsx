@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Medal, Crown, ArrowLeft, Flame, Trophy, Zap } from "lucide-react";
+import { Medal, Crown, ArrowLeft, Flame, Trophy, Zap, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -14,6 +14,7 @@ interface LeaderboardEntry {
   level_name: string;
   total_points: number;
   current_streak: number;
+  previous_rank?: number | null;
   user: {
     full_name: string | null;
     avatar_url: string | null;
@@ -69,6 +70,32 @@ function getAvatarColor(str: string) {
   for (let i = 0; i < str.length; i++)
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function RankChange({ currentRank, previousRank }: { currentRank: number; previousRank?: number | null }) {
+  if (previousRank == null) return null;
+  const diff = previousRank - currentRank;
+  if (diff > 0) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-500">
+        <ArrowUp className="h-3 w-3" />
+        {diff}
+      </span>
+    );
+  }
+  if (diff < 0) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-500">
+        <ArrowDown className="h-3 w-3" />
+        {Math.abs(diff)}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center text-[10px] text-muted-foreground">
+      <Minus className="h-3 w-3" />
+    </span>
+  );
 }
 
 export function LeaderboardView({ leaderboard, currentUserId }: Props) {
@@ -187,6 +214,12 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
 
       {/* Full table */}
       <Card className="overflow-hidden">
+        <style>{`
+          @keyframes pulse-subtle {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgb(16 185 129 / 0.08); }
+          }
+        `}</style>
         <CardContent className="p-0">
           <div className="divide-y divide-border/50">
             {leaderboard.map((player, i) => {
@@ -197,23 +230,26 @@ export function LeaderboardView({ leaderboard, currentUserId }: Props) {
                   key={player.user_id}
                   className={cn(
                     "flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-muted/30",
-                    isMe && "bg-emerald-500/5",
+                    isMe && "bg-emerald-500/5 animate-[pulse-subtle_3s_ease-in-out_1]",
                   )}
                 >
-                  <span
-                    className={cn(
-                      "text-sm font-bold w-8 text-center tabular-nums",
-                      rank === 1
-                        ? "text-amber-500"
-                        : rank === 2
-                          ? "text-slate-400"
-                          : rank === 3
-                            ? "text-orange-400"
-                            : "text-muted-foreground/50",
-                    )}
-                  >
-                    #{rank}
-                  </span>
+                  <div className="flex flex-col items-center w-8 gap-0.5">
+                    <span
+                      className={cn(
+                        "text-sm font-bold tabular-nums",
+                        rank === 1
+                          ? "text-amber-500"
+                          : rank === 2
+                            ? "text-slate-400"
+                            : rank === 3
+                              ? "text-orange-400"
+                              : "text-muted-foreground/50",
+                      )}
+                    >
+                      #{rank}
+                    </span>
+                    <RankChange currentRank={rank} previousRank={player.previous_rank} />
+                  </div>
                   <div
                     className={cn(
                       "h-9 w-9 rounded-lg flex items-center justify-center text-white text-[11px] font-bold shrink-0",

@@ -25,6 +25,11 @@ export async function getBookingById(bookingId: string) {
 
 export async function getTeamMembers() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data } = await supabase
     .from("profiles")
     .select("id, full_name, role")
@@ -199,6 +204,27 @@ export async function updateBooking(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
+  // Verify ownership or admin/manager role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin = profile?.role === "admin" || profile?.role === "manager";
+
+  if (!isAdmin) {
+    const { data: booking } = await supabase
+      .from("bookings")
+      .select("assigned_to")
+      .eq("id", bookingId)
+      .single();
+
+    if (booking?.assigned_to !== user.id) {
+      return { error: "Vous ne pouvez modifier que vos propres bookings" };
+    }
+  }
+
   const { error } = await supabase
     .from("bookings")
     .update({ ...data })
@@ -223,14 +249,45 @@ export async function rescheduleBooking(bookingId: string, newDate: string) {
     return { error: "Impossible de replanifier dans le passé" };
   }
 
-  // Get booking details for notification
+  // Get booking details for notification + conflict check
   const { data: booking } = await supabase
     .from("bookings")
-    .select("prospect_name, assigned_to")
+    .select("prospect_name, assigned_to, duration_minutes")
     .eq("id", bookingId)
     .single();
 
   if (!booking) return { error: "Booking introuvable" };
+
+  // Check for conflicts on the new slot
+  const newStart = new Date(newDate);
+  const newEnd = new Date(
+    newStart.getTime() + (booking.duration_minutes || 30) * 60 * 1000,
+  );
+  const assignee = booking.assigned_to || user.id;
+
+  const { data: existing } = await supabase
+    .from("bookings")
+    .select("id, scheduled_at, duration_minutes")
+    .eq("assigned_to", assignee)
+    .neq("status", "cancelled")
+    .neq("id", bookingId)
+    .gte(
+      "scheduled_at",
+      new Date(newStart.getTime() - 24 * 60 * 60 * 1000).toISOString(),
+    )
+    .lte("scheduled_at", newEnd.toISOString());
+
+  const hasConflict = (existing || []).some((b) => {
+    const bStart = new Date(b.scheduled_at);
+    const bEnd = new Date(
+      bStart.getTime() + (b.duration_minutes || 30) * 60 * 1000,
+    );
+    return newStart < bEnd && newEnd > bStart;
+  });
+
+  if (hasConflict) {
+    return { error: "Un booking existe déjà sur ce créneau horaire" };
+  }
 
   const { error } = await supabase
     .from("bookings")

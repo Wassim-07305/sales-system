@@ -186,6 +186,26 @@ export function RegisterForm() {
             >
               {passwordStrength.label}
             </p>
+            {/* Password criteria checklist */}
+            <ul className="space-y-0.5 pt-1">
+              {[
+                { met: password.length >= 8, label: "8+ caractères" },
+                { met: /[A-Z]/.test(password), label: "Majuscule" },
+                { met: /[0-9]/.test(password), label: "Chiffre" },
+                { met: /[^A-Za-z0-9]/.test(password), label: "Caractère spécial" },
+              ].map((criteria) => (
+                <li
+                  key={criteria.label}
+                  className={cn(
+                    "flex items-center gap-1.5 text-xs transition-colors",
+                    criteria.met ? "text-emerald-400" : "text-muted-foreground/50",
+                  )}
+                >
+                  <span className="text-sm leading-none">{criteria.met ? "\u2713" : "\u2717"}</span>
+                  {criteria.label}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         {password.length === 0 && (

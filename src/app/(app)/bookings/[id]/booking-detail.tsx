@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format, formatDistanceToNow, isPast, isFuture } from "date-fns";
@@ -65,6 +65,7 @@ import {
   deleteBooking,
 } from "@/lib/actions/bookings";
 import { createDealFromBooking } from "@/lib/actions/crm";
+import { CallResultModal } from "../call-result-modal";
 
 interface BookingDetailProps {
   booking: Booking;
@@ -145,6 +146,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
   const [saving, setSaving] = useState(false);
   const [statusLoading, setStatusLoading] = useState<string | null>(null);
   const [convertingToDeal, setConvertingToDeal] = useState(false);
+  const [showCallResult, setShowCallResult] = useState(false);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
 
@@ -161,7 +163,10 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
 
   const statusInfo = statusConfig[currentBooking.status];
   const StatusIcon = statusInfo.icon;
-  const scheduledDate = new Date(currentBooking.scheduled_at);
+  const scheduledDate = useMemo(
+    () => new Date(currentBooking.scheduled_at),
+    [currentBooking.scheduled_at],
+  );
   const isUpcoming = isFuture(scheduledDate);
   const isPastBooking = isPast(scheduledDate);
 
@@ -440,6 +445,7 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                     type="date"
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
                     className="mt-1.5 h-11 rounded-xl"
                   />
                 </div>
@@ -642,6 +648,30 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
                     Annuler
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Record call result */}
+          {currentBooking.status === "confirmed" && isPastBooking && (
+            <Card className="border-purple-500/20 bg-purple-500/5">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-sm">
+                    Appel terminé ?
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Enregistrez le résultat de votre appel
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setShowCallResult(true)}
+                  className="bg-purple-600 text-white hover:bg-purple-700 gap-1.5"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Enregistrer le résultat du call
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -943,6 +973,12 @@ export function BookingDetail({ booking, teamMembers }: BookingDetailProps) {
           </Card>
         </div>
       </div>
+
+      {/* Call Result Modal */}
+      <CallResultModal
+        booking={showCallResult ? currentBooking : null}
+        onClose={() => setShowCallResult(false)}
+      />
     </div>
   );
 }

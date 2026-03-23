@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, CalendarCheck, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Flame, CalendarCheck, RefreshCw, Clock, Award } from "lucide-react";
 import { checkAndUpdateStreak } from "@/lib/actions/gamification";
 import { toast } from "sonner";
 
@@ -12,8 +13,51 @@ interface Props {
   userId: string;
 }
 
+const STREAK_MILESTONES = [
+  { days: 7, label: "1 semaine", color: "text-amber-400 bg-amber-400/10 border-amber-400/30" },
+  { days: 14, label: "2 semaines", color: "text-orange-400 bg-orange-400/10 border-orange-400/30" },
+  { days: 30, label: "1 mois", color: "text-red-500 bg-red-500/10 border-red-500/30" },
+];
+
+function useCountdownToMidnight() {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    function update() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      const diff = midnight.getTime() - now.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      setTimeLeft(
+        `${hours.toString().padStart(2, "0")}h${minutes.toString().padStart(2, "0")}m${seconds.toString().padStart(2, "0")}s`
+      );
+    }
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return timeLeft;
+}
+
+function useIsAfter18h() {
+  const [isAfter, setIsAfter] = useState(() => new Date().getHours() >= 18);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAfter(new Date().getHours() >= 18);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+  return isAfter;
+}
+
 export function StreakDisplay({ currentStreak, userId }: Props) {
   const [isPending, startTransition] = useTransition();
+  const countdown = useCountdownToMidnight();
+  const isAfter18h = useIsAfter18h();
 
   // Visual tiers for streak flames
   const streakColor =
@@ -34,6 +78,11 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
           ? "bg-amber-400/10 border-amber-400/30"
           : "bg-muted/50 border-muted";
 
+  // Determine current milestone badge
+  const currentMilestone = [...STREAK_MILESTONES]
+    .reverse()
+    .find((m) => currentStreak >= m.days);
+
   function handleRefresh() {
     startTransition(async () => {
       const result = await checkAndUpdateStreak(userId);
@@ -46,23 +95,26 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
   // Build the 7-day visual track
   const days = ["L", "M", "M", "J", "V", "S", "D"];
 
+  // Urgency warning: after 18h and streak could be lost
+  const showUrgency = isAfter18h && currentStreak > 0;
+
   return (
     <Card className={`rounded-2xl border ${streakBg}`}>
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div
-              className={`h-12 w-12 rounded-full flex items-center justify-center ${
+              className={`h-14 w-14 rounded-full flex items-center justify-center ${
                 currentStreak > 0 ? "bg-emerald-500/20" : "bg-muted"
               }`}
             >
               <Flame
-                className={`h-6 w-6 ${currentStreak > 0 ? streakColor : "text-muted-foreground"}`}
+                className={`h-7 w-7 ${currentStreak > 0 ? streakColor : "text-muted-foreground"}`}
               />
             </div>
             <div>
               <div className="flex items-baseline gap-2">
-                <span className={`text-3xl font-bold ${streakColor}`}>
+                <span className={`text-4xl font-extrabold tracking-tight ${streakColor}`}>
                   {currentStreak}
                 </span>
                 <span className="text-sm text-muted-foreground">
@@ -94,6 +146,43 @@ export function StreakDisplay({ currentStreak, userId }: Props) {
             />
           </Button>
         </div>
+
+        {/* Countdown to midnight */}
+        <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-muted/30">
+          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
+            Temps restant avant minuit :{" "}
+          </span>
+          <span className="text-xs font-mono font-semibold tabular-nums">
+            {countdown}
+          </span>
+        </div>
+
+        {/* Urgency warning */}
+        {showUrgency && (
+          <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 animate-pulse">
+            <p className="text-xs font-semibold text-red-500 flex items-center gap-2">
+              <Flame className="h-3.5 w-3.5" />
+              Attention : votre streak expire dans {countdown.split("m")[0]}m
+            </p>
+          </div>
+        )}
+
+        {/* Milestone badges */}
+        {currentMilestone && (
+          <div className="flex items-center gap-2 mb-3">
+            {STREAK_MILESTONES.filter((m) => currentStreak >= m.days).map((m) => (
+              <Badge
+                key={m.days}
+                variant="outline"
+                className={`text-[10px] gap-1 ${m.color}`}
+              >
+                <Award className="h-3 w-3" />
+                {m.label}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         {/* 7-day progress visual */}
         <div className="flex items-center justify-between gap-1">

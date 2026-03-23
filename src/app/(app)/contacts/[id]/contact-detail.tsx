@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Profile, Deal, DealActivity } from "@/lib/types/database";
+import type { Profile, Deal, DealActivity, UserRole } from "@/lib/types/database";
 import type { TimelineEvent } from "@/lib/actions/timeline";
 import {
   Mail,
@@ -19,9 +19,14 @@ import {
   Sparkles,
   Loader2,
   X,
+  Pencil,
+  Trash2,
+  MoreVertical,
+  StickyNote,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ClientTimeline } from "@/components/client-timeline";
 import {
@@ -29,8 +34,36 @@ import {
   generateFollowUpMessage,
   type MessageChannel,
 } from "@/lib/actions/messaging";
+import {
+  updateContact,
+  deleteContact,
+  addContactNote,
+} from "@/lib/actions/contacts";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ContactDetailProps {
   contact: Profile;
@@ -73,6 +106,7 @@ export function ContactDetail({
   activities,
   timelineEvents,
 }: ContactDetailProps) {
+  const router = useRouter();
   const totalDealValue = deals.reduce((sum, d) => sum + (d.value || 0), 0);
   const [showMessaging, setShowMessaging] = useState(false);
   const [channel, setChannel] = useState<MessageChannel>("email");
@@ -80,6 +114,96 @@ export function ContactDetail({
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  // Edit dialog state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    full_name: contact.full_name || "",
+    email: contact.email || "",
+    phone: contact.phone || "",
+    company: contact.company || "",
+    niche: contact.niche || "",
+    role: contact.role || "client_b2b",
+  });
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Delete dialog state
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Note dialog state
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteText, setNoteText] = useState("");
+  const [noteSaving, setNoteSaving] = useState(false);
+
+  async function handleEditSave() {
+    if (!editForm.full_name.trim() || !editForm.email.trim()) {
+      toast.error("Le nom et l'email sont requis");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const result = await updateContact(contact.id, {
+        full_name: editForm.full_name.trim(),
+        email: editForm.email.trim(),
+        phone: editForm.phone.trim() || null,
+        company: editForm.company.trim() || null,
+        niche: editForm.niche.trim() || null,
+        role: editForm.role,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Contact mis à jour");
+        setEditOpen(false);
+        router.refresh();
+      }
+    } catch {
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setEditSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const result = await deleteContact(contact.id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Contact supprimé");
+        router.push("/contacts");
+      }
+    } catch {
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function handleAddNote() {
+    if (!noteText.trim()) {
+      toast.error("La note ne peut pas être vide");
+      return;
+    }
+    setNoteSaving(true);
+    try {
+      const result = await addContactNote(contact.id, noteText.trim());
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Note ajoutée");
+        setNoteText("");
+        setNoteOpen(false);
+        router.refresh();
+      }
+    } catch {
+      toast.error("Erreur lors de l'ajout de la note");
+    } finally {
+      setNoteSaving(false);
+    }
+  }
 
   async function handleSend() {
     if (!messageText.trim()) {
@@ -214,7 +338,7 @@ export function ContactDetail({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -265,6 +389,45 @@ export function ContactDetail({
                 )}
                 {showMessaging ? "Fermer" : "Envoyer"}
               </Button>
+
+              {/* Kebab menu: Edit, Note, Delete */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setEditForm({
+                        full_name: contact.full_name || "",
+                        email: contact.email || "",
+                        phone: contact.phone || "",
+                        company: contact.company || "",
+                        niche: contact.niche || "",
+                        role: contact.role || "client_b2b",
+                      });
+                      setEditOpen(true);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Éditer
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setNoteOpen(true)}>
+                    <StickyNote className="h-4 w-4 mr-2" />
+                    Ajouter une note
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-500 focus:text-red-500"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Supprimer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardContent>
@@ -428,6 +591,186 @@ export function ContactDetail({
           <ClientTimeline events={timelineEvents} />
         </div>
       )}
+
+      {/* Edit Contact Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Éditer le contact</DialogTitle>
+            <DialogDescription>
+              Modifier les informations du contact.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-full-name">Nom complet</Label>
+              <Input
+                id="edit-full-name"
+                value={editForm.full_name}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, full_name: e.target.value }))
+                }
+                placeholder="Jean Dupont"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, email: e.target.value }))
+                }
+                placeholder="jean@exemple.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-phone">Téléphone</Label>
+              <Input
+                id="edit-phone"
+                value={editForm.phone}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, phone: e.target.value }))
+                }
+                placeholder="+33 6 12 34 56 78"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-company">Entreprise</Label>
+              <Input
+                id="edit-company"
+                value={editForm.company}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, company: e.target.value }))
+                }
+                placeholder="Nom de l'entreprise"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-niche">Niche</Label>
+              <Input
+                id="edit-niche"
+                value={editForm.niche}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, niche: e.target.value }))
+                }
+                placeholder="Secteur d'activité"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-role">Rôle</Label>
+              <Select
+                value={editForm.role}
+                onValueChange={(v) => setEditForm((f) => ({ ...f, role: v as UserRole }))}
+              >
+                <SelectTrigger id="edit-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="client_b2b">Client B2B</SelectItem>
+                  <SelectItem value="client_b2c">Client B2C</SelectItem>
+                  <SelectItem value="setter">Setter</SelectItem>
+                  <SelectItem value="closer">Closer</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditOpen(false)}
+              disabled={editSaving}
+            >
+              Annuler
+            </Button>
+            <Button onClick={handleEditSave} disabled={editSaving}>
+              {editSaving ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : null}
+              {editSaving ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Supprimer le contact</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer{" "}
+              <strong>{contact.full_name || "ce contact"}</strong> ? Cette
+              action est irréversible. Tous les deals et activités associés
+              seront également supprimés.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleting}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-1" />
+              )}
+              {deleting ? "Suppression..." : "Supprimer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Note Dialog */}
+      <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ajouter une note</DialogTitle>
+            <DialogDescription>
+              Ajoutez une note rapide pour ce contact.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <Textarea
+              placeholder="Votre note..."
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              rows={4}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setNoteOpen(false)}
+              disabled={noteSaving}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleAddNote}
+              disabled={noteSaving || !noteText.trim()}
+            >
+              {noteSaving ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <StickyNote className="h-4 w-4 mr-1" />
+              )}
+              {noteSaving ? "Enregistrement..." : "Ajouter"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

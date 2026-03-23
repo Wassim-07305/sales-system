@@ -273,14 +273,22 @@ export function AnalyticsView({
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
                 activePeriod === opt.key
-                  ? "bg-emerald-500 text-black shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-emerald-500 text-black shadow-sm ring-2 ring-emerald-500/30 ring-offset-1 ring-offset-background"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
               {opt.label}
             </button>
           ))}
         </div>
+        {activePeriod === "custom" && customFrom && customTo && (
+          <Badge variant="outline" className="text-xs font-medium gap-1 ml-2">
+            <CalendarDays className="h-3 w-3" />
+            {new Date(customFrom).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
+            {" → "}
+            {new Date(customTo).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
+          </Badge>
+        )}
       </div>
 
       {showCustom && (

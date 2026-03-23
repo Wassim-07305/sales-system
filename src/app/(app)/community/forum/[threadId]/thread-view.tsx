@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, ArrowLeft, Send, MessageCircle } from "lucide-react";
+import { Heart, ArrowLeft, Send, MessageCircle, Reply, X } from "lucide-react";
 import { toggleLike, addComment } from "@/lib/actions/community";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -61,6 +61,7 @@ export function ThreadView({
   const [isPending, startTransition] = useTransition();
   const [liked, setLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   function handleLike() {
     setLiked(!liked);
@@ -184,6 +185,17 @@ export function ThreadView({
                     </span>
                   </div>
                   <p className="text-sm whitespace-pre-wrap">{c.content}</p>
+                  <button
+                    onClick={() => {
+                      const name = c.author?.full_name || "Anonyme";
+                      setReplyingTo(name);
+                      setCommentText(`@${name} `);
+                    }}
+                    className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground hover:text-emerald-500 transition-colors"
+                  >
+                    <Reply className="h-3 w-3" />
+                    Répondre
+                  </button>
                 </div>
               </div>
             </CardContent>
@@ -203,13 +215,37 @@ export function ThreadView({
       {/* Reply input */}
       <Card>
         <CardContent className="p-4">
+          {replyingTo && (
+            <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-sm">
+              <Reply className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+              <span className="text-muted-foreground">
+                En réponse à{" "}
+                <span className="font-semibold text-foreground">
+                  {replyingTo}
+                </span>
+              </span>
+              <button
+                onClick={() => {
+                  setReplyingTo(null);
+                  setCommentText("");
+                }}
+                className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
           <div className="flex gap-3">
             <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs font-bold shrink-0">
               ?
             </div>
             <div className="flex-1 flex gap-2">
               <Input
-                placeholder="Écrire un commentaire..."
+                placeholder={
+                  replyingTo
+                    ? `Répondre à ${replyingTo}...`
+                    : "Écrire un commentaire..."
+                }
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
@@ -217,7 +253,10 @@ export function ThreadView({
               />
               <Button
                 size="sm"
-                onClick={handleAddComment}
+                onClick={() => {
+                  handleAddComment();
+                  setReplyingTo(null);
+                }}
                 disabled={isPending || !commentText.trim()}
                 className="bg-emerald-500 text-black hover:bg-emerald-400"
               >

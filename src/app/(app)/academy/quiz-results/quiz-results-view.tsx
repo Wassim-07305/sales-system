@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
   CheckCircle,
   XCircle,
   ArrowLeft,
+  ArrowRight,
   Trophy,
   BookOpen,
   AlertCircle,
@@ -32,15 +33,37 @@ interface QuizResult {
     explanation: string | null;
   }>;
   attemptedAt: string;
+  courseId?: string;
+  nextLessonId?: string;
 }
 
 interface Props {
   attemptId: string;
+  courseId?: string;
+  nextLessonId?: string;
 }
 
-export function QuizResultsView({ attemptId }: Props) {
+export function QuizResultsView({ attemptId, courseId, nextLessonId }: Props) {
   const [results, setResults] = useState<QuizResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const animationRef = useRef<number | null>(null);
+
+  const animateScore = useCallback((target: number) => {
+    const duration = 1000; // 1 second
+    const startTime = performance.now();
+    function tick(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimatedScore(Math.round(eased * target));
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(tick);
+      }
+    }
+    animationRef.current = requestAnimationFrame(tick);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -55,6 +78,19 @@ export function QuizResultsView({ attemptId }: Props) {
     }
     void load();
   }, [attemptId]);
+
+  useEffect(() => {
+    if (results && !loading) {
+      const target =
+        results.totalQuestions > 0
+          ? Math.round((results.correctCount / results.totalQuestions) * 100)
+          : 0;
+      animateScore(target);
+    }
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [results, loading, animateScore]);
 
   if (loading) {
     return (
@@ -126,7 +162,9 @@ export function QuizResultsView({ attemptId }: Props) {
             </div>
             <div className="flex-1 text-center sm:text-left space-y-2">
               <div className="flex items-center gap-3 justify-center sm:justify-start">
-                <h2 className="text-3xl font-bold">{scorePercent}%</h2>
+                <h2 className="text-3xl font-bold tabular-nums">
+                  {animatedScore}%
+                </h2>
                 <Badge
                   className={cn(
                     results.passed
@@ -137,6 +175,19 @@ export function QuizResultsView({ attemptId }: Props) {
                   {results.passed ? "Réussi" : "Échoué"}
                 </Badge>
               </div>
+              <p
+                className={cn(
+                  "text-sm font-semibold transition-opacity duration-500",
+                  animatedScore === scorePercent
+                    ? "opacity-100"
+                    : "opacity-0",
+                  results.passed ? "text-emerald-400" : "text-amber-400",
+                )}
+              >
+                {results.passed
+                  ? "Bravo !"
+                  : "Continuez, vous progressez !"}
+              </p>
               <p className="text-muted-foreground">
                 {results.correctCount} bonne
                 {results.correctCount > 1 ? "s" : ""} réponse
@@ -145,7 +196,7 @@ export function QuizResultsView({ attemptId }: Props) {
                 {results.totalQuestions > 1 ? "s" : ""}
               </p>
               <Progress
-                value={scorePercent}
+                value={animatedScore}
                 className={cn(
                   "h-3",
                   results.passed
@@ -157,6 +208,39 @@ export function QuizResultsView({ attemptId }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Next module CTA */}
+      {results.passed && (
+        <Card className="border-emerald-500/30 bg-gradient-to-r from-emerald-500/5 to-transparent">
+          <CardContent className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-emerald-400">
+                Module validé !
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Vous pouvez passer au module suivant.
+              </p>
+            </div>
+            {nextLessonId && courseId ? (
+              <Link
+                href={`/academy/${courseId}?lesson=${nextLessonId}`}
+              >
+                <Button className="bg-emerald-500 text-black hover:bg-emerald-400 font-semibold">
+                  Passer au module suivant
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/academy">
+                <Button className="bg-emerald-500 text-black hover:bg-emerald-400 font-semibold">
+                  Retour à l&apos;Academy
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Question breakdown */}
       <div className="space-y-4">

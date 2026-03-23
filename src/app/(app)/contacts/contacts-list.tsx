@@ -40,7 +40,14 @@ import {
   Plus,
   X,
   Tag,
+  MoreVertical,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { ImportExportDialog } from "./import-export-dialog";
 import { ExportDialog } from "@/components/export-dialog";
@@ -262,11 +269,13 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
 
   const filtered = useMemo(() => {
     const result = contacts.filter((c) => {
+      const q = search.toLowerCase();
       const matchesSearch =
         !search ||
-        c.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.email.toLowerCase().includes(search.toLowerCase()) ||
-        c.company?.toLowerCase().includes(search.toLowerCase());
+        c.full_name?.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.company?.toLowerCase().includes(q) ||
+        c.phone?.toLowerCase().includes(q);
       const matchesRole = roleFilter === "all" || c.role === roleFilter;
       const matchesTag =
         tagFilter === "all" ||
@@ -364,7 +373,7 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par nom, email, entreprise..."
+            placeholder="Rechercher par nom, email, téléphone, entreprise..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -562,7 +571,8 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center gap-0.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Desktop: hover actions */}
+                        <div className="hidden sm:flex items-center gap-0.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -608,6 +618,60 @@ export function ContactsList({ initialContacts }: ContactsListProps) {
                               <ExternalLink className="h-3.5 w-3.5" />
                             </Button>
                           </Link>
+                        </div>
+                        {/* Mobile: always-visible kebab menu */}
+                        <div className="sm:hidden flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                              >
+                                <MoreVertical className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (contact.email) {
+                                    window.open(
+                                      `mailto:${contact.email}`,
+                                      "_blank",
+                                    );
+                                  } else {
+                                    toast.error("Aucune adresse email");
+                                  }
+                                }}
+                              >
+                                <Mail className="h-4 w-4 mr-2" />
+                                Email
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (contact.phone) {
+                                    window.open(
+                                      `tel:${contact.phone}`,
+                                      "_self",
+                                    );
+                                  } else {
+                                    toast.error("Aucun numéro de téléphone");
+                                  }
+                                }}
+                              >
+                                <Phone className="h-4 w-4 mr-2" />
+                                Appeler
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/contacts/${contact.id}`}>
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  Voir le profil
+                                </Link>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>

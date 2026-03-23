@@ -17,6 +17,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -89,6 +91,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
   const [isPending, startTransition] = useTransition();
   const [isBulkPending, startBulkTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -119,7 +122,14 @@ export function InvoicesView({ invoices, contracts }: Props) {
     });
   }
 
-  function handleBulkGenerate() {
+  // Contracts eligible for bulk invoicing (signed contracts)
+  const eligibleContracts = contracts.filter(
+    (c) => c.status === "signed" || c.status === "active",
+  );
+  const bulkTotal = eligibleContracts.reduce((sum, c) => sum + (c.amount || 0), 0);
+
+  function handleBulkConfirm() {
+    setBulkConfirmOpen(false);
     startBulkTransition(async () => {
       try {
         const result = await generateScheduledInvoices();
@@ -153,7 +163,7 @@ export function InvoicesView({ invoices, contracts }: Props) {
       <PageHeader title="Factures" description="Factures auto-générées">
         <Button
           variant="outline"
-          onClick={handleBulkGenerate}
+          onClick={() => setBulkConfirmOpen(true)}
           disabled={isBulkPending}
         >
           <CalendarCheck className="h-4 w-4 mr-2" />
@@ -320,6 +330,63 @@ export function InvoicesView({ invoices, contracts }: Props) {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Confirmation dialog for bulk invoice generation */}
+      <Dialog open={bulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Confirmer la génération des factures</DialogTitle>
+            <DialogDescription className="pt-2 text-sm text-muted-foreground">
+              {eligibleContracts.length > 0 ? (
+                <>
+                  <span className="font-semibold text-foreground">
+                    {eligibleContracts.length} contrat{eligibleContracts.length > 1 ? "s" : ""}
+                  </span>{" "}
+                  seront facturés pour un total de{" "}
+                  <span className="font-semibold text-foreground">
+                    {bulkTotal.toLocaleString("fr-FR")} &euro;
+                  </span>
+                </>
+              ) : (
+                "Aucun contrat éligible à la facturation ce mois-ci."
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          {eligibleContracts.length > 0 && (
+            <div className="max-h-48 overflow-y-auto space-y-1.5 py-2">
+              {eligibleContracts.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-muted/30 text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="font-medium">#{c.id.slice(0, 8)}</span>
+                    <span className="text-muted-foreground">
+                      {c.client?.full_name || "Client"}
+                    </span>
+                  </div>
+                  <span className="font-semibold tabular-nums">
+                    {(c.amount || 0).toLocaleString("fr-FR")} &euro;
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setBulkConfirmOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              className="bg-emerald-500 text-black hover:bg-emerald-400"
+              onClick={handleBulkConfirm}
+              disabled={eligibleContracts.length === 0 || isBulkPending}
+            >
+              {isBulkPending ? "Génération..." : "Confirmer la génération"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

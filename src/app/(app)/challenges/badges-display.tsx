@@ -127,6 +127,11 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                     );
                     const IconComponent = ICON_MAP[badge.icon] || Trophy;
 
+                    // Progress hint text for locked badges
+                    const progressHint = !isEarned
+                      ? badge.description
+                      : undefined;
+
                     return (
                       <Tooltip key={badge.id}>
                         <TooltipTrigger asChild>
@@ -135,7 +140,7 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                               "relative flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all duration-300 w-[90px]",
                               isEarned
                                 ? "border-emerald-500/20 bg-emerald-500/10 shadow-sm hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5"
-                                : "border-border/50 bg-muted/30 opacity-50 grayscale",
+                                : "border-border/50 bg-muted/30 opacity-60 grayscale hover:opacity-80 hover:grayscale-[50%]",
                             )}
                           >
                             <div
@@ -159,6 +164,11 @@ export function BadgesDisplay({ allBadges, earnedBadges, userId }: Props) {
                             {isEarned && (
                               <span className="text-[10px] text-emerald-500 font-semibold">
                                 +{badge.points} pts
+                              </span>
+                            )}
+                            {!isEarned && (
+                              <span className="text-[9px] text-muted-foreground text-center leading-tight line-clamp-2 mt-0.5">
+                                {progressHint}
                               </span>
                             )}
                           </div>

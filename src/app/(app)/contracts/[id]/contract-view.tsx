@@ -25,6 +25,7 @@ import {
   DollarSign,
   User,
   Calendar,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -79,6 +80,83 @@ const statusConfig: Record<
     bg: "bg-emerald-500/10 border-emerald-500/20",
   },
 };
+
+const LIFECYCLE_STAGES = [
+  { key: "draft", label: "Brouillon", step: 1 },
+  { key: "sent", label: "Envoyé", step: 2 },
+  { key: "client_signed", label: "Signé client", step: 3 },
+  { key: "signed", label: "Contresigné", step: 4 },
+  { key: "active", label: "Actif", step: 4 },
+];
+
+const STATUS_TO_STEP: Record<string, number> = {
+  draft: 1,
+  sent: 2,
+  client_signed: 3,
+  signed: 4,
+  active: 4,
+};
+
+function ContractTimeline({ status }: { status: string }) {
+  const currentStep = STATUS_TO_STEP[status] ?? 1;
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center w-full">
+        {LIFECYCLE_STAGES.filter((s) => s.key !== "active").map((stage, i, arr) => {
+          const isCompleted = currentStep > stage.step;
+          const isCurrent = currentStep === stage.step;
+          const isFuture = currentStep < stage.step;
+
+          return (
+            <div key={stage.key} className="flex items-center flex-1 last:flex-none">
+              <div className="flex flex-col items-center">
+                <div
+                  className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0",
+                    isCompleted
+                      ? "bg-emerald-500 text-black"
+                      : isCurrent
+                        ? "bg-emerald-500/20 ring-2 ring-emerald-500 text-emerald-500"
+                        : "bg-muted/50 text-muted-foreground/50",
+                  )}
+                >
+                  {isCompleted ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    stage.step
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    "text-[10px] mt-1.5 font-medium whitespace-nowrap",
+                    isCompleted
+                      ? "text-emerald-600"
+                      : isCurrent
+                        ? "text-emerald-500"
+                        : "text-muted-foreground/50",
+                  )}
+                >
+                  {stage.label}
+                </span>
+              </div>
+              {i < arr.length - 1 && (
+                <div
+                  className={cn(
+                    "h-0.5 flex-1 mx-2 rounded-full mt-[-1rem]",
+                    currentStep > stage.step + 1 || (currentStep > stage.step)
+                      ? "bg-emerald-500"
+                      : "bg-muted/50",
+                  )}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const AVATAR_COLORS = [
   "bg-blue-600",
@@ -184,6 +262,8 @@ export function ContractView({ contract, isClient, isAdmin }: Props) {
           </Link>
         </div>
       </PageHeader>
+
+      <ContractTimeline status={contract.status} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Contract content */}

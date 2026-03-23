@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface FlowchartNode {
   id: string;
@@ -92,6 +93,7 @@ const nodeTypeConfig: Record<
 };
 
 export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Order nodes by their position (top to bottom, following edges if possible)
@@ -147,13 +149,29 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
   const currentNode = orderedNodes[currentStep];
   const totalSteps = orderedNodes.length;
 
-  function goNext() {
-    if (currentStep < totalSteps - 1) setCurrentStep(currentStep + 1);
-  }
+  const goPrev = useCallback(() => {
+    setCurrentStep((s) => (s > 0 ? s - 1 : s));
+  }, []);
 
-  function goPrev() {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
-  }
+  const goNextCb = useCallback(() => {
+    setCurrentStep((s) => (s < totalSteps - 1 ? s + 1 : s));
+  }, [totalSteps]);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault();
+        goNextCb();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === "Escape") {
+        router.push(`/scripts/flowchart/${flowchart.id}`);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goNextCb, goPrev, router, flowchart.id]);
 
   if (totalSteps === 0) {
     return (
@@ -277,8 +295,12 @@ export function PresentView({ flowchart }: { flowchart: FlowchartData }) {
           Précédent
         </Button>
 
+        <p className="text-xs text-muted-foreground">
+          &larr; &rarr; pour naviguer &middot; Esc pour quitter
+        </p>
+
         <Button
-          onClick={goNext}
+          onClick={goNextCb}
           disabled={currentStep === totalSteps - 1}
           size="lg"
           className="bg-emerald-500 text-black hover:bg-emerald-400 disabled:opacity-30"

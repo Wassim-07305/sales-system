@@ -44,9 +44,12 @@ import {
   Sparkles,
   Flag,
   Video,
+  Pencil,
+  Bookmark,
 } from "lucide-react";
 import {
   createCommunityPost,
+  updateCommunityPost,
   toggleLike,
   getComments,
   addComment,
@@ -220,7 +223,51 @@ export function CommunityView({
   const [callTitle, setCallTitle] = useState("");
   const [callDesc, setCallDesc] = useState("");
   const [callPosting, setCallPosting] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(`community_bookmarks_${userId}`);
+        return saved ? new Set(JSON.parse(saved)) : new Set();
+      } catch {
+        return new Set();
+      }
+    }
+    return new Set();
+  });
+  const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  function toggleBookmark(postId: string) {
+    setBookmarkedPosts((prev) => {
+      const next = new Set(prev);
+      if (next.has(postId)) {
+        next.delete(postId);
+      } else {
+        next.add(postId);
+      }
+      try {
+        localStorage.setItem(
+          `community_bookmarks_${userId}`,
+          JSON.stringify([...next]),
+        );
+      } catch {
+        // localStorage full — ignore
+      }
+      return next;
+    });
+  }
+
+  function openEditDialog(post: Post) {
+    setEditingPostId(post.id);
+    setNewTitle(post.title || "");
+    setNewContent(post.content);
+    setNewType(post.type);
+    setNewChannel(post.channel || "general");
+    setNewImageUrl(post.image_url || "");
+    setNewImagePreview(post.image_url || "");
+    setDialogOpen(true);
+  }
 
   // Filter channels by role
   const visibleChannels = CHANNELS.filter((ch) => {
@@ -245,10 +292,14 @@ export function CommunityView({
         })
       : posts.filter((p) => (p.channel || "general") === activeChannel);
 
-  const filtered =
+  const tabFiltered =
     activeTab === "all"
       ? channelFiltered
       : channelFiltered.filter((p) => p.type === activeTab);
+
+  const filtered = showBookmarksOnly
+    ? tabFiltered.filter((p) => bookmarkedPosts.has(p.id))
+    : tabFiltered;
 
   const activeChannelDef =
     CHANNELS.find((ch) => ch.id === activeChannel) || CHANNELS[0];
@@ -256,6 +307,10 @@ export function CommunityView({
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Seules les images sont acceptées");
+      return;
+    }
     if (file.size > 10 * 1024 * 1024) {
       toast.error("L'image doit faire moins de 10 Mo");
       return;
@@ -284,15 +339,25 @@ export function CommunityView({
     if (!newContent.trim()) return;
     setIsPosting(true);
     try {
-      await createCommunityPost({
-        type: newType,
-        title: newTitle || undefined,
-        content: newContent,
-        image_url: newImageUrl || undefined,
-        channel: newChannel,
-      });
-      toast.success("Post publié !");
+      if (editingPostId) {
+        await updateCommunityPost(editingPostId, {
+          type: newType,
+          title: newTitle || undefined,
+          content: newContent,
+        });
+        toast.success("Post modifié !");
+      } else {
+        await createCommunityPost({
+          type: newType,
+          title: newTitle || undefined,
+          content: newContent,
+          image_url: newImageUrl || undefined,
+          channel: newChannel,
+        });
+        toast.success("Post publié !");
+      }
       setDialogOpen(false);
+      setEditingPostId(null);
       setNewContent("");
       setNewTitle("");
       setNewType("discussion");
@@ -466,6 +531,27 @@ export function CommunityView({
               <MessageCircle className="h-4 w-4" />
               <span className="font-medium">Commenter</span>
             </button>
+            <button
+              onClick={() => toggleBookmark(post.id)}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-all ${
+                bookmarkedPosts.has(post.id)
+                  ? "text-amber-500 bg-amber-500/10"
+                  : "text-muted-foreground hover:text-amber-500 hover:bg-amber-500/5"
+              }`}
+            >
+              <Bookmark
+                className={`h-4 w-4 ${bookmarkedPosts.has(post.id) ? "fill-amber-500" : ""}`}
+              />
+            </button>
+            {(post.author_id === userId || isAdmin) && (
+              <button
+                onClick={() => openEditDialog(post)}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-blue-500 hover:bg-blue-500/5 transition-all"
+              >
+                <Pencil className="h-4 w-4" />
+                <span className="font-medium">Modifier</span>
+              </button>
+            )}
             {post.author_id !== userId && (
               <button
                 onClick={() => setReportDialog(post.id)}
@@ -578,6 +664,12 @@ export function CommunityView({
           )}
           <Button
             onClick={() => {
+              setEditingPostId(null);
+              setNewTitle("");
+              setNewContent("");
+              setNewType("discussion");
+              setNewImageUrl("");
+              setNewImagePreview("");
               setNewChannel(
                 activeChannel === "all" ? "general" : activeChannel,
               );
@@ -740,15 +832,35 @@ export function CommunityView({
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="all">Tout</TabsTrigger>
-              <TabsTrigger value="win">
-                <Trophy className="h-4 w-4 mr-1" />
-                Wins
-              </TabsTrigger>
-              <TabsTrigger value="question">Questions</TabsTrigger>
-              <TabsTrigger value="discussion">Discussions</TabsTrigger>
-            </TabsList>
+            <div className="flex items-center gap-3 mb-6 flex-wrap">
+              <TabsList>
+                <TabsTrigger value="all">Tout</TabsTrigger>
+                <TabsTrigger value="win">
+                  <Trophy className="h-4 w-4 mr-1" />
+                  Wins
+                </TabsTrigger>
+                <TabsTrigger value="question">Questions</TabsTrigger>
+                <TabsTrigger value="discussion">Discussions</TabsTrigger>
+              </TabsList>
+              <button
+                onClick={() => setShowBookmarksOnly((v) => !v)}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all border ${
+                  showBookmarksOnly
+                    ? "text-amber-500 bg-amber-500/10 border-amber-500/30"
+                    : "text-muted-foreground hover:text-amber-500 hover:bg-amber-500/5 border-border"
+                }`}
+              >
+                <Bookmark
+                  className={`h-4 w-4 ${showBookmarksOnly ? "fill-amber-500" : ""}`}
+                />
+                Mes favoris
+                {bookmarkedPosts.size > 0 && (
+                  <span className="text-[11px] bg-muted rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                    {bookmarkedPosts.size}
+                  </span>
+                )}
+              </button>
+            </div>
 
             <TabsContent value="all">
               <div className="space-y-4">
@@ -824,12 +936,22 @@ export function CommunityView({
       </div>
 
       {/* ─── New post dialog ─── */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setEditingPostId(null);
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg">Nouveau post</DialogTitle>
+            <DialogTitle className="text-lg">
+              {editingPostId ? "Modifier le post" : "Nouveau post"}
+            </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Partagez avec la communauté
+              {editingPostId
+                ? "Modifiez le contenu de votre post"
+                : "Partagez avec la communauté"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 pt-2">
@@ -968,7 +1090,7 @@ export function CommunityView({
               ) : (
                 <Send className="h-4 w-4 mr-2" />
               )}
-              Publier
+              {editingPostId ? "Enregistrer" : "Publier"}
             </Button>
           </div>
         </DialogContent>

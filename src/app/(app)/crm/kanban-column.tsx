@@ -50,7 +50,7 @@ export const KanbanColumn = memo(function KanbanColumn({
         "flex-shrink-0 w-[75vw] sm:w-[260px] md:w-[280px] rounded-2xl transition-all duration-200 snap-center",
         "bg-muted/20 border border-border/50 shadow-sm",
         isOver &&
-          "bg-emerald-500/5 border-emerald-500/30 ring-2 ring-emerald-500/20 scale-[1.01] shadow-md",
+          "bg-emerald-500/5 border-emerald-500/30 ring-1 ring-emerald-500/20 scale-[1.01] shadow-lg",
       )}
     >
       {/* Column header */}
@@ -99,7 +99,7 @@ export const KanbanColumn = memo(function KanbanColumn({
         items={deals.map((d) => d.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="p-2 space-y-2 min-h-[80px] max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-280px)] overflow-y-auto scrollbar-hide">
+        <div className="p-2 space-y-2 min-h-[120px] max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-280px)] overflow-y-auto scrollbar-hide">
           {deals.map((deal) => (
             <DealCard
               key={deal.id}
@@ -113,11 +113,12 @@ export const KanbanColumn = memo(function KanbanColumn({
             />
           ))}
           {deals.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-20 text-center">
+            <div className="flex flex-col items-center justify-center min-h-[100px] text-center mx-1 rounded-xl border-2 border-dashed border-border/40 bg-muted/5">
               <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center mb-1.5">
                 <div className="h-2 w-2 rounded-full bg-muted-foreground/20" />
               </div>
               <p className="text-[11px] text-muted-foreground/60">Aucun deal</p>
+              <p className="text-[10px] text-muted-foreground/40 mt-0.5">Glissez un deal ici</p>
             </div>
           )}
         </div>

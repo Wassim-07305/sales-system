@@ -57,9 +57,17 @@ export function AvailabilityEditor({
 
   // Form state
   const [closerId, setCloserId] = useState("");
-  const [dayOfWeek, setDayOfWeek] = useState("1");
+  const [selectedDays, setSelectedDays] = useState<number[]>([1]);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
+
+  function toggleDay(dayValue: number) {
+    setSelectedDays((prev) =>
+      prev.includes(dayValue)
+        ? prev.filter((d) => d !== dayValue)
+        : [...prev, dayValue].sort((a, b) => a - b),
+    );
+  }
 
   /* eslint-disable react-hooks/immutability */
   useEffect(() => {
@@ -89,21 +97,40 @@ export function AvailabilityEditor({
       return;
     }
 
-    startTransition(async () => {
-      const result = await createAvailability({
-        booking_page_id: pageId,
-        closer_id: closerId,
-        day_of_week: parseInt(dayOfWeek),
-        start_time: startTime,
-        end_time: endTime,
-      });
+    if (selectedDays.length === 0) {
+      toast.error("Sélectionnez au moins un jour");
+      return;
+    }
 
-      if (result.error) {
-        toast.error(result.error);
-        return;
+    if (startTime >= endTime) {
+      toast.error("L'heure de début doit être avant l'heure de fin");
+      return;
+    }
+
+    startTransition(async () => {
+      let hasError = false;
+      for (const day of selectedDays) {
+        const result = await createAvailability({
+          booking_page_id: pageId,
+          closer_id: closerId,
+          day_of_week: day,
+          start_time: startTime,
+          end_time: endTime,
+        });
+        if (result.error) {
+          toast.error(result.error);
+          hasError = true;
+          break;
+        }
       }
 
-      toast.success("Disponibilité ajoutée");
+      if (!hasError) {
+        toast.success(
+          selectedDays.length > 1
+            ? `${selectedDays.length} créneaux ajoutés`
+            : "Disponibilité ajoutée",
+        );
+      }
       loadData();
     });
   }
@@ -170,20 +197,25 @@ export function AvailabilityEditor({
 
                 <div className="space-y-1.5">
                   <Label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Jour
+                    Jours
                   </Label>
-                  <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DAYS_OF_WEEK.map((d) => (
-                        <SelectItem key={d.value} value={String(d.value)}>
-                          {d.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {DAYS_OF_WEEK.map((d) => (
+                      <button
+                        key={d.value}
+                        type="button"
+                        onClick={() => toggleDay(d.value)}
+                        className={cn(
+                          "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
+                          selectedDays.includes(d.value)
+                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-600"
+                            : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground",
+                        )}
+                      >
+                        {d.short}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

@@ -42,6 +42,27 @@ export function DateSelector({
   const today = startOfDay(new Date());
   const maxDate = addDays(today, maxDaysAhead);
 
+  const tomorrow = addDays(today, 1);
+  const nextMonday = (() => {
+    const dayOfWeek = today.getDay();
+    // Days until next Monday: if today is Monday (1), next Monday is 7 days away
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+    return addDays(today, daysUntilMonday);
+  })();
+
+  const shortcuts = [
+    {
+      label: "Demain",
+      date: tomorrow,
+      visible: !isAfter(tomorrow, maxDate),
+    },
+    {
+      label: "Semaine prochaine",
+      date: nextMonday,
+      visible: !isAfter(nextMonday, maxDate),
+    },
+  ].filter((s) => s.visible);
+
   const days = useMemo(() => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
@@ -61,6 +82,39 @@ export function DateSelector({
 
   return (
     <div>
+      {/* Quick-select shortcuts */}
+      {!disabled && shortcuts.length > 0 && (
+        <div className="mb-4 flex items-center gap-2">
+          {shortcuts.map((shortcut) => {
+            const dateStr = format(shortcut.date, "yyyy-MM-dd");
+            const isActive =
+              selectedDate &&
+              isSameDay(
+                shortcut.date,
+                new Date(selectedDate + "T00:00:00"),
+              );
+            return (
+              <button
+                key={shortcut.label}
+                type="button"
+                onClick={() => {
+                  onSelect(dateStr);
+                  setCurrentMonth(shortcut.date);
+                }}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  isActive
+                    ? "text-white"
+                    : "border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                }`}
+                style={isActive ? { backgroundColor: brandColor } : undefined}
+              >
+                {shortcut.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Month + Year header */}
       <div className="mb-5 flex items-center justify-between">
         <span className="text-sm font-medium capitalize text-gray-900">

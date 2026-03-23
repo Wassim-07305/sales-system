@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import {
   Copy,
   Check,
@@ -14,6 +14,7 @@ import type { BookingPage } from "@/lib/types/database";
 import {
   deleteBookingPage,
   updateBookingPage,
+  getBookingKPIs,
 } from "@/lib/actions/booking-pages";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,18 @@ export function BookingPageCard({ page }: BookingPageCardProps) {
   const [showEdit, setShowEdit] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState<{
+    views: number;
+    contacts: number;
+  } | null>(null);
+
+  /* eslint-disable react-hooks/immutability */
+  useEffect(() => {
+    getBookingKPIs({ pageId: page.id }).then((data) =>
+      setStats({ views: data.views, contacts: data.contacts }),
+    );
+  }, [page.id]);
+  /* eslint-enable react-hooks/immutability */
 
   const bookingUrl =
     typeof window !== "undefined"
@@ -127,6 +140,15 @@ export function BookingPageCard({ page }: BookingPageCardProps) {
             {page.max_days_ahead}j max
           </span>
         </div>
+
+        {/* Stats */}
+        {stats && (
+          <p className="mb-4 text-xs text-muted-foreground">
+            <Eye className="mr-1 inline h-3 w-3" />
+            {stats.views} vue{stats.views !== 1 ? "s" : ""} &middot;{" "}
+            {stats.contacts} lead{stats.contacts !== 1 ? "s" : ""}
+          </p>
+        )}
 
         {/* URL bar with copy + external link */}
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">

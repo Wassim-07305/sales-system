@@ -139,9 +139,9 @@ export const DealCard = memo(function DealCard({
       className={cn(
         "transition-all duration-200 border-border/50 rounded-xl",
         selectionMode ? "cursor-pointer" : "cursor-grab active:cursor-grabbing",
-        "hover:shadow-md hover:border-border/80 hover:-translate-y-0.5",
+        "hover:shadow-lg hover:border-border/80 hover:-translate-y-1 hover:bg-muted/10",
         dragging &&
-          "opacity-60 shadow-xl rotate-1 scale-105 border-emerald-500/30 ring-1 ring-emerald-500/10",
+          "opacity-80 shadow-2xl rotate-1 scale-105 border-emerald-500/30 ring-2 ring-emerald-500/50",
         isSelected && "ring-2 ring-emerald-500/50 border-emerald-500/40 bg-emerald-500/5",
       )}
       onClick={handleCardClick}

@@ -32,8 +32,43 @@ import {
   CreditCard,
   Loader2,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
+
+function DueIndicator({ dueDate, status }: { dueDate: string; status: string }) {
+  if (status === "paid") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+        <CheckCircle2 className="h-3 w-3" />
+        Payé
+      </span>
+    );
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+  const daysUntilDue = differenceInDays(due, today);
+
+  if (daysUntilDue < 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-500/10 px-2 py-0.5 rounded-full">
+        En retard de {Math.abs(daysUntilDue)} jour{Math.abs(daysUntilDue) > 1 ? "s" : ""}
+      </span>
+    );
+  }
+
+  if (daysUntilDue <= 7) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full">
+        J-{daysUntilDue}
+      </span>
+    );
+  }
+
+  return null;
+}
 
 interface Installment {
   id: string;
@@ -287,9 +322,14 @@ export function PaymentsView({ installments, overdue }: Props) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {format(new Date(installment.due_date), "d MMM yyyy", {
-                      locale: fr,
-                    })}
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {format(new Date(installment.due_date), "d MMM yyyy", {
+                          locale: fr,
+                        })}
+                      </span>
+                      <DueIndicator dueDate={installment.due_date} status={installment.status} />
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge

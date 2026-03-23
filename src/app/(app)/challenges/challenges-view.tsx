@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+// Progress component not used directly – custom animated bars instead
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +25,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Trophy,
@@ -46,6 +45,7 @@ import {
   Crown,
   Calendar,
   Users,
+  Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -149,6 +149,63 @@ const EMPTY_FORM: ChallengeFormData = {
   points_reward: 100,
   recurrence: "once",
 };
+
+// ---------------------------------------------------------------------------
+// Confetti celebration overlay
+// ---------------------------------------------------------------------------
+
+function ConfettiCelebration({ onDone }: { onDone: () => void }) {
+  const [particles] = useState(() => {
+    const colors = ["#10b981", "#f59e0b", "#3b82f6", "#ef4444", "#8b5cf6", "#7af17a"];
+    return Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: -10 - Math.random() * 20,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      delay: Math.random() * 0.5,
+      duration: 1.5 + Math.random() * 2,
+      size: 6 + Math.random() * 6,
+      rotation: Math.random() * 360,
+      isRound: Math.random() > 0.5,
+    }));
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(onDone, 3500);
+    return () => clearTimeout(timer);
+  }, [onDone]);
+
+  return (
+    <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute animate-confetti-fall"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            borderRadius: p.isRound ? "50%" : "2px",
+            backgroundColor: p.color,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+            transform: `rotate(${p.rotation}deg)`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .animate-confetti-fall {
+          animation: confetti-fall linear forwards;
+        }
+      `}</style>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Admin challenge form dialog
@@ -741,6 +798,9 @@ export function ChallengesView({
   pastChallenges,
 }: Props) {
   const [showLevelUp] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const previousProgressRef = useRef<Record<string, boolean>>({});
 
   const currentLevel =
     LEVELS.find((l) => l.level === (gamProfile?.level || 1)) || LEVELS[0];
@@ -753,6 +813,46 @@ export function ChallengesView({
   const levelProgress = nextLevel
     ? Math.round((pointsInLevel / pointsNeeded) * 100)
     : 100;
+  const pointsRemaining = nextLevel
+    ? nextLevel.minPoints - (gamProfile?.total_points || 0)
+    : 0;
+
+  // Animate XP progress bar on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimatedProgress(levelProgress), 100);
+    return () => clearTimeout(timer);
+  }, [levelProgress]);
+
+  // Detect newly completed challenges and trigger confetti
+  const handleConfettiDone = useCallback(() => setShowConfetti(false), []);
+
+  useEffect(() => {
+    const prev = previousProgressRef.current;
+    let hasNew = false;
+    for (const challenge of challenges) {
+      const isCompleted = progressMap[challenge.id]?.completed;
+      const wasCompleted = prev[challenge.id];
+      if (isCompleted && !wasCompleted) {
+        hasNew = true;
+        toast.success(`Defi complete ! +${challenge.points_reward} points`, {
+          icon: <Trophy className="h-5 w-5 text-emerald-500" />,
+          style: { background: "#14080e", color: "#fff" },
+          duration: 5000,
+        });
+      }
+    }
+    // Update ref for next render
+    const next: Record<string, boolean> = {};
+    for (const c of challenges) {
+      next[c.id] = progressMap[c.id]?.completed || false;
+    }
+    previousProgressRef.current = next;
+    // Schedule confetti outside synchronous effect to avoid cascading renders
+    if (hasNew) {
+      const raf = requestAnimationFrame(() => setShowConfetti(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [challenges, progressMap]);
 
   const activeChallenges = challenges.filter(
     (c) => !progressMap[c.id]?.completed,
@@ -806,11 +906,25 @@ export function ChallengesView({
                     <span>{gamProfile?.total_points || 0} pts</span>
                     <span>{nextLevel.minPoints} pts</span>
                   </div>
-                  <Progress
-                    value={levelProgress}
-                    className="h-2 [[&>div]:bg-brand>div]:bg-emerald-500"
-                  />
+                  <div className="relative h-2.5 w-full rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-1000 ease-out"
+                      style={{ width: `${animatedProgress}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <Sparkles className="h-3 w-3 text-white/40" />
+                    <span className="text-[11px] text-white/40">
+                      {pointsRemaining} points restants pour{" "}
+                      <span className="text-emerald-500 font-medium">{nextLevel.name}</span>
+                    </span>
+                  </div>
                 </div>
+              )}
+              {!nextLevel && (
+                <p className="text-xs text-emerald-500 font-medium mt-1">
+                  Niveau maximum atteint !
+                </p>
               )}
             </div>
             <div className="flex gap-6 text-center">
@@ -921,10 +1035,12 @@ export function ChallengesView({
                           </span>
                         )}
                       </div>
-                      <Progress
-                        value={percent}
-                        className="h-2.5 [[&>div]:bg-brand>div]:bg-emerald-500"
-                      />
+                      <div className="relative h-2.5 w-full rounded-full bg-muted/50 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-emerald-500 transition-all duration-700 ease-out"
+                          style={{ width: `${Math.min(percent, 100)}%` }}
+                        />
+                      </div>
                     </CardContent>
                   </Card>
                 );
@@ -1057,6 +1173,8 @@ export function ChallengesView({
           levelName={gamProfile.level_name}
         />
       )}
+
+      {showConfetti && <ConfettiCelebration onDone={handleConfettiDone} />}
     </div>
   );
 }

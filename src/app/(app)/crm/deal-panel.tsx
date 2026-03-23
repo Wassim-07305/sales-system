@@ -512,9 +512,21 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {loadingActivities ? (
-                <p className="text-xs text-muted-foreground text-center py-4">
-                  Chargement...
-                </p>
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="p-2.5 rounded-lg bg-muted/30 border border-border/50 animate-pulse"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-6 w-6 rounded-full bg-muted/60 shrink-0" />
+                        <div className="h-3 w-3/4 rounded bg-muted/60" />
+                      </div>
+                      <div className="h-2.5 w-1/2 rounded bg-muted/40 mb-1.5" />
+                      <div className="h-2 w-1/4 rounded bg-muted/30" />
+                    </div>
+                  ))}
+                </div>
               ) : activities.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">
                   Aucune note pour le moment

@@ -35,14 +35,19 @@ export function CallResultModal({ booking, onClose }: CallResultModalProps) {
   const [followUpDate, setFollowUpDate] = useState("");
 
   function handleSubmit() {
-    if (!booking || !callResult) return;
+    if (!booking) return;
+    if (!callResult) {
+      toast.error("Veuillez sélectionner un résultat d'appel");
+      return;
+    }
 
     startTransition(async () => {
       const result = await saveCallResult(booking.id, {
         call_result: callResult,
         objections: objections || undefined,
         follow_up_notes: followUpNotes || undefined,
-        follow_up_date: followUpDate || undefined,
+        follow_up_date:
+          callResult === "suivi_prevu" ? followUpDate || undefined : undefined,
       });
 
       if (result.error) {
