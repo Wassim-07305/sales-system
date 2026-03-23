@@ -103,13 +103,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Newspaper,
     roles: ["admin", "manager"],
   },
-  {
-    label: "Communauté",
-    href: "/community",
-    icon: UsersRound,
-    roles: ["admin", "manager", "csm", "client_b2c"],
-  },
-
   // Messages (unified: team channels, DMs, WhatsApp, Inbox)
   {
     label: "Messages",
@@ -124,6 +117,13 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/live",
     icon: Radio,
     roles: ["admin", "manager", "setter", "closer", "client_b2b", "client_b2c"],
+  },
+
+  {
+    label: "Communauté",
+    href: "/community",
+    icon: UsersRound,
+    roles: ["admin", "manager", "csm", "client_b2c"],
   },
 
   // Setter/Closer specific
@@ -311,7 +311,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "",
     items: NAV_ITEMS.filter((i) =>
-      ["/dashboard", "/chat", "/live"].includes(i.href),
+      ["/dashboard", "/chat", "/live", "/community"].includes(i.href),
     ),
   },
   {
@@ -325,7 +325,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Formation",
     items: NAV_ITEMS.filter((i) =>
-      ["/academy", "/roleplay", "/community", "/challenges"].includes(i.href),
+      ["/academy", "/roleplay", "/challenges"].includes(i.href),
     ),
   },
   {
