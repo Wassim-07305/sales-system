@@ -28,7 +28,7 @@ import { globalSearch, type SearchResult } from "@/lib/actions/search";
 
 const QUICK_LINKS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "CRM Pipeline", href: "/crm", icon: Kanban },
+  { label: "Pipeline", href: "/pipeline", icon: Kanban },
   { label: "Utilisateurs", href: "/utilisateurs", icon: Users },
   { label: "Bookings", href: "/bookings", icon: CalendarDays },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },

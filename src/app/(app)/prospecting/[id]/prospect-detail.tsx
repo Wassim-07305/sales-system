@@ -475,7 +475,7 @@ export function ProspectDetail({
               className="rounded-xl font-medium text-emerald-500 hover:text-emerald-400/80"
               asChild
             >
-              <Link href={`/crm/${linkedDeal.id}`}>
+              <Link href={`/pipeline/${linkedDeal.id}`}>
                 <BarChart3 className="h-4 w-4 mr-1" />
                 {linkedDeal.title}
               </Link>

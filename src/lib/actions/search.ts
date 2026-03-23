@@ -66,7 +66,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
           title: d.title,
           subtitle:
             `${d.value ? `${Number(d.value).toLocaleString("fr-FR")} €` : ""} ${d.stage ? `• ${d.stage}` : ""}`.trim(),
-          href: `/crm`,
+          href: `/pipeline`,
         });
       }
     }

@@ -159,6 +159,7 @@ export async function updateSession(request: NextRequest) {
       if (role === "client_b2b") {
         clientAllowedRoutes.push(
           "/crm",
+          "/pipeline",
           "/prospects",
           "/ai-scripts",
           "/settings-ia",
@@ -189,9 +190,10 @@ export async function updateSession(request: NextRequest) {
         "/profile",
         "/notifications",
         "/crm",
+        "/pipeline",
         "/inbox",
         "/help",
-        "/prospecting/linkhub",
+        "/prospecting/linkedin",
       ];
       const isAllowed = csmAllowedRoutes.some((route) =>
         pathname.startsWith(route),

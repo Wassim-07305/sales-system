@@ -1,20 +1,37 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Database,
-  Radar,
-  BarChart3,
-  Send,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Linkedin, Instagram, Star, Send } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
+import { UnifiedTabs, type UnifiedTab } from "@/components/ui/unified-tabs";
+import { ProspectingKPIBanner } from "./prospecting-kpi-banner";
 
-const TABS = [
-  { label: "Base", href: "/prospecting", icon: Database, exact: true },
-  { label: "Hub", href: "/prospecting/linkhub", icon: Radar },
-  { label: "Analyse", href: "/prospecting/analyse", icon: BarChart3 },
-  { label: "Outreach", href: "/prospecting/outreach", icon: Send },
+const TABS: UnifiedTab[] = [
+  {
+    label: "LinkedIn",
+    value: "linkedin",
+    icon: Linkedin,
+    href: "/prospecting/linkedin",
+  },
+  {
+    label: "Instagram",
+    value: "instagram",
+    icon: Instagram,
+    href: "/prospecting/instagram",
+  },
+  {
+    label: "Scoring",
+    value: "scoring",
+    icon: Star,
+    href: "/prospecting/scoring",
+  },
+  {
+    label: "Outreach",
+    value: "outreach",
+    icon: Send,
+    href: "/prospecting/outreach",
+    exact: false,
+  },
 ];
 
 export default function ProspectingLayout({
@@ -24,47 +41,34 @@ export default function ProspectingLayout({
 }) {
   const pathname = usePathname();
 
-  // Don't show prospecting tabs on prospect detail pages (/prospecting/[id])
-  const isDetailPage = /^\/prospecting\/[^/]+$/.test(pathname) &&
-    !TABS.some((t) => t.href === pathname);
+  // Hide layout on prospect detail pages (/prospecting/[uuid])
+  const isDetailPage =
+    /^\/prospecting\/[0-9a-f-]{36}/.test(pathname);
 
-  // Hide tabs on old direct sub-pages that still have view components
-  const oldDirectPages = [
-    "/prospecting/instagram",
-  ];
-  const isOldPage = oldDirectPages.some((p) => pathname.startsWith(p));
-
-  function isActive(tab: (typeof TABS)[number]) {
-    if (tab.exact) return pathname === tab.href;
-    return pathname.startsWith(tab.href);
-  }
-
-  if (isDetailPage || isOldPage) {
+  if (isDetailPage) {
     return <>{children}</>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 border-b border-border/50 scrollbar-none">
-        {TABS.map((tab) => {
-          const active = isActive(tab);
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors",
-                active
-                  ? "bg-emerald-500/10 text-emerald-500"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-              )}
-            >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </Link>
-          );
-        })}
+    <div className="space-y-4">
+      <PageHeader
+        title="Prospection"
+        description="Recherchez, qualifiez et engagez vos prospects"
+      />
+
+      {/* KPI banner — compact stats always visible */}
+      <div className="px-6">
+        <div className="rounded-lg border border-border/50 bg-muted/20 px-4">
+          <ProspectingKPIBanner />
+        </div>
       </div>
+
+      {/* Unified tabs */}
+      <div className="px-6">
+        <UnifiedTabs tabs={TABS} />
+      </div>
+
+      {/* Tab content */}
       {children}
     </div>
   );

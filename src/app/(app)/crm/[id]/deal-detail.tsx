@@ -237,7 +237,7 @@ export function DealDetail({
       >
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/crm">
+            <Link href="/pipeline">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Retour
             </Link>

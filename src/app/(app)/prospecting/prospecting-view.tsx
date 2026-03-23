@@ -436,7 +436,7 @@ export function ProspectingView({
       <div className="flex items-center gap-1">
         <div className="inline-flex items-center rounded-lg bg-muted/40 border border-border/50 p-1">
           <a
-            href="/crm"
+            href="/pipeline"
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md transition-colors"
           >
             Pipeline

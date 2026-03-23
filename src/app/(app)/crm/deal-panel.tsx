@@ -204,7 +204,7 @@ export function DealPanel({ deal, stages, onClose, onUpdate }: DealPanelProps) {
                 )}
               </div>
               <Button variant="outline" size="sm" asChild className="shrink-0">
-                <Link href={`/crm/${deal.id}`}>
+                <Link href={`/pipeline/${deal.id}`}>
                   <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
                   Détail
                 </Link>
